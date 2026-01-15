@@ -1,0 +1,40 @@
+# Core
+jupyterlab
+ipykernel
+numpy
+pandas
+scipy
+matplotlib
+seaborn
+plotly
+altair
+statsmodels
+scikit-learn
+xgboost
+lightgbm
+shap
+mlflow
+fastapi
+uvicorn
+pydantic
+pandera
+pytest
+black
+flake8
+mypy
+python-dotenv
+prefect
+# Data processing / big data
+pyarrow
+dask[dataframe]
+polars
+# NLP / DL (optional heavy)
+transformers
+spacy
+torch
+torchvision
+# Time series
+pmdarima
+# Geo (optional, may need system deps)
+# geopandas
+# folium
