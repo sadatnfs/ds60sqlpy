@@ -1,45 +1,88 @@
-# Day 37 — Partitioning and Sharding: Scale Out Strategically (Companion Guide)
+# Day 37 — Partitioning and Sharding
 
-Learning objectives
-- Use native table partitioning to manage very large tables (by range/list/hash)
-- Choose partition keys and prune effectively; understand global vs local indexes
-- Distinguish partitioning (within a DB) vs sharding (across DBs/servers)
+## Level and prerequisites
 
-Why this matters
-Large, time‑series‑like tables (events, orders) benefit from partitioning for faster scans, simpler retention, and maintenance. True sharding is an architectural decision with tradeoffs in joins and transactions.
+- **Level:** Advanced
+- **Prerequisites:** [Day 36 — materialized views](day36_materialized_views.md)
+- **Artifacts:** [learner SQL](../day37_partitioning_sharding.sql) ·
+  [solution reasoning](../solutions/day37_solutions.md) ·
+  [executable solution](../solutions/day37_solutions.sql)
 
-Core concepts and deep dive (partitioning)
-- Declarative partitioning
-  - CREATE TABLE fact (...) PARTITION BY RANGE (order_date);
-  - CREATE TABLE fact_2025_01 PARTITION OF fact FOR VALUES FROM ('2025-01-01') TO ('2025-02-01');
-- Pruning
-  - Planner eliminates partitions that don’t match constraints; ensure predicates reference the partition key
-- Indexes
-  - Local indexes exist per partition; global indexes are not supported; consider a covering index per hot partition
-- Maintenance
-  - ATTACH/DETACH partitions for rolling windows; drop old partitions instantly (DTRT for retention)
-  - VACUUM/ANALYZE per partition; autovacuum runs per partition
-- Partitioning methods
-  - RANGE (time windows), LIST (country/tenant), HASH (even distribution when no natural range)
+## Learning objectives
 
-Sharding (overview)
-- Horizontal split across servers/clusters (by tenant, region, hash)
-- Pros: write/read scaling, isolation; Cons: cross‑shard joins/transactions are hard, added ops complexity
-- Coordination approaches: application‑driven routing, FDWs, logical replication, proxies
+- Define non-overlapping range partitions and prove pruning.
+- Separate local partitioning mechanics from distributed sharding design.
 
-Design patterns
-- Time‑series events RANGE partitioned by day/month; keep last N partitions; archive or drop older ones
-- Multi‑tenant LIST partitioning with per‑tenant isolation; attach/detach for migrations
+## Vocabulary and concepts
 
-Pitfalls
-- Non‑sargable filters prevent partition pruning (e.g., WHERE date(order_ts)=...); use ranges
-- Too many tiny partitions increase planning overhead; keep partition count reasonable (hundreds ok, thousands need care)
+- **Partition bound:** the lower-inclusive, upper-exclusive range accepted by a
+  partition.
+- **Partition pruning:** planner or executor removal of irrelevant partitions.
+- **Sharding:** routing data across separate databases or servers.
 
-Practice exercises
-1) Create a RANGE‑partitioned orders table by month; insert rows across months; verify pruning with EXPLAIN
-2) Implement retention: detach and drop partitions older than 12 months
-3) Add partition‑local indexes and compare plan/latency for key lookups
+## Worked example / walkthrough
 
-Further reading
-- Partitioning: https://www.postgresql.org/docs/current/ddl-partitioning.html
-- Sharding approaches: https://wiki.postgresql.org/wiki/Sharding
+Map the January and February bounds on a timeline, then plan a
+January-15-to-February-15 query. Both partitions are required. Change the range
+to a January-only half-open interval and inspect `EXPLAIN` to prove February is
+pruned rather than assuming it.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day37_partitioning_sharding.sql).
+Test values exactly on every partition boundary and one value with no matching
+partition.
+
+## Self-check
+
+- Are bounds complete and non-overlapping for the intended data?
+- Does the plan show pruning, and is “sharding” kept as an architecture topic
+  rather than claimed as implemented?
+
+## Next step
+
+Continue to [Day 38 — transactions and isolation](day38_transactions_isolation.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Create range partitions and verify partition pruning.
+- Add partition-local indexes and compare access plans.
+- Distinguish in-database partitioning from cross-database sharding.
+
+## How the learner script works
+
+The rollback-only demo creates `big_events` partitioned by `event_time`, with
+January and February 2025 partitions. It inserts 1,000 deterministic rows across
+those two months and plans a half-open January-15-to-February-15 count.
+
+Partition pruning removes partitions whose bounds cannot satisfy a predicate.
+Use the raw partition key in sargable ranges. Partitioning is primarily a data
+management and scale technique; it does not guarantee a faster small-table
+query.
+
+## Partitioning versus sharding
+
+- Partitioning divides one logical table inside one PostgreSQL database.
+- Sharding routes data across databases or servers and changes joins,
+  transactions, failure handling, and operations.
+- The learner script demonstrates partitioning only. “Sharding” remains an
+  architecture discussion, not a runnable course setup.
+
+## Practice — match the learner prompts exactly
+
+1. Add one or more new `big_events` partitions, insert matching rows, and use
+   `EXPLAIN` to prove pruning for single- and multi-partition date ranges.
+2. Create indexes on the relevant partitions and compare query plans for a
+   selective event/customer lookup.
+
+## Pitfalls and validation
+
+- PostgreSQL range bounds are lower-inclusive and upper-exclusive.
+- An inserted row with no matching partition fails unless a default partition
+  exists.
+- Too many tiny partitions increase planning and maintenance overhead.
+- PostgreSQL indexes are implemented per partition; plan index creation for new
+  partitions.
+- All demo tables and indexes disappear at the learner script's `ROLLBACK`.

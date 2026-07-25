@@ -8,8 +8,12 @@ CREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);
 -- Covering index (Postgres INCLUDE) for frequent query on order_items
 CREATE INDEX idx_oi_order_product_inc ON order_items(order_id, product_id) INCLUDE (quantity, unit_price, discount);
 
--- Partial index for recent orders
-CREATE INDEX idx_orders_recent ON orders(order_date) WHERE order_date >= now() - interval '90 days';
+-- Partial index for an active subset. Partial-index predicates must be
+-- immutable, so a moving expression such as now() - interval '90 days' is
+-- not valid in PostgreSQL.
+CREATE INDEX idx_orders_open
+  ON orders(order_date)
+  WHERE status IN ('placed', 'paid');
 
 -- Test with EXPLAIN
 EXPLAIN ANALYZE
@@ -21,7 +25,10 @@ EXPLAIN ANALYZE
 SELECT oi.order_id, oi.product_id, oi.quantity
 FROM order_items oi
 WHERE oi.order_id IN (
-  SELECT order_id FROM orders WHERE order_date >= now() - interval '90 days'
+  SELECT order_id
+  FROM orders
+  WHERE status IN ('placed', 'paid')
+    AND order_date >= now() - interval '90 days'
 );
 
 -- Exercises

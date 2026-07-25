@@ -1,61 +1,113 @@
-# Day 18 — Solutions (LAG/LEAD and Intra‑Row Comparisons)
+# Day 18 solutions — LAG and LEAD
 
-We calculate day‑to‑day deltas and growth, per‑customer gaps between orders, and price changes over time.
+These answers match the exercises in [Day 18](../day18_lag_lead.sql).
 
-Setup
-- Tables: orders(order_id, customer_id, order_date, total_amount), products_price_history(product_id, price, effective_at)
-- Tips: Protect division by zero with NULLIF; use EXTRACT(...) to turn intervals into numbers
+## Exercise 1 — Monthly product sales and the previous month
 
-Exercise 1 — Daily revenue delta and growth rate
+This solution interprets “sales” as discounted revenue. It builds a dense month calendar so `LAG` means the immediately previous calendar month, even when a product had no sales then.
+
 ```sql
-WITH daily AS (
-  SELECT DATE_TRUNC('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY DATE_TRUNC('day', o.order_date)
+WITH month_bounds AS (
+  SELECT
+    DATE_TRUNC('month', MIN(o.order_date) AT TIME ZONE 'UTC')::date AS first_month,
+    DATE_TRUNC('month', MAX(o.order_date) AT TIME ZONE 'UTC')::date AS last_month
+  FROM training.orders AS o
+),
+months AS (
+  SELECT generated_month::date AS sales_month
+  FROM month_bounds AS mb
+  CROSS JOIN LATERAL GENERATE_SERIES(
+    mb.first_month,
+    mb.last_month,
+    INTERVAL '1 month'
+  ) AS g(generated_month)
+),
+monthly_sales AS (
+  SELECT
+    oi.product_id,
+    DATE_TRUNC(
+      'month',
+      o.order_date AT TIME ZONE 'UTC'
+    )::date AS sales_month,
+    SUM(
+      oi.unit_price * oi.quantity * (1 - oi.discount)
+    ) AS revenue
+  FROM training.order_items AS oi
+  JOIN training.orders AS o
+    ON o.order_id = oi.order_id
+  GROUP BY
+    oi.product_id,
+    DATE_TRUNC('month', o.order_date AT TIME ZONE 'UTC')::date
+),
+dense_product_months AS (
+  SELECT
+    p.product_id,
+    p.name,
+    m.sales_month,
+    COALESCE(ms.revenue, 0) AS revenue
+  FROM training.products AS p
+  CROSS JOIN months AS m
+  LEFT JOIN monthly_sales AS ms
+    ON ms.product_id = p.product_id
+   AND ms.sales_month = m.sales_month
 )
-SELECT d,
-       revenue,
-       (revenue - LAG(revenue) OVER (ORDER BY d)) AS delta,
-       ROUND(
-         (revenue - LAG(revenue) OVER (ORDER BY d))
-         / NULLIF(LAG(revenue) OVER (ORDER BY d), 0)
-       , 4) AS growth_rate
-FROM daily
-ORDER BY d DESC
-LIMIT 60;
+SELECT
+  product_id,
+  name,
+  sales_month,
+  ROUND(revenue, 2) AS monthly_sales,
+  ROUND(
+    LAG(revenue) OVER (
+      PARTITION BY product_id
+      ORDER BY sales_month
+    ),
+    2
+  ) AS previous_month_sales
+FROM dense_product_months
+ORDER BY product_id, sales_month;
 ```
-Explanation
-- LAG(revenue) pulls prior day’s value to the current row; subtract to get delta.
-- Growth = delta / prior; NULLIF avoids divide‑by‑zero when the prior day’s revenue was 0.
 
-Exercise 2 — Days between orders per customer; flag gaps > 60 days
-```sql
-SELECT o.customer_id,
-       o.order_id,
-       o.order_date,
-       LAG(o.order_date) OVER (PARTITION BY o.customer_id ORDER BY o.order_date) AS prev_order,
-       EXTRACT(DAY FROM (o.order_date - LAG(o.order_date) OVER (PARTITION BY o.customer_id ORDER BY o.order_date))) AS days_since_prev,
-       CASE WHEN o.order_date - LAG(o.order_date) OVER (PARTITION BY o.customer_id ORDER BY o.order_date) > INTERVAL '60 days'
-            THEN TRUE ELSE FALSE END AS gap_gt_60
-FROM orders o
-ORDER BY o.customer_id, o.order_date
-LIMIT 200;
-```
-Notes
-- Window partition by customer computes gaps within each user’s timeline.
-- You can also compute median gaps later per user using percentile_disc on days_since_prev.
+Without the `months` CTE, `LAG` would mean “previous month with a row,” which can skip inactive calendar months.
 
-Exercise 3 — Product price deltas over time
+## Exercise 2 — Next higher salary within each department
+
 ```sql
-SELECT product_id,
-       effective_at,
-       price,
-       price - LAG(price) OVER (PARTITION BY product_id ORDER BY effective_at) AS price_delta
-FROM products_price_history
-ORDER BY product_id, effective_at
-LIMIT 200;
+WITH distinct_department_salaries AS (
+  SELECT DISTINCT
+    e.department_id,
+    e.salary
+  FROM training.employees AS e
+),
+salary_steps AS (
+  SELECT
+    dds.department_id,
+    dds.salary,
+    LEAD(dds.salary) OVER (
+      PARTITION BY dds.department_id
+      ORDER BY dds.salary
+    ) AS next_higher_salary
+  FROM distinct_department_salaries AS dds
+)
+SELECT
+  d.name AS department,
+  e.employee_id,
+  e.full_name,
+  e.salary,
+  ss.next_higher_salary,
+  ss.next_higher_salary - e.salary AS gap_to_next_higher
+FROM training.employees AS e
+JOIN training.departments AS d
+  ON d.department_id = e.department_id
+JOIN salary_steps AS ss
+  ON ss.department_id = e.department_id
+ AND ss.salary = e.salary
+ORDER BY d.name, e.salary, e.employee_id;
 ```
-Tips
-- If you need pct change: (price / LAG(price) - 1). Use ROUND as needed for presentation.
-- Ensure effective_at has no duplicates per product; otherwise define a secondary tiebreak (e.g., updated_at, product_id).
+
+Using distinct salary values makes “higher” strict: a same-salary colleague is not treated as the next step. The highest salary in each department has no higher value, so `LEAD` returns `NULL`.
+
+## Check yourself
+
+- The first month for each product has no previous-month value.
+- After that, every dense product-month row compares with the immediately preceding calendar month.
+- The highest salary in each department has a null `next_higher_salary`.

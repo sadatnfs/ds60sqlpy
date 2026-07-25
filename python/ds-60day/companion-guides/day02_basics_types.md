@@ -1,107 +1,86 @@
-# Day 2 — Python Basics: Variables and Core Types (Companion Guide)
+# Day 2 — Variables and Core Types
 
-This guide expands the Day 2 notebook with more narrative, examples, and exercises.
+**Level:** Beginner
+
+Python values have types; variable names refer to those values. This lesson
+turns text input into useful values and formats results clearly.
 
 ## Learning objectives
-- Understand names (identifiers), assignment, and dynamic typing in Python
-- Use Python’s scalar types: `int`, `float`, `bool`, and `str`
-- Perform type conversions safely and recognize when implicit coercion does not occur
-- Employ f-strings, string methods, and simple input/output
 
-## Why this matters
-Everything you build rests on a solid understanding of values and types. Data science often involves messy inputs; you must be comfortable checking and converting types safely and clearly documenting your intent with readable code.
+By the end of this lesson, you can:
 
-## Mental models
-- Names and objects: `x = 42` binds the name `x` to an integer object `42`. Rebinding doesn’t copy; it points `x` to a new object.
-- Mutability vs immutability: Numbers and strings are immutable—operations return new objects. You’ll see mutability later with lists/dicts.
-- Truthiness: Python determines truth value contextually—empty containers are `False`, non-empty are `True`; zero is `False`, non-zero is `True`.
+- distinguish `str`, `int`, `float`, `bool`, and `None`;
+- convert compatible values deliberately instead of relying on guesswork;
+- use comparisons, truthiness, string methods, and f-strings; and
+- explain why an input value is text until it is parsed.
 
-## Core concepts with examples
+## Prerequisites
 
-### Variables and assignment
+Complete Day 1 (`python-01`): run the course environment and a notebook cell.
+
+## Vocabulary and mental model
+
+- **Value:** data such as `42`, `3.5`, or `"Ada"`.
+- **Type:** the rules and operations associated with a value.
+- **Variable:** a name bound to a value; assignment does not copy every object.
+- **Conversion:** constructing one type from a compatible value, such as
+  `float("3.14")`.
+- **Truthiness:** the boolean interpretation of a value. Empty strings and
+  containers are false; non-empty ones are true.
+- **Immutable:** unable to change in place. String methods return new strings.
+
+## Worked example
+
 ```python
-x = 42          # int
-pi = 3.14159    # float
-name = 'Ada'    # str
-is_ready = True # bool
-```
-Use descriptive names; avoid single letters except in short-lived scopes.
+raw_celsius = "21.5"
+celsius = float(raw_celsius)
+fahrenheit = celsius * 9 / 5 + 32
+label = "  Indoor Sensor  ".strip().lower()
 
-### Numeric types and operations
-```python
-# ints and floats
-count = 7
-ratio = 22 / 7            # float division
-whole = 22 // 7           # integer division: 3
-remainder = 22 % 7        # modulus: 1
-power = 2 ** 10           # exponentiation: 1024
-```
-Be mindful of division semantics: `/` always returns float; use `//` for floor division.
-
-### Type conversions (casting)
-```python
-int('5')          # 5
-float('2.7')      # 2.7
-str(123)          # '123'
-bool(0), bool(1)  # False, True
-```
-Handle bad inputs explicitly:
-```python
-def to_int(s: str) -> int | None:
-    try:
-        return int(s)
-    except ValueError:
-        return None
+print(f"{label}: {fahrenheit:.1f} °F")
 ```
 
-### Strings and f-strings
-```python
-s = 'Data Science'
-s.lower(), s.upper(), s.strip()
-'f-strings: x={x}, pi≈{pi:.2f}'
-```
-Prefer f-strings to `format()` for readability.
+Trace the types after each line. Parsing and presentation are separate steps:
+the calculation uses numbers, while the f-string creates display text.
 
-### Truthiness and comparisons
-```python
-if []:
-    print('truthy')
-else:
-    print('falsy')   # prints 'falsy'
+## Exercises and progressive hints
 
-3 < 5 < 10     # chained comparisons → True
-'a' < 'b'      # lexicographic ordering
-```
+1. Read two numbers with `input()` and print their sum. **Hint:** inspect
+   `type(input(...))`, then convert both values before adding.
+2. Transform `"  Data Science  "` into lowercase text without surrounding
+   spaces. **Hint:** string methods can be chained because each returns a new
+   string.
+3. Convert `"3.14"` to a float and multiply it by two. **Hint:** do not change
+   the original text just to make the calculation possible.
 
-### Input/output patterns
-For CLI scripts, prefer `argparse` (Day 15). For quick demos, you can use `input()` but validate carefully:
-```python
-raw = input('Enter a number: ')
-val = to_int(raw)
-if val is None:
-    print('Please enter a valid integer')
-```
+For transfer practice, the separate solution uses parallel tasks: format a
+percentage, build a slug, and parse two numeric strings. Those are intentionally
+not line-for-line copies of the notebook answers.
 
-## Common pitfalls
-- Assuming implicit coercion: `int + str` raises `TypeError`. Convert explicitly.
-- Floating point surprises: `0.1 + 0.2 != 0.3` due to binary representation. Use `math.isclose()` for approximate comparisons.
-- Shadowing built-ins: Don’t name variables `list`, `str`, `sum`, etc.
+## Self-check
 
-## Practice exercises
-1) Write a function `percent(n, total)` that returns a string like `'37.5%'` with one decimal place; protect against division by zero.
-2) Given `'  Data Science  '`, write code to trim, lowercase, and replace spaces with hyphens.
-3) Read two numbers as strings, convert safely, and print both their sum and product with labeled f-strings.
+- What is the difference between `"8" + "2"` and `8 + 2`?
+- Why does `bool("False")` evaluate to `True`?
+- What does `None` communicate that `0` does not?
+- Which format specifier would show one digit after the decimal point?
 
-## Stretch goals
-- Implement `safe_float(s: str, default: float = float('nan')) -> float` that logs the bad input (use print or logging for now).
-- Implement a small REPL loop that accepts expressions and uses `eval` safely (restrict builtins; or better, parse with `ast.literal_eval`).
+Expected behavior: numeric addition produces a number, text cleanup leaves the
+original string unchanged, and formatted output is readable.
 
-## Check your understanding
-- What’s the difference between `/` and `//`? When would you use each?
-- Why does `0.1 + 0.2` not equal `0.3` exactly? How do you compare floats safely?
-- Explain truthiness for numbers, strings, and containers with examples.
+## Common pitfalls and diagnosis
 
-## Further reading
-- Python docs on built-in types: https://docs.python.org/3/library/stdtypes.html
-- Floating point arithmetic: https://docs.python.org/3/tutorial/floatingpoint.html
-- f-strings: https://docs.python.org/3/reference/lexical_analysis.html#f-strings
+- **Numbers concatenate:** print their types; one or both values are strings.
+- **`ValueError` during conversion:** show the original value with `repr(...)`
+  to reveal spaces or unexpected characters. Day 3 adds recovery logic.
+- **Unexpected integer result assumptions:** `/` returns a float; `//` performs
+  floor division, which differs from truncation for negative numbers.
+- **Variable names shadow built-ins:** avoid names such as `str`, `list`, and
+  `sum`; restarting the kernel clears accidental rebinding.
+- **Floating-point output looks imprecise:** binary floats approximate many
+  decimal fractions; format for display rather than comparing display strings.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day02_basics_types.ipynb)
+- [Check the separate transfer solutions](../solutions/day02_basics_types/day02_solutions.md)
+- [Next: Day 3 — Control flow and exceptions](day03_control_flow_exceptions.md)

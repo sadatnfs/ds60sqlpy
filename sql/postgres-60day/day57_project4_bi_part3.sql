@@ -41,17 +41,28 @@ WITH daily AS (
          m.median_rev
   FROM daily d CROSS JOIN med m
 ), mad AS (
-  SELECT d.d, d.revenue, d.median_rev,
-         percentile_cont(0.5) WITHIN GROUP (ORDER BY abs_dev) AS mad
-  FROM dev d
+  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY abs_dev) AS mad
+  FROM dev
 )
-SELECT d,
-       ROUND(revenue,2) AS revenue,
-       ROUND(median_rev,2) AS median_rev,
-       CASE WHEN mad = 0 THEN 0 ELSE ROUND(0.6745 * (revenue - median_rev) / mad, 2) END AS modified_z,
-       CASE WHEN mad > 0 AND ABS(0.6745 * (revenue - median_rev) / mad) >= 3.5 THEN 'anomaly' ELSE 'normal' END AS flag
-FROM mad
-ORDER BY d DESC
+SELECT dev.d,
+       ROUND(dev.revenue, 2) AS revenue,
+       ROUND(dev.median_rev::numeric, 2) AS median_rev,
+       CASE
+         WHEN mad.mad = 0 THEN 0
+         ELSE ROUND(
+           (0.6745 * (dev.revenue - dev.median_rev) / mad.mad)::numeric,
+           2
+         )
+       END AS modified_z,
+       CASE
+         WHEN mad.mad > 0
+          AND ABS(0.6745 * (dev.revenue - dev.median_rev) / mad.mad) >= 3.5
+         THEN 'anomaly'
+         ELSE 'normal'
+       END AS flag
+FROM dev
+CROSS JOIN mad
+ORDER BY dev.d DESC
 LIMIT 60;
 
 -- Forecast accuracy: compare MA(7) forecast to actual; compute MAPE for last 30 days

@@ -1,66 +1,98 @@
-# Day 19 — GroupBy, Aggregation, Pivoting (Companion Guide)
+# Day 19 — GroupBy, Aggregation, Pivoting, and Melting
+
+**Level:** Intermediate
+
+Grouping changes a table's grain. State the output grain before writing the
+aggregation so row counts and totals can be checked.
 
 ## Learning objectives
-- Summarize data with groupby-agg and transform
-- Reshape with pivot_table, crosstab, and stack/unstack
-- Handle MultiIndex results effectively
 
-## Why this matters
-Aggregation and reshaping are core to exploratory analysis and feature creation.
+By the end of this lesson, you can:
 
-## Mental models
-- groupby splits data into groups, applies aggregation, and combines results
-- pivot_table is a specialized aggregation with rows/columns like a spreadsheet pivot
+- apply the split-apply-combine model with `groupby`;
+- create named aggregations at a stated grain;
+- distinguish `.agg` from `.transform`;
+- reshape long data to wide with `pivot_table`;
+- reshape wide data to long with `melt` and validate totals.
 
-## Core concepts and examples
-### GroupBy basics
+## Prerequisites
+
+Complete Day 18 (`python-18`): typed, cleaned DataFrames and missing-value rules.
+
+## Vocabulary and mental model
+
+- **Grain:** what one row represents.
+- **Group key:** columns defining each output group.
+- **Aggregation:** many values reduced to one value per group.
+- **Transform:** group calculation broadcast back to original rows.
+- **Long format:** observations in rows; **wide format:** categories spread
+  across columns.
+- **Pivot table:** aggregation plus reshape; duplicate coordinates are combined.
+
+## Worked example
+
 ```python
-(df
- .groupby('store_id')
- .agg(revenue=('sales','sum'), orders=('order_id','nunique'))
- .reset_index()
+import pandas as pd
+
+sales = pd.DataFrame(
+    {
+        "region": ["west", "west", "east"],
+        "channel": ["web", "store", "web"],
+        "amount": [10.0, 20.0, 15.0],
+    }
+)
+summary = (
+    sales.groupby(["region", "channel"], observed=True)
+    .agg(total_amount=("amount", "sum"), rows=("amount", "size"))
+    .reset_index()
 )
 ```
 
-### Multiple keys and functions
-```python
-aggd = df.groupby(['region','product']).agg({'sales':['sum','mean'], 'qty':'sum'})
-aggd.columns = ['_'.join(c) for c in aggd.columns.to_flat_index()]
-```
+The result has one row per `(region, channel)`. `size` counts rows, while
+`count` would exclude missing values in the selected column.
 
-### transform vs agg
-```python
-# z-score within group
-df['z'] = (df['sales'] - df.groupby('region')['sales'].transform('mean')) / \
-          df.groupby('region')['sales'].transform('std')
-```
+## Dataset note
 
-### Pivoting
-```python
-pt = pd.pivot_table(df, index='region', columns='quarter', values='sales', aggfunc='sum', fill_value=0)
-ct = pd.crosstab(df['region'], df['returned'], normalize='index')
-```
+The notebook uses Seaborn's cached `tips` data. The constructed example above
+is the offline alternative when that cache has not been primed.
 
-### Reshaping
-```python
-wide = pt
-long = wide.stack().rename('sales').reset_index()
-```
+## Exercises and progressive hints
 
-## Common pitfalls
-- Forgetting `as_index=False` or `.reset_index()` when you want a flat frame
-- MultiIndex column names after multi-agg; flatten columns explicitly
-- Using `apply` when a built-in `agg`/`transform` exists (faster, clearer)
+1. Compute total revenue and average tip by `(day, smoker)`. **Hint:** write the
+   intended output column names and source-column/function pairs before calling
+   `.agg`.
+2. Create a pivot table of average tip by day and time, filling absent
+   combinations with zero. **Hint:** identify the row index, output columns,
+   measured value, and aggregation independently.
+3. Melt a wide table to long, then group to verify totals against the original.
+   **Hint:** preserve an identifier column and compare at the same grain, using
+   a tolerance for floating-point results.
 
-## Practice exercises
-1) Compute year-over-year growth by store
-2) Build a pivot table of average order value by region and quarter
-3) Convert a MultiIndex result back to tidy long format
+## Self-check
 
-## Stretch goals
-- Use `Grouper(freq='M')` with datetime index for time-based groups
-- Compute weighted means with custom aggregation
+- How does `.transform("sum")` differ in shape from `.agg("sum")`?
+- Why can `pivot` fail where `pivot_table` succeeds?
+- What does one row represent before and after your groupby?
+- When is filling a missing combination with zero semantically wrong?
 
-## Further reading
-- GroupBy: https://pandas.pydata.org/pandas-docs/stable/user_guide/groupby.html
-- Reshaping: https://pandas.pydata.org/pandas-docs/stable/user_guide/reshaping.html
+Expected behavior: group output has unique keys, the pivot has predictable
+labels, and a round-trip validation reconciles totals.
+
+## Common pitfalls and diagnosis
+
+- **Totals are too small:** `count` ignored missing measurements; compare with
+  `size`.
+- **Categories disappear:** check missing group keys and pandas categorical
+  `observed` behavior.
+- **Unexpected MultiIndex columns:** use named aggregations or flatten labels
+  deliberately.
+- **Pivot output has a surprising order:** reindex explicitly rather than
+  relying on display order.
+- **Melted totals differ:** verify identifier/value columns and compare equal
+  grains, not an average of averages.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day19_pandas_groupby_pivot.ipynb)
+- [Check the separate solution](../solutions/day19_pandas_groupby_pivot/day19_solutions.md)
+- [Next: Day 20 — Merging and joins](day20_pandas_merging_joins.md)

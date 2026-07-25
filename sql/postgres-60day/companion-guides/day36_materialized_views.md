@@ -1,41 +1,86 @@
-# Day 36 — Materialized Views: Caching Expensive Results (Companion Guide)
+# Day 36 — Materialized Views and Caching
 
-Learning objectives
-- Create and refresh materialized views to cache heavy query results
-- Decide between VIEW vs MATERIALIZED VIEW; REFRESH options (CONCURRENTLY)
-- Use indexes on materialized views and schedule refreshes safely
+## Level and prerequisites
 
-Why this matters
-Long-running aggregations and joins can be precomputed into a materialized view (MV) to accelerate dashboards and downstream queries while keeping logic centralized.
+- **Level:** Advanced
+- **Prerequisites:** [Day 35 — performance pitfalls](day35_avoiding_pitfalls.md)
+- **Artifacts:** [learner SQL](../day36_materialized_views.sql) ·
+  [solution reasoning](../solutions/day36_solutions.md) ·
+  [executable solution](../solutions/day36_solutions.sql)
 
-Core concepts and deep dive
-- VIEW vs MATERIALIZED VIEW
-  - VIEW is just a stored query; runs every time
-  - MATERIALIZED VIEW stores the result set; must be refreshed to reflect source changes
-- REFRESH MATERIALIZED VIEW
-  - REFRESH MATERIALIZED VIEW mv; (blocking, atomically replaces contents)
-  - REFRESH MATERIALIZED VIEW CONCURRENTLY mv; (non-blocking reads) requires a unique index on the MV covering all rows
-- Indexing MVs
-  - Create indexes on columns used by consumers (filters/joins/order)
-- Dependency management
-  - MVs depend on base tables; use COMMENT ON and naming to document lineage
-- Incremental refresh patterns (concept)
-  - Native incremental refresh not built-in; emulate with partitioned MVs or staging delta tables
+## Learning objectives
 
-Patterns
-- Precompute monthly/category revenue with dimensions joined; index (month, category)
-- Build a search-friendly MV with denormalized text for full-text search
+- Materialize a query at a declared grain and reconcile it with source data.
+- Design refresh, freshness, ownership, and failure expectations.
 
-Pitfalls
-- Forgetting the unique index prevents CONCURRENTLY refresh
-- Stale data: document freshness and add a last_refreshed timestamp column
-- Refresh storms: schedule refresh during off-peak; consider REFRESH only changed partitions
+## Vocabulary and concepts
 
-Practice exercises
-1) Create an MV for monthly revenue by country and category; index (month, country, category)
-2) Compare query latency against the raw query; measure with EXPLAIN (ANALYZE)
-3) Add a scheduler (cron/systemd) to refresh nightly; log refresh duration
+- **Materialized view:** stored rows produced by a query and refreshed
+  explicitly.
+- **Freshness:** how current cached output is relative to its sources.
+- **Concurrent refresh:** a read-preserving refresh mode with unique-index and
+  transaction restrictions.
 
-Further reading
-- Materialized views: https://www.postgresql.org/docs/current/sql-creatematerializedview.html
-- Concurrent refresh: https://www.postgresql.org/docs/current/sql-refreshmaterializedview.html
+## Worked example / walkthrough
+
+Create the monthly-category materialized view inside the learner transaction,
+reconcile its total revenue and row-grain uniqueness with the source query,
+then refresh it. Query speed is only one dimension; record when the stored rows
+become stale and who would own refresh failures.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day36_materialized_views.sql).
+Write a freshness service-level expectation and a validation query beside the
+refresh design.
+
+## Self-check
+
+- Does a declared key uniquely identify every materialized row?
+- Can the consumer tolerate the documented refresh interval and failure mode?
+
+## Next step
+
+Continue to [Day 37 — partitioning and sharding](day37_partitioning_sharding.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Store the result of an expensive query in a materialized view (MV).
+- Refresh cached results when source tables change.
+- Compare freshness, storage, and query cost with querying base tables.
+
+## How the learner script uses the current schema
+
+The script creates `mv_category_month_revenue` from `orders`, `order_items`, and
+`products`. Its grain is one row per `(category, month)`, and revenue is line
+price times quantity after discount. It queries and refreshes the MV, then rolls
+the object back.
+
+A normal view stores only SQL and executes it on every read. A materialized view
+stores rows and can be indexed, but those rows are stale until refreshed.
+
+## Refresh behavior
+
+- `REFRESH MATERIALIZED VIEW` replaces the stored contents and blocks reads of
+  that MV during refresh.
+- `REFRESH ... CONCURRENTLY` permits reads but requires a qualifying unique
+  index and cannot run inside an explicit transaction block.
+- PostgreSQL does not provide general native incremental MV refresh; selective
+  rollup tables are a separate design.
+
+## Practice — match the learner prompts exactly
+
+1. Create an MV for weekly revenue by `customers.country`. Use a clear grain of
+   `(week, country)` and line-item net revenue.
+2. Compare the same weekly-country query over base tables with a query over the
+   MV. Capture actual plans, buffers, row counts, and freshness assumptions.
+
+## Pitfalls and validation
+
+- Reconcile the MV's total revenue to the source query before measuring speed.
+- A fast stale result can be wrong for the consumer's freshness requirement.
+- The compact seed may make the raw query as fast as or faster than the MV.
+- Document refresh ownership and failure behavior before relying on an MV.
+- The learner transaction safely removes the demonstration MV at rollback.

@@ -1,88 +1,86 @@
-# Day 4 — Loops, Comprehensions, and Generators (Companion Guide)
+# Day 4 — Loops, Comprehensions, and Generators
+
+**Level:** Beginner
+
+All three tools process iterables. The important choice is whether to perform
+an action, build a collection now, or yield values lazily.
 
 ## Learning objectives
-- Master `for`/`while` loops and idiomatic iteration patterns
-- Replace imperative loops with list/dict/set comprehensions when appropriate
-- Understand generators, lazy evaluation, and back‑pressure friendly pipelines
 
-## Why this matters
-Iteration appears everywhere in data work: reading files, cleaning records, transforming rows. Comprehensions and generators make your code faster to write, often faster to run, and easier to reason about memory use.
+By the end of this lesson, you can:
 
-## Mental models
-- Comprehension = “map + (optional) filter” in one readable expression
-- Generator = a function that *yields* values on demand; think of it as a lazy stream
-- Iterables vs iterators: an iterable can produce a fresh iterator; an iterator *is* a consuming stream
+- iterate safely with `range`, `enumerate`, and direct iteration;
+- translate a simple append loop into a readable comprehension;
+- build list, set, and dictionary comprehensions; and
+- write and consume a generator without assuming it is a stored list.
 
-## Patterns and examples
-### Basic `for` and `enumerate`
+## Prerequisites
+
+Complete Day 3 (`python-03`): branches, loops, and exception behavior.
+
+## Vocabulary and mental model
+
+- **Iterable:** an object that can provide values one at a time.
+- **Iterator:** the stateful object that tracks the next value.
+- **Comprehension:** an expression that eagerly constructs a collection.
+- **Generator:** a lazy iterator produced by `yield` or a generator expression.
+- **Exhaustion:** once an iterator has no next value, another pass is empty.
+
+Use a loop for side effects or complex branching, a comprehension for one clear
+transformation, and a generator when values can be streamed.
+
+## Worked example
+
 ```python
-for i, item in enumerate(items, start=1):
-    print(i, item)
+readings = [12, -1, 18, 7, 21]
+valid_squares = [value**2 for value in readings if value >= 0]
+
+
+def batches(values: list[int], size: int):
+    for start in range(0, len(values), size):
+        yield values[start : start + size]
+
+
+print(list(batches(valid_squares, 2)))
 ```
-`enumerate` beats manual index tracking.
 
-### List/dict/set comprehensions
-```python
-# Filter + transform
-squares = [x*x for x in range(10) if x % 2 == 0]
-# Dict from pairs
-square_map = {x: x*x for x in range(5)}
-# Unique letters
-unique = {c for c in 'datascience'}
-```
-Prefer comprehensions for single‑line, clear transformations.
+The comprehension creates its result immediately. `batches(...)` does no work
+until it is iterated.
 
-### Generator functions and expressions
-```python
-def count_up_to(n):
-    for i in range(1, n+1):
-        yield i
+## Exercises and progressive hints
 
-# generator expression
-lines = (line.strip() for line in open('file.txt'))
-```
-Use generators to avoid loading everything into memory.
+1. Replace a loop that appends filtered values with a list comprehension.
+   **Hint:** identify the output expression, the `for` clause, then the filter.
+2. Write a generator that yields even numbers up to `N`. **Hint:** decide
+   explicitly whether "up to" includes `N`, and test both an even and odd `N`.
+3. Build a frequency dictionary. **Hint:** a comprehension can count each
+   distinct item, but first consider the repeated-work cost; compare it with
+   `collections.Counter`.
 
-### Chaining generators to build pipelines
-```python
-def read_lines(path):
-    with open(path) as f:
-        for line in f:
-            yield line.rstrip('\n')
+## Self-check
 
-def only_ints(lines):
-    for s in lines:
-        if s.isdigit():
-            yield int(s)
+- Why can iterating over the same generator twice produce different results?
+- When is a comprehension less readable than an ordinary loop?
+- What is the memory difference between a list and generator expression?
+- Why is modifying a list while iterating over it risky?
 
-def evens(nums):
-    for n in nums:
-        if n % 2 == 0:
-            yield n
+Expected behavior: the transformed list matches the original loop, the
+generator is lazy, and frequency counts include every occurrence.
 
-for n in evens(only_ints(read_lines('data.txt'))):
-    process(n)
-```
-Pipelines scale to large files and are naturally testable piece‑by‑piece.
+## Common pitfalls and diagnosis
 
-## Common pitfalls
-- List comprehension with heavy side effects: use a loop when clarity matters
-- Accidentally materializing big lists when a generator would suffice
-- Closing files: prefer `with` or wrap file iteration in a generator that uses a context manager
+- **A generator prints as `<generator object ...>`:** consume it with `next`,
+  iteration, or `list(...)` only when materializing is safe.
+- **The second pass is empty:** the iterator was exhausted; create a fresh
+  generator.
+- **An off-by-one boundary:** inspect the stop value passed to `range`.
+- **A dense nested comprehension is hard to debug:** expand it into named loops
+  and verify each stage.
+- **Frequency counting is unexpectedly slow:** avoid calling `items.count(x)`
+  for every item in a large list.
 
-## Practice exercises
-1) Convert a two‑step loop (`filter` then `map`) into a single list comprehension.
-2) Write a generator that yields sliding windows of size `k` over a list.
-3) Build a streaming CSV cleaner: read a CSV row‑by‑row, strip whitespace, and yield dicts.
+## Continue
 
-## Stretch goals
-- Reimplement `itertools.groupby` to group consecutive equal items
-- Benchmark a comprehension vs a `map`/`filter` vs a loop for 1e6 integers
-
-## Check your understanding
-- When do comprehensions hurt readability? Give an example.
-- Why can generators lower memory usage and enable back‑pressure?
-
-## Further reading
-- itertools: https://docs.python.org/3/library/itertools.html
-- Generator how‑to: https://docs.python.org/3/howto/functional.html#generators
+- [Open the learner notebook](../notebooks/day04_loops_comprehensions_generators.ipynb)
+- [Check the separate solution](../solutions/day04_loops_comprehensions_generators/day04_solutions.md)
+- [Next: Day 5 — Functions and type hints](day05_functions_type_hints.md)

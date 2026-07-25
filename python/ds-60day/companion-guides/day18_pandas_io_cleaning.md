@@ -1,72 +1,100 @@
-# Day 18 — Pandas I/O and Data Cleaning (Companion Guide)
+# Day 18 — pandas I/O and Data Cleaning
+
+**Level:** Intermediate
+
+Cleaning is a documented conversion from messy input to a predictable table.
+Never hide destructive assumptions inside a long notebook cell.
 
 ## Learning objectives
-- Read and write CSV, Parquet, Excel; parse dates and set indexes on load
-- Detect, standardize, and impute missing values
-- Clean columns via rename, string ops, type conversions, and categories
 
-## Why this matters
-Most data arrives messy. Reliable, repeatable cleaning transforms are the foundation for trustworthy analysis and models.
+By the end of this lesson, you can:
 
-## Mental models
-- Treat I/O as schema declaration: specify dtypes, parse_dates, and index_col upfront
-- Cleaning is a pipeline of pure-ish transforms that should be reproducible
+- load CSV or JSON while making parsing assumptions explicit;
+- measure missingness before choosing drop or imputation rules;
+- convert numeric and datetime fields with diagnosable invalid values;
+- write a non-mutating `clean(frame)` function and use `.pipe`;
+- verify resulting dtypes and required fields.
 
-## Core concepts and examples
-### Reading data
+## Prerequisites
+
+Complete Day 17 (`python-17`): DataFrames, selection, dtypes, and copies.
+
+## Vocabulary and mental model
+
+- **Missing value:** absent/unknown observation, commonly represented by
+  `NaN`, `NaT`, or `pd.NA`.
+- **Imputation:** replace missing values using an explicit rule.
+- **Coercion:** convert incompatible values to a sentinel such as `NaN`.
+- **Idempotent cleaning:** applying the cleaner twice produces the same result.
+- **Data contract:** expected columns, types, ranges, and missingness.
+- **Pipeline:** ordered transformations with named responsibilities.
+
+## Worked example
+
 ```python
 import pandas as pd
-sales = pd.read_csv('sales.csv', parse_dates=['order_date'], dtype={'store_id':'int64'})
-# Parquet is faster and typed
-sales.to_parquet('sales.parquet')
-fast = pd.read_parquet('sales.parquet')
-```
 
-### Column cleanup
-```python
-(df
- .rename(columns=str.lower)
- .rename(columns={"order id":"order_id"})
- .assign(sku=lambda d: d['sku'].str.strip().str.upper())
+raw = pd.DataFrame(
+    {"amount": ["10.5", "bad", None], "city": [" SF ", "ny", "NY"]}
 )
+
+
+def clean(frame: pd.DataFrame) -> pd.DataFrame:
+    result = frame.copy()
+    result["amount"] = pd.to_numeric(result["amount"], errors="coerce")
+    result["city"] = result["city"].str.strip().str.upper().astype("string")
+    return result
+
+
+tidy = raw.pipe(clean)
 ```
 
-### Types and categories
-```python
-df['year'] = df['year'].astype('Int64')   # nullable integer
-df['state'] = df['state'].astype('category')
-```
+Inspect the rows that became missing before filling or dropping them; coercion
+without review can hide a source-system change.
 
-### Missing values
-```python
-df['price'] = pd.to_numeric(df['price'], errors='coerce')
-df['price'] = df['price'].fillna(df['price'].median())
-```
+## Dataset and format notes
 
-### Dates and indexes
-```python
-df['dt'] = pd.to_datetime(df['dt'], errors='coerce', utc=True)
-df = df.set_index('dt').sort_index()
-```
+The notebook's Titanic sample follows the same Seaborn first-use download/cache
+behavior described on Day 17. CSV and JSON work with course defaults. Parquet
+requires a compatible optional engine; do not assume a fresh environment has
+one unless the project declares and installs it.
 
-## Common pitfalls
-- Letting pandas infer everything; explicitly set dtypes to avoid object columns
-- Using `inplace=True` everywhere; prefer method chaining for clarity and fewer bugs
-- Mixing localized and UTC datetimes; pick UTC internally, localize on display
+## Exercises and progressive hints
 
-## Practice exercises
-1) Load CSV with bad numerics; coerce and impute with median
-2) Standardize a messy product code column using string vectorized ops
-3) Convert high-cardinality string column to category and measure memory delta
+1. Load CSV with a parsed date column and make it the index. **Hint:** inspect
+   invalid dates before setting the index; `errors="coerce"` turns them into
+   `NaT`.
+2. Impute numeric columns with their median and categorical columns with their
+   mode. **Hint:** select columns by dtype and define behavior for an all-missing
+   column whose mode is empty.
+3. Write `clean(df)` returning a fully typed DataFrame. **Hint:** copy first,
+   normalize names/values, convert types, then assert the output contract.
 
-## Stretch goals
-- Write/Read compressed CSV and Parquet; compare speed/size
-- Use `pd.read_csv(..., chunksize=...)` to process large files incrementally
+## Self-check
 
-## Check your understanding
-- When would you choose Parquet over CSV?
-- Why might nullable dtypes (Int64, string) be preferable to object?
+- Why should missingness be measured by column and important segment?
+- What information can `errors="coerce"` discard?
+- Why should a cleaner return a new DataFrame?
+- How would you test that cleaning is idempotent?
 
-## Further reading
-- IO tools: https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html
-- Method chaining: https://pandas.pydata.org/pandas-docs/stable/user_guide/enhancingperf.html#method-chaining
+Expected behavior: dates are real datetimes, imputation leaves no targeted
+missing values, and the input frame remains unchanged.
+
+## Common pitfalls and diagnosis
+
+- **Dates parse with the wrong day/month order:** specify a format when known
+  and test an unambiguous fixture.
+- **Median imputation changes an integer dtype:** choose pandas' nullable dtypes
+  or document the float result.
+- **Mode access raises `IndexError`:** the column is empty/all-missing; define a
+  fallback or reject the data.
+- **A cleaner changes its input:** add a test comparing the original fixture
+  before and after the call.
+- **CSV values gain unexpected types:** inspect raw strings and pass explicit
+  `dtype`/parsing rules at the boundary.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day18_pandas_io_cleaning.ipynb)
+- [Check the separate solution](../solutions/day18_pandas_io_cleaning/day18_solutions.md)
+- [Next: Day 19 — Grouping and reshaping](day19_pandas_groupby_pivot.md)

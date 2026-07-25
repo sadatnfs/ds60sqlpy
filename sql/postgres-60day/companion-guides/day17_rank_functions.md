@@ -1,5 +1,47 @@
 # Day 17 — Ranking Functions: ROW_NUMBER, RANK, DENSE_RANK (Companion Guide)
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Prerequisites:** [Day 16 — window-function fundamentals](day16_window_functions_fundamentals.md)
+- **Artifacts:** [learner SQL](../day17_rank_functions.sql) ·
+  [solution reasoning](../solutions/day17_solutions.md) ·
+  [executable solution](../solutions/day17_solutions.sql)
+
+## Learning objectives
+
+- Choose a ranking function whose tie behavior matches the requirement.
+- Produce deterministic top-N-per-group results.
+
+## Vocabulary and concepts
+
+- **Peer rows:** rows equal on the window's `ORDER BY` expressions.
+- **Gap rank:** `RANK` gives peers the same rank and leaves gaps afterward.
+- **Dense rank:** `DENSE_RANK` gives peers the same rank without gaps.
+
+## Worked example / walkthrough
+
+Rank two products with equal revenue using `ROW_NUMBER`, `RANK`, and
+`DENSE_RANK`. Add `product_id` as the last `ORDER BY` key when the requirement
+is exactly five deterministic rows; omit that tie-breaker when equal metrics
+must share a business rank.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day17_rank_functions.sql). Add a
+small `VALUES` example with a tie and record all three rank outputs.
+
+## Self-check
+
+- Is the requirement “exactly N rows” or “all rows tied in the top N ranks”?
+- Does the ordering include a stable key where deterministic selection matters?
+
+## Next step
+
+Continue to [Day 18 — LAG and LEAD](day18_lag_lead.md).
+
+## Deep dive and reference
+
 Learning objectives
 - Assign row ordinals and ranks within partitions using ORDER BY
 - Choose the correct rank function for ties and pagination
@@ -23,10 +65,15 @@ Pitfalls
 - Using RANK when you need exactly k rows per group; ties may exceed k (use ROW_NUMBER) or allow overflow intentionally.
 - Non-deterministic ordering when ORDER BY is not unique; results can fluctuate.
 
-Practice exercises
-1) Get top 3 products by revenue per category with DENSE_RANK (ties included).
-2) De-duplicate customers by email keeping the earliest created_at using ROW_NUMBER.
-3) Rank customers by lifetime revenue within each country; return the top 10 per country.
+Exercises from the learner script
+1) Rank products by net line revenue within category and compare `RANK` with
+   `DENSE_RANK`.
+2) Return the top three customers per country by lifetime revenue.
+
+The prompt does not specify tie overflow for the top three. The maintained
+answer uses `DENSE_RANK`, so every customer tied in the first three distinct
+revenue levels is retained; use `ROW_NUMBER` only when exactly three rows per
+country are required.
 
 Further reading
 - Ranking: https://www.postgresql.org/docs/current/functions-window.html#FUNCTIONS-WINDOW-TABLE

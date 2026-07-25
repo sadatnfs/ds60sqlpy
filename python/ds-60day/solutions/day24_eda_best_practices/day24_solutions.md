@@ -17,7 +17,7 @@ df = sns.load_dataset('penguins')
 
 # Overview
 print(df.info())
-print(df.describe(numeric_only=True).T)
+print(df.describe(include='number').T)
 print(df.isna().mean().sort_values(ascending=False).head())
 
 # Distributions

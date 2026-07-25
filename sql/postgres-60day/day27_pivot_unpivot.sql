@@ -14,7 +14,8 @@ WHERE o.order_date >= date_trunc('year', now())
 GROUP BY p.category
 ORDER BY p.category;
 
--- Approach 2: crosstab (requires: CREATE EXTENSION tablefunc; run outside transaction)
+-- Approach 2: crosstab (requires the optional tablefunc extension; an
+-- authorized database role must install it before this query is used)
 -- SELECT * FROM crosstab(
 --   $$
 --   SELECT p.category::text AS rowid,

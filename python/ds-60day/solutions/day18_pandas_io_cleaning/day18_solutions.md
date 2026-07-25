@@ -30,7 +30,7 @@ for c in num_cols:
 
 for c in cat_cols:
     mode = df[c].mode(dropna=True)
-    df[c] = df[c].fillna(mode.iat(0) if not mode.empty else '')
+    df[c] = df[c].fillna(mode.iat[0] if not mode.empty else '')
 ```
 
 Exercise 3 — clean(df) with dtypes

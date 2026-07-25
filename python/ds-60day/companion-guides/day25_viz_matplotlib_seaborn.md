@@ -1,54 +1,100 @@
-# Day 25 — Visualization with Matplotlib and Seaborn (Companion Guide)
+# Day 25 — Visualization with Matplotlib and Seaborn
+
+**Level:** Intermediate
+
+A chart is an encoding of data into position, color, shape, and size. Choose the
+encoding for the question, then make the figure legible and reproducible.
 
 ## Learning objectives
-- Understand the Figure/Axes model in Matplotlib
-- Create common plots and style them effectively
-- Use Seaborn for statistical plots and faceting
 
-## Why this matters
-Good visuals communicate insights quickly and drive decisions.
+By the end of this lesson, you can:
 
-## Core concepts and examples
-### Matplotlib basics
+- choose a distribution, comparison, relationship, or trend chart;
+- use Matplotlib's figure/axes object model;
+- add informative titles, labels, units, legends, and accessible colors;
+- apply one consistent Seaborn theme;
+- export deterministic figures at an appropriate size and resolution.
+
+## Prerequisites
+
+Complete Day 24 (`python-24`): EDA questions, distributions, segmentation, and
+data-quality caveats.
+
+## Vocabulary and mental model
+
+- **Figure:** entire output canvas; **Axes:** one plotting area within it.
+- **Mark:** geometric object such as a point, line, or bar.
+- **Encoding:** mapping from a data field to position, color, or another visual
+  property.
+- **Scale:** mapping from data values to visual range.
+- **Overplotting:** marks overlap enough to hide density.
+- **Resolution:** pixel density for raster output such as PNG.
+
+## Worked example
+
 ```python
+from pathlib import Path
+
 import matplotlib.pyplot as plt
-fig, ax = plt.subplots(figsize=(6,4))
-ax.plot(df['x'], df['y'], marker='o')
-ax.set(title='Y over X', xlabel='X', ylabel='Y')
-fig.tight_layout()
-```
-
-### Subplots and styling
-```python
-fig, axes = plt.subplots(1,2, figsize=(10,4))
-axes[0].hist(df['value'], bins=30, color='C0')
-axes[1].scatter(df['x'], df['y'], alpha=0.6)
-plt.style.use('seaborn-v0_8-whitegrid')
-```
-
-### Seaborn
-```python
+import pandas as pd
 import seaborn as sns
-sns.set_theme(context='notebook', style='whitegrid')
-sns.boxplot(data=df, x='category', y='value')
-sns.lmplot(data=df, x='x', y='y', hue='segment', height=4, aspect=1.2)
+
+data = pd.DataFrame({"group": ["A", "A", "B", "B"], "value": [2, 4, 3, 7]})
+sns.set_theme(style="whitegrid")
+
+fig, ax = plt.subplots(figsize=(6, 4))
+sns.boxplot(data=data, x="group", y="value", ax=ax)
+ax.set(title="Value distribution by group", xlabel="Group", ylabel="Value")
+fig.tight_layout()
+
+output = Path("artifacts") / "boxplot.png"
+output.parent.mkdir(parents=True, exist_ok=True)
+fig.savefig(output, dpi=150)
+plt.close(fig)
 ```
 
-### Faceting
-```python
-sns.displot(df, x='value', col='segment', kde=True, col_wrap=3)
-```
+The example is offline. Closing completed figures matters in loops and long
+notebook sessions.
 
-## Common pitfalls
-- Overplotting; use alpha, hexbin, or aggregation
-- Misleading axes limits; always label and consider context
-- Too many colors/hues; emphasize only what matters
+## Dataset note
 
-## Practice exercises
-1) Recreate a metric dashboard with 3 subplots
-2) Use faceting to compare distributions across segments
-3) Style a plot for publication: labels, legends, annotations
+The notebook uses Seaborn's `tips` sample. First uncached use downloads it; later
+runs use Seaborn's cache. Prime the cache while online or substitute a
+constructed/local frame.
 
-## Further reading
-- Matplotlib tutorial: https://matplotlib.org/stable/tutorials/
-- Seaborn API: https://seaborn.pydata.org/api.html
+## Exercises and progressive hints
+
+1. Recreate two Day 24 plots with improved labeling. **Hint:** for each, write
+   the question, intended reader, visual encoding, and required units before
+   changing code.
+2. Export figures to `reports/figures/` with a consistent style. **Hint:** use
+   the figure object, create the directory with `Path`, call `tight_layout`, and
+   save before any display/close step.
+
+## Self-check
+
+- When should a histogram, box plot, line plot, or scatter plot be used?
+- Why is a truncated bar-chart baseline potentially misleading?
+- How can opacity, aggregation, or faceting address overplotting?
+- What output format suits web display versus scalable print?
+
+Expected behavior: plots have unambiguous labels/units, remain understandable
+without the notebook narration, and save to predictable paths.
+
+## Common pitfalls and diagnosis
+
+- **Labels are clipped in the saved image:** call `tight_layout` or use
+  `constrained_layout=True`.
+- **A blank file is saved:** save through the intended `fig` before closing or
+  clearing it.
+- **Many figures consume memory:** close each completed figure.
+- **Color is the only group signal:** use an accessible palette plus shape,
+  line style, faceting, or direct labels where appropriate.
+- **A line connects unordered categories/time:** sort the x dimension and verify
+  that connecting observations is meaningful.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day25_viz_matplotlib_seaborn.ipynb)
+- [Check the separate solution](../solutions/day25_viz_matplotlib_seaborn/day25_solutions.md)
+- [Next: Day 26 — Interactive visualization](day26_viz_plotly_altair.md)

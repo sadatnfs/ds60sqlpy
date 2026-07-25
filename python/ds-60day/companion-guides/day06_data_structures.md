@@ -1,80 +1,87 @@
-# Day 6 — Core Data Structures: Lists, Tuples, Sets, Dicts (Companion Guide)
+# Day 6 — Lists, Tuples, Sets, and Dictionaries
+
+**Level:** Beginner
+
+Choose a data structure from the operations you need, not from habit.
 
 ## Learning objectives
-- Understand each built‑in collection’s properties (mutability, ordering, uniqueness)
-- Choose the right structure for the job (lookup vs order vs uniqueness vs memory)
-- Implement common DS tasks: frequency counting, stable dedupe, grouping/aggregating
-- Use purpose‑built helpers: `collections.Counter`, `defaultdict`, `deque`
 
-## Why this matters
-Data structure choice affects clarity and performance. In data science you’ll count, deduplicate, group, and join constantly. Knowing the right tool prevents O(n²) mistakes and makes your code simpler.
+By the end of this lesson, you can:
 
-## Mental models
-- List = ordered, mutable sequence; fast append, O(n) membership
-- Tuple = ordered, immutable; hashable when elements are hashable (good as dict/set keys)
-- Set = unordered, unique membership; O(1) average membership test
-- Dict = key → value mapping; O(1) average get/set; preserves insertion order (3.7+)
+- explain ordering, mutability, uniqueness, and lookup behavior;
+- select a list, tuple, set, or dictionary for a stated requirement;
+- count, group, and de-duplicate values without losing required information;
+- avoid unintended aliasing when working with mutable collections.
 
-## Patterns and examples
-### Frequency counting
+## Prerequisites
+
+Complete Day 5 (`python-05`): functions, collection annotations, and contracts.
+
+## Vocabulary and mental model
+
+- **List:** mutable, ordered sequence that permits duplicates.
+- **Tuple:** immutable, ordered sequence; useful for fixed records or keys.
+- **Set:** mutable collection of unique, hashable values; fast membership.
+- **Dictionary:** mapping from unique, hashable keys to values.
+- **Hashable:** stable enough to be used as a set member or dictionary key.
+- **Aliasing:** two names refer to the same mutable object.
+
+Think in operations: preserve order, enforce uniqueness, look up by key, or
+represent a fixed record. A set removes duplicates but does not represent the
+original sequence order as a contract.
+
+## Worked example
+
 ```python
-from collections import Counter
-words = "this is a test this is".split()
-counts = Counter(words)          # {'this': 2, 'is': 2, 'a': 1, 'test': 1}
-counts.most_common(2)
+pipeline = ["extract", "clean", "load"]
+coordinate = (37.7749, -122.4194)
+allowed_roles = {"reader", "editor"}
+user_by_id = {7: "Ada", 12: "Grace"}
+
+pipeline.append("validate")
+can_edit = "editor" in allowed_roles
+user_name = user_by_id[7]
 ```
 
-### Stable dedupe (preserve first occurrence order)
-```python
-def dedupe_stable(xs):
-    seen = set()
-    out = []
-    for x in xs:
-        if x not in seen:
-            seen.add(x)
-            out.append(x)
-    return out
-```
+The structures express different guarantees: ordered mutable stages, a fixed
+coordinate pair, unique role membership, and keyed user lookup.
 
-### Grouping with `defaultdict`
-```python
-from collections import defaultdict
-pairs = [("a", 1), ("b", 2), ("a", 3)]
-by_key = defaultdict(list)
-for k, v in pairs:
-    by_key[k].append(v)          # {'a': [1, 3], 'b': [2]}
-```
+## Exercises and progressive hints
 
-### Using tuples as dict keys
-```python
-edges = {("SFO", "LAX"): 337, ("SFO", "SEA"): 679}
-edges[("SFO", "LAX")]
-```
+1. Implement stable de-duplication that preserves the first occurrence.
+   **Hint:** keep one structure for membership checks and another for ordered
+   output.
+2. Aggregate key-value pairs by key. Try collecting values, unique values, and
+   numeric totals. **Hint:** decide what a missing key should start with before
+   processing the pair.
 
-## Performance notes
-- Prefer sets when you need fast membership tests: `x in my_set`
-- Prefer dict lookups over repeated `list.index` or `list.count`
-- Converting a large list to a set for one‑time membership checks can pay off
+## Self-check
 
-## Common pitfalls
-- Modifying a list while iterating forward (skip elements unexpectedly). Iterate a copy or go backward when removing
-- Using lists for membership tests in hot loops (switch to set)
-- Forgetting that dict/set membership checks depend on `__hash__`/`__eq__` semantics
+- Why is `item in a_set` usually preferable to `item in a_list` for repeated
+  membership checks?
+- Why can a tuple contain a list but then fail as a dictionary key?
+- What is the difference between `copy = original` and
+  `copy = original.copy()`?
+- Which required guarantee would make a set the wrong output type?
 
-## Practice exercises
-1) Implement `top_k_frequent(xs, k)` using `Counter.most_common` and also without `Counter` (for practice).
-2) Given `records = [(user, score), ...]`, build a dict of `user → max_score`.
-3) Write `group_by_key(pairs)` returning `dict[key, list[values]]` and `group_by_key_set` returning `dict[key, set[values]]`.
+Expected behavior: stable de-duplication retains original order, and each
+aggregation uses an appropriate empty starting value.
 
-## Stretch goals
-- Implement a simple multimap class on top of `defaultdict(list)` with `.add(key, value)` and `.get(key)`
-- Time `x in list` vs `x in set` for increasing sizes; plot the results
+## Common pitfalls and diagnosis
 
-## Check your understanding
-- When would you choose a tuple over a list? Give two examples
-- Why does `set` drop duplicates but also scramble order (pre‑3.7 mental model)?
-- What’s the complexity of `dict.get(k)` on average and worst case?
+- **Output order changes after `set(values)`:** a set is not the ordered result
+  you need; retain a separate list.
+- **`KeyError`:** inspect whether the key should be required or initialized
+  with `get`, `setdefault`, or `defaultdict`.
+- **`TypeError: unhashable type`:** a mutable list or dictionary was used where
+  a stable key is required.
+- **Changing one nested list changes another:** print object identities; a
+  shallow copy still shares nested objects.
+- **Removing items while iterating skips values:** build a new collection or
+  iterate over a copy.
 
-## Further reading
-- collections: https://docs.python.org/3/library/collections.html
-- time complexity reference (CPython): https://wiki.python.org/moin/TimeComplexity
+## Continue
+
+- [Open the learner notebook](../notebooks/day06_data_structures.ipynb)
+- [Check the separate solution](../solutions/day06_data_structures/day06_solutions.md)
+- [Next: Day 7 — Strings, regex, and paths](day07_strings_regex_pathlib.md)

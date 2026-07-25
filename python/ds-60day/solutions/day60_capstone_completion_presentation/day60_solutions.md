@@ -23,23 +23,32 @@ Exercise 1 — Slide outline
 Exercise 2 — Packaging
 ```makefile
 # Makefile
+PYTHON ?= python
+
 setup:
-	python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+	$(PYTHON) -m pip install -e ".[quality]"
 
 train:
-	python src/train.py
+	$(PYTHON) -m src.train
 
 eval:
-	python src/eval.py
+	$(PYTHON) -m src.eval
 
 serve:
-	uvicorn app:app --host 0.0.0.0 --port 8000
+	$(PYTHON) -m uvicorn app:app --host 0.0.0.0 --port 8000
 
 smoke:
-	pytest -q tests/smoke
+	$(PYTHON) -m pytest -q tests/smoke
 ```
+
+Create the virtual environment with the operating-system-specific setup before
+using the Makefile. On Windows, pass the interpreter explicitly if `make` is
+available: `make PYTHON=.venv/Scripts/python.exe smoke`. VS Code tasks or a
+PowerShell script are equally valid Windows automation.
+
 Checklist
-- Pin requirements; include README with commands
+- Declare dependencies in `pyproject.toml`, keep a reviewed lock, and include a
+  README with exact commands
 - Save trained model and schema artifacts under artifacts/
 - Provide sample inputs/outputs; add smoke tests
 

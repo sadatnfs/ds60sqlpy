@@ -1,31 +1,88 @@
-# Day 58 — Final Capstone (Part 1) — Ingestion, Cleansing, and Validation (Companion Guide)
+# Day 58 — Final Capstone, Part 1: Ingestion and Data Quality
 
-Objectives
-- Ingest messy staged data; normalize case/whitespace/date formats
-- Validate emails/countries; upsert valid rows; report data quality
-- Build mapping tables for normalization and reusable validation functions
+## Level and prerequisites
 
-Flow (matches script)
-1) Stage raw rows into a temp staging table (stg_customers_raw)
-2) Clean:
-   - full_name: trim; collapse whitespace
-   - email: lower, trim; regex validation
-   - country: upper, trim; map via country_map
-   - segment: nullif(trim(segment), '')
-   - created_at: parse multiple formats with CASE/regex + to_timestamp
-   - attributes: to JSONB, fallback to '{}'
-3) Validate flags: email_valid, country_valid
-4) Upsert: INSERT ... SELECT valid rows; ON CONFLICT DO NOTHING (or DO UPDATE by design)
-5) DQ summary: counts of invalid email/country/name; store/report
+- **Level:** Advanced
+- **Prerequisites:** [Day 57 — trends and anomalies](day57_project4_bi_part3.md)
+- **Artifacts:** [learner SQL](../day58_final_capstone_part1.sql) ·
+  [solution reasoning](../solutions/day58_solutions.md) ·
+  [executable solution](../solutions/day58_solutions.sql)
 
-Pitfalls
-- Overly strict regexes that reject valid emails; choose pragmatic patterns
-- Server‑side COPY permission issues; prefer \copy or inserts in curriculum
-- Time zone normalization; parse to timestamptz
+## Learning objectives
 
-Deliverables
-- Cleaned records inserted; DQ summary table/view with counts
+- Preserve raw staged input while deriving validated, normalized fields.
+- Package a repeatable stage/validate/upsert flow with observable counts.
 
-Stretch goals
-- Extend parser to more date formats and phone normalization
-- Stored procedure to wrap end‑to‑end ingest with return of DQ metrics
+## Vocabulary and concepts
+
+- **Raw staging:** an input-preserving landing area before typed transformation.
+- **Rejection reason:** a stable explanation for why a record was not accepted.
+- **Upsert count:** affected rows under the interface's defined insert/update
+  semantics.
+
+## Worked example / walkthrough
+
+For each timestamp format, test a format-specific regular expression before
+casting. Keep raw text and parsed value together, collect explicit rejection
+reasons, and upsert only accepted rows inside the rollback-only transaction.
+Return staged, valid, invalid, and affected counts that reconcile.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day58_final_capstone_part1.sql).
+Add one malformed value for each parser and verify it becomes an explained
+rejection rather than an exception or silent default.
+
+## Self-check
+
+- Can every normalized value be traced to preserved raw input?
+- Do count summaries reconcile, and are schema additions kept out of an
+  unreviewed tutorial upsert?
+
+## Next step
+
+Continue to [Day 59 — stakeholder analytics](day59_final_capstone_part2.md).
+
+## Deep dive and reference
+
+## Capstone focus
+
+- Stage messy customer text without losing the raw input.
+- Normalize names, email, country, segment, timestamps, JSON, and phone.
+- Validate records, upsert accepted customers, and return a DQ summary.
+
+## How the learner script works
+
+The rollback-only starter creates `stg_customers_raw`, inserts three varied
+records, parses three timestamp patterns, validates email/country, upserts valid
+rows by unique email, reports invalid counts, and demonstrates a country map.
+
+## Practice — match the learner prompts exactly
+
+1. Extend the guarded timestamp parser for additional explicit formats.
+2. Add a staged phone value, strip non-digits with regex, and return a
+   `phone_valid` flag under a clearly stated numbering policy.
+3. Create a PostgreSQL stored procedure that truncates/rebuilds a cleaned stage,
+   validates it, upserts accepted customers, and returns upserted/invalid counts
+   through `INOUT` parameters.
+
+## Pipeline reasoning
+
+- Guard every timestamp cast with a format-specific regex; ambiguous dates need
+  an explicit locale policy.
+- Preserve rejection reasons and raw text in a real pipeline.
+- Normalize before comparing unique email values.
+- `ON CONFLICT (email)` counts affected inserts/updates but does not distinguish
+  them without additional logic.
+- Invalid JSON falling back to `{}` is a course choice; production should retain
+  the error.
+
+## Schema and safety limits
+
+`training.customers` has no phone column. Validate phone in staging, but do not
+invent a destination. Persisting phone requires a reviewed schema migration.
+The sample phone regex is intentionally narrow and is not global normalization.
+
+Keep the entire demonstration in a transaction and roll it back. A procedure is
+appropriate for side effects and can expose `INOUT` counts; a table-returning
+function would be a different interface.

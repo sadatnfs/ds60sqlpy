@@ -1,75 +1,92 @@
-# Day 8 — Files, JSON/CSV, and Context Managers (Companion Guide)
+# Day 8 — Files, JSON, CSV, and Context Managers
+
+**Level:** Beginner
+
+File I/O crosses a boundary where paths, encodings, permissions, and data shape
+can all fail. Make those assumptions visible.
 
 ## Learning objectives
-- Read/write text, JSON, and CSV reliably
-- Use `with` statements to guarantee resource cleanup
-- Handle errors (missing files, bad JSON) gracefully
 
-## Why this matters
-I/O is where data enters or leaves your system. Good patterns prevent file descriptor leaks, half-written files, and cryptic errors for users.
+By the end of this lesson, you can:
 
-## Mental models
-- Context managers wrap setup/teardown around a block (`__enter__` / `__exit__`)
-- CSV and JSON have edge cases: quoting, newlines, encodings; always be explicit
+- read and write text using an explicit UTF-8 encoding;
+- explain how Python values map to JSON values;
+- read and write row-oriented CSV with the standard library;
+- use `with` so resources close on success or failure;
+- report a recoverable file error without hiding programming defects.
 
-## Reading and writing JSON
+## Prerequisites
+
+Complete Day 7 (`python-07`): string normalization, exceptions, and `Path`.
+
+## Vocabulary and mental model
+
+- **Serialization:** encode in-memory values into a storable representation.
+- **Deserialization:** decode stored bytes/text into values.
+- **Encoding:** mapping between text characters and bytes; UTF-8 is the course
+  default.
+- **Context manager:** an object whose `with` block guarantees setup/cleanup.
+- **CSV dialect:** delimiter, quoting, newline, and related format rules.
+- **Schema:** the expected fields, types, and constraints of data.
+
+Opening a file supplies a resource; `with` defines exactly how long that
+resource is owned.
+
+## Worked example
+
 ```python
 import json
 from pathlib import Path
-p = Path('data/people.json')
-people = [{"name": "Ada", "age": 36}, {"name": "Alan", "age": 41}]
-with p.open('w', encoding='utf-8') as f:
-    json.dump(people, f, indent=2, ensure_ascii=False)
 
-with p.open(encoding='utf-8') as f:
-    loaded = json.load(f)
-```
-Use `ensure_ascii=False` to preserve Unicode; always specify `encoding`.
+path = Path("artifacts") / "day08-settings.json"
+settings = {"theme": "light", "page_size": 25}
+path.parent.mkdir(parents=True, exist_ok=True)
 
-## CSV pitfalls and dialects
-```python
-import csv
-p = Path('data/people.csv')
-with p.open('w', newline='', encoding='utf-8') as f:
-    w = csv.DictWriter(f, fieldnames=['name','age'])
-    w.writeheader(); w.writerows(people)
-```
-Use `newline=''` on Windows to avoid double newlines. For reading, `csv.Sniffer` can guess dialects.
+with path.open("w", encoding="utf-8") as stream:
+    json.dump(settings, stream, indent=2)
 
-## Safe loaders
-```python
-from typing import Any
+with path.open(encoding="utf-8") as stream:
+    loaded = json.load(stream)
 
-def safe_load_json(p: Path) -> Any | None:
-    try:
-        with p.open(encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print(f"missing: {p}")
-    except json.JSONDecodeError as e:
-        print(f"bad json in {p}: {e}")
-    return None
+assert loaded == settings
 ```
 
-## Context managers beyond files
-- Database connections, locks, temporary directory changes (`contextlib`)
-- Write your own with `contextlib.contextmanager`
+This deterministic round trip requires no network access. `artifacts/` is the
+repository's ignored location for disposable generated data.
 
-## Common pitfalls
-- Forgetting `newline=''` on CSV writes (Windows)
-- Blindly using `open('file')` without `encoding` (non‑portable)
-- Swallowing exceptions without context (always include file path)
+## Exercises and progressive hints
 
-## Practice exercises
-1) Write `read_csv_dicts(path) -> list[dict]` that returns rows as dicts with robust error handling
-2) Build a converter between CSV and JSON with CLI flags for input/output paths
-3) Implement a context manager that temporarily sets `os.environ` vars for a block
+1. Write `safe_load_json(path)` that returns `None` for expected read/decode
+   failures and logs the cause. **Hint:** identify the narrow exception types
+   raised by a missing file and malformed JSON; avoid catching every exception.
+2. Convert CSV rows to JSON records and JSON records back to CSV. **Hint:** use
+   `csv.DictReader`/`DictWriter`, decide which object supplies field names, and
+   open CSV output with `newline=""`.
 
-## Stretch goals
-- Stream CSV in chunks; transform rows and write out a new CSV without loading everything into memory
-- Write an `atomic_write(path)` context manager that writes to a temp file and moves it into place on success
+## Self-check
 
-## Further reading
-- csv docs: https://docs.python.org/3/library/csv.html
-- json docs: https://docs.python.org/3/library/json.html
-- contextlib: https://docs.python.org/3/library/contextlib.html
+- Why does JSON not preserve tuples as tuples?
+- What guarantee does `with` provide if decoding raises an exception?
+- Why should CSV output on Windows use `newline=""`?
+- When should a loader raise instead of returning `None`?
+
+Expected behavior: valid data round-trips, malformed JSON produces a useful log
+entry, and CSV output has one header plus the expected row count.
+
+## Common pitfalls and diagnosis
+
+- **`UnicodeDecodeError`:** confirm the source encoding; do not silently discard
+  characters with `errors="ignore"`.
+- **Extra blank CSV rows on Windows:** pass `newline=""` when opening CSV files.
+- **`JSONDecodeError`:** log the path and decoder message, then inspect the
+  reported line and column.
+- **A JSON top-level object has an unexpected shape:** validate that it is the
+  list/dictionary your converter expects before iterating.
+- **A write leaves a partial file:** production code should write a temporary
+  file and replace the destination only after success.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day08_files_json_csv_context.ipynb)
+- [Check the separate solution](../solutions/day08_files_json_csv_context/day08_solutions.md)
+- [Next: Day 9 — Modules and packages](day09_modules_packages.md)

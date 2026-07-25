@@ -1,199 +1,127 @@
-# Day 57 — Solutions (Project 4: Complex BI, Part 3 — Trends, Anomalies, Accuracy)
+# Day 57 Solutions — Forecast Accuracy and Anomalies
 
-We detect anomalies with z-scores and MAD, and evaluate simple forecasts. Below are detailed, line-by-line solutions to the practice exercises.
+The exercises compare a seven-day moving average with a weekly seasonal naive,
+then rank recent positive and negative anomalies using standard-deviation and
+MAD scores. See [`day57_solutions.sql`](day57_solutions.sql).
 
-Reference (annotated)
+## Exercise 1 — Compare MA(7) and lag-7 MAPE
+
+The calendar spine makes “seven days ago” mean seven calendar days, including
+days with no orders as zero revenue.
+
 ```sql
--- Daily revenue baseline with rolling stats
-WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), stats AS (
-  SELECT d,
-         revenue,
-         -- rolling average of the previous 14 days (excluding today)
-         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS avg14,
-         STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS sd14
-  FROM daily
-)
-SELECT d,
-       ROUND(revenue,2) AS revenue,
-       ROUND(avg14,2)   AS rolling_avg14,
-       ROUND(sd14,2)    AS rolling_sd14,
-       CASE WHEN sd14 IS NULL OR sd14 = 0 THEN 0 ELSE ROUND((revenue - avg14)/sd14, 2) END AS z_score,
-       CASE WHEN sd14 IS NOT NULL AND sd14 > 0 AND ABS((revenue-avg14)/sd14) >= 3 THEN 'anomaly' ELSE 'normal' END AS flag
-FROM stats
-ORDER BY d DESC
-LIMIT 60;
-```
-Explanation
-- daily: collapse orders to 1 row per day.
-- stats: compute rolling avg and standard deviation using a 14-day lookback.
-- Output: z_score flags days ±3 SD away from recent trend.
+SET search_path TO training, public;
 
-Exercise 1 — Replace MA(7) with seasonal naive (t−7) and compare MAPE
-Goal
-- Compare forecast error when using the value from 7 days ago vs the MA(7) baseline.
-
-Solution
-```sql
-WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), feats AS (
-  SELECT d,
+WITH bounds AS (
+  SELECT MIN(order_date)::date AS min_day,
+         MAX(order_date)::date AS max_day
+  FROM orders
+), calendar AS (
+  SELECT day::date
+  FROM bounds
+  CROSS JOIN LATERAL generate_series(min_day, max_day, interval '1 day') AS day
+), daily AS (
+  SELECT order_date::date AS day, SUM(total_amount) AS revenue
+  FROM orders
+  GROUP BY order_date::date
+), complete AS (
+  SELECT c.day, COALESCE(d.revenue, 0) AS revenue
+  FROM calendar c
+  LEFT JOIN daily d USING (day)
+), forecasts AS (
+  SELECT day,
          revenue,
-         LAG(revenue, 7) OVER (ORDER BY d) AS seasonal_naive,
-         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) AS ma7
-  FROM daily
-), errors AS (
-  SELECT d,
-         revenue AS actual,
-         seasonal_naive,
-         ma7,
-         CASE WHEN revenue IS NULL OR revenue = 0 OR seasonal_naive IS NULL THEN NULL
-              ELSE ABS(revenue - seasonal_naive)/revenue END AS ape_seasonal,
-         CASE WHEN revenue IS NULL OR revenue = 0 OR ma7 IS NULL THEN NULL
-              ELSE ABS(revenue - ma7)/revenue END AS ape_ma7
-  FROM feats
+         AVG(revenue) OVER (
+           ORDER BY day ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING
+         ) AS ma7_forecast,
+         LAG(revenue, 7) OVER (ORDER BY day) AS seasonal_naive
+  FROM complete
 )
-SELECT d,
-       ROUND(actual,2) AS actual,
-       ROUND(seasonal_naive,2) AS fc_t_minus_7,
-       ROUND(ma7,2) AS fc_ma7,
-       ROUND(ape_seasonal,4) AS ape_t_minus_7,
-       ROUND(ape_ma7,4) AS ape_ma7
-FROM errors
-ORDER BY d DESC
-LIMIT 30;
-```
-Line-by-line notes
-- LAG(...,7): aligns same weekday last week; captures weekly seasonality.
-- Excluding current day from MA(7) ensures no leakage.
-- APE guards: return NULL when actual is 0 or forecast unavailable.
-
-Aggregate MAPE (optional)
-```sql
-WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), feats AS (
-  SELECT d,
-         revenue,
-         LAG(revenue, 7) OVER (ORDER BY d) AS seasonal_naive,
-         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) AS ma7
-  FROM daily
-), errors AS (
-  SELECT d,
-         revenue AS actual,
-         seasonal_naive,
-         ma7,
-         CASE WHEN revenue IS NULL OR revenue = 0 OR seasonal_naive IS NULL THEN NULL
-              ELSE ABS(revenue - seasonal_naive)/revenue END AS ape_seasonal,
-         CASE WHEN revenue IS NULL OR revenue = 0 OR ma7 IS NULL THEN NULL
-              ELSE ABS(revenue - ma7)/revenue END AS ape_ma7
-  FROM feats
-)
-SELECT ROUND(AVG(ape_seasonal),4) AS mape_t_minus_7,
-       ROUND(AVG(ape_ma7),4)      AS mape_ma7
-FROM errors
-WHERE d >= (SELECT MIN(d) + interval '14 days' FROM errors);
+SELECT 'MA(7)' AS model,
+       ROUND(AVG(ABS(revenue - ma7_forecast) / NULLIF(revenue, 0)), 4) AS mape
+FROM forecasts
+WHERE day >= CURRENT_DATE - 180
+  AND ma7_forecast IS NOT NULL
+UNION ALL
+SELECT 'seasonal naive (lag 7)',
+       ROUND(AVG(ABS(revenue - seasonal_naive) / NULLIF(revenue, 0)), 4)
+FROM forecasts
+WHERE day >= CURRENT_DATE - 180
+  AND seasonal_naive IS NOT NULL
+ORDER BY model;
 ```
 
-Exercise 2 — Flag top-10 positive and negative anomalies (last 6 months) with SD and MAD
-Goal
-- Produce two lists each for SD-based and MAD-based anomalies over the last 6 months: highest positive deviations and lowest negative deviations.
+Expected shape: two model rows. Zero-revenue days are excluded from MAPE by
+`NULLIF`; disclose that choice.
 
-A) SD-based z-score extremes
+## Exercise 2 — Top ten positive and negative anomalies
+
 ```sql
+SET search_path TO training, public;
+
 WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), stats AS (
-  SELECT d,
-         revenue,
-         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS avg14,
-         STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS sd14
+  SELECT order_date::date AS day, SUM(total_amount) AS revenue
+  FROM orders
+  WHERE order_date >= CURRENT_TIMESTAMP - interval '6 months'
+  GROUP BY order_date::date
+), moments AS (
+  SELECT AVG(revenue) AS mean_revenue,
+         STDDEV_SAMP(revenue) AS sd_revenue
   FROM daily
-), scored AS (
-  SELECT d,
-         revenue,
-         (CASE WHEN sd14 IS NULL OR sd14=0 THEN NULL ELSE (revenue - avg14)/sd14 END) AS z
-  FROM stats
-), last6 AS (
-  SELECT * FROM scored WHERE d >= CURRENT_DATE - interval '6 months'
-)
--- Top-10 positive z
-SELECT 'sd_top_pos' AS list, d, ROUND(revenue,2) AS revenue, ROUND(z,2) AS score
-FROM last6
-WHERE z IS NOT NULL
-ORDER BY z DESC
-LIMIT 10;
-
--- Top-10 negative z
-SELECT 'sd_top_neg' AS list, d, ROUND(revenue,2) AS revenue, ROUND(z,2) AS score
-FROM last6
-WHERE z IS NOT NULL
-ORDER BY z ASC
-LIMIT 10;
-```
-Notes
-- Separate queries for positive and negative extremes improve readability.
-
-B) MAD-based modified z-score extremes (robust)
-```sql
-WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), med AS (
-  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_rev FROM daily
-), dev AS (
-  SELECT d.d, d.revenue, m.median_rev,
-         ABS(d.revenue - m.median_rev) AS abs_dev
-  FROM daily d CROSS JOIN med m
+), median AS (
+  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_revenue
+  FROM daily
+), deviations AS (
+  SELECT d.*,
+         m.median_revenue,
+         ABS(d.revenue - m.median_revenue) AS absolute_deviation
+  FROM daily d
+  CROSS JOIN median m
 ), mad AS (
-  SELECT d,
-         revenue,
-         median_rev,
-         percentile_cont(0.5) WITHIN GROUP (ORDER BY abs_dev) AS mad
-  FROM dev
+  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY absolute_deviation) AS mad
+  FROM deviations
 ), scored AS (
-  SELECT d,
-         revenue,
-         CASE WHEN mad = 0 THEN NULL ELSE 0.6745 * (revenue - median_rev) / mad END AS mod_z
-  FROM mad
-), last6 AS (
-  SELECT * FROM scored WHERE d >= CURRENT_DATE - interval '6 months'
+  SELECT d.day,
+         d.revenue,
+         (d.revenue - mo.mean_revenue) / NULLIF(mo.sd_revenue, 0) AS sd_z,
+         0.6745 * (d.revenue - d.median_revenue) / NULLIF(mad.mad, 0)
+           AS modified_z
+  FROM deviations d
+  CROSS JOIN moments mo
+  CROSS JOIN mad
+), ranked AS (
+  SELECT *,
+         CASE WHEN revenue >= (SELECT mean_revenue FROM moments)
+              THEN 'positive' ELSE 'negative' END AS direction,
+         ROW_NUMBER() OVER (
+           PARTITION BY (
+             CASE WHEN revenue >= (SELECT mean_revenue FROM moments)
+                  THEN 'positive' ELSE 'negative' END
+           )
+           ORDER BY ABS(sd_z) + ABS(modified_z) DESC, day
+         ) AS anomaly_rank
+  FROM scored
 )
--- Top-10 positive modified z
-SELECT 'mad_top_pos' AS list, d, ROUND(revenue,2) AS revenue, ROUND(mod_z,2) AS score
-FROM last6
-WHERE mod_z IS NOT NULL
-ORDER BY mod_z DESC
-LIMIT 10;
-
--- Top-10 negative modified z
-SELECT 'mad_top_neg' AS list, d, ROUND(revenue,2) AS revenue, ROUND(mod_z,2) AS score
-FROM last6
-WHERE mod_z IS NOT NULL
-ORDER BY mod_z ASC
-LIMIT 10;
+SELECT direction,
+       anomaly_rank,
+       day,
+       ROUND(revenue, 2) AS revenue,
+       ROUND(sd_z::numeric, 3) AS sd_z,
+       ROUND(modified_z::numeric, 3) AS modified_z
+FROM ranked
+WHERE anomaly_rank <= 10
+ORDER BY direction DESC, anomaly_rank;
 ```
-Line-by-line notes
-- med/dev/mad: compute median and median absolute deviation.
-- 0.6745 rescales MAD to approximate standard deviations under normality.
-- Using last 6 months window focuses on recent operations.
 
-Tips
-- Use both SD and MAD; SD is more sensitive to outliers, MAD is robust when distributions are skewed.
-- Persist anomaly labels in a table for downstream alerting and BI.
+Expected shape: up to ten positive and ten negative rows. The combined absolute
+score is a ranking heuristic; it is not a calibrated probability.
+
+## Reasoning, safety, and pitfalls
+
+- A moving average must exclude the current day to avoid leakage.
+- The SD score is sensitive to extreme values; the MAD score is more robust.
+- `NULLIF` handles zero dispersion. An undefined score should not be silently
+  relabeled zero.
+- The anomaly query groups only days with orders, unlike the forecast query's
+  complete calendar. Choose and document the intended population.
+- Anomaly detection flags candidates for investigation, not proven incidents.

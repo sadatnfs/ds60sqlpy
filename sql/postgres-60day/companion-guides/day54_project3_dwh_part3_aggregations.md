@@ -1,30 +1,88 @@
-# Day 54 — Project 3: Data Warehouse (Part 3) — Aggregate Tables and Marts (Companion Guide)
+# Day 54 — Data Warehouse Project, Part 3: Aggregates
 
-Objectives
-- Build aggregate fact tables for common queries (daily revenue by segment, category)
-- Schedule refreshes and manage incremental updates
-- Document lineage and quality checks
+## Level and prerequisites
 
-Aggregates
-- daily_revenue(dim keys..., day, revenue, orders, customers)
-- Use INSERT INTO ... SELECT ... FROM fact_order_item GROUP BY ... for full rebuild
-- For incremental loads, restrict by day >= :last_loaded_day; handle late arriving facts
+- **Level:** Advanced
+- **Prerequisites:** Review [Day 53 — slowly changing dimensions](day53_project3_dwh_part2_scd.md)
+  and retain the committed Day 52 warehouse in the same database. Day 54 does
+  not depend on Day 53's rolled-back changes.
+- **Artifacts:** [learner SQL](../day54_project3_dwh_part3_aggregations.sql) ·
+  [solution reasoning](../solutions/day54_solutions.md) ·
+  [executable solution](../solutions/day54_solutions.sql)
 
-Indexes and MVs
-- Consider MATERIALIZED VIEW for complex rollups; add unique index and CONCURRENT refresh
-- Add indexes on (day, segment/category) for common filters
+## Learning objectives
 
-Quality
-- Reconcile aggregates to detail fact totals by day; exception on mismatch > threshold
-- Track row counts per day to detect gaps
+- Build aggregate tables with an enforced monthly grain.
+- Refresh one period idempotently and reconcile it with warehouse facts.
 
-Pitfalls
-- Double counting due to joining to dims at detail level after aggregation; join dims before aggregate or via keys only
-- Incremental logic missing late corrections; periodically run a backfill window
+## Vocabulary and concepts
 
-Deliverables
-- One or more aggregate tables with refresh script and validation queries
+- **Aggregate table:** persisted summaries at a coarser fact grain.
+- **Idempotent refresh:** a rebuild whose repeated execution yields the same
+  target-period rows.
+- **Late-arriving fact:** a fact received after its reporting period was first
+  built.
 
-Stretch goals
-- Aggregate by week (ISO), month; use date_dim to drive calendar completeness
-- Partition large aggregate tables by month for faster maintenance
+## Worked example / walkthrough
+
+For one target year/month, delete category, customer, and product aggregate
+rows, rebuild each independently from facts, and commit or roll back the whole
+unit together. Reconcile each table's period revenue with a fact-only control
+before considering the refresh successful.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day54_project3_dwh_part3_aggregations.sql).
+Call the period refresh twice inside the disposable transaction and compare row
+counts and totals.
+
+## Self-check
+
+- Does each primary key exactly match the documented aggregate grain?
+- Can a late fact be incorporated through a deliberate period backfill?
+
+## Next step
+
+Continue to [Day 55 — BI drill-downs](day55_project4_bi_part1.md).
+
+## Deep dive and reference
+
+## Project focus
+
+- Build monthly category and customer aggregate tables.
+- Add a monthly product aggregate with a declared primary-key grain.
+- Refresh one period idempotently and reconcile it to facts.
+
+## Preconditions and state
+
+Run Day 52 first in the same database. The learner creates its aggregate tables,
+loads them, performs data-quality checks, and rolls the entire Day 54 transaction
+back.
+
+The starter grains are `(year, month, category)` and
+`(year, month, customer_sk)`. Revenue is summed from `fact_sales.amount`; date
+attributes come from `dim_date`.
+
+## Practice — match the learner prompts exactly
+
+1. Create `agg_sales_product_month` at
+   `(year, month, product_sk)` grain with revenue, units, and distinct orders,
+   then validate it against `fact_sales`.
+2. Create a stored procedure accepting year and month that deletes and rebuilds
+   category, customer, and product aggregates for that target period.
+
+## Refresh design
+
+- Delete and insert all related aggregates in one transaction.
+- A period rebuild is idempotent when the primary-key grain is correct.
+- Filter facts through `dim_date.year` and `dim_date.month`.
+- Aggregate each side independently before reconciliation to prevent fanout.
+
+## Validation and limits
+
+- Every refreshed month's aggregate revenue must equal fact revenue.
+- Orphan surrogate keys must be zero.
+- Late facts require rerunning affected periods or a deliberate backfill window.
+- The compact seed does not need aggregates for speed; this is a warehouse
+  serving-pattern exercise.
+- Day 54 does not require rolled-back Day 53 audit/SCD changes.

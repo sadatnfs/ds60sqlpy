@@ -1,73 +1,90 @@
-# Day 03 — Solutions (INNER JOINs and Predicate Placement)
+# Day 03 solutions — INNER JOINs
 
-Detailed explanations of each join pattern and how to avoid fanout.
+These answers match the exercises in [Day 03](../day03_inner_joins.sql). The join keys preserve the intended grain of each result.
 
-Setup
-- Facts: orders, order_items, payments; Dimensions: customers, products
-- Heuristic: Pre‑aggregate facts before joining two 1:N relationships to avoid row multiplication
+## Exercise 1 — Top 20 customers by revenue
 
-Exercise 1 — Revenue by customer country for last 90 days
 ```sql
-WITH order_revenue AS (
-  SELECT o.order_id,
-         o.customer_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  WHERE o.order_date >= now() - interval '90 days'
-  GROUP BY o.order_id, o.customer_id
-)
-SELECT c.country,
-       ROUND(SUM(orv.order_revenue),2) AS revenue_90d
-FROM order_revenue orv
-JOIN customers c ON c.customer_id = orv.customer_id
-GROUP BY c.country
-ORDER BY revenue_90d DESC;
+SELECT
+  c.customer_id,
+  c.full_name,
+  ROUND(
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)),
+    2
+  ) AS total_revenue
+FROM training.customers AS c
+JOIN training.orders AS o
+  ON o.customer_id = c.customer_id
+JOIN training.order_items AS oi
+  ON oi.order_id = o.order_id
+GROUP BY c.customer_id, c.full_name
+ORDER BY total_revenue DESC, c.customer_id
+LIMIT 20;
 ```
-Why it works
-- Aggregate line items to the order level first. Then the join to customers is 1:1, so no duplication.
-- Time filter is applied in the CTE to reduce rows early.
 
-Exercise 2 — Gross margin per category
-```sql
-SELECT p.category,
-       ROUND(SUM( (oi.unit_price - p.cost) * oi.quantity * (1 - oi.discount) ), 2) AS gross_margin
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category
-ORDER BY gross_margin DESC;
-```
-Explanation
-- Margin formula: (sell_price - unit_cost) × effective_quantity. Discounts reduce revenue, so include (1 - discount).
-- Group by category to aggregate across SKUs.
-Pitfall
-- If cost is NULL for some products, (price - NULL) yields NULL; wrap cost with COALESCE(cost,0) if appropriate.
+The join reaches the line-item grain, so revenue uses the discounted line formula. Grouping by customer collapses those lines back to one row per customer.
 
-Exercise 3 — Fixing fanout with pre‑aggregation
+## Exercise 2 — Last 100 paid orders with payment methods
+
+This answer interprets “paid orders” as rows whose course status is exactly `paid`. A different business definition—such as any order with a payment—would require a different predicate.
+
 ```sql
-WITH order_totals AS (
-  SELECT o.order_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id
+WITH latest_paid_orders AS (
+  SELECT
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    o.total_amount
+  FROM training.orders AS o
+  WHERE o.status = 'paid'
+  ORDER BY o.order_date DESC, o.order_id DESC
+  LIMIT 100
 ),
-payments_totals AS (
-  SELECT p.order_id,
-         SUM(p.amount) AS paid_amount
-  FROM payments p
+payment_summary AS (
+  SELECT
+    p.order_id,
+    STRING_AGG(DISTINCT p.method, ', ' ORDER BY p.method) AS payment_methods,
+    SUM(p.amount) AS amount_paid
+  FROM training.payments AS p
+  JOIN latest_paid_orders AS lpo
+    ON lpo.order_id = p.order_id
   GROUP BY p.order_id
 )
-SELECT o.order_id,
-       ROUND(o.order_revenue,2) AS order_revenue,
-       ROUND(pt.paid_amount,2) AS paid_amount,
-       ROUND(o.order_revenue - COALESCE(pt.paid_amount,0),2) AS balance
-FROM order_totals o
-LEFT JOIN payments_totals pt ON pt.order_id = o.order_id
-ORDER BY o.order_id
-LIMIT 100;
+SELECT
+  lpo.order_id,
+  lpo.customer_id,
+  lpo.order_date,
+  lpo.total_amount,
+  ps.payment_methods,
+  ROUND(ps.amount_paid, 2) AS amount_paid
+FROM latest_paid_orders AS lpo
+LEFT JOIN payment_summary AS ps
+  ON ps.order_id = lpo.order_id
+ORDER BY lpo.order_date DESC, lpo.order_id DESC;
 ```
-Line‑by‑line
-- order_totals: 1 row per order with revenue. payments_totals: 1 row per order with total paid.
-- LEFT JOIN: Preserve orders with no payments (paid_amount becomes NULL). COALESCE to treat NULL as 0 for balance.
-- This pattern avoids N×M explosion from joining two raw 1:N tables.
+
+An order can have more than one payment row. Aggregating payments before the final join preserves one output row per order; joining raw payments and then applying `LIMIT 100` would limit payment rows instead.
+
+## Exercise 3 — Employees and their managers by department
+
+```sql
+SELECT
+  d.name AS department,
+  e.employee_id,
+  e.full_name AS employee,
+  m.full_name AS manager
+FROM training.departments AS d
+JOIN training.employees AS e
+  ON e.department_id = d.department_id
+LEFT JOIN training.employees AS m
+  ON m.employee_id = e.manager_id
+ORDER BY d.name, e.full_name, e.employee_id;
+```
+
+The second reference to `employees` is a self-join. It is a `LEFT JOIN` because top-level employees have no manager and should remain visible with a `NULL` manager.
+
+## Check yourself
+
+- Exercise 1 returns no more than 20 customers.
+- Exercise 2 returns no more than 100 orders, even when an order has multiple payments.
+- Exercise 3 retains employees whose `manager_id` is `NULL`.

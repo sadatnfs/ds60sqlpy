@@ -15,7 +15,10 @@ WITH orders_m AS (
 ), retention AS (
   SELECT co.cohort_month,
          om.order_month,
-         EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))::int AS month_offset,
+         (
+           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12
+           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))
+         )::int AS month_offset,
          COUNT(DISTINCT om.customer_id) AS active_customers
   FROM orders_m om
   JOIN cohorts co ON co.customer_id = om.customer_id

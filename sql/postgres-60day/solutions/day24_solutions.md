@@ -1,98 +1,114 @@
-# Day 24 — Solutions (Recursive CTEs: Trees, Paths, and Tallies)
+# Day 24 — Solutions: Recursive CTEs
 
-We use WITH RECURSIVE to traverse hierarchies, build paths, compute depths, and do running rollups. Recursive CTEs elegantly replace loops for tree problems inside SQL.
+Recursive CTEs have an anchor term, a recursive term, and a stopping condition.
+The employee hierarchy uses `manager_id` as the parent pointer.
 
-Setup
-- Example hierarchy: categories(id, parent_id, name) or employees(employee_id, manager_id, name)
-- Syntax: WITH RECURSIVE t AS (base UNION ALL step) SELECT ... FROM t
+## Exercise 1 — Every manager's direct and indirect reports
 
-Exercise 1 — Walk an org chart top-down (root → leaves)
+The literal prompt says “for each manager,” so this solution seeds every direct
+manager-report edge and then walks downward. `path` both documents the route and
+prevents a bad cycle from recursing forever.
+
 ```sql
+SET search_path TO training, public;
+
+WITH RECURSIVE reporting_lines AS (
+  SELECT m.employee_id AS manager_id,
+         e.employee_id AS report_id,
+         e.full_name AS report_name,
+         1 AS depth,
+         ARRAY[m.employee_id, e.employee_id] AS path
+  FROM employees m
+  JOIN employees e ON e.manager_id = m.employee_id
+
+  UNION ALL
+
+  SELECT rl.manager_id,
+         e.employee_id,
+         e.full_name,
+         rl.depth + 1,
+         rl.path || e.employee_id
+  FROM reporting_lines rl
+  JOIN employees e ON e.manager_id = rl.report_id
+  WHERE NOT e.employee_id = ANY(rl.path)
+)
+SELECT m.employee_id AS manager_id,
+       m.full_name AS manager_name,
+       rl.report_id,
+       rl.report_name,
+       rl.depth,
+       rl.path
+FROM reporting_lines rl
+JOIN employees m ON m.employee_id = rl.manager_id
+ORDER BY manager_id, depth, report_id;
+```
+
+Expected shape: one row per ancestor-descendant pair. `depth = 1` is a direct
+report; larger depths are indirect reports. A report can correctly appear under
+several managers along its chain.
+
+To answer a question about one manager instead, add a root-manager predicate to
+the anchor term; the maintained executable solution intentionally answers the
+literal all-managers prompt shown above.
+
+## Exercise 2 — Generate 1 through 100 and sum the sequence
+
+```sql
+SET search_path TO training, public;
+
+WITH RECURSIVE numbers(n) AS (
+  VALUES (1)
+
+  UNION ALL
+
+  SELECT n + 1
+  FROM numbers
+  WHERE n < 100
+)
+SELECT SUM(n) AS sum_1_to_100
+FROM numbers;
+```
+
+Expected result: `5050`.
+
+## Additional hierarchy diagnostic
+
+The executable answer includes this useful check: count employees at each
+depth from all roots.
+
+```sql
+SET search_path TO training, public;
+
 WITH RECURSIVE org AS (
-  -- base: top-level managers (no manager)
   SELECT e.employee_id,
          e.manager_id,
-         e.first_name || ' ' || e.last_name AS name,
          0 AS depth,
-         (e.first_name || ' ' || e.last_name)::text AS path
+         ARRAY[e.employee_id] AS path
   FROM employees e
   WHERE e.manager_id IS NULL
+
   UNION ALL
-  -- step: attach direct reports
+
   SELECT c.employee_id,
          c.manager_id,
-         c.first_name || ' ' || c.last_name AS name,
-         p.depth + 1 AS depth,
-         (p.path || ' > ' || (c.first_name || ' ' || c.last_name)) AS path
+         org.depth + 1,
+         org.path || c.employee_id
   FROM employees c
-  JOIN org p ON p.employee_id = c.manager_id
+  JOIN org ON c.manager_id = org.employee_id
+  WHERE NOT c.employee_id = ANY(org.path)
 )
-SELECT employee_id, manager_id, depth, name, path
+SELECT depth,
+       COUNT(*) AS employees_at_depth
 FROM org
-ORDER BY path
-LIMIT 200;
-```
-Explanation
-- Base picks roots (manager_id NULL). Step joins children to parents and increments depth. Path concatenates names.
-- ORDER BY path yields preorder traversal; for large trees add a guard to prevent cycles.
-
-Exercise 2 — Find all ancestors of a node (bottom-up)
-```sql
-WITH RECURSIVE ancestors AS (
-  SELECT e.employee_id, e.manager_id, 0 AS depth
-  FROM employees e
-  WHERE e.employee_id = :target_id
-  UNION ALL
-  SELECT p.employee_id, p.manager_id, depth + 1
-  FROM employees p
-  JOIN ancestors a ON a.manager_id = p.employee_id
-)
-SELECT *
-FROM ancestors
+GROUP BY depth
 ORDER BY depth;
 ```
-Why
-- Start at the target and repeatedly join to its manager. depth grows upward.
 
-Exercise 3 — Category rollups from leaves to root
-```sql
-WITH RECURSIVE tree AS (
-  SELECT c.category_id, c.parent_id
-  FROM categories c
-  UNION ALL
-  SELECT c.category_id, c.parent_id
-  FROM categories c
-  JOIN tree t ON c.parent_id = t.category_id
-), leaf_sales AS (
-  SELECT p.category_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM order_items oi JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.category_id
-), ascend AS (
-  -- map each node to all of its ancestors (including self)
-  WITH RECURSIVE up AS (
-    SELECT c.category_id AS node, c.category_id AS anc
-    FROM categories c
-    UNION ALL
-    SELECT u.node, c.parent_id AS anc
-    FROM up u JOIN categories c ON c.category_id = u.anc
-    WHERE c.parent_id IS NOT NULL
-  )
-  SELECT node AS category_id, anc
-  FROM up
-)
-SELECT a.anc AS rollup_category,
-       ROUND(SUM(COALESCE(ls.revenue,0)),2) AS rollup_revenue
-FROM ascend a
-LEFT JOIN leaf_sales ls ON ls.category_id = a.category_id
-GROUP BY a.anc
-ORDER BY rollup_revenue DESC
-LIMIT 200;
-```
-Notes
-- ascend relates each node to all ancestors. Summing leaf revenues by ancestor yields rollups.
-- For large graphs, consider indexing and cycle guards.
+## Pitfalls
 
-Pitfalls
-- Infinite recursion on cycles: add a visited list or a max depth constraint.
-- Performance: Recursive CTEs can be expensive; test with EXPLAIN and add indexes on join keys.
+- Use `UNION ALL`; `UNION` performs duplicate elimination on every iteration
+  and is not a substitute for a deliberate cycle check.
+- Put the stop condition in the recursive term. The number generator would run
+  indefinitely without `n < 100`.
+- This schema permits multiple roots (`manager_id IS NULL`), so do not assume
+  the organization has exactly one top-level employee.

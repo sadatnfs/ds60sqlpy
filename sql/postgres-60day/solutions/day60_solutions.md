@@ -1,162 +1,173 @@
-# Day 60 — Solutions (Final Capstone, Part 3 — E2E Docs, Views, Performance Sign‑off)
+# Day 60 Solution — End-to-End Capstone Sign-off
 
-Today ties everything together: we build DQ and business views, run stakeholder queries, and check performance. Below are detailed, line‑by‑line explanations and practical tips to flip ROLLBACK→COMMIT when you’re satisfied.
+Day 60 has acceptance criteria, not discrete exercises. The final submission
+must connect data quality, transformation, analytics, performance evidence, and
+documented tradeoffs. The executable reference is
+[`day60_solutions.sql`](day60_solutions.sql).
 
-Section 1 — Data Quality (DQ) Summary Views
+## Success criteria
+
+Sign off only when:
+
+1. critical queries complete in under 10 seconds **on the learner's measured
+   dataset and machine**;
+2. data-quality checks pass or every exception has an owner and explanation;
+3. business totals reconcile across views and source tables; and
+4. the write-up records grain, assumptions, before/after plans, compromises,
+   known limits, and next steps.
+
+The compact seed makes the 10-second target easy; it does not prove
+production-scale performance.
+
+## Deliverable 1 — Reusable DQ views
+
+The learner creates `v_dq_customers` and `v_dq_orders`. The reference solution
+uses a suffixed customer view so it cannot collide with a learner's view:
+
 ```sql
-CREATE OR REPLACE VIEW v_dq_customers AS
-SELECT COUNT(*) AS total,
-       SUM(CASE WHEN email IS NULL OR email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' THEN 1 ELSE 0 END) AS invalid_email,
-       SUM(CASE WHEN country IS NULL OR country !~ '^[A-Z]{2}$' THEN 1 ELSE 0 END) AS invalid_country,
-       SUM(CASE WHEN full_name IS NULL OR btrim(full_name) = '' THEN 1 ELSE 0 END) AS invalid_name
+BEGIN;
+SET search_path TO training, public;
+
+CREATE VIEW v_dq_customers_solution AS
+SELECT COUNT(*) AS total_rows,
+       COUNT(*) FILTER (
+         WHERE email IS NULL
+            OR email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$'
+       ) AS invalid_email,
+       COUNT(*) FILTER (WHERE country !~ '^[A-Z]{2}$') AS invalid_country,
+       COUNT(*) FILTER (WHERE trim(full_name) = '') AS invalid_name
 FROM customers;
-```
-Line‑by‑line
-- total: total customer rows.
-- invalid_email: email missing or regex‑failing (case‑insensitive !~* matches invalids).
-- invalid_country: country missing or not 2 letters (you can harden using a reference map).
-- invalid_name: blank after trimming.
 
-```sql
-CREATE OR REPLACE VIEW v_dq_orders AS
-SELECT COUNT(*) AS total,
-       SUM(CASE WHEN total_amount < 0 THEN 1 ELSE 0 END) AS negative_amounts,
-       SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) AS missing_customer
+SELECT * FROM v_dq_customers_solution;
+
+SELECT COUNT(*) AS total_rows,
+       COUNT(*) FILTER (WHERE total_amount < 0) AS negative_amounts,
+       COUNT(*) FILTER (WHERE customer_id IS NULL) AS missing_customer
 FROM orders;
-```
-Notes
-- negative_amounts: catches data errors or refund rows; decide policy.
-- missing_customer: should be zero under enforced FKs.
 
-Quick check
-```sql
-SELECT * FROM v_dq_customers;
-SELECT * FROM v_dq_orders;
+ROLLBACK;
 ```
 
-Section 2 — Business Views (reusable)
-A) Customer Lifetime Value (LTV)
+Expected shape: one customer summary row and one order summary row. The course
+seed should report zero failures.
+
+## Deliverable 2 — Core business views and reconciliation
+
 ```sql
-CREATE OR REPLACE VIEW v_customer_ltv AS
-WITH line AS (
-  SELECT o.customer_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value
-  FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id
+BEGIN;
+SET search_path TO training, public;
+
+CREATE VIEW v_customer_ltv_solution AS
+SELECT c.customer_id,
+       c.country,
+       COALESCE(SUM(o.total_amount), 0)::numeric(14,2) AS ltv
+FROM customers c
+LEFT JOIN orders o USING (customer_id)
+GROUP BY c.customer_id, c.country;
+
+CREATE VIEW v_monthly_revenue_solution AS
+WITH monthly AS (
+  SELECT date_trunc('month', order_date)::date AS month,
+         SUM(total_amount) AS revenue
+  FROM orders
+  GROUP BY date_trunc('month', order_date)
 )
-SELECT customer_id, ROUND(SUM(order_value),2) AS ltv
-FROM line
-GROUP BY customer_id;
-```
-Line‑by‑line
-- line: reduce each order to a single value (sum of items net of discount) so orders don’t double‑count.
-- Final: sum orders per customer; round for currency presentation.
+SELECT month,
+       revenue,
+       LAG(revenue) OVER (ORDER BY month) AS previous_month,
+       ROUND(
+         (revenue - LAG(revenue) OVER (ORDER BY month))
+           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0),
+         4
+       ) AS month_over_month_growth
+FROM monthly;
 
-B) Monthly Revenue with MoM Growth
+SELECT (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)
+         AS customer_ltv_total,
+       (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS order_total,
+       (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)
+         - (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS difference;
+
+ROLLBACK;
+```
+
+Expected reconciliation: `difference = 0.00`. The monthly view has one row per
+represented order month; it does not manufacture missing months.
+
+## Deliverable 3 — Stakeholder-ready outputs
+
+The learner file contains three runnable outputs:
+
+- Finance: YTD actual, budget, and variance at `(month, category)` grain.
+- Marketing: active customers by signup cohort and lifecycle month 0–6. A full
+  retention rate additionally needs the cohort-size denominator from Day 47.
+- Operations: an `EXPLAIN` of recent units by product category.
+
+For each output, record the consumer, business definition, result grain,
+freshness expectation, and at least one reconciliation or sanity check.
+
+## Deliverable 4 — Performance sign-off
+
 ```sql
-CREATE OR REPLACE VIEW v_monthly_revenue AS
-WITH m AS (
-  SELECT date_trunc('month', o.order_date)::date AS month,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
+BEGIN;
+SET search_path TO training, public;
+
+CREATE INDEX idx_orders_date_day60_solution ON orders(order_date);
+CREATE INDEX idx_orders_customer_day60_solution ON orders(customer_id);
+CREATE INDEX idx_order_items_order_day60_solution ON order_items(order_id);
+CREATE INDEX idx_expenses_date_day60_solution ON expenses(expense_date);
+CREATE INDEX idx_budgets_period_day60_solution ON budgets(period);
+
+CREATE VIEW v_monthly_revenue_solution AS
+WITH monthly AS (
+  SELECT date_trunc('month', order_date)::date AS month,
+         SUM(total_amount) AS revenue
+  FROM orders
+  GROUP BY date_trunc('month', order_date)
 )
-SELECT m.month,
-       m.revenue,
-       LAG(m.revenue) OVER (ORDER BY m.month) AS prev_month,
-       ROUND((m.revenue - COALESCE(LAG(m.revenue) OVER (ORDER BY m.month),0)) / NULLIF(LAG(m.revenue) OVER (ORDER BY m.month),0), 4) AS mom_growth
-FROM m;
+SELECT month,
+       revenue,
+       LAG(revenue) OVER (ORDER BY month) AS previous_month,
+       ROUND(
+         (revenue - LAG(revenue) OVER (ORDER BY month))
+           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0),
+         4
+       ) AS month_over_month_growth
+FROM monthly;
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT *
+FROM v_monthly_revenue_solution
+ORDER BY month DESC
+LIMIT 12;
+
+ROLLBACK;
 ```
-Line‑by‑line
-- m: monthly rollup.
-- prev_month: window LAG by month.
-- mom_growth: safe divide; when prev is 0 or NULL, result is NULL to avoid divide‑by‑zero.
 
-Section 3 — Stakeholder‑ready Queries
-A) Finance — YTD Budget vs Actual by month/category
-```sql
-WITH exp AS (
-  SELECT date_trunc('month', expense_date)::date AS month, category, SUM(amount) AS actual
-  FROM expenses WHERE expense_date >= date_trunc('year', now()) GROUP BY 1,2
-), bud AS (
-  SELECT date_trunc('month', period)::date AS month, category, SUM(amount) AS budget
-  FROM budgets WHERE period >= date_trunc('year', now()) GROUP BY 1,2
-)
-SELECT COALESCE(b.category, e.category) AS category,
-       COALESCE(b.month, e.month) AS month,
-       COALESCE(b.budget,0) AS budget,
-       COALESCE(e.actual,0) AS actual,
-       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0),2) AS variance
-FROM bud b FULL OUTER JOIN exp e ON e.month=b.month AND e.category=b.category
-ORDER BY month DESC, category
-LIMIT 120;
-```
-Line‑by‑line
-- Restricts to current year.
-- FULL OUTER JOIN shows categories present in only one side.
-- variance = actual − budget per month.
+Capture actual execution time and buffers before and after candidate indexes.
+The transaction rolls back both views and indexes.
 
-B) Marketing — Cohort retention (last 6 cohorts)
-```sql
-WITH orders_m AS (
-  SELECT o.customer_id, date_trunc('month', o.order_date)::date AS order_month FROM orders o GROUP BY 1,2
-), cohorts AS (
-  SELECT c.customer_id, date_trunc('month', c.created_at)::date AS cohort_month FROM customers c
-), retention AS (
-  SELECT co.cohort_month, om.order_month,
-         EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))::int AS month_offset,
-         COUNT(DISTINCT om.customer_id) AS active_customers
-  FROM orders_m om JOIN cohorts co ON co.customer_id = om.customer_id
-  GROUP BY co.cohort_month, om.order_month
-), last6 AS (
-  SELECT DISTINCT cohort_month FROM cohorts ORDER BY cohort_month DESC LIMIT 6
-)
-SELECT * FROM retention WHERE month_offset BETWEEN 0 AND 6 AND cohort_month IN (SELECT cohort_month FROM last6)
-ORDER BY cohort_month DESC, month_offset;
-```
-Notes
-- month_offset: lifecycle months since cohort signup.
-- Filter to a small preview window (0..6) for quick charts.
+## Deliverable 5 — Written sign-off
 
-C) Operations — Identify a heavy query and inspect its plan
-```sql
-EXPLAIN
-SELECT p.category, SUM(oi.quantity) AS qty
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o   ON o.order_id = oi.order_id
-WHERE o.order_date >= now() - interval '180 days'
-GROUP BY p.category
-ORDER BY qty DESC;
-```
-Tips
-- Replace EXPLAIN with EXPLAIN ANALYZE to execute and measure.
-- Ensure an index on orders(order_date) to prune time range efficiently.
+The final write-up must cover:
 
-Section 4 — Performance Checklist (DDL staged under transaction)
-```sql
-CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(order_date);
-CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
-CREATE INDEX IF NOT EXISTS idx_oi_order ON order_items(order_id);
-CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-CREATE INDEX IF NOT EXISTS idx_expenses_month ON expenses(expense_date);
-CREATE INDEX IF NOT EXISTS idx_budgets_period ON budgets(period);
+- DQ exceptions and remediation;
+- source entities, analytical grain, and join rationale;
+- KPI definitions and reconciliation evidence;
+- before/after `EXPLAIN (ANALYZE, BUFFERS)` evidence;
+- freshness versus performance tradeoffs;
+- known limitations and next steps; and
+- whether the learner-file success criteria were met on the measured setup.
 
-EXPLAIN ANALYZE SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 12;
-```
-Line‑by‑line
-- CREATE INDEX IF NOT EXISTS: safe to run repeatedly; no effect if present.
-- Final EXPLAIN ANALYZE: validate plans/timings after indexes.
+Do not replace evidence with “an index should help.” A complete capstone records
+the query, dataset size, environment, plan, timing, correctness check, and
+decision.
 
-Persisting vs testing safely
-- Lesson script ends with ROLLBACK; switch to COMMIT only once you’re happy with the views and indexes.
-- In production, create change scripts (DDL) separate from ad‑hoc EXPLAINs and keep before/after plan snapshots.
+## Safety and state assumptions
 
-Troubleshooting patterns
-- If EXPLAIN shows sequential scans on large tables: verify predicate sargability (no functions on columns), stats up‑to‑date (ANALYZE), and relevant indexes exist.
-- If sorts spill to disk: raise work_mem for the session temporarily or add appropriate indexes to avoid large sorts.
-
-What to hand off
-- DQ snapshots from v_dq_* with remediation notes.
-- A short readme listing the views created and the indexes added.
-- Before/after EXPLAIN ANALYZE for two or three critical queries with timings.
+- Both learner and solution files end with `ROLLBACK`; replace it with `COMMIT`
+  only in a deliberate migration after reviewing object names and ownership.
+- `CREATE VIEW` without `OR REPLACE` is intentional in the reference transaction
+  and expects a clean course setup.
+- Days 59–60 are sign-off checkpoints, so some deliverables are documentation
+  and measured evidence rather than new SQL exercises.

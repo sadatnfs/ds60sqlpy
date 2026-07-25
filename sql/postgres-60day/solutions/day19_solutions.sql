@@ -1,44 +1,55 @@
--- Day 19 - Solutions: Running Aggregates and Moving Windows
--- Assumes: orders(order_date, total_amount)
+-- Day 19 solutions: running aggregates
+SET search_path TO training, public;
 
-/*
-Exercise 1) Daily revenue rolling 7 and 28-day averages; plot and discuss lag.
-Why: Pre-aggregate to daily grain, then use ROWS frames to get exactly the last N rows, avoiding RANGE peer expansion.
-*/
-WITH daily AS (
-  SELECT DATE_TRUNC('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY DATE_TRUNC('day', o.order_date)
+-- Exercise 1: an exact 30-calendar-day moving revenue sum and average.
+WITH bounds AS (
+  SELECT MIN(order_date)::date AS min_date,
+         MAX(order_date)::date AS max_date
+  FROM orders
+), calendar AS (
+  SELECT d::date AS day
+  FROM bounds
+  CROSS JOIN LATERAL generate_series(min_date, max_date, interval '1 day') AS d
+), daily AS (
+  SELECT order_date::date AS day,
+         SUM(total_amount) AS revenue
+  FROM orders
+  GROUP BY order_date::date
+), complete_daily AS (
+  SELECT c.day, COALESCE(d.revenue, 0) AS revenue
+  FROM calendar c
+  LEFT JOIN daily d USING (day)
 )
-SELECT d,
+SELECT day,
        revenue,
-       ROUND(AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 6 PRECEDING  AND CURRENT ROW), 2) AS ma7,
-       ROUND(AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 27 PRECEDING AND CURRENT ROW), 2) AS ma28
-FROM daily
-ORDER BY d DESC
-LIMIT 60;
+       ROUND(SUM(revenue) OVER (
+         ORDER BY day ROWS BETWEEN 29 PRECEDING AND CURRENT ROW
+       ), 2) AS revenue_sum_30d,
+       ROUND(AVG(revenue) OVER (
+         ORDER BY day ROWS BETWEEN 29 PRECEDING AND CURRENT ROW
+       ), 2) AS revenue_avg_30d
+FROM complete_daily
+ORDER BY day DESC;
 
-/*
-Exercise 2) Per-customer cumulative spend and count of orders.
-Why: PARTITION BY customer_id, ORDER BY order_date with UNBOUNDED PRECEDING → cumulative running totals per customer.
-*/
-SELECT o.customer_id,
-       o.order_id,
-       o.order_date,
-       o.total_amount,
-       SUM(o.total_amount) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
+-- Exercise 2: cumulative units for every product within its category.
+WITH daily_product AS (
+  SELECT p.category,
+         p.product_id,
+         o.order_date::date AS order_day,
+         SUM(oi.quantity) AS units
+  FROM products p
+  JOIN order_items oi ON oi.product_id = p.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+  GROUP BY p.category, p.product_id, o.order_date::date
+)
+SELECT category,
+       product_id,
+       order_day,
+       units,
+       SUM(units) OVER (
+         PARTITION BY category, product_id
+         ORDER BY order_day
          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS cum_spend,
-       COUNT(*) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS cum_orders
-FROM orders o
-ORDER BY o.customer_id, o.order_date, o.order_id
-LIMIT 300;
-
--- End of Day 19 solutions
+       ) AS cumulative_units
+FROM daily_product
+ORDER BY category, product_id, order_day;

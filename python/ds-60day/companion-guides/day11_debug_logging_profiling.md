@@ -1,43 +1,94 @@
-# Day 11 — Debugging, Logging, and Profiling (Companion Guide)
+# Day 11 — Debugging, Logging, and Profiling
+
+**Level:** Beginner
+
+Debugging explains incorrect behavior; logging records useful runtime events;
+profiling locates where time is actually spent. Measure before optimizing.
 
 ## Learning objectives
-- Choose between `print` and `logging` and configure loggers
-- Measure performance with `timeit` and `cProfile`
-- Identify and address hot spots (vectorization, algorithms)
 
-## Why this matters
-Clear diagnostics reduce mean‑time‑to‑repair. Performance wins often come from measurement + picking the right algorithm or vectorization.
+By the end of this lesson, you can:
 
-## Logging setup
+- reduce a failure to a small reproducible case and read its traceback;
+- choose an appropriate log level and attach useful context;
+- time a focused expression with `timeit`;
+- profile a call tree with `cProfile`;
+- distinguish an algorithmic improvement from a micro-optimization.
+
+## Prerequisites
+
+Complete Day 10 (`python-10`): tests, exceptions, importable utilities.
+
+## Vocabulary and mental model
+
+- **Traceback:** stack of calls leading to an uncaught exception; read the final
+  exception first, then move upward into your code.
+- **Log level:** `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`, indicating
+  severity and intended audience.
+- **Benchmark:** controlled measurement of a specific operation.
+- **Profile:** distribution of runtime across functions/calls.
+- **Hot spot:** code responsible for a meaningful share of runtime.
+
+A stopwatch tells you *that* work is slow; a profiler helps locate *where*.
+
+## Worked example
+
 ```python
 import logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
-log = logging.getLogger(__name__)
-log.info('starting…')
-```
-Use levels intentionally; avoid logging secrets/PII.
-
-## Timing snippets
-```python
 import timeit
-setup = 'import numpy as np; x = np.arange(1_000_000)'
-stmt  = 'x * 2'
-print(timeit.timeit(stmt, setup=setup, number=100))
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+
+
+def unique_count(values: list[int]) -> int:
+    return len(set(values))
+
+
+values = list(range(1_000))
+logger.info("benchmarking unique_count count=%d", len(values))
+elapsed = timeit.timeit(lambda: unique_count(values), number=10)
+print(f"{elapsed=:.6f}s")
 ```
 
-## Profiling functions
-- `cProfile`: whole‑program profiling
-- `line_profiler` (optional): line‑level timing
+Configure logging once at an application entry point. Library code should emit
+records through its module logger, not repeatedly call `basicConfig`.
 
-## Common patterns
-- Replace Python loops over arrays with NumPy vectorization
-- Cache pure function results with `functools.lru_cache`
+## Exercises and progressive hints
 
-## Practice exercises
-1) Add logging to your CLI tool; include start/end timestamps and input size
-2) Profile a slow function, then: pick a better data structure or vectorize
+1. Add useful logging to the CSV/JSON utilities from Day 8. **Hint:** log path,
+   operation, row count, and expected failures; never log secrets or entire
+   sensitive records.
+2. Profile a deliberately slow function, identify its hot spot, then improve
+   it. **Hint:** first improve the algorithm or data structure. If the work is
+   numeric array processing, compare the measured loop with NumPy vectorization
+   from the course's installed data dependencies.
 
-## Further reading
-- logging: https://docs.python.org/3/library/logging.html
-- timeit: https://docs.python.org/3/library/timeit.html
-- cProfile: https://docs.python.org/3/library/profile.html
+## Self-check
+
+- What is the first traceback line you should interpret?
+- Why is an f-string inside a disabled debug log less efficient than `%s`
+  placeholders?
+- Why can a single timing result be misleading?
+- What evidence would justify an optimization?
+
+Expected behavior: logs explain the operation without exposing data, profiling
+identifies a measured bottleneck, and tests still pass after optimization.
+
+## Common pitfalls and diagnosis
+
+- **Duplicate log lines:** handlers were configured more than once, often in
+  both a library and entry point.
+- **Logs are silent:** inspect the configured level and logger hierarchy.
+- **Timing includes setup/I/O:** move data construction outside the measured
+  statement and repeat the measurement.
+- **The "optimized" result changed:** run tests and compare representative
+  outputs before comparing speed.
+- **`print` statements scatter through library code:** use a module logger so
+  callers control destination and verbosity.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day11_debug_logging_profiling.ipynb)
+- [Check the separate solution](../solutions/day11_debug_logging_profiling/day11_solutions.md)
+- [Next: Day 12 — OOP and dataclasses](day12_oop_dataclasses.md)

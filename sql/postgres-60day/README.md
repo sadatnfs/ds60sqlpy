@@ -1,142 +1,171 @@
-PostgreSQL Advanced SQL 60-Day Curriculum
+# PostgreSQL track
 
-Beginner-friendly setup and how to run each day (with fixes for common role/connection errors)
+This track contains 60 ordered PostgreSQL lessons, companion guides, and projects. The number is a sequence, not a deadline.
 
-What you will do
-- Install PostgreSQL (or use Docker)
-- Create a training database once
-- Load the sample schema/data once (00_setup.sql)
-- Run one daily script at a time (day01 ... day60)
-- By default, daily scripts ROLLBACK so your DB stays unchanged unless you COMMIT
+Start at the repository [README](../../README.md), and run every command from the repository root.
 
-Quick start by environment
-- macOS (Homebrew) — simplest path (use your macOS username as the DB role):
-  1) brew install postgresql@16
-  2) brew services start postgresql@16
-  3) psql -h localhost
-     - CREATE DATABASE advanced_sql_training; \q
-  4) psql -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  5) psql -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
+## Requirements
 
-- macOS (Homebrew) — create canonical postgres superuser (fix for "role 'postgres' does not exist"):
-  1) brew services start postgresql@16
-  2) psql -h localhost
-     - CREATE ROLE postgres WITH LOGIN SUPERUSER PASSWORD 'postgres';
-     - \q
-  3) psql -U postgres -h localhost -c "CREATE DATABASE advanced_sql_training;"
-  4) psql -U postgres -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  5) psql -U postgres -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
+- PostgreSQL 16 or newer
+- PostgreSQL client tools, including `psql`
+- PostgreSQL 17 for the canonical Docker Compose environment
 
-- Docker (no local install):
-  1) docker run --name pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
-  2) docker exec -it pg psql -U postgres -c "CREATE DATABASE advanced_sql_training;"
-  3) cat sql/postgres-60day/00_setup.sql | docker exec -i pg psql -U postgres -d advanced_sql_training
-  4) cat sql/postgres-60day/day01_select_where_orderby.sql | docker exec -i pg psql -U postgres -d advanced_sql_training
+Use the operating-system guide for native installation:
 
-- Linux (Debian/Ubuntu):
-  1) sudo apt-get update && sudo apt-get install -y postgresql postgresql-contrib
-  2) sudo service postgresql start
-  3) sudo -u postgres psql -c "CREATE DATABASE advanced_sql_training;"
-  4) psql -U postgres -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  5) psql -U postgres -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
+- [Windows](../../docs/setup/windows.md)
+- [macOS](../../docs/setup/macos.md)
+- [Linux](../../docs/setup/linux.md)
 
-- Windows (installer):
-  1) Install from https://www.postgresql.org/download/windows/ (remember superuser+password)
-  2) Open "SQL Shell (psql)" and run:
-     - CREATE DATABASE advanced_sql_training;
-     - \q
-  3) From Command Prompt/PowerShell:
-     - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-     - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
+## Safety
 
-Run daily scripts one by one (safe by default)
-- Example (no superuser specified):
-  - psql -d advanced_sql_training -f sql/postgres-60day/day02_aggregates_groupby_having.sql
-- Example (explicit postgres superuser):
-  - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/day02_aggregates_groupby_having.sql
-- Docker example:
-  - cat sql/postgres-60day/day02_aggregates_groupby_having.sql | docker exec -i pg psql -U postgres -d advanced_sql_training
-- Safety: Each script starts with BEGIN; and ends with ROLLBACK; so the database returns to its prior state after running. Replace ROLLBACK with COMMIT to keep changes.
+> [!WARNING]
+> `sql/postgres-60day/00_setup.sql` drops and recreates the course-owned `training` schema. Run it only in the disposable `advanced_sql_training` database. Never point it at production, shared, or valuable data.
 
-If you want changes to persist
-- Two choices:
-  1) Edit the day’s .sql and change the final ROLLBACK; to COMMIT; then run it.
-  2) Copy the statements you want to keep into your own .sql file or into an interactive psql session and wrap with BEGIN; ... COMMIT;
-- Note: DDL (e.g., CREATE MATERIALIZED VIEW, CREATE INDEX, CREATE TABLE) is also rolled back unless you COMMIT.
+Daily lessons normally start a transaction and end with `ROLLBACK`. The explicit
+exception is the warehouse project: Day 52 drops and rebuilds the course-owned
+`dwh` schema and commits it so Days 53 and 54 can use it. Run those three days
+in order. Do not remove `ROLLBACK` merely to make any other undeclared
+dependency work.
 
-Using a GUI instead of psql (optional)
-- pgAdmin:
-  - Connect to localhost:5432, create advanced_sql_training (if not created), run 00_setup.sql, then each dayXX_*.sql
-- DBeaver:
-  - Create a PostgreSQL connection, create DB, run 00_setup.sql and each day script via SQL Editor
+## Option A: Canonical Docker Compose environment
 
-Common troubleshooting and fixes (applies to all calls)
-- Error: psql: error: connection to server at "localhost" failed
-  - Ensure the server is running:
-    - macOS: brew services start postgresql@16
-    - Linux: sudo service postgresql start
-    - Docker: docker ps (ensure container named pg is up)
-- Error: role "postgres" does not exist (macOS/Homebrew installs commonly)
-  - Fix A (use your macOS username as DB role):
-    - psql -h localhost
-    - CREATE DATABASE advanced_sql_training; \q
-    - psql -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  - Fix B (create canonical postgres superuser):
-    - psql -h localhost
-    - CREATE ROLE postgres WITH LOGIN SUPERUSER PASSWORD 'postgres'; \q
-    - psql -U postgres -h localhost -c "CREATE DATABASE advanced_sql_training;"
-    - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  - Fix C (CLI):
-    - createuser -s postgres
-- Error: createdb or psql: command not found
-  - Install or add to PATH:
-    - macOS: brew install postgresql@16
-    - Windows: use "SQL Shell (psql)" or add PostgreSQL bin to PATH
-    - Or use Docker flow above without installing psql locally
-- Permission denied on COPY
-  - Use client-side \copy or run from an accessible directory; the curriculum does not require server-side COPY by default
-- Linter warnings about BEGIN/ROLLBACK
-  - Many editors warn on transaction blocks at top level; scripts are meant for psql and work fine. Change ROLLBACK to COMMIT to persist when desired.
+This is the most reproducible route across operating systems:
 
-What 00_setup.sql creates
-- Schema training (scripts set search_path to training)
-- Core tables: customers, products, orders, order_items, payments
-- Org tables: employees, departments
-- Analytics helpers: events (JSONB), expenses, budgets, promotions
-- XML sample: xml_docs
-- Thousands of realistic rows for joins, windows, CTEs, JSON/XML, and performance labs
+```text
+docker compose up -d postgres
+docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
+docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql
+docker compose run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql
+```
 
-Daily script map (high level)
-- Days 1–7: Core SQL & Joins
-- Days 8–15: Subqueries, DML, CASE, string/date/number functions; Phase 1 project
-- Days 16–22: Window functions; Days 23–30: CTEs, pivoting, JSON/XML, patterns; Phase 2 project
-- Days 31–37: EXPLAIN/ANALYZE, indexing, optimization, partitioning
-- Days 38–45: Transactions, locks, analytics, data quality, ops; Phase 3 optimization project
-- Days 46–60: Capstone projects (e-commerce, finance, data warehouse, BI, integrated challenge)
+The Compose environment uses a local-only course role, password, database, and persistent volume. Stop containers without deleting the training volume:
 
-Cheat sheet (copy/paste variants for all calls)
-- macOS — use local user role:
-  - psql -h localhost
-  - CREATE DATABASE advanced_sql_training; \q
-  - psql -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  - psql -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
-- macOS — create postgres superuser:
-  - psql -h localhost -c "CREATE ROLE postgres WITH LOGIN SUPERUSER PASSWORD 'postgres';"
-  - psql -U postgres -h localhost -c "CREATE DATABASE advanced_sql_training;"
-  - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
-- Docker:
-  - docker run --name pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
-  - docker exec -it pg psql -U postgres -c "CREATE DATABASE advanced_sql_training;"
-  - cat sql/postgres-60day/00_setup.sql | docker exec -i pg psql -U postgres -d advanced_sql_training
-  - cat sql/postgres-60day/day01_select_where_orderby.sql | docker exec -i pg psql -U postgres -d advanced_sql_training
-- Linux:
-  - sudo -u postgres psql -c "CREATE DATABASE advanced_sql_training;"
-  - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
-- Windows:
-  - Use SQL Shell (psql) to CREATE DATABASE advanced_sql_training; \q
-  - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-  - psql -U postgres -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
+```text
+docker compose down
+```
 
-You’re ready to start. Begin with Day 1 and verify the sample queries return rows. If anything fails, use the fixes above for your environment or share your exact error and OS for a tailored command pair.
+Deleting the volume is a destructive reset and is not required for normal lessons.
+
+## Option B: Native PostgreSQL
+
+Create `advanced_sql_training` using your OS guide, then reset and verify:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_verify.sql
+```
+
+Your OS guide shows the correct host and role flags. macOS and Linux installations often use a role matching the operating-system username; do not create an unnecessary `postgres` superuser merely to copy an old command.
+
+The seed is deterministic: relationships and categorical values are derived
+from row numbers, while dates remain relative to the day setup runs so recent
+date exercises stay useful. `00_verify.sql` fails immediately if expected
+coverage, chronology, totals, or foreign-key relationships are broken.
+The seed deliberately leaves BR as an event-only market and products 276–300
+unsold, giving outer joins, `EXCEPT`, and `NOT EXISTS` visible examples.
+
+## Cross-platform course CLI
+
+With `psql` on `PATH`, the course CLI avoids shell-specific pipes:
+
+```text
+python scripts/course.py sql setup --yes
+python scripts/course.py sql run 1
+```
+
+The explicit `--yes` acknowledges that setup resets the training schema. Override the default local Compose URL with `DS60_DATABASE_URL` or `--database`.
+
+Run all lessons only when the database has been prepared for the full sequence:
+
+```text
+python scripts/course.py sql all --reset
+```
+
+After attempting the exercises, run the complete executable answer track with
+the same fail-fast, state-aware runner:
+
+```text
+python scripts/course.py sql solutions --reset
+```
+
+Both `--reset` commands recreate the disposable `training` schema first.
+
+## Study a lesson
+
+1. Read the matching [companion guide](companion-guides/README.md).
+2. Run the learner SQL file with stop-on-error behavior.
+3. Inspect results and query plans where requested.
+4. Attempt exercises in your own scratch file or transaction.
+5. Read the separate solution only after an honest attempt.
+
+Start with:
+
+- [Day 1 guide](companion-guides/day01_select_where_orderby.md)
+- [Day 1 SQL](day01_select_where_orderby.sql)
+- [Day 1 explanation](solutions/day01_solutions.md)
+- [Day 1 executable solution](solutions/day01_solutions.sql)
+
+Native example:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
+```
+
+`-X` ignores personal `psqlrc` settings; `ON_ERROR_STOP=1` prevents later statements from hiding the first error.
+
+## Track map
+
+- Days 1–15: relational querying, joins, subqueries, DML, functions, and a report project
+- Days 16–30: windows, CTEs, recursion, pivots, JSON/XML, patterns, and a project
+- Days 31–45: plans, indexes, optimization, partitioning, transactions, locks, quality, and operations
+- Days 46–60: e-commerce, finance, data warehouse, BI, and capstone projects
+
+See the [curriculum map](../../docs/curriculum-map.md) or:
+
+```text
+python scripts/course.py catalog --track sql
+```
+
+## Artifact coverage
+
+- Learner SQL scripts: Days 1–60
+- Companion guides: Days 1–60
+- Markdown solutions: Days 1–60
+- Executable solution SQL: Days 1–60
+
+Use the catalog for the exact learner, guide, and solution paths.
+
+## Connect PostgreSQL with Python
+
+After SQL Day 15 and Python Day 15, the optional
+[engineering bridge](../../bridge/README.md) teaches parameterized Psycopg
+queries, transaction and retry ownership, database test doubles, ETL,
+concurrency, and production failure recovery.
+
+## Progress and Codex
+
+```text
+python scripts/course.py progress show
+python scripts/course.py progress complete sql-01 --notes "Explained filtering and query order."
+```
+
+Tutor prompt:
+
+```text
+Use $guide-ds60sqlpy-learning to guide SQL Day 1. Use the disposable training database, give hints before solutions, and explain my first failing statement.
+```
+
+See [Learning with Codex](../../docs/learning-with-codex.md).
+
+## Troubleshooting and validation
+
+- [Troubleshooting](../../docs/troubleshooting.md)
+- [Validation](../../docs/validation.md)
+
+Run:
+
+```text
+python scripts/course.py validate
+```
+
+Structural validation is not a substitute for executing SQL against PostgreSQL.

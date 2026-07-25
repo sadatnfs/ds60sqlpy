@@ -64,20 +64,53 @@ Interpretation
 
 Exercise 3 — Save artifacts and serve via FastAPI
 ```python
-import joblib, json
+import json
+from pathlib import Path
+
+import joblib
 
 # Save fitted search (contains the best estimator)
-joblib.dump(search, 'model_search.joblib')
+artifact_dir = Path('artifacts/day45')
+artifact_dir.mkdir(parents=True, exist_ok=True)
+joblib.dump(search, artifact_dir / 'model_search.joblib')
 # Bundle threshold and metadata
 meta = {'threshold': th_star, 'params': search.best_params_, 'metric': {'roc_auc': float(roc), 'ap': float(ap)}}
-json.dump(meta, open('model_meta.json','w'))
+with (artifact_dir / 'model_meta.json').open('w', encoding='utf-8') as stream:
+    json.dump(meta, stream)
 
-# Minimal FastAPI app (app.py)
-open('app.py','w').write('''\nfrom fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\nimport joblib, json, numpy as np\n\napp = FastAPI()\nsearch = joblib.load('model_search.joblib')\nmeta = json.load(open('model_meta.json'))\n\nclass Features(BaseModel):\n    x: list\n\n@app.post('/predict')\ndef predict(req: Features):\n    try:\n        X = np.array([req.x], dtype=float)\n        proba = float(search.predict_proba(X)[:,1][0])\n        label = int(proba >= meta['threshold'])\n        return {'proba': proba, 'label': label, 'threshold': meta['threshold']}\n    except Exception as e:\n        raise HTTPException(status_code=400, detail=str(e))\n''')
+# Minimal FastAPI app (artifacts/day45/app.py)
+app_source = '''\
+from pathlib import Path
+import json
+import joblib
+import numpy as np
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+ARTIFACT_DIR = Path(__file__).resolve().parent
+app = FastAPI()
+search = joblib.load(ARTIFACT_DIR / "model_search.joblib")
+with (ARTIFACT_DIR / "model_meta.json").open(encoding="utf-8") as stream:
+    meta = json.load(stream)
+
+class Features(BaseModel):
+    x: list[float]
+
+@app.post("/predict")
+def predict(req: Features):
+    try:
+        X = np.array([req.x], dtype=float)
+        proba = float(search.predict_proba(X)[:, 1][0])
+        label = int(proba >= meta["threshold"])
+        return {"proba": proba, "label": label, "threshold": meta["threshold"]}
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+'''
+(artifact_dir / 'app.py').write_text(app_source, encoding='utf-8')
 ```
 Test locally
 ```bash
-uvicorn app:app --reload
+python -m uvicorn app:app --app-dir artifacts/day45 --reload
 curl -s -X POST http://127.0.0.1:8000/predict -H 'Content-Type: application/json' -d '{"x": [X_FEATURES_HERE]}'
 ```
 Checklist for README.md

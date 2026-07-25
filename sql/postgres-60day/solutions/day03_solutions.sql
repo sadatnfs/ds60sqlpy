@@ -1,61 +1,50 @@
--- Day 03 - Solutions: INNER JOINs and Predicate Placement
--- Assumes: orders, order_items, products, customers, payments
+-- Day 03 solutions: INNER JOINs
+SET search_path TO training, public;
 
-/*
-Exercise 1) Join orders to customers to compute revenue by customer country for the last 90 days.
-Why: Join facts (orders + items) correctly by aggregating line revenue per order to avoid double counting when adding dimensions.
-*/
-WITH order_revenue AS (
-  SELECT o.order_id,
-         o.customer_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  WHERE o.order_date >= now() - interval '90 days'
-  GROUP BY o.order_id, o.customer_id
-)
-SELECT c.country,
-       ROUND(SUM(orv.order_revenue),2) AS revenue_90d
-FROM order_revenue orv
-JOIN customers c ON c.customer_id = orv.customer_id
-GROUP BY c.country
-ORDER BY revenue_90d DESC;
+-- Exercise 1: top 20 customers by item-level revenue.
+SELECT c.customer_id,
+       c.full_name,
+       c.country,
+       ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue
+FROM customers c
+JOIN orders o ON o.customer_id = c.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY c.customer_id, c.full_name, c.country
+ORDER BY revenue DESC, c.customer_id
+LIMIT 20;
 
-/*
-Exercise 2) Join order_items to products and compute gross margin per category.
-Why: Margin = (price - cost) * quantity after discount; aggregate by category.
-*/
-SELECT p.category,
-       ROUND(SUM( (oi.unit_price - p.cost) * oi.quantity * (1 - oi.discount) ), 2) AS gross_margin
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category
-ORDER BY gross_margin DESC;
-
-/*
-Exercise 3) Detect and fix a fanout when joining orders and payments (1:N on both sides) by aggregating first.
-Why: Joining orders (1:N items) to payments (1:N) directly multiplies rows. Pre-aggregate each side to 1 row per order_id.
-*/
-WITH order_totals AS (
-  SELECT o.order_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id
-),
-payments_totals AS (
+-- Exercise 2: last 100 orders whose course status is exactly "paid".
+-- Limit orders first, then aggregate payments so split rows do not duplicate.
+WITH latest_paid_orders AS (
+  SELECT order_id, customer_id, order_date, total_amount
+  FROM orders
+  WHERE status = 'paid'
+  ORDER BY order_date DESC, order_id DESC
+  LIMIT 100
+), payment_summary AS (
   SELECT p.order_id,
-         SUM(p.amount) AS paid_amount
+         string_agg(DISTINCT p.method, ', ' ORDER BY p.method) AS methods,
+         SUM(p.amount) AS amount_paid
   FROM payments p
+  JOIN latest_paid_orders lpo USING (order_id)
   GROUP BY p.order_id
 )
-SELECT o.order_id,
-       ROUND(o.order_revenue,2) AS order_revenue,
-       ROUND(pt.paid_amount,2) AS paid_amount,
-       ROUND(o.order_revenue - COALESCE(pt.paid_amount,0),2) AS balance
-FROM order_totals o
-LEFT JOIN payments_totals pt ON pt.order_id = o.order_id
-ORDER BY o.order_id
-LIMIT 100;
+SELECT lpo.order_id,
+       lpo.customer_id,
+       lpo.order_date,
+       lpo.total_amount,
+       ps.methods,
+       ROUND(ps.amount_paid, 2) AS amount_paid
+FROM latest_paid_orders lpo
+LEFT JOIN payment_summary ps USING (order_id)
+ORDER BY lpo.order_date DESC, lpo.order_id DESC;
 
--- End of Day 03 solutions
+-- Exercise 3: employees, departments, and optional manager names.
+SELECT d.name AS department,
+       e.employee_id,
+       e.full_name AS employee,
+       m.full_name AS manager
+FROM employees e
+JOIN departments d ON d.department_id = e.department_id
+LEFT JOIN employees m ON m.employee_id = e.manager_id
+ORDER BY d.name, manager NULLS FIRST, employee;

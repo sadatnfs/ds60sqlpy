@@ -39,15 +39,17 @@ val_tfms = transforms.Compose([
 # 5) Datasets and loaders
 train_ds = datasets.ImageFolder(train_dir, transform=val_tfms)
 valid_ds = datasets.ImageFolder(valid_dir, transform=val_tfms)
-train_dl = DataLoader(train_ds, batch_size=64, shuffle=True, num_workers=2)
-valid_dl = DataLoader(valid_ds, batch_size=128, num_workers=2)
+train_dl = DataLoader(train_ds, batch_size=64, shuffle=True, num_workers=0)
+valid_dl = DataLoader(valid_ds, batch_size=128, num_workers=0)
 
 n_classes = len(train_ds.classes)
 ```
 Explanation
 - transforms: Always normalize to ImageNet stats for pretrained ImageNet weights
 - ImageFolder: expects subfolders per class under train/ and valid/
-- DataLoader: larger batch for eval; set num_workers>0 for speed locally
+- DataLoader: `num_workers=0` is portable in notebooks and on Windows. Increase
+  it only after moving loader creation under a script's `if __name__ ==
+  "__main__":` guard and measuring a benefit.
 
 ---
 
@@ -116,7 +118,7 @@ aug_tfms = transforms.Compose([
     transforms.ToTensor(), transforms.Normalize(mean, std)
 ])
 train_ds_aug = datasets.ImageFolder(train_dir, transform=aug_tfms)
-train_dl_aug = DataLoader(train_ds_aug, batch_size=64, shuffle=True, num_workers=2)
+train_dl_aug = DataLoader(train_ds_aug, batch_size=64, shuffle=True, num_workers=0)
 
 # Re-train head phase with augmentation for a few epochs
 train_dl = train_dl_aug  # swap in

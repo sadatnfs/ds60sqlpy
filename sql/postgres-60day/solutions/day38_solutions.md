@@ -1,108 +1,160 @@
-# Day 38 — Solutions (Transactions and Isolation)
+# Day 38 — Solutions: Transactions and Isolation
 
-We practice transactional control and explore PostgreSQL isolation levels with reproducible anomaly demos. We also cover lock modifiers (FOR UPDATE/SHARE), NOWAIT/SKIP LOCKED, and safe patterns for concurrent workers.
+Isolation anomalies require genuinely concurrent database sessions. They cannot
+be proven by running one `.sql` file serially. Open two VS Code terminals, name
+them Session A and Session B, and paste each step only when instructed.
 
-Setup
-- ACID recap: Atomicity, Consistency, Isolation, Durability
-- Default isolation in Postgres is READ COMMITTED; others: REPEATABLE READ, SERIALIZABLE
-- Session commands: `BEGIN/COMMIT/ROLLBACK`, `SET TRANSACTION ISOLATION LEVEL ...`, `SHOW default_transaction_isolation`.
+The following single-session check is safe to run independently and demonstrates
+transaction-local isolation plus savepoint rollback:
 
-Exercise 1 — Explicit transaction blocks and error handling
 ```sql
-BEGIN;
-  -- 1) Insert an order and its lines atomically
-  INSERT INTO orders(order_id, customer_id, order_date, total_amount)
-  VALUES (90001, 123, now(), 0.00);
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+SET LOCAL search_path TO training, public;
 
-  INSERT INTO order_items(order_id, product_id, quantity, unit_price, discount)
-  VALUES (90001, 501, 2, 19.99, 0.10);
+SHOW TRANSACTION ISOLATION LEVEL;
 
-  -- 2) Update order total from lines
-  UPDATE orders o
-  SET total_amount = (
-    SELECT SUM(oi.quantity*oi.unit_price*(1-oi.discount)) FROM order_items oi WHERE oi.order_id = o.order_id
-  )
-  WHERE o.order_id = 90001;
+CREATE TEMP TABLE savepoint_demo (
+  id int PRIMARY KEY,
+  qty int NOT NULL
+);
+INSERT INTO savepoint_demo VALUES (1, 10);
 
-  -- 3) Optional validation; RAISE EXCEPTION to trigger rollback in pl/pgSQL context
-COMMIT;  -- or ROLLBACK on error
+SAVEPOINT before_change;
+UPDATE savepoint_demo
+SET qty = qty + 100
+WHERE id = 1;
+ROLLBACK TO SAVEPOINT before_change;
+
+SELECT id, qty
+FROM savepoint_demo;
+
+ROLLBACK;
 ```
-Notes
-- Group multi-table changes in one transaction to prevent partial writes.
 
-Exercise 2 — READ COMMITTED vs REPEATABLE READ (non-repeatable reads)
-Open two sessions A and B.
+Expected row: `(1, 10)`.
 
-Session A (repeatable read):
-```sql
-BEGIN;
-SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
-SELECT SUM(total_amount) FROM orders WHERE order_date >= CURRENT_DATE - interval '1 day';  -- take snapshot
--- keep txn open
+## Lab setup
+
+Run this once in either terminal. The table is deliberately course-specific,
+but it is persistent because temporary tables cannot be shared by two sessions.
+
+```text
+SET search_path TO training, public;
+DROP TABLE IF EXISTS isolation_lab;
+CREATE TABLE isolation_lab (
+  id int PRIMARY KEY,
+  qty int NOT NULL
+);
+INSERT INTO isolation_lab VALUES (1, 10), (2, 20);
 ```
-Session B (separate connection):
-```sql
-INSERT INTO orders(order_id, customer_id, order_date, total_amount)
-VALUES (90002, 321, now(), 42.00);
+
+## Exercise 1 — Non-repeatable read under `READ COMMITTED`
+
+Session A:
+
+```text
+BEGIN ISOLATION LEVEL READ COMMITTED;
+SET LOCAL search_path TO training, public;
+SELECT qty FROM isolation_lab WHERE id = 1;  -- 10
+```
+
+While A remains open, Session B:
+
+```text
+BEGIN;
+SET LOCAL search_path TO training, public;
+UPDATE isolation_lab SET qty = 15 WHERE id = 1;
 COMMIT;
 ```
-Back to Session A:
-```sql
-SELECT SUM(total_amount) FROM orders WHERE order_date >= CURRENT_DATE - interval '1 day';
-COMMIT;
-```
-Observation
-- Under REPEATABLE READ, A keeps a consistent snapshot; both sums in A are identical, ignoring B’s committed row. Under READ COMMITTED they would differ.
 
-Exercise 3 — Phantom reads and predicate locks
-```sql
--- In REPEATABLE READ, predicate locks prevent phantoms for certain queries
+Back in Session A:
+
+```text
+SELECT qty FROM isolation_lab WHERE id = 1;  -- now 15
+ROLLBACK;
+```
+
+The two reads in A return different committed versions because
+`READ COMMITTED` takes a new statement snapshot. Repeat the sequence with
+`REPEATABLE READ`; A's second read remains `10` until A ends.
+
+## Exercise 2 — Phantom rows between two counts
+
+Reset, then start Session A:
+
+```text
+DELETE FROM training.isolation_lab WHERE id >= 3;
+BEGIN ISOLATION LEVEL READ COMMITTED;
+SELECT COUNT(*) FROM training.isolation_lab WHERE qty >= 20;  -- 1
+```
+
+Session B inserts a new qualifying row:
+
+```text
 BEGIN;
-SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
-SELECT COUNT(*) FROM customers WHERE country='US';  -- snapshot established
--- In another session insert a new US customer and COMMIT
--- Back here, re-run the COUNT(*): still the same in RR; new row is invisible in this txn
+INSERT INTO training.isolation_lab(id, qty) VALUES (3, 30);
 COMMIT;
 ```
-Takeaway
-- REPEATABLE READ avoids non-repeatable reads and phantoms (via MVCC + predicate locking) in Postgres.
 
-Exercise 4 — SERIALIZABLE and serialization failures
-```sql
-BEGIN;
-SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
--- Run two concurrent txns that both read a total, compute a new value, and update
--- One may ROLLBACK with "could not serialize access due to read/write dependencies"
--- Pattern: catch and retry the whole transaction
+Back in Session A:
+
+```text
+SELECT COUNT(*) FROM training.isolation_lab WHERE qty >= 20;  -- 2
+ROLLBACK;
+```
+
+The new qualifying row is a phantom. Under `REPEATABLE READ`, Session A would
+continue to see its original predicate result.
+
+## Exercise 3 — Serialization failure under contention
+
+Reset the two rows, then interleave these commands. Both transactions read the
+same set before either writes it.
+
+Session A:
+
+```text
+UPDATE training.isolation_lab SET qty = 10 WHERE id = 1;
+UPDATE training.isolation_lab SET qty = 20 WHERE id = 2;
+DELETE FROM training.isolation_lab WHERE id >= 3;
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+SELECT SUM(qty) FROM training.isolation_lab;
+```
+
+Session B:
+
+```text
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+SELECT SUM(qty) FROM training.isolation_lab;
+```
+
+Session A, then Session B:
+
+```text
+-- Session A
+UPDATE training.isolation_lab SET qty = qty + 1 WHERE id = 1;
+
+-- Session B
+UPDATE training.isolation_lab SET qty = qty + 1 WHERE id = 2;
+
+-- Session A
+COMMIT;
+
+-- Session B
 COMMIT;
 ```
-Pattern
-- Use application-level retry for serialization failures; keep transactions short and deterministic.
 
-Exercise 5 — Row locking, NOWAIT, SKIP LOCKED (worker queues)
-```sql
--- Safely claim work items without blocking other workers
-BEGIN;
-WITH claimed AS (
-  SELECT id
-  FROM jobs
-  WHERE status='queued'
-  ORDER BY created_at
-  FOR UPDATE SKIP LOCKED
-  LIMIT 10
-)
-UPDATE jobs j
-SET status='in_progress'
-FROM claimed c
-WHERE j.id=c.id
-RETURNING j.*;
-COMMIT;
+PostgreSQL must abort one transaction with SQLSTATE `40001` to prevent the
+read/write dependency cycle. Real applications retry the entire transaction,
+not just the final statement.
+
+## Cleanup and cautions
+
+After both sessions have no open transaction, run:
+
+```text
+DROP TABLE IF EXISTS training.isolation_lab;
 ```
-Variants
-- `FOR UPDATE NOWAIT` raises an error instead of waiting; handle and move on.
-- `FOR SHARE` for read locks when updating related tables.
 
-Tips
-- Keep transactions short; avoid long-held locks.
-- Use explicit isolation only when needed; default READ COMMITTED is fine for many OLTP workloads.
-- Prefer SKIP LOCKED patterns for concurrent consumers.
+Do not leave terminals “idle in transaction.” Results depend on exact
+interleaving, and the setup state must be reset between experiments.

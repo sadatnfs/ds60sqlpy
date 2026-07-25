@@ -1,47 +1,117 @@
-# Day 41 — Handling Class Imbalance (Companion Guide)
+# Day 41 — Handling Class Imbalance
+
+**Lesson ID:** `python-41` · **Level:** intermediate · **Dependencies:** `ml` · **Network:** offline
+
+An imbalanced target is not automatically a problem. It becomes a modeling
+problem when the minority outcome matters and the chosen metric or decision
+threshold hides poor performance on it.
 
 ## Learning objectives
-- Diagnose imbalance and select metrics accordingly
-- Use class weights, under/over-sampling, and SMOTE variants
-- Adjust decision thresholds and evaluate cost-sensitive performance
 
-## Why this matters
-Imbalanced labels are common; naive accuracy can be misleading. You must optimize for recall/precision tradeoffs.
+By the end of the lesson, you can:
 
-## Core concepts and examples
-### Class weights
+- quantify target prevalence before fitting a model;
+- interpret precision, recall, F1, average precision, and ROC AUC under imbalance;
+- compare class weighting with training-only resampling;
+- tune a probability threshold without using final test labels; and
+- explain why synthetic resampling does not create new real-world evidence.
+
+## Prerequisites
+
+- Complete `python-40` (hyperparameter search).
+- Recall classification metrics from `python-35`.
+- Install the `ml` dependency group during bootstrap for `imbalanced-learn`.
+
+## Vocabulary and mental models
+
+| Term | Definition |
+|---|---|
+| Prevalence | Fraction of observations in the positive class |
+| Class weight | Multiplier that changes how much each class contributes to training loss |
+| Resampling | Changing training class frequencies through over- or undersampling |
+| SMOTE | Synthesizing minority examples between nearby minority observations |
+| Decision threshold | Score boundary converted into a class label |
+| Precision–recall curve | Precision and recall across thresholds |
+| Average precision | Summary of the precision–recall ranking curve |
+| Calibration | Agreement between predicted probabilities and observed frequencies |
+
+A classifier produces scores; a threshold turns scores into actions. Model
+ranking quality and operating-policy quality are related but distinct.
+
+## Worked example: report the minority outcome explicitly
+
 ```python
+from sklearn.datasets import make_classification
 from sklearn.linear_model import LogisticRegression
-clf = LogisticRegression(class_weight='balanced', max_iter=1000, random_state=0)
+from sklearn.metrics import average_precision_score, classification_report
+from sklearn.model_selection import train_test_split
+
+X, y = make_classification(
+    n_samples=5_000,
+    weights=[0.95, 0.05],
+    flip_y=0.01,
+    random_state=42,
+)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, stratify=y, random_state=42
+)
+model = LogisticRegression(
+    class_weight="balanced",
+    max_iter=1_000,
+).fit(X_train, y_train)
+scores = model.predict_proba(X_test)[:, 1]
+
+print(classification_report(y_test, scores >= 0.5, digits=3))
+print("average precision:", average_precision_score(y_test, scores))
 ```
 
-### Resampling (imblearn)
-```python
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline
-pipe = Pipeline([
-    ('pre', preprocessor),
-    ('smote', SMOTE(random_state=0)),
-    ('model', LogisticRegression(max_iter=1000))
-])
-```
+The 0.5 threshold is a starting convention, not a law. Select an operating point
+using validation data and an explicit cost, capacity, recall, or precision goal.
 
-### Threshold tuning
-```python
-from sklearn.metrics import precision_recall_curve
-probs = clf.predict_proba(X_valid)[:,1]
-prec, rec, thr = precision_recall_curve(y_valid, probs)
-```
+## Learner exercises
 
-## Common pitfalls
-- Performing resampling before train/test split (leakage)
-- Evaluating with accuracy only; prefer PR AUC, recall@k, F-beta
-- SMOTE on high-dimensional sparse features; consider alternatives
+1. Compare `class_weight="balanced"` with a SMOTE strategy.
+2. Tune the threshold to maximize minority-class F1.
+3. Plot precision–recall curves and discuss the tradeoff.
 
-## Practice exercises
-1) Compare class_weight vs SMOTE in a pipeline
-2) Plot PR curve and choose threshold for desired recall
-3) Report confusion matrix at multiple thresholds
+### Progressive hints
 
-## Further reading
-- imbalanced-learn: https://imbalanced-learn.org
+1. Resample only `X_train, y_train`. For cross-validation, place SMOTE inside an
+   `imblearn.pipeline.Pipeline` so each fold synthesizes from its training rows.
+2. Use `precision_recall_curve` on validation scores. Check array lengths
+   carefully: thresholds have one fewer element than precision and recall.
+3. Plot recall on the x-axis and precision on the y-axis; add class prevalence
+   as a simple reference and label average precision.
+
+## Self-check
+
+- Why can ROC AUC look strong while precision remains poor?
+- Which information would you need to choose between false positives and false
+  negatives?
+- Why is applying SMOTE before splitting a leakage error?
+- Does class weighting guarantee calibrated probabilities?
+
+Expected behavior: changing the threshold moves precision and recall in opposite
+directions. Class weighting and SMOTE need not produce the same ranking or
+calibration.
+
+## Pitfalls, diagnostics, and tradeoffs
+
+| Pitfall | Consequence | Better practice |
+|---|---|---|
+| Accuracy as the only metric | Majority prediction looks successful | Report minority-aware metrics and confusion counts |
+| SMOTE before split/CV | Synthetic points include validation information | Resample inside training folds |
+| Threshold selected on test labels | Optimistic final metric | Tune on validation, lock, evaluate once |
+| Optimizing F1 without costs | Encodes an arbitrary tradeoff | Tie the threshold to operational consequences |
+| Ignoring calibration after reweighting | Scores may not represent probabilities | Evaluate/recalibrate on representative data |
+
+Undersampling is cheap but discards evidence. Oversampling preserves rows but
+can overfit duplicates or implausible synthetic neighborhoods. Class weights are
+simple and often a strong first comparison.
+
+## Next step
+
+- Work in the [Day 41 learner notebook](../notebooks/day41_imbalance_handling.ipynb).
+- Then consult the
+  [Day 41 solution](../solutions/day41_imbalance_handling/day41_solutions.md).
+- Continue to [Day 42 — Unsupervised Learning](day42_unsupervised_kmeans_anomaly.md).

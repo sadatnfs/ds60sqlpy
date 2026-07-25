@@ -3,8 +3,10 @@
 BEGIN;
 SET search_path TO training, public;
 
--- Create a DWH schema (demo; will be rolled back)
-CREATE SCHEMA IF NOT EXISTS dwh;
+-- This three-day project is intentionally stateful. Re-running Day 52 resets
+-- only the course-owned dwh schema, then commits it for Days 53 and 54.
+DROP SCHEMA IF EXISTS dwh CASCADE;
+CREATE SCHEMA dwh;
 SET search_path TO dwh, training, public;
 
 -- Dimension tables (surrogate keys)
@@ -57,13 +59,25 @@ CREATE TABLE fact_sales (
   amount         NUMERIC(12,2) NOT NULL
 );
 
--- Populate dim_date for a 3-year range around today
-WITH cal AS (
+-- Populate dim_date for every source order plus a useful planning horizon.
+-- Deriving the bounds from the source prevents old facts from missing a date key.
+WITH bounds AS (
+  SELECT LEAST(
+           MIN(order_date)::date,
+           (CURRENT_DATE - interval '2 years')::date
+         ) AS start_date,
+         GREATEST(
+           MAX(order_date)::date,
+           (CURRENT_DATE + interval '1 year')::date
+         ) AS end_date
+  FROM training.orders
+), cal AS (
   SELECT generate_series(
-           (CURRENT_DATE - interval '2 years')::date,
-           (CURRENT_DATE + interval '1 year')::date,
+           start_date,
+           end_date,
            interval '1 day'
          )::date AS d
+  FROM bounds
 )
 INSERT INTO dim_date(date_key, date_actual, year, quarter, month, day, day_name, is_weekend)
 SELECT extract(year from d)::int * 10000 + extract(month from d)::int * 100 + extract(day from d)::int,
@@ -79,13 +93,13 @@ FROM cal;
 -- Initial load for customer dimension (Type 2 structure; initial current rows)
 INSERT INTO dim_customer(customer_id, full_name, country, segment, valid_from, valid_to, is_current)
 SELECT c.customer_id, c.full_name, c.country, COALESCE(c.segment,'standard') AS segment,
-       CURRENT_DATE, NULL, TRUE
+       c.created_at::date, NULL, TRUE
 FROM training.customers c;
 
 -- Initial load for product dimension
 INSERT INTO dim_product(product_id, name, category, price, cost, valid_from, valid_to, is_current)
 SELECT p.product_id, p.name, p.category, p.price, p.cost,
-       CURRENT_DATE, NULL, TRUE
+       p.created_at::date, NULL, TRUE
 FROM training.products p;
 
 -- Load fact from existing orders/items (map to dims using current rows)
@@ -123,4 +137,4 @@ LIMIT 50;
 -- 1) Add dim_country and link customers to it.
 -- 2) Build a second fact table fact_payments linked to dim_date and dim_customer.
 
-ROLLBACK;
+COMMIT;

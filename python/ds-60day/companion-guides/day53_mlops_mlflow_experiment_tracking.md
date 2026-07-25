@@ -1,41 +1,127 @@
-# Day 53 — MLOps: MLflow Experiment Tracking (Companion Guide)
+# Day 53 — Experiment Tracking with MLflow
+
+**Lesson ID:** `python-53` · **Level:** advanced · **Dependencies:** `production` · **Network:** offline
+
+Experiment tracking connects a result to its parameters, metrics, code context,
+and artifacts. MLflow can run entirely on the local machine for this lesson; no
+hosted service or account is required.
 
 ## Learning objectives
-- Track params, metrics, artifacts, and models with MLflow
-- Run the tracking UI and compare runs
-- Use autologging and the Model Registry (concepts)
 
-## Why this matters
-Reproducibility and comparability are essential for iterative modeling.
+By the end of the lesson, you can:
 
-## Core concepts and examples
-### Basic logging
+- organize local MLflow experiments and runs;
+- log explicit parameters, metrics, and plot artifacts;
+- save a fitted scikit-learn model under a run;
+- reload an artifact by run URI; and
+- distinguish tracking, artifact storage, registry workflow, and reproducibility.
+
+## Prerequisites
+
+- Complete `python-52` (scalable computation).
+- Recall model evaluation and saved pipelines.
+- Install the `production` dependency group.
+
+## Vocabulary and mental models
+
+| Term | Definition |
+|---|---|
+| Experiment | Named collection of related runs |
+| Run | One execution with parameters, metrics, tags, and artifacts |
+| Parameter | Configuration intended to remain fixed during a run |
+| Metric | Numeric measurement, optionally recorded over steps |
+| Artifact | File output such as a plot, model, or report |
+| Tracking store | Metadata location for experiments and runs |
+| Artifact store | Location containing run files |
+| Model registry | Versioned promotion and governance layer beyond basic tracking |
+
+Tracking proves what was logged, not that the data were valid or the run can be
+reproduced. Record dataset identity, code revision, environment lock, and seed
+alongside model hyperparameters.
+
+## Worked example: one explicit local run
+
 ```python
 import mlflow
-mlflow.set_experiment('churn-baseline')
-with mlflow.start_run():
-    mlflow.log_params({'model':'rf','n_estimators':300})
-    mlflow.log_metric('auc', 0.812)
-    mlflow.sklearn.log_model(clf, 'model')
+import mlflow.sklearn
+
+mlflow.set_experiment("ds60-local-experiment")
+with mlflow.start_run(run_name="baseline") as run:
+    mlflow.log_param("model", "LogisticRegression")
+    mlflow.log_param("random_state", 42)
+    mlflow.log_metric("roc_auc", 0.91)
+    # After fitting:
+    # mlflow.sklearn.log_model(pipeline, artifact_path="model")
+    print(run.info.run_id)
 ```
 
-### UI
-- `mlflow ui --port 5000` and open http://localhost:5000
+Use actual calculated metrics in the notebook; the literal metric above only
+shows the logging API. Keep `mlruns/` as a learner-local ignored artifact, not a
+source file to commit.
 
-### Autologging
-```python
-mlflow.sklearn.autolog()
+## View the local UI
+
+macOS/Linux:
+
+```bash
+.venv/bin/mlflow ui --backend-store-uri mlruns
 ```
 
-## Common pitfalls
-- Logging outside a run context; nothing gets recorded
-- Not pinning versions; runs become irreproducible
-- Sensitive data in artifacts; sanitize before logging
+Windows PowerShell:
 
-## Practice exercises
-1) Track a grid search with MLflow and compare runs
-2) Save the best model as an artifact and load it elsewhere
-3) Explore Model Registry concepts
+```powershell
+.\.venv\Scripts\mlflow.exe ui --backend-store-uri mlruns
+```
 
-## Further reading
-- MLflow: https://mlflow.org
+Open `http://127.0.0.1:5000`, and stop the process with Ctrl+C when finished.
+The server binds locally and the lesson works offline.
+
+## Learner exercises
+
+1. Log additional parameters such as Logistic Regression `C` and compare runs.
+2. Save a confusion-matrix PNG and log it as an artifact.
+3. Try a different classifier, such as Random Forest, and compare ROC AUC.
+
+### Progressive hints
+
+1. Make one run per configuration and include split seed, metric name, and model
+   type. Avoid changing several uncontrolled factors at once.
+2. Save figures under an ignored `artifacts/` directory, close the figure, and
+   pass the path to `mlflow.log_artifact`.
+3. Reuse exactly the same train/test split. Compare runtime and complexity as
+   well as score.
+
+The reference solution adds scikit-learn autologging and model reload. Start
+with explicit logging so you know which information is essential; use autolog
+as a supplement, not as a substitute for experiment design.
+
+## Self-check
+
+- What uniquely identifies the logged model artifact?
+- Which facts are missing if you log only ROC AUC and `C`?
+- Why should the final holdout not become a leaderboard across many runs?
+- What is the difference between a tracking run and an approved production
+  model version?
+
+Expected behavior: runs and artifacts appear in the local UI, and reloading a
+model from `runs:/<run_id>/model` reproduces predictions on the same input.
+
+## Pitfalls, diagnostics, and tradeoffs
+
+| Symptom | Likely cause | Response |
+|---|---|---|
+| Runs appear in different stores | Working directory/tracking URI changed | Set and document the local URI |
+| Nested/duplicate runs appear | Autolog and manual contexts overlap | Decide the intended run structure |
+| Artifact cannot be loaded | Wrong run ID or artifact path | Inspect the run's artifact tree in UI |
+| Repository becomes huge | Local `mlruns/` committed | Keep learner artifacts ignored |
+| Metrics are incomparable | Split/data/metric definition changed | Log data identity and evaluation protocol |
+
+Local file tracking is ideal for learning and one user. Team use needs durable
+backends, access controls, retention, backup, and an explicit promotion process.
+
+## Next step
+
+- Work in the [Day 53 learner notebook](../notebooks/day53_mlops_mlflow_experiment_tracking.ipynb).
+- Then consult the
+  [Day 53 solution](../solutions/day53_mlops_mlflow_experiment_tracking/day53_solutions.md).
+- Continue to [Day 54 — Monitoring and Governance](day54_monitoring_model_governance.md).

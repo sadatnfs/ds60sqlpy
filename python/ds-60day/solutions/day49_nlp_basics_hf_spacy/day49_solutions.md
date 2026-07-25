@@ -17,6 +17,7 @@ from transformers import (AutoTokenizer, AutoModelForSequenceClassification,
                           TrainingArguments, Trainer)
 import numpy as np
 import evaluate
+from pathlib import Path
 
 # 2) Data: use IMDB for demo
 ds = load_dataset('imdb')
@@ -25,7 +26,7 @@ ds = load_dataset('imdb')
 tok = AutoTokenizer.from_pretrained('distilbert-base-uncased')
 
 def encode(batch):
-    return tok(batch['text'], truncation=True, padding='max_length', max_length=256)
+    return tok(batch['text'], truncation=True, padding='max_length', max_length=128)
 
 ds_enc = ds.map(encode, batched=True)
 
@@ -44,20 +45,31 @@ def compute_metrics(eval_pred):
     return {'accuracy': accuracy.compute(predictions=preds, references=labels)['accuracy']}
 
 # 6) Training args and trainer
-args = TrainingArguments(output_dir='out', evaluation_strategy='epoch',
-                         per_device_train_batch_size=16, per_device_eval_batch_size=32,
-                         num_train_epochs=1, logging_steps=50)
-trainer = Trainer(model=model, args=args, train_dataset=ds_enc['train'].shuffle(seed=0).select(range(8000)),
-                  eval_dataset=ds_enc['test'].select(range(2000)), compute_metrics=compute_metrics)
+args = TrainingArguments(
+    output_dir=str(Path('artifacts/day49/out')),
+    eval_strategy='steps',
+    eval_steps=10,
+    max_steps=20,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=16,
+    logging_steps=5,
+)
+trainer = Trainer(
+    model=model,
+    args=args,
+    train_dataset=ds_enc['train'].shuffle(seed=0).select(range(256)),
+    eval_dataset=ds_enc['test'].select(range(128)),
+    compute_metrics=compute_metrics,
+)
 
 trainer.train(); trainer.evaluate()
 ```
 Line‑by‑line
 - load_dataset: quick access to IMDB; replace with your dataset if needed
-- encode: consistent padding/truncation to fixed length 256
+- encode: consistent padding/truncation to fixed length 128
 - set_format: returns torch tensors compatible with Trainer
 - compute_metrics: argmax over logits → accuracy
-- TrainingArguments: small epochs for demo; adjust for real training
+- TrainingArguments: 20-step laptop smoke run; remove `max_steps` only for an intentional full experiment
 
 ---
 
@@ -75,25 +87,49 @@ weights = [total/(2*counts[i]) for i in range(2)]
 import torch
 w = torch.tensor(weights)
 
-# Define custom loss with weights in Trainer
-from transformers import TrainingArguments
+# Define a current Trainer subclass with a weighted loss.
+class WeightedTrainer(Trainer):
+    def __init__(self, *args, class_weights, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.class_weights = class_weights
+        # The custom loss does not use the batch-size loss kwarg.
+        self.model_accepts_loss_kwargs = False
 
-def custom_loss(model, inputs, return_outputs=False):
-    labels = inputs.get('labels')
-    outputs = model(**{k:v for k,v in inputs.items() if k!='labels'})
-    logits = outputs.logits
-    loss_fn = torch.nn.CrossEntropyLoss(weight=w.to(logits.device))
-    loss = loss_fn(logits, labels)
-    return (loss, outputs) if return_outputs else loss
+    def compute_loss(
+        self,
+        model,
+        inputs,
+        return_outputs=False,
+        num_items_in_batch=None,
+    ):
+        labels = inputs['labels']
+        model_inputs = {key: value for key, value in inputs.items() if key != 'labels'}
+        outputs = model(**model_inputs)
+        loss_fn = torch.nn.CrossEntropyLoss(
+            weight=self.class_weights.to(outputs.logits.device)
+        )
+        loss = loss_fn(outputs.logits, labels)
+        return (loss, outputs) if return_outputs else loss
 
-trainer_weighted = Trainer(model=model, args=args, train_dataset=ds_enc['train'].select(range(8000)),
-                           eval_dataset=ds_enc['test'].select(range(2000)), compute_metrics=compute_metrics)
-trainer_weighted.compute_loss = custom_loss
+
+weighted_model = AutoModelForSequenceClassification.from_pretrained(
+    'distilbert-base-uncased',
+    num_labels=2,
+)
+trainer_weighted = WeightedTrainer(
+    model=weighted_model,
+    args=args,
+    train_dataset=ds_enc['train'].select(range(256)),
+    eval_dataset=ds_enc['test'].select(range(128)),
+    compute_metrics=compute_metrics,
+    class_weights=w,
+)
 trainer_weighted.train(); trainer_weighted.evaluate()
 ```
 Explanation
 - Compute class weights inversely proportional to class counts
-- Plug a custom compute_loss into Trainer to apply weighted CrossEntropy
+- Override `Trainer.compute_loss` with its current signature, including
+  `num_items_in_batch`, to apply weighted cross entropy
 - This biases the learner to pay more attention to the minority class
 
 ---
@@ -128,5 +164,6 @@ Line‑by‑line
 - Iterate matches to extract spans; extend patterns for your domain
 
 Notes
+- Hugging Face and spaCy assets require a first network download; cache them before offline study
 - For custom domains, train spaCy NER or use patterns + lists
 - For long docs, prefer nlp.pipe for speed

@@ -1,46 +1,90 @@
-# Day 32 — Index Fundamentals: B‑tree, Covering, and Selectivity (Companion Guide)
+# Day 32 — Index Fundamentals
 
-Learning objectives
-- Understand how B‑tree indexes work and when the planner uses them
-- Create single- and multi-column indexes; choose column order
-- Use covering (Index Only Scan) and partial/functional indexes
-- Measure selectivity and plan changes with EXPLAIN
+## Level and prerequisites
 
-Why this matters
-Indexes are the primary lever for performance on OLTP/OLAP queries. The right index turns seconds into milliseconds; the wrong one bloats storage and slows writes.
+- **Level:** Advanced
+- **Prerequisites:** [Day 31 — EXPLAIN and EXPLAIN ANALYZE](day31_explain_analyze.md)
+- **Artifacts:** [learner SQL](../day32_index_fundamentals.sql) ·
+  [solution reasoning](../solutions/day32_solutions.md) ·
+  [executable solution](../solutions/day32_solutions.sql)
 
-Core concepts and deep dive
-- B‑tree basics
-  - Balanced tree on sorted keys; supports =, <, >, BETWEEN, prefix LIKE, IN
-  - Multi-column: leftmost prefix rule — (a,b) can serve predicates on a, or a+b; not on b alone
-- Cardinality/selectivity
-  - High selectivity (few rows) benefits most; low selectivity (many rows) may prefer Seq Scan
-  - Use pg_stats (n_distinct, most_common_vals) to reason about selectivity
-- Covering indexes
-  - Index Only Scan if all needed columns are in the index and visibility map allows
-  - INCLUDE clause (Postgres 11+) adds non-key columns only for covering
-- Partial indexes
-  - WHERE predicate stored in the index definition for hot subsets (e.g., status='active')
-  - Smaller, faster; planner uses only when query implies predicate
-- Functional/Expression indexes
-  - Support computed predicates like LOWER(email) or (order_date::date)
-  - Must match query expression or be derivable
+## Learning objectives
 
-Design patterns
-- OLTP filters: (customer_id), (order_date DESC) with DESC ordering for recent-first queries
-- Composite keys: (customer_id, order_date) for recent orders per customer
-- Covering read-mostly: CREATE INDEX ... ON orders(customer_id) INCLUDE(total_amount, order_date)
+- Match a B-tree index to equality, range, and ordering requirements.
+- Explain a planner choice using selectivity, table size, projection, and
+  measured cost.
 
-Pitfalls
-- Over-indexing hurts writes and vacuum; index only what queries use
-- Wrong column order: put most selective and most commonly filtered columns first
-- Functions on columns prevent index use; add functional index or store normalized value
+## Vocabulary and concepts
 
-Practice exercises
-1) Add (order_date) and (customer_id, order_date) indexes; compare plans on date filter and customer-history queries.
-2) Create LOWER(email) index and test case-insensitive search.
-3) Build a partial index for orders WHERE status='completed' and measure size/speed vs full index.
+- **Selectivity:** the fraction of rows a predicate is expected to return.
+- **Index scan:** an access path that uses index entries to locate heap rows.
+- **Index-only scan:** a plan that can satisfy selected values from the index,
+  subject to visibility checks.
 
-Further reading
-- Indexes: https://www.postgresql.org/docs/current/indexes.html
-- INCLUDE: https://www.postgresql.org/docs/current/sql-createindex.html#SQL-CREATEINDEX-INCLUDE
+## Worked example / walkthrough
+
+Capture a category-filter plan before creating `products(category)`, create the
+index inside the rollback-only transaction, and rerun the identical query.
+Record the plan even if PostgreSQL keeps the sequential scan: the compact seed
+can make reading the table cheaper than traversing an index.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day32_index_fundamentals.sql).
+Compare selective and unselective predicates against the same indexed column.
+
+## Self-check
+
+- Are the before/after SQL, parameters, and returned rows identical?
+- Can you explain index write/storage cost as well as possible read benefit?
+
+## Next step
+
+Continue to [Day 33 — composite, covering, and partial indexes](day33_index_optimization_strategies.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Create B-tree indexes for equality and range predicates.
+- Observe planner choices before and after an index exists.
+- Explain why a valid index can remain unused on a small or unselective query.
+
+## How the learner script uses the current schema
+
+Inside a rollback-only transaction, the script creates indexes on
+`orders.total_amount`, `orders.order_date`, and `customers.country`. It then
+executes matching filters with `EXPLAIN ANALYZE`. No course index persists after
+the final `ROLLBACK`.
+
+B-tree is PostgreSQL's default and supports equality, ranges, ordering, `IN`,
+and prefix pattern searches. A hash index is mentioned only as a contrast;
+B-tree already handles the equality lookup on `customers.email`.
+
+## Planner and index concepts
+
+- Selective predicates benefit most because they fetch a small fraction of the
+  table.
+- Every index adds storage and write/vacuum work. “Index every column” is not a
+  sound policy.
+- An index-only scan also depends on selected columns and visibility-map state.
+- `SELECT *` can make heap access necessary even when a filter uses an index.
+- On the compact seed, a sequential scan may correctly be cheaper.
+
+## Practice — match the learner prompts exactly
+
+1. Create an index on `products(category)` and run a category filter with
+   `EXPLAIN ANALYZE`.
+2. Compare the same category query with the index absent and present. Record
+   scan type, estimated/actual rows, execution time, and buffers if requested.
+
+Run both comparisons in one controlled session and keep predicate and projection
+the same.
+
+## Pitfalls and validation
+
+- Use only the setup's valid order statuses: `placed`, `paid`, `shipped`,
+  `delivered`, and `returned`.
+- Do not disable sequential scans as proof that an index is beneficial.
+- Index names are schema-local; use exercise-specific names to avoid collisions.
+- The learner transaction rolls all index experiments back safely.

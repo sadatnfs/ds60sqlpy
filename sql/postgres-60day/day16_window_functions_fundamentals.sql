@@ -3,20 +3,20 @@
 BEGIN;
 SET search_path TO training, public;
 
--- Convert GROUP BY to window function: revenue per category and share
-WITH line AS (
+-- Aggregate once, then use a window over the grouped result to calculate
+-- the grand total without a second query.
+WITH category_totals AS (
   SELECT p.category,
-         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
+         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
   FROM order_items oi
   JOIN products p ON p.product_id = oi.product_id
+  GROUP BY p.category
 )
 SELECT category,
-       ROUND(SUM(revenue) OVER (PARTITION BY category),2) AS category_revenue,
-       ROUND(SUM(revenue) OVER (),2) AS total_revenue,
-       ROUND(SUM(revenue) OVER (PARTITION BY category)
-             / NULLIF(SUM(revenue) OVER (),0), 4) AS category_share
-FROM line
-GROUP BY category
+       ROUND(revenue, 2) AS category_revenue,
+       ROUND(SUM(revenue) OVER (), 2) AS total_revenue,
+       ROUND(revenue / NULLIF(SUM(revenue) OVER (), 0), 4) AS category_share
+FROM category_totals
 ORDER BY category_revenue DESC;
 
 -- Row-wise metrics without collapsing rows

@@ -20,9 +20,12 @@ WHERE department_id IN (
 
 -- Example: Delete unpaid old orders (demo only)
 DELETE FROM orders o
-USING payments p
-WHERE p.order_id IS NULL
-  AND o.order_date < now() - interval '365 days'
+WHERE o.order_date < now() - interval '365 days'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM payments p
+    WHERE p.order_id = o.order_id
+  )
 RETURNING o.order_id;
 
 -- All changes will be rolled back below

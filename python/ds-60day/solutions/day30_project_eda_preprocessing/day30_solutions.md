@@ -18,12 +18,13 @@ Checklist with code skeletons
 2) Load with dtypes + validate schema
 ```python
 import pandas as pd
-import pandera as pa, pandera.typing as pat
+import pandera.pandas as pa
+import pandera.typing as pat
 
 dtypes = {'city':'string', 'price':'float64', 'qty':'Int64', 'date':'string'}
 df = pd.read_csv('raw.csv', dtype=dtypes, parse_dates=['date'])
 
-class Schema(pa.SchemaModel):
+class Schema(pa.DataFrameModel):
     city: pat.Series[str]
     price: pat.Series[float] = pa.Field(ge=0)
     qty: pat.Series[int] = pa.Field(ge=0)
@@ -63,7 +64,12 @@ train, test = train_test_split(df, test_size=0.2, random_state=42)
 
 7) Save processed data and data dictionary
 ```python
-train.to_parquet('data/train.parquet', index=False)
+from pathlib import Path
+
+artifact_dir = Path('artifacts/day30/processed')
+artifact_dir.mkdir(parents=True, exist_ok=True)
+train.to_parquet(artifact_dir / 'train.parquet', index=False)
+test.to_parquet(artifact_dir / 'test.parquet', index=False)
 metadata = {'columns': df.dtypes.astype(str).to_dict()}
 ```
 

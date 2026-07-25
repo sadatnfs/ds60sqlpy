@@ -1,71 +1,40 @@
--- Day 21 - Solutions: Distribution Functions (NTILE, PERCENT_RANK, CUME_DIST)
--- Assumes: orders(order_id, customer_id, order_date, total_amount), order_items(...), products(...)
+-- Day 21 solutions: distribution functions
+SET search_path TO training, public;
 
-/*
-Exercise 1) Assign quartiles to products by revenue within category; compute share per quartile.
-Why: NTILE(4) partitions ordered revenue into nearly equal sized tiles; then aggregate by tile.
-*/
-WITH prod_rev AS (
-  SELECT p.category,
-         oi.product_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM order_items oi
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.category, oi.product_id
-), ranked AS (
-  SELECT category, product_id, revenue,
-         NTILE(4) OVER (PARTITION BY category ORDER BY revenue DESC) AS quartile
-  FROM prod_rev
+-- Exercise 1: product deciles by units sold during the last 90 days.
+WITH product_units AS (
+  SELECT p.product_id,
+         p.name,
+         p.category,
+         COALESCE(
+           SUM(oi.quantity) FILTER (
+             WHERE o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+           ),
+           0
+         ) AS units_90d
+  FROM products p
+  LEFT JOIN order_items oi ON oi.product_id = p.product_id
+  LEFT JOIN orders o ON o.order_id = oi.order_id
+  GROUP BY p.product_id, p.name, p.category
 )
-SELECT category,
-       quartile,
-       ROUND(SUM(revenue),2) AS rev,
-       ROUND(SUM(revenue) / NULLIF(SUM(SUM(revenue)) OVER (PARTITION BY category),0), 4) AS share_in_category
-FROM ranked
-GROUP BY category, quartile
-ORDER BY category, quartile;
+SELECT product_id,
+       name,
+       category,
+       units_90d,
+       NTILE(10) OVER (ORDER BY units_90d DESC, product_id) AS sales_decile
+FROM product_units
+ORDER BY sales_decile, units_90d DESC, product_id;
 
-/*
-Exercise 2) Identify orders above the 99th percentile by amount per month.
-Why: PERCENTILE_CONT is an ordered-set aggregate; compute a per-month threshold, then filter.
-*/
-WITH monthly AS (
-  SELECT DATE_TRUNC('month', o.order_date)::date AS m,
-         o.order_id,
-         o.total_amount
-  FROM orders o
-), thresholds AS (
-  SELECT m,
-         PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY total_amount) AS p99
-  FROM monthly
-  GROUP BY m
-)
-SELECT mo.m, mo.order_id, mo.total_amount
-FROM monthly mo
-JOIN thresholds t USING (m)
-WHERE mo.total_amount >= t.p99
-ORDER BY mo.m DESC, mo.total_amount DESC
-LIMIT 200;
-
-/*
-Exercise 3) Use CUME_DIST to flag top-5% customers by lifetime revenue per country.
-Why: CUME_DIST gives relative rank as a fraction in [0,1]; filter at >=0.95.
-*/
-WITH order_values AS (
-  SELECT o.customer_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id
-), ltv AS (
-  SELECT customer_id, SUM(order_value) AS lifetime_revenue
-  FROM order_values
-  GROUP BY customer_id
-)
-SELECT c.country,
-       c.customer_id,
-       ROUND(l.lifetime_revenue,2) AS ltv,
-       CUME_DIST() OVER (PARTITION BY c.country ORDER BY l.lifetime_revenue) AS cd
-FROM customers c
-JOIN ltv l ON l.customer_id = c.customer_id
-QUALIFY cd >= 0.95; -- If QUALIFY not supported, wrap and filter in outer SELECT
+-- Exercise 2: each order's percentile rank within its customer.
+SELECT customer_id,
+       order_id,
+       total_amount,
+       ROUND(
+         PERCENT_RANK() OVER (
+           PARTITION BY customer_id
+           ORDER BY total_amount
+         )::numeric,
+         4
+       ) AS customer_percentile_rank
+FROM orders
+ORDER BY customer_id, total_amount, order_id;

@@ -21,6 +21,6 @@ WHERE to_tsvector('english', p.name || ' ' || p.category) @@ to_tsquery('english
 
 -- Exercises
 -- 1) Find customers whose emails start with 'customer1' followed by 2 digits using regex.
--- 2) Full-text search: products matching 'home & (decor | furniture)'.
+-- 2) Full-text search: products matching both 'home' and 'product'.
 
 ROLLBACK;

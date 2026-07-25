@@ -1,56 +1,75 @@
-# Day 21 — Solutions (Distribution Functions: Percentiles, Quantiles, Ntiles)
+# Day 21 — Solutions: Distribution Functions
 
-We compute percentiles/quantiles, use ordered-set aggregates, and bucket rows with NTILE. We explain window vs aggregate usage and performance considerations.
+The learner script introduces `NTILE` and `PERCENT_RANK`. These answers use the
+tables created by `00_setup.sql` and match both exercises in
+`day21_distribution_functions.sql`.
 
-Setup
-- Tables: orders(total_amount, order_date, customer_id), order_items(...)
-- Postgres supports ordered-set aggregates: percentile_cont/percentile_disc WITHIN GROUP (ORDER BY ...)
+## Exercise 1 — Product deciles by units sold in the last 90 days
 
-Exercise 1 — Median and percentile bands of order totals
+First aggregate to one row per product, then apply `NTILE(10)`. The `LEFT JOIN`
+keeps products with no qualifying sales, and the `product_id` tie-breaker makes
+bucket assignment deterministic when products have equal unit counts.
+
 ```sql
-SELECT 
-  percentile_cont(0.5)  WITHIN GROUP (ORDER BY o.total_amount) AS p50,
-  percentile_cont(0.9)  WITHIN GROUP (ORDER BY o.total_amount) AS p90,
-  percentile_cont(0.95) WITHIN GROUP (ORDER BY o.total_amount) AS p95
-FROM orders o;
-```
-Explanation
-- percentile_cont returns a continuous percentile (interpolated). Use percentile_disc for discrete selection among observed values.
-- WITHIN GROUP applies to the entire input set since we have no GROUP BY.
+SET search_path TO training, public;
 
-Exercise 2 — Monthly P50/P90 order totals
-```sql
-SELECT date_trunc('month', o.order_date)::date AS month,
-       percentile_cont(0.5) WITHIN GROUP (ORDER BY o.total_amount) AS p50,
-       percentile_cont(0.9) WITHIN GROUP (ORDER BY o.total_amount) AS p90,
-       COUNT(*) AS orders
-FROM orders o
-GROUP BY date_trunc('month', o.order_date)
-ORDER BY month;
-```
-Notes
-- Ordered-set aggregates compute per-group quantiles directly; no subqueries required.
-- COUNT(*) alongside percentiles gives context for sample size.
-
-Exercise 3 — Bucket customers into deciles by lifetime revenue
-```sql
-WITH order_values AS (
-  SELECT o.customer_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
-  FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id
-), ltv AS (
-  SELECT customer_id, SUM(order_value) AS lifetime_revenue
-  FROM order_values
-  GROUP BY customer_id
+WITH product_units AS (
+  SELECT p.product_id,
+         p.name,
+         p.category,
+         COALESCE(
+           SUM(oi.quantity) FILTER (
+             WHERE o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+           ),
+           0
+         ) AS units_90d
+  FROM products p
+  LEFT JOIN order_items oi ON oi.product_id = p.product_id
+  LEFT JOIN orders o ON o.order_id = oi.order_id
+  GROUP BY p.product_id, p.name, p.category
 )
-SELECT customer_id,
-       lifetime_revenue,
-       NTILE(10) OVER (ORDER BY lifetime_revenue DESC) AS decile
-FROM ltv
-ORDER BY decile, lifetime_revenue DESC
-LIMIT 200;
+SELECT product_id,
+       name,
+       category,
+       units_90d,
+       NTILE(10) OVER (ORDER BY units_90d DESC, product_id) AS sales_decile
+FROM product_units
+ORDER BY sales_decile, units_90d DESC, product_id;
 ```
-Why and pitfalls
-- NTILE(k) partitions ordered rows into k buckets as evenly as possible. The sort direction matters for which side gets higher values.
-- For ties, buckets may be uneven; for strict quantile boundaries use percentile_cont and join thresholds.
+
+Expected shape: one row per product. Decile `1` contains the highest-volume
+products and decile `10` the lowest-volume products. `NTILE` balances row
+counts; it does not promise that tied values stay in the same bucket.
+
+## Exercise 2 — Order percentile rank within each customer
+
+```sql
+SET search_path TO training, public;
+
+SELECT customer_id,
+       order_id,
+       total_amount,
+       ROUND(
+         PERCENT_RANK() OVER (
+           PARTITION BY customer_id
+           ORDER BY total_amount
+         )::numeric,
+         4
+       ) AS customer_percentile_rank
+FROM orders
+ORDER BY customer_id, total_amount, order_id;
+```
+
+Expected shape: one row per order. Within each customer, the smallest total has
+rank `0`; the largest has rank `1` when that customer has more than one order.
+Equal totals share a rank. The ascending sort is intentional: a higher
+percentile means a higher-value order.
+
+## Pitfalls
+
+- Aggregate before applying `NTILE`; otherwise each order line, not each
+  product, would be bucketed.
+- `PERCENT_RANK` returns `double precision`, so cast to `numeric` before using
+  PostgreSQL's two-argument `ROUND`.
+- A 90-day window is relative to execution time. The deterministic setup keeps
+  recent orders so this result does not become empty.

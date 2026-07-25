@@ -1,74 +1,88 @@
-# Day 7 — Strings, Regular Expressions, and Pathlib (Companion Guide)
+# Day 7 — Strings, Regular Expressions, and `pathlib`
+
+**Level:** Beginner
+
+Text and paths are boundary data. Normalize deliberately, validate narrowly,
+and let `pathlib` handle operating-system path rules.
 
 ## Learning objectives
-- Clean and normalize text with Python string methods
-- Parse patterns with regular expressions (regex)
-- Work with files and directories via `pathlib` in a cross-platform way
 
-## Why this matters
-Text cleaning is a core step in almost every data workflow—logs, CSV headers, free-form notes. A practical regex vocabulary + safe file handling saves time and reduces bugs.
+By the end of this lesson, you can:
 
-## Mental models
-- Prefer string methods for simple tasks (strip/lower/replace); reach for regex when patterns vary or need validation
-- Compile regexes you reuse; write readable patterns with named groups
-- Treat `Path` objects as first-class citizens; avoid manual path string concatenation
+- normalize and split strings without mutating the original value;
+- use a raw-string regular expression with groups;
+- distinguish regex search, matching, and substitution;
+- construct, inspect, and rename paths with `pathlib.Path`.
 
-## Text normalization toolbox
-```python
-s = '  Data Science  '
-s_clean = s.strip().lower().replace(' ', '_')  # 'data_science'
-```
-Common transforms: `strip`, `lower`, `upper`, `title`, `replace`, `split`, `join`.
+## Prerequisites
 
-## Regex basics
+Complete Day 6 (`python-06`): lists, sets, dictionaries, and iteration.
+
+## Vocabulary and mental model
+
+- **Normalization:** convert equivalent text forms to one consistent form.
+- **Regular expression:** a pattern language for matching text.
+- **Capture group:** the portion of a match retained for later use.
+- **Raw string:** `r"..."`, which prevents Python from consuming most
+  backslashes before the regex engine sees them.
+- **Path:** an object representing a filesystem location; it need not exist.
+- **Stem/suffix:** a filename without its final extension / its final extension.
+
+Use ordinary string methods for simple, fixed transformations. Reach for regex
+when the text has a pattern with alternatives or variable-length parts.
+
+## Worked example
+
 ```python
 import re
-EMAIL = re.compile(r"[\w.%-]+@[\w.-]+\.[A-Za-z]{2,}")
-match = EMAIL.search('contact alice@example.com today')
-match.group(0)  # 'alice@example.com'
-```
-Prefer raw strings `r"..."` for regex; escape sequences stay predictable.
-
-### Named groups and validation
-```python
-DATE = re.compile(r"(?P<y>\d{4})-(?P<m>\d{2})-(?P<d>\d{2})")
-if m := DATE.search('2025-01-03'):
-    int(m['y']), int(m['m']), int(m['d'])
-```
-Use anchors `^` `$` for full-string validation: `re.fullmatch(pattern, s)`.
-
-## Pathlib idioms
-```python
 from pathlib import Path
-data_dir = Path('data')
-data_dir.mkdir(exist_ok=True)
-for p in data_dir.glob('*.csv'):
-    print(p.name, p.stat().st_size)
+
+line = "run_id=DS-042 status=ok"
+match = re.fullmatch(r"run_id=(?P<run_id>[A-Z]{2}-\d{3}) status=(?P<status>\w+)", line)
+if match is not None:
+    print(match.groupdict())
+
+report = Path("reports") / "daily.csv"
+print(report.parent, report.stem, report.suffix)
 ```
-Avoid `os.path.join`/string concatenation; `Path` overloads `/` for subpaths: `(data_dir / 'file.csv')`.
 
-## Robust file reads
-- Always open with context managers (`with Path(...).open() as f:`)
-- For unknown encodings, try `encoding='utf-8'` then consider `errors='replace'`
+The regex describes the whole record. `Path` composes a portable location
+without hard-coding `/` or `\`.
 
-## Common pitfalls
-- Greedy vs lazy regex quantifiers (`.*` vs `.*?`)
-- Backslashes in Windows paths; raw strings prevent `"\n"` surprises
-- Assuming OS-specific separators; use `Path` for portability
+## Exercises and progressive hints
 
-## Practice exercises
-1) Extract all emails from a multiline string and return a unique, lowercased set
-2) Given files `Report (Jan).csv`, `Report (Feb).csv`, rename to `report-jan.csv`, `report-feb.csv`
-3) Validate dates in multiple formats using alternation and named groups
+1. Extract every email address from multiline text, then produce unique,
+   lowercase results. **Hint:** first get all matches; normalize and de-duplicate
+   as separate steps.
+2. Rename files in a chosen directory to kebab-case with `pathlib`. **Hint:**
+   calculate and print every source/destination pair before calling `rename`;
+   preserve each suffix and handle name collisions.
 
-## Stretch goals
-- Build a small anonymizer: replace emails and phone numbers in a file with placeholders
-- Write a `slugify` function that keeps only `[a-z0-9-]` and collapses multiple hyphens
+## Self-check
 
-## Check your understanding
-- When is regex overkill? Give an example solved more simply with `split` or `replace`
-- What are greedy vs lazy quantifiers? Show a before/after match
+- When is `str.replace` clearer than `re.sub`?
+- What is the difference between `re.search` and `re.fullmatch`?
+- Why should a rename utility have a dry-run mode?
+- Which part of `archive.tar.gz` is returned by `Path(...).suffix`?
 
-## Further reading
-- re docs: https://docs.python.org/3/library/re.html
-- pathlib docs: https://docs.python.org/3/library/pathlib.html
+Expected behavior: emails are normalized without duplicates, and the dry-run
+rename plan does not modify files.
+
+## Common pitfalls and diagnosis
+
+- **Backslashes behave unexpectedly:** use a raw regex string and inspect
+  `repr(pattern)`.
+- **A pattern matches too much:** replace a greedy quantifier with a bounded
+  class or non-greedy form, then add examples that must not match.
+- **`match` is `None`:** check it before calling `.group()` and print the input
+  with `repr`.
+- **Windows paths break on another OS:** never split paths manually on `/` or
+  `\`; use `Path` properties.
+- **Renaming overwrites or collides:** compare normalized destination names
+  before making any filesystem change.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day07_strings_regex_pathlib.ipynb)
+- [Check the separate solution](../solutions/day07_strings_regex_pathlib/day07_solutions.md)
+- [Next: Day 8 — Files, JSON, and CSV](day08_files_json_csv_context.md)

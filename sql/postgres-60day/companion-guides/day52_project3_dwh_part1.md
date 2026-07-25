@@ -1,26 +1,89 @@
-# Day 52 — Project 3: Data Warehouse (Part 1) — Dimensional Modeling (Companion Guide)
+# Day 52 — Data Warehouse Project, Part 1: Star Schema
 
-Objectives
-- Design a star schema for analytics: fact tables and conforming dimensions
-- Define grain, surrogate keys, and slowly changing needs
-- Plan staging → conformance → serving layers
+## Level and prerequisites
 
-Modeling steps
-- Identify business processes (orders, events) and define fact grain (e.g., one row per order_item)
-- Dimensions: customers, products, dates, geography; surrogate keys (bigint identity)
-- Conformance: consistent codes, canonical types (timestamptz UTC)
+- **Level:** Advanced
+- **Prerequisites:** [Day 51 — cash flow](day51_project2_finance_part3.md).
+  Use only the course-owned disposable `dwh` schema; Day 52 resets and commits
+  it for Days 53–54.
+- **Artifacts:** [learner SQL](../day52_project3_dwh_part1.sql) ·
+  [solution reasoning](../solutions/day52_solutions.md) ·
+  [executable solution](../solutions/day52_solutions.sql)
 
-Pipelines
-- Staging tables mirror sources; light typing only
-- Conformance applies business rules, deduping, and SCD logic for dims
-- Serving exposes facts/dims with foreign keys and quality checks
+## Learning objectives
 
-Pitfalls
-- Mixed grains; lock grain early
-- Natural key drift; use robust key mapping and audit tables
+- Declare fact and dimension grains before creating a star schema.
+- Load surrogate keys and validate every fact-to-dimension relationship.
 
-Deliverables
-- ERD of star schema; checklist of columns and dtypes
+## Vocabulary and concepts
 
-Stretch goals
-- Bridge tables for many‑to‑many (product tags), role‑playing dims (order_date vs ship_date)
+- **Fact table:** measurements/events at a declared business grain.
+- **Dimension:** descriptive attributes joined to facts through keys.
+- **Surrogate key:** warehouse-owned identifier for a dimension row or version.
+
+## Worked example / walkthrough
+
+Write the grain beside every table before loading it. Load `dim_date` and the
+customer/product dimensions, then map each source order item to exactly one date,
+customer, and product key in `fact_sales`. Compare fact row count with source
+`order_items` and check every key resolves once before committing Day 52.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day52_project3_dwh_part1.sql).
+Run the file from a known reset and save its fact-count and orphan-key checks
+for Days 53–54.
+
+## Self-check
+
+- Does every fact table have a documented, enforced source grain?
+- Did the script complete with `COMMIT`, and do all source/fact counts and key
+  resolution checks pass?
+
+## Next step
+
+Continue in the same database to
+[Day 53 — slowly changing dimensions](day53_project3_dwh_part2_scd.md).
+
+## Deep dive and reference
+
+## Project focus
+
+- Define fact and dimension grain with surrogate keys.
+- Load date, customer, product, and sales facts from `training`.
+- Add a conformed country dimension and a payment fact.
+
+## Stateful behavior
+
+Day 52 is intentionally different from most lessons. It drops and recreates
+only the course-owned `dwh` schema, builds its base warehouse, and commits it for
+Days 53 and 54. Do not run it against a `dwh` schema containing unrelated work.
+
+The base grains are:
+
+- `dim_date`: one row per calendar date;
+- `dim_customer`: Type-2-ready versions keyed by `customer_sk`;
+- `dim_product`: Type-2-ready versions keyed by `product_sk`; and
+- `fact_sales`: one row per source `order_item_id`.
+
+## Practice — match the learner prompts exactly
+
+1. Create `dim_country`, load one row per customer country code, add
+   `country_sk` to `dim_customer`, backfill it, and enforce the relationship.
+2. Create `fact_payments` at one row per source payment, linked to payment-day
+   `dim_date` and the customer version valid on that date.
+
+## Required Days 52–54 sequence
+
+1. Run Day 52 once; it commits the base warehouse.
+2. Run Day 53 in the same database; its exercise changes roll back.
+3. Run Day 54 in the same database; its aggregate/procedure changes roll back.
+
+Day 54 depends on committed Day 52 state, not on Day 53 changes persisting.
+
+## Validation and limits
+
+- `fact_sales` rows must equal source `order_items` rows.
+- `fact_payments` rows must equal source `payments` rows.
+- Every fact date and dimension key must resolve exactly once.
+- Use `psql -v ON_ERROR_STOP=1`; a partial warehouse is not a passing load.

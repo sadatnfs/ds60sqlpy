@@ -4,15 +4,20 @@ We recreate EDA visuals with better labeling and export figures with a consisten
 
 Contents
 - Exercise 1: Recreate two plots with improved labeling
-- Exercise 2: Export figures to reports/figures with consistent style
+- Exercise 2: Export figures under the ignored course artifact directory
 
 ---
 
 Setup
 ```python
-import seaborn as sns, matplotlib.pyplot as plt, pathlib
+import pathlib
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 sns.set_theme(context='notebook', style='whitegrid')
-FIG_DIR = pathlib.Path('reports/figures'); FIG_DIR.mkdir(parents=True, exist_ok=True)
+FIG_DIR = pathlib.Path('artifacts/day25/figures')
+FIG_DIR.mkdir(parents=True, exist_ok=True)
 ```
 
 Exercise 1 — Improved labeling

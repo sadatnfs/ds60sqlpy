@@ -1,64 +1,119 @@
-# Day 20 — Solutions (FIRST_VALUE, LAST_VALUE, NTH_VALUE)
+# Day 20 solutions — FIRST_VALUE and LAST_VALUE
 
-We compare current values to first values within a partition, and attach the month’s last value to each row. Proper framing is crucial for these functions.
+These answers match the exercises in [Day 20](../day20_first_last_value.sql).
 
-Setup
-- Tables: orders(order_id, order_date, total_amount)
-- Frame caution: default frame is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` in many systems; for FIRST/LAST over the whole partition, specify UNBOUNDED FOLLOWING explicitly
+## Exercise 1 — Current-month revenue versus first-month revenue
 
-Exercise 1 — Each order vs the customer’s first order amount
+This solution interprets “current month” as the calendar month containing `CURRENT_DATE`. Products without any sale have no first-sales month; products without a sale this month receive zero current-month revenue.
+
 ```sql
-WITH per_order AS (
-  SELECT o.customer_id,
-         o.order_id,
-         o.order_date,
-         o.total_amount AS order_total
-  FROM orders o
+WITH monthly_sales AS (
+  SELECT
+    oi.product_id,
+    DATE_TRUNC(
+      'month',
+      o.order_date AT TIME ZONE 'UTC'
+    )::date AS sales_month,
+    SUM(
+      oi.unit_price * oi.quantity * (1 - oi.discount)
+    ) AS month_revenue
+  FROM training.order_items AS oi
+  JOIN training.orders AS o
+    ON o.order_id = oi.order_id
+  GROUP BY
+    oi.product_id,
+    DATE_TRUNC('month', o.order_date AT TIME ZONE 'UTC')::date
+),
+sales_with_first AS (
+  SELECT
+    ms.*,
+    FIRST_VALUE(ms.sales_month) OVER product_history AS first_sales_month,
+    FIRST_VALUE(ms.month_revenue) OVER product_history AS first_month_revenue
+  FROM monthly_sales AS ms
+  WINDOW product_history AS (
+    PARTITION BY ms.product_id
+    ORDER BY ms.sales_month
+    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+  )
+),
+product_summary AS (
+  SELECT
+    swf.product_id,
+    MIN(swf.first_sales_month) AS first_sales_month,
+    MAX(swf.first_month_revenue) AS first_month_revenue,
+    COALESCE(
+      MAX(swf.month_revenue) FILTER (
+        WHERE swf.sales_month = DATE_TRUNC('month', CURRENT_DATE)::date
+      ),
+      0
+    ) AS current_month_revenue
+  FROM sales_with_first AS swf
+  GROUP BY swf.product_id
 )
-SELECT customer_id,
-       order_id,
-       order_date,
-       order_total,
-       FIRST_VALUE(order_total) OVER (
-         PARTITION BY customer_id
-         ORDER BY order_date, order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS first_order_amt,
-       ROUND(order_total / NULLIF(FIRST_VALUE(order_total) OVER (
-         PARTITION BY customer_id
-         ORDER BY order_date, order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ), 0), 4) AS vs_first_ratio
-FROM per_order
-ORDER BY customer_id, order_date, order_id
-LIMIT 300;
+SELECT
+  p.product_id,
+  p.name,
+  ps.first_sales_month,
+  ROUND(ps.first_month_revenue, 2) AS first_month_revenue,
+  ROUND(COALESCE(ps.current_month_revenue, 0), 2) AS current_month_revenue,
+  CASE
+    WHEN ps.first_month_revenue IS NULL THEN NULL
+    ELSE ROUND(
+      COALESCE(ps.current_month_revenue, 0) - ps.first_month_revenue,
+      2
+    )
+  END AS change_from_first_month
+FROM training.products AS p
+LEFT JOIN product_summary AS ps
+  ON ps.product_id = p.product_id
+ORDER BY p.product_id;
 ```
-Explanation
-- FIRST_VALUE over a full partition gives the baseline. Without the UNBOUNDED FOLLOWING, some engines would use a frame ending at CURRENT ROW, causing FIRST_VALUE to change across rows in certain ORDER BY/FRAME combinations.
 
-Exercise 2 — Month’s last day revenue attached to each day
+The full frame makes the first value available to every monthly row in a product partition. The outer product join retains the intentionally unsold products.
+
+## Exercise 2 — Synthetic first-salary comparison
+
+The course schema has one current salary per employee and no salary-history table. It cannot recover an employee’s original salary. Following the prompt, this simulation compares each employee with the salary of the earliest-hired employee in the same department.
+
 ```sql
-WITH daily AS (
-  SELECT DATE_TRUNC('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY DATE_TRUNC('day', o.order_date)
-), with_month AS (
-  SELECT d,
-         revenue,
-         DATE_TRUNC('month', d)::date AS m
-  FROM daily
+WITH salary_reference AS (
+  SELECT
+    d.name AS department,
+    e.department_id,
+    e.employee_id,
+    e.full_name,
+    e.hire_date,
+    e.salary,
+    FIRST_VALUE(e.full_name) OVER department_hire_order
+      AS earliest_hired_employee,
+    FIRST_VALUE(e.salary) OVER department_hire_order
+      AS earliest_hire_salary
+  FROM training.employees AS e
+  JOIN training.departments AS d
+    ON d.department_id = e.department_id
+  WINDOW department_hire_order AS (
+    PARTITION BY e.department_id
+    ORDER BY e.hire_date, e.employee_id
+    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+  )
 )
-SELECT d,
-       revenue,
-       LAST_VALUE(revenue) OVER (
-         PARTITION BY m ORDER BY d
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS month_last_rev
-FROM with_month
-ORDER BY d DESC
-LIMIT 60;
+SELECT
+  department,
+  employee_id,
+  full_name,
+  hire_date,
+  salary,
+  earliest_hired_employee,
+  earliest_hire_salary,
+  salary - earliest_hire_salary AS difference_from_reference
+FROM salary_reference
+ORDER BY department, hire_date, employee_id;
 ```
-Notes
-- LAST_VALUE returns the value at the end of the frame; hence, you must extend the frame to UNBOUNDED FOLLOWING to get the true month‑end value on every row.
-- NTH_VALUE works similarly for arbitrary positions; ensure deterministic ORDER BY.
+
+This is a ranking-based reference, not salary history. A real answer to “first salary recorded” needs a table such as `employee_salary_history(employee_id, effective_at, salary)`.
+
+## Check yourself
+
+- An unsold product has `NULL` first-month revenue and zero current-month revenue.
+- Every employee in a department sees the same earliest-hire reference.
+- Do not describe the synthetic reference as an employee’s historical starting salary.

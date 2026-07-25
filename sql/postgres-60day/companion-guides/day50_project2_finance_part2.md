@@ -1,31 +1,84 @@
-# Day 50 — Project 2: Finance (Part 2) — Risk, Drawdowns, and Attribution (Companion Guide)
+# Day 50 — Finance/Operations Project, Part 2: Budget Variance
 
-Objectives
-- Compute returns, volatility, and drawdowns for securities/portfolio
-- Attribute performance across sectors or strategies
-- Estimate simple Value‑at‑Risk (VaR) from historical returns
+## Level and prerequisites
 
-Returns and risk
-- Daily return r_t = close_t/close_{t-1} − 1; use LAG
-- Rolling volatility: STDDEV_SAMP(r_t) OVER (ORDER BY dt ROWS BETWEEN 20 PRECEDING AND CURRENT ROW)
-- Drawdown: running max of cumulative returns; DD_t = (cum_ret_t / running_max) − 1
+- **Level:** Advanced
+- **Prerequisites:** [Day 49 — revenue forecasting](day49_project2_finance_part1.md)
+- **Artifacts:** [learner SQL](../day50_project2_finance_part2.sql) ·
+  [solution reasoning](../solutions/day50_solutions.md) ·
+  [executable solution](../solutions/day50_solutions.sql)
 
-Attribution
-- Map securities to sector; aggregate returns and contributions by sector
-- Contribution = weight_{t-1} × return_t; sum by sector and over time
+## Learning objectives
 
-VaR (historical)
-- Compute distribution of daily P&L over a window; p1 percentile as VaR_99
-- PERCENTILE_CONT(0.01) WITHIN GROUP (ORDER BY pnl)
+- Align actual and budget values without discarding one-sided periods.
+- Calculate absolute and percentage variance and pivot controlled categories.
 
-Pitfalls
-- Using arithmetic mean of returns instead of geometric for multi‑period
-- Inconsistent weights timing; use t‑1 weights for t return attribution
+## Vocabulary and concepts
 
-Deliverables
-- risk_metrics(security/portfolio, dt, ret, vol20, dd)
-- attribution(sector, dt, contribution)
+- **Variance:** actual minus budget under this course's declared convention.
+- **Budget-only row:** a period/category with budget but no represented actual.
+- **Static pivot:** fixed output columns for a controlled category domain.
 
-Stretch goals
-- Conditional VaR (expected shortfall)
-- Beta and alpha vs benchmark using rolling regression (outside SQL scope)
+## Worked example / walkthrough
+
+Aggregate actuals and budgets independently at `(month, category)`, full-join
+those stable relations, and retain both raw values. Derive absolute variance and
+guard percentage variance with `NULLIF(budget, 0)`; only then pivot the five
+known categories.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day50_project2_finance_part2.sql).
+Add actual-only, budget-only, and zero-budget toy rows and define their display
+policy.
+
+## Self-check
+
+- Are missing and zero values kept semantically distinct?
+- Does every pivot row reconcile with the long-form variance rows?
+
+## Next step
+
+Continue to [Day 51 — cash flow](day51_project2_finance_part3.md).
+
+## Deep dive and reference
+
+## Project focus
+
+- Align monthly actual expenses with monthly budgets.
+- Add year-over-year and greater-than-15% overspend indicators.
+- Pivot known expense categories into report columns.
+
+## How the learner script uses the current schema
+
+Actuals come from `expenses(expense_date, category, amount)`. Budgets come from
+`budgets(period, category, amount)`, where `period` is the first day of a month.
+The starter uses a full outer join so months/categories present on only one side
+remain visible, then demonstrates rolling three-row totals.
+
+The setup categories are `COGS`, `Marketing`, `Payroll`, `Infrastructure`, and
+`G&A`.
+
+## Practice — match the learner prompts exactly
+
+1. Add prior-year actual and year-over-year percentage by category, plus
+   `actual > budget * 1.15` as the requested overspend flag.
+2. Return one row per month with actual-minus-budget variance columns for the
+   five known categories.
+
+## Metric semantics
+
+- Variance is `actual - budget`; positive means overspend.
+- Percentage variance uses budget as denominator and must guard zero budgets.
+- A 12-row `LAG` assumes every category has a complete monthly series. Build a
+  month/category spine when gaps are possible.
+- A static pivot is appropriate only while the category set is controlled.
+
+## Validation and limits
+
+- Preserve actual-only and budget-only rows before deciding how to display
+  missing values.
+- Reconcile each pivot row to the long-form monthly variance.
+- Do not silently label a missing budget as zero-percent variance.
+- Report both absolute currency variance and percentage; either alone can
+  mislead.

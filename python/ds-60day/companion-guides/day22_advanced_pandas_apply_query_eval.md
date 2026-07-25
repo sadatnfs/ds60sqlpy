@@ -1,55 +1,91 @@
-# Day 22 — Advanced Pandas: apply, pipe, query, eval (Companion Guide)
+# Day 22 — Advanced pandas: Vectorization, `query`, and Categoricals
+
+**Level:** Intermediate
+
+Express column operations with pandas/NumPy primitives before reaching for
+row-wise `apply`. Then measure memory and performance on representative data.
 
 ## Learning objectives
-- Choose between vectorized ops, agg/transform, and apply
-- Structure transformation pipelines with `pipe`
-- Use `query`/`eval` for readability and potential speedups
 
-## Why this matters
-The right tool for the job keeps code expressive and fast. Overusing `apply` can hide performance issues.
+By the end of this lesson, you can:
 
-## Core concepts and examples
-### Prefer vectorized and built-ins
+- replace common row-wise `apply(axis=1)` patterns with vectorized operations;
+- use group `transform` when a group result must align with original rows;
+- filter readable expressions with `query` and compute with `eval`;
+- measure whether categorical dtype reduces memory for repeated strings;
+- verify optimized output against a simple baseline.
+
+## Prerequisites
+
+Complete Day 21 (`python-21`) and Day 19 grouping (`python-19`).
+
+## Vocabulary and mental model
+
+- **Row-wise apply:** Python function called once per row; flexible but often
+  slow.
+- **Vectorized operation:** implementation acts on whole arrays/Series.
+- **Expression engine:** machinery used by `query`/`eval` to evaluate column
+  expressions.
+- **Categorical:** integer codes plus a category lookup table.
+- **Cardinality:** number of distinct values.
+- **Memory profile:** measured bytes used by a representation.
+
+Categoricals help when values repeat enough to outweigh the category table.
+Near-unique strings can use the same or more memory.
+
+## Worked example
+
 ```python
-# good: vectorized
-df['z'] = (df['x'] - df['x'].mean()) / df['x'].std()
-# avoid: row-wise apply when not needed
-df['z'] = df.apply(lambda r: (r.x - df['x'].mean())/df['x'].std(), axis=1)
+import pandas as pd
+
+sales = pd.DataFrame(
+    {"region": ["w", "w", "e"], "amount": [10.0, 30.0, 20.0]}
+)
+regional_total = sales.groupby("region")["amount"].transform("sum")
+sales["regional_share"] = sales["amount"].div(regional_total)
+large = sales.query("regional_share >= 0.5")
 ```
 
-### groupby + transform vs apply
-```python
-df['pct_of_group'] = df['sales'] / df.groupby('region')['sales'].transform('sum')
-```
+`transform` returns one aligned value per original row, so division is direct
+and no row-wise lookup is required.
 
-### pipe for readability
-```python
-def standardize(d):
-    cols = ['x','y']
-    return d.assign(**{c: (d[c]-d[c].mean())/d[c].std() for c in cols})
+## Dataset note
 
-out = (df
-       .pipe(standardize)
-       .query('region != "NA"')
-      )
-```
+The notebook uses Seaborn's cached `tips` data. A constructed DataFrame such as
+the example above keeps this lesson fully offline.
 
-### query/eval
-```python
-subset = df.query('price > 100 and category in ["A","B"]')
-df.eval('ratio = sales / qty', inplace=True)
-```
+## Exercises and progressive hints
 
-## Common pitfalls
-- Using `apply` with `axis=1` for simple arithmetic — it’s slow and obscures intent
-- `eval/query` strings don’t see Python local variables unless you pass them via `@var`
-- Chained indexing sneaks back in with query; use `loc` for assignment
+1. Find a slow row-wise `apply` and replace it with vectorized logic. **Hint:**
+   classify the operation as arithmetic, conditional selection, string method,
+   mapping, or group transform; pandas has primitives for each.
+2. Convert a repeated string column to categorical and profile memory. **Hint:**
+   compare `memory_usage(deep=True)` before and after, record unique/row counts,
+   and do not assume a high-cardinality column will improve.
 
-## Practice exercises
-1) Rewrite an `apply` solution using `transform` or vectorized ops
-2) Build a tidy pipeline using `pipe` and `assign`
-3) Use `query` with external variables via `@threshold`
+## Self-check
 
-## Further reading
-- Method chaining and pipe: https://pandas.pydata.org/pandas-docs/stable/user_guide/enhancingperf.html#method-chaining
-- eval/query: https://pandas.pydata.org/pandas-docs/stable/user_guide/enhancingperf.html#enhancing-performance-eval
+- Why does group `transform` preserve row count while `agg` does not?
+- When is `apply` still a reasonable choice?
+- How do category count and row count affect memory savings?
+- How do you refer to a Python variable safely inside `DataFrame.query`?
+
+Expected behavior: vectorized and baseline outputs match (including missing
+values), and the categorical decision is supported by measured bytes.
+
+## Common pitfalls and diagnosis
+
+- **Optimized results differ:** compare index, dtype, missing-value behavior,
+  and boundary conditions before timing.
+- **Division creates infinity:** handle zero group totals explicitly.
+- **A `query` column name has spaces:** normalize names or quote with backticks.
+- **Untrusted text is passed to `query`/`eval`:** do not treat user-provided
+  expressions as safe code.
+- **Categorical assignment rejects a new label:** add the category first or
+  convert back to string.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day22_advanced_pandas_apply_query_eval.ipynb)
+- [Check the separate solution](../solutions/day22_advanced_pandas_apply_query_eval/day22_solutions.md)
+- [Next: Day 23 — Streaming data pipelines](day23_data_pipelines_generators.md)

@@ -1,43 +1,47 @@
--- Day 11 - Solutions: CASE Expressions and Conditional Logic
--- Assumes: orders, order_items, products, customers
+-- Day 11 solutions: CASE expressions
+SET search_path TO training, public;
 
-/*
-Exercise 1) Bucket orders by amount into tiers and compute counts per tier.
-Why: Searched CASE allows flexible thresholds; do all bucketing in a single pass.
-*/
-WITH bucketed AS (
-  SELECT o.order_id,
-         o.total_amount,
-         CASE
-           WHEN o.total_amount >= 500 THEN 'tier_500_plus'
-           WHEN o.total_amount >= 200 THEN 'tier_200_499'
-           WHEN o.total_amount >= 50  THEN 'tier_50_199'
-           ELSE 'tier_under_50'
-         END AS amount_tier
-  FROM orders o
+-- Exercise 1: lifetime-revenue tiers. Thresholds are explicit business rules.
+WITH customer_revenue AS (
+  SELECT c.customer_id,
+         c.full_name,
+         COALESCE(
+           SUM(oi.unit_price * oi.quantity * (1 - oi.discount)),
+           0
+         ) AS lifetime_revenue
+  FROM customers c
+  LEFT JOIN orders o USING (customer_id)
+  LEFT JOIN order_items oi USING (order_id)
+  GROUP BY c.customer_id, c.full_name
 )
-SELECT amount_tier, COUNT(*) AS orders
-FROM bucketed
-GROUP BY amount_tier
-ORDER BY orders DESC;
-
-/*
-Exercise 2) Create priority rules combining country, segment, and recent activity.
-Why: CASE encodes business rules; order matters (first match wins).
-*/
-SELECT c.customer_id,
-       c.country,
-       COALESCE(c.segment,'standard') AS segment,
-       MAX(o.order_date) AS last_order,
+SELECT customer_id,
+       full_name,
+       ROUND(lifetime_revenue, 2) AS lifetime_revenue,
        CASE
-         WHEN c.country IN ('US','CA') AND COALESCE(c.segment,'') = 'gold' THEN 'P1'
-         WHEN c.country IN ('GB','DE','FR') AND COALESCE(c.segment,'') IN ('gold','silver') THEN 'P2'
-         WHEN MAX(o.order_date) >= CURRENT_DATE - INTERVAL '30 days' THEN 'P2'
-         ELSE 'P3'
-       END AS priority
-FROM customers c
-LEFT JOIN orders o ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.country, COALESCE(c.segment,'standard')
-ORDER BY priority, last_order DESC NULLS LAST;
+         WHEN lifetime_revenue >= 10000 THEN 'platinum'
+         WHEN lifetime_revenue >= 5000 THEN 'gold'
+         WHEN lifetime_revenue >= 1000 THEN 'silver'
+         WHEN lifetime_revenue > 0 THEN 'bronze'
+         ELSE 'no_orders'
+       END AS revenue_tier
+FROM customer_revenue
+ORDER BY lifetime_revenue DESC, customer_id;
 
--- End of Day 11 solutions
+-- Exercise 2: UTC hour buckets. Explicit UTC makes output session-independent.
+WITH order_hours AS (
+  SELECT order_id,
+         order_date,
+         EXTRACT(hour FROM order_date AT TIME ZONE 'UTC')::int AS order_hour_utc
+  FROM orders
+)
+SELECT order_id,
+       order_date,
+       order_hour_utc,
+       CASE
+         WHEN order_hour_utc >= 6 AND order_hour_utc < 12 THEN 'morning'
+         WHEN order_hour_utc >= 12 AND order_hour_utc < 17 THEN 'afternoon'
+         WHEN order_hour_utc >= 17 AND order_hour_utc < 22 THEN 'evening'
+         ELSE 'night'
+       END AS day_part
+FROM order_hours
+ORDER BY order_date, order_id;

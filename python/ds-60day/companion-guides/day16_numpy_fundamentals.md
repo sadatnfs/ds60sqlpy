@@ -1,95 +1,93 @@
-# Day 16 — NumPy Fundamentals: Arrays, Vectorization, Broadcasting (Companion Guide)
+# Day 16 — NumPy Arrays, Vectorization, and Broadcasting
+
+**Level:** Intermediate
+
+NumPy stores homogeneous values in an `ndarray` and applies compiled operations
+across whole arrays. Shape and dtype are part of every array's contract.
 
 ## Learning objectives
-- Create and manipulate ndarrays; understand shape, dtype, and strides
-- Replace Python loops with vectorized array operations for speed and clarity
-- Use broadcasting rules to combine arrays of different but compatible shapes
-- Distinguish views vs copies; avoid subtle bugs when slicing
 
-## Why this matters
-NumPy is the foundation of scientific Python. Vectorized operations are orders of magnitude faster than Python loops and unlock idiomatic data science code. Broadcasting lets you express operations concisely without manual tiling.
+By the end of this lesson, you can:
 
-## Mental models
-- An ndarray = (buffer of bytes) + (dtype) + (shape) + (strides). Vectorization is fast because operations loop in C over contiguous memory, not in Python.
-- Broadcasting = align shapes from right to left; a dimension of 1 can be stretched to match the other operand. Fails only when non‑singleton dimensions disagree.
-- Slicing returns **views** (usually) that share the same memory. Writing into a view writes into the original.
+- create arrays and inspect `shape`, `ndim`, and `dtype`;
+- interpret an aggregation's `axis`;
+- replace element-by-element Python loops with array expressions;
+- predict valid broadcasting from trailing dimensions;
+- demonstrate when slicing returns a view versus an independent copy.
 
-## Core concepts and examples
-### Creating arrays
+## Prerequisites
+
+Complete the Python foundations through Day 15 (`python-15`). The standard setup
+installs the `data` dependency group containing NumPy.
+
+## Vocabulary and mental model
+
+- **Array:** homogeneous n-dimensional container.
+- **Shape:** tuple of lengths along each dimension.
+- **Dtype:** fixed representation used for every element.
+- **Vectorization:** express work as array operations rather than Python-level
+  element loops.
+- **Axis:** dimension removed or transformed by an operation.
+- **Broadcasting:** align compatible shapes without explicitly copying values.
+- **View:** another array sharing underlying memory; **copy:** independent data.
+
+For shape `(rows, columns)`, `axis=0` combines rows and returns one result per
+column; `axis=1` combines columns and returns one result per row.
+
+## Worked example
+
 ```python
 import numpy as np
-np.array([1,2,3], dtype=np.int64)
-np.arange(12).reshape(3,4)
-np.linspace(0, 1, 5)      # 0. , 0.25, 0.5, 0.75, 1.
-np.zeros((2,3)), np.ones((2,3)), np.full((2,3), 7)
+
+scores = np.array([[10.0, 20.0, 30.0], [15.0, 25.0, 35.0]])
+column_means = scores.mean(axis=0)
+centered = scores - column_means
+
+assert centered.shape == scores.shape
+assert np.allclose(centered.mean(axis=0), 0.0)
 ```
 
-### Vectorization vs Python loops
-```python
-x = np.arange(1_000_000)
-# vectorized
-x2 = x * 2
-# Python loop (slow)
-res = np.empty_like(x)
-for i in range(len(x)):
-    res[i] = x[i] * 2
-```
-Prefer vectorized ops; they are clearer and drastically faster.
+`column_means` has shape `(3,)`, compatible with the matrix's trailing
+dimension, so it broadcasts across both rows.
 
-### Broadcasting rules
-Right-align shapes; compare each dimension from right to left. A dimension is compatible when equal or one of them is 1.
-```python
-M = np.ones((3,3))
-v = np.arange(3)       # shape (3,)
-M + v                  # broadcast v across rows → (3,3)
+## Exercises and progressive hints
 
-A = np.ones((2,3,4))
-b = np.arange(4)       # (4,)
-A * b                  # broadcast along last axis → (2,3,4)
-```
+1. Create a `1000 x 1000` matrix and compute row means without Python loops.
+   **Hint:** verify the result has 1,000 values and choose the axis that removes
+   columns.
+2. Normalize each column to `[0, 1]` with broadcasting. **Hint:** compute
+   column-wise minima and ranges separately; decide what a zero-range column
+   should become.
+3. Show how changing a slice can change its source, then prevent that behavior.
+   **Hint:** check `np.shares_memory` and compare a basic slice with `.copy()`.
 
-### Views vs copies
-```python
-Z = np.arange(12).reshape(3,4)
-sub = Z[:, 1:3]      # view (no copy)
-sub[:] = -1          # writes into Z!
-Z
-```
-Force a copy when needed: `Z[:, 1:3].copy()`.
+Use a seeded generator (`np.random.default_rng(42)`) if you generate data so
+results remain deterministic.
 
-### Aggregations and axis
-```python
-Z = np.arange(12).reshape(3,4)
-Z.sum()              # 66
-Z.sum(axis=0)        # shape (4,)
-Z.mean(axis=1)       # shape (3,)
-```
+## Self-check
 
-## Performance tips
-- Prefer contiguous arrays for kernels (C‑order by default). Use `np.ascontiguousarray` if needed.
-- Vectorize; avoid Python loops in hot paths.
-- Use ufuncs (`np.add`, `np.multiply`) and in‑place updates (`out=`) when appropriate.
+- What shapes can broadcast with an array shaped `(1000, 4)`?
+- What does `mean(axis=1)` return for a two-dimensional array?
+- Why can adding a float to an integer array produce a float result?
+- When is a view useful, and when is it dangerous?
 
-## Common pitfalls
-- Unexpected writes via views; `.copy()` when you intend isolation.
-- Broadcasting mistakes when shapes are not aligned; print `.shape` and reason right‑to‑left.
-- Mixing Python lists and arrays; convert early and keep everything ndarray.
+Expected behavior: row means have shape `(1000,)`, normalized non-constant
+columns have minimum 0 and maximum 1, and copy mutation leaves the source alone.
 
-## Practice exercises
-1) Create a 1000×1000 array of random numbers and compute column‑wise z‑scores using broadcasting (subtract mean, divide by std).
-2) Implement a rolling 3‑point average using strides or vectorized slicing (no Python loops).
-3) Show a case where a slice changes the original; then fix it with `.copy()` and explain why.
+## Common pitfalls and diagnosis
 
-## Stretch goals
-- Implement a softmax function in a numerically stable way: subtract max before `exp`.
-- Explore `np.einsum` to express matrix operations succinctly.
+- **Broadcasting error:** write both shapes right-aligned and compare dimensions
+  from the end; each pair must match or contain `1`.
+- **Wrong-shaped aggregation:** print the input/result shapes and re-evaluate
+  the axis.
+- **Integer values truncate on assignment:** inspect `dtype` before assigning a
+  float into an integer array.
+- **Division by zero during scaling:** detect constant columns before dividing.
+- **Source data changes through a slice:** use `.copy()` at the boundary where
+  independence is required.
 
-## Check your understanding
-- Explain broadcasting with an example where shapes (2,1,3) and (1,4,1) combine.
-- Why are vectorized operations faster than Python loops?
-- When would you convert to contiguous arrays explicitly?
+## Continue
 
-## Further reading
-- NumPy quickstart: https://numpy.org/doc/stable/user/quickstart.html
-- Broadcasting: https://numpy.org/doc/stable/user/basics.broadcasting.html
-- Strides and memory: https://numpy.org/doc/stable/reference/generated/numpy.ndarray.strides.html
+- [Open the learner notebook](../notebooks/day16_numpy_fundamentals.ipynb)
+- [Check the separate solution](../solutions/day16_numpy_fundamentals/day16_solutions.md)
+- [Next: Day 17 — pandas fundamentals](day17_pandas_intro.md)

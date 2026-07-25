@@ -1,19 +1,40 @@
-# SQL Solutions — PostgreSQL Advanced SQL 60-Day Curriculum
+# SQL solutions
 
-This folder contains worked solutions for the practice exercises in each day’s lesson. Solutions are:
-- Executable SQL with heavy inline commentary explaining the “how” and the “why”
-- Written against the `training` schema created by 00_setup.sql
-- Safe by default (no persistent DML unless explicitly noted); many examples use ROLLBACK wrappers
+This folder contains worked solutions for the PostgreSQL exercises.
 
-Conventions
-- One file per day: `dayXX_solutions.sql`
-- Each solution block is prefixed with the exercise statement for easy cross‑reference
-- Where assumptions are needed (e.g., a status code), they are stated clearly and alternatives are suggested
+Current artifact coverage:
 
-Tip: Run with `psql -d advanced_sql_training -f sql/postgres-60day/solutions/dayXX_solutions.sql` to execute a whole file. Most files are segmented so you can copy/paste individual blocks.
+- Markdown explanations: Days 1–60
+- Executable `.sql` solutions: Days 1–60
 
+Use `python scripts/course.py catalog --track sql` from the repository root for the generated availability view.
 
-Markdown deep-dive writeups
-- In addition to executable .sql files, detailed, beginner-friendly explanations are available per day as .md files alongside each day’s .sql.
-- Completed so far: Days 01–20 (day01_solutions.md … day20_solutions.md). More are being added continuously.
-- Open the corresponding .md to read line-by-line commentary, pitfalls, and alternatives.
+## Conventions
+
+- Solutions target the disposable `training` schema created by `00_setup.sql`.
+- Markdown explains reasoning, tradeoffs, assumptions, and alternatives.
+- Executable solutions include an explicit `search_path` and are intended for `psql`.
+- Exercises that change data should remain rollback-safe unless persistence is explicitly stated.
+- Days 38 and 39 include runnable single-session work plus explicit manual
+  two-session instructions because isolation anomalies and deadlocks require
+  genuine concurrency.
+- Days 52–54 are the declared stateful solution sequence. Day 52 resets and
+  commits the course-owned `dwh` schema; run Days 53 and 54 after it.
+
+Run an available executable solution from the repository root:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day01_solutions.sql
+```
+
+Or validate the complete answer sequence, including the Days 52–54 warehouse
+state contract:
+
+```text
+python scripts/course.py sql solutions --reset
+```
+
+`--reset` is destructive only to the disposable course schemas described in
+the main SQL README.
+
+Try the learner exercise first. A solution is a comparison and explanation, not a replacement for the attempt.

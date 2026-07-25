@@ -1,80 +1,105 @@
-# Day 27 — Solutions (Pivot and Unpivot)
+# Day 27 — Solutions: Pivot and Unpivot
 
-We show multiple ways to pivot (rows→columns) and unpivot (columns→rows) in Postgres. We prefer portable SUM(CASE WHEN ...) for simple pivots and crosstab() for wide/unknown sets. For unpivot, we use UNION ALL or a VALUES/LATERAL approach.
+PostgreSQL has no `PIVOT` or `UNPIVOT` keyword. Conditional aggregation is the
+portable pivot technique; a lateral `VALUES` list is a clear unpivot technique.
 
-Setup
-- Tables: orders(order_id, order_date), order_items(order_id, product_id, quantity, unit_price, discount), products(product_id, category)
-- Extension: crosstab() requires tablefunc: `CREATE EXTENSION IF NOT EXISTS tablefunc;`
+## Exercise 1 — Payment revenue by method across the latest four quarters
 
-Exercise 1 — Pivot daily revenue by category (portable)
+The result keeps quarters as rows and turns the four allowed payment methods
+into columns. The window begins at the start of the quarter three quarters ago,
+so it includes the current quarter plus the previous three.
+
 ```sql
-WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         p.category,
-         SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS rev
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY 1,2
+SET search_path TO training, public;
+
+WITH quarter_totals AS (
+  SELECT date_trunc('quarter', payment_date)::date AS quarter,
+         method,
+         SUM(amount) AS revenue
+  FROM payments
+  WHERE payment_date
+        >= date_trunc('quarter', CURRENT_DATE) - interval '9 months'
+  GROUP BY date_trunc('quarter', payment_date), method
 )
-SELECT d,
-       SUM(CASE WHEN category='electronics' THEN rev ELSE 0 END) AS electronics,
-       SUM(CASE WHEN category='apparel'     THEN rev ELSE 0 END) AS apparel,
-       SUM(CASE WHEN category='home'        THEN rev ELSE 0 END) AS home
-FROM daily
-GROUP BY d
-ORDER BY d;
+SELECT quarter,
+       ROUND(
+         SUM(revenue) FILTER (WHERE method = 'card'),
+         2
+       ) AS card,
+       ROUND(
+         SUM(revenue) FILTER (WHERE method = 'paypal'),
+         2
+       ) AS paypal,
+       ROUND(
+         SUM(revenue) FILTER (WHERE method = 'bank'),
+         2
+       ) AS bank,
+       ROUND(
+         SUM(revenue) FILTER (WHERE method = 'credit'),
+         2
+       ) AS credit
+FROM quarter_totals
+GROUP BY quarter
+ORDER BY quarter;
 ```
-Notes
-- This approach is explicit and index‑friendly. Add columns per category you care about.
 
-Exercise 2 — Pivot with crosstab() for many categories
-```sql
--- 1) source rows: rowid, category, value
-WITH src AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         p.category,
-         SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS rev
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY 1,2
-  ORDER BY 1,2
-)
-SELECT *
-FROM crosstab(
-    $$ SELECT d::text AS rowid, category, rev FROM src ORDER BY 1,2 $$,
-    $$ SELECT DISTINCT category FROM products ORDER BY 1 $$
-) AS ct(
-    d text,
-    "apparel" numeric,
-    "electronics" numeric,
-    "home" numeric
-)
-ORDER BY d;
-```
-Caveats
-- Output columns must be declared up front and in the same order as the category SQL. For dynamic schemas, generate SQL.
+Expected shape: up to four quarter rows and one column per method. A method with
+no payment in a quarter is `NULL`; wrap each expression in `COALESCE(..., 0)` if
+the report contract requires zeros.
 
-Exercise 3 — Unpivot columns to rows
-Method A: UNION ALL
+## Exercise 2 — Unpivot budgets to period-category-amount rows
+
+Ambiguity: `budgets` is already normalized as
+`(period, category, amount)`. There is nothing to unpivot in its stored shape.
+To practice the operation, this answer first makes a wide row per period and
+then normalizes those columns with `CROSS JOIN LATERAL`.
+
 ```sql
-SELECT order_id, 'subtotal' AS metric, subtotal AS value FROM invoices
-UNION ALL
-SELECT order_id, 'tax'     , tax      FROM invoices
-UNION ALL
-SELECT order_id, 'shipping', shipping FROM invoices;
-```
-Method B: VALUES/LATERAL (concise)
-```sql
-SELECT i.order_id, x.metric, x.value
-FROM invoices i
+SET search_path TO training, public;
+
+WITH wide_budgets AS (
+  SELECT period,
+         SUM(amount) FILTER (
+           WHERE category = 'COGS'
+         ) AS cogs,
+         SUM(amount) FILTER (
+           WHERE category = 'Marketing'
+         ) AS marketing,
+         SUM(amount) FILTER (
+           WHERE category = 'Payroll'
+         ) AS payroll,
+         SUM(amount) FILTER (
+           WHERE category = 'Infrastructure'
+         ) AS infrastructure,
+         SUM(amount) FILTER (
+           WHERE category = 'G&A'
+         ) AS general_admin
+  FROM budgets
+  GROUP BY period
+)
+SELECT w.period,
+       u.category,
+       u.amount
+FROM wide_budgets w
 CROSS JOIN LATERAL (
   VALUES
-    ('subtotal', i.subtotal),
-    ('tax',      i.tax),
-    ('shipping', i.shipping)
-) AS x(metric, value);
+    ('COGS', w.cogs),
+    ('Marketing', w.marketing),
+    ('Payroll', w.payroll),
+    ('Infrastructure', w.infrastructure),
+    ('G&A', w.general_admin)
+) AS u(category, amount)
+ORDER BY w.period, u.category;
 ```
-Why
-- Unpivoting simplifies later aggregations and filters by metric. The LATERAL form is compact and typically faster than multiple UNIONs for small column sets.
+
+Expected shape: five rows per budget period in the seeded data. For real
+reporting, `SELECT period, category, amount FROM budgets` is already the desired
+long-form answer.
+
+## Pitfalls
+
+- Hard-coded pivot columns do not adapt automatically when a new payment method
+  or budget category appears.
+- Pivoting can hide missing values. Decide deliberately between `NULL` and `0`.
+- The optional `tablefunc.crosstab` extension is not needed for these answers
+  and may be unavailable on managed or offline installations.

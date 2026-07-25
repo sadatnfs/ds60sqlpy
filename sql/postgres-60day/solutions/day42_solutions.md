@@ -1,134 +1,81 @@
-# Day 42 — Solutions (Data Quality and Validation)
+# Day 42 Solutions — Data Quality and Validation
 
-We implement schema and semantic checks, row‐level constraints, uniqueness/foreign key tests, profiling metrics, and drift/contract validation for production data.
+The goal is to turn scattered checks into one auditable report, then isolate
+bad email values. Run the canonical file at
+[`day42_solutions.sql`](day42_solutions.sql).
 
-Setup
-- Validation layers:
-  - Schema: types, nullability, PK/FK, check constraints
-  - Semantic: ranges, enumerations, business rules
-  - Referential: FK integrity, orphan detection
-  - Profiling: row counts, distincts, distributions, freshness
-- Tooling: SQL first; optionally wire into dbt/evidently/great_expectations later
+## Exercise 1 — Core-table validation report
 
-Exercise 1 — Enforce constraints (DDL)
+Each row is a named check and the number of failing records or duplicate groups.
+On the deterministic course seed, every count should be zero.
+
 ```sql
--- Primary/unique keys
-ALTER TABLE customers
-  ADD CONSTRAINT customers_pk PRIMARY KEY (customer_id);
-ALTER TABLE customers
-  ADD CONSTRAINT email_unique UNIQUE (email);
+SET search_path TO training, public;
 
--- Foreign keys
-ALTER TABLE orders
-  ADD CONSTRAINT orders_customer_fk FOREIGN KEY (customer_id)
-    REFERENCES customers(customer_id);
-
--- Value ranges / enumerations
-ALTER TABLE orders
-  ADD CONSTRAINT total_amount_nonneg CHECK (total_amount >= 0);
-
--- NOT NULL
-ALTER TABLE products
-  ALTER COLUMN name SET NOT NULL;
-```
-Why
-- Fail fast at the database edge; prevents bad data from persisting.
-
-Exercise 2 — Referential integrity audits
-```sql
--- Orphan orders (no matching customer)
-SELECT o.order_id
-FROM orders o
-LEFT JOIN customers c ON c.customer_id = o.customer_id
-WHERE c.customer_id IS NULL
-LIMIT 100;
-
--- Products missing categories
-SELECT p.product_id
-FROM products p
-LEFT JOIN categories c ON c.category_id = p.category_id
-WHERE c.category_id IS NULL
-LIMIT 100;
-```
-Action
-- Fix sources or add FKs; log exceptions.
-
-Exercise 3 — Uniqueness and duplicates
-```sql
--- Duplicate emails after normalization
-SELECT lower(trim(email)) AS norm_email, COUNT(*)
+SELECT 'customers.null_email' AS check_name,
+       COUNT(*) AS failing_rows
 FROM customers
-GROUP BY lower(trim(email))
-HAVING COUNT(*) > 1
-ORDER BY 2 DESC
-LIMIT 100;
-```
-Remediation
-- Choose a keeper by created_at; merge records; add UNIQUE on lower(email).
-
-Exercise 4 — Profiling metrics and freshness
-```sql
--- Daily counts and freshness
-SELECT CURRENT_DATE                         AS as_of,
-       (SELECT COUNT(*) FROM customers)      AS customers,
-       (SELECT COUNT(*) FROM orders)         AS orders,
-       (SELECT MAX(order_date) FROM orders)  AS max_order_ts,
-       EXTRACT(EPOCH FROM (now() - (SELECT MAX(order_date) FROM orders)))/3600 AS hours_since_order;
-```
-Why
-- Track basic health KPIs; alert when freshness thresholds exceed SLO.
-
-Exercise 5 — Range and enum checks
-```sql
--- Orders with out-of-range totals
-SELECT order_id, total_amount
+WHERE email IS NULL
+UNION ALL
+SELECT 'customers.duplicate_normalized_email',
+       COUNT(*)
+FROM (
+  SELECT lower(trim(email))
+  FROM customers
+  GROUP BY lower(trim(email))
+  HAVING COUNT(*) > 1
+) duplicates
+UNION ALL
+SELECT 'orders.negative_total', COUNT(*)
 FROM orders
-WHERE total_amount < 0 OR total_amount > 1000000
-LIMIT 100;
-
--- Countries outside ISO allowlist (example)
-WITH allow AS (
-  SELECT unnest(ARRAY['US','CA','GB','DE','FR','AU']) AS code
-)
-SELECT DISTINCT c.country
-FROM customers c
-LEFT JOIN allow a ON a.code = c.country
-WHERE a.code IS NULL
-ORDER BY 1;
+WHERE total_amount < 0
+UNION ALL
+SELECT 'orders.orphan_customer', COUNT(*)
+FROM orders o
+LEFT JOIN customers c USING (customer_id)
+WHERE c.customer_id IS NULL
+UNION ALL
+SELECT 'order_items.orphan_order_or_product', COUNT(*)
+FROM order_items oi
+LEFT JOIN orders o USING (order_id)
+LEFT JOIN products p USING (product_id)
+WHERE o.order_id IS NULL OR p.product_id IS NULL
+UNION ALL
+SELECT 'order_items.invalid_quantity_or_discount', COUNT(*)
+FROM order_items
+WHERE quantity <= 0 OR discount NOT BETWEEN 0 AND 1
+UNION ALL
+SELECT 'payments.negative_or_orphan', COUNT(*)
+FROM payments p
+LEFT JOIN orders o USING (order_id)
+WHERE p.amount < 0 OR o.order_id IS NULL
+ORDER BY check_name;
 ```
-Action
-- Correct sources; maintain reference tables (ISO codes) and validate by FK to reference.
 
-Exercise 6 — Contract/drift checks (distributions)
+Expected shape: seven rows with `check_name` and `failing_rows`. A nonzero
+result is evidence to investigate, not permission to delete data automatically.
+
+## Exercise 2 — Invalid email patterns
+
 ```sql
--- Compare today vs last 30 days category mix
-WITH today AS (
-  SELECT p.category, COUNT(*) AS n
-  FROM orders o
-  JOIN order_items oi ON oi.order_id=o.order_id
-  JOIN products p ON p.product_id=oi.product_id
-  WHERE o.order_date::date = CURRENT_DATE
-  GROUP BY p.category
-), baseline AS (
-  SELECT p.category, COUNT(*) AS n
-  FROM orders o
-  JOIN order_items oi ON oi.order_id=o.order_id
-  JOIN products p ON p.product_id=oi.product_id
-  WHERE o.order_date >= CURRENT_DATE - interval '30 days'
-  GROUP BY p.category
-)
-SELECT COALESCE(t.category, b.category) AS category,
-       t.n AS today,
-       b.n AS last_30d
-FROM today t
-FULL JOIN baseline b USING (category)
-ORDER BY 1;
-```
-Next steps
-- Convert to PSI/chi‑square tests; threshold alerts in monitoring.
+SET search_path TO training, public;
 
-Checklist
-- Enforce PK/FK/UNIQUE/NOT NULL/CHECK
-- Scheduled integrity/profiling queries
-- Reference tables + FKs for enumerations
-- Distribution drift checks; publish dashboards and alerts
+SELECT customer_id, email
+FROM customers
+WHERE email IS NULL
+   OR email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$'
+ORDER BY customer_id;
+```
+
+The seed should return zero rows. The regex is a practical course check, not a
+complete implementation of every valid RFC email address.
+
+## Reasoning, safety, and pitfalls
+
+- Normalize with `lower(trim(email))` before duplicate detection.
+- Anti-join checks remain valuable even with foreign keys: imports or disabled
+  constraints can violate assumptions.
+- `COUNT(*)` over the duplicate subquery counts duplicate groups, not all rows
+  participating in those groups. Label it accordingly.
+- Keep validation queries read-only. Fix source data or use a reviewed
+  remediation transaction after examining the exact failures.

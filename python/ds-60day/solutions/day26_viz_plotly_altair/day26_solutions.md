@@ -12,13 +12,19 @@ Plotly Express approach
 ```python
 import plotly.express as px
 import seaborn as sns
+from pathlib import Path
 
 df = sns.load_dataset('tips')
+artifact_dir = Path('artifacts/day26')
+artifact_dir.mkdir(parents=True, exist_ok=True)
 fig = px.histogram(df, x='total_bill', nbins=40, color='time', marginal='rug',
                    title='Interactive Total Bill Histogram')
 fig.update_layout(bargap=0.05)
 fig.show()
-fig.write_html('reports/figures/total_bill_hist_interactive.html', include_plotlyjs='cdn')
+fig.write_html(
+    artifact_dir / 'total_bill_hist_interactive.html',
+    include_plotlyjs=True,
+)
 ```
 
 Altair approach (requires vega)
@@ -38,5 +44,5 @@ hist = (alt.Chart(df)
 hist.properties(width=500, height=300)
 ```
 Notes
-- For Plotly, write_html saves a self-contained report friendly for sharing
+- `include_plotlyjs=True` keeps the exported report usable offline
 - Altair interactive binning shown via a bound parameter

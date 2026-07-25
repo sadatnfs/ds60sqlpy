@@ -1,49 +1,87 @@
-# Day 35 — Avoiding SQL Pitfalls: Correctness and Performance (Companion Guide)
+# Day 35 — Avoiding Common Performance Pitfalls
 
-Learning objectives
-- Recognize common correctness bugs (NULL logic, join fanout, implicit casts)
-- Avoid performance anti-patterns (SELECT *, function-wrapped predicates, DISTINCT-as-bandaid)
-- Write robust, maintainable SQL with explicit semantics
+## Level and prerequisites
 
-Why this matters
-Small mistakes can silently skew metrics or explode runtime. Developing a checklist of pitfalls prevents costly outages and bad decisions.
+- **Level:** Advanced
+- **Prerequisites:** [Day 34 — query optimization](day34_query_optimization.md)
+- **Artifacts:** [learner SQL](../day35_avoiding_pitfalls.sql) ·
+  [solution reasoning](../solutions/day35_solutions.md) ·
+  [executable solution](../solutions/day35_solutions.sql)
 
-Correctness pitfalls and fixes
-- NULL semantics and three-valued logic
-  - WHERE col = 'X' excludes NULLs; use IS [NOT] NULL explicitly when intended
-  - COALESCE for grouping labels; beware of conflating unknown with zero
-- Join fanout and double counting
-  - Joining two facts (orders × payments) multiplies rows; pre-aggregate each to 1 row per key before joining
-  - Validate with COUNT(*) vs COUNT(DISTINCT key) at each stage
-- Implicit type casts
-  - Comparing text to numeric or timestamp to text triggers runtime casts and can block indexes; cast once up front
-- Time zone mismatch
-  - TIMESTAMPTZ vs TIMESTAMP; convert to UTC on ingest; display only at the edge
-- Using NOT IN with NULLs
-  - NOT IN (subq) returns UNKNOWN if subq contains NULL; use NOT EXISTS correlated subquery instead
+## Learning objectives
 
-Performance anti-patterns
-- SELECT *
-  - Increases I/O and blocks Index Only Scans; select only needed columns
-- Function-wrapped predicates
-  - WHERE date(order_ts) = '2025-01-01' prevents index use; rewrite as range WHERE order_ts >= '2025-01-01' AND order_ts < '2025-01-02'
-- DISTINCT to “fix” duplicates
-  - Often hides join bugs; fix join cardinality or pre-aggregate instead
-- Large OFFSET pagination
-  - OFFSET 100000 is O(n); use keyset pagination (WHERE (t, id) < (...))
-- Over-normalizing optional attributes into EAV tables
-  - Hard to index and validate; prefer JSONB with GIN for sparse attributes
+- Rewrite non-sargable temporal predicates as correct raw-column ranges.
+- Replace repeated correlated work with one set-based aggregation.
 
-Reliability practices
-- Guard rails with CHECK/UNIQUE/FOREIGN KEY constraints (deferred when necessary)
-- Use generated columns for canonical forms (e.g., lower_email) with unique indexes
-- Add comments on tables/columns (COMMENT ON ...) for shared understanding
+## Vocabulary and concepts
 
-Practice exercises
-1) Refactor a query that uses DISTINCT to remove dupes by fixing join logic; show identical result set without DISTINCT
-2) Rewrite function-wrapped date filters to sargable ranges; compare plans
-3) Demonstrate NOT IN vs NOT EXISTS with a NULL in the subquery
+- **Sargability:** whether a predicate can use an index's search ordering.
+- **Half-open range:** `>= start AND < end`, suitable for adjacent periods.
+- **Set-based rewrite:** compute a relation once rather than once per outer row.
 
-Further reading
-- pitfalls: https://wiki.postgresql.org/wiki/Don%27t_Do_This
-- sargable predicates: https://use-the-index-luke.com
+## Worked example / walkthrough
+
+Compare `date_trunc('day', order_date) = target_day` with
+`order_date >= target_day AND order_date < target_day + interval '1 day'`.
+Test timestamps at both boundaries, reconcile row IDs, and compare plans with a
+matching `order_date` index.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day35_avoiding_pitfalls.sql).
+For each rewrite, add an edge-case result check before the performance
+comparison.
+
+## Self-check
+
+- Does the range preserve the intended time-zone and boundary semantics?
+- Does a set-based rewrite retain outer entities with no matching facts when
+  required?
+
+## Next step
+
+Continue to [Day 36 — materialized views](day36_materialized_views.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Recognize function-wrapped predicates that are hard to index.
+- Replace per-row correlated aggregation with one set-based aggregation.
+- Preserve correctness while reducing repeated work.
+
+## How the learner script uses the current schema
+
+The first pair compares `date_trunc('day', order_date) = ...` with a half-open
+range on raw `orders.order_date`. The second pair compares a customer-by-customer
+correlated sum with one grouped `orders` CTE joined to `customers`.
+
+The half-open range is:
+
+`order_date >= start_of_day AND order_date < start_of_next_day`
+
+It handles every timestamp in the day and can match a normal B-tree index on
+`order_date`.
+
+## Why the set-based rewrite helps
+
+The correlated form can execute an order scan once per customer. The grouped
+form scans and aggregates orders once, then joins one row per customer. A
+`LEFT JOIN` retains customers with no orders; decide whether the displayed
+value should remain `NULL` or become zero.
+
+## Practice — match the learner prompts exactly
+
+1. Find and rewrite three queries that apply a function to an indexed column.
+   Use equivalent raw-column ranges and prove their boundary behavior.
+2. Replace correlated subqueries with joins to grouped CTEs or derived tables,
+   then compare plans and reconcile results.
+
+## Pitfalls and validation
+
+- Do not rewrite a predicate unless time zone and inclusive/exclusive boundaries
+  remain correct.
+- Functions are not universally bad; a matching expression index can be valid
+  when the expression is the real search key.
+- Preserve outer-join behavior for entities with no facts.
+- Compare result keys and totals before comparing timing.

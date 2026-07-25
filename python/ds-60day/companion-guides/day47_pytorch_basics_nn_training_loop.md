@@ -1,92 +1,124 @@
-# Day 47 — PyTorch Basics: Tensors, Modules, and the Training Loop (Companion Guide)
+# Day 47 — PyTorch Tensors, Modules, and Training Loops
+
+**Lesson ID:** `python-47` · **Level:** advanced · **Dependencies:** `deep-learning` · **Network:** offline
+
+Day 46 exposed the core update sequence. Today you make the training procedure
+more realistic with minibatches, explicit training/evaluation modes, and
+validation-aware extensions.
 
 ## Learning objectives
-- Create tensors, move between CPU/GPU, and manage dtype/device
-- Build models with nn.Module; write clear training/eval loops
-- Use Datasets/DataLoaders, optimizers, schedulers, and checkpoints
 
-## Why this matters
-Mastering the training loop unlocks every deep learning project: you’ll debug faster, train reproducibly, and scale when needed.
+By the end of the lesson, you can:
 
-## Core concepts and examples
-### Tensors and device
+- convert NumPy feature arrays and labels to correctly typed tensors;
+- build a classification MLP that returns logits;
+- use `TensorDataset` and `DataLoader` for minibatches;
+- switch correctly between `model.train()` and `model.eval()`; and
+- reason about dropout, early stopping, schedulers, and optional mixed precision.
+
+## Prerequisites
+
+- Complete `python-46` (deep learning overview).
+- Know stratified splitting and scaling from `python-34`–`python-35`.
+- Use CPU by default; CUDA-specific acceleration is optional.
+
+## Vocabulary and mental models
+
+| Term | Definition |
+|---|---|
+| Logit | Unnormalized class score produced before softmax |
+| Batch | Subset processed in one forward/backward update |
+| `DataLoader` | Iterator that batches and optionally shuffles a dataset |
+| Training mode | Enables training behavior such as dropout |
+| Evaluation mode | Disables training-only behavior such as dropout |
+| Dropout | Randomly zeros activations during training as regularization |
+| Early stopping | Stops after validation performance fails to improve |
+| Learning-rate scheduler | Changes the optimizer's rate over time |
+
+`CrossEntropyLoss` expects logits shaped `(batch, classes)` and integer class
+labels with dtype `torch.long`. Do not apply softmax before this loss.
+
+## Worked example: one minibatch-safe epoch
+
 ```python
 import torch
-x = torch.randn(32, 100)
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-x = x.to(device)
+
+
+def train_one_epoch(
+    model: torch.nn.Module,
+    loader: torch.utils.data.DataLoader,
+    optimizer: torch.optim.Optimizer,
+    loss_fn: torch.nn.Module,
+) -> float:
+    model.train()
+    total_loss = 0.0
+    total_rows = 0
+
+    for features, labels in loader:
+        optimizer.zero_grad()
+        logits = model(features)
+        loss = loss_fn(logits, labels)
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item() * len(features)
+        total_rows += len(features)
+
+    return total_loss / total_rows
 ```
 
-### Dataset and DataLoader
-```python
-from torch.utils.data import Dataset, DataLoader
-class MyDS(Dataset):
-    def __init__(self, X, y): self.X, self.y = X, y
-    def __len__(self): return len(self.X)
-    def __getitem__(self, i): return self.X[i], self.y[i]
+Average by row rather than by batch so a smaller final batch does not receive
+the same weight as every full batch. Evaluation should use `model.eval()` and
+`torch.inference_mode()`.
 
-dls = DataLoader(MyDS(X_train, y_train), batch_size=64, shuffle=True, num_workers=2)
-```
+The learner notebook scales before splitting for compactness. In your exercise,
+improve the boundary: split first, fit `StandardScaler` only on training
+features, then transform train and test separately.
 
-### Model, loss, optimizer
-```python
-import torch.nn as nn
-class MLP(nn.Module):
-    def __init__(self, inp, hid, out):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(inp, hid), nn.ReLU(),
-            nn.Linear(hid, out)
-        )
-    def forward(self, x): return self.net(x)
+## Learner exercises
 
-model = MLP(X_train.shape[1], 128, n_classes).to(device)
-loss_fn = nn.CrossEntropyLoss()
-opt = torch.optim.Adam(model.parameters(), lr=1e-3)
-```
+1. Add dropout to the MLP and compare results.
+2. Implement a small minibatch training loop with `DataLoader`.
 
-### Training/eval loop
-```python
-def train_epoch(model, dloader):
-    model.train(); total=0; correct=0; loss_sum=0.0
-    for xb, yb in dloader:
-        xb, yb = xb.to(device), yb.to(device)
-        opt.zero_grad()
-        logits = model(xb)
-        loss = loss_fn(logits, yb)
-        loss.backward(); opt.step()
-        loss_sum += loss.item()*xb.size(0)
-        correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)
-    return loss_sum/total, correct/total
+### Progressive hints
 
-@torch.no_grad()
-def evaluate(model, dloader):
-    model.eval(); total=0; correct=0; loss_sum=0.0
-    for xb, yb in dloader:
-        xb, yb = xb.to(device), yb.to(device)
-        logits = model(xb)
-        loss = loss_fn(logits, yb)
-        loss_sum += loss.item()*xb.size(0)
-        correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)
-    return loss_sum/total, correct/total
-```
+1. Place `Dropout(p=...)` after an activation. Compare multiple seeded runs or
+   validation curves, because one final accuracy is noisy.
+2. Wrap float32 features and long labels in a `TensorDataset`; shuffle only the
+   training loader. Move `zero_grad`, forward, loss, backward, and step inside
+   the batch loop.
 
-### Checkpointing
-```python
-torch.save({'model': model.state_dict(), 'opt': opt.state_dict()}, 'chkpt.pt')
-# load: ckpt = torch.load('chkpt.pt', map_location=device); model.load_state_dict(ckpt['model'])
-```
+The separate solution proceeds to early stopping, `StepLR`, and CUDA mixed
+precision. Mixed precision is an optional GPU optimization; the code path must
+remain correct on CPU.
 
-## Common pitfalls
-- Forgetting `.train()`/`.eval()`; batchnorm/dropout behave differently
-- Not zeroing gradients before backward; grads accumulate
-- Mismatched shapes/dtypes for loss functions (e.g., Long for class labels)
+## Self-check
 
-## Practice exercises
-1) Implement early stopping on validation loss
-2) Add a StepLR scheduler and compare convergence
-3) Add mixed precision training with torch.cuda.amp
+- Why are class labels `long` while input features are `float32`?
+- What changes when `model.eval()` is omitted from a model with dropout?
+- Why should the validation loader not shuffle for correctness or debugging?
+- Where should a scheduler step occur, and why does the scheduler type matter?
 
-## Further reading
-- PyTorch docs: https://pytorch.org/docs/stable/index.html
-- Training loops: https://pytorch.org/tutorials/beginner/introyt/trainingyt.html
+Expected behavior: logits have two columns, validation accuracy is between 0 and
+1, and minibatch loss generally decreases. Dropout is not guaranteed to improve
+one small run.
+
+## Pitfalls, diagnostics, and tradeoffs
+
+| Symptom | Likely cause | Response |
+|---|---|---|
+| Target dtype error | Labels are float tensors | Convert labels with `dtype=torch.long` |
+| Evaluation changes every call | Model left in training mode | Call `model.eval()` and use inference mode |
+| Memory grows during evaluation | Graphs are still recorded | Use `torch.inference_mode()` |
+| Scaling leaks test distribution | Scaler fit before split | Fit preprocessing on training data only |
+| Windows worker process errors | Notebook multiprocessing behavior | Begin with `num_workers=0`; use a main guard in scripts |
+
+Larger batches improve hardware throughput but use more memory and change
+optimization dynamics. Smaller batches add gradient noise and more updates.
+
+## Next step
+
+- Work in the [Day 47 learner notebook](../notebooks/day47_pytorch_basics_nn_training_loop.ipynb).
+- Then consult the
+  [Day 47 solution](../solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.md).
+- Continue to [Day 48 — Transfer Learning](day48_transfer_learning_cnn.md).

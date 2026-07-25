@@ -1,57 +1,82 @@
-# Day 11 — Solutions (CASE Expressions and Conditional Logic)
+# Day 11 solutions — CASE expressions
 
-We implement searched CASE expressions to encode business rules, create buckets, and combine multiple signals. Includes reasoning, line-by-line notes, and pitfalls.
+These answers match the exercises in [Day 11](../day11_case_expressions.sql). The prompts do not prescribe tier thresholds, hour boundaries, or a time zone, so this solution states those business rules explicitly.
 
-Setup
-- Schema: training; tables: orders, order_items, products, customers
-- Rule: Order of CASE branches matters — the first match wins; add an ELSE for completeness
+## Exercise 1 — Tier customers by lifetime revenue
 
-Exercise 1 — Bucket orders by amount into tiers and count per tier
+This example defines:
+
+- `platinum`: at least $10,000
+- `gold`: at least $5,000
+- `silver`: at least $1,000
+- `bronze`: some revenue below $1,000
+- `no_orders`: zero lifetime revenue
+
 ```sql
-WITH bucketed AS (
-  SELECT o.order_id,
-         o.total_amount,
-         CASE
-           WHEN o.total_amount >= 500 THEN 'tier_500_plus'
-           WHEN o.total_amount >= 200 THEN 'tier_200_499'
-           WHEN o.total_amount >= 50  THEN 'tier_50_199'
-           ELSE 'tier_under_50'
-         END AS amount_tier
-  FROM orders o
+WITH customer_revenue AS (
+  SELECT
+    c.customer_id,
+    c.full_name,
+    COALESCE(
+      SUM(oi.unit_price * oi.quantity * (1 - oi.discount)),
+      0
+    ) AS lifetime_revenue
+  FROM training.customers AS c
+  LEFT JOIN training.orders AS o
+    ON o.customer_id = c.customer_id
+  LEFT JOIN training.order_items AS oi
+    ON oi.order_id = o.order_id
+  GROUP BY c.customer_id, c.full_name
 )
-SELECT amount_tier, COUNT(*) AS orders
-FROM bucketed
-GROUP BY amount_tier
-ORDER BY orders DESC;
+SELECT
+  customer_id,
+  full_name,
+  ROUND(lifetime_revenue, 2) AS lifetime_revenue,
+  CASE
+    WHEN lifetime_revenue >= 10000 THEN 'platinum'
+    WHEN lifetime_revenue >= 5000 THEN 'gold'
+    WHEN lifetime_revenue >= 1000 THEN 'silver'
+    WHEN lifetime_revenue > 0 THEN 'bronze'
+    ELSE 'no_orders'
+  END AS revenue_tier
+FROM customer_revenue
+ORDER BY lifetime_revenue DESC, customer_id;
 ```
-Line-by-line
-- CASE searched form compares boolean predicates in order; the first true branch returns the label. Non-overlapping ranges prevent ambiguity.
-- ELSE catches all values < 50 (and NULLs, if total_amount can be NULL). Consider adding explicit `WHEN o.total_amount IS NULL THEN 'tier_unknown'` if you want to separate NULLs.
-- GROUP BY amount_tier then counts rows per bucket.
-Pitfalls
-- Overlapping ranges or missing ELSE leading to NULL labels that later break GROUP BY expectations.
 
-Exercise 2 — Priority rules combining country, segment, recent activity
+`CASE` uses the first matching branch, so thresholds must be tested from highest to lowest. The outer joins and `COALESCE` preserve customers without orders.
+
+## Exercise 2 — Bucket order hour
+
+This example interprets timestamps in UTC and defines morning as 06:00–11:59, afternoon as 12:00–16:59, evening as 17:00–21:59, and night as all other hours.
+
 ```sql
-SELECT c.customer_id,
-       c.country,
-       COALESCE(c.segment,'standard') AS segment,
-       MAX(o.order_date) AS last_order,
-       CASE
-         WHEN c.country IN ('US','CA') AND COALESCE(c.segment,'') = 'gold' THEN 'P1'
-         WHEN c.country IN ('GB','DE','FR') AND COALESCE(c.segment,'') IN ('gold','silver') THEN 'P2'
-         WHEN MAX(o.order_date) >= CURRENT_DATE - INTERVAL '30 days' THEN 'P2'
-         ELSE 'P3'
-       END AS priority
-FROM customers c
-LEFT JOIN orders o ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.country, COALESCE(c.segment,'standard')
-ORDER BY priority, last_order DESC NULLS LAST;
+WITH order_hours AS (
+  SELECT
+    o.order_id,
+    o.order_date,
+    EXTRACT(
+      HOUR FROM o.order_date AT TIME ZONE 'UTC'
+    )::integer AS order_hour_utc
+  FROM training.orders AS o
+)
+SELECT
+  order_id,
+  order_date,
+  order_hour_utc,
+  CASE
+    WHEN order_hour_utc >= 6 AND order_hour_utc < 12 THEN 'morning'
+    WHEN order_hour_utc >= 12 AND order_hour_utc < 17 THEN 'afternoon'
+    WHEN order_hour_utc >= 17 AND order_hour_utc < 22 THEN 'evening'
+    ELSE 'night'
+  END AS day_part
+FROM order_hours
+ORDER BY order_date, order_id;
 ```
-Explanation
-- COALESCE(segment,'standard'): normalizes NULL segments to a default before grouping; the same expression appears in GROUP BY.
-- MAX(o.order_date): we need the most recent activity signal; because we aggregate, the CASE must reference the aggregate as well. Postgres allows aggregates in a SELECT alongside GROUP BY keys.
-- Priority rules: The order matters; P1 supersedes others. The third WHEN uses recent activity alone to promote to P2.
-Pitfalls and tips
-- If you reference MAX(o.order_date) in CASE, ensure it’s computed in the same SELECT scope (as shown). Alternatively, compute last_order in a CTE and use it in a non-aggregated SELECT.
-- If you later filter by priority, consider wrapping this statement as a CTE to avoid duplicating CASE logic.
+
+Using an explicit time zone makes the result independent of the database session’s local time-zone setting.
+
+## Check yourself
+
+- Every customer receives exactly one tier.
+- Customers with no orders are not silently lost.
+- Every integer hour from 0 through 23 maps to exactly one day part.

@@ -1,5 +1,51 @@
 # Day 22 — Advanced Windows: Multiple Partitions, Named Windows, Exclusion (Companion Guide)
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Prerequisites:** [Day 21 — distribution functions](day21_distribution_functions.md)
+- **Artifacts:** [learner SQL](../day22_advanced_windows.sql) ·
+  [solution reasoning](../solutions/day22_solutions.md) ·
+  [executable solution](../solutions/day22_solutions.sql)
+
+## Learning objectives
+
+- Combine local and global windows at a stable grain.
+- Reuse named window specifications and exclude current rows or peers when
+  required.
+
+## Vocabulary and concepts
+
+- **Named window:** a reusable `WINDOW name AS (...)` specification.
+- **Peer exclusion:** removal of the current row, its peers, or ties from a
+  frame.
+- **Mixed grain:** an unsafe calculation that combines measures defined at
+  different row meanings.
+
+## Worked example / walkthrough
+
+Aggregate revenue to `(country, category)` first. Rank categories within each
+country from that relation, then calculate a separate category-total relation
+for the overall rank. Joining those stable grains avoids incorrectly ranking
+every country/category pair as though it were one global category.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day22_advanced_windows.sql). Define
+one named window and compare a full average with a leave-one-out average.
+
+## Self-check
+
+- Can you state the grain before every window layer?
+- Does an excluded-row calculation handle one-row partitions without dividing
+  by zero?
+
+## Next step
+
+Continue to [Day 23 — common table expressions](day23_ctes_intro.md).
+
+## Deep dive and reference
+
 Learning objectives
 - Reuse window specs with WINDOW clause and combine multiple windows efficiently
 - Use EXCLUDE to omit current row/peers from aggregates
@@ -22,9 +68,16 @@ Pitfalls
 - Window after GROUP BY changes row cardinality; ensure you window the intended grain.
 - Excessive repeated specs without WINDOW harms readability.
 
-Practice exercises
-1) Compute leave-one-out average order amount per customer.
-2) Produce, in one query, both per-category and global running totals.
+Exercises from the learner script
+1) For each country, rank categories by net line revenue and also compute the
+   category's overall rank.
+2) For each employee, compute salary rank within department and across the
+   whole company.
+
+“Overall category rank” means rank categories by their revenue summed across
+all countries, then attach that category-level rank to each country-category
+row. Ranking every country-category pair globally would answer a different
+question.
 
 Further reading
 - WINDOW clause: https://www.postgresql.org/docs/current/sql-select.html#SQL-WINDOW

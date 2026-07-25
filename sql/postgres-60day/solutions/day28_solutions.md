@@ -1,69 +1,75 @@
-# Day 28 — Solutions (JSON and XML in PostgreSQL)
+# Day 28 — Solutions: JSONB and XML
 
-We parse, filter, and aggregate semi‑structured data using Postgres’s JSON/JSONB operators and functions. We also touch on indexing and performance considerations. Examples translate directly to XML via xpath()/xmlelement() where applicable.
+The setup stores event metadata in `jsonb` and sample order documents in
+PostgreSQL's `xml` type. These exercises extract scalar values and reconcile
+semi-structured data with relational tables.
 
-Setup
-- Tables: events(id, occurred_at, payload jsonb), products(extra jsonb)
-- Core JSONB operators: -> (field as json), ->> (field as text), #> (path), #>> (path text), @> (contains), ? (key), ?| (any keys), ?& (all keys)
-- Useful functions: jsonb_extract_path_text, jsonb_array_elements, jsonb_each, jsonb_build_object, jsonb_set
+## Exercise 1 — Count events by first path segment
 
-Exercise 1 — Extract scalar fields and filter by nested path
+Leading and trailing slashes are removed before `split_part` extracts the first
+directory. Empty paths are labeled `[root]`.
+
 ```sql
--- Get user_id (text) and action (text) out of payload; filter where nested path meta.channel='email'
-SELECT id,
-       occurred_at,
-       payload->>'user_id'   AS user_id,
-       payload->>'action'    AS action,
-       payload#>>'{meta,channel}' AS channel
-FROM events
-WHERE payload@> '{"meta": {"channel": "email"}}'::jsonb
-ORDER BY occurred_at DESC
-LIMIT 100;
-```
-Explanation
-- ->> casts to text directly. #>> traverses a path and returns text. @> performs a containment test; create a GIN index for speed.
-- Index: `CREATE INDEX ON events USING gin (payload jsonb_path_ops);`
+SET search_path TO training, public;
 
-Exercise 2 — Unnest arrays and aggregate
-```sql
--- Suppose payload has an array of tag objects: {"tags": [{"k":"color","v":"red"}, ...]}
-WITH tags AS (
-  SELECT id,
-         occurred_at,
-         t->>'k' AS k,
-         t->>'v' AS v
-  FROM events e,
-       LATERAL jsonb_array_elements(e.payload->'tags') AS t
+WITH paths AS (
+  SELECT CASE
+           WHEN trim(BOTH '/' FROM metadata->>'path') = ''
+             THEN '[root]'
+           ELSE split_part(
+             trim(BOTH '/' FROM metadata->>'path'),
+             '/',
+             1
+           )
+         END AS first_path_segment
+  FROM events
 )
-SELECT k, v, COUNT(*) AS cnt
-FROM tags
-GROUP BY k, v
-ORDER BY cnt DESC
-LIMIT 50;
+SELECT first_path_segment,
+       COUNT(*) AS events
+FROM paths
+GROUP BY first_path_segment
+ORDER BY events DESC, first_path_segment;
 ```
-Line‑by‑line
-- LATERAL jsonb_array_elements expands each tag into its own row. Use LATERAL to pass the current row’s JSONB to the set‑returning function.
-- Aggregate the exploded rows as needed.
 
-Exercise 3 — Update a JSONB document immutably
+Expected shape: one row per first path segment. If `metadata` lacks `path`,
+the expression evaluates to `NULL`, which forms its own aggregate group.
+
+## Exercise 2 — Extract XML order IDs and validate status
+
+`xpath` returns an XML array even when the path selects one node. Index `[1]`
+extracts that node, and the order ID is cast through text to integer before the
+join.
+
 ```sql
--- Set payload.meta.processed=true; if meta is missing, create it.
-UPDATE events
-SET payload = jsonb_set(
-               payload,
-               '{meta,processed}',
-               'true'::jsonb,
-               true  -- create missing
-             )
-WHERE occurred_at >= now() - interval '7 days';
+SET search_path TO training, public;
+
+WITH parsed AS (
+  SELECT doc_id,
+         ((xpath('/order/id/text()', payload))[1]::text)::int AS order_id,
+         (xpath('/order/status/text()', payload))[1]::text AS xml_status
+  FROM xml_docs
+)
+SELECT p.doc_id,
+       p.order_id,
+       p.xml_status,
+       o.status AS relational_status,
+       p.xml_status = o.status AS statuses_match
+FROM parsed p
+LEFT JOIN orders o USING (order_id)
+ORDER BY p.doc_id;
 ```
-Notes
-- jsonb_set returns a new document; JSONB is immutable. The 4th arg controls creation of missing keys.
-- For large updates, batch by time or key ranges to avoid long‑running transactions.
 
-XML sketch
-- Use xpath('//book/title/text()', xml_col) to extract; unnest with unnest(xpath(...)). Casting to text may require (xpath(...))[1]::text.
+Expected shape: one row per XML document. `statuses_match` is `true` when both
+sources agree, `false` when they disagree, and `NULL` if no relational order is
+found.
 
-Performance tips
-- Avoid repetitive extraction in WHERE and SELECT by projecting into a CTE first.
-- Index common predicates with GIN (jsonb_ops or jsonb_path_ops); consider partial indexes for hot paths.
+## Pitfalls
+
+- `metadata->'path'` returns JSONB; `metadata->>'path'` returns text. Text
+  functions need the latter.
+- A missing JSON key yields SQL `NULL`; it is different from a JSON value that
+  literally contains `null`.
+- This XML path assumes exactly one `/order/id` and `/order/status`. Production
+  parsing should validate cardinality before indexing the returned array.
+- XML is case-sensitive and namespace-aware; namespaced documents require a
+  namespace mapping argument to `xpath`.

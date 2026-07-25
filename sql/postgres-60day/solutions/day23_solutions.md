@@ -1,71 +1,68 @@
-# Day 23 — Solutions (CTEs Intro: Naming Subqueries, Readability, Reuse)
+# Day 23 — Solutions: Common Table Expressions
 
-We refactor subqueries into named common table expressions (CTEs) to improve readability and enable reuse. We also show how to chain CTEs and why CTEs can be materialization boundaries (planner‑dependent).
+A CTE names an intermediate relation for one statement. It improves readability
+here by separating “build the metric” from “filter, aggregate, or present it.”
 
-Setup
-- Tables: orders, order_items, customers, products
-- Syntax: WITH name AS ( ... ) SELECT ... FROM name ...
+## Exercise 1 — Monthly revenue, top three months
 
-Exercise 1 — Refactor a nested subquery into a named CTE
 ```sql
--- Before (nested subquery)
-SELECT c.country,
-       SUM(line_rev) AS revenue
-FROM customers c
-JOIN (
-  SELECT oi.order_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS line_rev
-  FROM order_items oi
-  GROUP BY oi.order_id
-) ol ON ol.order_id = c.customer_id -- (bug!)
-GROUP BY c.country;
+SET search_path TO training, public;
+
+WITH monthly_revenue AS (
+  SELECT date_trunc('month', o.order_date)::date AS month,
+         SUM(
+           oi.unit_price * oi.quantity * (1 - oi.discount)
+         ) AS revenue
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY date_trunc('month', o.order_date)
+)
+SELECT month,
+       ROUND(revenue, 2) AS revenue
+FROM monthly_revenue
+ORDER BY revenue DESC, month
+LIMIT 3;
 ```
-Fix and refactor
+
+Expected shape: at most three rows, ordered from highest to lowest net
+line-item revenue. The query calculates revenue from `order_items`; using
+`orders.total_amount` is also valid if the exercise explicitly treats that
+stored total as authoritative.
+
+## Exercise 2 — Electronics orders aggregated by country
+
+The CTE retains one row per Electronics order line. The outer query joins the
+customer dimension and rolls those lines up by country.
+
 ```sql
-WITH order_lines AS (
-  SELECT oi.order_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_revenue
-  FROM order_items oi
-  GROUP BY oi.order_id
+SET search_path TO training, public;
+
+WITH electronics AS (
+  SELECT o.order_id,
+         o.customer_id,
+         o.order_date,
+         oi.unit_price * oi.quantity * (1 - oi.discount) AS line_revenue
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN products p ON p.product_id = oi.product_id
+  WHERE p.category = 'Electronics'
 )
 SELECT c.country,
-       ROUND(SUM(ol.order_revenue),2) AS revenue
-FROM orders o
-JOIN order_lines ol ON ol.order_id = o.order_id
-JOIN customers c    ON c.customer_id = o.customer_id
+       ROUND(SUM(e.line_revenue), 2) AS revenue
+FROM electronics e
+JOIN customers c ON c.customer_id = e.customer_id
 GROUP BY c.country
-ORDER BY revenue DESC;
+ORDER BY revenue DESC, c.country;
 ```
-Line‑by‑line
-- order_lines encapsulates the line‑item aggregation to one row per order.
-- The main SELECT joins customers via orders (correct key), then groups by country.
-- This structure is easier to debug and extend (e.g., add filters in order_lines).
 
-Exercise 2 — Chain multiple CTEs
-```sql
-WITH order_lines AS (
-  SELECT oi.order_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_revenue
-  FROM order_items oi
-  GROUP BY oi.order_id
-), last_90d AS (
-  SELECT o.order_id, o.customer_id, o.order_date, ol.order_revenue
-  FROM orders o JOIN order_lines ol ON ol.order_id = o.order_id
-  WHERE o.order_date >= CURRENT_DATE - INTERVAL '90 days'
-), by_country AS (
-  SELECT c.country,
-         SUM(l.order_revenue) AS revenue
-  FROM last_90d l JOIN customers c ON c.customer_id = l.customer_id
-  GROUP BY c.country
-)
-SELECT country, ROUND(revenue,2) AS revenue
-FROM by_country
-ORDER BY revenue DESC;
-```
-Notes
-- Build the result stepwise: aggregate lines → filter time → group by dimension.
-- Consider adding comments in each CTE for future maintainers.
+Expected shape: one row per country with Electronics revenue. Countries with no
+Electronics orders are absent because the exercise says to filter Electronics
+orders; use a dimension-first `LEFT JOIN` if zero-revenue countries must appear.
 
-Exercise 3 — CTE vs derived table and materialization
-- In Postgres 12+, CTEs are inlined by default; earlier versions materialize CTEs (which can degrade or improve performance depending on reuse and size).
-- Guidance: Prefer CTEs for readability; if performance suffers, test with derived tables or explicit TEMP TABLEs for heavy reuse.
+## Pitfalls
+
+- A CTE exists only for the single statement that follows it.
+- `ORDER BY` belongs in the final query unless ordering is required to implement
+  `LIMIT` or a window calculation inside the CTE.
+- Since PostgreSQL 12, a side-effect-free CTE may be inlined. Use
+  `MATERIALIZED` only when you intentionally need an optimization fence.

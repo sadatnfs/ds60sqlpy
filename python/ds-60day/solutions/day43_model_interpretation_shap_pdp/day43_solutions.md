@@ -30,8 +30,14 @@ try:
     shap_explainer = shap.TreeExplainer(rf)
     X_sample = Xte[:200]
     shap_values = shap_explainer.shap_values(X_sample)
-    # Summary plot: SHAP library uses matplotlib; avoid blocking UIs in some envs with show=False
-    shap.summary_plot(shap_values[1], X_sample, show=False)
+    # SHAP <0.45 returned one array per class; newer SHAP returns a 3-D array.
+    if isinstance(shap_values, list):
+        positive_class_values = shap_values[1]
+    elif shap_values.ndim == 3:
+        positive_class_values = shap_values[:, :, 1]
+    else:
+        positive_class_values = shap_values
+    shap.summary_plot(positive_class_values, X_sample, show=False)
 except Exception as e:
     print('SHAP unavailable or failed:', e)
 ```

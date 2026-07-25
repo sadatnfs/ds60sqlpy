@@ -1,87 +1,58 @@
-# Day 29 — Solutions (Pattern Matching: LIKE/ILIKE, SIMILAR TO, Regex)
+# Day 29 — Solutions: Pattern Matching
 
-We compare text pattern tools in PostgreSQL, from simple LIKE/ILIKE to SIMILAR TO and full regular expressions (~, ~*, !~, !~*). We also discuss escaping, indexes, and practical extraction with regex groups.
+PostgreSQL regex operators are `~` (case-sensitive) and `~*`
+(case-insensitive). Full-text search tokenizes and normalizes words rather than
+matching arbitrary substrings.
 
-Setup
-- Tables: customers(full_name, email), products(name, sku), orders(...)
-- Operators:
-  - LIKE: case-sensitive wildcard match (% any-length, _ single char)
-  - ILIKE: case-insensitive (Postgres extension)
-  - SIMILAR TO: SQL-standard regex-like (limited); use full regex instead when possible
-  - ~, ~*: POSIX regex match (case-sensitive/sensitive*, * means case-insensitive)
+## Exercise 1 — Emails beginning with `customer1` plus two digits
 
-Exercise 1 — Find customer emails by domain and safe escaping
+Assumption: the seeded `@example.com` domain is part of the required format.
+Anchors ensure the entire email matches, and the dot in the domain is escaped.
+
 ```sql
--- Simple: all customers with gmail.com (case-insensitive)
-SELECT customer_id, email
-FROM customers
-WHERE email ILIKE '%@gmail.com';
+SET search_path TO training, public;
 
--- Escape a literal % or _ in LIKE search
--- e.g., search for '100% Organic' product names literally
-SELECT product_id, name
-FROM products
-WHERE name LIKE '%100\% Organic%' ESCAPE '\';
-```
-Notes
-- ILIKE is convenient but may need trigram index for speed (see performance section)
-- In LIKE, % and _ are wildcards; escape them when you want literal characters
-
-Exercise 2 — Prefix vs infix searches and index usage
-```sql
--- Prefix search can use btree index with text_pattern_ops or default in many cases
--- names starting with 'App'
-SELECT product_id, name
-FROM products
-WHERE name LIKE 'App%'
-ORDER BY name
-LIMIT 50;
-
--- Infix search (contains anywhere) generally needs pg_trgm for index acceleration
--- names containing 'wireless'
-SELECT product_id, name
-FROM products
-WHERE name ILIKE '%wireless%'
-LIMIT 50;
-```
-Performance
-- Prefix LIKE 'foo%' may use btree (especially with appropriate collation/opclass); but '%foo%' will not
-- For infix/ILIKE, add pg_trgm index: `CREATE EXTENSION IF NOT EXISTS pg_trgm;`
-  - `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_products_name_trgm ON products USING gin (name gin_trgm_ops);`
-
-Exercise 3 — Full regex with capture groups and validation
-```sql
--- Extract local and domain from emails using regex SUBSTRING (first capture)
 SELECT customer_id,
-       email,
-       SUBSTRING(email FROM '^(.*?)@')          AS local_part,
-       SUBSTRING(email FROM '@(.*)$')           AS domain
+       full_name,
+       email
 FROM customers
-WHERE email ~* '^[^@]+@[^@]+\.[^@]+$'  -- basic email shape (very permissive)
-LIMIT 100;
-
--- Validate SKU pattern like ABC-1234 (three letters, dash, four digits)
-SELECT sku
-FROM products
-WHERE sku ~ '^[A-Z]{3}-[0-9]{4}$'
-LIMIT 100;
+WHERE email ~* '^customer1[0-9]{2}@example\.com$'
+ORDER BY customer_id;
 ```
-Explanation
-- ~ is regex match; ~* is case-insensitive match; !~ and !~* are negations
-- SUBSTRING(string FROM 'regex') returns the first capture group (or full match if no capture). Use additional parentheses to capture specific parts.
 
-Exercise 4 — SIMILAR TO vs regex
+Expected shape: customers whose numeric suffix is exactly three digits and
+starts with `1`, such as `customer100@example.com`. It does not match
+`customer10` or `customer1000`.
+
+If the domain should be unrestricted, replace the ending with `@.+$`; that is a
+different and much looser requirement.
+
+## Exercise 2 — Full-text search requiring both “home” and “product”
+
 ```sql
--- SIMILAR TO is SQL-standard but limited; prefer regex when available
-SELECT sku
-FROM products
-WHERE sku SIMILAR TO '[A-Z]{3}-[0-9]{4}'  -- works, but regex ~ is more flexible
-LIMIT 50;
-```
-Caveats
-- SIMILAR TO’s syntax and escaping can be surprising; if you need real regex features, use ~/~* instead
+SET search_path TO training, public;
 
-Anti-patterns and tips
-- Don’t lower() both sides repeatedly in WHERE; prefer ILIKE or computed/generated columns with indexes
-- For heavy regex filtering, consider materialized columns (e.g., domain extracted from email) with ordinary indexes
-- Use anchors ^ and $ to avoid unintended substring matches when you need whole-string checks
+SELECT product_id,
+       name,
+       category
+FROM products
+WHERE to_tsvector(
+        'english',
+        name || ' ' || category
+      ) @@ to_tsquery('english', 'home & product')
+ORDER BY product_id;
+```
+
+Expected shape: products whose combined name and category contain both search
+lexemes. In the seeded catalog, `Product ...` names in the `Home` category
+qualify.
+
+## Pitfalls
+
+- `%` and `_` are wildcards for `LIKE`, not for PostgreSQL regex.
+- `|` means OR and `&` means AND in `to_tsquery`; the exercise requires `&`.
+- Concatenation with a nullable field produces `NULL`. The setup columns used
+  here are non-null, but production code can use
+  `concat_ws(' ', name, category)`.
+- Applying `to_tsvector` at query time is fine for this small course table. A
+  larger system normally uses a generated `tsvector` column plus a GIN index.

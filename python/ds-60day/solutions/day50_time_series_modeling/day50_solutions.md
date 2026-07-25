@@ -89,7 +89,7 @@ model = RandomForestRegressor(n_estimators=500, random_state=0).fit(train[['lag1
 fc = model.predict(test[['lag1','lag7','roll7']])
 print('Test MAPE vs baseline:', MAPE(test['y'], fc), 'vs', base_mape)
 
-plt.figure(figsize=8,3)
+plt.figure(figsize=(8, 3))
 plt.plot(df.index[-120:], df['y'].iloc[-120:], label='actual')
 plt.plot(test.index, fc, label='forecast')
 plt.legend(); plt.title('Forecast vs actual'); plt.tight_layout(); plt.show()
@@ -100,4 +100,5 @@ err.plot(title='Forecast error'); plt.axhline(0,color='k',lw=1); plt.show()
 ```
 Notes
 - Prefer pinball/quantile loss for asymmetric costs
-- For multi‑step forecasting, consider recursive strategies or models like Prophet/ARIMA
+- For multi-step forecasting, compare direct and recursive strategies with
+  validated ARIMA or lag-feature baselines before adding a heavier model

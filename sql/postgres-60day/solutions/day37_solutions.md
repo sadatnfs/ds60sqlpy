@@ -1,64 +1,124 @@
-# Day 37 — Solutions (Partitioning and Sharding)
+# Day 37 — Solutions: Partitioning
 
-We explore PostgreSQL table partitioning (declarative) for performance and manageability on large tables, and discuss sharding strategies at the application/DB layer. We include creation, indexing, pruning, and maintenance patterns.
+PostgreSQL partitioning divides one logical table into physical child tables.
+The optimizer can prune children whose bounds cannot satisfy a query predicate.
+“Sharding” across servers is a separate architectural concern and is not
+implemented by this single-database exercise.
 
-Setup
-- Declarative partitioning by RANGE/LIST on large fact tables (e.g., orders by order_date)
-- Global vs local indexes: in PG, indexes are per-partition; create on each partition or use default partitioned indexes (PG11+)
+## Exercise 1 — Add a partition and test pruning
 
-Exercise 1 — Create a partitioned table by month
+Temporary tables keep the answer isolated from the learner script's
+`big_events` names.
+
 ```sql
--- Parent table
-CREATE TABLE IF NOT EXISTS orders_p (
-  order_id     BIGINT NOT NULL,
-  customer_id  BIGINT NOT NULL,
-  order_date   timestamptz NOT NULL,
-  total_amount numeric(12,2) NOT NULL
-) PARTITION BY RANGE (order_date);
+BEGIN;
+SET LOCAL search_path TO training, public;
 
--- Create monthly partitions (example for 2025 Q1)
-CREATE TABLE IF NOT EXISTS orders_2025_01 PARTITION OF orders_p
-  FOR VALUES FROM ('2025-01-01') TO ('2025-02-01');
-CREATE TABLE IF NOT EXISTS orders_2025_02 PARTITION OF orders_p
-  FOR VALUES FROM ('2025-02-01') TO ('2025-03-01');
-CREATE TABLE IF NOT EXISTS orders_2025_03 PARTITION OF orders_p
-  FOR VALUES FROM ('2025-03-01') TO ('2025-04-01');
+CREATE TEMP TABLE solution_big_events (
+  id bigint GENERATED ALWAYS AS IDENTITY,
+  event_time timestamptz NOT NULL,
+  customer_id int,
+  payload jsonb
+) PARTITION BY RANGE (event_time);
 
--- Index per partition (or create a partitioned index on parent in PG11+)
-CREATE INDEX IF NOT EXISTS idx_orders_2025_01_date ON orders_2025_01(order_date);
-CREATE INDEX IF NOT EXISTS idx_orders_2025_02_date ON orders_2025_02(order_date);
-CREATE INDEX IF NOT EXISTS idx_orders_2025_03_date ON orders_2025_03(order_date);
+CREATE TEMP TABLE solution_big_events_2025_01
+  PARTITION OF solution_big_events
+  FOR VALUES FROM ('2025-01-01 00:00:00+00')
+             TO ('2025-02-01 00:00:00+00');
+
+CREATE TEMP TABLE solution_big_events_2025_02
+  PARTITION OF solution_big_events
+  FOR VALUES FROM ('2025-02-01 00:00:00+00')
+             TO ('2025-03-01 00:00:00+00');
+
+CREATE TEMP TABLE solution_big_events_2025_03
+  PARTITION OF solution_big_events
+  FOR VALUES FROM ('2025-03-01 00:00:00+00')
+             TO ('2025-04-01 00:00:00+00');
+
+INSERT INTO solution_big_events(event_time, customer_id, payload)
+SELECT timestamptz '2025-01-01 00:00:00+00'
+         + (event_no - 1) * interval '30 minutes',
+       1 + ((event_no * 29 - 1) % 500),
+       jsonb_build_object('source_row', event_no)
+FROM generate_series(1, 3000) AS g(event_no);
+
+EXPLAIN (ANALYZE, VERBOSE)
+SELECT COUNT(*)
+FROM solution_big_events
+WHERE event_time >= timestamptz '2025-03-01 00:00:00+00'
+  AND event_time < timestamptz '2025-04-01 00:00:00+00';
+
+ROLLBACK;
 ```
-Why
-- Queries filtered by order_date prune partitions, scanning only relevant ones.
 
-Exercise 2 — Insert, query, and confirm pruning
+Inspect the plan for only the March child (or for other evidence that January
+and February were pruned). Exact wording varies by PostgreSQL version.
+
+## Exercise 2 — Index partitions and compare plans
+
 ```sql
--- Insert routes to the right partition based on order_date
-INSERT INTO orders_p(order_id, customer_id, order_date, total_amount)
-VALUES (101, 1, '2025-02-17 12:00+00', 99.99);
+BEGIN;
+SET LOCAL search_path TO training, public;
 
--- Query last 30 days
-EXPLAIN (ANALYZE)
-SELECT * FROM orders_p
-WHERE order_date >= CURRENT_DATE - INTERVAL '30 days';
+CREATE TEMP TABLE indexed_big_events (
+  id bigint GENERATED ALWAYS AS IDENTITY,
+  event_time timestamptz NOT NULL,
+  customer_id int,
+  payload jsonb
+) PARTITION BY RANGE (event_time);
+
+CREATE TEMP TABLE indexed_big_events_2025_01
+  PARTITION OF indexed_big_events
+  FOR VALUES FROM ('2025-01-01 00:00:00+00')
+             TO ('2025-02-01 00:00:00+00');
+
+CREATE TEMP TABLE indexed_big_events_2025_02
+  PARTITION OF indexed_big_events
+  FOR VALUES FROM ('2025-02-01 00:00:00+00')
+             TO ('2025-03-01 00:00:00+00');
+
+CREATE TEMP TABLE indexed_big_events_2025_03
+  PARTITION OF indexed_big_events
+  FOR VALUES FROM ('2025-03-01 00:00:00+00')
+             TO ('2025-04-01 00:00:00+00');
+
+INSERT INTO indexed_big_events(event_time, customer_id, payload)
+SELECT timestamptz '2025-01-01 00:00:00+00'
+         + (event_no - 1) * interval '30 minutes',
+       1 + ((event_no * 29 - 1) % 500),
+       jsonb_build_object('source_row', event_no)
+FROM generate_series(1, 3000) AS g(event_no);
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT event_time, customer_id
+FROM indexed_big_events
+WHERE event_time >= timestamptz '2025-03-02 00:00:00+00'
+  AND event_time < timestamptz '2025-03-03 00:00:00+00';
+
+CREATE INDEX indexed_big_events_2025_01_time_idx
+  ON indexed_big_events_2025_01(event_time);
+CREATE INDEX indexed_big_events_2025_02_time_idx
+  ON indexed_big_events_2025_02(event_time);
+CREATE INDEX indexed_big_events_2025_03_time_idx
+  ON indexed_big_events_2025_03(event_time);
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT event_time, customer_id
+FROM indexed_big_events
+WHERE event_time >= timestamptz '2025-03-02 00:00:00+00'
+  AND event_time < timestamptz '2025-03-03 00:00:00+00';
+
+ROLLBACK;
 ```
-Notes
-- Explain output should show only recent partitions scanned.
 
-Exercise 3 — Default partition and maintenance
-```sql
--- Default catch-all partition for out-of-range data
-CREATE TABLE IF NOT EXISTS orders_default PARTITION OF orders_p DEFAULT;
+Expected logical result: the before and after queries return the same March
+rows. The indexed plan may use only the March index; the small child can still
+make a sequential scan rational.
 
--- Detach or drop old partitions to purge data quickly
-ALTER TABLE orders_p DETACH PARTITION orders_2024_01;  -- archive elsewhere then DROP TABLE orders_2024_01;
-```
-Guidance
-- Automate partition creation/retention with scheduled jobs.
-- Consider partitioned foreign keys (PG15+) or enforce via app logic.
+## Pitfalls
 
-Sharding discussion
-- Logical sharding by customer/region at app layer; use separate schemas/DBs per shard.
-- Router maps shard key → connection. Keep cross-shard joins out of the DB; aggregate in the app or via federation layer.
-- Use identical schema per shard; central metadata registry for shard location.
+- Partition bounds are lower-inclusive and upper-exclusive.
+- An insert outside all bounds fails unless a default partition exists.
+- Put the partition key in filtering predicates so pruning is possible.
+- Too many tiny partitions increase planning and maintenance overhead.

@@ -1,75 +1,47 @@
-# Day 08 — Solutions (Scalar and Inline Subqueries)
+# Day 08 solutions — scalar and inline subqueries
 
-We compare scalar subqueries to join-based rewrites, and demonstrate set comparisons with ANY. Line-by-line explanations and pitfalls included.
+These answers match the exercises in [Day 08](../day08_scalar_inline_subqueries.sql).
 
-Setup
-- Schema: training; tables: customers, orders, products (plus optional promotions/events)
-- Rule of thumb: Prefer pre-aggregated subqueries JOINed back over row-by-row scalar subqueries for performance and clarity
+## Exercise 1 — Largest single order amount by country
 
-Exercise 1 — Last order date per customer (scalar subquery vs JOIN)
-
-Scalar subquery form
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       (
-         SELECT MAX(o.order_date)
-         FROM orders o
-         WHERE o.customer_id = c.customer_id
-       ) AS last_order_date
-FROM customers c
-ORDER BY last_order_date DESC NULLS LAST
-LIMIT 200;
+SELECT
+  countries.country,
+  (
+    SELECT MAX(o.total_amount)
+    FROM training.orders AS o
+    JOIN training.customers AS c
+      ON c.customer_id = o.customer_id
+    WHERE c.country = countries.country
+  ) AS largest_order_amount
+FROM (
+  SELECT DISTINCT country
+  FROM training.customers
+) AS countries
+ORDER BY countries.country;
 ```
-Explanation
-- The parent SELECT scans customers; for each row, the scalar subquery runs to compute MAX(order_date).
-- This is simple to write and logically clear, but on large tables it can be slower (N subqueries).
-- ORDER BY ... NULLS LAST pushes customers with no orders to the bottom.
-Pitfalls
-- Correlated subqueries that cannot use an index (due to functions, casts) can be expensive.
 
-Preferred JOIN form
-```sql
-WITH last_orders AS (
-  SELECT o.customer_id, MAX(o.order_date) AS last_order_date
-  FROM orders o
-  GROUP BY o.customer_id
-)
-SELECT c.customer_id,
-       c.full_name,
-       lo.last_order_date
-FROM customers c
-LEFT JOIN last_orders lo ON lo.customer_id = c.customer_id
-ORDER BY lo.last_order_date DESC NULLS LAST
-LIMIT 200;
-```
-Line-by-line
-- last_orders pre-aggregates to one row per customer; a LEFT JOIN preserves customers without orders (NULL last_order_date).
-- The planner can optimize a single grouped scan better than many correlated lookups.
-- Same result set semantics as the scalar subquery, typically faster.
+The inner query is scalar: it returns one aggregate value for the current outer country. A country with no orders remains in the result with `NULL` as its largest order.
 
-Exercise 2 — Orders whose total exceeds ANY of the top-decile totals
+## Exercise 2 — First order date for every customer
+
 ```sql
-WITH ranked AS (
-  SELECT o.order_id,
-         o.total_amount,
-         NTILE(10) OVER (ORDER BY o.total_amount DESC) AS decile
-  FROM orders o
-), top_decile AS (
-  SELECT r.total_amount
-  FROM ranked r
-  WHERE r.decile = 1
-)
-SELECT o.order_id, o.total_amount
-FROM orders o
-WHERE o.total_amount > ANY (SELECT td.total_amount FROM top_decile td)
-ORDER BY o.total_amount DESC
-LIMIT 100;
+SELECT
+  c.customer_id,
+  c.full_name,
+  (
+    SELECT MIN(o.order_date)
+    FROM training.orders AS o
+    WHERE o.customer_id = c.customer_id
+  ) AS first_order_date
+FROM training.customers AS c
+ORDER BY c.customer_id;
 ```
-Explanation
-- NTILE(10) assigns deciles by total_amount; decile=1 is the top 10%.
-- ANY compares a value to a set; “> ANY (set)” is equivalent to “> MIN(set)”. Here, picking ANY with the top decile essentially means greater than the minimum of that decile.
-- You could also compute a cutoff with percentile_cont(0.9) and compare directly; the ANY form highlights set semantics.
-Pitfalls
-- Be careful with NULLs in the set — comparison to NULL yields UNKNOWN; filter NULLs in top_decile if needed.
-- If you intended “greater than ALL of the top decile” (i.e., strictly above the entire top decile), use > ALL instead.
+
+The correlated subquery uses the outer row’s `customer_id`. `MIN` guarantees at most one scalar value, and customers without orders receive `NULL`.
+
+## Check yourself
+
+- Exercise 1 returns one row for every distinct customer country.
+- Exercise 2 returns one row for every customer, including the intentionally order-free customers.
+- Removing the correlation predicate from either query would calculate one global value and repeat it incorrectly.

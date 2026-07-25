@@ -1,5 +1,50 @@
 # Day 16 — Window Functions Fundamentals: OVER, PARTITION BY, ORDER BY, Frames (Companion Guide)
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Prerequisites:** [Day 15 — Phase 1 project](day15_phase1_project.md), including
+  grouped aggregates and declared result grain
+- **Artifacts:** [learner SQL](../day16_window_functions_fundamentals.sql) ·
+  [solution reasoning](../solutions/day16_solutions.md) ·
+  [executable solution](../solutions/day16_solutions.sql)
+
+## Learning objectives
+
+- Add partition-level and running metrics without collapsing detail rows.
+- Choose an explicit `ROWS` frame when peer-aware `RANGE` behavior is not
+  intended.
+
+## Vocabulary and concepts
+
+- **Window:** the related rows visible to a window function for one result row.
+- **Partition:** an independent window group created by `PARTITION BY`.
+- **Frame:** the ordered subset of a partition used for the current row.
+
+## Worked example / walkthrough
+
+Pre-aggregate net revenue to one row per category, then calculate
+`SUM(revenue) OVER ()` beside each category. The ordinary aggregate establishes
+the category grain; the window exposes the grand total without removing those
+category rows.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day16_window_functions_fundamentals.sql).
+Create tied ordering values and compare the default frame with
+`ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`.
+
+## Self-check
+
+- Does the result retain the intended number of detail rows?
+- Can you state the partition, ordering, and frame for every window expression?
+
+## Next step
+
+Continue to [Day 17 — ranking functions](day17_rank_functions.md).
+
+## Deep dive and reference
+
 Learning objectives
 - Understand what a window is and how window functions differ from aggregates
 - Use OVER() with PARTITION BY and ORDER BY to compute per-row metrics without collapsing rows
@@ -25,7 +70,9 @@ Core concepts and deep dive
   - You may compute aggregates in a subquery/CTE then apply window functions to the aggregated rows, or vice versa. Know which level is appropriate for your metric.
 
 Walkthrough of the day’s script
-- Category share of total revenue: SUM(revenue) OVER (PARTITION BY category) and SUM(...) OVER () retain one row per category while exposing category and total sums for share calculations. This illustrates two partitions (by category and overall).
+- Category share of total revenue: a CTE first produces one row per category,
+  then `SUM(revenue) OVER ()` exposes the grand total without collapsing those
+  category rows.
 - Customer-level windows: AVG(total_amount) OVER (PARTITION BY customer_id) and COUNT(*) OVER (PARTITION BY customer_id) produce lifetime averages and counts joined to each order without GROUP BY.
 - Rolling window: SUM(revenue) OVER (ORDER BY d ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) computes a 7-day moving total. Note the explicit ROWS frame to avoid RANGE pitfalls.
 
@@ -39,10 +86,15 @@ Pitfalls
 - Window functions run after WHERE but before ORDER BY LIMIT at the outermost level; to filter on a windowed value, wrap in a subquery.
 - Performance: Heavy windows over millions of rows may spill; ensure indexes on partition/order keys.
 
-Practice exercises
-1) For each order, show the customer’s lifetime revenue next to order_total and compute the ratio.
-2) Compute a 30-day rolling average of daily revenue; discuss RANGE vs ROWS differences when multiple days share the same total.
-3) For each category, compute product revenue and product share within the category.
+Exercises from the learner script
+1) For each order, show its total and the customer's lifetime total alongside
+   it.
+2) For each category, show each product's net line revenue and its share of
+   category revenue.
+
+The maintained answer also computes each order's share of customer lifetime
+revenue as a useful extension. Include unsold products with a dimension-first
+`LEFT JOIN` if the report must cover the entire catalog.
 
 Further reading
 - Postgres windows: https://www.postgresql.org/docs/current/tutorial-window.html

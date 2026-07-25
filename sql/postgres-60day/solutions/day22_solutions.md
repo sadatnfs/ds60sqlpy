@@ -1,68 +1,90 @@
-# Day 22 — Solutions (Advanced Windows: Frames, Percentiles, Exclusion, Distribution)
+# Day 22 — Solutions: Advanced Window Scenarios
 
-We dive deeper into window framing, distribution functions (percent_rank, cume_dist), and EXCLUDE frame clauses. These tools enable precise analytics without extra joins.
+These answers calculate an aggregate at the correct grain first and add window
+rankings in a later query. That separation prevents line-item fanout from
+distorting a rank.
 
-Setup
-- Tables: orders(order_date, total_amount, customer_id), order_items, products
-- Key idea: The window ORDER BY + frame define what rows each function sees
+## Exercise 1 — Category ranks by country and overall
 
-Exercise 1 — percent_rank and cume_dist on order totals per month
+Assumption: “overall category rank” means ranking each category by its revenue
+across all countries, not ranking every country-category pair in one global
+list.
+
 ```sql
-WITH monthly AS (
-  SELECT date_trunc('month', o.order_date)::date AS m,
-         o.order_id,
-         o.total_amount
-  FROM orders o
-)
-SELECT m,
-       order_id,
-       total_amount,
-       ROUND(percent_rank() OVER (PARTITION BY m ORDER BY total_amount), 4) AS pct_rank,
-       ROUND(cume_dist()   OVER (PARTITION BY m ORDER BY total_amount), 4) AS cume
-FROM monthly
-ORDER BY m, total_amount, order_id
-LIMIT 200;
-```
-Explanation
-- percent_rank = (rank - 1)/(n - 1): 0 for smallest, 1 for largest when n>1
-- cume_dist = cumulative distribution: fraction of rows <= current
+SET search_path TO training, public;
 
-Exercise 2 — Rolling sum with value-ties using RANGE vs ROWS
+WITH country_category AS (
+  SELECT c.country,
+         p.category,
+         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM customers c
+  JOIN orders o ON o.customer_id = c.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN products p ON p.product_id = oi.product_id
+  GROUP BY c.country, p.category
+), country_ranked AS (
+  SELECT *,
+         DENSE_RANK() OVER (
+           PARTITION BY country
+           ORDER BY revenue DESC
+         ) AS rank_in_country
+  FROM country_category
+), overall_category AS (
+  SELECT category,
+         SUM(revenue) AS overall_revenue
+  FROM country_category
+  GROUP BY category
+), overall_ranked AS (
+  SELECT *,
+         DENSE_RANK() OVER (
+           ORDER BY overall_revenue DESC
+         ) AS overall_category_rank
+  FROM overall_category
+)
+SELECT cr.country,
+       cr.category,
+       ROUND(cr.revenue, 2) AS country_category_revenue,
+       cr.rank_in_country,
+       ROUND(o.overall_revenue, 2) AS overall_category_revenue,
+       o.overall_category_rank
+FROM country_ranked cr
+JOIN overall_ranked o USING (category)
+ORDER BY cr.country, cr.rank_in_country, cr.category;
+```
+
+Expected shape: one row per observed country-category pair. The overall revenue
+and overall rank repeat for the same category in each country.
+
+## Exercise 2 — Employee salary rank in department and company
+
 ```sql
-WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d, SUM(o.total_amount) AS rev
-  FROM orders o GROUP BY 1
-)
-SELECT d,
-       rev,
-       SUM(rev) OVER (ORDER BY d ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)   AS sum7_rows,
-       SUM(rev) OVER (ORDER BY d RANGE BETWEEN INTERVAL '6 days' PRECEDING AND CURRENT ROW) AS sum7_range
-FROM daily
-ORDER BY d
-LIMIT 100;
-```
-Notes
-- ROWS counts rows; RANGE counts peers with same ORDER BY value. For dates, RANGE by time interval expands to all rows in the interval window even if some dates missing
+SET search_path TO training, public;
 
-Exercise 3 — EXCLUDE frame to compute peer-contrast metrics
-```sql
-WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d, SUM(o.total_amount) AS rev
-  FROM orders o GROUP BY 1
-)
-SELECT d,
-       rev,
-       AVG(rev) OVER (
-         ORDER BY d
-         ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING
-         EXCLUDE CURRENT ROW
-       ) AS neighbor_avg_excl_self
-FROM daily
-ORDER BY d
-LIMIT 120;
+SELECT d.name AS department,
+       e.employee_id,
+       e.full_name,
+       e.salary,
+       RANK() OVER (
+         PARTITION BY e.department_id
+         ORDER BY e.salary DESC
+       ) AS department_salary_rank,
+       RANK() OVER (
+         ORDER BY e.salary DESC
+       ) AS company_salary_rank
+FROM employees e
+JOIN departments d ON d.department_id = e.department_id
+ORDER BY company_salary_rank, e.employee_id;
 ```
-Why
-- EXCLUDE CURRENT ROW removes the self-value from the frame; useful to compare against neighbors only
 
-Pitfalls
-- Default frames differ across engines; be explicit with ROWS/RANGE and EXCLUDE as needed
+Expected shape: one row per employee. Rank `1` is the highest salary. `RANK`
+leaves gaps after ties; use `DENSE_RANK` instead only if the requirement says
+rank numbers must remain consecutive.
+
+## Pitfalls
+
+- A window function cannot directly rank a `SUM` at a different grain without
+  first defining that grain in a CTE or subquery.
+- Do not partition the company-wide rank; it deliberately has no
+  `PARTITION BY`.
+- The seeded employees all have departments, but a production report may need
+  a `LEFT JOIN` to retain unassigned employees.

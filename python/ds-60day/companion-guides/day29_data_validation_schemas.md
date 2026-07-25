@@ -1,49 +1,98 @@
-# Day 29 — Data Validation with Schemas (Companion Guide)
+# Day 29 — Data Validation with Schemas
+
+**Level:** Intermediate
+
+A schema turns assumptions about columns, types, ranges, and uniqueness into an
+executable boundary contract. Validation detects problems; it does not decide
+how to clean them.
 
 ## Learning objectives
-- Define and enforce data schemas with Pandera or Pydantic
-- Validate types, ranges, categories, and unique constraints
-- Integrate validation in pipelines and CI
 
-## Why this matters
-Data contracts catch issues early and keep pipelines robust as data evolves.
+By the end of this lesson, you can:
 
-## Core concepts and examples
-### Pandera schemas
+- define a Pandera DataFrame model with typed columns;
+- add nullability, range, category, and uniqueness constraints;
+- validate a frame at a pipeline boundary;
+- interpret a schema failure without discarding bad rows silently;
+- distinguish DataFrame validation from row/object validation.
+
+## Prerequisites
+
+Complete Day 28 (`python-28`) and the typed cleaner from Day 18 (`python-18`).
+Pandera is in the `data` dependency group. Pydantic is an optional
+object-validation tool in the advanced `production` group.
+
+## Vocabulary and mental model
+
+- **Schema:** executable description of expected data shape and constraints.
+- **Constraint:** rule such as non-negative, unique, allowed category, or
+  non-null.
+- **Coercion:** attempt to convert values to the declared dtype.
+- **Fail fast:** reject invalid data near the boundary rather than propagating
+  it.
+- **Lazy validation:** collect multiple failures before raising.
+- **DataFrame model:** class-based Pandera schema for table-shaped data.
+
+## Worked example
+
 ```python
-import pandera as pa
-import pandera.typing as pat
+import pandas as pd
+import pandera.pandas as pa
+from pandera.typing import Series
 
-class Sales(pa.SchemaModel):
-    order_id: pat.Series[int] = pa.Field(unique=True)
-    store: pat.Series[str]
-    amount: pat.Series[float] = pa.Field(ge=0)
 
-validated = Sales.validate(df)
+class ReadingSchema(pa.DataFrameModel):
+    sensor_id: Series[int] = pa.Field(ge=1, unique=True)
+    status: Series[str] = pa.Field(isin=["ok", "warning"])
+    value: Series[float] = pa.Field(nullable=False)
+
+    class Config:
+        coerce = True
+
+
+readings = pd.DataFrame(
+    {"sensor_id": [1, 2], "status": ["ok", "warning"], "value": [2.5, 4.0]}
+)
+validated = ReadingSchema.validate(readings)
 ```
 
-### Pydantic models (row-wise)
-```python
-from pydantic import BaseModel, Field
-class Row(BaseModel):
-    order_id: int
-    amount: float = Field(ge=0)
-rows = [Row(**rec) for rec in df.to_dict(orient='records')]
-```
+Coercion is explicit; inspect source anomalies before relying on coercion as
+cleaning.
 
-### Great Expectations (concept)
-- Create expectations suites; run in CI; produce data docs
+## Exercises and progressive hints
 
-## Common pitfalls
-- Validating after transformation instead of before ingestion
-- Overly strict schemas that block real-world changes
-- Silent coercions; prefer fail-fast unless justified
+1. Add range and allowed-category constraints to a schema. **Hint:** start from
+   written business rules, include boundary values, and create one invalid
+   fixture per rule.
+2. Validate the cleaned Day 18 DataFrame before saving. **Hint:** perform
+   cleaning, validate the returned frame, then write only the validated result;
+   preserve the failure report when validation stops the write.
 
-## Practice exercises
-1) Write a Pandera schema for a dataset with categories and ranges
-2) Add schema validation to the start of an ETL job
-3) Configure CI to run validations on sample data
+## Self-check
 
-## Further reading
-- Pandera: https://pandera.readthedocs.io
-- Great Expectations: https://greatexpectations.io
+- Which rules belong in a schema versus a cleaning function?
+- What can coercion accidentally hide?
+- When is uniqueness expected globally versus within a composite key?
+- Why should both valid and invalid fixtures be tested?
+
+Expected behavior: valid input returns a typed frame, each invalid fixture
+fails for the intended rule, and invalid output is not written.
+
+## Common pitfalls and diagnosis
+
+- **Schema and DataFrame column names differ:** compare exact labels and whether
+  extra/missing columns are allowed.
+- **A nullable column still fails:** nullable controls missing values, not
+  incompatible non-missing types or other constraints.
+- **Coercion turns bad text into a failure far from its source:** validate/raw
+  profile first and retain source-row context.
+- **A schema is treated as cleaning:** keep repair decisions explicit and test
+  validation after cleaning.
+- **Pandera imports fail:** verify the notebook uses `.venv` and the standard
+  data dependencies were installed.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day29_data_validation_schemas.ipynb)
+- [Check the separate solution](../solutions/day29_data_validation_schemas/day29_solutions.md)
+- [Next: Day 30 — EDA and preprocessing project](day30_project_eda_preprocessing.md)

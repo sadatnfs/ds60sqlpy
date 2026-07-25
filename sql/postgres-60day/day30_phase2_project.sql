@@ -26,7 +26,10 @@ WITH orders_enriched AS (
 ), cohort_agg AS (
   SELECT cohort_month,
          order_month,
-         EXTRACT(MONTH FROM age(order_month, cohort_month))::int AS month_offset,
+         (
+           EXTRACT(YEAR FROM age(order_month, cohort_month)) * 12
+           + EXTRACT(MONTH FROM age(order_month, cohort_month))
+         )::int AS month_offset,
          SUM(revenue) AS cohort_revenue,
          COUNT(DISTINCT customer_id) AS active_customers
   FROM metrics

@@ -1,55 +1,110 @@
-# Day 37 — Regularization and Linear Models (Companion Guide)
+# Day 37 — Regularization and Linear Models
+
+**Lesson ID:** `python-37` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
+
+Regularization changes the fitting objective by penalizing coefficient size.
+The goal is controlled generalization, not simply making every coefficient
+small.
 
 ## Learning objectives
-- Understand bias–variance, overfitting, and the role of regularization
-- Train Ridge, Lasso, and ElasticNet with proper scaling
-- Use cross-validation to select alpha and interpret coefficients
 
-## Why this matters
-Regularization improves generalization and stabilizes estimates, especially with multicollinearity and high-dimensional features.
+By the end of the lesson, you can:
 
-## Mental models
-- Ridge (L2) shrinks coefficients continuously; Lasso (L1) can set them exactly to zero
-- Stronger regularization increases bias, decreases variance; sweet spot via CV
+- contrast Ridge (L2), Lasso (L1), and Elastic Net penalties;
+- explain why numeric scaling matters before penalization;
+- sweep regularization strength with cross-validation;
+- compare coefficient shrinkage and sparsity; and
+- diagnose underfitting, convergence warnings, and unstable feature selection.
 
-## Core concepts and examples
+## Prerequisites
+
+- Complete `python-36` (PCA and feature selection).
+- Recall linear-model coefficients from `python-33`.
+- Be able to evaluate a pipeline with cross-validation from `python-35`.
+
+## Vocabulary and mental models
+
+| Term | Definition |
+|---|---|
+| Regularization | Adding a complexity penalty to the data-fitting loss |
+| Ridge / L2 | Penalty proportional to the sum of squared coefficients |
+| Lasso / L1 | Penalty proportional to the sum of absolute coefficients |
+| Elastic Net | Weighted mixture of L1 and L2 penalties |
+| `alpha` | Penalty strength in these scikit-learn estimators |
+| Sparsity | Many coefficients exactly zero |
+| Shrinkage | Moving estimated coefficients toward zero |
+
+With standardized features, the penalty treats one coefficient unit
+consistently across columns. Without scaling, a feature's measurement unit can
+determine how strongly it is penalized.
+
+## Worked example: inspect validation and coefficients
+
 ```python
+import numpy as np
+from sklearn.datasets import load_diabetes
+from sklearn.linear_model import Lasso
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
-from sklearn.pipeline import Pipeline
 
-alphas = [0.001, 0.01, 0.1, 1.0, 10.0]
-ridge = Pipeline([
-    ('scaler', StandardScaler()),
-    ('model', RidgeCV(alphas=alphas, store_cv_values=True))
-])
-ridge.fit(X_train, y_train)
+X, y = load_diabetes(return_X_y=True)
+alphas = np.logspace(-3, 1, 8)
 
-lasso = Pipeline([
-    ('scaler', StandardScaler()),
-    ('model', LassoCV(alphas=alphas, max_iter=5000, random_state=0))
-])
-lasso.fit(X_train, y_train)
-
-enet = Pipeline([
-    ('scaler', StandardScaler()),
-    ('model', ElasticNetCV(l1_ratio=[0.2,0.5,0.8], alphas=alphas, random_state=0))
-])
-enet.fit(X_train, y_train)
+for alpha in alphas:
+    model = make_pipeline(
+        StandardScaler(),
+        Lasso(alpha=alpha, max_iter=20_000),
+    )
+    mean_r2 = cross_val_score(model, X, y, cv=5, scoring="r2").mean()
+    print(f"{alpha=:.4f} {mean_r2=:.3f}")
 ```
 
-### Coefficient paths (idea)
-- Use sklearn.linear_model.lasso_path to visualize sparsity vs alpha
+A stronger penalty usually increases bias and decreases variance, but the
+validation curve is empirical. Select `alpha` using training folds rather than
+the final test set.
 
-## Common pitfalls
-- Skipping scaling; penalization depends on scale
-- Comparing raw coefficients across differently scaled features
-- Using default max_iter too low for Lasso; increase if not converged
+## Learner exercises
 
-## Practice exercises
-1) Compare Ridge vs Lasso performance via CV on a noisy dataset
-2) Plot coefficient paths for Lasso and discuss sparsity
-3) Tune ElasticNet l1_ratio; report best alpha and l1_ratio
+1. Sweep `alpha` values and plot validation scores for Ridge and Lasso.
+2. Inspect fitted coefficients and compare their sparsity.
 
-## Further reading
-- Linear models: https://scikit-learn.org/stable/modules/linear_model.html
+The separate solution also demonstrates Elastic Net as a useful extension.
+
+### Progressive hints
+
+1. Use a logarithmic grid and a log-scaled x-axis because meaningful penalty
+   strengths often span orders of magnitude. Keep folds identical.
+2. Fit the chosen pipelines on the same training data. Access the final model
+   through `named_steps` and count values equal or very close to zero.
+
+## Self-check
+
+- Why does Ridge rarely produce exact zeros while Lasso can?
+- What does a very large `alpha` do to training fit and model flexibility?
+- Why can Lasso select one arbitrary member of a correlated feature group?
+- Which two hyperparameters does Elastic Net expose conceptually?
+
+Expected behavior: overly large penalties underfit; Lasso generally produces
+more zeros than Ridge at useful strengths, though exact outcomes depend on data
+and `alpha`.
+
+## Pitfalls, diagnostics, and tradeoffs
+
+| Symptom | Likely cause | Response |
+|---|---|---|
+| `ConvergenceWarning` from Lasso | Too few iterations, poor scaling, or hard optimization | Scale, raise `max_iter`, and inspect convergence |
+| All coefficients become zero | Penalty too strong | Expand the search toward smaller `alpha` |
+| Coefficient comparison is misleading | Different feature units | Keep `StandardScaler` inside the pipeline |
+| Sparse features change across resamples | Correlated predictors or limited data | Check selection stability; consider Elastic Net |
+| Best score selected from final holdout | Evaluation leakage | Tune with CV, reserve the holdout |
+
+Sparsity may improve deployment and interpretation, but zero coefficients are
+not proof that a feature is irrelevant or causally unimportant.
+
+## Next step
+
+- Work in the [Day 37 learner notebook](../notebooks/day37_regularization_linear_models.ipynb).
+- Then compare with the
+  [Day 37 solution](../solutions/day37_regularization_linear_models/day37_solutions.md).
+- Continue to [Day 38 — Trees and Random Forests](day38_tree_models_random_forest.md).

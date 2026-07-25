@@ -1,0 +1,44 @@
+name: ds60sqlpy
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: advanced_sql_training
+      POSTGRES_USER: ds60
+      POSTGRES_PASSWORD: ds60
+    ports:
+      - "${DS60_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ds60 -d advanced_sql_training"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  sql-runner:
+    image: postgres:17
+    profiles: ["tools"]
+    environment:
+      PGPASSWORD: ds60
+    volumes:
+      - .:/course:ro
+    working_dir: /course
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint:
+      - psql
+      - -X
+      - -v
+      - ON_ERROR_STOP=1
+      - --host
+      - postgres
+      - --username
+      - ds60
+      - --dbname
+      - advanced_sql_training
+
+volumes:
+  postgres-data:

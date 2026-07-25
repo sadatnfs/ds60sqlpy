@@ -24,12 +24,12 @@ GROUP BY c.country
 ORDER BY 2 DESC;
 
 -- Additional optimization: pre-aggregate items by order to reduce rows early
+EXPLAIN ANALYZE
 WITH items AS (
   SELECT order_id, SUM(quantity) AS qty
   FROM order_items
   GROUP BY order_id
 )
-EXPLAIN ANALYZE
 SELECT c.country, SUM(i.qty)
 FROM orders o
 JOIN items i ON i.order_id = o.order_id

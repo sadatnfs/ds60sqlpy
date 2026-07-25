@@ -1,97 +1,85 @@
-# Day 06 — Solutions (Set Operations: UNION/UNION ALL, INTERSECT, EXCEPT)
+# Day 06 solutions — set operations
 
-We derive overlaps and exclusives between cohorts, stitch monthly top‑k across partitions, and compare catalog vs facts. Each solution includes the reasoning, line‑by‑line notes, and pitfalls.
+These answers match the exercises in [Day 06](../day06_set_operations.sql). Each side of a set operation returns the same number of columns with compatible types.
 
-Setup
-- Schema: training; tables: customers, products, orders, order_items
-- Quick refresher: UNION removes duplicates; UNION ALL preserves duplicates. INTERSECT keeps rows present in both sets. EXCEPT keeps rows in A not in B.
+## Exercise 1 — Products in both orders and promotions
 
-Exercise 1 — Q1 vs Q2 cohorts: intersection and exclusives
 ```sql
-WITH q1 AS (
-  SELECT DISTINCT o.customer_id
-  FROM orders o
-  WHERE o.order_date >= DATE_TRUNC('year', CURRENT_DATE)
-    AND o.order_date <  DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '3 months'
-), q2 AS (
-  SELECT DISTINCT o.customer_id
-  FROM orders o
-  WHERE o.order_date >= DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '3 months'
-    AND o.order_date <  DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '6 months'
-)
--- Intersection (both Q1 and Q2)
-SELECT 'intersection' AS set_type, customer_id FROM (
-  SELECT customer_id FROM q1
+WITH matching_product_ids AS (
+  SELECT oi.product_id
+  FROM training.order_items AS oi
   INTERSECT
-  SELECT customer_id FROM q2
-) i
-UNION ALL
--- Exclusive Q1 only
-SELECT 'q1_only' AS set_type, customer_id FROM (
-  SELECT customer_id FROM q1
-  EXCEPT
-  SELECT customer_id FROM q2
-) q1_only
-UNION ALL
--- Exclusive Q2 only
-SELECT 'q2_only' AS set_type, customer_id FROM (
-  SELECT customer_id FROM q2
-  EXCEPT
-  SELECT customer_id FROM q1
-) q2_only
-ORDER BY set_type, customer_id
-LIMIT 500;
-```
-Line‑by‑line
-- DISTINCT in q1/q2: ensure each set is a set of unique customer_ids; avoids duplicate semantics confusion.
-- INTERSECT: returns only IDs present in both sets.
-- EXCEPT: asymmetric difference; (A EXCEPT B) ≠ (B EXCEPT A).
-- UNION ALL: concatenate labeled results without dedup so counts stay additive.
-Pitfalls
-- Using UNION (dedup) where UNION ALL is intended; can change counts and add sorting overhead.
-
-Exercise 2 — Monthly top‑k sellers by category across a two‑month window
-```sql
-WITH month_cat AS (
-  SELECT DATE_TRUNC('month', o.order_date)::date AS month,
-         p.category,
-         oi.product_id,
-         SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  WHERE o.order_date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
-    AND o.order_date <  DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
-  GROUP BY DATE_TRUNC('month', o.order_date), p.category, oi.product_id
-), ranked AS (
-  SELECT month,
-         category,
-         product_id,
-         revenue,
-         DENSE_RANK() OVER (PARTITION BY month, category ORDER BY revenue DESC) AS rnk
-  FROM month_cat
+  SELECT pr.product_id
+  FROM training.promotions AS pr
 )
-SELECT month, category, product_id, revenue
-FROM ranked
-WHERE rnk <= 3
-ORDER BY month, category, revenue DESC;
+SELECT
+  p.product_id,
+  p.name,
+  p.category
+FROM matching_product_ids AS m
+JOIN training.products AS p
+  ON p.product_id = m.product_id
+ORDER BY p.product_id;
 ```
-Explanation
-- Window partition (month, category) produces separate rankings per month and category.
-- DENSE_RANK keeps ties; if ties matter, consider ROW_NUMBER (breaks ties deterministically) or RANK (skips ranks on ties).
-Pitfalls
-- Grouping by date_trunc but selecting raw order_date will fail; always select grouped expressions or aggregates.
 
-Exercise 3 — Catalog products never ordered
+`INTERSECT` removes duplicates and retains only product IDs present in both inputs.
+
+## Exercise 2 — Countries with customers but no orders
+
 ```sql
-SELECT p.product_id
-FROM products p
-EXCEPT
-SELECT DISTINCT oi.product_id
-FROM order_items oi
-ORDER BY product_id
-LIMIT 200;
+WITH countries_without_orders AS (
+  SELECT c.country
+  FROM training.customers AS c
+  EXCEPT
+  SELECT c.country
+  FROM training.customers AS c
+  JOIN training.orders AS o
+    ON o.customer_id = c.customer_id
+)
+SELECT country
+FROM countries_without_orders
+ORDER BY country;
 ```
-Why this way
-- EXCEPT reads “in catalog but not in order_items.” A LEFT JOIN … WHERE oi.product_id IS NULL is equivalent; EXCEPT makes the intent crisp.
-- DISTINCT on order_items avoids duplicate rows in the right set; EXCEPT applies set semantics regardless, but DISTINCT can reduce work.
+
+The first set is every customer country. The second set is countries represented by an order. `EXCEPT` subtracts the second from the first; the current seed intentionally makes `BR` an event-only market.
+
+## Exercise 3 — Compare UNION with UNION ALL
+
+The learner prompt permits any two filtered order sets. This example uses recent orders and high-value orders so some orders can appear in both.
+
+```sql
+WITH recent_orders AS (
+  SELECT o.order_id
+  FROM training.orders AS o
+  WHERE o.order_date >= CURRENT_TIMESTAMP - INTERVAL '365 days'
+),
+high_value_orders AS (
+  SELECT o.order_id
+  FROM training.orders AS o
+  WHERE o.total_amount >= 500
+),
+union_rows AS (
+  SELECT order_id FROM recent_orders
+  UNION
+  SELECT order_id FROM high_value_orders
+),
+union_all_rows AS (
+  SELECT order_id FROM recent_orders
+  UNION ALL
+  SELECT order_id FROM high_value_orders
+)
+SELECT 'UNION' AS operation, COUNT(*) AS rows_returned
+FROM union_rows
+UNION ALL
+SELECT 'UNION ALL', COUNT(*)
+FROM union_all_rows
+ORDER BY operation;
+```
+
+`UNION` deduplicates the overlap. `UNION ALL` keeps both copies and is normally faster because it does not perform that deduplication.
+
+## Check yourself
+
+- Exercise 1 contains no product that is missing from either source.
+- Exercise 2 returns the intentionally order-free country from a clean seed.
+- The `UNION ALL` count is greater than or equal to the `UNION` count.

@@ -55,7 +55,7 @@ SELECT
   (SELECT COUNT(*) FROM buyers) AS buyers
 FROM ev;
 
--- c) Top product pairs revenue (market basket)
+-- c) Top product pairs by co-occurrence (market basket)
 WITH items AS (
   SELECT order_id, product_id FROM order_items GROUP BY order_id, product_id
 ), pairs AS (

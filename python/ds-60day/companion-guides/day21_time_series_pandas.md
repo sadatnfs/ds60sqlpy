@@ -1,49 +1,88 @@
-# Day 21 — Time Series with Pandas (Companion Guide)
+# Day 21 — Time Series with pandas
+
+**Level:** Intermediate
+
+Time-series correctness depends on timestamp meaning, time zones, ordering, and
+window boundaries—not just the numeric calculation.
 
 ## Learning objectives
-- Work with datetime dtypes, indexes, time zones
-- Resample, roll, and window functions
-- Time-based selection and period arithmetic
 
-## Why this matters
-Time is a first-class dimension in many analyses. Pandas offers rich tools for temporal data that simplify complex logic.
+By the end of this lesson, you can:
 
-## Core concepts and examples
-### Datetime handling
+- parse timestamps and construct a sorted `DatetimeIndex`;
+- distinguish timezone-naive from timezone-aware values;
+- localize wall-clock time and convert aware timestamps to UTC;
+- resample observations into stated calendar intervals;
+- compute row-based and time-based rolling windows.
+
+## Prerequisites
+
+Complete Day 20 (`python-20`): indexes, table grain, grouping, and validation.
+
+## Vocabulary and mental model
+
+- **Timestamp:** one point in time or an unzoned wall-clock reading.
+- **Timezone-naive:** no zone/offset; **timezone-aware:** carries location or
+  offset rules.
+- **Localization:** attach a zone to naive local time; **conversion:** express
+  an aware instant in another zone.
+- **Frequency:** spacing such as calendar day, business day, or month end.
+- **Resampling:** group observations into time bins.
+- **Rolling window:** calculation over preceding rows or duration.
+
+Store instants in UTC and preserve the source zone when business meaning depends
+on local clocks.
+
+## Worked example
+
 ```python
-s = pd.to_datetime(df['timestamp'], utc=True)
-df = df.assign(ts=s).set_index('ts').sort_index()
-df.tz_convert('America/Los_Angeles')
+import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(42)
+index = pd.date_range("2024-01-01", periods=14, freq="D", tz="UTC")
+values = pd.Series(rng.integers(1, 10, size=len(index)), index=index)
+
+weekly = values.resample("W-SUN", label="right", closed="right").sum()
+trailing_7d = values.rolling("7D", min_periods=1).mean()
 ```
 
-### Time-based selection
-```python
-df.loc['2024-01']          # month
-df.loc['2024-01-15']       # day
-```
+The seeded generator makes results repeatable. The explicit weekly label and
+boundary make the bin definition reviewable.
 
-### Resampling and rolling
-```python
-# resample to daily sum
-daily = df['value'].resample('D').sum()
-# 7-day moving average
-df['ma7'] = df['value'].rolling(window=7, min_periods=1).mean()
-```
+## Exercises and progressive hints
 
-### Periods vs timestamps
-```python
-p = pd.PeriodIndex(['2024Q1','2024Q2'], freq='Q')
-```
+1. Create a business-day series and compute weekly sums. **Hint:** choose and
+   document the weekly boundary (`W-FRI` or `W-SUN`), then reconcile the grand
+   total before and after resampling.
+2. Add a named local timezone to a timestamp column, then convert it to UTC.
+   **Hint:** parse first, use localization only on naive values, and include a
+   date near a daylight-saving transition in your tests.
 
-## Common pitfalls
-- Mixing naive and tz-aware datetimes; pick UTC internally
-- Using `rolling` on unsorted indexes; always sort by time
-- Expecting `resample` on non-datetime index; set a DatetimeIndex first
+## Self-check
 
-## Practice exercises
-1) Convert a column to UTC and to a local timezone for reporting
-2) Compute weekly revenue and a 4-week rolling average
-3) Use `asfreq` to fill a regular grid and forward-fill missing observations
+- Why is `tz_localize` not interchangeable with `tz_convert`?
+- How does a seven-row rolling window differ from `rolling("7D")`?
+- Which side of a resample bin contains an exact boundary timestamp?
+- Why should a time index be sorted before slicing or rolling?
 
-## Further reading
-- Timeseries: https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html
+Expected behavior: weekly sums reconcile with source values, aware timestamps
+represent the same instants after UTC conversion, and window choices are stated.
+
+## Common pitfalls and diagnosis
+
+- **Localizing an aware timestamp raises:** use `tz_convert` for already-aware
+  values.
+- **Daylight-saving times are ambiguous/nonexistent:** choose an explicit
+  policy and test those dates rather than silently guessing.
+- **Monthly aliases change behavior across versions:** use current explicit
+  aliases such as month-end `"ME"` and inspect deprecation warnings.
+- **Rolling results begin with missing values:** set `min_periods` deliberately.
+- **Resampled totals differ:** inspect missing timestamps, aggregation, bin
+  closure, and time zone before blaming arithmetic.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day21_time_series_pandas.ipynb)
+- [Check the separate solution](../solutions/day21_time_series_pandas/day21_solutions.md)
+- [Next: Day 22 — Advanced pandas](day22_advanced_pandas_apply_query_eval.md)

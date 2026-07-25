@@ -1,76 +1,50 @@
-# Day 13 — Solutions (Date/Time Functions, Cohorts, Calendars)
+# Day 13 solutions — date and time functions
 
-We build weekly signup cohorts with retention, then create a complete daily calendar joined to daily revenue. Step‑by‑step notes explain the time arithmetic and windowing.
+These answers match the exercises in [Day 13](../day13_date_time_functions.sql).
 
-Setup
-- Schema: training; tables: customers(created_at), orders(order_date)
-- Time math: DATE_TRUNC for bucketing; generate_series for dense calendars
+## Exercise 1 — Compute the quarter for each order
 
-Exercise 1 — Weekly cohorts with 0–4 week retention
+The prompt says “fiscal quarter” but does not define when the fiscal year starts. This answer assumes the fiscal year follows the calendar year and evaluates the timestamp in UTC.
+
 ```sql
-WITH cohorts AS (
-  SELECT c.customer_id,
-         DATE_TRUNC('week', c.created_at)::date AS cohort_week
-  FROM customers c
-), order_weeks AS (
-  SELECT o.customer_id,
-         DATE_TRUNC('week', o.order_date)::date AS order_week
-  FROM orders o
-), offsets AS (
-  SELECT co.cohort_week,
-         ow.customer_id,
-         (EXTRACT(EPOCH FROM (ow.order_week - co.cohort_week)) / 604800)::int AS week_offset
-  FROM cohorts co
-  JOIN order_weeks ow ON ow.customer_id = co.customer_id
-  WHERE ow.order_week >= co.cohort_week
-), coh_sizes AS (
-  SELECT cohort_week, COUNT(*) AS cohort_size
-  FROM cohorts
-  GROUP BY cohort_week
+WITH order_calendar AS (
+  SELECT
+    o.order_id,
+    o.order_date,
+    o.order_date AT TIME ZONE 'UTC' AS order_time_utc
+  FROM training.orders AS o
 )
-SELECT o.cohort_week,
-       o.week_offset,
-       COUNT(DISTINCT o.customer_id) AS active_customers,
-       ROUND(COUNT(DISTINCT o.customer_id)::numeric / NULLIF(cs.cohort_size,0), 4) AS retention_rate
-FROM offsets o
-JOIN coh_sizes cs USING (cohort_week)
-WHERE o.week_offset IN (0,1,2,3,4)
-GROUP BY o.cohort_week, o.week_offset, cs.cohort_size
-ORDER BY o.cohort_week, o.week_offset;
+SELECT
+  order_id,
+  order_date,
+  EXTRACT(YEAR FROM order_time_utc)::integer AS fiscal_year,
+  EXTRACT(QUARTER FROM order_time_utc)::integer AS fiscal_quarter
+FROM order_calendar
+ORDER BY order_date, order_id;
 ```
-Line‑by‑line
-- DATE_TRUNC('week', ts)::date: buckets to Monday‑based weeks (default in Postgres) and casts to date for readability.
-- week_offset: Difference in weeks between an order week and the cohort week. We convert the interval to seconds via EXTRACT(EPOCH ...) and divide by 604800.
-- coh_sizes: cohort denominators used for retention rate.
-- Final SELECT: Distinct active users per (cohort, offset) divided by cohort size yields retention; limited to weeks 0–4.
-Pitfalls
-- If created_at is timezone‑aware and order_date is not, normalize first (AT TIME ZONE) to avoid off‑by‑one week in edge cases.
 
-Exercise 2 — Dense daily calendar with left‑joined revenue
+For a fiscal year starting in another month, define that start month before writing the query; shifting dates without a stated rule can label both the quarter and fiscal year incorrectly.
+
+## Exercise 2 — Days since each customer’s last order
+
 ```sql
-WITH bounds AS (
-  SELECT MIN(order_date)::date AS start_d, MAX(order_date)::date AS end_d FROM orders
-), cal AS (
-  SELECT gs::date AS d
-  FROM bounds b
-  CROSS JOIN generate_series(b.start_d, b.end_d, interval '1 day') gs
-), daily AS (
-  SELECT DATE_TRUNC('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY DATE_TRUNC('day', o.order_date)
-)
-SELECT c.d,
-       COALESCE(d.revenue, 0) AS revenue
-FROM cal c
-LEFT JOIN daily d ON d.d = c.d
-ORDER BY c.d
-LIMIT 500;
+SELECT
+  c.customer_id,
+  c.full_name,
+  MAX(o.order_date) AS last_order_at,
+  CURRENT_DATE
+    - MAX((o.order_date AT TIME ZONE 'UTC')::date) AS days_since_last_order
+FROM training.customers AS c
+LEFT JOIN training.orders AS o
+  ON o.customer_id = c.customer_id
+GROUP BY c.customer_id, c.full_name
+ORDER BY days_since_last_order DESC NULLS LAST, c.customer_id;
 ```
-Explanation
-- bounds: Captures the inclusive min/max day so generate_series produces a correct range.
-- cal: One row per day. Casting gs to date trims time components.
-- daily: Aggregate order totals per day.
-- LEFT JOIN: Ensures days with zero revenue are present with 0 after COALESCE.
-Tips
-- For weekly/monthly calendars, change the generate_series step to interval '1 week' / use DATE_TRUNC('month', ...), etc.
+
+`MAX` finds each customer’s most recent order. Customers without orders remain present; both last-order columns are `NULL` because “days since” is undefined for them.
+
+## Check yourself
+
+- Calendar months 1–3 map to quarter 1, 4–6 to quarter 2, and so on.
+- Exercise 2 returns one row per customer.
+- Do not replace a missing last order with zero days; that would falsely mean the customer ordered today.

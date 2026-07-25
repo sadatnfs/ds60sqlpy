@@ -22,14 +22,14 @@ class Payload(BaseModel):
     y: float
 
 @app.post('/predict')
-def predict(p: Payload):
+def predict(payload: Payload) -> dict[str, float]:
     # placeholder: sum as a toy 'model'
-    return {'pred': p.x + p.y}
+    return {"pred": payload.x + payload.y}
 ```
 
 ```dockerfile
 # Dockerfile
-FROM python:3.11-slim AS base
+FROM python:3.12-slim AS base
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -40,10 +40,10 @@ CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ```text
 # requirements.txt
-fastapi
-uvicorn[standard]
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
 ```
-Build and run
+Build and run (the same one-line commands work in Bash, zsh, PowerShell, and Command Prompt):
 ```bash
 docker build -t ds-fastapi:latest .
 docker run -p 8000:8000 ds-fastapi:latest
@@ -54,38 +54,53 @@ docker run -p 8000:8000 ds-fastapi:latest
 Exercise 2 — Health endpoint and HEALTHCHECK
 ```python
 # app.py addition
-@app.get('/health')
-def health():
-    return {'status':'ok'}
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
 ```
 
 ```dockerfile
-# Dockerfile addition
+# Add this before CMD. Python is already present in python:3.12-slim, so the
+# check needs no curl package and uses no shell-specific operators.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
 ```
 Explanation
-- HEALTHCHECK lets orchestrators replace unhealthy containers
-- Keep timeouts short; endpoint should be fast and dependency‑light
+- During the start period, failed probes do not count toward the retry threshold
+- A successful probe marks the container healthy; consecutive failures mark it unhealthy
+- Docker records health status but does not restart an unhealthy container by itself
+- An orchestrator can act on that status only when its policy is configured to do so
+- Keep the endpoint fast and dependency-light; use a separate readiness check when needed
 
 ---
 
 Exercise 3 — Multi‑stage build
 ```dockerfile
-# Stage 1: builder with build deps
-FROM python:3.11-slim AS builder
-WORKDIR /app
+# Stage 1: build dependencies in an isolated virtual environment.
+FROM python:3.12-slim AS builder
+ENV VIRTUAL_ENV=/opt/venv
+RUN python -m venv "$VIRTUAL_ENV"
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+WORKDIR /build
 COPY requirements.txt .
-RUN pip install --prefix=/install --no-warn-script-location --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: runtime
-FROM gcr.io/distroless/python3-debian12 AS runtime
-COPY --from=builder /install /usr/local
+# Stage 2: use the matching Python base so the copied environment is compatible.
+FROM python:3.12-slim AS runtime
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+COPY --from=builder /opt/venv /opt/venv
 WORKDIR /app
-COPY app.py .
+RUN useradd --create-home --uid 10001 appuser
+COPY --chown=appuser:appuser app.py .
+USER appuser
 EXPOSE 8000
-CMD ["/usr/local/bin/uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 Notes
-- Distroless reduces attack surface; ensure compatibility
-- Alternatively, use python:slim and remove build tools after install
+- The final image contains neither `requirements.txt` nor build-stage caches
+- Builder and runtime use the same Python minor version, avoiding ABI and script-shebang mismatches
+- The runtime uses a non-root user and the same shell-independent health probe as Exercise 2
+- For compiled packages, install compilers only in the builder stage

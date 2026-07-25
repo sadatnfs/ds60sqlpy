@@ -1,47 +1,84 @@
-# Day 44 — Monitoring and Diagnostics (Companion Guide)
+# Day 44 — Monitoring and Diagnostics
 
-Learning objectives
-- Observe database health with pg_stat_* views and background process metrics
-- Identify slow/expensive queries via pg_stat_statements and logs (auto_explain)
-- Track bloat, vacuum activity, I/O pressure, and connection/session issues
+## Level and prerequisites
 
-Why this matters
-Performance and reliability require continuous visibility. Knowing what to watch and how to interpret it lets you fix issues proactively and triage incidents quickly.
+- **Level:** Advanced
+- **Prerequisites:** [Day 43 — logical backup and recovery](day43_backup_recovery.md)
+- **Artifacts:** [learner SQL](../day44_monitoring_diagnostics.sql) ·
+  [solution reasoning](../solutions/day44_solutions.md) ·
+  [executable solution](../solutions/day44_solutions.sql)
 
-Core concepts and deep dive
-- Sessions and waits
-  - pg_stat_activity: state (active/idle/idle in transaction), query, xact_start, wait_event(_type)
-  - Long‑running transactions block vacuum → bloat; kill or nudge offenders
-- Top queries with pg_stat_statements (enable in postgresql.conf)
-  - CREATE EXTENSION pg_stat_statements;
-  - Columns: total_time, mean_time, calls, rows; normalize by calls to find outliers
-  - Reset stats thoughtfully (SELECT pg_stat_statements_reset())
-- Plans in logs with auto_explain
-  - shared_preload_libraries='auto_explain'; auto_explain.log_min_duration='200ms'; auto_explain.log_analyze=on
-  - Captures plans only for slow statements; inspect node time/loops and buffers
-- Table/index stats
-  - pg_stat_user_tables: seq_scan, idx_scan, n_tup_ins/upd/del, vacuum/analyze counts
-  - pg_stat_user_indexes and pg_index: idx_scan usage, size via pg_relation_size
-  - Bloat heuristics: compare relpages to expected; consider pgstattuple extension for accuracy
-- I/O and caching (PG16+)
-  - pg_stat_io shows read/write/wal I/O by backend type
-  - EXPLAIN (ANALYZE, BUFFERS) to see shared/local read hits vs reads
-- Vacuum and autovacuum
-  - Monitor autovacuum activity; freeze age (400M) risk; tune autovacuum_vacuum_cost_limit/scale_factor
-- Connections and pools
-  - max_connections vs workload; prefer pgbouncer for pooling; check too many idle sessions
+## Learning objectives
 
-Operational playbook
-- Daily dashboard: top queries (last 24h), slowest plans, vacuum lag, bloat candidates, blocked queries
-- On incident: capture pg_stat_activity, lock tree, top pg_stat_statements; attach relevant logs
-- Periodic hygiene: drop unused indexes (idx_scan=0), refresh stats, tune autovacuum per table
+- Distinguish active session state from aggregated statement history.
+- Collect wait, runtime, and plan evidence before proposing intervention.
 
-Practice exercises
-1) Enable pg_stat_statements and list top 10 queries by total_time and mean_time
-2) Turn on auto_explain and capture a slow plan; identify the dominant node
-3) Compute a bloat candidate list and size the largest relations
+## Vocabulary and concepts
 
-Further reading
-- pg_stat_statements: https://www.postgresql.org/docs/current/pgstatstatements.html
-- Monitoring: https://www.postgresql.org/docs/current/monitoring-stats.html
-- auto_explain: https://www.postgresql.org/docs/current/auto-explain.html
+- **Wait event:** the resource or condition an active backend is waiting on.
+- **Backend PID:** the process identifier for one PostgreSQL session.
+- **Normalized statement:** structurally equivalent SQL grouped for aggregate
+  statistics.
+
+## Worked example / walkthrough
+
+Query `pg_stat_activity`, exclude `pg_backend_pid()`, and calculate runtime only
+for active statements. For one row, read user, state, wait type/event, and query
+together; a long duration alone does not prove a fault or authorize
+termination.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day44_monitoring_diagnostics.sql).
+If `pg_stat_statements` is unavailable, document that capability boundary
+instead of changing server configuration.
+
+## Self-check
+
+- Can you tell whether evidence describes a current session or historical
+  aggregates?
+- Have you avoided extension installation, statistics resets, cancellation, and
+  termination?
+
+## Next step
+
+Continue to [Day 45 — optimization project](day45_phase3_optimization_project.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Find active statements and calculate their current runtime.
+- Interpret wait events before deciding that a query is stuck.
+- Read optional aggregate statement statistics when the extension is available.
+
+## How the learner script works
+
+The starter queries `pg_stat_activity`, then runs `EXPLAIN ANALYZE` on recent
+category units. Its `pg_stat_statements` query is commented because the
+extension may require server configuration and elevated access.
+
+For PostgreSQL 16, the relevant extension columns include `calls`,
+`total_exec_time`, and `mean_exec_time`. Use the current `_exec_time` names
+rather than column names from older PostgreSQL examples.
+
+## Practice — match the learner prompts exactly
+
+1. List the longest-running sessions whose state is `active`, excluding your
+   monitoring query with `pid <> pg_backend_pid()`. Include runtime and wait
+   event columns.
+2. If `pg_stat_statements` is installed and loaded, list the top ten statements
+   by total execution time and expose mean execution time as well.
+
+## Interpretation and safety
+
+- A long-running query can be legitimate; inspect owner, purpose, wait state,
+  locks, and plan before intervening.
+- `pg_stat_statements` aggregates normalized statement history; it is not a list
+  of currently active sessions.
+- Statistics reset, server restarts, and extension availability affect the
+  observation window.
+- Never install extensions, change `shared_preload_libraries`, reset statistics,
+  cancel queries, or terminate backends merely to complete this lesson.
+- The executable solution can remain portable by checking for the extension
+  view and using dynamic SQL only when it exists.

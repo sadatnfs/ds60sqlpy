@@ -1,17 +1,24 @@
-# 60-Day Intensive Python for Data Science — Daily Lesson Plan
+# Python and Data Science — 60-Lesson Plan
 
 Overview  
-- Goal: Become proficient in Python for data science in 60 days with ~1–2 hours/day practice.  
+- Goal: Progress from first Python programs to substantial data-science and
+  production projects. “Day” is a stable lesson number, not a deadline.
 - Structure: 4 Phases — Core Python & Good Coding (Days 1–15), Data Manipulation & Visualization (Days 16–30), Statistics & Machine Learning (Days 31–45), Advanced Topics, Production & Capstone (Days 46–60).  
-- Each day: Topic, 30–60 min targeted learning, 30–60 min hands-on exercise/project.
+- Each lesson: companion reading, a runnable learner notebook, hands-on
+  exercises, a self-check, and a separate worked solution.
+
+Start with the [track guide](ds-60day/README.md). The machine-readable paths,
+prerequisites, dependency groups, and network notes live in
+[`curriculum/catalog.json`](../curriculum/catalog.json).
 
 ---
 
 ## Phase 1 — Core Python & Good Coding Practices (Days 1–15)
 
-Day 1 — Python setup & REPL, virtualenv, package management  
-- Objectives: Install Python, set up venv/conda, pip, Jupyter.  
-- Exercise: Create venv, run a simple script, launch Jupyter.
+Day 1 — Python setup & REPL, virtual environments, package management
+- Objectives: Run the repository setup for Windows, macOS, or Linux; select the
+  `.venv` interpreter in VS Code; use Python and Jupyter.
+- Exercise: Verify the environment, run a simple script, and launch Jupyter.
 
 Day 2 — Basic syntax, variables, data types (str, int, float, bool)  
 - Exercise: Small script manipulating types and printing results.
@@ -49,8 +56,8 @@ Day 12 — OOP basics: classes, properties, inheritance, dataclasses
 Day 13 — Functional tools: itertools, functools, map/filter, lambda  
 - Exercise: Use itertools to create streaming transformations.
 
-Day 14 — Code quality: linters (flake8), formatter (black), type checking (mypy)  
-- Exercise: Apply black/flake8/mypy to existing code and fix issues.
+Day 14 — Code quality: linting and formatting with Ruff, type checking with mypy
+- Exercise: Apply Ruff and mypy to existing code and fix issues.
 
 Day 15 — Project: Small CLI data tool combining above skills  
 - Exercise: Build a command-line script that ingests a CSV, cleans it, outputs summary; include tests and linting.
@@ -86,19 +93,20 @@ Day 23 — Data pipelines: functions, generators, memory-efficient processing
 Day 24 — Exploratory Data Analysis (EDA) best practices & checklist  
 - Exercise: Produce an EDA summary notebook for a dataset.
 
-Day 25 — Visualization with Matplotlib + seaborn fundamentals  
+Day 25 — Visualization with Matplotlib + Seaborn fundamentals
 - Exercise: Plot distributions, pairplots, correlation heatmap.
 
 Day 26 — Advanced visualizations: interactive plots with Plotly or Altair  
 - Exercise: Create one interactive dashboard chart.
 
-Day 27 — Geospatial basics (GeoPandas intro) or domain-specific viz (choose relevant)  
-- Exercise: Plot simple geospatial data or domain chart.
+Day 27 — Geospatial basics with GeoPandas
+- Exercise: Plot simple geospatial data; the optional map dataset has a
+  disclosed first-use download and cache.
 
 Day 28 — Feature engineering: encoding, scaling, bins, missing flags  
 - Exercise: Engineer features for a modeling task.
 
-Day 29 — Data validation & schemas: pandera or pydantic for data contracts  
+Day 29 — Data validation & schemas with Pandera
 - Exercise: Add schema checks to ingest pipeline.
 
 Day 30 — Project: EDA + preprocessing notebook on a mid-size dataset  
@@ -147,7 +155,7 @@ Day 42 — Unsupervised learning basics: clustering (KMeans), anomaly detection
 Day 43 — Model interpretation: SHAP, partial dependence, LIME basics  
 - Exercise: Generate SHAP explanations for a model.
 
-Day 44 — Model deployment basics: saving models (joblib), simple API with FastAPI/Flask  
+Day 44 — Model deployment basics: saving models with joblib, typed APIs with FastAPI
 - Exercise: Save model and create a minimal prediction endpoint.
 
 Day 45 — Project: End-to-end modeling mini-project (data → model → evaluation → save)  
@@ -157,26 +165,31 @@ Day 45 — Project: End-to-end modeling mini-project (data → model → evaluat
 
 ## Phase 4 — Advanced Topics, Production & Capstone (Days 46–60)
 
-Day 46 — Introduction to Deep Learning: frameworks overview (PyTorch/TensorFlow)  
-- Exercise: Set up environment and run a hello-world example.
+Day 46 — Introduction to deep learning with PyTorch
+- Exercise: Compare a neural model with a simpler baseline and run a small,
+  deterministic example.
 
-Day 47 — PyTorch basics: tensors, autograd, simple NN, training loop  
-- Exercise: Train a small NN on MNIST or tabular data.
+Day 47 — PyTorch basics: tensors, autograd, a small neural network, training loop
+- Exercise: Train a small network on local generated data.
 
-Day 48 — Transfer learning & CNN basics (if image domain relevant)  
-- Exercise: Fine-tune a pre-trained model on small dataset.
+Day 48 — Transfer learning & convolutional-network basics
+- Exercise: Adapt a model on a small local dataset, with pretrained weights as
+  an explicitly optional first download.
 
-Day 49 — NLP basics with Hugging Face / spaCy: tokenization, embeddings  
-- Exercise: Run a text classification baseline with pretrained embeddings.
+Day 49 — NLP basics with Hugging Face and spaCy: tokenization and embeddings
+- Exercise: Build a local text-classification baseline, then optionally compare
+  it with a cached pretrained model.
 
-Day 50 — Time series modeling: ARIMA, prophet, LSTM overview  
-- Exercise: Forecast a basic time series and evaluate.
+Day 50 — Time-series modeling and forecast evaluation
+- Exercise: Forecast a local time series, compare with a naive baseline, and
+  evaluate without leakage.
 
 Day 51 — Advanced feature engineering: target encoding, leakage prevention, pipelines  
 - Exercise: Implement robust target encoding with CV folds.
 
-Day 52 — Scalability: Dask, Vaex, or chunked processing for big data  
-- Exercise: Process a large CSV with Dask or streaming approach.
+Day 52 — Scalability with Dask and chunked processing
+- Exercise: Process a bounded generated dataset with Dask and reason about
+  partition and memory tradeoffs.
 
 Day 53 — MLOps intro: experiment tracking (MLflow), reproducibility, CI basics  
 - Exercise: Track experiments and log artifacts.
@@ -187,8 +200,8 @@ Day 54 — Monitoring & model governance: drift detection, retraining strategies
 Day 55 — APIs & containerization: Dockerize a prediction service  
 - Exercise: Create Dockerfile for model API and run locally.
 
-Day 56 — Orchestration basics: Airflow/Prefect for pipelines (concepts + simple DAG)  
-- Exercise: Write a simple Prefect/airflow task to run preprocessing + training.
+Day 56 — Orchestration basics with Prefect
+- Exercise: Write a local Prefect flow for preprocessing and training.
 
 Day 57 — Security, data privacy & ethical considerations for data science  
 - Exercise: Perform basic PII scan and redact sample dataset.
@@ -204,15 +217,24 @@ Day 60 — Capstone completion & presentation: finalize model, prepare report & 
 
 ---
 
-## Suggested Weekly Rhythm
+## Suggested rhythm
 - 5 focused weekdays (learning + exercises), 1 lighter day for reading/recap, 1 day for mini-projects or catch-up.  
 - Keep a daily journal: what you learned, 3 takeaways, 1 blocker.
+- Pause at phase projects and repeat material as needed; project lessons often
+  take more than one session.
 
 ## Resources & Tools
-- Python 3.10+, Jupyter, pandas, NumPy, scikit-learn, matplotlib/seaborn, PyTorch or TF, Plotly/Altair, pytest, black/flake8, Git, Docker, MLflow.  
-- Recommended reading: "Python for Data Analysis" (Wes McKinney), "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow" (Aurélien Géron), official docs.
+- Python 3.11–3.12 (3.12 recommended), Jupyter, pandas, NumPy,
+  scikit-learn, matplotlib/Seaborn, PyTorch, Plotly/Altair, pytest, Ruff,
+  mypy, Git, Docker, and MLflow.
+- Use the repository companion guides first. Optional books and external
+  documentation are enrichment, not offline prerequisites.
 
-## Deliverables after 60 days
+## Deliverables after the track
 - Portfolio: 3 notebooks (EDA, ML pipeline, DL/NLP or time series), tests for utility modules, Dockerized model endpoint, project README and slides.
+
+The track is practical breadth, not a replacement for the complete Python
+language, statistics, security, or operations references. Demonstrate mastery
+with runnable work and explanations rather than lesson completion alone.
 
 ---

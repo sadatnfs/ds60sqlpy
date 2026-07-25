@@ -1,101 +1,90 @@
-# Day 5 — Functions, Docstrings, and Type Hints (Companion Guide)
+# Day 5 — Functions, Docstrings, and Type Hints
+
+**Level:** Beginner
+
+A function is a named contract: given valid inputs, it returns a documented
+result or raises a documented exception.
 
 ## Learning objectives
-- Define functions with positional-only, keyword-only, defaults, `*args`, `**kwargs`
-- Write clear docstrings (purpose, parameters, returns, raises)
-- Add type hints to improve readability and tooling (mypy/IDE)
-- Design functions for testability, reusability, and good error messages
 
-## Why this matters
-Functions are the basic unit of abstraction. Clear interfaces reduce bugs, speed up collaboration, and make code review easier. Type hints enable static checks and better IDE support without changing runtime behavior.
+By the end of this lesson, you can:
 
-## Mental models
-- A function is a contract: inputs (types, constraints) → outputs (types, guarantees)
-- Keep functions small and single-purpose; compose small functions into pipelines
-- Prefer pure functions (no hidden global state) for easier testing and reasoning
+- design a function with parameters, defaults, and a return value;
+- use `*args` and `**kwargs` only when variable inputs are part of the contract;
+- write a docstring that documents behavior and edge cases;
+- annotate inputs and outputs with Python 3.11-compatible type hints; and
+- validate values at runtime instead of assuming annotations enforce them.
 
-## Defining functions and signatures
+## Prerequisites
+
+Complete Day 4 (`python-04`): collections, iteration, and generators.
+
+## Vocabulary and mental model
+
+- **Parameter:** the name in a function definition; **argument:** a value passed
+  at a call site.
+- **Signature:** the function name, parameter kinds, defaults, and annotations.
+- **Scope:** where a name can be resolved.
+- **Pure function:** returns a result without changing external state.
+- **Type hint:** machine-readable documentation used by tools such as mypy.
+  Python does not enforce hints automatically.
+- **Docstring:** runtime-accessible documentation immediately inside a
+  function, class, or module.
+
+## Worked example
+
 ```python
-# Positional and keyword params with defaults
-
-def normalize(values: list[float], *, eps: float = 1e-9) -> list[float]:
-    total = sum(values) or eps
-    return [v / total for v in values]
-
-# *args (variadic positional) and **kwargs (variadic keyword)
-
-def summarize(title: str, *items: str, uppercase: bool = False, **meta: object) -> dict:
-    data = [i.upper() if uppercase else i for i in items]
-    return {"title": title, "count": len(data), "items": data, "meta": meta}
-```
-Use keyword-only params (the `*,` marker) for clarity on “configuration” arguments.
-
-## Docstrings that help humans
-```python
-def topk(values: list[float], k: int) -> list[float]:
-    """
-    Return the top-k values in descending order.
-
-    Args:
-        values: sequence of numeric values (may be empty)
-        k: number of values to return (k >= 0)
-
-    Returns:
-        A new list of up to k values sorted descending.
+def clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
+    """Return value restricted to the inclusive range [low, high].
 
     Raises:
-        ValueError: if k < 0
+        ValueError: If low is greater than high.
     """
-    if k < 0:
-        raise ValueError("k must be non-negative")
-    return sorted(values, reverse=True)[:k]
-```
-Use Google or NumPy style consistently; include constraints and error conditions.
-
-## Type hints in practice
-- Scalar types: `int, float, str, bool`
-- Containers: `list[int]`, `dict[str, float]`, `tuple[int, str]`
-- Optional: `str | None` (Python 3.10+) or `Optional[str]`
-- Callables: `Callable[[int, int], int]`
-- Type aliases: `UserId = int`
-
-Type hints do not enforce at runtime—use mypy for static checks.
-
-## Validating inputs and raising errors
-Keep validation upfront with helpful messages:
-```python
-def percentile(p: float) -> float:
-    if not 0.0 <= p <= 1.0:
-        raise ValueError(f"percentile p must be in [0, 1], got {p!r}")
-    return p
+    if low > high:
+        raise ValueError("low must not exceed high")
+    return min(max(value, low), high)
 ```
 
-## Designing for testability
-- Pure functions with inputs/outputs
-- Avoid I/O inside core logic (return data instead, do I/O at the edges)
-- Deterministic behavior; inject randomness via parameters with seeds
+The annotation describes intended types; the branch enforces a relationship
+between values that a basic type checker cannot express.
 
-## Common pitfalls
-- Overusing `*args/**kwargs` for generality; explicit is better than implicit
-- Missing docstrings in public functions
-- Ignoring edge cases (empty list, None, negative indices)
+## Exercises and progressive hints
 
-## Practice exercises
-1) Write `moving_average(xs: Sequence[float], window: int) -> list[float]` with input validation and docstring.
-2) Write `slugify(text: str, *, maxlen: int | None = None) -> str` that lowercases, replaces spaces with hyphens, removes unsafe chars, and truncates to `maxlen` if given.
-3) Add type hints and docstrings to two functions you’ve already written; run `mypy` and fix any warnings.
+1. Write an annotated function that computes the mean and population standard
+   deviation of a list of numbers. **Hint:** calculate the mean once, then use
+   each value's squared distance from that mean.
+2. Add a docstring that states the return shape and empty-input behavior.
+   **Hint:** decide on the contract before coding: return a sentinel or raise a
+   specific exception.
+3. Reject invalid inputs with `ValueError`. **Hint:** validate the collection
+   and its values near the function boundary; do not catch errors the function
+   cannot repair.
 
-## Stretch goals
-- Add `@overload` definitions for a function that returns different types based on input signature.
-- Use `TypedDict` or `dataclasses.dataclass` to define structured return types.
+## Self-check
 
-## Check your understanding
-- What’s the value of keyword-only parameters? Give an example where it improves clarity.
-- How do type hints improve code quality without runtime checks?
-- Write a docstring for a function that may raise `ValueError` and explain when it occurs.
+- What is the difference between a default argument and a return default?
+- Why are mutable defaults such as `items=[]` dangerous?
+- What can mypy detect that runtime execution may not, and vice versa?
+- When is `*args` clearer than accepting a collection?
 
-## Further reading
-- PEP 8 (style): https://peps.python.org/pep-0008/
-- PEP 484 (type hints): https://peps.python.org/pep-0484/
-- Mypy docs: https://mypy.readthedocs.io/en/stable/
-- Google Python Style Guide: https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings
+Expected behavior: normal numeric input returns two floats, the empty case
+matches the docstring, and invalid values fail with a useful message.
+
+## Common pitfalls and diagnosis
+
+- **A list default retains old values:** use `None`, then create the list inside
+  the function.
+- **A function prints but returns `None`:** inspect whether every intended path
+  has `return`.
+- **A local assignment unexpectedly hides an outer name:** pass dependencies as
+  parameters instead of relying on globals.
+- **`float | None` is treated as a float:** narrow it with an explicit
+  `is None` check before arithmetic.
+- **A type hint seems to validate input:** call the function with a wrong value
+  to confirm that validation requires code (or a validation library).
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day05_functions_type_hints.ipynb)
+- [Check the separate solution](../solutions/day05_functions_type_hints/day05_solutions.md)
+- [Next: Day 6 — Core data structures](day06_data_structures.md)

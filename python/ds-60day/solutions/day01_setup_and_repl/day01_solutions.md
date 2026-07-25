@@ -2,41 +2,53 @@
 
 This solution expands each exercise with exact commands and the reasoning behind them.
 
-Exercise 1: Create two virtual environments `ds-play` and `ds-prod`. Install `numpy` only in `ds-prod`. Verify import works only there.
+Exercise 1: Create two virtual environments under the ignored
+`artifacts/day01/` directory. Install `numpy` only in `ds-prod`. Verify import
+works only there.
 
 Why: Isolate dependencies to avoid conflicts across projects. Verifying imports ensures the correct environment is active.
 
 Commands (macOS/Linux)
 ```
-python3 -m venv ds-play/.venv
-python3 -m venv ds-prod/.venv
+python3 -m venv artifacts/day01/ds-play/.venv
+python3 -m venv artifacts/day01/ds-prod/.venv
 
 # Activate ds-play and verify numpy is not present
-source ds-play/.venv/bin/activate
+source artifacts/day01/ds-play/.venv/bin/activate
 python -c "import sys; print(sys.executable)"  # sanity
 python -c "import numpy" || echo "numpy not installed in ds-play (expected)"
 deactivate
 
 # Activate ds-prod and install numpy
-source ds-prod/.venv/bin/activate
+source artifacts/day01/ds-prod/.venv/bin/activate
 python -m pip install --upgrade pip
-pip install numpy
+python -m pip install numpy
 python -c "import numpy as np; print(np.__version__)"  # should succeed
 ```
 Windows (PowerShell)
 ```
-py -3 -m venv ds-play/.venv
-py -3 -m venv ds-prod/.venv
+py -3.12 -m venv artifacts\day01\ds-play\.venv
+if ($LASTEXITCODE -ne 0) { throw "ds-play environment creation failed" }
+py -3.12 -m venv artifacts\day01\ds-prod\.venv
+if ($LASTEXITCODE -ne 0) { throw "ds-prod environment creation failed" }
 
 # ds-play
-./ds-play/.venv/Scripts/Activate.ps1
-python -c "import numpy" || echo "numpy not installed in ds-play (expected)"
+$playPython = ".\artifacts\day01\ds-play\.venv\Scripts\python.exe"
+& $playPython -c "import importlib.util; raise SystemExit(importlib.util.find_spec('numpy') is not None)"
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "numpy is not installed in ds-play (expected)"
+} else {
+    throw "numpy unexpectedly exists in ds-play"
+}
 
 # ds-prod
-./ds-prod/.venv/Scripts/Activate.ps1
-python -m pip install --upgrade pip
-pip install numpy
-python -c "import numpy as np; print(np.__version__)"
+$prodPython = ".\artifacts\day01\ds-prod\.venv\Scripts\python.exe"
+& $prodPython -m pip install --upgrade pip
+if ($LASTEXITCODE -ne 0) { throw "pip upgrade failed" }
+& $prodPython -m pip install numpy
+if ($LASTEXITCODE -ne 0) { throw "numpy installation failed" }
+& $prodPython -c "import numpy as np; print(np.__version__)"
+if ($LASTEXITCODE -ne 0) { throw "numpy import failed" }
 ```
 
 Exercise 2: From the REPL, define a function `gcd(a, b)` (Euclid’s algorithm) and test.
@@ -59,22 +71,40 @@ Exercise 3: Add a kernel for each environment and practice switching in JupyterL
 
 Why: Notebooks execute in a kernel process; binding the correct env avoids import errors.
 
-Commands
-```
+macOS/Linux:
+```bash
 # In ds-play
-source ds-play/.venv/bin/activate
-python -m pip install ipykernel
-python -m ipykernel install --user --name=ds-play --display-name "Python (ds-play)"
+artifacts/day01/ds-play/.venv/bin/python -m pip install ipykernel
+artifacts/day01/ds-play/.venv/bin/python -m ipykernel install \
+  --user --name ds-play --display-name "Python (ds-play)"
 
 # In ds-prod
-source ds-prod/.venv/bin/activate
-python -m pip install ipykernel
-python -m ipykernel install --user --name=ds-prod --display-name "Python (ds-prod)"
+artifacts/day01/ds-prod/.venv/bin/python -m pip install ipykernel
+artifacts/day01/ds-prod/.venv/bin/python -m ipykernel install \
+  --user --name ds-prod --display-name "Python (ds-prod)"
 
 # Launch JupyterLab and switch kernels from the Kernel menu
-jupyter lab
+.venv/bin/python -m jupyterlab
+```
+
+Windows PowerShell:
+```powershell
+$playPython = ".\artifacts\day01\ds-play\.venv\Scripts\python.exe"
+$prodPython = ".\artifacts\day01\ds-prod\.venv\Scripts\python.exe"
+
+& $playPython -m pip install ipykernel
+if ($LASTEXITCODE -ne 0) { throw "ds-play ipykernel installation failed" }
+& $playPython -m ipykernel install --user --name ds-play --display-name "Python (ds-play)"
+if ($LASTEXITCODE -ne 0) { throw "ds-play kernel registration failed" }
+
+& $prodPython -m pip install ipykernel
+if ($LASTEXITCODE -ne 0) { throw "ds-prod ipykernel installation failed" }
+& $prodPython -m ipykernel install --user --name ds-prod --display-name "Python (ds-prod)"
+if ($LASTEXITCODE -ne 0) { throw "ds-prod kernel registration failed" }
+
+.\.venv\Scripts\python.exe -m jupyterlab
 ```
 
 Notes
-- If `jupyter` isn’t found, install with `pip install jupyterlab` in the target env.
-- On Windows, use the Scripts paths and install ipykernel similarly.
+- These commands avoid activation so it is always clear which interpreter runs.
+- The course setup already installs JupyterLab in the repository `.venv`.

@@ -1,82 +1,46 @@
-# Day 09 — Solutions (Correlated Subqueries, EXISTS/NOT EXISTS)
+# Day 09 solutions — correlated subqueries and EXISTS
 
-We use EXISTS as a semi-join, NOT EXISTS as an anti-join, and show why NOT IN can be incorrect in the presence of NULLs. Step-by-step explanations and pitfalls included.
+These answers match the exercises in [Day 09](../day09_correlated_subqueries.sql).
 
-Setup
-- Schema: training; tables: customers, orders, order_items, products, events
-- Rule of thumb: Prefer EXISTS/NOT EXISTS over IN/NOT IN when the subquery can contain NULLs or when you only need to test existence
+## Exercise 1 — Customers with an order over $1,000
 
-Exercise 1 — Customers with a return/refund event (EXISTS)
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       c.email
-FROM customers c
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.country
+FROM training.customers AS c
 WHERE EXISTS (
   SELECT 1
-  FROM events e
-  WHERE e.customer_id = c.customer_id
-    AND (
-      e.kind = 'refund' OR e.kind = 'return'
-      -- If payload is JSONB with type in payload->>'event', you can use:
-      -- (e.payload->>'event') IN ('refund','return')
-    )
+  FROM training.orders AS o
+  WHERE o.customer_id = c.customer_id
+    AND o.total_amount > 1000
 )
-ORDER BY c.customer_id
-LIMIT 200;
+ORDER BY c.customer_id;
 ```
-Line-by-line
-- EXISTS: returns true if the subquery finds at least one row; the SELECT list inside EXISTS is ignored, so `SELECT 1` is idiomatic.
-- Correlation: `e.customer_id = c.customer_id` ties the inner query to the current customer row.
-- Why EXISTS: stops on first match; avoids duplicates and is robust to NULLs inside events.
 
-Exercise 2 — Categories with no orders in the last 30 days (NOT EXISTS)
+`EXISTS` asks whether at least one matching row exists. PostgreSQL does not need the inner query to return an order’s columns, so `SELECT 1` states the intent clearly.
+
+## Exercise 2 — Products never purchased
+
 ```sql
-WITH window AS (
-  SELECT CURRENT_DATE - INTERVAL '30 days' AS start_dt
-)
-SELECT DISTINCT p.category
-FROM products p
+SELECT
+  p.product_id,
+  p.name,
+  p.category
+FROM training.products AS p
 WHERE NOT EXISTS (
   SELECT 1
-  FROM order_items oi
-  JOIN orders o ON o.order_id = oi.order_id
+  FROM training.order_items AS oi
   WHERE oi.product_id = p.product_id
-    AND o.order_date >= (SELECT start_dt FROM window)
 )
-ORDER BY p.category;
+ORDER BY p.product_id;
 ```
-Explanation
-- NOT EXISTS is an anti-join: it keeps a row from the outer query only if the subquery matches zero rows.
-- Place the date filter in the subquery so that only recent orders disqualify a category.
-- DISTINCT prevents duplicate categories if multiple products map to the same category.
 
-Exercise 3 — Why NOT IN can be wrong with NULLs; fix with NOT EXISTS
-Bad pattern (can exclude all rows if subquery has NULL)
-```sql
-SELECT c.customer_id, c.email
-FROM customers c
-WHERE c.email NOT IN (
-  SELECT email
-  FROM customers
-  WHERE country = 'GB' -- might include NULL emails
-);
-```
-Correct pattern with NOT EXISTS
-```sql
-SELECT c.customer_id, c.email
-FROM customers c
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM customers gb
-  WHERE gb.country = 'GB'
-    AND gb.email = c.email
-);
-```
-Why
-- If the subquery of NOT IN returns any NULL, every comparison `x NOT IN (.., NULL, ..)` becomes UNKNOWN (i.e., false), yielding 0 rows.
-- NOT EXISTS compares equality row-by-row and does not misbehave in the presence of NULLs.
+`NOT EXISTS` is null-safe because it checks row existence rather than comparing a value with a list. The clean seed deliberately leaves products 276–300 unpurchased.
 
-Checks and tips
-- When using IN/NOT IN, ensure the subquery column is declared NOT NULL or explicitly `WHERE email IS NOT NULL` inside the subquery.
-- EXISTS is also often faster than `IN (SELECT ...)` for large subqueries, depending on indexes and planner choices.
+## Check yourself
+
+- Exercise 1 returns each qualifying customer once even if they have several large orders.
+- Exercise 2 returns the same product IDs as the Day 04 outer-join solution.
+- Do not replace `NOT EXISTS` with `NOT IN` unless you have proved the subquery cannot return `NULL`.

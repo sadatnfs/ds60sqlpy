@@ -1,5 +1,52 @@
 # Day 02 — Aggregations, GROUP BY, HAVING, Grouping Sets (Companion Guide)
 
+## Level and prerequisites
+
+- **Level:** Foundation (beginner)
+- **Prerequisites:** [Day 01 — SELECT, filtering, and ordering](day01_select_where_orderby.md)
+- **Artifacts:** [learner SQL](../day02_aggregates_groupby_having.sql) ·
+  [solution reasoning](../solutions/day02_solutions.md) ·
+  [executable solution](../solutions/day02_solutions.sql)
+
+## Learning objectives
+
+- Aggregate rows at a declared grain with `GROUP BY`.
+- Choose `WHERE` for row filters and `HAVING` for post-aggregation group filters.
+- Produce subtotals without confusing subtotal `NULL`s with data `NULL`s.
+
+## Vocabulary and concepts
+
+- **Aggregate:** a function such as `SUM` or `COUNT` that summarizes rows.
+- **Group grain:** the real-world meaning of one output row after grouping.
+- **Grouping set:** one of several grouping-key combinations evaluated in one
+  aggregate query.
+
+## Worked example / walkthrough
+
+In the category-revenue query, first identify one joined row as an order line.
+Next group those rows by product category, calculate the revenue aggregate, and
+only then apply `HAVING`. Compare that flow with a date predicate in `WHERE`,
+which removes rows before the category totals are computed.
+
+## Exercises
+
+Complete the three prompts in the [learner SQL](../day02_aggregates_groupby_having.sql).
+Add a `COUNT(*)` beside `COUNT(column)` for a nullable column and explain any
+difference.
+
+## Self-check
+
+- Can you state the grain of every result and explain why each selected
+  non-aggregate belongs in `GROUP BY`?
+- Do subtotal rows use `GROUPING(...)` rather than assuming every `NULL` is a
+  subtotal marker?
+
+## Next step
+
+Continue to [Day 03 — inner joins](day03_inner_joins.md).
+
+## Deep dive and reference
+
 Learning objectives
 - Master aggregate functions: COUNT/COUNT(DISTINCT), SUM, AVG, MIN/MAX, BOOL_AND/BOOL_OR
 - Use GROUP BY on columns and expressions; understand functional dependencies
@@ -28,14 +75,16 @@ Core concepts and deep dive
   - Use GROUPING(a) to detect subtotal rows (returns 1 when a is aggregated away).
 
 Walkthrough of the day’s script (mapping to your data)
-- Summaries by store/category/period using SUM(...) and COUNT(DISTINCT ...) showcase how to derive revenue, orders, and distinct customers.
-- HAVING clauses restrict to meaningful segments (e.g., HAVING SUM(revenue) > 10_000) after aggregation.
-- Grouping by expressions such as date_trunc('month', order_date) illustrates time bucketing.
+- Customer counts by `customers.country` introduce grouping and count aliases.
+- Net line revenue by `products.category` uses `HAVING` to retain categories
+  whose undiscounted line value exceeds 10,000.
+- Monthly order counts and average `orders.total_amount` demonstrate grouping
+  by `date_trunc('month', order_date)`.
 
 Advanced patterns
 - Conditional aggregation
-  - SUM(CASE WHEN status='refunded' THEN amount ELSE 0 END) AS refunded_amount
-  - COUNT(*) FILTER (WHERE status='completed') AS completed_orders (Postgres syntax)
+  - `SUM(amount) FILTER (WHERE method = 'card') AS card_payments`
+  - `COUNT(*) FILTER (WHERE status = 'returned') AS returned_orders`
 - Distinct inside aggregates
   - SUM(DISTINCT amount) is allowed but costly. Prefer dedup in a subquery when needed.
 - Multi-level totals
@@ -46,10 +95,16 @@ Anti-patterns and pitfalls
 - Confusing WHERE and HAVING; using HAVING for row-level filters degrades performance.
 - Relying on integer AVG without casting (integer division truncates). Cast to numeric: AVG(col::numeric).
 
-Practice exercises (beyond the script)
-1) Compute revenue, orders, AOV (avg order value) by country and month; include a country subtotal and a grand total using ROLLUP.
-2) For each product category, compute share of total revenue: SUM(revenue)/SUM(SUM(revenue)) OVER ().
-3) Use FILTER to count late shipments by region in the same query that computes total shipments.
+Exercises from the learner script
+1) Compute total payments per method and show only methods over 1,000,000.
+2) For each country, compute average customer age in the system
+   (`CURRENT_TIMESTAMP - created_at`).
+3) Return the top five categories by gross margin, defined by the prompt as
+   `SUM((products.price - products.cost) * order_items.quantity)`.
+
+The third exercise deliberately uses catalog price and cost. It does not apply
+the line discount or historical `unit_price`; document that business assumption
+if you extend the metric.
 
 Check your understanding
 - When do you use HAVING instead of WHERE? Give an example that would be wrong with WHERE.

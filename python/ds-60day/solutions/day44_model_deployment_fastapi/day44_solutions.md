@@ -15,15 +15,19 @@ from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import joblib
+from pathlib import Path
 
 X, y = load_iris(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
-clf = LogisticRegression(max_iter=1000, multi_class='auto').fit(Xtr, ytr)
+clf = LogisticRegression(max_iter=1000).fit(Xtr, ytr)
 print({'test_acc': clf.score(Xte, yte)})
-joblib.dump(clf, 'model.joblib')
+artifact_dir = Path('artifacts/day44')
+artifact_dir.mkdir(parents=True, exist_ok=True)
+model_path = artifact_dir / 'model.joblib'
+joblib.dump(clf, model_path)
 
 # Reload & quick sanity
-m = joblib.load('model.joblib')
+m = joblib.load(model_path)
 assert m.predict(Xte[:1]).shape == (1,)
 ```
 Line-by-line
@@ -32,32 +36,34 @@ Line-by-line
 ---
 
 Exercise 2 — Minimal FastAPI endpoint
-Create `app.py` in this folder:
+Create `artifacts/day44/app.py`:
 ```python
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, conlist
-import joblib, numpy as np
+from typing import Annotated
+
+import joblib
+import numpy as np
+from fastapi import FastAPI
+from pathlib import Path
+from pydantic import BaseModel, Field
 
 app = FastAPI()
-model = joblib.load('model.joblib')
+artifact_dir = Path(__file__).resolve().parent
+model = joblib.load(artifact_dir / 'model.joblib')
 CLASS_NAMES = ['setosa', 'versicolor', 'virginica']
 
 class IrisFeatures(BaseModel):
     # exactly 4 numeric features (sepal length/width, petal length/width)
-    features: conlist(float, min_items=4, max_items=4)
+    features: Annotated[list[float], Field(min_length=4, max_length=4)]
 
 @app.post('/predict')
 def predict(data: IrisFeatures):
-    try:
-        X = np.array([data.features], dtype=float)
-        pred = int(model.predict(X).tolist()[0])
-        return {'prediction': pred, 'class_name': CLASS_NAMES[pred]}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f'Bad request: {e}')
+    X = np.array([data.features], dtype=float)
+    pred = int(model.predict(X).tolist()[0])
+    return {'prediction': pred, 'class_name': CLASS_NAMES[pred]}
 ```
 Run the server in a terminal:
 ```bash
-uvicorn app:app --reload
+python -m uvicorn app:app --app-dir artifacts/day44 --reload
 ```
 
 ---
@@ -77,6 +83,7 @@ curl -s -X POST http://127.0.0.1:8000/predict \
 Notes
 - Pydantic validates the request shape and types automatically
 - Prefer returning human-friendly class names along with numeric ids
+- Load only trusted joblib artifacts; pickle-compatible formats can execute code while loading
 
 Deployment pointers
 - Freeze dependencies into a minimal requirements.txt (fastapi, uvicorn, scikit-learn, joblib, numpy)

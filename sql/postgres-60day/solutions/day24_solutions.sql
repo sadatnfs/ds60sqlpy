@@ -1,55 +1,43 @@
--- Day 24 - Solutions: Recursive CTEs (Hierarchies)
--- Assumes: employees(id, manager_id, first_name, last_name), products(product_id, category, parent_category) example
+-- Day 24 solutions: recursive CTEs
+SET search_path TO training, public;
 
-/*
-Exercise 1) From a given department head, list all reports with depth and path.
-Why: WITH RECURSIVE; accumulate path to prevent cycles and provide breadcrumbs.
-*/
-WITH RECURSIVE tree AS (
-  SELECT e.id, e.manager_id, 0 AS depth,
-         (ARRAY[e.id]) AS path
-  FROM employees e
-  WHERE e.id = 1  -- parameterize for a given root
-  UNION ALL
-  SELECT c.id, c.manager_id, t.depth + 1,
-         t.path || c.id
-  FROM employees c
-  JOIN tree t ON c.manager_id = t.id
-  WHERE NOT c.id = ANY(t.path)
-)
-SELECT id, manager_id, depth, path
-FROM tree
-ORDER BY depth, id
-LIMIT 500;
+-- Exercise 1: every manager's direct and indirect reports.
+WITH RECURSIVE reports AS (
+  SELECT m.employee_id AS manager_id,
+         e.employee_id AS report_id,
+         1 AS depth,
+         ARRAY[m.employee_id, e.employee_id] AS path
+  FROM employees m
+  JOIN employees e ON e.manager_id = m.employee_id
 
-/*
-Exercise 2) From a product, walk up to root category and return full lineage.
-Assume products(category) with a categories(parent_category) tree.
-*/
-WITH RECURSIVE up AS (
-  SELECT p.product_id, c.category, c.parent_category
-  FROM products p
-  JOIN categories c ON c.category = p.category
-  WHERE p.product_id = 42
   UNION ALL
-  SELECT up.product_id, c.category, c.parent_category
-  FROM up
-  JOIN categories c ON c.category = up.parent_category
-)
-SELECT * FROM up;
 
-/*
-Exercise 3) Count number of reports at each depth across the org.
-*/
-WITH RECURSIVE org AS (
-  SELECT e.id, e.manager_id, 0 AS depth
-  FROM employees e
-  WHERE e.manager_id IS NULL
-  UNION ALL
-  SELECT c.id, c.manager_id, org.depth + 1
-  FROM employees c JOIN org ON c.manager_id = org.id
+  SELECT r.manager_id,
+         e.employee_id,
+         r.depth + 1,
+         r.path || e.employee_id
+  FROM reports r
+  JOIN employees e ON e.manager_id = r.report_id
+  WHERE NOT e.employee_id = ANY(r.path)
 )
-SELECT depth, COUNT(*) AS nodes
-FROM org
-GROUP BY depth
-ORDER BY depth;
+SELECT r.manager_id,
+       m.full_name AS manager,
+       r.report_id,
+       e.full_name AS report,
+       r.depth,
+       r.path
+FROM reports r
+JOIN employees m ON m.employee_id = r.manager_id
+JOIN employees e ON e.employee_id = r.report_id
+ORDER BY r.manager_id, r.depth, r.report_id;
+
+-- Exercise 2: generate 1 through 100 and sum recursively.
+WITH RECURSIVE numbers(n) AS (
+  VALUES (1)
+  UNION ALL
+  SELECT n + 1
+  FROM numbers
+  WHERE n < 100
+)
+SELECT SUM(n) AS sum_1_to_100
+FROM numbers;

@@ -1,70 +1,120 @@
-# Day 1 — Python Setup, REPL, Virtual Envs, and Package Management (Companion Guide)
+# Day 1 — Setup, REPL, Virtual Environments, and Packages
 
-This guide provides the narrative context for the Day 1 notebook. Use it as a reading resource before and during the hands‑on sections.
+**Level:** Beginner
 
-## What you’ll learn
-- Install Python 3.10+ and verify your installation
-- Create and activate isolated environments with `venv`
-- Use `pip` to manage packages and why upgrading `pip` first is wise
-- Launch and use the Python REPL for quick experiments
-- Install and launch JupyterLab; understand kernels
+Day 1 builds the environment used by every later lesson. Run commands from the
+repository root in VS Code's integrated terminal.
 
-## Why this matters
-Professional data science relies on reproducibility and isolation. Virtual environments ensure your project’s dependencies don’t conflict with system or other projects. A solid workflow today prevents hours of debugging in week 4.
+## Learning objectives
 
-## Concepts and mental models
-- Environment isolation: Think of each project as a self‑contained lab bench. Mixing chemicals (packages) across benches is risky.
-- REPL vs scripts vs notebooks: REPL is fast feedback; scripts are reproducible; notebooks are great for exploratory, narrative workflows.
-- Kernels: Jupyter’s kernel is the interpreter process running your code. Match notebooks to the correct environment via kernels.
+By the end of this lesson, you can:
 
-## Step‑by‑step workflow (recommended)
-1) Check Python
-   - macOS/Linux: `python3 --version`
-   - Windows: `py -3 --version`
-2) Create a project folder and environment
-   - macOS/Linux:
-     ```bash
-     python3 -m venv .venv
-     source .venv/bin/activate
-     ```
-   - Windows (PowerShell):
-     ```ps1
-     py -3 -m venv .venv
-     .venv\Scripts\Activate.ps1
-     ```
-3) Upgrade `pip` and install core tools
-   ```bash
-   python -m pip install --upgrade pip
-   pip install jupyterlab ipykernel
-   python -m ipykernel install --user --name=python3
-   ```
-4) Launch Lab
-   ```bash
-   jupyter lab
-   ```
-5) Use the REPL when needed
-   - Run `python` (or `python3`) in terminal for quick arithmetic, small function tests, and import checks.
+- verify that a supported Python 3.11–3.12 interpreter is installed;
+- create the repository's isolated `.venv` environment;
+- identify which interpreter and Jupyter kernel are running your code;
+- use the REPL for an experiment and a `.py` file for repeatable work; and
+- install packages through the selected interpreter.
 
-## Common pitfalls and fixes
-- “jupyter: command not found”: You installed Jupyter to a different environment. Activate the right venv and reinstall, or use the full path `python -m jupyterlab`.
-- Kernel mismatch: If a notebook can’t find modules you installed, its kernel is likely bound to a different environment. In JupyterLab, change the kernel to your environment’s kernel (installed above as `python3`).
-- Spaces and paths: On Windows, prefer PowerShell and avoid paths with spaces where possible.
+## Prerequisites
 
-## Exercises (beyond notebook)
-1) Create two virtual environments: `ds‑play` and `ds‑prod`. Install `numpy` only in `ds‑prod`. Verify you can import `numpy` in that env and not the other.
-2) From the REPL, define a function `gcd(a, b)` (Euclid’s algorithm) and test with several inputs.
-3) Add a kernel for each environment and practice switching kernels in Jupyter.
+None. Start with the operating-system setup in
+[`docs/setup/windows.md`](../../../docs/setup/windows.md) or the corresponding
+macOS/Linux guide. Python 3.12 is the canonical version; 3.11 is also supported.
 
-## Stretch goals
-- Install `pipx` and learn when it’s preferable to install CLI tools globally.
-- Try `conda` or `uv` (if available) and compare UX to `venv`.
+## Vocabulary and mental model
 
-## Check your understanding
-- Why do we use virtual environments? Name two practical benefits.
-- What is a kernel, and why might a notebook fail to import a package even after you installed it?
-- When would you use REPL vs a `.py` script vs a notebook?
+- **Interpreter:** the program that executes Python code.
+- **REPL:** a read-evaluate-print loop for short, disposable experiments.
+- **Virtual environment:** a project-local interpreter and package directory.
+  Think of `.venv` as this repository's private toolbox.
+- **Package:** reusable code installed into an environment.
+- **Kernel:** the interpreter process backing a notebook. Selecting the wrong
+  kernel is like running the right file with the wrong toolbox.
 
-## Further reading
-- Python venv docs: https://docs.python.org/3/library/venv.html
-- Packaging tutorial: https://packaging.python.org/en/latest/tutorials/installing-packages/
-- JupyterLab docs: https://jupyterlab.readthedocs.io
+`.venv` and cache directories are local, disposable machine state. They are
+ignored by Git; each learner creates their own.
+
+## Create and verify the course environment
+
+Windows PowerShell:
+
+```powershell
+py -3.12 --version
+powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
+.\.venv\Scripts\python.exe scripts\course.py doctor
+.\.venv\Scripts\python.exe -m jupyterlab python\ds-60day\notebooks
+```
+
+macOS/Linux:
+
+```bash
+python3.12 --version
+bash scripts/setup.sh
+.venv/bin/python scripts/course.py doctor
+.venv/bin/python -m jupyterlab python/ds-60day/notebooks
+```
+
+Activation is optional. Calling the interpreter by its path avoids PowerShell
+execution-policy issues and makes the selected environment unambiguous. In VS
+Code, select that same `.venv` interpreter and the `Python (ds60sqlpy)` kernel.
+
+## Worked example
+
+Try this in the REPL, then save it as `hello.py` and run the file:
+
+```python
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+
+print(greet("learner"))
+```
+
+The REPL gives fast feedback. The file records exactly what should run again.
+
+## Exercises and progressive hints
+
+1. Run the setup and confirm that `course.py doctor` reports Python 3.11 or
+   3.12. **Hint:** read the interpreter path in the report; it should contain
+   `.venv`.
+2. Start the REPL and evaluate arithmetic, a string method, and `type(...)`.
+   **Hint:** exit with `exit()`.
+3. In JupyterLab, select `Python (ds60sqlpy)` and print the interpreter path.
+   **Hint:** the `sys` module can describe the running interpreter.
+4. Create `calc.py` so two numeric command-line arguments produce their sum.
+   **Hint:** command-line values in `sys.argv` are strings, so convert them
+   deliberately. Day 15 replaces this bounded approach with `argparse`.
+5. As deeper environment practice, create two temporary environments and
+   install NumPy in only one. **Hint:** always use `python -m pip` from the
+   interpreter you intend to modify.
+
+The separate solution notes use the two-environment and REPL exercises to test
+the same setup skills without simply copying the notebook cells.
+
+## Self-check
+
+- How can you prove which Python interpreter is executing a command?
+- Why can an import work in a terminal but fail in a notebook?
+- Which work belongs in the REPL, a script, and a notebook?
+- What should be committed: `.venv`, or the files that describe dependencies?
+
+Expected behavior: setup is repeatable, `doctor` identifies `.venv`, and a new
+notebook can import the packages installed by `scripts/setup.*`.
+
+## Common pitfalls and diagnosis
+
+- **`py` or `python3.12` is not found:** install Python 3.12, reopen VS Code,
+  and rerun the version command.
+- **A package is missing only in Jupyter:** inspect the selected kernel; it is
+  probably not the repository's `.venv`.
+- **PowerShell blocks activation:** do not change policy just for activation;
+  use `.\.venv\Scripts\python.exe` directly.
+- **`pip` installs to the wrong place:** replace bare `pip` with
+  `<venv-python> -m pip`.
+- **A path contains spaces:** quote it when typing the path manually.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day01_setup_and_repl.ipynb)
+- [Check the separate solution after attempting the work](../solutions/day01_setup_and_repl/day01_solutions.md)
+- [Next: Day 2 — Variables and core types](day02_basics_types.md)

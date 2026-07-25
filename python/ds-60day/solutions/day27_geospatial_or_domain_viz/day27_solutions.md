@@ -10,11 +10,14 @@ Contents
 
 Track A — Geospatial (GeoPandas)
 ```python
-# Requires: geopandas, contextily
-import geopandas as gpd, contextily as cx
-world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres')).to_crs(3857)
-ax = world.plot(figsize=(8,6), alpha=0.6, edgecolor='k')
-cx.add_basemap(ax, source=cx.providers.Stamen.TonerLite)
+# Requires: geopandas, contextily, geodatasets
+import contextily as cx
+import geopandas as gpd
+from geodatasets import get_path
+
+world = gpd.read_file(get_path('naturalearth.land')).to_crs(3857)
+ax = world.plot(figsize=(8, 6), alpha=0.6, edgecolor='k')
+cx.add_basemap(ax, source=cx.providers.OpenStreetMap.Mapnik)
 ax.set(title='World basemap (Web Mercator)')
 ```
 
@@ -34,4 +37,5 @@ plt.title('Pipeline Stages (Network Graph)'); plt.tight_layout(); plt.show()
 ```
 Notes
 - For maps, ensure CRS is consistent; reproject to 3857 for web tiles
+- `geodatasets` and contextily tiles download/cache data on first use
 - For network graphs, layout algorithms (spring, kamada_kawai) affect readability

@@ -1,160 +1,87 @@
-# Day 53 — Solutions (Project 3: DWH Design, Part 2 — SCD Type 2)
+# Day 53 Solutions — SCD Type 2 and Temporal Fact Keys
 
-Today we practice Slowly Changing Dimensions (SCD Type 2) for customers and products. We close the current version and insert a new one when attributes change, then show how facts should join to the correct historical version by date.
+Run [`day52_solutions.sql`](day52_solutions.sql) first in the same database.
+Day 53 reads that committed `dwh` state but wraps its own changes in a
+transaction and rolls them back. The full answer is
+[`day53_solutions.sql`](day53_solutions.sql).
 
-Reference from lesson (annotated)
+## Exercise 1 — Resolve dimension versions by fact date
+
+The exercise requires the customer and product surrogate keys whose validity
+intervals contain each source order date.
+
 ```sql
--- Demo of detecting changed customers and applying SCD2
-WITH current_dim AS (
-  SELECT dc.*
-  FROM dim_customer dc
-  WHERE dc.is_current
-), diffs AS (
-  SELECT s.customer_id,
-         s.full_name,
-         s.country,
-         s.segment
-  FROM changed_customers s
-  JOIN current_dim dc ON dc.customer_id = s.customer_id
-  WHERE coalesce(s.full_name,'') <> coalesce(dc.full_name,'')
-     OR coalesce(s.country,'')   <> coalesce(dc.country,'')
-     OR coalesce(s.segment,'')   <> coalesce(dc.segment,'')
-), closed AS (
-  UPDATE dim_customer dc
-  SET valid_to = CURRENT_DATE - 1,
-      is_current = FALSE
-  FROM diffs d
-  WHERE dc.customer_id = d.customer_id
-    AND dc.is_current
-  RETURNING dc.customer_id
-)
-INSERT INTO dim_customer(customer_id, full_name, country, segment, valid_from, valid_to, is_current)
-SELECT d.customer_id, d.full_name, d.country, d.segment, CURRENT_DATE, NULL, TRUE
-FROM diffs d;
-```
-Line‑by‑line notes
-- current_dim: only the active version participates in change detection.
-- diffs: row‑by‑row attribute comparison vs source to find changes.
-- closed: end‑date the current version (yesterday) and flip is_current.
-- INSERT: add a new current row starting today.
+BEGIN;
+SET search_path TO dwh, training, public;
 
-Exercise 1 — Join facts to the correct SCD version using the fact date
-Prompt
-- For a fact row at date_key (derived from order_date), you must join to the dimensional version valid at that date: valid_from ≤ fact_date ≤ COALESCE(valid_to, infinity).
+CREATE TEMP TABLE fact_sales_temporal_solution AS
+SELECT o.order_id,
+       oi.order_item_id,
+       dd.date_key,
+       dc.customer_sk,
+       dp.product_sk,
+       oi.quantity,
+       oi.unit_price,
+       oi.discount,
+       oi.unit_price * oi.quantity * (1 - oi.discount) AS amount
+FROM training.orders o
+JOIN training.order_items oi USING (order_id)
+JOIN dim_date dd ON dd.date_actual = o.order_date::date
+JOIN dim_customer dc
+  ON dc.customer_id = o.customer_id
+ AND o.order_date::date >= dc.valid_from
+ AND o.order_date::date <= COALESCE(dc.valid_to, 'infinity'::date)
+JOIN dim_product dp
+  ON dp.product_id = oi.product_id
+ AND o.order_date::date >= dp.valid_from
+ AND o.order_date::date <= COALESCE(dp.valid_to, 'infinity'::date);
 
-Solution (rebuild fact_sales joins to SCD2 by date)
-```sql
--- We assume:
---  - dim_date(date_key INT -> date_actual DATE)
---  - orders + order_items exist in training schema
---  - dim_customer and dim_product are SCD2 with (valid_from, valid_to, is_current)
+SELECT (SELECT COUNT(*) FROM fact_sales_temporal_solution) AS mapped_fact_rows,
+       (SELECT COUNT(*) FROM training.order_items) AS source_item_rows;
 
-WITH oi AS (
-  SELECT oi.order_item_id,
-         oi.order_id,
-         o.order_date::date AS od,
-         o.customer_id,
-         oi.product_id,
-         oi.quantity,
-         oi.unit_price,
-         oi.discount,
-         (oi.unit_price*oi.quantity*(1-oi.discount)) AS amount
-  FROM training.order_items oi
-  JOIN training.orders o ON o.order_id = oi.order_id
-), keys AS (
-  SELECT oi.*,
-         -- yyyymmdd date key
-         (EXTRACT(year FROM oi.od)::int * 10000
-        + EXTRACT(month FROM oi.od)::int * 100
-        + EXTRACT(day  FROM oi.od)::int) AS date_key
-  FROM oi
-), with_scds AS (
-  SELECT k.order_id,
-         k.order_item_id,
-         k.date_key,
-         dc.customer_sk,
-         dp.product_sk,
-         k.quantity,
-         k.unit_price,
-         k.discount,
-         k.amount
-  FROM keys k
-  JOIN dwh.dim_date dd ON dd.date_key = k.date_key
-  JOIN dwh.dim_customer dc
-    ON dc.customer_id = k.customer_id
-   AND dd.date_actual BETWEEN dc.valid_from AND COALESCE(dc.valid_to, 'infinity')::date
-  JOIN dwh.dim_product dp
-    ON dp.product_id = k.product_id
-   AND dd.date_actual BETWEEN dp.valid_from AND COALESCE(dp.valid_to, 'infinity')::date
-)
--- Insert into fact (idempotency and PK handling omitted for brevity)
-INSERT INTO dwh.fact_sales(order_id, order_item_id, date_key, customer_sk, product_sk, quantity, unit_price, discount, amount)
-SELECT order_id, order_item_id, date_key, customer_sk, product_sk, quantity, unit_price, discount, amount
-FROM with_scds;
-```
-Line‑by‑line notes
-- keys: compute date_key once at the row grain.
-- Join to dim_date to convert key → actual date for interval comparison.
-- BETWEEN valid_from and valid_to: selects the correct version; COALESCE(...,'infinity') handles open‑ended rows.
-
-Performance tips
-- Index SCD tables for version lookups: (customer_id, valid_from, valid_to) and (product_id, valid_from, valid_to).
-- Keep dim_date(date_key PK, date_actual UNIQUE) for fast resolution.
-
-Exercise 2 — Add audit columns to SCD tables
-Prompt
-- Track who and when made SCD changes.
-
-Solution (DDL + simple defaults)
-```sql
-ALTER TABLE dwh.dim_customer
-  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now(),
-  ADD COLUMN IF NOT EXISTS updated_by text NOT NULL DEFAULT current_user;
-
-ALTER TABLE dwh.dim_product
-  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now(),
-  ADD COLUMN IF NOT EXISTS updated_by text NOT NULL DEFAULT current_user;
-```
-Notes
-- Defaults stamp the actor/time for inserts. For UPDATEs (closing rows), stamp explicitly:
-```sql
-UPDATE dwh.dim_customer dc
-SET valid_to = CURRENT_DATE - 1,
-    is_current = FALSE,
-    updated_at = now(),
-    updated_by = current_user
-WHERE ... ;
-```
-Optional: trigger to auto‑update updated_at on any change
-```sql
-CREATE OR REPLACE FUNCTION dwh.touch_updated_at() RETURNS trigger AS $$
-BEGIN
-  NEW.updated_at := now();
-  NEW.updated_by := current_user;
-  RETURN NEW;
-END; $$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS trg_touch_dim_customer ON dwh.dim_customer;
-CREATE TRIGGER trg_touch_dim_customer
-BEFORE UPDATE ON dwh.dim_customer
-FOR EACH ROW EXECUTE FUNCTION dwh.touch_updated_at();
+ROLLBACK;
 ```
 
-Validation queries
-```sql
--- 1) Show customers with >1 version (SCD2 working)
-SELECT customer_id, COUNT(*) AS versions
-FROM dwh.dim_customer
-GROUP BY customer_id
-HAVING COUNT(*) > 1
-ORDER BY versions DESC, customer_id
-LIMIT 20;
+Expected result: `mapped_fact_rows` equals `source_item_rows`. A lower count
+means a date or dimension-version gap; a higher count means overlapping
+validity ranges caused one fact to match more than one version.
 
--- 2) Sample fact rows and confirm date‑appropriate version
-SELECT fs.order_id, fs.order_item_id, dd.date_actual, dc.valid_from, dc.valid_to, dc.is_current
-FROM dwh.fact_sales fs
-JOIN dwh.dim_customer dc ON dc.customer_sk = fs.customer_sk
-JOIN dwh.dim_date dd ON dd.date_key = fs.date_key
-ORDER BY dd.date_actual DESC
-LIMIT 20;
+The executable solution also stages a deterministic customer change effective
+30 days ago, closes the previous current row at `effective_date - 1`, inserts a
+new current row, and then performs this temporal mapping.
+
+## Exercise 2 — Audit columns
+
+Inside the Day 53 transaction, the answer adds:
+
+```sql
+BEGIN;
+SET search_path TO dwh, training, public;
+
+ALTER TABLE dim_customer
+  ADD COLUMN updated_by text NOT NULL DEFAULT CURRENT_USER,
+  ADD COLUMN updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE dim_product
+  ADD COLUMN updated_by text NOT NULL DEFAULT CURRENT_USER,
+  ADD COLUMN updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ROLLBACK;
 ```
+
+The SCD close and insert explicitly stamp `updated_by = 'day53_solution'`.
+Because the executable answer rolls back, these columns do not remain after the
+lesson.
+
+## Reasoning, state, and pitfalls
+
+- A Type 2 change is two operations in one transaction: close the current
+  version, then insert the replacement.
+- `valid_from <= fact_date <= COALESCE(valid_to, infinity)` matches the
+  course's inclusive-date convention.
+- Enforce one current row per business key in a production warehouse, commonly
+  with a partial unique index on the business key where `is_current`.
+- Audit defaults cover inserts, not meaningful update actors; set audit values
+  explicitly when closing versions.
+- Do not run this before Day 52; the executable file raises a clear exception if
+  `dwh.dim_customer` is absent.

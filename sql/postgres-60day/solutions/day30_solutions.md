@@ -1,143 +1,107 @@
-# Day 30 — Solutions (Phase 2 Project: Performance & Robustness)
+# Day 30 — Solution: Cohort Retention and CLV Projection
 
-We produce a set of production‑ready queries (and patterns) for a Phase‑2 analytical project: parameterized date windows, KPI dashboards, SLAs, and built‑in validation. We also show how to reason about performance (indexes, EXPLAIN) and correctness (reconciliation checks).
+The current Day 30 deliverable extends the starter cohort query with:
 
-Setup
-- Facts: orders(order_id, customer_id, order_date, total_amount), order_items(order_id, product_id, quantity, unit_price, discount)
-- Dimensions: customers(customer_id, country, segment), products(product_id, category), dates (optional)
-- Parameters: use a params CTE for time windows so the same code works for different ranges
+1. cohort size;
+2. active customers and retention by cohort age;
+3. revenue per active customer; and
+4. an illustrative projection based on a moving average.
 
-Exercise 1 — KPI dashboard (orders, revenue, AOV) by day with YOY comparison
+The answer below is also the maintained executable solution.
+
 ```sql
-WITH params AS (
-  SELECT DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '30 days' AS start_d,
-         DATE_TRUNC('day', CURRENT_DATE)                     AS end_d
-), daily AS (
-  SELECT DATE_TRUNC('day', o.order_date)::date AS d,
-         COUNT(DISTINCT o.order_id) AS orders,
-         SUM(o.total_amount)        AS revenue
-  FROM orders o
-  WHERE o.order_date >= (SELECT start_d FROM params)
-    AND o.order_date <  (SELECT end_d   FROM params)
-  GROUP BY 1
-), daily_yoy AS (
-  SELECT DATE_TRUNC('day', o.order_date)::date AS d,
-         COUNT(DISTINCT o.order_id) AS orders_yoy,
-         SUM(o.total_amount)        AS revenue_yoy
-  FROM orders o
-  WHERE o.order_date >= (SELECT start_d FROM params) - INTERVAL '1 year'
-    AND o.order_date <  (SELECT end_d   FROM params) - INTERVAL '1 year'
-  GROUP BY 1
-)
-SELECT d.d,
-       d.orders,
-       d.revenue,
-       ROUND(d.revenue / NULLIF(d.orders,0), 2) AS aov,
-       dy.orders_yoy,
-       dy.revenue_yoy,
-       ROUND((d.revenue - dy.revenue_yoy) / NULLIF(dy.revenue_yoy,0), 4) AS yoy_revenue_growth
-FROM daily d
-LEFT JOIN daily_yoy dy ON dy.d = d.d - INTERVAL '1 year'
-ORDER BY d.d;
-```
-Line‑by‑line
-- params: isolates the 30‑day window; change once to shift the whole report
-- daily and daily_yoy: identical structure with a 1‑year offset for the comparison
-- Final SELECT: AOV and YoY revenue growth derived with safe NULLIF guards
+SET search_path TO training, public;
 
-Exercise 2 — SLA: fulfillment‑time distribution and percentiles
-```sql
--- Assume shipments(order_id, shipped_at) exists; SLA measured as shipped_at - order_date
-WITH params AS (
-  SELECT CURRENT_DATE - INTERVAL '90 days' AS start_d,
-         CURRENT_DATE                     AS end_d
-), spans AS (
+WITH order_values AS (
   SELECT o.order_id,
-         EXTRACT(EPOCH FROM (s.shipped_at - o.order_date)) / 3600.0 AS hours_to_ship
+         o.customer_id,
+         date_trunc('month', o.order_date)::date AS order_month,
+         SUM(
+           oi.unit_price * oi.quantity * (1 - oi.discount)
+         ) AS order_value
   FROM orders o
-  JOIN shipments s ON s.order_id = o.order_id
-  WHERE o.order_date >= (SELECT start_d FROM params)
-    AND o.order_date <  (SELECT end_d   FROM params)
+  JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY o.order_id,
+           o.customer_id,
+           date_trunc('month', o.order_date)
+), cohorts AS (
+  SELECT customer_id,
+         date_trunc('month', created_at)::date AS cohort_month
+  FROM customers
+), cohort_sizes AS (
+  SELECT cohort_month,
+         COUNT(*) AS cohort_size
+  FROM cohorts
+  GROUP BY cohort_month
+), cohort_months AS (
+  SELECT c.cohort_month,
+         ov.order_month,
+         (
+           EXTRACT(year FROM age(ov.order_month, c.cohort_month)) * 12
+           + EXTRACT(month FROM age(ov.order_month, c.cohort_month))
+         )::int AS month_offset,
+         COUNT(DISTINCT ov.customer_id) AS active_customers,
+         SUM(ov.order_value) AS revenue
+  FROM cohorts c
+  JOIN order_values ov ON ov.customer_id = c.customer_id
+  GROUP BY c.cohort_month, ov.order_month
+), metrics AS (
+  SELECT cm.*,
+         cs.cohort_size,
+         cm.active_customers::numeric
+           / NULLIF(cs.cohort_size, 0) AS retention_rate,
+         cm.revenue
+           / NULLIF(cm.active_customers, 0) AS revenue_per_active
+  FROM cohort_months cm
+  JOIN cohort_sizes cs USING (cohort_month)
+), projected AS (
+  SELECT *,
+         AVG(revenue_per_active) OVER (
+           PARTITION BY cohort_month
+           ORDER BY month_offset
+           ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+         ) AS moving_avg_revenue_per_active
+  FROM metrics
 )
-SELECT ROUND(AVG(hours_to_ship), 2) AS avg_hours,
-       percentile_cont(0.50) WITHIN GROUP (ORDER BY hours_to_ship) AS p50_hours,
-       percentile_cont(0.90) WITHIN GROUP (ORDER BY hours_to_ship) AS p90_hours,
-       percentile_cont(0.95) WITHIN GROUP (ORDER BY hours_to_ship) AS p95_hours,
-       COUNT(*) AS shipments
-FROM spans;
+SELECT cohort_month,
+       order_month,
+       month_offset,
+       cohort_size,
+       active_customers,
+       ROUND(retention_rate, 4) AS retention_rate,
+       ROUND(revenue, 2) AS revenue,
+       ROUND(revenue_per_active, 2) AS revenue_per_active,
+       ROUND(
+         moving_avg_revenue_per_active * 12,
+         2
+       ) AS projected_12m_clv
+FROM projected
+WHERE month_offset BETWEEN 0 AND 12
+ORDER BY cohort_month DESC, month_offset;
 ```
-Explanation
-- spans CTE computes numeric hours; final SELECT uses ordered‑set aggregates for percentiles
-- These metrics feed SLAs; pick thresholds from p90/p95 as operational targets
 
-Exercise 3 — Segment revenue by country and category with fanout‑safe aggregation
-```sql
-WITH order_lines AS (
-  SELECT oi.order_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_revenue
-  FROM order_items oi
-  GROUP BY oi.order_id
-), fact AS (
-  SELECT o.order_id, o.customer_id, o.order_date, ol.order_revenue
-  FROM orders o JOIN order_lines ol ON ol.order_id = o.order_id
-), sku_cat AS (
-  SELECT oi.order_id,
-         (ARRAY_AGG(p.category ORDER BY (oi.unit_price*oi.quantity*(1-oi.discount)) DESC))[1] AS category
-  FROM order_items oi JOIN products p ON p.product_id = oi.product_id
-  GROUP BY oi.order_id
-)
-SELECT DATE_TRUNC('month', f.order_date)::date AS month,
-       c.country,
-       COALESCE(c.segment,'standard') AS segment,
-       sc.category,
-       ROUND(SUM(f.order_revenue),2) AS revenue,
-       COUNT(*) AS orders
-FROM fact f
-JOIN customers c ON c.customer_id = f.customer_id
-JOIN sku_cat   sc ON sc.order_id = f.order_id
-GROUP BY 1,2,3,4
-ORDER BY month DESC, revenue DESC
-LIMIT 500;
-```
-Notes
-- Pre‑aggregate order_lines to avoid double counting when re‑joining order_items later
-- If multi‑category attribution is required, replace dominant category with proportional splits
+## Expected shape and interpretation
 
-Exercise 4 — Built‑in validation (reconciliation)
-```sql
-WITH params AS (
-  SELECT CURRENT_DATE - INTERVAL '30 days' AS start_d,
-         CURRENT_DATE                     AS end_d
-), by_lines AS (
-  SELECT SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS rev
-  FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
-  WHERE o.order_date >= (SELECT start_d FROM params)
-    AND o.order_date <  (SELECT end_d   FROM params)
-), by_orders AS (
-  SELECT SUM(o.total_amount) AS rev
-  FROM orders o
-  WHERE o.order_date >= (SELECT start_d FROM params)
-    AND o.order_date <  (SELECT end_d   FROM params)
-)
-SELECT ROUND((SELECT rev FROM by_lines),2)  AS rev_by_lines,
-       ROUND((SELECT rev FROM by_orders),2) AS rev_by_orders,
-       ROUND((SELECT rev FROM by_lines) - (SELECT rev FROM by_orders), 2) AS diff;
-```
-Guidance
-- Expect small differences (tax, shipping, rounding) depending on your business definition; large diffs need investigation
+There is one row per observed cohort month and order month, limited to cohort
+ages 0–12. `retention_rate` is active customers divided by the original cohort
+size. `projected_12m_clv` annualizes the trailing three observed
+revenue-per-active values.
 
-Performance checklist
-- Indexes to consider:
-  - orders(order_date) for time slicing
-  - order_items(order_id) for line aggregation
-  - shipments(order_id) for SLA joins
-  - customers(country, segment) if frequently grouped/filtered
-- Use partial indexes for hot ranges (e.g., orders where order_date >= current_date - interval '180 days')
-- `EXPLAIN (ANALYZE, BUFFERS)`:
-  - Verify index scans on time filters; avoid seq scans on large tables during routine reporting
-  - Ensure CTEs don’t force materialization unnecessarily (PG12+ inlines by default)
+## Explicit assumptions and limitations
 
-Robustness tips
-- Always parameterize time windows via a params CTE or function arguments
-- Use NULLIF guards in ratios; COALESCE to label unknown segments; explicit ORDER BY for reproducibility
-- Prefer windows for attaching global/partition metrics over joins where possible
+- Cohort membership is based on `customers.created_at`, not first order date.
+  Customers who never order remain in the cohort-size denominator.
+- An “active” customer has at least one order in that order month.
+- The query reports only observed activity months. It does not create zero rows
+  for missing cohort ages, so the three-row moving frame may span gaps.
+- The projection is a teaching heuristic, not a production CLV model. It does
+  not model churn, margin, discount rate, future acquisition, or uncertainty.
+- The year-plus-month `age` calculation is deliberate. Extracting only the
+  month component would wrap after 12 months and mislabel older cohorts.
+
+## Reconciliation checks
+
+For a trustworthy extension, verify that `active_customers <= cohort_size`,
+retention lies between 0 and 1, and summed `order_values` equals net line-item
+revenue for the same scope. Do not sum revenue across overlapping cohort report
+windows and call it a separate total.

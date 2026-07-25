@@ -1,165 +1,161 @@
-# Day 59 — Solutions (Final Capstone, Part 2 — KPIs, Performance, Stakeholder Views)
+# Day 59 Solution — Integrated Stakeholder Analytics
 
-We assemble business KPIs, add performance aids (indexes + EXPLAIN), and build stakeholder views. Below are step‑by‑step, line‑by‑line explanations for each section of the day’s SQL.
+Day 59 is a capstone checkpoint, not a pair of discrete exercises. Its
+deliverables are a reconciled KPI suite, performance evidence, stakeholder
+queries, and a large-scale design note. The canonical executable checkpoint is
+[`day59_solutions.sql`](day59_solutions.sql).
 
-KPI A — LTV by cohort and segment (annotated)
+## Deliverable 1 — Business KPI suite
+
+### LTV by signup cohort and segment
+
 ```sql
-WITH order_values AS (
-  SELECT o.customer_id, o.order_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value,
-         o.order_date
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id, o.order_date
-), ltv AS (
-  SELECT customer_id,
-         date_trunc('month', MIN(order_date))::date AS first_order_month,
-         SUM(order_value) AS ltv
-  FROM order_values
-  GROUP BY customer_id
-), cohort AS (
+SET search_path TO training, public;
+
+WITH customer_ltv AS (
   SELECT c.customer_id,
+         c.country,
+         COALESCE(c.segment, 'standard') AS segment,
          date_trunc('month', c.created_at)::date AS cohort_month,
-         COALESCE(c.segment,'standard') AS segment
+         COALESCE(SUM(o.total_amount), 0) AS ltv
   FROM customers c
+  LEFT JOIN orders o USING (customer_id)
+  GROUP BY c.customer_id, c.country, c.segment, date_trunc('month', c.created_at)
 )
-SELECT cohort.segment,
-       cohort.cohort_month,
-       ROUND(AVG(ltv.ltv),2) AS avg_ltv,
-       COUNT(*) AS customers
-FROM ltv
-JOIN cohort ON cohort.customer_id = ltv.customer_id
-GROUP BY cohort.segment, cohort.cohort_month
-ORDER BY cohort.cohort_month DESC, avg_ltv DESC
-LIMIT 100;
+SELECT cohort_month,
+       segment,
+       COUNT(*) AS customers,
+       ROUND(AVG(ltv), 2) AS avg_ltv,
+       ROUND(SUM(ltv), 2) AS total_ltv
+FROM customer_ltv
+GROUP BY cohort_month, segment
+ORDER BY cohort_month DESC, total_ltv DESC;
 ```
-Line‑by‑line
-- order_values: collapse each order to a revenue number at order grain.
-- ltv: per‑customer lifetime value and first_order_month (for context).
-- cohort: attach signup cohort month and segment.
-- Final: average LTV by (segment, cohort_month); COUNT gives cohort size for interpretation.
 
-KPI B — Conversion funnel from events → orders (last 90 days)
+Expected grain: one row per `(cohort_month, segment)`, including customers with
+zero orders.
+
+### Ninety-day conversion funnel
+
 ```sql
-WITH ev AS (
-  SELECT e.customer_id,
-         MAX(CASE WHEN e.event_type='page_view'  THEN 1 ELSE 0 END) AS page_view,
-         MAX(CASE WHEN e.event_type='add_to_cart' THEN 1 ELSE 0 END) AS add_to_cart,
-         MAX(CASE WHEN e.event_type='checkout'   THEN 1 ELSE 0 END) AS checkout
-  FROM events e
-  WHERE e.event_time >= now() - interval '90 days'
-  GROUP BY e.customer_id
-), buyers AS (
-  SELECT DISTINCT o.customer_id
-  FROM orders o
-  WHERE o.order_date >= now() - interval '90 days'
+SET search_path TO training, public;
+
+WITH activity AS (
+  SELECT c.customer_id,
+         BOOL_OR(e.event_type = 'page_view') AS viewed,
+         BOOL_OR(e.event_type = 'add_to_cart') AS added,
+         BOOL_OR(e.event_type = 'checkout') AS checked_out,
+         EXISTS (
+           SELECT 1
+           FROM orders o
+           WHERE o.customer_id = c.customer_id
+             AND o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+         ) AS bought
+  FROM customers c
+  LEFT JOIN events e
+    ON e.customer_id = c.customer_id
+   AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY c.customer_id
 )
-SELECT 
-  SUM(page_view)    AS viewers,
-  SUM(add_to_cart)  AS adders,
-  SUM(checkout)     AS checkouts,
-  (SELECT COUNT(*) FROM buyers) AS buyers
-FROM ev;
+SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
+       COUNT(*) FILTER (WHERE added) AS adders,
+       COUNT(*) FILTER (WHERE checked_out) AS checkouts,
+       COUNT(*) FILTER (WHERE bought) AS buyers,
+       ROUND(
+         COUNT(*) FILTER (WHERE bought)::numeric
+           / NULLIF(COUNT(*) FILTER (WHERE viewed), 0),
+         4
+       ) AS viewer_to_buyer_rate
+FROM activity;
 ```
-Notes
-- MAX(CASE ...) turns presence of an event into a 0/1 flag per customer.
-- buyers CTE counts unique purchasers in the same window.
-- Compare ratios buyers/viewers, checkouts/adders, etc. for funnel drop‑offs.
 
-KPI C — Top product pairs revenue (market basket)
+Expected shape: one row. Every funnel stage is measured at customer grain, but
+the synthetic data does not enforce strict stage ordering.
+
+### Product-pair affinity
+
+The learner script already supplies the runnable market-basket query. Its
+deliverable is the 20 most frequent distinct product pairs. Deduplicate
+`(order_id, product_id)` first and enforce `a.product_id < b.product_id`; this
+prevents self-pairs and reversed duplicates. The metric is co-occurrence count,
+despite the starter comment saying “revenue.”
+
+## Deliverable 2 — Performance evidence
+
 ```sql
-WITH items AS (
-  SELECT order_id, product_id FROM order_items GROUP BY order_id, product_id
-), pairs AS (
-  SELECT a.product_id AS p1, b.product_id AS p2, COUNT(*) AS together
-  FROM items a
-  JOIN items b ON a.order_id = b.order_id AND a.product_id < b.product_id
-  GROUP BY a.product_id, b.product_id
-)
-SELECT p1.name AS product_a, p2.name AS product_b, together
-FROM pairs
-JOIN products p1 ON p1.product_id = pairs.p1
-JOIN products p2 ON p2.product_id = pairs.p2
-ORDER BY together DESC
-LIMIT 20;
-```
-Line‑by‑line
-- Distinct items per order avoid double counting.
-- a.product_id < b.product_id enforces one ordering for pairs.
-- Join names for a human‑readable report; LIMIT to top pairs.
+BEGIN;
+SET search_path TO training, public;
 
-Performance aids — Indexes and EXPLAIN (annotated)
-```sql
-CREATE INDEX IF NOT EXISTS idx_orders_customer_date ON orders(customer_id, order_date);
-CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
-CREATE INDEX IF NOT EXISTS idx_payments_order_date ON payments(order_id, payment_date);
+CREATE INDEX idx_orders_customer_date_day59_solution
+  ON orders(customer_id, order_date) INCLUDE (total_amount);
 
-EXPLAIN ANALYZE
-SELECT o.customer_id, SUM(o.total_amount)
-FROM orders o
-WHERE o.order_date >= now() - interval '180 days'
-GROUP BY o.customer_id
-ORDER BY SUM(o.total_amount) DESC
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT customer_id, SUM(total_amount) AS revenue
+FROM orders
+WHERE order_date >= CURRENT_TIMESTAMP - interval '180 days'
+GROUP BY customer_id
+ORDER BY revenue DESC
 LIMIT 50;
-```
-How to read the plan
-- Expect an index/bitmap scan on orders constrained by order_date (or a seq scan if table is small).
-- Check rows/loops vs actuals; high misestimates suggest ANALYZE or better stats.
-- Look at Sort method (memory vs disk) and overall execution time.
 
-Stakeholder views — Finance: Budget vs Actual YTD
+ROLLBACK;
+```
+
+Save the actual plan, execution time, buffer counts, and result reconciliation.
+The compact seed may correctly use a sequential scan; index presence does not
+guarantee index use.
+
+## Deliverable 3 — Stakeholder queries
+
+### Finance: YTD budget versus actual
+
 ```sql
-WITH ytd_exp AS (
-  SELECT date_trunc('year', expense_date)::date AS yr,
-         category,
-         SUM(amount) AS actual
+SET search_path TO training, public;
+
+WITH actual AS (
+  SELECT category, SUM(amount) AS actual
   FROM expenses
-  WHERE expense_date >= date_trunc('year', now())
-  GROUP BY 1,2
-), ytd_bud AS (
-  SELECT date_trunc('year', period)::date AS yr,
-         category,
-         SUM(amount) AS budget
+  WHERE expense_date >= date_trunc('year', CURRENT_DATE)
+  GROUP BY category
+), budget AS (
+  SELECT category, SUM(amount) AS budget
   FROM budgets
-  WHERE period >= date_trunc('year', now())
-  GROUP BY 1,2
+  WHERE period >= date_trunc('year', CURRENT_DATE)
+  GROUP BY category
 )
-SELECT COALESCE(b.category, e.category) AS category,
-       COALESCE(b.yr, e.yr) AS year,
-       COALESCE(b.budget,0) AS budget_ytd,
-       COALESCE(e.actual,0) AS actual_ytd,
-       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0),2) AS variance
-FROM ytd_bud b
-FULL OUTER JOIN ytd_exp e ON e.yr=b.yr AND e.category=b.category
+SELECT COALESCE(a.category, b.category) AS category,
+       ROUND(COALESCE(b.budget, 0), 2) AS budget,
+       ROUND(COALESCE(a.actual, 0), 2) AS actual,
+       ROUND(COALESCE(a.actual, 0) - COALESCE(b.budget, 0), 2) AS variance
+FROM actual a
+FULL OUTER JOIN budget b USING (category)
 ORDER BY category;
 ```
-Line‑by‑line
-- date_trunc('year') aligns months into YTD totals.
-- FULL OUTER JOIN ensures categories present in one side still show up.
 
-Stakeholder views — Marketing: Campaign‑assisted purchases (within 7 days)
-```sql
-WITH first_purchase AS (
-  SELECT o.customer_id, MIN(o.order_date) AS first_buy
-  FROM orders o
-  GROUP BY o.customer_id
-), touch AS (
-  SELECT e.customer_id, e.event_time, COALESCE(e.metadata->>'campaign','none') AS campaign
-  FROM events e
-)
-SELECT t.campaign,
-       COUNT(DISTINCT t.customer_id) AS assisted_customers
-FROM touch t
-JOIN first_purchase fp ON fp.customer_id = t.customer_id
-WHERE t.event_time BETWEEN fp.first_buy - interval '7 days' AND fp.first_buy
-GROUP BY t.campaign
-ORDER BY assisted_customers DESC
-LIMIT 20;
-```
-Notes
-- Counts customers, not touches; switch to COUNT(*) for touch counts.
-- Adjust window length per business definition of assistance.
+Expected grain: one row per category found in actuals or budget.
 
-Operational tips
-- Keep separate notebooks/tickets for each KPI with its SQL and EXPLAIN before/after.
-- Save plan text and timing for regression detection after deployments.
+### Marketing: campaign-assisted purchases
+
+The learner query anchors on each customer's first order and counts distinct
+customers with a campaign touch in the preceding seven days. Document that
+definition: it is first-purchase assistance, not all-purchase event attribution
+from Day 48. Multiple campaigns can assist one customer, so campaign rows are
+not additive.
+
+## Deliverable 4 — Large-scale design note
+
+For a hypothetical 100M-row deployment, record:
+
+- candidate range partition keys (`orders.order_date`, `events.event_time`);
+- proof that critical predicates constrain those keys for pruning;
+- local/partial indexes on hot recent partitions;
+- retention and partition-maintenance ownership; and
+- an observed representative-scale plan, not an assumed benefit.
+
+## Capstone checkpoint limits
+
+- Days 59–60 provide sign-off criteria rather than neatly isolated exercises.
+- The current executable solution selects representative KPI, finance, and
+  performance checks; the learner starter contains the product-pair and
+  marketing queries that must also be discussed in the final write-up.
+- All DDL in the solution transaction rolls back. Production changes require a
+  separate reviewed migration.

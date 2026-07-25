@@ -1,35 +1,83 @@
-# Day 49 — Project 2: Finance (Part 1) — Trades → Positions → P&L (Companion Guide)
+# Day 49 — Finance/Operations Project, Part 1: Revenue Forecasting
 
-Objectives
-- Transform trades into daily positions via fills and corporate actions
-- Compute end‑of‑day valuation and daily P&L (realized/unrealized)
-- Handle weekends/holidays with a trading calendar
+## Level and prerequisites
 
-Data assumptions
-- trades(security_id, trade_dt, qty, price, side)
-- prices(security_id, dt, close)
-- calendar(dt, is_trading_day)
+- **Level:** Advanced
+- **Prerequisites:** [Day 48 — affinity and attribution](day48_project1_ecommerce_part3.md)
+- **Artifacts:** [learner SQL](../day49_project2_finance_part1.sql) ·
+  [solution reasoning](../solutions/day49_solutions.md) ·
+  [executable solution](../solutions/day49_solutions.sql)
 
-Pipeline
-1) signed_trades: qty_signed = CASE side WHEN 'BUY' THEN qty ELSE -qty END
-2) position_days: expand each security across all trading days from first trade to last price via a calendar join
-3) positions: cumulative SUM(qty_signed) OVER (PARTITION BY security ORDER BY dt)
-4) valuation: position * close; daily unrealized_pnl = position * (close − LAG(close))
-5) realized_pnl (simplified): when qty_signed decreases position, use average cost; else 0
+## Learning objectives
 
-Techniques
-- Window cumulative sums and LAG for price deltas
-- Calendar join to fill gaps (generate_series or calendar table)
-- LEFT JOINs with COALESCE for missing prices
+- Backtest moving-average and seasonal-naive forecasts without target leakage.
+- Compare errors on a common scoring population and disclose sparse history.
 
-Pitfalls
-- Corporate actions (splits/dividends) not modeled — note assumptions
-- Look‑ahead bias: never use future prices
-- Performance on large calendars; pre‑restrict to securities with activity
+## Vocabulary and concepts
 
-Deliverables
-- positions_pnl(security_id, dt, position, close, unrealized_pnl, realized_pnl)
+- **Backtest:** evaluate a forecast using only information available before each
+  historical target.
+- **Target leakage:** using the actual target or future information in its
+  prediction.
+- **MAPE:** mean absolute percentage error, undefined for zero actuals.
 
-Stretch goals
-- VWAP cost basis; FIFO lots via windowed allocation (advanced)
-- Portfolio aggregation and benchmark relative returns
+## Worked example / walkthrough
+
+At complete monthly grain, compute MA(6) with a frame ending at
+`1 PRECEDING`, place it beside actual revenue, and score only months with a
+forecast and nonzero actual. Compare seasonal naive on that same scoring set and
+retain the number of evaluated months.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day49_project2_finance_part1.sql).
+Add mean absolute error (MAE) and compare its interpretation with MAPE.
+
+## Self-check
+
+- Does every forecast exclude its current actual?
+- Are model errors compared over the same months, with excluded zero actuals
+  and warm-up periods reported?
+
+## Next step
+
+Continue to [Day 50 — budget variance](day50_project2_finance_part2.md).
+
+## Deep dive and reference
+
+## Project focus
+
+- Build one monthly order-revenue series.
+- Backtest moving-average and seasonal-naive forecasts.
+- Compare MAPE and inspect a 50/50 blended forecast.
+
+## How the learner script uses the current schema
+
+The starter aggregates `orders.total_amount` by order month, calculates
+year-over-year growth with `LAG(..., 12)`, projects future months from last
+year's matching month, and shows a trailing three-month average.
+
+## Practice — match the learner prompts exactly
+
+1. Build MA(6) and MA(12) one-step forecasts and compare their MAPEs with a
+   12-month seasonal naive.
+2. Produce a forecast equal to 50% seasonal naive plus 50% MA(6), and inspect it
+   month by month.
+
+## Backtesting reasoning
+
+- Moving windows must end at `1 PRECEDING`; including the current actual leaks
+  the answer into its forecast.
+- `LAG(revenue, 12)` means the previous 12 result rows. Build a complete month
+  calendar first if months can be absent.
+- MAPE is undefined when actual revenue is zero; disclose excluded periods and
+  consider MAE as a companion metric.
+- Compare models over a common scoring window when warm-up history differs.
+
+## Validation and limits
+
+- Return forecast and actual side by side.
+- Record the number of scored months for each model.
+- The deterministic seed has only a few years of history, so model ranking is a
+  learning result, not evidence of forecast reliability.
+- A historical backtest does not create a production forecast pipeline.

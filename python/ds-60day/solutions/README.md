@@ -1,8 +1,13 @@
 # Python Solutions — 60-Day Data Science Curriculum
 
-This folder contains worked solutions for the practice exercises in each Python day. Per your preference, each day provides:
-- A Markdown guide (deep commentary on approach, tradeoffs, pitfalls)
-- A Jupyter notebook with runnable solution code and annotated cells
+This folder contains worked solutions for the Python practice exercises.
+
+Current artifact coverage:
+
+- Markdown solution guides: Days 1–60
+- Runnable solution notebooks: Days 1–60
+
+Use `python scripts/course.py catalog --track python` from the repository root for the generated per-lesson availability view.
 
 Conventions
 - One subdirectory per day: `dayXX_.../`

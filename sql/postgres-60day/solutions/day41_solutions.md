@@ -1,86 +1,114 @@
-# Day 41 — Solutions (Complex Aggregations)
+# Day 41 Solutions — Complex Aggregations
 
-We combine advanced grouping patterns, conditional aggregates, window + group hybrids, and ratio-of-ratios safely. We also show how to format subtotal/grand-total rows and label them with GROUPING().
+The learner script introduces `FILTER`, conditional aggregation, and
+`string_agg`. The two exercises turn those techniques into a category dashboard
+and a country-level top-product label. The canonical runnable answer is also in
+[`day41_solutions.sql`](day41_solutions.sql).
 
-Setup
-- Tables: orders(order_id, customer_id, order_date, total_amount), order_items(order_id, product_id, quantity, unit_price, discount), customers(country, segment), products(category)
+## Exercise 1 — Six category dashboard metrics
 
-Exercise 1 — Multi-level totals with GROUPING SETS and labels
+Build one row per product category containing:
+
+1. revenue in the last 30 days;
+2. revenue in the last 90 days;
+3. distinct orders in the last 30 days;
+4. units in the last 30 days;
+5. distinct customers in the last 90 days; and
+6. revenue per order in the last 30 days.
+
 ```sql
-WITH base AS (
-  SELECT date_trunc('month', o.order_date)::date AS month,
-         c.country,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  JOIN customers c ON c.customer_id = o.customer_id
-  GROUP BY 1, 2
-)
-SELECT 
-  CASE WHEN GROUPING(month)=1   THEN NULL ELSE month   END AS month,
-  CASE WHEN GROUPING(country)=1 THEN 'ALL_COUNTRIES' ELSE country END AS country,
-  SUM(revenue) AS revenue
-FROM base
-GROUP BY GROUPING SETS ((month, country), (month), ())
-ORDER BY month NULLS FIRST, country NULLS FIRST;
-```
-Notes
-- GROUPING(month)=1 marks subtotal/grand-total rows so you can format them explicitly.
+SET search_path TO training, public;
 
-Exercise 2 — Conditional aggregation with FILTER and CASE
-```sql
-SELECT c.country,
-       COUNT(*)                                         AS orders,
-       COUNT(*) FILTER (WHERE o.total_amount >= 100)    AS big_orders,
-       SUM(o.total_amount)                              AS revenue,
-       SUM(CASE WHEN o.total_amount >= 100 THEN o.total_amount ELSE 0 END) AS big_revenue
-FROM orders o
-JOIN customers c ON c.customer_id=o.customer_id
-GROUP BY c.country
-ORDER BY revenue DESC;
-```
-Why
-- FILTER is concise in Postgres; CASE is portable. Both compute segment-specific metrics without extra joins.
-
-Exercise 3 — Product share of category with window-denominator
-```sql
-WITH prod_rev AS (
+WITH lines AS (
   SELECT p.category,
-         oi.product_id,
-         SUM(oi.quantity*oi.unit_price*(1-oi.discount)) AS revenue
-  FROM order_items oi
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.category, oi.product_id
+         o.order_id,
+         o.customer_id,
+         o.order_date,
+         oi.quantity,
+         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
+  FROM orders o
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
 )
 SELECT category,
-       product_id,
-       ROUND(revenue,2) AS revenue,
-       ROUND(revenue / NULLIF(SUM(revenue) OVER (PARTITION BY category),0), 4) AS share_in_category
-FROM prod_rev
-ORDER BY category, share_in_category DESC
-LIMIT 300;
+       ROUND(SUM(revenue) FILTER (
+         WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
+       ), 2) AS revenue_30d,
+       ROUND(SUM(revenue) FILTER (
+         WHERE order_date >= CURRENT_TIMESTAMP - interval '90 days'
+       ), 2) AS revenue_90d,
+       COUNT(DISTINCT order_id) FILTER (
+         WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
+       ) AS orders_30d,
+       SUM(quantity) FILTER (
+         WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
+       ) AS units_30d,
+       COUNT(DISTINCT customer_id) FILTER (
+         WHERE order_date >= CURRENT_TIMESTAMP - interval '90 days'
+       ) AS customers_90d,
+       ROUND(
+         SUM(revenue) FILTER (
+           WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
+         )
+         / NULLIF(
+             COUNT(DISTINCT order_id) FILTER (
+               WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
+             ),
+             0
+           ),
+         2
+       ) AS revenue_per_order_30d
+FROM lines
+GROUP BY category
+ORDER BY revenue_30d DESC NULLS LAST, category;
 ```
-Notes
-- Windowed denominator avoids self-joins and preserves each row’s context.
 
-Exercise 4 — Ratio-of-ratios: category share within a country and global share
+Expected shape: one row for each category in `training.products`, with six
+metric columns. A category with no qualifying recent activity can have `NULL`
+windowed sums. `NULLIF` makes revenue per order `NULL` instead of raising a
+division-by-zero error.
+
+## Exercise 2 — Top five product names per country
+
+Rank at `(country, product)` grain before aggregating names. This avoids the
+common mistake of applying `LIMIT 5` to the entire result instead of five
+products per country.
+
 ```sql
-WITH line_rev AS (
-  SELECT c.country, p.category,
-         SUM(oi.quantity*oi.unit_price*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id=o.order_id
-  JOIN customers c    ON c.customer_id=o.customer_id
-  JOIN products p     ON p.product_id=oi.product_id
-  GROUP BY c.country, p.category
+SET search_path TO training, public;
+
+WITH product_revenue AS (
+  SELECT c.country,
+         p.product_id,
+         p.name,
+         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM customers c
+  JOIN orders o USING (customer_id)
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+  GROUP BY c.country, p.product_id, p.name
+), ranked AS (
+  SELECT *,
+         ROW_NUMBER() OVER (
+           PARTITION BY country ORDER BY revenue DESC, product_id
+         ) AS product_rank
+  FROM product_revenue
 )
 SELECT country,
-       category,
-       ROUND(revenue,2) AS revenue,
-       ROUND(revenue / NULLIF(SUM(revenue) OVER (PARTITION BY country),0), 4) AS share_in_country,
-       ROUND(revenue / NULLIF(SUM(revenue) OVER (),0), 4)                    AS share_global
-FROM line_rev
-ORDER BY country, revenue DESC;
+       string_agg(name, ', ' ORDER BY product_rank) AS top_five_products
+FROM ranked
+WHERE product_rank <= 5
+GROUP BY country
+ORDER BY country;
 ```
-Cautions
-- Always guard denominators with NULLIF to avoid division-by-zero.
-- Distinguish between row-level windows and grouped results to avoid fanout.
+
+Expected shape: one row per represented country and one comma-separated label
+ordered from highest to lowest product revenue.
+
+## Reasoning, safety, and pitfalls
+
+- Compute line revenue from `order_items`; do not multiply `orders.total_amount`
+  after joining to items because that would repeat the order total per line.
+- Use `DISTINCT` inside counts when the input is at line-item grain.
+- Add a deterministic tie-breaker (`product_id`) to `ROW_NUMBER`.
+- Both answers are read-only and safe to run repeatedly.

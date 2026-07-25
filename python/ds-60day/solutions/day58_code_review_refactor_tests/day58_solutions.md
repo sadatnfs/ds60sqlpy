@@ -35,8 +35,14 @@ def test_scale_constant():
     assert scale_minmax([3,3,3]) == [0.0,0.0,0.0]
 ```
 Run tests
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
 ```bash
-pytest -q
+# macOS or Linux
+.venv/bin/python -m pytest -q
 ```
 
 ---
@@ -45,21 +51,31 @@ Exercise 2 — pre‑commit
 ```yaml
 # .pre-commit-config.yaml
 repos:
-- repo: https://github.com/psf/black
-  rev: 24.8.0
-  hooks: [{id: black}]
-- repo: https://github.com/pycqa/isort
-  rev: 5.13.2
-  hooks: [{id: isort}]
-- repo: https://github.com/pycqa/flake8
-  rev: 6.1.0
-  hooks: [{id: flake8}]
+- repo: local
+  hooks:
+  - id: ruff-check
+    name: Ruff check
+    entry: ruff check --fix
+    language: system
+    types: [python]
+  - id: ruff-format
+    name: Ruff format
+    entry: ruff format
+    language: system
+    types: [python]
 ```
-Install and run
+Core setup already installs pre-commit. Install the local hook and run it:
+
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\python.exe -m pre_commit install
+.\.venv\Scripts\python.exe -m pre_commit run --all-files
+```
+
 ```bash
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files
+# macOS or Linux
+.venv/bin/python -m pre_commit install
+.venv/bin/python -m pre_commit run --all-files
 ```
 
 ---
@@ -73,11 +89,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with: { python-version: '3.11' }
-    - run: pip install -r requirements.txt -r requirements-dev.txt
-    - run: pre-commit run --all-files
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+      with: { python-version: '3.12' }
+    - run: python -m pip install -e ".[quality]"
+    - run: ruff check .
+    - run: ruff format --check .
     - run: pytest -q
 ```
 Notes

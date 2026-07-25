@@ -1,115 +1,101 @@
-# Day 56 — Solutions (Project 4: Complex BI, Part 2 — Percentiles, Ranking, CUBE)
+# Day 56 Solutions — CUBE and Percentiles
 
-We compute distribution percentiles, top‑N splits, and multi‑dimensional subtotals. Below are step‑by‑step solutions to the exercises with line‑by‑line explanations.
+The exercises add payment method to a multidimensional cube and calculate
+category-attributable order-value percentiles by month. See
+[`day56_solutions.sql`](day56_solutions.sql).
 
-Reference (annotated)
+## Exercise 1 — Add payment method and measure cube growth
+
+An order can have more than one payment. The answer defines its primary method
+as the method with the greatest total paid amount, breaking ties by method name.
+Reducing to one method prevents order lines from being duplicated; unpaid
+orders remain visible.
+
 ```sql
--- p50/p90/p99 of order values per country‑month
-WITH orders_m AS (
-  SELECT c.country,
-         date_trunc('month', o.order_date)::date AS month,
-         o.total_amount AS amt
-  FROM orders o
-  JOIN customers c ON c.customer_id = o.customer_id
-)
-SELECT country,
-       month,
-       PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY amt) AS p50,
-       PERCENTILE_CONT(0.9)  WITHIN GROUP (ORDER BY amt) AS p90,
-       PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY amt) AS p99
-FROM orders_m
-GROUP BY country, month
-ORDER BY month DESC, country
-LIMIT 200;
-```
-Explanation
-- orders_m: bring values (amt) to the group we’ll summarize over (country, month).
-- PERCENTILE_CONT: continuous quantile; requires ORDER BY value inside WITHIN GROUP.
+SET search_path TO training, public;
 
-Exercise 1 — Add payment method to the CUBE and measure row count increase
-Goal
-- Expand CUBE to include payment_method and quantify how many extra subtotal rows appear.
-
-Solution
-```sql
-WITH line AS (
+WITH payment_by_method AS (
+  SELECT order_id, method, SUM(amount) AS paid_amount
+  FROM payments
+  GROUP BY order_id, method
+), ranked_payment AS (
+  SELECT *,
+         ROW_NUMBER() OVER (
+           PARTITION BY order_id ORDER BY paid_amount DESC, method
+         ) AS payment_rank
+  FROM payment_by_method
+), primary_payment AS (
+  SELECT order_id, method
+  FROM ranked_payment
+  WHERE payment_rank = 1
+), line AS (
   SELECT c.country,
          p.category,
-         pm.method AS payment_method,
-         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
+         COALESCE(pp.method, 'unpaid') AS payment_method,
+         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
   FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  LEFT JOIN payments pm ON pm.order_id = o.order_id
-), base AS (
-  SELECT COUNT(*) AS n_cube2
-  FROM (
-    SELECT 1
-    FROM line
-    GROUP BY CUBE(country, category)
-  ) t
-), expanded AS (
-  SELECT COUNT(*) AS n_cube3
-  FROM (
-    SELECT 1
-    FROM line
-    GROUP BY CUBE(country, category, payment_method)
-  ) t
+  JOIN customers c USING (customer_id)
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+  LEFT JOIN primary_payment pp USING (order_id)
+), cube_two AS (
+  SELECT country, category, SUM(revenue) AS revenue
+  FROM line
+  GROUP BY CUBE (country, category)
+), cube_three AS (
+  SELECT country, category, payment_method, SUM(revenue) AS revenue
+  FROM line
+  GROUP BY CUBE (country, category, payment_method)
 )
-SELECT n_cube2, n_cube3, (n_cube3 - n_cube2) AS extra_rows
-FROM base CROSS JOIN expanded;
+SELECT (SELECT COUNT(*) FROM cube_two) AS two_dimension_rows,
+       (SELECT COUNT(*) FROM cube_three) AS three_dimension_rows;
 ```
-Line‑by‑line
-- base: number of grouping sets produced by a 2‑dimensional CUBE.
-- expanded: same but with a 3rd dimension (payment_method).
-- Difference shows added subtotal combinations.
 
-Exercise 2 — Compute p50/p90 of order values per category‑month
-Goal
-- Replace “country” with “category” and summarize distribution by month.
+Expected shape: one row; `three_dimension_rows` should be larger.
 
-Solution
+## Exercise 2 — Category-month p50 and p90
+
+The metric is each category's contribution to an order, not the entire order
+total repeated for every category.
+
 ```sql
-WITH orders_cat AS (
-  SELECT p.category,
-         date_trunc('month', o.order_date)::date AS month,
-         o.total_amount AS amt
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p ON p.product_id = oi.product_id
-)
-SELECT category,
-       month,
-       ROUND(PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY amt)::numeric, 2)  AS p50,
-       ROUND(PERCENTILE_CONT(0.9)  WITHIN GROUP (ORDER BY amt)::numeric, 2)  AS p90
-FROM orders_cat
-GROUP BY category, month
-ORDER BY month DESC, category
-LIMIT 200;
-```
-Notes
-- We join through order_items to expose product category for each order’s amount. If order totals already reflect all items, grouping by order is fine.
+SET search_path TO training, public;
 
-Top‑N within dimension (reference)
-```sql
-WITH prod_rev AS (
-  SELECT c.country,
+WITH category_orders AS (
+  SELECT date_trunc('month', o.order_date)::date AS month,
          p.category,
-         p.product_id,
-         p.name,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
+         o.order_id,
+         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
   FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  GROUP BY c.country, p.category, p.product_id, p.name
-), ranked AS (
-  SELECT *, RANK() OVER (PARTITION BY country, category ORDER BY revenue DESC) AS rnk
-  FROM prod_rev
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+  GROUP BY date_trunc('month', o.order_date), p.category, o.order_id
 )
-SELECT * FROM ranked WHERE rnk <= 5
-ORDER BY country, category, rnk;
+SELECT month,
+       category,
+       ROUND(
+         percentile_cont(0.50) WITHIN GROUP (ORDER BY order_value)::numeric,
+         2
+       ) AS p50_order_value,
+       ROUND(
+         percentile_cont(0.90) WITHIN GROUP (ORDER BY order_value)::numeric,
+         2
+       ) AS p90_order_value
+FROM category_orders
+GROUP BY month, category
+ORDER BY month DESC, category;
 ```
-Explanation
-- RANK gives ties the same rank. Use ROW_NUMBER to break ties deterministically.
+
+Expected grain: one row per represented `(month, category)`.
+
+## Reasoning, safety, and pitfalls
+
+- Joining all payment rows to lines would multiply revenue for split-payment
+  orders. Define a payment attribution policy before adding that dimension.
+- Aggregate by `(order_id, method)` before ranking so split payments using the
+  same method are compared by their total paid amount.
+- The method-name tie-break makes the primary-method policy deterministic.
+- `percentile_cont` interpolates and returns a floating type; cast to numeric
+  before two-argument `ROUND`.
+- Percentiles need enough observations. Always accompany production percentiles
+  with sample counts.

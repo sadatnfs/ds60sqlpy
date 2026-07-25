@@ -1,5 +1,55 @@
 # Day 01 — SELECT, WHERE, ORDER BY, LIMIT/OFFSET (Companion Guide)
 
+## Level and prerequisites
+
+- **Level:** Foundation (beginner)
+- **Prerequisites:** Complete the [SQL track setup](../README.md), reset the
+  disposable `advanced_sql_training` database, and know how to run a `.sql`
+  file with `psql`.
+- **Artifacts:** [learner SQL](../day01_select_where_orderby.sql) ·
+  [solution reasoning](../solutions/day01_solutions.md) ·
+  [executable solution](../solutions/day01_solutions.sql)
+
+## Learning objectives
+
+- Project named columns, filter rows, sort deterministically, and limit a result.
+- Explain why `NULL` comparisons and an omitted `ORDER BY` can produce
+  surprising results.
+
+## Vocabulary and concepts
+
+- **Projection:** the columns or expressions returned by `SELECT`.
+- **Predicate:** a true/false/unknown condition used to filter rows.
+- **Deterministic ordering:** an `ORDER BY` whose final tie-breaker uniquely
+  orders the result.
+
+## Worked example / walkthrough
+
+Trace the first learner query in logical order: `FROM training.customers`
+produces candidate rows, `WHERE country IN ('US', 'CA')` filters them,
+`ORDER BY created_at DESC, customer_id DESC` fixes their order, and `LIMIT 10`
+keeps the first ten. Remove the `customer_id` tie-breaker and explain why rows
+with equal timestamps no longer have a guaranteed relative order.
+
+## Exercises
+
+Complete the three prompts in the [learner SQL](../day01_select_where_orderby.sql).
+Then change one filter to include `NULL` deliberately with `IS NULL` or
+`IS NOT NULL`; do not use `= NULL`.
+
+## Self-check
+
+- Can you predict which clause runs logically before `SELECT` and which runs
+  after it?
+- Does the learner file complete under `psql -X -v ON_ERROR_STOP=1` and finish
+  with `ROLLBACK`?
+
+## Next step
+
+Continue to [Day 02 — aggregations and grouping](day02_aggregates_groupby_having.md).
+
+## Deep dive and reference
+
 Learning objectives
 - Understand logical vs physical query execution order (FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT)
 - Select specific columns; create derived columns with aliases
@@ -30,10 +80,13 @@ Anti-patterns and pitfalls
 - Assuming WHERE matches NULLs; use IS NULL/IS NOT NULL explicitly.
 - Depending on implicit order without ORDER BY; SQL does not guarantee row order otherwise.
 
-Practice exercises (beyond the script)
-1) Return the 20 newest orders with customer_id and total_amount. Add NULLS LAST when sorting by nullable columns.
-2) Find top 10 most expensive products created in the last 90 days. Compare ILIKE vs LOWER(name) LIKE for case-insensitive matching.
-3) Show GB/DE customers created in the last year, newest first. Add secondary sort by full_name.
+Exercises from the learner script
+1) List the 20 newest orders with `customer_id` and `total_amount`.
+2) Find the top 10 most expensive products created in the last 90 days.
+3) Show customers from GB or DE created within the last year, newest first.
+
+Use `order_date DESC, order_id DESC` and `created_at DESC, customer_id DESC`
+when you want deterministic ordering among timestamp ties.
 
 Check your understanding
 - In what order are WHERE and ORDER BY evaluated, and why does that matter for derived columns?

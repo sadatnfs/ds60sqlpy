@@ -14,9 +14,9 @@ CREATE TEMP TABLE changed_customers AS
 SELECT c.customer_id,
        c.full_name,
        c.country,
-       CASE WHEN random() < 0.5 THEN 'platinum' ELSE 'gold' END AS segment
+       CASE WHEN c.segment = 'platinum' THEN 'gold' ELSE 'platinum' END AS segment
 FROM training.customers c
-ORDER BY random()
+ORDER BY c.customer_id
 LIMIT 10;
 
 -- Detect current rows that differ from source attributes
@@ -62,10 +62,10 @@ CREATE TEMP TABLE changed_products AS
 SELECT p.product_id,
        p.name,
        p.category,
-       round(p.price * (0.9 + random()*0.2), 2) AS price,
+       round(p.price * 1.05, 2) AS price,
        p.cost
 FROM training.products p
-ORDER BY random()
+ORDER BY p.product_id
 LIMIT 10;
 
 WITH current_p AS (

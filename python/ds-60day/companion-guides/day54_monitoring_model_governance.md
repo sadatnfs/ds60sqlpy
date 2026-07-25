@@ -1,36 +1,114 @@
-# Day 54 — Monitoring and Model Governance (Companion Guide)
+# Day 54 — Monitoring and Model Governance
+
+**Lesson ID:** `python-54` · **Level:** advanced · **Dependencies:** `data` · **Network:** offline
+
+Deployment changes the question from “How did the model score once?” to “Is the
+whole decision system still behaving acceptably?” Monitoring provides evidence;
+governance assigns ownership and defines what happens next.
 
 ## Learning objectives
-- Monitor data quality, drift, and performance in production
-- Log predictions with features/metadata; design feedback loops
-- Understand governance: lineage, approvals, and auditability
 
-## Why this matters
-Models live in dynamic environments. Monitoring and governance ensure safety, reliability, and compliance.
+By the end of the lesson, you can:
 
-## Core concepts and examples
-- Data quality checks: schema validation, ranges, missingness, anomalies
-- Drift detection: PSI, KL divergence, population stability indices
-- Performance tracking: delayed ground truth, windowed metrics
-- Governance: versioning models/data/code; approvals; reproducible builds
+- distinguish data quality, drift, performance, calibration, and service health;
+- calculate and trend a simple Population Stability Index (PSI);
+- design privacy-aware prediction logs;
+- define owners, review gates, alerts, and rollback evidence; and
+- explain why a drift statistic is a signal rather than a diagnosis.
 
-## Example (sketch)
+## Prerequisites
+
+- Complete `python-53` (MLflow tracking).
+- Recall held-out performance, data schemas, and artifact versioning.
+- Be prepared to state a monitoring window and reference population.
+
+## Vocabulary and mental models
+
+| Term | Definition |
+|---|---|
+| Data drift | Input distribution changes |
+| Concept drift | Relationship between inputs and target changes |
+| Performance drift | Decision metric changes once delayed labels arrive |
+| Calibration drift | Predicted probabilities no longer match observed rates |
+| PSI | Binned comparison of reference and current proportions |
+| Service-level indicator | Measured behavior such as latency or error rate |
+| Alert threshold | Declared condition triggering investigation/action |
+| Rollback | Restoring a known version when risk exceeds tolerance |
+
+Monitoring layers answer different questions: **Is data valid? Has it changed?
+Does the model still work? Is the service healthy? Is impact acceptable across
+groups?**
+
+## Worked example: treat PSI as a defined calculation
+
 ```python
-# compute PSI between train and prod feature distributions
 import numpy as np
-# binning and PSI function omitted for brevity
+
+
+def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -> float:
+    edges = np.quantile(reference, np.linspace(0, 1, bins + 1))
+    edges[0], edges[-1] = -np.inf, np.inf
+    reference_counts = np.histogram(reference, bins=edges)[0]
+    current_counts = np.histogram(current, bins=edges)[0]
+    reference_rate = np.clip(reference_counts / reference_counts.sum(), 1e-6, 1)
+    current_rate = np.clip(current_counts / current_counts.sum(), 1e-6, 1)
+    return float(
+        np.sum(
+            (current_rate - reference_rate)
+            * np.log(current_rate / reference_rate)
+        )
+    )
 ```
 
-## Common pitfalls
-- No ground truth pipeline; performance unknown
-- Silent schema drift breaking assumptions
-- Storing PII without proper controls and retention policies
+Quantile edges are learned from the reference and extended to infinity so
+current out-of-range observations are counted. Duplicated quantiles, missing
+values, and tiny samples need explicit handling in real code.
 
-## Practice exercises
-1) Implement and visualize drift metrics for two datasets
-2) Design a logging schema for online predictions
-3) Propose an approval flow for pushing a new model version
+## Learner exercises
 
-## Further reading
-- EvidentlyAI: https://evidentlyai.com
-- Data governance: https://www.mondelezinternational.com/-/media/Mondelez/Files/governance.pdf (conceptual)
+1. Compute PSI for multiple features or score windows over time.
+2. Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.
+3. Draft a governance policy covering roles, approvals, alerts, and rollback.
+
+### Progressive hints
+
+1. Freeze each feature's reference bin edges and record sample counts beside PSI.
+   Test “no shift,” mean shift, and variance shift.
+2. Use one row per week with observation count, label coverage, AUC, PSI, and
+   model version. Mark missing/delayed labels instead of filling fake metrics.
+3. For every threshold, name an owner, review clock, evidence source, action,
+   escalation path, and recovery test.
+
+## Self-check
+
+- Can input drift occur without performance degradation?
+- Why can performance degrade without detectable marginal feature drift?
+- What happens to AUC monitoring before labels arrive?
+- Which raw fields should not be copied into prediction logs?
+- What evidence proves a rollback restored acceptable behavior?
+
+Expected behavior: the notebook's simulated second score distribution has lower
+separability and a nonzero PSI. Exact values depend on bins and data; no PSI
+number alone mandates a universal action.
+
+## Pitfalls, diagnostics, and tradeoffs
+
+| Pitfall | Consequence | Better practice |
+|---|---|---|
+| Universal PSI threshold copied from a blog | Context-free alerts | Calibrate thresholds with historical variation and risk |
+| Current values outside reference range ignored | Drift understated | Use open-ended edge bins |
+| AUC calculated on partial labels | Selection bias | Track label coverage/delay |
+| Raw features logged by default | Privacy/security exposure | Minimize, tokenize, aggregate, and retain intentionally |
+| Alert without owner/runbook | Noise with no action | Bind alerts to decision procedures |
+| Monitoring only global averages | Subgroup harm is hidden | Track relevant cohorts with sample-size safeguards |
+
+Monitoring every feature increases cost and false alarms. Prioritize data
+contracts, important features, decision outcomes, critical subgroups, and system
+health; document what is intentionally not monitored.
+
+## Next step
+
+- Work in the [Day 54 learner notebook](../notebooks/day54_monitoring_model_governance.ipynb).
+- Then review the
+  [Day 54 solution](../solutions/day54_monitoring_model_governance/day54_solutions.md).
+- Continue to [Day 55 — Docker](day55_apis_containerization_docker.md).

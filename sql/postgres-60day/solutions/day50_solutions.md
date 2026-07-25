@@ -1,159 +1,95 @@
-# Day 50 — Solutions (Project 2: Finance/Operations, Part 2 — Expense/Budget Variance)
+# Day 50 Solutions — Expense and Budget Variance
 
-We compute monthly actual vs budget, rolling totals, and now tackle YoY variance and a pivoted report.
+This day adds year-over-year context, a greater-than-15% overspend flag, and a
+static monthly pivot using the categories present in the course seed. See
+[`day50_solutions.sql`](day50_solutions.sql).
 
-Reference join (annotated)
+## Exercise 1 — YoY and budget variance
+
 ```sql
-WITH monthly_exp AS (
+SET search_path TO training, public;
+
+WITH actual AS (
   SELECT date_trunc('month', expense_date)::date AS month,
          category,
          SUM(amount) AS actual
   FROM expenses
-  GROUP BY 1,2
-), monthly_budget AS (
-  SELECT period AS month,
-         category,
-         SUM(amount) AS budget
+  GROUP BY date_trunc('month', expense_date), category
+), budget AS (
+  SELECT period AS month, category, SUM(amount) AS budget
   FROM budgets
-  GROUP BY 1,2
-)
-SELECT coalesce(b.category, e.category) AS category,
-       coalesce(b.month, e.month) AS month,
-       COALESCE(b.budget, 0) AS budget,
-       COALESCE(e.actual, 0) AS actual
-FROM monthly_budget b
-FULL OUTER JOIN monthly_exp e
-  ON e.month = b.month AND e.category = b.category
-ORDER BY month DESC, category
-LIMIT 100;
-```
-
-Exercise 1 — Compute YoY variance and highlight categories with > 15% overspend
-Goal
-- For each category‑month, compute actual − budget and (actual − budget) / budget. Compare to prior year.
-
-Solution
-```sql
-WITH exp AS (
-  SELECT date_trunc('month', expense_date)::date AS month,
-         category,
-         SUM(amount) AS actual
-  FROM expenses
-  GROUP BY 1,2
-), bud AS (
-  SELECT date_trunc('month', period)::date AS month,
-         category,
-         SUM(amount) AS budget
-  FROM budgets
-  GROUP BY 1,2
+  GROUP BY period, category
 ), joined AS (
-  SELECT COALESCE(b.category, e.category) AS category,
-         COALESCE(b.month, e.month) AS month,
-         COALESCE(b.budget, 0) AS budget,
-         COALESCE(e.actual, 0) AS actual
-  FROM bud b
-  FULL JOIN exp e ON e.month = b.month AND e.category = b.category
-), with_yoy AS (
-  SELECT category,
-         month,
-         actual,
-         budget,
-         ROUND(actual - budget, 2) AS variance,
-         ROUND((actual - budget) / NULLIF(budget, 0), 4) AS variance_pct,
-         LAG(actual, 12) OVER (PARTITION BY category ORDER BY month) AS actual_prev_year,
-         LAG(budget, 12) OVER (PARTITION BY category ORDER BY month) AS budget_prev_year
+  SELECT COALESCE(a.month, b.month) AS month,
+         COALESCE(a.category, b.category) AS category,
+         COALESCE(a.actual, 0) AS actual,
+         COALESCE(b.budget, 0) AS budget
+  FROM actual a
+  FULL OUTER JOIN budget b USING (month, category)
+), compared AS (
+  SELECT *,
+         LAG(actual, 12) OVER (
+           PARTITION BY category ORDER BY month
+         ) AS prior_year_actual
   FROM joined
 )
-SELECT category,
-       month,
-       actual,
-       budget,
-       variance,
-       variance_pct,
-       CASE WHEN variance_pct IS NOT NULL AND variance_pct > 0.15 THEN 'overspend>15%' ELSE 'ok' END AS flag
-FROM with_yoy
-ORDER BY month DESC, category
-LIMIT 120;
+SELECT month,
+       category,
+       ROUND(actual, 2) AS actual,
+       ROUND(prior_year_actual, 2) AS prior_year_actual,
+       ROUND((actual - prior_year_actual) / NULLIF(prior_year_actual, 0), 4)
+         AS year_over_year_variance_pct,
+       ROUND((actual - budget) / NULLIF(budget, 0), 4) AS budget_variance_pct,
+       actual > budget * 1.15 AS overspent_by_more_than_15_pct
+FROM compared
+ORDER BY month DESC, category;
 ```
-Line‑by‑line notes
-- FULL JOIN ensures visibility when either actual or budget is missing.
-- variance_pct uses NULLIF to avoid divide‑by‑zero when budget is 0.
-- LAG(...) provides prior‑year comparators if you wish to show YoY deltas.
 
-Exercise 2 — Pivot categories as columns and months as rows with variance
-Options
-- Dynamic pivot: use tablefunc.crosstab (requires CREATE EXTENSION tablefunc).
-- Static pivot for a small, known set of categories using conditional aggregates.
+Expected grain: one row per month and category, including periods found on only
+one side of the actual/budget comparison.
 
-A) Static pivot with conditional aggregates
+## Exercise 2 — Monthly variance pivot
+
 ```sql
-WITH exp AS (
+SET search_path TO training, public;
+
+WITH actual AS (
   SELECT date_trunc('month', expense_date)::date AS month,
          category,
          SUM(amount) AS actual
   FROM expenses
-  GROUP BY 1,2
-), bud AS (
-  SELECT date_trunc('month', period)::date AS month,
-         category,
-         SUM(amount) AS budget
-  FROM budgets
-  GROUP BY 1,2
-), j AS (
-  SELECT COALESCE(b.category, e.category) AS category,
-         COALESCE(b.month, e.month) AS month,
-         COALESCE(b.budget, 0) AS budget,
-         COALESCE(e.actual, 0) AS actual
-  FROM bud b FULL JOIN exp e ON e.month = b.month AND e.category = b.category
+  GROUP BY date_trunc('month', expense_date), category
+), variance AS (
+  SELECT b.period AS month,
+         b.category,
+         COALESCE(a.actual, 0) - b.amount AS variance
+  FROM budgets b
+  LEFT JOIN actual a
+    ON a.month = b.period
+   AND a.category = b.category
 )
 SELECT month,
-       ROUND(SUM(CASE WHEN category='COGS'          THEN actual - budget END),2) AS var_cogs,
-       ROUND(SUM(CASE WHEN category='Payroll'       THEN actual - budget END),2) AS var_payroll,
-       ROUND(SUM(CASE WHEN category='Infrastructure'THEN actual - budget END),2) AS var_infra,
-       ROUND(SUM(CASE WHEN category='G&A'           THEN actual - budget END),2) AS var_gna
-FROM j
+       ROUND(SUM(variance) FILTER (WHERE category = 'COGS'), 2) AS cogs,
+       ROUND(SUM(variance) FILTER (WHERE category = 'Marketing'), 2) AS marketing,
+       ROUND(SUM(variance) FILTER (WHERE category = 'Payroll'), 2) AS payroll,
+       ROUND(SUM(variance) FILTER (WHERE category = 'Infrastructure'), 2)
+         AS infrastructure,
+       ROUND(SUM(variance) FILTER (WHERE category = 'G&A'), 2) AS general_admin
+FROM variance
 GROUP BY month
-ORDER BY month DESC
-LIMIT 24;
+ORDER BY month DESC;
 ```
-Note
-- Edit the WHEN clauses to match your organization’s category names.
 
-B) Dynamic pivot using crosstab (optional)
-```sql
--- Enable once per database (requires superuser privileges in some setups)
--- CREATE EXTENSION IF NOT EXISTS tablefunc;
+Expected shape: one row per budget month and one variance column per known
+category.
 
-WITH base AS (
-  SELECT date_trunc('month', expense_date)::date AS month,
-         category,
-         SUM(amount) AS actual
-  FROM expenses
-  GROUP BY 1,2
-), bud AS (
-  SELECT date_trunc('month', period)::date AS month,
-         category,
-         SUM(amount) AS budget
-  FROM budgets
-  GROUP BY 1,2
-), diff AS (
-  SELECT COALESCE(b.month, e.month) AS month,
-         COALESCE(b.category, e.category) AS category,
-         COALESCE(e.actual,0) - COALESCE(b.budget,0) AS variance
-  FROM bud b FULL JOIN base e ON e.month=b.month AND e.category=b.category
-)
-SELECT *
-FROM crosstab(
-  $$
-  SELECT to_char(month, 'YYYY-MM') AS row_name,
-         category AS category,
-         variance AS value
-  FROM diff
-  ORDER BY 1,2
-  $$
-) AS ct(row_name text, "COGS" numeric, "Payroll" numeric, "Infrastructure" numeric, "G&A" numeric)
-ORDER BY row_name DESC
-LIMIT 24;
-```
-Notes
-- You must enumerate output columns/types in AS ct(...). Add or change categories as needed.
+## Reasoning, safety, and pitfalls
+
+- Positive variance means actual spending exceeded budget because the formula
+  is `actual - budget`.
+- `LAG(..., 12)` assumes every category has one row for every month. Build a
+  category/month spine when periods can be missing.
+- The pivot is intentionally static. New categories require a new column or a
+  long-form BI result.
+- Treat zero or absent budgets explicitly; `NULL` percentage is safer than a
+  fabricated infinite or zero rate.

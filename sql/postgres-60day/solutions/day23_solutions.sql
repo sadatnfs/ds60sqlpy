@@ -1,4 +1,6 @@
 -- Day 23 - Solutions: CTEs Introduction
+SET search_path TO training, public;
+
 -- Assumes: orders, order_items, products, customers
 
 /*

@@ -1,0 +1,126 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ds60sqlpy"
+version = "0.2.0"
+description = "Offline-capable tools for the DS60 Python, PostgreSQL, and engineering curriculum"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = "Apache-2.0"
+authors = [{name = "DS60 contributors"}]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Education",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Education",
+]
+dependencies = []
+
+[project.optional-dependencies]
+notebooks = [
+  "ipykernel>=6.29",
+  "jupyterlab>=4.2",
+  "nbclient>=0.10",
+  "nbformat>=5.10",
+]
+data = [
+  "altair>=5.2",
+  "joblib>=1.3",
+  "matplotlib>=3.8",
+  "numpy>=1.26",
+  "pandas>=2.2",
+  "pandera>=0.20",
+  "plotly>=5.20",
+  "requests>=2.32",
+  "scikit-learn>=1.4",
+  "scipy>=1.12",
+  "seaborn>=0.13",
+  "statsmodels>=0.14",
+]
+ml = [
+  "imbalanced-learn>=0.12",
+  "lightgbm>=4.3",
+  "lime>=0.2.0.1",
+  "pmdarima>=2.0",
+  "shap>=0.45",
+  "xgboost>=2.0",
+]
+production = [
+  "dask[dataframe,distributed]>=2024.5",
+  "fastapi>=0.115",
+  "mlflow>=2.15",
+  "prefect>=3.0",
+  "pydantic>=2.8",
+  "uvicorn>=0.30",
+]
+bridge = [
+  "psycopg[binary,pool]>=3.2",
+]
+deep-learning = [
+  "torch>=2.3",
+  "torchvision>=0.18",
+]
+nlp = [
+  "accelerate>=1.0",
+  "datasets>=3.0",
+  "evaluate>=0.4",
+  "spacy>=3.7",
+  "transformers>=4.44",
+]
+geo = [
+  "contextily>=1.6",
+  "geodatasets>=2024.8",
+  "geopandas>=1.0",
+  "networkx>=3.3",
+]
+quality = [
+  "mypy>=1.14",
+  "pre-commit>=4.0",
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.9",
+]
+
+[project.scripts]
+ds60 = "ds60sqlpy.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests", "bridge/tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = [
+  "python/ds-60day/notebooks",
+  "python/ds-60day/solutions",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PTH"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "scripts", "tests", "bridge/solutions", "bridge/tests"]
+exclude = [
+  "python/ds-60day",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["ds60sqlpy"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

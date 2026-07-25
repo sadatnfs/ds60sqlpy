@@ -1,228 +1,190 @@
-# Day 58 — Solutions (Final Capstone, Part 1 — Staging, Cleaning, Validation)
+# Day 58 Solutions — Staging, Cleaning, and Ingestion
 
-We’ll extend the cleaning pipeline to support more datetime formats, add phone normalization and validation, and implement a stored procedure/function that ingests staging rows, cleans, validates, upserts, and returns a data‑quality (DQ) summary.
+The three capstone deliverables are additional timestamp parsing, phone
+normalization/validation, and a stored procedure that cleans, validates,
+upserts, and returns load counts. The full transaction-safe answer is
+[`day58_solutions.sql`](day58_solutions.sql).
 
-Reference from lesson (annotated: cleaning multiple timestamp formats)
+## Exercises 1 and 2 — Dates and phone numbers
+
+The staged answer supports these guarded timestamp formats:
+
+| Input example | Guard | Parser |
+|---|---|---|
+| `2026/01/03 10:00` | `YYYY/MM/DD` regex | `to_timestamp(..., 'YYYY/MM/DD HH24:MI')` |
+| `01/15/2026 08:30` | `MM/DD/YYYY` regex | `to_timestamp(..., 'MM/DD/YYYY HH24:MI')` |
+| `15-Jan-2026 12:00` | textual month regex | `to_timestamp(..., 'DD-Mon-YYYY HH24:MI')` |
+| ISO `YYYY-MM-DD...` | ISO prefix regex | cast to `timestamptz` |
+
+Phone cleanup removes every non-digit character:
+
 ```sql
-WITH cleaned AS (
-  SELECT trim(full_name)                           AS full_name,
-         lower(trim(email))                        AS email,
-         upper(trim(country))                      AS country,
-         nullif(trim(segment), '')                 AS segment,
-         (
-           CASE
-             WHEN created_at ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}' THEN created_at::timestamptz
-             WHEN created_at ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}$' THEN to_timestamp(created_at, 'DD-MM-YYYY')
-             WHEN created_at ~ '^\d{4}/\d{2}/\d{2}' THEN to_timestamp(created_at, 'YYYY/MM/DD HH24:MI')
-             ELSE NULL
-           END
-         )                                          AS created_at,
-         COALESCE(NULLIF(trim(attributes),''),'{}')::jsonb AS attributes
-  FROM stg_customers_raw
-)
-SELECT * FROM cleaned;
+SELECT phone,
+       regexp_replace(phone, '[^0-9]', '', 'g') AS phone_digits,
+       regexp_replace(phone, '[^0-9]', '', 'g') ~ '^(1)?[0-9]{10}$'
+         AS phone_valid
+FROM (
+  VALUES
+    ('(415) 555-0101'),
+    ('+1 415 555 0101'),
+    ('123')
+) AS sample(phone);
 ```
 
-Exercise 1 — Extend the parser to handle more datetime formats
-Goal
-- Support additional common formats: MM/DD/YYYY, RFC 2822 (Fri, 03 Jan 2025 10:00:00 +0000), and textual month (Jan 3, 2025 10:00).
+Expected shape: one row per raw phone with normalized digits and a Boolean
+validation flag. This regex is a simplified North American course rule, not a
+global phone-number standard.
 
-Solution
+## Exercise 3 — `INOUT` ingestion procedure
+
+The procedure uses an `INOUT` pair because PostgreSQL procedures do not return a
+query result like table-returning functions. `CALL` returns the final parameter
+values as a one-row result.
+
 ```sql
-WITH cleaned AS (
-  SELECT trim(full_name) AS full_name,
-         lower(trim(email)) AS email,
-         upper(trim(country)) AS country,
-         nullif(trim(segment),'') AS segment,
-         COALESCE(NULLIF(trim(attributes),''),'{}')::jsonb AS attributes,
-         trim(created_at) AS created_raw
-  FROM stg_customers_raw
-), parsed AS (
-  SELECT *,
-         CASE
-           -- ISO 8601 / YYYY-MM-DD[THH:MI:SS[Z]]
-           WHEN created_raw ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
-             THEN created_raw::timestamptz
-           -- DD-MM-YYYY
-           WHEN created_raw ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}$'
-             THEN to_timestamp(created_raw, 'DD-MM-YYYY')
-           -- YYYY/MM/DD HH24:MI
-           WHEN created_raw ~ '^\d{4}/\d{2}/\d{2}'
-             THEN to_timestamp(created_raw, 'YYYY/MM/DD HH24:MI')
-           -- MM/DD/YYYY [HH:MI[:SS]]
-           WHEN created_raw ~ '^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}'
-             THEN to_timestamp(created_raw, 'MM/DD/YYYY HH24:MI:SS')
-           -- RFC 2822 like: Fri, 03 Jan 2025 10:00:00 +0000
-           WHEN created_raw ~ '^[A-Za-z]{3},\s\d{2}\s[A-Za-z]{3}\s\d{4}'
-             THEN to_timestamp(created_raw, 'Dy, DD Mon YYYY HH24:MI:SS TZH:TZM')
-           -- Text month like: Jan 3, 2025 10:00
-           WHEN created_raw ~ '^[A-Za-z]{3}\s\d{1,2},\s\d{4}'
-             THEN to_timestamp(created_raw, 'Mon DD, YYYY HH24:MI')
-           ELSE NULL
-         END AS created_at
-  FROM cleaned
+BEGIN;
+SET search_path TO training, public;
+
+CREATE TEMP TABLE stg_customer_ingest_solution (
+  full_name text,
+  email text,
+  country text,
+  segment text,
+  created_at text,
+  phone text,
+  attributes text
+);
+
+INSERT INTO stg_customer_ingest_solution
+VALUES
+  (' Customer 601 ', 'CUSTOMER601@EXAMPLE.COM ', 'USA', 'gold',
+   '2026/01/03 10:00', '(415) 555-0101', '{"channel":"web"}'),
+  ('Customer 602', 'customer602@example.com', 'GB', 'silver',
+   '01/15/2026 08:30', '+44 20 7946 0958', '{"channel":"mobile"}'),
+  ('Customer 603', 'customer603@example.com', 'DE', NULL,
+   '15-Jan-2026 12:00', '030-1234567', '{"channel":"store"}'),
+  ('Customer bad', 'not-an-email', 'XX', 'bronze',
+   'not-a-date', '123', 'not-json');
+
+CREATE TEMP TABLE cleaned_customer_ingest_solution (
+  full_name text,
+  email text,
+  country text,
+  segment text,
+  created_at timestamptz,
+  phone_digits text,
+  phone_valid boolean,
+  email_valid boolean,
+  country_valid boolean,
+  attributes jsonb
+) ON COMMIT DROP;
+
+CREATE OR REPLACE PROCEDURE ingest_customer_stage_solution(
+  INOUT upserted_rows integer,
+  INOUT invalid_rows integer
 )
-SELECT * FROM parsed;
-```
-Line‑by‑line notes
-- created_raw: cache the trimmed string once.
-- Each WHEN branch: use a regex guard then an appropriate to_timestamp pattern.
-- RFC 2822 branch expects timezone; adapt TZ pattern to your input if needed.
-
-Exercise 2 — Add phone normalization and flag invalid formats
-Goal
-- Produce a normalized phone string. Example strategy: keep digits only, optionally prefix with a default country code (here just illustrate US +1 if 10 digits). Also compute phone_valid boolean.
-
-Solution
-```sql
--- Assume staging has a phone column (TEXT). If not, add it for the exercise.
-ALTER TABLE IF EXISTS stg_customers_raw ADD COLUMN IF NOT EXISTS phone TEXT;
-
-WITH cleaned AS (
-  SELECT trim(full_name) AS full_name,
-         lower(trim(email)) AS email,
-         upper(trim(country)) AS country,
-         nullif(trim(segment),'') AS segment,
-         COALESCE(NULLIF(trim(attributes),''),'{}')::jsonb AS attributes,
-         trim(phone) AS phone_raw
-  FROM stg_customers_raw
-), normalized AS (
-  SELECT *,
-         regexp_replace(COALESCE(phone_raw,''), '[^0-9]+', '', 'g') AS digits
-  FROM cleaned
-), mapped AS (
-  SELECT *,
-    CASE
-      WHEN length(digits) = 10 THEN '+1' || digits          -- example default country
-      WHEN length(digits) = 11 AND left(digits,1)='1' THEN '+' || digits
-      WHEN length(digits) BETWEEN 8 AND 15 THEN '+' || digits -- generic E.164-ish fallback
-      ELSE NULL
-    END AS phone_norm
-  FROM normalized
-)
-SELECT *, (phone_norm IS NOT NULL) AS phone_valid
-FROM mapped;
-```
-Notes
-- regexp_replace removes everything but digits.
-- Adjust default country logic for your locale; real systems use a library or metadata.
-
-Exercise 3 — Write a stored routine to ingest, clean, validate, upsert, and return a DQ summary
-Goal
-- Implement a stored FUNCTION (returns a summary table) that:
-  1) Cleans/validates emails, countries, phones, and timestamps
-  2) Upserts valid rows into training.customers (by unique email)
-  3) Returns counts for total, inserted, updated, invalid
-
-Solution (PL/pgSQL)
-```sql
-CREATE OR REPLACE FUNCTION training.ingest_customers_from_staging()
-RETURNS TABLE(total_rows int, inserted int, updated int, invalid_rows int)
 LANGUAGE plpgsql
-AS $$
-DECLARE
-  v_total int := 0;
-  v_inserted int := 0;
-  v_updated int := 0;
-  v_invalid int := 0;
+AS $procedure$
 BEGIN
-  -- 1) Clean + validate into a temp table ---------------------------------
-  CREATE TEMP TABLE tmp_customers_clean AS
-  WITH cleaned AS (
+  TRUNCATE cleaned_customer_ingest_solution;
+
+  INSERT INTO cleaned_customer_ingest_solution
+  WITH normalized AS (
     SELECT trim(full_name) AS full_name,
            lower(trim(email)) AS email,
-           upper(trim(country)) AS country,
-           nullif(trim(segment),'') AS segment,
-           trim(created_at) AS created_raw,
-           COALESCE(NULLIF(trim(attributes),''),'{}')::jsonb AS attributes,
-           trim(phone) AS phone_raw
-    FROM stg_customers_raw
-  ), parsed AS (
-    SELECT *,
+           CASE upper(trim(country))
+             WHEN 'USA' THEN 'US'
+             WHEN 'U S' THEN 'US'
+             ELSE upper(trim(country))
+           END AS country,
+           lower(NULLIF(trim(segment), '')) AS segment,
            CASE
-             WHEN created_raw ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}' THEN created_raw::timestamptz
-             WHEN created_raw ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}$' THEN to_timestamp(created_raw, 'DD-MM-YYYY')
-             WHEN created_raw ~ '^\d{4}/\d{2}/\d{2}' THEN to_timestamp(created_raw, 'YYYY/MM/DD HH24:MI')
-             WHEN created_raw ~ '^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}' THEN to_timestamp(created_raw, 'MM/DD/YYYY HH24:MI:SS')
-             WHEN created_raw ~ '^[A-Za-z]{3},\s\d{2}\s[A-Za-z]{3}\s\d{4}' THEN to_timestamp(created_raw, 'Dy, DD Mon YYYY HH24:MI:SS TZH:TZM')
-             WHEN created_raw ~ '^[A-Za-z]{3}\s\d{1,2},\s\d{4}' THEN to_timestamp(created_raw, 'Mon DD, YYYY HH24:MI')
+             WHEN created_at ~ '^[0-9]{4}/[0-9]{2}/[0-9]{2} '
+               THEN to_timestamp(created_at, 'YYYY/MM/DD HH24:MI')
+             WHEN created_at ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4} '
+               THEN to_timestamp(created_at, 'MM/DD/YYYY HH24:MI')
+             WHEN created_at ~ '^[0-9]{2}-[A-Za-z]{3}-[0-9]{4} '
+               THEN to_timestamp(created_at, 'DD-Mon-YYYY HH24:MI')
+             WHEN created_at ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+               THEN created_at::timestamptz
              ELSE NULL
-           END AS created_at
-    FROM cleaned
-  ), phone_norm AS (
-    SELECT *, regexp_replace(COALESCE(phone_raw,''), '[^0-9]+', '', 'g') AS digits
-    FROM parsed
-  ), with_phone AS (
-    SELECT *,
-      CASE
-        WHEN length(digits) = 10 THEN '+1' || digits
-        WHEN length(digits) = 11 AND left(digits,1)='1' THEN '+' || digits
-        WHEN length(digits) BETWEEN 8 AND 15 THEN '+' || digits
-        ELSE NULL
-      END AS phone_norm
-    FROM phone_norm
-  ), validated AS (
-    SELECT *,
-           (email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$') AS email_valid,
-           (country IN ('US','CA','GB','DE','FR','IN','AU','BR')) AS country_valid,
-           (phone_norm IS NOT NULL) AS phone_valid
-    FROM with_phone
+           END AS parsed_created_at,
+           regexp_replace(phone, '[^0-9]', '', 'g') AS phone_digits,
+           CASE
+             WHEN attributes IS JSON THEN attributes::jsonb
+             ELSE '{}'::jsonb
+           END AS attributes
+    FROM stg_customer_ingest_solution
   )
-  SELECT * FROM validated;
+  SELECT full_name,
+         email,
+         country,
+         segment,
+         parsed_created_at,
+         phone_digits,
+         phone_digits ~ '^(1)?[0-9]{10}$' AS phone_valid,
+         email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' AS email_valid,
+         country IN ('US','CA','GB','DE','FR','IN','AU','BR') AS country_valid,
+         attributes
+  FROM normalized;
 
-  SELECT COUNT(*) INTO v_total FROM tmp_customers_clean;
+  SELECT COUNT(*)
+  INTO invalid_rows
+  FROM cleaned_customer_ingest_solution
+  WHERE NOT email_valid
+     OR NOT country_valid
+     OR NOT phone_valid
+     OR created_at IS NULL
+     OR full_name IS NULL
+     OR full_name = '';
 
-  -- 2) Split valid/invalid -----------------------------------------------
-  CREATE TEMP TABLE tmp_valid AS
-    SELECT * FROM tmp_customers_clean
-    WHERE email_valid AND country_valid;  -- phone_valid optional for acceptance
+  INSERT INTO customers(full_name, email, country, created_at, segment, attributes)
+  SELECT full_name,
+         email,
+         country,
+         created_at,
+         segment,
+         attributes
+  FROM cleaned_customer_ingest_solution
+  WHERE email_valid
+    AND country_valid
+    AND phone_valid
+    AND created_at IS NOT NULL
+    AND full_name <> ''
+  ON CONFLICT (email) DO UPDATE
+  SET full_name = EXCLUDED.full_name,
+      country = EXCLUDED.country,
+      segment = EXCLUDED.segment,
+      attributes = EXCLUDED.attributes;
 
-  CREATE TEMP TABLE tmp_invalid AS
-    SELECT * FROM tmp_customers_clean
-    WHERE NOT (email_valid AND country_valid);
+  GET DIAGNOSTICS upserted_rows = ROW_COUNT;
+END
+$procedure$;
 
-  SELECT COUNT(*) INTO v_invalid FROM tmp_invalid;
+CALL ingest_customer_stage_solution(0, 0);
 
-  -- 3) Upsert by email ----------------------------------------------------
-  -- 3a) UPDATE existing rows
-  WITH u AS (
-    UPDATE training.customers c
-    SET full_name = v.full_name,
-        country   = v.country,
-        segment   = v.segment,
-        created_at= COALESCE(v.created_at, c.created_at),
-        attributes= v.attributes
-    FROM tmp_valid v
-    WHERE c.email = v.email
-    RETURNING 1
-  ) SELECT COUNT(*) INTO v_updated FROM u;
+SELECT *
+FROM cleaned_customer_ingest_solution
+ORDER BY email;
 
-  -- 3b) INSERT new rows
-  WITH ins AS (
-    INSERT INTO training.customers(full_name, email, country, segment, created_at, attributes)
-    SELECT v.full_name, v.email, v.country, v.segment,
-           COALESCE(v.created_at, now()), v.attributes
-    FROM tmp_valid v
-    WHERE NOT EXISTS (SELECT 1 FROM training.customers c WHERE c.email = v.email)
-    RETURNING 1
-  ) SELECT COUNT(*) INTO v_inserted FROM ins;
-
-  -- 4) Return summary -----------------------------------------------------
-  total_rows := v_total; inserted := v_inserted; updated := v_updated; invalid_rows := v_invalid;
-  RETURN NEXT;
-END;
-$$;
+ROLLBACK;
 ```
-How to run and interpret
-```sql
-SELECT * FROM training.ingest_customers_from_staging();
--- Expect a single row with counts. Inspect tmp_invalid (in same session) if you want details.
-```
-Notes
-- We chose a FUNCTION to return a summary row; a PROCEDURE cannot RETURN rows directly. In Postgres 11+, procedures are for side effects; functions return data.
-- For production, consider persisting invalid rows in an error table with reasons per row.
 
-Going further
-- Add strict country normalization via a country_map table before validation.
-- Track audit columns (created_at/updated_at/by) on training.customers.
-- Wrap the ingestion in a transaction; add exception handling with GET STACKED DIAGNOSTICS.
+Expected results: `CALL` returns `upserted_rows` and `invalid_rows`; the cleaned
+table provides row-level evidence behind those counts. The whole demo rolls
+back, including the procedure and customer changes.
+
+## Reasoning, safety, and limits
+
+- Regex guards prevent known malformed strings from reaching timestamp casts.
+  Add formats deliberately; ambiguous dates such as `03/04/2026` require an
+  explicit locale policy.
+- Invalid JSON becomes `{}` in this exercise. A production pipeline should also
+  retain the raw value and rejection reason.
+- `ON CONFLICT (email)` makes repeat loads deterministic, but the procedure's
+  `upserted_rows` counts rows affected, not inserts versus updates separately.
+- The canonical `training.customers` table has no phone column. The solution
+  validates phone in staging but does not discard the schema boundary by
+  inventing a destination. Persisting phone requires a reviewed migration.
+- The phone regex is intentionally narrow; use country-aware normalization for
+  international data.

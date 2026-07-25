@@ -1,137 +1,92 @@
-# Day 55 — Solutions (Project 4: Complex BI, Part 1 — Drilldowns with GROUPING SETS)
+# Day 55 Solutions — BI Drill-down and Subtotals
 
-We’ll compare ROLLUP vs CUBE, interpret GROUPING flags, and extend the drill‑down to include order status. Explanations are line‑by‑line for beginners.
+The two exercises compare `ROLLUP` and `CUBE`, then add order status to a
+country/category/product top-five drill-down. See
+[`day55_solutions.sql`](day55_solutions.sql).
 
-Reference (annotated)
+## Exercise 1 — Compare row counts
+
 ```sql
+SET search_path TO training, public;
+
 WITH line AS (
   SELECT c.country,
          p.category,
-         pm.method AS payment_method,
-         date_trunc('month', o.order_date)::date AS month,
-         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue,
-         oi.quantity AS qty
+         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
   FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  LEFT JOIN payments pm ON pm.order_id = o.order_id
+  JOIN customers c USING (customer_id)
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+), rollup_rows AS (
+  SELECT country, category, SUM(revenue) AS revenue
+  FROM line
+  GROUP BY ROLLUP (country, category)
+), cube_rows AS (
+  SELECT country, category, SUM(revenue) AS revenue
+  FROM line
+  GROUP BY CUBE (country, category)
+)
+SELECT (SELECT COUNT(*) FROM rollup_rows) AS rollup_row_count,
+       (SELECT COUNT(*) FROM cube_rows) AS cube_row_count;
+```
+
+Expected shape: one comparison row. `CUBE(country, category)` adds category-only
+subtotals that the hierarchical `ROLLUP(country, category)` omits, so its count
+is greater on this seed.
+
+## Exercise 2 — Status-aware top five
+
+```sql
+SET search_path TO training, public;
+
+WITH line AS (
+  SELECT c.country,
+         p.category,
+         o.status,
+         p.product_id,
+         p.name,
+         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
+  FROM orders o
+  JOIN customers c USING (customer_id)
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+), product_revenue AS (
+  SELECT country,
+         category,
+         status,
+         product_id,
+         name,
+         SUM(revenue) AS revenue
+  FROM line
+  GROUP BY country, category, status, product_id, name
+), ranked AS (
+  SELECT *,
+         ROW_NUMBER() OVER (
+           PARTITION BY country, category, status
+           ORDER BY revenue DESC, product_id
+         ) AS product_rank
+  FROM product_revenue
 )
 SELECT country,
        category,
-       payment_method,
-       month,
-       ROUND(SUM(revenue),2) AS revenue,
-       SUM(qty) AS units,
-       GROUPING(country)        AS g_country,
-       GROUPING(category)       AS g_category,
-       GROUPING(payment_method) AS g_method,
-       GROUPING(month)          AS g_month
-FROM line
-GROUP BY ROLLUP (country, category, payment_method, month)
-ORDER BY country NULLS FIRST, category NULLS FIRST, payment_method NULLS FIRST, month NULLS FIRST;
-```
-Notes
-- ROLLUP builds hierarchical subtotals: (country,category,payment,month) → (country,category,payment) → (country,category) → (country) → grand total.
-- GROUPING(col)=1 marks that column is aggregated (subtotal level), 0 means detail value present.
-
-Exercise 1 — Replace ROLLUP with CUBE and compare row counts
-Goal
-- Show that CUBE produces all combinations of subtotals (not only hierarchical). Count resulting rows and compare to ROLLUP.
-
-Solution
-```sql
-WITH line AS (
-  SELECT c.country,
-         p.category,
-         pm.method AS payment_method,
-         date_trunc('month', o.order_date)::date AS month,
-         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  LEFT JOIN payments pm ON pm.order_id = o.order_id
-), roll AS (
-  SELECT COUNT(*) AS n_roll
-  FROM (
-    SELECT 1
-    FROM line
-    GROUP BY ROLLUP(country, category, payment_method, month)
-  ) r
-), cub AS (
-  SELECT COUNT(*) AS n_cube
-  FROM (
-    SELECT 1
-    FROM line
-    GROUP BY CUBE(country, category, payment_method, month)
-  ) c
-)
-SELECT n_roll, n_cube, (n_cube - n_roll) AS extra_rows
-FROM roll CROSS JOIN cub;
-```
-Line‑by‑line
-- roll/cub: compute the number of groups produced by each operator.
-- Expect n_cube ≥ n_roll. CUBE adds cross‑dimension subtotals such as (country, month) without category/payment.
-
-Bonus — Inspect grouping combinations with GROUPING_ID
-```sql
-WITH line AS (
-  SELECT c.country, p.category, pm.method AS payment_method,
-         date_trunc('month', o.order_date)::date AS month,
-         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN customers c ON c.customer_id=o.customer_id
-  JOIN order_items oi ON oi.order_id=o.order_id
-  JOIN products p ON p.product_id=oi.product_id
-  LEFT JOIN payments pm ON pm.order_id=o.order_id
-)
-SELECT GROUPING_ID(country, category, payment_method, month) AS gid,
-       GROUPING(country) AS g_country,
-       GROUPING(category) AS g_category,
-       GROUPING(payment_method) AS g_method,
-       GROUPING(month) AS g_month,
-       ROUND(SUM(revenue),2) AS revenue
-FROM line
-GROUP BY CUBE(country, category, payment_method, month)
-ORDER BY gid, g_country, g_category, g_method, g_month
-LIMIT 30;
-```
-Notes
-- GROUPING_ID encodes which columns are aggregated (higher values = more aggregated).
-
-Exercise 2 — Add order status to drill‑down top‑5
-Goal
-- Extend the product drill‑down (country → category → product) by adding order status.
-
-Solution
-```sql
-WITH prod_rev AS (
-  SELECT c.country,
-         p.category,
-         COALESCE(o.status,'unknown') AS status,
-         p.product_id,
-         p.name,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  GROUP BY c.country, p.category, COALESCE(o.status,'unknown'), p.product_id, p.name
-), ranked AS (
-  SELECT *,
-         RANK() OVER (PARTITION BY country, category, status ORDER BY revenue DESC) AS rnk
-  FROM prod_rev
-)
-SELECT country, category, status, product_id, name, ROUND(revenue,2) AS revenue
+       status,
+       product_id,
+       name,
+       ROUND(revenue, 2) AS revenue,
+       product_rank
 FROM ranked
-WHERE rnk <= 5
-ORDER BY country, category, status, rnk;
+WHERE product_rank <= 5
+ORDER BY country, category, status, product_rank;
 ```
-Line‑by‑line
-- COALESCE status in case the column is NULL in your dataset.
-- RANK() PARTITION BY the three dimensions so each (country,category,status) gets its own top‑5.
 
-Tips
-- If “status” is on order_items instead, adjust the join/column accordingly.
-- For dense top‑N without ties, use ROW_NUMBER().
+Expected grain: up to five rows per `(country, category, status)`.
+
+## Reasoning, safety, and pitfalls
+
+- `CUBE` grows quickly: three dimensions produce up to eight grouping sets,
+  before considering the number of distinct dimension values.
+- `NULL` can mean a subtotal or a real null dimension value. Include
+  `GROUPING(...)` flags in user-facing subtotal reports when ambiguity exists.
+- Aggregate product revenue before ranking.
+- `ROW_NUMBER` plus `product_id` yields exactly five deterministic rows when at
+  least five products exist; `RANK` can return more because of ties.

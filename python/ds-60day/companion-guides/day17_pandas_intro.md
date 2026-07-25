@@ -1,86 +1,93 @@
-# Day 17 — Pandas Intro: Series, DataFrame, Index (Companion Guide)
+# Day 17 — pandas Series, DataFrames, and Indexing
+
+**Level:** Intermediate
+
+A DataFrame is a labeled table. Unlike a spreadsheet cell reference, a pandas
+selection has a shape, dtype, index, and alignment behavior.
 
 ## Learning objectives
-- Create Series and DataFrames; understand index, columns, and dtypes
-- Select, filter, and assign data idiomatically without chained indexing
-- Leverage vectorized ops, alignment, and missing-data handling
 
-## Why this matters
-Pandas is the standard table abstraction in Python data work. Mastering selection and assignment patterns early prevents subtle bugs later and speeds up every downstream task.
+By the end of this lesson, you can:
 
-## Mental models
-- DataFrame = ordered dict of equal-length Series sharing the same index
-- Index is a labeled axis enabling alignment; it is data, not just row numbers
-- Most operations are vectorized and align on index/columns automatically
+- create and inspect a `Series` and `DataFrame`;
+- select columns, rows, and scalar positions with `[]`, `.loc`, and `.iloc`;
+- build and apply a boolean mask;
+- set, sort, and reset an index;
+- avoid ambiguous chained assignment.
 
-## Core concepts and examples
-### Creating objects
+## Prerequisites
+
+Complete Day 16 (`python-16`): arrays, shapes, dtypes, masks, and vectorization.
+
+## Vocabulary and mental model
+
+- **Series:** one-dimensional labeled array.
+- **DataFrame:** two-dimensional collection of aligned Series.
+- **Index:** row labels used for selection and alignment; not necessarily a
+  row-number sequence or unique identifier.
+- **Label selection:** `.loc`; **position selection:** `.iloc`.
+- **Boolean mask:** aligned true/false values selecting rows.
+- **Alignment:** pandas combines labeled objects by index/column labels.
+
+## Worked example
+
 ```python
 import pandas as pd
-s = pd.Series([10, 20, 30], name='value', index=['a','b','c'])
-df = pd.DataFrame({
-    'city': ['NY','SF','LA'],
-    'temp_c': [8.0, 12.5, 18.3],
-    'rain_mm': [5, 0, 12]
-}, index=[101,102,103])
+
+sales = pd.DataFrame(
+    {
+        "region": ["west", "east", "west"],
+        "amount": [12.0, 9.5, 15.0],
+        "units": [2, 1, 3],
+    }
+)
+west = sales.loc[sales["region"].eq("west"), ["amount", "units"]]
+first_value = sales.iloc[0, 1]
 ```
 
-### Inspecting
-```python
-df.shape, df.dtypes, df.head(), df.tail(), df.sample(5, random_state=0)
-df.info()
-df.describe(numeric_only=True)
-```
+This example is fully offline and deterministic. Inspect `.shape`, `.dtypes`,
+`.head()`, and `.describe()` before transforming unfamiliar data.
 
-### Selection (avoid chained indexing)
-```python
-# column(s)
-df['temp_c']              # Series
-df[['temp_c','rain_mm']]  # DataFrame
+## Dataset note
 
-# row(s) by label vs position
-df.loc[101]                # label-based
-df.iloc[0]                  # position-based
+The notebook uses Seaborn's `tips` sample. `sns.load_dataset("tips")` downloads
+it on the first uncached use and then reuses Seaborn's local cache. Run once
+while online before an offline session, or practice the same operations with a
+small constructed DataFrame like the one above.
 
-# boolean filtering
-hot = df[df['temp_c'] > 15]
+## Exercises and progressive hints
 
-# assignment — use .loc for clarity
-df.loc[df['temp_c'] > 10, 'comfort'] = 'ok'
-```
+1. Select Dinner rows and compute the average tip. **Hint:** create one boolean
+   mask, select the `tip` Series, then aggregate.
+2. Add `is_big_party` for rows where `size >= 5`. **Hint:** assign one
+   vectorized comparison to a new column; do not loop through rows.
+3. Sort descending by tip percentage (`tip / total_bill`). **Hint:** derive a
+   named column first so you can inspect divide-by-zero or missing results.
 
-### Alignment and arithmetic
-```python
-s1 = pd.Series({'a': 1, 'b': 2, 'c': 3})
-s2 = pd.Series({'b': 10, 'c': 20, 'd': 30})
-s1 + s2     # aligns on index; missing gives NaN
-```
+## Self-check
 
-### Missing data
-```python
-df.isna().sum()
-df['rain_mm'] = df['rain_mm'].astype('float')
-df['rain_mm'] = df['rain_mm'].fillna(0.0)
-```
+- What determines whether `df["col"]` returns a Series or DataFrame?
+- When should `.iloc` be used instead of `.loc`?
+- How can two Series with different indexes produce missing values when added?
+- Why is an index not automatically a database primary key?
 
-## Common pitfalls
-- Chained indexing like `df[df.x>0]['y'] = 1` — may not set values; use `.loc[mask, 'y'] = 1`
-- Silent dtype coercion (object vs numeric); explicitly `astype` when needed
-- Assuming row order equals meaning; use indexes/keys, not positions
+Expected behavior: the Dinner calculation is a scalar, the new column is
+boolean, and the highest valid tip percentage appears first.
 
-## Practice exercises
-1) Load a small CSV to a DataFrame; compute a new column from two numeric columns
-2) Select top-k rows by a metric and show only selected columns
-3) Demonstrate alignment by adding two Series with different indexes
+## Common pitfalls and diagnosis
 
-## Stretch goals
-- Use `pd.Categorical` for low-cardinality string columns and compare memory
-- Explore `convert_dtypes()` to get nullable dtypes
+- **`KeyError` for an existing-looking label:** inspect exact column names,
+  whitespace, capitalization, and index levels.
+- **`SettingWithCopyWarning`:** combine row/column selection in one `.loc[...]`
+  assignment or make an intentional `.copy()`.
+- **Unexpected missing values after arithmetic:** inspect both indexes; pandas
+  aligned labels rather than positions.
+- **`df.info()` prints `None` afterward:** it prints its report and returns
+  `None`; call it without wrapping in `print`.
+- **A ratio is infinite:** detect zero denominators before sorting.
 
-## Check your understanding
-- When should you prefer `.loc` over bracket selection?
-- How does alignment affect arithmetic across Series/DataFrames?
+## Continue
 
-## Further reading
-- 10 minutes to pandas: https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html
-- Indexing basics: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html
+- [Open the learner notebook](../notebooks/day17_pandas_intro.ipynb)
+- [Check the separate solution](../solutions/day17_pandas_intro/day17_solutions.md)
+- [Next: Day 18 — I/O and cleaning](day18_pandas_io_cleaning.md)

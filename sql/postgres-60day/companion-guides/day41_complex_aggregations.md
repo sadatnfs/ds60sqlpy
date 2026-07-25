@@ -1,44 +1,87 @@
-# Day 41 — Complex Aggregations and Advanced GROUP BY (Companion Guide)
+# Day 41 — Complex Aggregations
 
-Learning objectives
-- Master conditional aggregation and FILTER to compute many metrics in one pass
-- Combine grouping sets (ROLLUP/CUBE) with windowed post-aggregations
-- Use ordered-set aggregates (percentiles) alongside classic stats
-- Structure multi-stage aggregates safely to avoid fanout and miscounts
+## Level and prerequisites
 
-Why this matters
-Real reports mix totals, subtotals, rates, and percentiles. Efficiently computing all of them in one query reduces compute and keeps logic consistent.
+- **Level:** Advanced
+- **Prerequisites:** [Day 40 — advanced analytic functions](day40_analytic_functions_advanced.md)
+- **Artifacts:** [learner SQL](../day41_complex_aggregations.sql) ·
+  [solution reasoning](../solutions/day41_solutions.md) ·
+  [executable solution](../solutions/day41_solutions.sql)
 
-Core concepts and deep dive
-- Conditional aggregation
-  - SUM(CASE WHEN status='completed' THEN amount ELSE 0 END) AS completed_amt
-  - COUNT(*) FILTER (WHERE status='refunded') AS refunds  -- clearer and faster in Postgres
-- Multi-metric patterns
-  - Compute counts, sums, distinct customers, and conversion rates without extra joins using FILTER/CASE
-  - Example metrics per month: orders, distinct customers, revenue, AOV, refund_rate, on-time_rate
-- Grouping sets, ROLLUP, CUBE
-  - Generate grand totals and subtotals across dimensions; detect with GROUPING() to label subtotal rows
-  - Present results with a stable ordering: subtotals after detail rows
-- Ordered-set aggregates and stats
-  - PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY order_amount) AS p50
-  - p90/p95 for tails; combine with STDDEV_SAMP/VAR_POP for dispersion
-- Post-aggregation windows
-  - After GROUP BY at a desired grain (e.g., month), apply window functions for running totals and shares across the grouped rows
+## Learning objectives
 
-Design patterns
-- Stage details → aggregate to grain (CTE) → compute windows → add percentiles with GROUP BY + ordered-set
-- Add safety via NULLIF in denominators and COALESCE for presentation
+- Produce several conditional measures from one controlled fact grain.
+- Build deterministic ordered labels after ranking within a partition.
 
-Pitfalls
-- DISTINCT inside aggregates can be costly; prefer pre-dedup in a CTE when possible
-- Mixed grains: ensure all columns in SELECT are group keys or aggregates at the current level
-- Re-aggregating already-aggregated rows; wrap carefully or recompute at the correct grain
+## Vocabulary and concepts
 
-Practice exercises
-1) Build a monthly KPI table with orders, revenue, distinct customers, AOV, refund_rate, on_time_rate in one query using FILTER.
-2) Add p50/p90 order amounts alongside averages per month.
-3) Extend with ROLLUP over (country, month) and label subtotal rows with GROUPING().
+- **FILTER clause:** a per-aggregate condition written after the aggregate.
+- **Conditional aggregate:** a measure calculated only for qualifying rows.
+- **Ordered aggregation:** concatenation or collection under a specified order.
 
-Further reading
-- Aggregates and FILTER: https://www.postgresql.org/docs/current/functions-aggregate.html
-- Ordered-set aggregates: https://www.postgresql.org/docs/current/functions-aggregate.html#FUNCTIONS-ORDEREDSET-TABLE
+## Worked example / walkthrough
+
+Establish one order-line relation, then calculate 30-day revenue, 90-day
+revenue, order count, and customer count in one category group using `FILTER`.
+Reconcile each measure with a simpler single-purpose query before trusting the
+combined dashboard.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day41_complex_aggregations.sql).
+Add a category with no qualifying recent rows and decide whether its measures
+should be `NULL` or zero.
+
+## Self-check
+
+- Are order and customer counts protected from line-level fanout?
+- Is the top-five label order stable under metric ties?
+
+## Next step
+
+Continue to [Day 42 — data quality and validation](day42_data_quality_validation.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Calculate several conditional metrics in one grouped query with `FILTER`.
+- Express equivalent conditional aggregates with `CASE`.
+- Build ordered labels with `string_agg`.
+
+## How the learner script uses the current schema
+
+The starter calculates category units and revenue over all history, 30 days, and
+90 days by joining `orders`, `order_items`, and `products`. It also reports
+successful/returned orders by `customers.country`, then demonstrates
+`string_agg(DISTINCT products.name, ...)` by category.
+
+The valid successful status set used by the script is `paid`, `shipped`, and
+`delivered`; `returned` is reported separately. Use only the statuses supplied
+by the course setup.
+
+## Multi-metric design
+
+- Establish line-item grain before summing net revenue.
+- Use `COUNT(DISTINCT order_id)` and `COUNT(DISTINCT customer_id)` when a join
+  has expanded each order to multiple item rows.
+- Guard every denominator with `NULLIF`.
+- Conditional sums can be `NULL` when no row qualifies; decide whether display
+  policy should use `COALESCE`.
+
+## Practice — match the learner prompts exactly
+
+1. Build a six-metric dashboard by category with `FILTER`: 30-day revenue,
+   90-day revenue, 30-day orders, 30-day units, 90-day customers, and 30-day
+   revenue per order.
+2. For each country, rank products by net line revenue, keep the top five, then
+   `string_agg` their names in revenue-rank order.
+
+## Pitfalls and validation
+
+- Applying a global `LIMIT 5` does not produce five products per country; rank
+  within country first.
+- Do not sum `orders.total_amount` after joining to item rows.
+- Add a deterministic tie-break such as `product_id`.
+- Validate dashboard totals against a simpler single-metric query before
+  trusting the combined report.

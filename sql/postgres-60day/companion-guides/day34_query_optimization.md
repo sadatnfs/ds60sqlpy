@@ -1,42 +1,88 @@
-# Day 34 — Query Optimization: From Hypothesis to Faster SQL (Companion Guide)
+# Day 34 — Query Optimization Techniques
 
-Learning objectives
-- Build a disciplined optimization loop: observe → hypothesize → change → measure
-- Eliminate unnecessary work (rows, columns, joins, sorts)
-- Push predicates, choose join orders, avoid function-wrapped predicates
-- Use appropriate indexes and rewrite queries for sargability
+## Level and prerequisites
 
-Why this matters
-Most slow queries do too much work. Optimization is about reducing work while preserving semantics. Small rewrites and proper indexing often yield order‑of‑magnitude gains.
+- **Level:** Advanced
+- **Prerequisites:** [Day 33 — composite, covering, and partial indexes](day33_index_optimization_strategies.md)
+- **Artifacts:** [learner SQL](../day34_query_optimization.sql) ·
+  [solution reasoning](../solutions/day34_solutions.md) ·
+  [executable solution](../solutions/day34_solutions.sql)
 
-Optimization loop
-1) Get a baseline with EXPLAIN (ANALYZE, BUFFERS)
-2) Identify dominant nodes (big time/rows/loops)
-3) Hypothesize root cause (missing index, poor join order, huge sort, low selectivity)
-4) Try a targeted change (index, predicate pushdown, rewrite)
-5) Measure again; keep changes that reduce total time and I/O
+## Learning objectives
 
-Tactics and patterns
-- Projection pruning: SELECT only needed columns; avoid SELECT * in joins and aggregates
-- Predicate pushdown: Filter early in CTEs/subqueries; move filters into ON for outer joins carefully
-- Sargability: WHERE date_col >= '2025-01-01' instead of WHERE date(date_col) >= '2025-01-01'
-  - Add functional indexes only when needed (LOWER(email))
-- Join order: Join most selective relations first; pre-aggregate many‑to‑many before joining to avoid fanout
-- Aggregation: Prefer FILTER and CASE in one pass; avoid correlated subqueries computing aggregates per row
-- Sorting: Ensure ORDER BY matches an index where possible; avoid unnecessary ORDER BY in subqueries
-- De‑dup: Distinct often hides fanout; fix join logic or pre-aggregate rather than slapping DISTINCT
-- Data volume: Pre-aggregate to day/month before windows; sample representative partitions for experimentation
+- Optimize one measured bottleneck while preserving result semantics.
+- Reduce repeated work through early safe filtering, narrower projection, or
+  pre-aggregation.
 
-Instrumentation
-- EXPLAIN options: ANALYZE, BUFFERS, TIMING, VERBOSE; track shared/local read vs hit
-- pg_stat_statements: find top queries by total_time and mean_time
-- Auto_explain: log slow plans in dev
+## Vocabulary and concepts
 
-Practice exercises
-1) Rewrite a query using date_trunc(date_col) in WHERE to a sargable range and compare plans
-2) Replace a correlated subquery with a join on a pre-aggregated CTE; measure speedup
-3) Remove unnecessary DISTINCT by fixing join cardinality; validate counts stay correct
+- **Baseline:** the controlled query, data, plan, and result used for comparison.
+- **Predicate pushdown:** evaluating a safe filter closer to its source.
+- **Semantic equivalence:** two queries returning the same defined result.
 
-Further reading
-- Using EXPLAIN: https://www.postgresql.org/docs/current/using-explain.html
-- Query planning: https://www.postgresql.org/docs/current/runtime-config-query.html
+## Worked example / walkthrough
+
+Capture a baseline and control totals, replace a repeated scalar aggregate with
+one grouped relation, and join it back. Recheck keys and totals before comparing
+plans; a faster query that silently drops zero-order customers is not an
+optimization of the same requirement.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day34_query_optimization.sql).
+Change one thing per experiment and record plan, buffers, result reconciliation,
+and observed tradeoff.
+
+## Self-check
+
+- Are compared queries semantically identical at edge cases as well as typical
+  rows?
+- Does the evidence identify work removed rather than relying only on elapsed
+  time?
+
+## Next step
+
+Continue to [Day 35 — performance pitfalls](day35_avoiding_pitfalls.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Reduce rows and columns before expensive joins or aggregates.
+- Replace repeated subquery work with set-based joins when semantics allow.
+- Measure a rewrite rather than assuming it is faster.
+
+## How the learner script uses the current schema
+
+The script filters recent `orders` in a CTE before joining to `customers`,
+projects only `order_id` and `customer_id` in a seven-day plan, and aggregates
+`order_items.quantity` by `products.category` for successful order statuses.
+
+PostgreSQL can inline many non-materialized CTEs, so writing a filter in a CTE
+does not itself guarantee a faster plan. The value is a clear, correct query
+shape that the optimizer can transform.
+
+## Optimization loop
+
+1. Capture `EXPLAIN (ANALYZE, BUFFERS)` for a safe baseline.
+2. Identify excess rows, repeated loops, large sorts, or poor estimates.
+3. Make one targeted change.
+4. Reconcile keys, counts, and totals.
+5. Compare plans under the same data and predicate.
+
+## Practice — match the learner prompts exactly
+
+1. Replace a scalar or correlated subquery with a join to a pre-aggregated
+   relation, then compare the two plans and outputs.
+2. Limit rows as early as the business semantics permit and compare performance.
+   Do not move `LIMIT` before an aggregate or ordering if that changes which
+   rows are eligible.
+
+## Pitfalls and validation
+
+- The optimizer chooses physical join order; SQL text order is not a reliable
+  tuning lever.
+- Pushing a filter from `WHERE` into the nullable side of an outer join can
+  change results.
+- `DISTINCT` can hide join fanout. Fix grain instead of masking duplicates.
+- A faster query that changes counts or totals is incorrect.

@@ -1,66 +1,87 @@
-# Day 47 — Project 1: E‑commerce (Part 2) — Retention, Cohorts, and Funnels (Companion Guide)
+# Day 47 — E-commerce Project, Part 2: Cohort Retention
 
-Objectives
-- Build retention/returning behavior views by cohort and months‑since‑signup
-- Create a cohort retention matrix (cohort_month × month_offset)
-- Model a purchase funnel and compute step‑to‑step conversion rates
+## Level and prerequisites
 
-Why this matters
-Acquisition without retention is a leaky bucket. Cohort retention normalizes behavior over time and funnels reveal where customers drop off.
+- **Level:** Advanced
+- **Prerequisites:** [Day 46 — LTV and cohorts](day46_project1_ecommerce_part1.md)
+- **Artifacts:** [learner SQL](../day47_project1_ecommerce_part2.sql) ·
+  [solution reasoning](../solutions/day47_solutions.md) ·
+  [executable solution](../solutions/day47_solutions.sql)
 
-Data model refresh
-- Customers (created_at, segment, country)
-- Orders (order_date, customer_id, total_amount, status)
-- Events (occurred_at, customer_id, kind, payload)
+## Learning objectives
 
-Cohort and retention pipeline (CTEs)
-1) cohorts AS (
-   SELECT customer_id,
-          date_trunc('month', created_at)::date AS cohort_month
-   FROM customers)
-2) order_months AS (
-   SELECT o.customer_id,
-          date_trunc('month', o.order_date)::date AS order_month
-   FROM orders o)
-3) offsets AS (
-   SELECT c.cohort_month,
-          o.customer_id,
-          (EXTRACT(YEAR FROM o.order_month)*12 + EXTRACT(MONTH FROM o.order_month)
-           - (EXTRACT(YEAR FROM c.cohort_month)*12 + EXTRACT(MONTH FROM c.cohort_month)))::int AS month_offset
-   FROM cohorts c
-   JOIN order_months o USING (customer_id)
-   WHERE o.order_month >= c.cohort_month)
-4) retention AS (
-   SELECT cohort_month, month_offset, COUNT(DISTINCT customer_id) AS active_customers
-   FROM offsets
-   GROUP BY 1,2)
-5) cohort_sizes AS (
-   SELECT cohort_month, COUNT(*) AS cohort_size
-   FROM cohorts GROUP BY 1)
+- Define cohort size independently from later activity.
+- Produce a chart-ready retention table with explicit numerator, denominator,
+  and lifecycle offset.
 
-Outputs
-- Retention rate per offset: active_customers / cohort_size
-- Retention matrix pivot (optional with crosstab) or conditional aggregation
+## Vocabulary and concepts
 
-Funnel analysis
-- Define steps (e.g., visit → add_to_cart → checkout → purchase) using events.kind
-- For a time window (e.g., first 30 days post‑signup), compute counts per step and conversion rates
-- Use semi‑joins/EXISTS per step keyed by customer or session; ensure step ordering via occurred_at
+- **Cohort size:** all eligible signups in the cohort, including non-purchasers.
+- **Active customer:** a distinct customer meeting the declared period rule.
+- **Retention curve:** retention rate across lifecycle offsets for one cohort.
 
-Techniques used
-- Date math for month offsets
-- COUNT(DISTINCT ...) with cohort denominators
-- Conditional aggregation or crosstab for matrices
+## Worked example / walkthrough
 
-Pitfalls
-- Misaligned calendars (use date_trunc('month') everywhere)
-- Counting repeat orders instead of active customers (distinct customer_ids per offset)
-- Including months before signup; enforce o.order_month >= cohort_month
+Deduplicate activity to `(customer_id, order_month)`, count active customers per
+cohort/offset, and join to cohort size calculated from all customers. Cast
+before division and build a cohort/offset spine when missing periods must appear
+as explicit zeros.
 
-Deliverables
-- Table/view retention_rates(cohort_month, month_offset, retention_rate)
-- Funnel summary with step counts and conversion rates, segmented by cohort or segment
+## Exercises
 
-Stretch goals
-- Revenue retention (sum order totals) in addition to customer count retention
-- Survival curves and median time‑to‑second‑purchase
+Complete the prompts in the [learner SQL](../day47_project1_ecommerce_part2.sql).
+Return a tidy six-cohort result with numerator and denominator retained beside
+the rate.
+
+## Self-check
+
+- Is each customer counted once per activity month regardless of order count?
+- Are rates bounded by zero and one, with missing rows distinguished from zero?
+
+## Next step
+
+Continue to [Day 48 — affinity and attribution](day48_project1_ecommerce_part3.md).
+
+## Deep dive and reference
+
+## Project focus
+
+- Define signup cohort size.
+- Count distinct active customers by lifecycle month.
+- Produce six chart-ready retention curves.
+
+## How the learner script uses the current schema
+
+The starter deduplicates `orders` to one row per `(customer_id, order_month)`,
+joins each customer to the signup month from `customers.created_at`, and counts
+active customers at offsets 0–12.
+
+This lesson is retention only. Funnel analysis belongs to the later
+event/capstone work and is not a Day 47 deliverable.
+
+## Practice — match the learner prompts exactly
+
+1. Divide `active_customers` by total signup `cohort_size` to calculate
+   `retention_rate`. Return numerator, denominator, and rate.
+2. Restrict the tidy result to the six newest cohorts and chart
+   `month_offset` on X, `retention_rate` on Y, and `cohort_month` as series.
+
+The chart itself is outside SQL. The SQL deliverable is the narrow,
+chart-ready table.
+
+## Grain and denominator
+
+- Cohort size includes every signup in the month, not only later purchasers.
+- Multiple orders by the same customer in one month count as one active
+  customer.
+- Cast before division so PostgreSQL does not perform integer division.
+- Combine year and month components when calculating lifecycle offset.
+
+## Validation and limits
+
+- A missing offset row and a present zero-rate row are different. Build a
+  cohort-by-offset spine when a complete matrix is required.
+- Do not count orders as retained customers.
+- Restrict activity to order months on or after signup.
+- The synthetic curves are technique demonstrations, not expected business
+  retention shapes.

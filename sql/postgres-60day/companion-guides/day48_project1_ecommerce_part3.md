@@ -1,39 +1,91 @@
-# Day 48 — Project 1: E‑commerce (Part 3) — LTV Curves, Profitability, and Experiments (Companion Guide)
+# Day 48 — E-commerce Project, Part 3: Affinity and Attribution
 
-Objectives
-- Produce LTV curves (cumulative revenue versus months since signup) by cohort/segment
-- Incorporate cost to estimate contribution margin and payback period
-- Analyze simple A/B experiments on onboarding or promotions
+## Level and prerequisites
 
-LTV curves
-- Build months_since_signup as on Day 47; aggregate cumulative revenue per cohort and offset
-- Window cumulative: SUM(revenue) OVER (PARTITION BY cohort_month ORDER BY month_offset ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
-- Plot/compare curves across cohorts/segments; compute area under curve at fixed horizons (90/180/365 days)
+- **Level:** Advanced
+- **Prerequisites:** [Day 47 — cohort retention](day47_project1_ecommerce_part2.md)
+- **Artifacts:** [learner SQL](../day48_project1_ecommerce_part3.sql) ·
+  [solution reasoning](../solutions/day48_solutions.md) ·
+  [executable solution](../solutions/day48_solutions.sql)
 
-Profitability and payback
-- Add cost_of_goods (from products) and acquisition_cost per cohort (marketing)
-- Contribution margin = revenue − cogs − variable_costs
-- Payback month = smallest offset where cumulative margin ≥ acquisition_cost
+## Learning objectives
 
-A/B experiments (simplified)
-- Define treatment flag (e.g., promo code at signup, onboarding variant) from events or attributes
-- For comparable cohorts, compute uplift in activation rate, first‑purchase rate, and 90‑day LTV
-- Use WHERE cohort_month in a narrow window; ensure overlap of distributions (avoid time confounding)
+- Count each undirected basket pair once per order.
+- Attribute a purchase event across distinct qualifying campaigns under an
+  explicit lookback rule.
 
-Techniques
-- Window cumulatives, partitioned by cohort
-- Joining external cost tables; careful handling of NULL costs
-- Percent uplift and confidence intervals (optionally with stats functions outside SQL)
+## Vocabulary and concepts
 
-Pitfalls
-- Comparing cohorts from different seasons; control for seasonality
-- Average of ratios vs ratio of averages; pick the meaningful metric
-- Survivorship bias (customers with more time have more chance to convert)
+- **Market basket:** the distinct products associated with one order.
+- **Attribution window:** the time interval in which a touch can qualify for
+  conversion credit.
+- **Fractional credit:** one conversion divided across several qualifying
+  touches or campaigns.
 
-Deliverables
-- ltv_curve table/view with cohort_month, month_offset, cum_revenue, cum_margin
-- Payback summary by cohort/segment and A/B treatment flag
+## Worked example / walkthrough
 
-Stretch goals
-- Quantile LTV curves (p50/p90) using ordered‑set aggregates
-- CUPED or diff‑in‑diff designs for better variance reduction (outline only)
+Deduplicate products within each order, self-join with
+`a.product_id < b.product_id`, and count orders per pair. For attribution,
+deduplicate campaigns per purchase before dividing one credit by the distinct
+campaign count; verify allocated credit sums to one for every assisted purchase.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day48_project1_ecommerce_part3.sql).
+Add touches exactly at both seven-day boundaries and document which qualify.
+
+## Self-check
+
+- Are reversed pairs, self-pairs, and repeat quantities excluded as intended?
+- Does fractional credit reconcile to assisted conversions without implying
+  causal impact?
+
+## Next step
+
+Continue to [Day 49 — revenue forecasting](day49_project2_finance_part1.md).
+
+## Deep dive and reference
+
+## Project focus
+
+- Form undirected market-basket product pairs.
+- Count campaign-assisted purchase events in a seven-day lookback.
+- Allocate equal fractional credit across distinct qualifying campaigns.
+
+## How the learner script uses the current schema
+
+The starter deduplicates products within each order and pairs them with
+`a.product_id < b.product_id`. It also extracts campaign from
+`events.metadata->>'campaign'` and demonstrates each customer's first and last
+touch by `events.event_time`.
+
+The setup provides event types `page_view`, `add_to_cart`, `checkout`,
+`purchase`, and `support`. It has no separate sessions or experiment assignment
+table.
+
+## Practice — match the learner prompts exactly
+
+1. For every `purchase` event, find non-purchase campaign touches for the same
+   customer from seven days before the purchase up to, but not including, the
+   purchase timestamp. Count distinct assisted purchases by campaign.
+2. Deduplicate repeated campaign touches per purchase, divide one conversion
+   equally across its distinct campaigns with a window count, and sum
+   fractional credit by campaign.
+
+## Attribution reasoning
+
+- The conversion anchor is a purchase event, not an order. State that definition
+  before comparing results with order revenue.
+- Assisted counts are not additive because one purchase can have several
+  assisting campaigns.
+- Equal credit for a qualifying purchase should sum to exactly one across its
+  distinct campaigns.
+- Decide whether missing campaign metadata, represented as `none`, should
+  receive credit.
+
+## Validation and limits
+
+- Enforce `product_id` ordering to avoid self-pairs and reversed duplicates.
+- The exercise does not establish causal marketing impact.
+- The seven-day half-open window needs explicit boundary tests.
+- Without session IDs, do not imply session-level journeys.

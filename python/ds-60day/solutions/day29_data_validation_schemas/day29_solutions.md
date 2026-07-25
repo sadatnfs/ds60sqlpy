@@ -11,10 +11,10 @@ Contents
 Exercise 1 — Column constraints
 ```python
 import pandas as pd
-import pandera as pa
+import pandera.pandas as pa
 import pandera.typing as pat
 
-class Cleaned(pa.SchemaModel):
+class Cleaned(pa.DataFrameModel):
     id: pat.Series[int] = pa.Field(ge=1, unique=True)
     city: pat.Series[str] = pa.Field(isin=['NY','SF','LA','SEA'])
     price: pat.Series[float] = pa.Field(ge=0)

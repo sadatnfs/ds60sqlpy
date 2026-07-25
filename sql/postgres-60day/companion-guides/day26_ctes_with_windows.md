@@ -1,5 +1,51 @@
 # Day 26 — CTEs with Window Functions: Layered Analytics (Companion Guide)
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Prerequisites:** [Day 25 — multiple CTEs and hierarchies](day25_multiple_ctes_hierarchies.md)
+- **Artifacts:** [learner SQL](../day26_ctes_with_windows.sql) ·
+  [solution reasoning](../solutions/day26_solutions.md) ·
+  [executable solution](../solutions/day26_solutions.sql)
+
+## Learning objectives
+
+- Pre-aggregate to the correct grain before calculating ranks, shares, or
+  changes.
+- Filter a window result through an outer query in PostgreSQL.
+
+## Vocabulary and concepts
+
+- **Layered analytics:** successive relational stages with progressively richer
+  measures.
+- **Window input grain:** the meaning of one row before `OVER (...)` is applied.
+- **QUALIFY alternative:** an outer `SELECT` that filters a computed window
+  column.
+
+## Worked example / walkthrough
+
+Create monthly totals in one CTE, add `LAG(total)` in the next, and calculate
+growth in the outer query with a guarded denominator. Keeping the ratio outside
+the `LAG` layer makes the prior value visible and lets you inspect both values
+before interpreting the percentage.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day26_ctes_with_windows.sql). For
+the top-five exercise, compare `ROW_NUMBER` with `RANK` on a tied value.
+
+## Self-check
+
+- Does every window operate over the intended pre-aggregated relation?
+- Is window filtering performed in an outer query rather than an invalid
+  same-level `WHERE`?
+
+## Next step
+
+Continue to [Day 27 — pivoting and unpivoting](day27_pivot_unpivot.md).
+
+## Deep dive and reference
+
 Learning objectives
 - Combine CTE staging with window calculations for clarity and speed
 - Decide which grain to aggregate at before applying windows
@@ -21,9 +67,15 @@ Pitfalls
 - Windowing raw rows creates noisy and heavy computations; pre-aggregate first.
 - Filtering on windowed values in the same SELECT; wrap in another SELECT to filter.
 
-Practice exercises
-1) Build a CTE daily_revenue(day, category, rev), then compute 7‑day moving averages by category.
-2) Compute each category’s share of monthly revenue and the global cumulative monthly revenue.
+Exercises from the learner script
+1) Build a multi-stage CTE that computes monthly totals and then
+   month-over-month growth with `LAG`.
+2) For each product, return its top five orders by that product's net line
+   value using a CTE plus a window rank.
+
+Filter a window rank in an outer query because PostgreSQL has no `QUALIFY`
+clause. Use `ROW_NUMBER` for at most five rows per product or a tie-aware rank
+when the requirement allows more than five.
 
 Further reading
 - CTEs: https://www.postgresql.org/docs/current/queries-with.html

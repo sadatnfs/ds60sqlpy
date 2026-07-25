@@ -41,17 +41,18 @@ Exercise 2 — Chunk sizes
 import dask.array as da
 import time
 
-# Create a large array and benchmark means at different chunk sizes
-for chunk in [(1000,1000), (2000,2000), (5000,5000)]:
-    x = da.random.random((40_000, 40_000), chunks=chunk)
-    t0 = time.time();
-    x.mean().compute();
-    dt = time.time()-t0
-    print({'chunk': chunk, 'seconds': round(dt,2)})
+# About 128 MB of logical float64 data: visible chunking without a 12.8 GB job.
+shape = (4_000, 4_000)
+for chunk in [(500, 500), (1_000, 1_000), (2_000, 2_000)]:
+    x = da.random.random(shape, chunks=chunk)
+    t0 = time.perf_counter()
+    x.mean().compute()
+    elapsed = time.perf_counter() - t0
+    print({'chunk': chunk, 'seconds': round(elapsed, 2)})
 ```
 Notes
 - Too small chunks → overhead; too large → poor parallelism/memory pressure
-- Use dashboard + this microbenchmark to pick sweet spot for your cluster
+- Use dashboard + this laptop-safe microbenchmark before increasing the shape
 
 ---
 

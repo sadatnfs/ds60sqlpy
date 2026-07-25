@@ -1,4 +1,6 @@
 -- Day 01 - Solutions: SELECT, WHERE, ORDER BY, LIMIT/OFFSET
+SET search_path TO training, public;
+
 -- Schema assumption: training schema from 00_setup.sql with tables customers, products, orders, order_items, payments
 -- Note: Run `SET search_path TO training, public;` at the start of your session if needed.
 

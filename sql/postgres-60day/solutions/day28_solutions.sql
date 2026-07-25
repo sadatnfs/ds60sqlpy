@@ -1,50 +1,31 @@
--- Day 28 - Solutions: JSON/JSONB and XML
--- Assumes: events(id, customer_id, occurred_at, payload JSONB), xml_docs(id, doc XML)
+-- Day 28 solutions: JSONB and XML
+SET search_path TO training, public;
 
-/*
-Exercise 1) Extract campaign and channel from events.payload and compute conversion by channel.
-Why: Use ->> to extract text fields; GROUP BY channel and compute simple rates.
-*/
-WITH clicks AS (
-  SELECT customer_id,
-         payload->>'channel'  AS channel,
-         payload->>'campaign' AS campaign
+-- Exercise 1: count events by the first directory in metadata.path.
+WITH paths AS (
+  SELECT CASE
+           WHEN trim(BOTH '/' FROM metadata->>'path') = '' THEN '[root]'
+           ELSE split_part(trim(BOTH '/' FROM metadata->>'path'), '/', 1)
+         END AS first_path_segment
   FROM events
-  WHERE payload @> '{"event":"click"}'
-), purchases AS (
-  SELECT DISTINCT customer_id FROM events WHERE payload @> '{"event":"purchase"}'
 )
-SELECT c.channel,
-       COUNT(*) AS clicks,
-       COUNT(*) FILTER (WHERE c.customer_id IN (SELECT customer_id FROM purchases)) AS converters,
-       ROUND(
-         COUNT(*) FILTER (WHERE c.customer_id IN (SELECT customer_id FROM purchases))::numeric / NULLIF(COUNT(*),0)
-       , 4) AS conv_rate
-FROM clicks c
-GROUP BY c.channel
-ORDER BY conv_rate DESC NULLS LAST;
+SELECT first_path_segment, COUNT(*) AS events
+FROM paths
+GROUP BY first_path_segment
+ORDER BY events DESC, first_path_segment;
 
-/* Portable alternative: replace FILTER with SUM(CASE WHEN … THEN 1 ELSE 0 END) */
-
-/*
-Exercise 2) Create a GIN index and compare performance of @> queries before/after.
-*/
--- CREATE INDEX IF NOT EXISTS idx_events_payload ON events USING gin (payload jsonb_path_ops);
--- EXPLAIN ANALYZE SELECT * FROM events WHERE payload @> '{"channel":"Web"}';
-
-/*
-Exercise 3) Flatten line items embedded in an orders JSON and compute item-level revenue.
-Assume orders_json(id, doc JSONB) with doc.items as an array of {sku, qty, price}.
-*/
-SELECT o.id,
-       (item->>'sku')       AS sku,
-       ((item->>'qty')::int * (item->>'price')::numeric) AS line_rev
-FROM orders_json o
-CROSS JOIN LATERAL jsonb_array_elements(o.doc->'items') AS item;
-
-/*
-XML example (brief): extract values via xpath
-*/
--- SELECT id, xpath('//order/total/text()', doc) FROM xml_docs;
-
--- End of Day 28 solutions
+-- Exercise 2: extract XML values and validate status against relational data.
+WITH parsed AS (
+  SELECT doc_id,
+         ((xpath('/order/id/text()', payload))[1]::text)::int AS order_id,
+         (xpath('/order/status/text()', payload))[1]::text AS xml_status
+  FROM xml_docs
+)
+SELECT p.doc_id,
+       p.order_id,
+       p.xml_status,
+       o.status AS relational_status,
+       p.xml_status = o.status AS statuses_match
+FROM parsed p
+LEFT JOIN orders o USING (order_id)
+ORDER BY p.doc_id;

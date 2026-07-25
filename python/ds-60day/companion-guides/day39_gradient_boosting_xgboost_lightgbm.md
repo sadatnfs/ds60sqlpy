@@ -1,50 +1,114 @@
-# Day 39 — Gradient Boosting, XGBoost, LightGBM (Companion Guide)
+# Day 39 — Gradient Boosting, XGBoost, and LightGBM
+
+**Lesson ID:** `python-39` · **Level:** intermediate · **Dependencies:** `ml` · **Network:** offline
+
+Gradient boosting builds trees sequentially so each new tree reduces the
+current model's loss. XGBoost and LightGBM add efficient implementations and
+regularization choices; neither is automatically best for every dataset.
 
 ## Learning objectives
-- Understand boosting vs bagging; additive trees trained on residuals
-- Tune learning_rate, n_estimators, max_depth/num_leaves
-- Use early stopping and evaluate with proper validation
 
-## Why this matters
-Gradient-boosted trees dominate many structured-data problems when tuned well.
+By the end of the lesson, you can:
 
-## Core concepts and examples (sklearn)
+- explain the sequential correction idea behind boosting;
+- fit an `XGBClassifier` with deterministic, CPU-friendly settings;
+- reason about the interaction of learning rate and number of estimators;
+- compare XGBoost and LightGBM under the same split and metric; and
+- recognize validation leakage and overfitting during tuning.
+
+## Prerequisites
+
+- Complete `python-38` (trees and random forests).
+- Know cross-validation and ROC AUC from `python-35`.
+- Install the `ml` dependency group during connected setup; lesson data and
+  execution are offline afterward.
+
+## Vocabulary and mental models
+
+| Term | Definition |
+|---|---|
+| Boosting | Sequentially adding weak learners to reduce a loss |
+| Learning rate | Shrinkage applied to each new tree's contribution |
+| Estimator count | Maximum number of boosting rounds/trees |
+| Tree depth / leaves | Controls interaction complexity in each weak learner |
+| Subsampling | Training a round on a fraction of rows or features |
+| Early stopping | Halting rounds when a separate validation metric no longer improves |
+| Regularization | Constraints or penalties that reduce model complexity |
+
+Random forests average independent-ish trees to reduce variance. Boosting
+constructs dependent trees to correct errors. The latter can be very accurate
+but is sensitive to tuning and validation design.
+
+## Worked example: a bounded offline baseline
+
 ```python
-from sklearn.ensemble import GradientBoostingClassifier
-model = GradientBoostingClassifier(learning_rate=0.05, n_estimators=500, max_depth=3, random_state=0)
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier
+
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+model = XGBClassifier(
+    n_estimators=300,
+    learning_rate=0.05,
+    max_depth=4,
+    subsample=0.9,
+    colsample_bytree=0.9,
+    eval_metric="logloss",
+    n_jobs=2,
+    random_state=42,
+)
 model.fit(X_train, y_train)
+auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+print(f"{auc=:.3f}")
 ```
 
-### XGBoost/LightGBM patterns
-```python
-import xgboost as xgb
-xgbm = xgb.XGBClassifier(
-    n_estimators=1000, learning_rate=0.05, max_depth=6,
-    subsample=0.8, colsample_bytree=0.8, eval_metric='auc', n_jobs=-1, random_state=0
-)
-xgbm.fit(X_train, y_train, eval_set=[(X_valid,y_valid)], early_stopping_rounds=50, verbose=False)
-```
+This is a survey-scale baseline, not a production prescription. A result on one
+small dataset does not establish a universal library winner.
 
-```python
-import lightgbm as lgb
-lgbm = lgb.LGBMClassifier(
-    n_estimators=2000, learning_rate=0.03, num_leaves=63,
-    subsample=0.8, colsample_bytree=0.8, metric='auc', random_state=0
-)
-lgbm.fit(X_train, y_train, eval_set=[(X_valid,y_valid)], callbacks=[lgb.early_stopping(50)])
-```
+## Learner exercises
 
-## Common pitfalls
-- Too large learning_rate; prefer small lr with more trees + early stopping
-- Data leakage in eval_set; build a proper validation split first
-- Interpreting default importance without validation
+1. Tune `learning_rate` and `n_estimators` with a simple loop.
+2. Compare XGBoost with LightGBM if the `ml` dependency group is installed.
 
-## Practice exercises
-1) Tune XGBoost with early stopping; report best iteration
-2) Compare LightGBM num_leaves and depth on AUC
-3) Plot feature importance and validate with permutation importance
+### Progressive hints
 
-## Further reading
-- XGBoost: https://xgboost.readthedocs.io
-- LightGBM: https://lightgbm.readthedocs.io
-- CatBoost (alternative): https://catboost.ai
+1. Use a small grid, hold `max_depth` constant, and evaluate all combinations
+   with identical folds or an explicit validation set. Record runtime too.
+2. Match the split, metric, approximate capacity, and random seed. For LightGBM,
+   `num_leaves` plays a related—but not identical—complexity role to depth.
+
+## Self-check
+
+- Why are a smaller learning rate and larger estimator count often paired?
+- Why is a training-set early-stopping target invalid?
+- How does row or column subsampling act as regularization?
+- Which evidence would justify choosing a slower model with a slightly better
+  validation score?
+
+Expected behavior: all data are package-bundled and no model download occurs.
+Results can vary by library because algorithms and defaults differ.
+
+## Pitfalls, diagnostics, and tradeoffs
+
+| Symptom | Likely issue | Response |
+|---|---|---|
+| Training score rises while validation falls | Too much capacity/too many rounds | Reduce complexity or use valid early stopping |
+| Comparison favors one library unfairly | Different data, metric, or budget | Hold the experimental protocol constant |
+| Laptop becomes unresponsive | Excessive threads/search space | Set `n_jobs` modestly and start with small grids |
+| “Best iteration” is unavailable | Early stopping was not configured | Use the installed library's current callback/API deliberately |
+| Scores cannot be reproduced | Seeds or split differ | Set split and model random states and log versions |
+
+LightGBM can be extremely fast on larger tabular data; XGBoost has broad tooling
+and mature controls. Operational fit, calibration, latency, and maintainability
+matter alongside a validation score.
+
+## Next step
+
+- Work in the [Day 39 learner notebook](../notebooks/day39_gradient_boosting_xgboost_lightgbm.ipynb).
+- Then review the
+  [Day 39 solution](../solutions/day39_gradient_boosting_xgboost_lightgbm/day39_solutions.md).
+- Continue to [Day 40 — SearchCV](day40_model_tuning_searchcv.md).

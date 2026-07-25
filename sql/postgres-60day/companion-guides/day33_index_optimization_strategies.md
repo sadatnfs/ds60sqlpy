@@ -1,47 +1,95 @@
-# Day 33 — Index Optimization Strategies (Companion Guide)
+# Day 33 — Composite, Covering, and Partial Indexes
 
-Learning objectives
-- Choose the right index type and shape (btree vs GIN/GiST/BRIN) for your workload
-- Design composite, partial, covering, and functional indexes; pick effective column order
-- Maintain healthy indexes: analyze, vacuum, reindex concurrently; watch bloat and visibility
+## Level and prerequisites
 
-Why this matters
-Indexes are not one-size-fits-all. Careful design and maintenance improve plan quality and latency while controlling write overhead and storage.
+- **Level:** Advanced
+- **Prerequisites:** [Day 32 — index fundamentals](day32_index_fundamentals.md)
+- **Artifacts:** [learner SQL](../day33_index_optimization_strategies.sql) ·
+  [solution reasoning](../solutions/day33_solutions.md) ·
+  [executable solution](../solutions/day33_solutions.sql)
 
-Core concepts and deep dive
-- B‑tree vs GIN/GiST/BRIN
-  - B‑tree: general purpose for equality/range/prefix LIKE
-  - GIN: inverted index for arrays, jsonb containment, full-text search
-  - GiST: geometric/range types, KNN searches
-  - BRIN: block-range index for very large, naturally ordered tables (time-series), tiny footprint
-- Composite indexes and order
-  - Leftmost prefix rule: (a,b,c) can satisfy predicates on (a), (a,b), (a,b,c)
-  - Column order: most selective and most common filter first; consider sort order to enable ORDER BY without extra Sort
-- Covering indexes (INCLUDE)
-  - CREATE INDEX ... ON t(a) INCLUDE (b,c) to enable Index Only Scan when visibility map permits
-- Partial indexes
-  - CREATE INDEX ... ON orders(order_date) WHERE status='completed' — smaller, faster; planner uses when predicate is implied
-- Functional/Expression indexes
-  - CREATE INDEX ... ON customers(LOWER(email)); query must use the same expression (or be provably equivalent)
-- Fillfactor and clustering
-  - ALTER INDEX ... SET (fillfactor=80) to reduce page splits for heavy updates
-  - CLUSTER t USING idx to physically reorder table; persists until table changes; consider for range scans
-- Stats and bloat
-  - Adjust default_statistics_target per column for skewed data
-  - Monitor pg_stat_user_indexes, pg_class relpages, pg_stat_all_indexes idx_scan; reindex concurrently to avoid locks
+## Learning objectives
 
-Tuning workflow
-1) Identify slow queries (pg_stat_statements) and read plans (EXPLAIN ANALYZE)
-2) Propose index candidates from predicates/join keys/sort keys
-3) Validate with plans; watch index size and write overhead
-4) Drop unused or redundant indexes (idx_scan=0 over long window)
+- Order composite search keys from real predicate and ordering requirements.
+- Separate search keys, included payload columns, and a partial-index predicate.
 
-Practice exercises
-1) For a top-N query with ORDER BY order_date DESC WHERE customer_id=?, create a composite index that avoids a Sort.
-2) Add a partial index for active products (active=true) and show plan change vs full-table index.
-3) Compare BRIN vs B‑tree on a 100M‑row time-series table; measure size and query latency.
+## Vocabulary and concepts
 
-Further reading
-- Indexes and types: https://www.postgresql.org/docs/current/indexes-types.html
-- BRIN: https://www.postgresql.org/docs/current/brin.html
-- GIN/GiST: https://www.postgresql.org/docs/current/gin.html, https://www.postgresql.org/docs/current/gist.html
+- **Leftmost prefix:** the leading composite-index keys usable by a query.
+- **Included column:** payload stored with an index but not part of its search
+  ordering.
+- **Partial index:** an index containing only rows satisfying a fixed predicate.
+
+## Worked example / walkthrough
+
+For a query filtering `customer_id` and a date range, compare
+`(customer_id, order_date)` with the reversed key order. Then check whether the
+query predicate logically implies a partial-index predicate; mere overlap is
+not enough for PostgreSQL to use that index safely.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day33_index_optimization_strategies.sql).
+For each candidate, write the exact query shape and expected maintenance tradeoff
+before creating it.
+
+## Self-check
+
+- Can you identify search, order, and return-only columns separately?
+- Is every partial predicate immutable and logically implied by its target
+  query?
+
+## Next step
+
+Continue to [Day 34 — query optimization](day34_query_optimization.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Match composite-index order to filters and ordering.
+- Use `INCLUDE` for covering columns that are not search keys.
+- Use a partial index for a stable, explicitly defined subset.
+
+## How the learner script uses the current schema
+
+The script creates:
+
+- `(customer_id, order_date)` on `orders`;
+- `(order_id, product_id) INCLUDE (quantity, unit_price, discount)` on
+  `order_items`; and
+- a partial `orders(order_date)` index for statuses `placed` and `paid`.
+
+The partial predicate is deliberately status-based. PostgreSQL index predicates
+must be immutable, so a moving boundary such as `now() - interval '90 days'`
+cannot appear in a partial-index definition.
+
+## Design reasoning
+
+- A composite B-tree is most useful from its leftmost key onward.
+- `INCLUDE` columns can support index-only reads but do not participate in
+  search ordering.
+- A partial index is used only when the query predicate logically implies its
+  stored predicate.
+- Index-only scans are possible, not guaranteed; visibility and cost still
+  matter.
+
+## Practice — match the learner prompts exactly
+
+1. Add a composite index on `products(category, created_at)` and test a query
+   that filters category and a created-at range.
+2. Add a partial index for `orders.total_amount > 1000` and test a query whose
+   predicate implies that exact high-value subset.
+
+For each exercise, compare the same query before and after the index and record
+plan, row estimate, timing, and index size if useful.
+
+## Pitfalls and validation
+
+- `products` has no `active` column. Do not import an “active products” example
+  from another schema.
+- A query for `total_amount > 500` cannot generally use an index containing
+  only rows greater than 1000.
+- The compact seed may prefer a sequential scan; correctness and measured cost
+  come before forcing a plan.
+- All exercise indexes roll back with the learner transaction.

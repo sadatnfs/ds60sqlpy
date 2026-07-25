@@ -1,46 +1,123 @@
-# Day 50 — Time Series Modeling (Companion Guide)
+# Day 50 — Time-Series Modeling and Forecast Evaluation
+
+**Lesson ID:** `python-50` · **Level:** advanced · **Dependencies:** `ml` · **Network:** offline
+
+Forecasting differs from ordinary random-split prediction because the future
+must never influence the past. This lesson compares a small `pmdarima` model
+against simple time-safe baselines on deterministic synthetic data.
 
 ## Learning objectives
-- Establish baselines (naive, seasonal naive) and proper splits
-- Engineer lag/rolling features; use TimeSeriesSplit
-- Fit ARIMA/Prophet or tree models and compare
 
-## Why this matters
-Good baselines and leakage-aware validation are crucial for credible forecasts.
+By the end of the lesson, you can:
 
-## Core concepts and examples
-### Baselines and split
+- construct a chronological train/test split with a declared forecast horizon;
+- build last-value and seasonal-naive forecasts;
+- fit a bounded seasonal ARIMA candidate with `pmdarima`;
+- evaluate every candidate on the same timestamps and metric; and
+- engineer lags or rolling features without future leakage.
+
+## Prerequisites
+
+- Complete `python-49` (NLP survey).
+- Recall pandas time indexes from `python-21`.
+- Install the `ml` dependency group, which includes `pmdarima`.
+
+## Vocabulary and mental models
+
+| Term | Definition |
+|---|---|
+| Forecast horizon | Number of future steps predicted |
+| Temporal split | Training observations occur before evaluation observations |
+| Naive forecast | Simple rule, such as repeating the latest observation |
+| Seasonal-naive forecast | Repeats the observation from one seasonal period earlier |
+| Lag | Past value aligned as a current-row feature |
+| Rolling statistic | Summary over a trailing window |
+| Differencing | Subtracting an earlier observation to reduce trend/seasonality |
+| ARIMA | Autoregressive integrated moving-average model |
+| Backtesting | Repeating forward train/evaluate windows over historical time |
+
+The key boundary is “information available as of forecast time.” A feature can
+be mathematically shifted yet still be operationally unavailable because of
+reporting delay.
+
+## Worked example: baseline before complexity
+
 ```python
-from sklearn.model_selection import TimeSeriesSplit
 import numpy as np
-split = TimeSeriesSplit(n_splits=5)
-# naive forecast
-y_pred = y.shift(1)  # last value
+import pandas as pd
+from sklearn.metrics import mean_absolute_error
+
+rng = np.random.default_rng(42)
+index = pd.date_range("2020-01-01", periods=300, freq="D")
+values = (
+    20
+    + np.linspace(0, 10, len(index))
+    + 2 * np.sin(2 * np.pi * np.arange(len(index)) / 30)
+    + rng.normal(scale=1.0, size=len(index))
+)
+series = pd.Series(values, index=index, name="y")
+train, test = series.iloc[:-30], series.iloc[-30:]
+
+last_value = np.repeat(train.iloc[-1], len(test))
+seasonal_naive = train.iloc[-30:].to_numpy()
+print("last:", mean_absolute_error(test, last_value))
+print("seasonal:", mean_absolute_error(test, seasonal_naive))
 ```
 
-### Lag/rolling features
-```python
-df['lag1'] = df['y'].shift(1)
-df['roll7'] = df['y'].rolling(7).mean()
-```
+Every candidate must use this same 30-day horizon and metric. A more complex
+model earns its cost only if it improves the relevant evidence reliably.
 
-### ARIMA (statsmodels)
-```python
-import statsmodels.api as sm
-model = sm.tsa.ARIMA(y, order=(1,1,1)).fit()
-fc = model.forecast(steps=14)
-```
+## Learner exercises
 
-## Common pitfalls
-- Random CV on time series; use temporal splits
-- Target leakage from future-derived features (like centered rolling)
-- Optimizing MSE when business cares about MAPE or pinball loss
+1. Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the
+   same test window.
+2. Create last-value and 30-day seasonal-naive forecasts and compare them with
+   ARIMA.
+3. Difference the training series and inspect autocorrelation without using
+   test-period observations.
 
-## Practice exercises
-1) Implement seasonal naive baseline and beat it
-2) Use TimeSeriesSplit and compare models across folds
-3) Evaluate with MAPE and visualize errors over time
+### Progressive hints
 
-## Further reading
-- statsmodels tsa: https://www.statsmodels.org/stable/tsa.html
-- sktime: https://www.sktime.net
+1. Change only the seasonal period. Keep the split, horizon, and MAE calculation
+   fixed, and bound the search if runtime is high.
+2. Build each baseline solely from `train`; verify predictions have the same
+   index/length as `test`.
+3. Call `train.diff().dropna()` before plotting autocorrelation. The test values
+   should not appear anywhere in transformation fitting.
+
+The reference solution extends the lesson with `TimeSeriesSplit`, shifted
+rolling features, and a seasonal-naive evaluation. It uses a different
+synthetic weekly series to reinforce the method rather than mirror the notebook.
+
+## Self-check
+
+- Why is a shuffled train/test split invalid for this forecasting question?
+- Why must rolling features use `shift(1)` before the window?
+- When does MAPE behave badly, and why is MAE safer for values near zero?
+- If ARIMA beats the naive baseline once, what additional evidence is needed?
+
+Expected behavior: the synthetic data and all model code run offline. Different
+seasonal periods can produce different search time and MAE; complexity is not
+guaranteed to win.
+
+## Pitfalls, diagnostics, and tradeoffs
+
+| Pitfall | Consequence | Better practice |
+|---|---|---|
+| Random CV | Future observations train past predictions | Use forward splits/backtests |
+| Rolling mean includes current target | Direct leakage | Shift before rolling |
+| Comparing different horizons | Metrics are not comparable | Align timestamps and horizon |
+| `auto_arima` search left broad | Long CPU runtime/selection noise | Start with bounded orders and a baseline |
+| One final window treated as certainty | Result depends on time regime | Backtest multiple origins |
+| Forecast intervals ignored | Point prediction looks overconfident | Evaluate coverage and decision uncertainty |
+
+ARIMA encodes a structured temporal process. Tree models on lag features can
+capture nonlinearities but require careful recursive forecasting. Select by
+backtested evidence, operational latency, and maintainability.
+
+## Next step
+
+- Work in the [Day 50 learner notebook](../notebooks/day50_time_series_modeling.ipynb).
+- Then review the
+  [Day 50 solution](../solutions/day50_time_series_modeling/day50_solutions.md).
+- Continue to [Day 51 — Target Encoding](day51_advanced_feature_engineering_target_encoding.md).

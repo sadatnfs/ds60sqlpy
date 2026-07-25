@@ -1,66 +1,90 @@
-# Day 36 — Solutions (Materialized Views)
+# Day 36 — Solutions: Materialized Views
 
-We use materialized views (MVs) to cache expensive query results, add indexes on top of them, and refresh safely (including concurrently). We also discuss when to prefer MVs vs. table snapshots.
+A materialized view stores query results. Reads can become cheaper, but the
+result is a snapshot and must be refreshed when source data changes.
 
-Setup
-- MV basics: `CREATE MATERIALIZED VIEW ... AS SELECT ...;`
-- Refresh: `REFRESH MATERIALIZED VIEW [CONCURRENTLY] ...;`
-- Requirements: CONCURRENTLY needs a UNIQUE index that covers all rows (typically on a deterministic key set)
+## Exercise 1 — Weekly revenue by country
 
-Exercise 1 — Create a materialized view for monthly revenue by country
+This demonstration is transactional and leaves no materialized view behind.
+
 ```sql
-CREATE MATERIALIZED VIEW IF NOT EXISTS mv_monthly_country_revenue AS
-SELECT date_trunc('month', o.order_date)::date AS month,
+BEGIN;
+SET LOCAL search_path TO training, public;
+
+DROP MATERIALIZED VIEW IF EXISTS mv_weekly_country_revenue_solution;
+
+CREATE MATERIALIZED VIEW mv_weekly_country_revenue_solution AS
+SELECT date_trunc('week', o.order_date)::date AS week_start,
        c.country,
-       SUM(o.total_amount) AS revenue,
-       COUNT(*) AS orders
+       SUM(
+         oi.unit_price * oi.quantity * (1 - oi.discount)
+       ) AS revenue
 FROM orders o
 JOIN customers c ON c.customer_id = o.customer_id
-GROUP BY 1,2;
+JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY date_trunc('week', o.order_date), c.country;
+
+SELECT week_start,
+       country,
+       ROUND(revenue, 2) AS revenue
+FROM mv_weekly_country_revenue_solution
+ORDER BY week_start DESC, revenue DESC;
+
+ROLLBACK;
 ```
-Index the MV for common access paths
+
+Expected shape: one row per observed week-country pair. PostgreSQL weeks begin
+on Monday under `date_trunc('week', ...)`.
+
+## Exercise 2 — Compare base-table and snapshot plans
+
 ```sql
-CREATE INDEX IF NOT EXISTS idx_mv_mcr_month_country
-  ON mv_monthly_country_revenue(month, country);
-```
-Why
-- The heavy GROUP BY is computed once and reused; downstream queries filter/aggregate on a much smaller MV.
+BEGIN;
+SET LOCAL search_path TO training, public;
 
-Exercise 2 — CONCURRENT refresh for read availability
-```sql
--- Add a unique index required for CONCURRENTLY refresh
--- Choose a key that uniquely identifies MV rows (month,country) here
-CREATE UNIQUE INDEX IF NOT EXISTS uid_mv_mcr ON mv_monthly_country_revenue (month, country);
+DROP MATERIALIZED VIEW IF EXISTS mv_weekly_country_revenue_compare;
 
--- Now refresh without blocking readers
-REFRESH MATERIALIZED VIEW CONCURRENTLY mv_monthly_country_revenue;
-```
-Notes
-- CONCURRENTLY builds a new MV snapshot and swaps it in, allowing reads during refresh. It’s slower than non‑concurrent but avoids downtime.
-
-Exercise 3 — Parameterized MVs vs. table snapshots
-- If your aggregation needs parameters (e.g., last N days), consider creating a date‑partitioned snapshot table and rolling window ETL instead of a single MV.
-- For near‑real‑time dashboards, schedule frequent refreshes or maintain an incremental table via triggers/CDC.
-
-Exercise 4 — Combine MVs
-```sql
--- Another MV for monthly product category revenue
-CREATE MATERIALIZED VIEW IF NOT EXISTS mv_monthly_cat_revenue AS
-SELECT date_trunc('month', o.order_date)::date AS month,
-       p.category,
-       SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
+CREATE MATERIALIZED VIEW mv_weekly_country_revenue_compare AS
+SELECT date_trunc('week', o.order_date)::date AS week_start,
+       c.country,
+       SUM(
+         oi.unit_price * oi.quantity * (1 - oi.discount)
+       ) AS revenue
 FROM orders o
-JOIN order_items oi ON oi.order_id=o.order_id
-JOIN products p ON p.product_id=oi.product_id
-GROUP BY 1,2;
+JOIN customers c ON c.customer_id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY date_trunc('week', o.order_date), c.country;
 
-CREATE UNIQUE INDEX IF NOT EXISTS uid_mv_mcr2 ON mv_monthly_cat_revenue (month, category);
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT date_trunc('week', o.order_date)::date AS week_start,
+       c.country,
+       SUM(
+         oi.unit_price * oi.quantity * (1 - oi.discount)
+       ) AS revenue
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY date_trunc('week', o.order_date), c.country;
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT week_start,
+       country,
+       revenue
+FROM mv_weekly_country_revenue_compare;
+
+ROLLBACK;
 ```
-Consumers
-```sql
-SELECT * FROM mv_monthly_country_revenue WHERE month >= date_trunc('month', current_date) - interval '12 months';
-```
-Best practices
-- Refresh cadence matches data freshness needs; consider cron or managed schedulers
-- Add indexes that match query shapes on the MV
-- Avoid parameter‑dependent logic inside the MV definition; precompute stable aggregates
+
+The materialized-view plan should avoid source joins and aggregation. On this
+small dataset, wall-clock differences can be noisy; compare plan work and
+buffers as well as execution time.
+
+## Pitfalls
+
+- A normal `REFRESH MATERIALIZED VIEW` blocks concurrent reads of that view.
+  `REFRESH ... CONCURRENTLY` requires a qualifying unique index and cannot run
+  inside an explicit transaction block.
+- Refresh is not automatic. Define freshness ownership and monitoring before
+  using a materialized view for reporting.
+- Materialized views duplicate data and add refresh cost; they are not a default
+  replacement for indexing or query repair.

@@ -1,47 +1,92 @@
-# Day 20 — Merging and Joins (Companion Guide)
+# Day 20 — Merging and Joins
+
+**Level:** Intermediate
+
+A join combines tables according to keys and cardinality. Predict which rows
+should survive and how many rows can be produced before calling `merge`.
 
 ## Learning objectives
-- Combine tables with concat, merge, and join
-- Choose appropriate join type (inner/left/right/outer) and keys
-- Validate merges and diagnose mismatches
 
-## Why this matters
-Most datasets are not in one table. Correct joins prevent data loss and duplication.
+By the end of this lesson, you can:
 
-## Core concepts and examples
-### concat vs merge
+- choose inner, left, right, or outer join semantics;
+- distinguish row concatenation from key-based merging;
+- state and enforce one-to-one, one-to-many, or many-to-many cardinality;
+- diagnose orphan keys, duplicate keys, dtype mismatches, and suffixes;
+- reconcile row counts and totals after a merge.
+
+## Prerequisites
+
+Complete Day 19 (`python-19`): table grain, grouping keys, and aggregation.
+
+## Vocabulary and mental model
+
+- **Join key:** column(s) used to match rows.
+- **Cardinality:** number of rows per key on each side (`1:1`, `1:m`, `m:1`,
+  or `m:m`).
+- **Inner join:** matched keys only; **left join:** every left row; **right
+  join:** every right row; **outer join:** every key from either side.
+- **Orphan:** row whose key has no match in the other table.
+- **Row explosion:** unintended multiplication caused by duplicate keys.
+
+## Worked example
+
 ```python
-pd.concat([df1, df2], axis=0, ignore_index=True)   # stack rows
-pd.concat([s1, s2], axis=1)                        # align on index, add columns
+import pandas as pd
+
+products = pd.DataFrame({"sku": ["A", "B"], "price": [4.0, 7.5]})
+items = pd.DataFrame({"order_id": [1, 1, 2], "sku": ["A", "B", "A"]})
+
+priced = items.merge(
+    products,
+    on="sku",
+    how="left",
+    validate="many_to_one",
+    indicator=True,
+)
+assert priced["_merge"].eq("both").all()
 ```
 
-### merge basics
-```python
-orders = pd.read_csv('orders.csv')
-customers = pd.read_csv('customers.csv')
-merged = orders.merge(customers, how='left', on='customer_id', validate='m:1')
-```
+The contract says many item rows may refer to one product row. `indicator=True`
+makes missing matches visible during validation.
 
-### multiple keys and suffixes
-```python
-m = a.merge(b, how='inner', on=['store_id','sku'], suffixes=('_a','_b'))
-```
+## Exercises and progressive hints
 
-### diagnosing issues
-```python
-m = a.merge(b, how='outer', on='id', indicator=True)
-m['_merge'].value_counts()
-```
+1. Join products, order items, and customers to compute revenue per customer.
+   **Hint:** write each table's grain and key uniqueness first; calculate
+   line-level revenue only after price and quantity share a row.
+2. Demonstrate a right join and explain when it is useful. **Hint:** identify
+   which right-side rows must survive; compare with swapping the inputs and
+   performing a left join.
+3. Use `validate="one_to_many"` to catch unexpected duplicates. **Hint:** place
+   the table expected to have one row per key on the left, then deliberately
+   duplicate one of its keys to observe the error.
 
-## Common pitfalls
-- Joining on non-unique keys unintentionally; use `validate` to enforce cardinality
-- Different dtypes for join keys; align with `astype`
-- Duplicate column names; set suffixes or select needed columns before merge
+## Self-check
 
-## Practice exercises
-1) Perform left vs inner join and compare row counts
-2) Use `indicator=True` to find records unmatched in either table
-3) Merge on multiple keys and verify cardinality
+- How many output rows can an `m:m` match create for one key?
+- Why might a left join produce more rows than the left input?
+- What does an outer join reveal about data quality?
+- Why should join-key dtypes be normalized before merging?
 
-## Further reading
-- Merge/join: https://pandas.pydata.org/pandas-docs/stable/user_guide/merging.html
+Expected behavior: revenue reconciles with line items, orphan rows are
+identified rather than silently lost, and incorrect cardinality raises
+`MergeError`.
+
+## Common pitfalls and diagnosis
+
+- **Row count unexpectedly multiplies:** measure duplicate counts on both key
+  sets and add `validate`.
+- **Matches are missing:** compare key dtypes, whitespace, case, and nulls.
+- **`_x`/`_y` columns are confusing:** select needed columns or supply meaningful
+  suffixes before downstream work.
+- **Totals change after a join:** reconcile at the pre-join grain and inspect
+  duplicated matches.
+- **`concat` was used for a relational join:** use `merge`; `concat` stacks or
+  aligns along an axis rather than matching business keys.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day20_pandas_merging_joins.ipynb)
+- [Check the separate solution](../solutions/day20_pandas_merging_joins/day20_solutions.md)
+- [Next: Day 21 — Time series with pandas](day21_time_series_pandas.md)

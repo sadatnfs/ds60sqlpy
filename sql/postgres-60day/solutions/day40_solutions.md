@@ -1,122 +1,98 @@
-# Day 40 — Solutions (Advanced Analytic Functions)
+# Day 40 — Solutions: Advanced Analytic Functions
 
-We go deeper into analytics with hypothetical‑set aggregates, ordered‑set functions, ranking nuances, and advanced window framing patterns that solve real reporting needs. We emphasize correct semantics and performance considerations.
+This day combines statistical aggregates with windows and ordered-set
+aggregates. The answers define the input grain before computing statistics.
 
-Setup
-- Tables: orders(order_id, customer_id, order_date, total_amount), order_items(...), customers(...)
-- Glossary
-  - Ordered‑set aggregates: percentile_cont/percentile_disc ... WITHIN GROUP (ORDER BY ...)
-  - Hypothetical‑set aggregates: rank/percent_rank/cume_dist/dense_rank for a hypothetical row WITHIN GROUP (ORDER BY ...)
-  - Window frames: UNBOUNDED, PRECEDING/FOLLOWING, EXCLUDE
+## Exercise 1 — Fifteen-row rolling z-score for daily revenue
 
-Exercise 1 — Hypothetical rank of a target order total
 ```sql
--- Where would a hypothetical value rank within the distribution of order totals in the last 90 days?
-WITH span AS (
-  SELECT o.total_amount
-  FROM orders o
-  WHERE o.order_date >= current_date - interval '90 days'
+SET search_path TO training, public;
+
+WITH daily AS (
+  SELECT date_trunc('day', order_date)::date AS order_day,
+         SUM(total_amount) AS revenue
+  FROM orders
+  GROUP BY date_trunc('day', order_date)
+), rolling AS (
+  SELECT order_day,
+         revenue,
+         AVG(revenue) OVER (
+           ORDER BY order_day
+           ROWS BETWEEN 14 PRECEDING AND CURRENT ROW
+         ) AS avg15,
+         STDDEV_SAMP(revenue) OVER (
+           ORDER BY order_day
+           ROWS BETWEEN 14 PRECEDING AND CURRENT ROW
+         ) AS sd15
+  FROM daily
 )
-SELECT rank(42.00)          WITHIN GROUP (ORDER BY total_amount) AS hyp_rank,
-       percent_rank(42.00)  WITHIN GROUP (ORDER BY total_amount) AS hyp_percent_rank,
-       cume_dist(42.00)     WITHIN GROUP (ORDER BY total_amount) AS hyp_cume
-FROM span;
+SELECT order_day,
+       ROUND(revenue, 2) AS revenue,
+       ROUND(avg15, 2) AS avg15,
+       ROUND(sd15, 2) AS sd15,
+       ROUND(
+         (revenue - avg15) / NULLIF(sd15, 0),
+         4
+       ) AS z_score
+FROM rolling
+ORDER BY order_day;
 ```
-Explanation
-- Hypothetical‑set aggregates treat the provided value as if it were inserted and return its rank or distribution location.
-- Use cases: threshold setting, pricing tiers, SLA cutoffs.
 
-Exercise 2 — Percentiles by segment (ordered‑set aggregates)
-```sql
-SELECT COALESCE(c.segment,'standard') AS segment,
-       percentile_cont(0.50) WITHIN GROUP (ORDER BY o.total_amount) AS p50,
-       percentile_cont(0.90) WITHIN GROUP (ORDER BY o.total_amount) AS p90,
-       COUNT(*) AS n
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-GROUP BY COALESCE(c.segment,'standard')
-ORDER BY segment;
-```
-Notes
-- Ordered‑set aggregates compute per‑group quantiles directly; this is typically faster and clearer than self‑joins or window emulation.
+Expected shape: one row per day with orders. A positive z-score is above the
+rolling mean; a negative score is below it. The first row has no sample standard
+deviation, and any zero-standard-deviation frame yields `NULL`.
 
-Exercise 3 — Top‑K per partition with stable tie‑breaking
+Assumption: “15-day” in the learner example means 15 observed daily rows. To
+model 15 consecutive calendar days, first join revenue to a dense date series
+and decide whether missing days mean zero or unknown.
+
+## Exercise 2 — Category P50 and P90 of order values
+
+An order can contain several categories. This answer defines an “order total
+within a category” as the sum of that category's net lines in that order; using
+the whole order total for every category would double-count mixed orders.
+
 ```sql
-WITH line_rev AS (
+SET search_path TO training, public;
+
+WITH category_order_values AS (
   SELECT p.category,
-         oi.product_id,
-         SUM(oi.quantity*oi.unit_price*(1-oi.discount)) AS revenue
+         oi.order_id,
+         SUM(
+           oi.unit_price * oi.quantity * (1 - oi.discount)
+         ) AS category_order_value
   FROM order_items oi
   JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.category, oi.product_id
-), ranked AS (
-  SELECT category, product_id, revenue,
-         ROW_NUMBER()  OVER (PARTITION BY category ORDER BY revenue DESC, product_id ASC)  AS rn,
-         RANK()        OVER (PARTITION BY category ORDER BY revenue DESC)                  AS rnk,
-         DENSE_RANK()  OVER (PARTITION BY category ORDER BY revenue DESC)                  AS drnk
-  FROM line_rev
-)
-SELECT category, product_id, revenue, rn, rnk, drnk
-FROM ranked
-WHERE rn <= 3  -- guarantees exactly 3 even with ties (secondary key breaks ties)
-ORDER BY category, rn;
-```
-Why
-- ROW_NUMBER gives deterministic top‑K; RANK/DENSE_RANK show tie behavior differences for audit and display.
-
-Exercise 4 — Neighbor‑only comparisons with EXCLUDE
-```sql
--- Compare a day’s revenue to the average of its 3‑day neighbors excluding itself
-WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS rev
-  FROM orders o
-  GROUP BY 1
-)
-SELECT d,
-       rev,
-       ROUND(
-         AVG(rev) OVER (
-           ORDER BY d
-           ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING
-           EXCLUDE CURRENT ROW
-         )
-       ,2) AS neighbor_avg
-FROM daily
-ORDER BY d DESC
-LIMIT 60;
-```
-Notes
-- EXCLUDE CURRENT ROW removes the self‑value; think “context but not me.” Useful in outlier detection and smoothing.
-
-Exercise 5 — Within‑group shares and complements
-```sql
--- Product share within category and its complement ("others") per category
-WITH prod_rev AS (
-  SELECT p.category,
-         oi.product_id,
-         SUM(oi.quantity*oi.unit_price*(1-oi.discount)) AS revenue
-  FROM order_items oi
-  JOIN products p ON p.product_id=oi.product_id
-  GROUP BY p.category, oi.product_id
+  GROUP BY p.category, oi.order_id
 )
 SELECT category,
-       product_id,
-       ROUND(revenue,2) AS revenue,
-       ROUND(revenue / NULLIF(SUM(revenue) OVER (PARTITION BY category),0), 4) AS share,
-       ROUND(1 - (revenue / NULLIF(SUM(revenue) OVER (PARTITION BY category),0)), 4) AS others_share
-FROM prod_rev
-ORDER BY category, share DESC
-LIMIT 200;
+       ROUND(
+         PERCENTILE_CONT(0.5) WITHIN GROUP (
+           ORDER BY category_order_value
+         )::numeric,
+         2
+       ) AS p50_order_value,
+       ROUND(
+         PERCENTILE_CONT(0.9) WITHIN GROUP (
+           ORDER BY category_order_value
+         )::numeric,
+         2
+       ) AS p90_order_value,
+       COUNT(*) AS category_orders
+FROM category_order_values
+GROUP BY category
+ORDER BY category;
 ```
-Reasoning
-- Window denominator avoids extra joins; complements often used for “others” bucket in charts.
 
-Exercise 6 — Caution around running quantiles
-- Postgres ordered‑set aggregates are not window functions; a *running* median/quantile needs custom approaches (e.g., PL/pgSQL state, sorted arrays with percentile_disc across slices, or extensions).
-- For fixed windows, compute subsets in a CTE and aggregate per window using joins or bucketing.
+Expected shape: one row per sold category. `PERCENTILE_CONT` can interpolate
+between observed values, so a percentile need not equal an actual order value.
 
-Performance and correctness tips
-- Always include deterministic secondary keys in ORDER BY for rank/row_number to ensure stable outputs.
-- Use ROWS frames for exact window widths; RANGE expands to peers and may surprise.
-- Avoid large per‑row hypothetical calls inside big scans; pre‑aggregate to reduce input size.
+## Pitfalls
+
+- `STDDEV_SAMP` is `NULL` for a one-row frame. `NULLIF(sd15, 0)` also protects
+  constant frames from division by zero.
+- A `ROWS` frame counts rows, not elapsed time.
+- Ordered-set aggregates such as `PERCENTILE_CONT` use `WITHIN GROUP`; they are
+  not written with `OVER` in this grouped query.
+- Define the analytical grain before calculating a percentile. Line-level and
+  order-level percentiles answer different questions.

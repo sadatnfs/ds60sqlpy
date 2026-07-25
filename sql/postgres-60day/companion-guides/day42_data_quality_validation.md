@@ -1,47 +1,84 @@
-# Day 42 — Data Quality and Validation in SQL (Companion Guide)
+# Day 42 — Data Quality and Validation
 
-Learning objectives
-- Encode business rules with constraints (NOT NULL, CHECK, UNIQUE, FK, EXCLUDE)
-- Detect anomalies with profiling queries and schema tests
-- Build reproducible validation suites you can run in CI
+## Level and prerequisites
 
-Why this matters
-Analytics and downstream apps depend on trustworthy data. Catching schema drift, out‑of‑range values, referential breaks, or malformed text early prevents expensive rework and bad decisions.
+- **Level:** Advanced
+- **Prerequisites:** [Day 41 — complex aggregations](day41_complex_aggregations.md)
+- **Artifacts:** [learner SQL](../day42_data_quality_validation.sql) ·
+  [solution reasoning](../solutions/day42_solutions.md) ·
+  [executable solution](../solutions/day42_solutions.sql)
 
-Core concepts and deep dive
-- Declarative integrity
-  - NOT NULL for mandatory fields; CHECK for ranges/enums; UNIQUE for keys; FOREIGN KEY for referential integrity; EXCLUDE for complex constraints (ranges, overlaps)
-  - DEFERRABLE INITIALLY DEFERRED for multi‑row invariants within a transaction
-- Profiling queries (templates)
-  - Completeness: SELECT COUNT(*) FILTER (WHERE col IS NULL)/COUNT(*) AS null_rate FROM t
-  - Valid ranges/categories: SELECT col, COUNT(*) FROM t GROUP BY 1 ORDER BY 2 DESC
-  - Uniqueness: SELECT key, COUNT(*) FROM t GROUP BY 1 HAVING COUNT(*)>1
-  - Referentials: SELECT child.key FROM child c LEFT JOIN parent p USING(key) WHERE p.key IS NULL
-  - Pattern checks: SELECT COUNT(*) FROM t WHERE NOT (email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$')
-- JSONB and semi‑structured
-  - Enforce presence of required keys with CHECK (payload ? 'field')
-  - Expression indexes for (payload->>'field')::int to support fast validation queries
-- Time consistency
-  - CHECK (starts_at < ends_at); EXCLUDE USING gist (period WITH &&) to prevent overlapping bookings
-- Repeatable validation
-  - Package checks as a view or stored procedure returning a table of (check_name, status, failing_rows)
-  - Run validations after ingestion; fail the job if critical thresholds are exceeded
+## Learning objectives
 
-Design patterns
-- Staging → conformance → serving layers: validate in staging, reject/fix bad rows before promoting
-- Small dimension tables for valid categories (FK from facts) to block typos
+- Encode repeatable quality rules with stable names, grains, and failure counts.
+- Separate observed failures from remediation policy.
 
-Pitfalls
-- Relying only on application‑level checks; enforce in the database too
-- Turning every check into a constraint; some rules evolve—keep them in validation jobs first
-- Costly full‑table scans for validation; sample or validate deltas on large fact tables
+## Vocabulary and concepts
 
-Practice exercises
-1) Add CHECK constraints to enforce non‑negative quantities/amounts and valid enumerations
-2) Write a validation view that reports null_rate, duplicate keys, and invalid patterns for customers
-3) Create a small valid_countries table and add a FK from customers(country)
+- **Invariant:** a condition expected to remain true for valid data.
+- **Orphan:** a foreign-key-like value with no matching parent.
+- **DQ result grain:** whether a check counts failing rows, keys, or duplicate
+  groups.
 
-Further reading
-- Constraints: https://www.postgresql.org/docs/current/ddl-constraints.html
-- Exclusion constraints: https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-EXCLUSION
-- JSONB operators: https://www.postgresql.org/docs/current/functions-json.html
+## Worked example / walkthrough
+
+Normalize email with `lower(trim(email))`, group it, and return groups with
+`COUNT(*) > 1`. Keep the raw emails in a separate detail query: the summary
+counts duplicate groups, while remediation needs the member records.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day42_data_quality_validation.sql).
+For one rule, return both a summary row and the failing-record detail.
+
+## Self-check
+
+- Does every check expose its name, result grain, expected result, and observed
+  failure count?
+- Can a zero result be rerun on future data without implying a permanent
+  guarantee?
+
+## Next step
+
+Continue to [Day 43 — logical backup and recovery](day43_backup_recovery.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Profile nulls and normalized duplicates.
+- Check referential, range, quantity, and discount invariants.
+- Return repeatable validation results with named checks and failure counts.
+
+## How the learner script uses the current schema
+
+The starter profiles `customers.email` and `customers.country`, searches for
+duplicate emails, checks `order_items` and `payments` for orphan orders, and
+looks for negative order/payment amounts. Foreign keys and checks should keep
+many failures at zero, but the queries protect future imports and schema
+changes.
+
+## Validation design
+
+- Give each rule a stable `check_name` and `failing_rows`.
+- Normalize email with `lower(trim(email))` before duplicate grouping.
+- Use anti-joins to test relationships even when foreign keys exist.
+- Keep observed failures separate from remediation policy.
+- Report the grain: duplicate groups, failing records, and orphan keys are
+  different counts.
+
+## Practice — match the learner prompts exactly
+
+1. Build one validation report for core tables that summarizes null emails,
+   normalized duplicate emails, negative totals, orphan references, invalid
+   quantities, and discounts outside 0–1.
+2. Return `customer_id` and `email` for null or regex-invalid email values.
+
+## Pitfalls and validation
+
+- The course email regex is a pragmatic check, not the full email RFC.
+- A zero count means the checked rule passed on this snapshot, not that future
+  loads are guaranteed clean.
+- Do not auto-delete failed rows from a validation query.
+- The deterministic seed should return zero for every core failure check and no
+  invalid emails.

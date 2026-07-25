@@ -21,7 +21,8 @@ SELECT 'customers_stg', COUNT(*) FROM customers_stg;
 -- - For ad-hoc recovery, restore into a separate DB and compare using EXCEPT/INTERSECT
 
 -- Exercises
--- 1) Use COPY to export/import a subset (WHERE clause via COPY not supported; use \\copy in psql).
+-- 1) Export/import a subset. COPY table has no WHERE clause; use
+--    COPY (SELECT ... WHERE ...) TO STDOUT or client-side \copy in psql.
 -- 2) Restore customers from staged into base with conflict handling (ON CONFLICT DO UPDATE) in a transaction.
 
 ROLLBACK;

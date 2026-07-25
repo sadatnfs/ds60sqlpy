@@ -1,5 +1,48 @@
 # Day 09 — Correlated Subqueries and EXISTS (Companion Guide)
 
+## Level and prerequisites
+
+- **Level:** Foundation (beginner)
+- **Prerequisites:** [Day 08 — scalar and inline subqueries](day08_scalar_inline_subqueries.md)
+- **Artifacts:** [learner SQL](../day09_correlated_subqueries.sql) ·
+  [solution reasoning](../solutions/day09_solutions.md) ·
+  [executable solution](../solutions/day09_solutions.sql)
+
+## Learning objectives
+
+- Express existence and non-existence without multiplying outer rows.
+- Recognize when a correlated subquery repeats work for each candidate row.
+
+## Vocabulary and concepts
+
+- **Correlation:** a nested query's reference to a column from its outer query.
+- **Semi-join:** return an outer row when at least one match exists.
+- **Anti-join:** return an outer row only when no match exists.
+
+## Worked example / walkthrough
+
+Read `WHERE EXISTS (...)` as a yes/no question for one outer customer. The
+subquery may stop after its first qualifying order, and it never adds order
+columns or duplicates the customer. Replace it temporarily with a join to see
+why `DISTINCT` may become necessary in the join form.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day09_correlated_subqueries.sql).
+Implement one exclusion with `NOT EXISTS` and test it against a nullable-key
+counterexample before considering `NOT IN`.
+
+## Self-check
+
+- Does the outer result retain one row per intended entity?
+- Can you explain the `NULL` hazard of `NOT IN` and why `NOT EXISTS` avoids it?
+
+## Next step
+
+Continue to [Day 10 — data modification with subqueries](day10_dml_with_subqueries.md).
+
+## Deep dive and reference
+
 Learning objectives
 - Write correlated subqueries that reference outer query rows
 - Use EXISTS/NOT EXISTS efficiently for semi/anti-joins
@@ -18,9 +61,13 @@ Pitfalls
 - Correlated subqueries in SELECT list scale poorly; precompute and join.
 - NOT IN with NULLs can drop all rows unexpectedly; prefer NOT EXISTS with correlated subquery.
 
-Practice exercises
-1) List customers with a return/refund event using EXISTS against events.
-2) Find categories with no orders in the last 30 days using NOT EXISTS.
+Exercises from the learner script
+1) Find customers with any order over 1,000 using a correlated `EXISTS`.
+2) Find products never purchased using correlated `NOT EXISTS`.
+
+Use `orders.total_amount > 1000` for the first prompt. For the second, correlate
+`order_items.product_id` to the outer `products.product_id`; do not use
+`NOT IN`, whose NULL behavior is less robust.
 
 Further reading
 - EXISTS: https://www.postgresql.org/docs/current/functions-subquery.html

@@ -1,54 +1,92 @@
-# Day 23 — Data Pipelines and Generators (Companion Guide)
+# Day 23 — Streaming Data Pipelines and Generators
+
+**Level:** Intermediate
+
+A streaming pipeline bounds memory by processing records incrementally. It also
+requires explicit ownership of files, errors, and partial output.
 
 ## Learning objectives
-- Stream large files with chunking and generators
-- Compose iterators with itertools and generator functions
-- Separate I/O from pure transforms for testability
 
-## Why this matters
-Not all data fits in memory. Streaming pipelines enable scalable, memory-efficient processing and clearer architecture.
+By the end of this lesson, you can:
 
-## Core concepts and examples
-### read_csv with chunksize
+- distinguish streaming from loading an entire dataset;
+- write a generator that owns its input resource for the full iteration;
+- compose filter, map, and batch stages;
+- process CSV records incrementally;
+- report malformed rows with enough context to diagnose them.
+
+## Prerequisites
+
+Complete Day 22 (`python-22`), generators from Day 4 (`python-04`), and file I/O
+from Day 8 (`python-08`).
+
+## Vocabulary and mental model
+
+- **Streaming:** process a bounded portion while the rest remains unread.
+- **Lazy evaluation:** work occurs only as the consumer requests values.
+- **Stage:** one transformation with a clear input/output contract.
+- **Batch:** bounded collection handled as one unit.
+- **Backpressure:** a slower consumer naturally limits how quickly values are
+  requested upstream.
+- **Partial failure:** some records/output may exist before a later error.
+
+## Worked example
+
 ```python
-import pandas as pd
-chunks = pd.read_csv('big.csv', chunksize=100_000)
-for chunk in chunks:
-    process(chunk)
+from collections.abc import Iterable, Iterator
+
+
+def parsed_integers(lines: Iterable[str]) -> Iterator[int]:
+    for line_number, raw in enumerate(lines, start=1):
+        text = raw.strip()
+        if not text:
+            continue
+        try:
+            yield int(text)
+        except ValueError as exc:
+            raise ValueError(f"line {line_number}: expected integer") from exc
+
+
+result = list(parsed_integers(["10\n", "\n", "20\n"]))
 ```
 
-### Generator functions
-```python
-def read_lines(path):
-    with open(path, 'r') as f:
-        for line in f:
-            yield line.rstrip('\n')
-```
+The generator is deterministic and does not require a file. Including the line
+number turns a malformed record into actionable evidence.
 
-### Composing iterators
-```python
-from itertools import islice, chain
-first_1k = islice(read_lines('log.txt'), 1000)
-all_lines = chain(read_lines('a.txt'), read_lines('b.txt'))
-```
+## Exercises and progressive hints
 
-### Pure transforms
-```python
-def clean(df):
-    return (df.assign(sku=lambda d: d['sku'].str.strip().str.upper())
-              .astype({'qty':'int64'}))
-```
+1. Build a CSV streaming cleaner that yields normalized row dictionaries.
+   **Hint:** let the generator open the file inside its own `with` block and use
+   `csv.DictReader`; state whether malformed rows stop or are quarantined.
+2. Compose generators to filter, map, and batch rows. **Hint:** give every stage
+   one responsibility, preserve laziness, and make the final partial batch part
+   of the contract.
 
-## Common pitfalls
-- Mixing side effects and transforms; keep functions pure where possible
-- Forgetting to close file handles; use context managers
-- Accumulating lists in memory when a stream would suffice
+## Self-check
 
-## Practice exercises
-1) Build a CSV-to-Parquet converter that processes in chunks
-2) Implement a generator that yields parsed log records as dicts
-3) Write tests for your pure transform functions
+- When does a generator function begin executing?
+- What happens to an open file if iteration stops early?
+- Why is `list(generator)` dangerous for an unbounded stream?
+- Where should row numbers and source paths be added to errors?
 
-## Further reading
-- itertools: https://docs.python.org/3/library/itertools.html
-- Toolz: https://toolz.readthedocs.io
+Expected behavior: rows are processed in order with bounded memory, empty input
+produces no batches, and malformed input follows the documented policy.
+
+## Common pitfalls and diagnosis
+
+- **A returned generator reads a closed file:** keep `yield` inside the file's
+  `with` block so its lifetime covers iteration.
+- **Memory still grows with file size:** a downstream stage called `list`,
+  retained all batches, or performed a global sort/group.
+- **The final records disappear:** emit the remaining partial batch after the
+  source is exhausted.
+- **Errors lack record context:** wrap them with source path and line number
+  while preserving the original cause.
+- **A pipeline can only run once:** iterators are consumable; expose a function
+  that constructs a fresh pipeline for each run.
+
+## Continue
+
+- [Open the learner notebook](../notebooks/day23_data_pipelines_generators.ipynb)
+- [Check the separate solution](../solutions/day23_data_pipelines_generators/day23_solutions.md)
+- [Next: Day 24 — Exploratory data analysis](day24_eda_best_practices.md)

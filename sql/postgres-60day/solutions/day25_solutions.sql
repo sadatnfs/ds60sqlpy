@@ -1,46 +1,64 @@
--- Day 25 - Solutions: Multiple CTEs and Hierarchies
--- Assumes: orders, order_items, products, customers, employees
+-- Day 25 solutions: multiple CTEs and hierarchies
+SET search_path TO training, public;
 
-/*
-Exercise 1) 4-stage pipeline from order_items to a country-category monthly summary.
-*/
-WITH lines AS (
-  SELECT oi.order_id, oi.product_id, (oi.unit_price*oi.quantity*(1-oi.discount)) AS line_rev
-  FROM order_items oi
-), enriched AS (
-  SELECT l.order_id, p.category, l.line_rev
-  FROM lines l JOIN products p ON p.product_id = l.product_id
-), monthly AS (
-  SELECT DATE_TRUNC('month', o.order_date)::date AS month,
-         c.country,
-         e.category,
-         SUM(e.line_rev) AS revenue
-  FROM orders o
-  JOIN enriched e ON e.order_id = o.order_id
-  JOIN customers c ON c.customer_id = o.customer_id
-  GROUP BY DATE_TRUNC('month', o.order_date), c.country, e.category
+-- Exercise 1: a three-level org report enriched with department aggregates.
+WITH department_metrics AS (
+  SELECT department_id,
+         COUNT(*) AS department_headcount,
+         ROUND(SUM(salary), 2) AS department_payroll,
+         ROUND(AVG(salary), 2) AS department_avg_salary
+  FROM employees
+  GROUP BY department_id
+), three_levels AS (
+  SELECT e.department_id,
+         e.employee_id,
+         e.full_name AS employee,
+         m.full_name AS manager,
+         gm.full_name AS managers_manager
+  FROM employees e
+  LEFT JOIN employees m ON m.employee_id = e.manager_id
+  LEFT JOIN employees gm ON gm.employee_id = m.manager_id
 )
-SELECT month, country, category, ROUND(revenue,2) AS revenue
-FROM monthly
-ORDER BY month DESC, revenue DESC
-LIMIT 500;
+SELECT d.name AS department,
+       t.employee_id,
+       t.employee,
+       t.manager,
+       t.managers_manager,
+       dm.department_headcount,
+       dm.department_payroll,
+       dm.department_avg_salary
+FROM three_levels t
+JOIN departments d ON d.department_id = t.department_id
+JOIN department_metrics dm ON dm.department_id = t.department_id
+ORDER BY department, managers_manager NULLS FIRST, manager NULLS FIRST, employee;
 
-/*
-Exercise 2) Employee tree with depth; join monthly revenue per employee’s accounts to compute team totals by level.
-(Outline: depends on schema; example shows structure.)
-*/
-WITH RECURSIVE team AS (
-  SELECT id, manager_id, 0 AS depth FROM employees WHERE id = 1
-  UNION ALL
-  SELECT e.id, e.manager_id, t.depth + 1 FROM employees e JOIN team t ON e.manager_id = t.id
-), sales AS (
-  SELECT account_owner_id AS id,
-         DATE_TRUNC('month', order_date)::date AS month,
-         SUM(total_amount) AS revenue
+-- Exercise 2: filter -> enrich -> aggregate -> present.
+WITH filtered_orders AS (
+  SELECT *
   FROM orders
-  GROUP BY account_owner_id, DATE_TRUNC('month', order_date)
+  WHERE order_date >= CURRENT_TIMESTAMP - interval '180 days'
+), enriched_lines AS (
+  SELECT fo.order_id,
+         fo.order_date::date AS order_day,
+         c.country,
+         p.category,
+         oi.unit_price * oi.quantity * (1 - oi.discount) AS line_revenue
+  FROM filtered_orders fo
+  JOIN customers c ON c.customer_id = fo.customer_id
+  JOIN order_items oi ON oi.order_id = fo.order_id
+  JOIN products p ON p.product_id = oi.product_id
+), aggregated AS (
+  SELECT country,
+         category,
+         COUNT(DISTINCT order_id) AS orders,
+         SUM(line_revenue) AS revenue
+  FROM enriched_lines
+  GROUP BY country, category
 )
-SELECT t.depth, s.month, SUM(s.revenue) AS team_revenue
-FROM team t JOIN sales s ON s.id = t.id
-GROUP BY t.depth, s.month
-ORDER BY s.month DESC, t.depth;
+SELECT country,
+       category,
+       orders,
+       ROUND(revenue, 2) AS revenue,
+       ROUND(revenue / NULLIF(orders, 0), 2) AS revenue_per_order
+FROM aggregated
+ORDER BY revenue DESC, country, category;

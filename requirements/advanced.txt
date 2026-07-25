@@ -1,0 +1,2 @@
+# Optional bridge, geospatial, and heavier lessons. See curriculum/catalog.json.
+-e .[ml,production,bridge,deep-learning,nlp,geo]

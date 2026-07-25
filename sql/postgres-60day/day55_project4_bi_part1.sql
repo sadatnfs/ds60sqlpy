@@ -3,12 +3,30 @@
 BEGIN;
 SET search_path TO training, public;
 
--- Use GROUPING SETS/ROLLUP/CUBE for flexible drilldowns
--- Dimensions: country, category, payment method, month
-WITH line AS (
+-- Use GROUPING SETS/ROLLUP/CUBE for flexible drilldowns.
+-- Dimensions: country, category, primary payment method, month.
+-- An order can have split payments, so first choose one reporting label:
+-- the method with the greatest paid amount (method name breaks ties).
+WITH payment_by_method AS (
+  SELECT order_id, method, SUM(amount) AS method_amount
+  FROM payments
+  GROUP BY order_id, method
+), primary_payment_method AS (
+  SELECT order_id, method
+  FROM (
+    SELECT order_id,
+           method,
+           ROW_NUMBER() OVER (
+             PARTITION BY order_id
+             ORDER BY method_amount DESC, method
+           ) AS method_rank
+    FROM payment_by_method
+  ) ranked_methods
+  WHERE method_rank = 1
+), line AS (
   SELECT c.country,
          p.category,
-         pm.method AS payment_method,
+         COALESCE(pm.method, 'unpaid') AS payment_method,
          date_trunc('month', o.order_date)::date AS month,
          (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue,
          oi.quantity AS qty
@@ -16,7 +34,7 @@ WITH line AS (
   JOIN customers c  ON c.customer_id = o.customer_id
   JOIN order_items oi ON oi.order_id = o.order_id
   JOIN products p   ON p.product_id = oi.product_id
-  LEFT JOIN payments pm ON pm.order_id = o.order_id
+  LEFT JOIN primary_payment_method pm ON pm.order_id = o.order_id
 )
 SELECT country,
        category,

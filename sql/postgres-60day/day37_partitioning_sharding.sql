@@ -11,13 +11,18 @@ CREATE TABLE big_events (
 ) PARTITION BY RANGE (event_time);
 
 -- Create monthly partitions
-CREATE TABLE big_events_2025_01 PARTITION OF big_events FOR VALUES FROM ('2025-01-01') TO ('2025-02-01');
-CREATE TABLE big_events_2025_02 PARTITION OF big_events FOR VALUES FROM ('2025-02-01') TO ('2025-03-01');
+CREATE TABLE big_events_2025_01 PARTITION OF big_events
+  FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
+CREATE TABLE big_events_2025_02 PARTITION OF big_events
+  FOR VALUES FROM ('2025-02-01 00:00:00+00') TO ('2025-03-01 00:00:00+00');
 
 -- Insert sample rows
 INSERT INTO big_events(event_time, customer_id, payload)
-SELECT now() - (random()*'50 days'::interval), (SELECT customer_id FROM customers ORDER BY random() LIMIT 1), jsonb_build_object('k','v')
-FROM generate_series(1, 1000);
+SELECT timestamp with time zone '2025-01-01 00:00:00+00'
+         + ((event_no * 37) % (59 * 24 * 60)) * interval '1 minute',
+       1 + ((event_no * 29 - 1) % 500),
+       jsonb_build_object('k', 'v', 'source_row', event_no)
+FROM generate_series(1, 1000) AS g(event_no);
 
 -- Query with partition pruning
 EXPLAIN ANALYZE

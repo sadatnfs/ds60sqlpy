@@ -1,52 +1,115 @@
-# Day 48 — Transfer Learning with CNNs (Companion Guide)
+# Day 48 — Transfer Learning with CNNs
+
+**Lesson ID:** `python-48` · **Level:** advanced · **Dependencies:** `deep-learning` · **Network:** optional model download
+
+Transfer learning reuses features from a model trained on another dataset. This
+lesson practices a two-stage workflow: train a new classifier head, then
+optionally fine-tune part of the backbone with a lower learning rate.
 
 ## Learning objectives
-- Load pretrained CNNs (e.g., ResNet), freeze/unfreeze layers
-- Prepare image datasets with transforms and augmentation
-- Fine-tune head and optionally backbone with schedulers
 
-## Why this matters
-Pretrained features drastically reduce data needs and training time for vision tasks.
+By the end of the lesson, you can:
 
-## Core concepts and examples
-### Data and transforms
+- prepare an `ImageFolder` directory and matching data transforms;
+- load ResNet-18 with cached pretrained weights or an explicit offline fallback;
+- freeze and verify backbone parameters;
+- replace and train the classification head; and
+- unfreeze the final block cautiously for fine-tuning.
+
+## Prerequisites
+
+- Complete `python-47` (PyTorch training loops).
+- Understand class logits, DataLoaders, train/evaluation mode, and checkpoints.
+- Have a small local image dataset organized by class.
+
+## Network and resource contract
+
+`models.ResNet18_Weights.DEFAULT` downloads pretrained weights on first use
+unless they are already in the PyTorch cache. During a connected bootstrap, run
+the model-loading cell once and keep the cache. Later runs are offline.
+
+If weights are not cached and the machine is offline, use
+`models.resnet18(weights=None)` to practice the mechanics. That fallback is
+training from scratch, not transfer learning, so label results accordingly.
+CPU and a small image subset are the default; a GPU is optional.
+
+## Vocabulary and mental models
+
+| Term | Definition |
+|---|---|
+| Convolutional neural network | Network using learned spatial filters |
+| Backbone | Feature-extracting layers before the task-specific head |
+| Pretrained weights | Parameters learned from an earlier dataset |
+| Freeze | Set `requires_grad=False` so optimizer updates do not change parameters |
+| Fine-tune | Continue training some pretrained layers on the new task |
+| Data augmentation | Label-preserving random input transformations |
+| Catastrophic forgetting | Useful pretrained features damaged by overly aggressive updates |
+
+## Worked example: replace the head and verify trainable state
+
 ```python
-from torchvision import datasets, transforms
-tr = transforms.Compose([
-    transforms.Resize(256), transforms.CenterCrop(224),
-    transforms.ToTensor(), transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])
-])
-train_ds = datasets.ImageFolder('data/train', transform=tr)
-```
+import torch
+from torchvision import models
 
-### Model and head
-```python
-import torchvision.models as models
-import torch.nn as nn
+# DEFAULT requires a one-time download unless already cached.
 model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-for p in model.parameters(): p.requires_grad = False
-model.fc = nn.Linear(model.fc.in_features, n_classes)
+for parameter in model.parameters():
+    parameter.requires_grad = False
+
+model.fc = torch.nn.Linear(model.fc.in_features, 2)
+trainable = [name for name, p in model.named_parameters() if p.requires_grad]
+print(trainable)
 ```
 
-### Fine-tuning
-```python
-# first train head
-opt = torch.optim.Adam(model.fc.parameters(), lr=1e-3)
-# later unfreeze some blocks and use smaller lr
-for p in model.layer4.parameters(): p.requires_grad = True
-opt = torch.optim.Adam([{'params': model.fc.parameters(), 'lr':1e-3},
-                        {'params': model.layer4.parameters(), 'lr':3e-4}])
-```
+Only the new `fc.weight` and `fc.bias` should be trainable initially. Build the
+optimizer from trainable parameters so the intended phase is explicit.
 
-## Common pitfalls
-- Forgetting ImageNet normalization; performance collapses
-- Too high LR when unfreezing leading to catastrophic forgetting
-- Class imbalance; use WeightedRandomSampler or class weights
+## Learner exercises
 
-## Practice exercises
-1) Train only the head; then unfreeze last block and compare
-2) Add augmentation (RandomResizedCrop, Flip, ColorJitter) and measure impact
-3) Use OneCycleLR and observe training dynamics
+1. Load a small image folder with `ImageFolder` and `DataLoader`.
+2. Train only the classifier head for a few epochs.
+3. Unfreeze the final ResNet block and fine-tune it with a lower learning rate.
 
-## Further reading
-- Torchvision models: https://pytorch.org/vision/stable/models.html
+### Progressive hints
+
+1. Use `data/train/<class>/...` and `data/valid/<class>/...`. Resize/crop to the
+   expected input size and normalize with the selected weights' documented
+   transform. Start with `num_workers=0` for portable notebooks.
+2. Pass only `model.fc.parameters()` to the optimizer and record validation loss
+   as well as accuracy.
+3. Set `requires_grad=True` for `model.layer4`, then use parameter groups: a
+   smaller rate for the backbone than for the new head.
+
+The separate solution also demonstrates augmentation and `OneCycleLR`. Add
+those only after the head-only and fine-tuning baselines are reproducible.
+
+## Self-check
+
+- Why must preprocessing match the pretrained weights?
+- How can you prove that the backbone did not update in phase one?
+- Why should fine-tuned layers usually receive a lower learning rate?
+- What is the difference between a cached-weight run and `weights=None`?
+
+Expected behavior: the head is the only trainable module in phase one. Unfreezing
+`layer4` increases the trainable parameter count substantially.
+
+## Pitfalls, diagnostics, and tradeoffs
+
+| Symptom | Likely cause | Response |
+|---|---|---|
+| Weight download fails offline | Cache was not prepared | Use cached assets or the labeled `weights=None` fallback |
+| Validation accuracy is nonsensical | Class-index mapping differs | Record `ImageFolder.class_to_idx` for both splits |
+| CPU run is extremely slow | Dataset/images/model too large | Use a small subset, fewer epochs, and bounded image size |
+| Fine-tuning destroys validation performance | Learning rate too high or too many layers unfrozen | Restore checkpoint; unfreeze gradually |
+| Windows DataLoader hangs | Multiprocessing from notebook/script | Use `num_workers=0`; add main guard in scripts |
+
+Augmentation can improve robustness but must preserve the label. Horizontal
+flips, for example, are inappropriate when left/right orientation defines the
+class.
+
+## Next step
+
+- Work in the [Day 48 learner notebook](../notebooks/day48_transfer_learning_cnn.ipynb).
+- Then review the
+  [Day 48 solution](../solutions/day48_transfer_learning_cnn/day48_solutions.md).
+- Continue to [Day 49 — NLP](day49_nlp_basics_hf_spacy.md).

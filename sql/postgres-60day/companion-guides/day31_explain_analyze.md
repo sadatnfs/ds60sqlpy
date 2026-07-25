@@ -1,47 +1,91 @@
-# Day 31 — EXPLAIN and EXPLAIN ANALYZE: Reading Query Plans (Companion Guide)
+# Day 31 — EXPLAIN and EXPLAIN ANALYZE
 
-Learning objectives
-- Generate query plans with EXPLAIN and EXPLAIN ANALYZE
-- Interpret nodes (Seq Scan, Index Scan/Only, Bitmap Heap/Index Scan, Hash/Sort/Merge Join)
-- Understand cost estimates vs actuals; rows, loops, width
-- Identify selectivity, join order, and bottlenecks; iterate toward faster plans
+## Level and prerequisites
 
-Why this matters
-Performance work starts with visibility. Plans reveal how the optimizer will execute your SQL and why it’s slow. You’ll learn to form hypotheses and fix root causes instead of guessing.
+- **Level:** Advanced
+- **Prerequisites:** [Day 30 — Phase 2 project](day30_phase2_project.md), with
+  confidence in joins, aggregates, CTEs, and result reconciliation
+- **Artifacts:** [learner SQL](../day31_explain_analyze.sql) ·
+  [solution reasoning](../solutions/day31_solutions.md) ·
+  [executable solution](../solutions/day31_solutions.sql)
 
-Core concepts and deep dive
-- EXPLAIN vs EXPLAIN ANALYZE
-  - EXPLAIN shows the planned operations with estimated costs and rows.
-  - EXPLAIN ANALYZE executes the query and adds actual time and rows for each node; use LIMIT or representative filters to keep safe.
-- Anatomy of a plan node
-  - Node type, relation name, filter conditions, startup/total cost, rows, width; for ANALYZE: actual time, rows, loops.
-  - Rows and loops show cardinality; big mismatches (est vs act) indicate poor statistics or skew.
-- Join strategies
-  - Nested Loop (good for small inner); Hash Join (build hash of smaller input); Merge Join (requires sorted inputs).
-- Scan types
-  - Seq Scan (table scan), Index Scan (uses btree), Index Only Scan (all columns from index), Bitmap scans (efficient for many scattered rows).
-- Common issues discovered via plans
-  - Missing/unused index; wrong join order; unselective predicates; heavy sorts/aggregates; repeated function calls preventing index use.
+## Learning objectives
 
-Walkthrough of the day’s script
-- Baseline plan for a filter on orders.total_amount > 500 and limited output; compare EXPLAIN vs EXPLAIN ANALYZE outputs.
-- Multi-join with a WHERE on last 90 days shows whether indexes on (order_date) and join keys are used; track how GROUP BY feeds into ORDER BY.
-- Guidance to rerun plans after creating indexes (Day 32) to observe improvements.
+- Read a plan tree from its leaf nodes through the final output.
+- Compare estimates with actual rows, loops, timing, and buffers without
+  treating one timing as universal evidence.
 
-Tactics
-- Add FILTER (WHERE ...) to aggregates to avoid extra joins; reduce plan nodes.
-- Push selective predicates as early as possible; avoid functions on columns (cast/store normalized instead or use functional index).
-- Use SET enable_seqscan = off temporarily to test index viability (for exploration only).
+## Vocabulary and concepts
 
-Pitfalls
-- EXPLAIN ANALYZE runs the query; don’t use on destructive DML in production. Wrap in a transaction and ROLLBACK.
-- Chasing micro-optimizations before fixing cardinality (stats) or schema (indexes).
+- **Plan node:** one physical operation in a PostgreSQL execution plan.
+- **Cost estimate:** a planner-relative estimate, not elapsed milliseconds.
+- **Loop count:** the number of times a node executes under its parent.
 
-Practice exercises
-1) Compare plans before/after adding an index on orders(order_date) and customers(country).
-2) Force Hash vs Merge vs Nested Loop joins by adjusting work_mem, enable_* GUCs; note differences.
-3) Use EXPLAIN (ANALYZE, BUFFERS) to inspect I/O and cache effects.
+## Worked example / walkthrough
 
-Further reading
-- EXPLAIN: https://www.postgresql.org/docs/current/using-explain.html
-- Understanding plans: https://explain.depesz.com and https://tatiyants.com/pev/
+Run the same safe filter first with `EXPLAIN` and then with
+`EXPLAIN (ANALYZE, BUFFERS)`. Start at the scan leaf, compare estimated rows
+with `actual rows × loops`, note rows removed by the filter, and only then read
+the parent `LIMIT` or aggregate node.
+
+## Exercises
+
+Complete the prompts in the [learner SQL](../day31_explain_analyze.sql). Save one
+plan and a result-control query as the baseline for Day 32.
+
+## Self-check
+
+- Can you distinguish estimated cost from measured time?
+- Have you verified that every `EXPLAIN ANALYZE` statement is safe to execute?
+
+## Next step
+
+Continue to [Day 32 — index fundamentals](day32_index_fundamentals.md).
+
+## Deep dive and reference
+
+## What you will learn
+
+- Read planned operations, estimated costs, row counts, and widths.
+- Add actual timing, rows, and loop counts with `EXPLAIN ANALYZE`.
+- Compare scan, join, aggregate, and sort nodes without guessing about speed.
+
+## How the learner script uses the current schema
+
+The first plan filters `training.orders.total_amount > 500`. The second plan
+executes that filter with `LIMIT 100`. The join plan combines `orders`,
+`customers`, and `order_items`, filters the last 90 days, and aggregates units
+by `customers.country`.
+
+`EXPLAIN` does not execute the statement. `EXPLAIN ANALYZE` does, so use it with
+care around writes. The day is wrapped in a transaction and contains only
+read-only statements.
+
+## Reading a plan
+
+- Start at the most indented nodes: they produce rows for their parents.
+- Compare estimated `rows` with `actual rows × loops`; large gaps can signal
+  stale statistics, skew, or a misunderstood predicate.
+- Inspect filters and “Rows Removed by Filter” to understand selectivity.
+- A sequential scan is not automatically bad. It is often cheapest for a small
+  table or a predicate returning much of the table.
+- The highest individual node time is not the whole story. Loops multiply work,
+  and sort or aggregate nodes can spill when memory is insufficient.
+
+## Practice — match the learner prompts exactly
+
+1. Add different `WHERE` predicates to the existing order queries and record
+   how selectivity changes estimates, actual rows, and scan choice.
+2. Run the same safe query with `EXPLAIN` and `EXPLAIN ANALYZE`; note which
+   actual timing, row, and loop fields appear only after execution.
+
+Keep the query result logically identical when comparing plans. Day 32 adds
+indexes, so save one Day 31 plan as a before-index baseline.
+
+## Pitfalls and validation
+
+- Do not compare timings from different predicates or different result sets.
+- Warm cache, background activity, and the compact seed can change timings.
+- Never use `EXPLAIN ANALYZE` on destructive production DML merely to see a
+  plan; it executes the statement.
+- Prefer `EXPLAIN (ANALYZE, BUFFERS)` when you need I/O evidence.

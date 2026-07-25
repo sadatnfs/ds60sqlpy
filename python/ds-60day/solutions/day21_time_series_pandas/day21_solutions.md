@@ -50,7 +50,7 @@ df['ts'] = pd.to_datetime(df['ts']).dt.tz_localize('America/Los_Angeles')
 df_utc = df.assign(ts=df['ts'].dt.tz_convert('UTC'))
 
 # 3) Set as index and resample hourly (example)
-by_hour = df_utc.set_index('ts').sort_index().resample('H').sum()
+by_hour = df_utc.set_index('ts').sort_index().resample('h').sum()
 
 print(df)
 print(df_utc)

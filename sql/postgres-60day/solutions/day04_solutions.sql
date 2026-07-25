@@ -1,57 +1,40 @@
--- Day 04 - Solutions: OUTER JOINs
--- Assumes: products, order_items, orders, customers
+-- Day 04 solutions: OUTER JOINs and NULL handling
+SET search_path TO training, public;
 
-/*
-Exercise 1) List categories that had no orders last month.
-Why: LEFT JOIN order_items, aggregate by category, then filter categories with zero matched rows.
-*/
-WITH last_month AS (
-  SELECT DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month' AS start_m,
-         DATE_TRUNC('month', CURRENT_DATE) AS end_m
+-- Exercise 1: reconcile orders and payments.
+-- A valid foreign key prevents payment-only rows; order-only rows are expected.
+WITH order_keys AS (
+  SELECT order_id FROM orders
+), payment_keys AS (
+  SELECT DISTINCT order_id FROM payments
 )
-SELECT p.category
-FROM products p
-LEFT JOIN order_items oi
-  ON oi.product_id = p.product_id
-LEFT JOIN orders o
-  ON o.order_id = oi.order_id
-  AND o.order_date >= (SELECT start_m FROM last_month)
-  AND o.order_date <  (SELECT end_m FROM last_month)
-GROUP BY p.category
-HAVING SUM(CASE WHEN o.order_id IS NOT NULL THEN 1 ELSE 0 END) = 0
-ORDER BY p.category;
+SELECT COALESCE(o.order_id, p.order_id) AS order_id,
+       CASE
+         WHEN o.order_id IS NULL THEN 'payment_without_order'
+         WHEN p.order_id IS NULL THEN 'order_without_payment'
+       END AS mismatch
+FROM order_keys o
+FULL OUTER JOIN payment_keys p USING (order_id)
+WHERE o.order_id IS NULL OR p.order_id IS NULL
+ORDER BY mismatch, order_id;
 
-/*
-Exercise 2) Compute number of customers without any orders, by country.
-Why: LEFT JOIN orders and count NULLs on the right side.
-*/
-SELECT c.country,
-       SUM(CASE WHEN o.order_id IS NULL THEN 1 ELSE 0 END) AS customers_without_orders
+-- Exercise 2: products that have never appeared in an order.
+SELECT p.product_id, p.name, p.category
+FROM products p
+LEFT JOIN order_items oi ON oi.product_id = p.product_id
+WHERE oi.order_item_id IS NULL
+ORDER BY p.product_id;
+
+-- Exercise 3: customers with no order in the last 90 days.
+-- Keeping the predicate inside the JOIN preserves customers with no orders ever.
+SELECT c.customer_id,
+       c.full_name,
+       c.country,
+       MAX(o.order_date) AS last_order_in_window
 FROM customers c
 LEFT JOIN orders o
   ON o.customer_id = c.customer_id
-GROUP BY c.country
-ORDER BY customers_without_orders DESC;
-
-/*
-Exercise 3) FULL JOIN reconciliation showing keys present only in A, only in B, and in both.
-Why: FULL JOIN and a merge flag using CASE on IS NULL tests.
-*/
-WITH a AS (
-  SELECT order_id FROM orders
-), b AS (
-  SELECT DISTINCT order_id FROM payments
-)
-SELECT COALESCE(a.order_id, b.order_id) AS order_id,
-       CASE
-         WHEN a.order_id IS NOT NULL AND b.order_id IS NOT NULL THEN 'both'
-         WHEN a.order_id IS NOT NULL AND b.order_id IS NULL THEN 'orders_only'
-         WHEN a.order_id IS NULL AND b.order_id IS NOT NULL THEN 'payments_only'
-         ELSE 'unknown'
-       END AS presence
-FROM a
-FULL JOIN b ON b.order_id = a.order_id
-ORDER BY order_id
-LIMIT 200;
-
--- End of Day 04 solutions
+ AND o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+GROUP BY c.customer_id, c.full_name, c.country
+HAVING COUNT(o.order_id) = 0
+ORDER BY c.country, c.customer_id;

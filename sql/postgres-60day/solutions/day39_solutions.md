@@ -1,93 +1,116 @@
-# Day 39 — Solutions (Locks and Deadlocks)
+# Day 39 — Solutions: Locks and Deadlocks
 
-We explore PostgreSQL lock types, how to inspect blocking, reproduce a deadlock, and apply timeouts/ordering to avoid them. We also cover advisory locks for application‑level coordination.
+Deadlocks and lock waits require concurrent sessions. A single sequential
+solution file cannot fully execute these labs. Use two terminals for the
+staged commands and a third terminal when observing a wait.
 
-Setup
-- Inspect locks: `SELECT * FROM pg_locks JOIN pg_stat_activity USING (pid);`
-- Helpful settings: `SET lock_timeout = '3s';` `SET statement_timeout = '30s';`
-- Lock modes (row level): FOR UPDATE/SHARE + NOWAIT/SKIP LOCKED. Table locks: ACCESS SHARE/EXCLUSIVE etc.
+## Exercise 1 — Reproduce and observe a deadlock
 
-Exercise 1 — Identify blockers and waiters
-```sql
--- Who is blocking whom?
-SELECT bl.pid        AS waiting_pid,
-       a_us.usename  AS waiting_user,
-       bl.locktype, bl.mode, bl.relation::regclass AS rel,
-       now() - a_bl.query_start AS waiting_for,
-       a_bl.query      AS waiting_query,
-       a_gr.pid       AS blocking_pid,
-       a_gr.query     AS blocking_query
-FROM pg_locks bl
-JOIN pg_stat_activity a_bl ON a_bl.pid = bl.pid AND NOT bl.granted
-JOIN pg_locks gr ON gr.locktype = bl.locktype AND gr.relation = bl.relation AND gr.granted
-JOIN pg_stat_activity a_gr ON a_gr.pid = gr.pid
-JOIN pg_stat_activity a_us ON a_us.pid = bl.pid
-WHERE bl.pid <> gr.pid;
+Session A locks order 1:
+
+```text
+BEGIN;
+SET LOCAL search_path TO training, public;
+SELECT order_id FROM orders WHERE order_id = 1 FOR UPDATE;
 ```
-Notes
-- Join pg_locks to pg_stat_activity to see SQL text and durations. Add filters for a specific relation.
 
-Exercise 2 — Reproduce a simple deadlock (two sessions A/B)
-Session A:
+Session B locks order 2:
+
+```text
+BEGIN;
+SET LOCAL search_path TO training, public;
+SELECT order_id FROM orders WHERE order_id = 2 FOR UPDATE;
+```
+
+Session A now waits for B:
+
+```text
+UPDATE training.orders
+SET total_amount = total_amount
+WHERE order_id = 2;
+```
+
+Before completing the cycle, run this safe diagnostic in a third session:
+
+```sql
+SELECT a.pid,
+       a.state,
+       l.locktype,
+       l.relation::regclass AS relation,
+       l.mode,
+       l.granted,
+       pg_blocking_pids(a.pid) AS blocking_pids
+FROM pg_stat_activity a
+JOIN pg_locks l ON l.pid = a.pid
+WHERE cardinality(pg_blocking_pids(a.pid)) > 0
+   OR NOT l.granted
+ORDER BY a.pid, l.granted, l.locktype;
+```
+
+Then Session B completes the cycle:
+
+```text
+UPDATE training.orders
+SET total_amount = total_amount
+WHERE order_id = 1;
+```
+
+PostgreSQL detects the cycle and aborts one transaction with
+`deadlock detected`; roll back both sessions afterward. The detector normally
+resolves the deadlock quickly, so the diagnostic captures the lock wait before
+the final cycle edge rather than promising to freeze a deadlock.
+
+## Exercise 2 — Prevent the deadlock with consistent ordering
+
+Every worker must acquire the same set of row locks in the same order:
+
 ```sql
 BEGIN;
-UPDATE customers SET segment='gold' WHERE customer_id=1;  -- locks row 1
--- keep txn open
+SET LOCAL search_path TO training, public;
+SET LOCAL lock_timeout = '5s';
+
+SELECT order_id,
+       total_amount
+FROM orders
+WHERE order_id IN (1, 2)
+ORDER BY order_id
+FOR UPDATE;
+
+ROLLBACK;
 ```
-Session B:
+
+Run the same transaction in both sessions. One may wait, but neither can hold
+order 2 while requesting order 1, so this pair does not form a cycle.
+
+## Exercise 3 — Job-queue claiming with `SKIP LOCKED`
+
 ```sql
 BEGIN;
-UPDATE customers SET segment='silver' WHERE customer_id=2;  -- locks row 2
--- keep txn open
-```
-Now, still in A:
-```sql
-UPDATE customers SET segment='gold' WHERE customer_id=2;  -- waits on B
-```
-Still in B:
-```sql
-UPDATE customers SET segment='silver' WHERE customer_id=1; -- deadlock; one txn will ROLLBACK
-```
-Takeaway
-- Always update rows in a consistent key order (e.g., ascending customer_id) across code paths to avoid cycles.
+SET LOCAL search_path TO training, public;
 
-Exercise 3 — Row‑level locking options
-```sql
--- Avoid waiting indefinitely
-SELECT *
-FROM jobs
-WHERE status='queued'
-FOR UPDATE NOWAIT;  -- error immediately if locked by another txn
+SELECT order_id,
+       order_date,
+       status
+FROM orders
+WHERE status = 'placed'
+ORDER BY order_id
+LIMIT 5
+FOR UPDATE SKIP LOCKED;
 
--- Nonblocking worker queue pattern
-WITH take AS (
-  SELECT id FROM jobs WHERE status='queued' ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 10
-)
-UPDATE jobs j
-SET status='in_progress'
-FROM take t
-WHERE j.id=t.id
-RETURNING j.*;
+ROLLBACK;
 ```
-When to use
-- NOWAIT for fast‑fail UX; SKIP LOCKED for high‑throughput worker fleets.
 
-Exercise 4 — Advisory locks for coarse‑grained coordination
-```sql
--- App‑level critical section keyed by a bigint
-SELECT pg_try_advisory_lock(42);   -- returns true if acquired
--- do protected work
-SELECT pg_advisory_unlock(42);
-```
-Notes
-- Advisory locks are independent of data rows; choose a hashable key. Prefer try_ variants; avoid global bottlenecks.
+To see queue behavior, keep the first session open before `ROLLBACK` and run the
+same `SELECT` in Session B. B skips A's locked rows and can claim a different
+batch.
 
-Exercise 5 — Timeouts and safe defaults
-```sql
-SET lock_timeout = '3s';       -- give up waiting on locks quickly
-SET statement_timeout = '30s'; -- prevent runaway queries
-```
-Guidance
-- Keep transactions short; hold locks only as long as needed.
-- Access rows in deterministic order to avoid deadlocks.
-- Prefer SKIP LOCKED queues for concurrency, and use monitoring queries to alert on blocking chains.
+## Pitfalls
+
+- `SKIP LOCKED` intentionally returns an inconsistent view and is appropriate
+  for queues, not ordinary reports.
+- `NOWAIT` fails immediately; `lock_timeout` bounds a wait; neither prevents a
+  badly ordered locking design.
+- Row locks are held until transaction end. Keep transactions short and never
+  wait for user input while holding them.
+- `total_amount = total_amount` is used only to request a write lock without
+  changing course data; do not use no-op updates as a production lock pattern.

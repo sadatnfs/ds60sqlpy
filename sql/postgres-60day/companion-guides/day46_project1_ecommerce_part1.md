@@ -1,43 +1,87 @@
-# Day 46 — Project 1: E‑commerce Analytics (Part 1) — LTV and Cohorts (Companion Guide)
+# Day 46 — E-commerce Project, Part 1: LTV and Cohorts
 
-Objectives
-- Compute customer Lifetime Value (LTV) robustly at order and customer grain
-- Build signup cohorts (by month) and basic cohort descriptors
-- Segment customers by LTV for downstream analysis
+## Level and prerequisites
 
-Why this matters
-Understanding how value accrues over time drives acquisition, retention, and budgeting decisions. Cohorts normalize comparisons across signup dates.
+- **Level:** Advanced
+- **Prerequisites:** [Day 45 — optimization project](day45_phase3_optimization_project.md)
+- **Artifacts:** [learner SQL](../day46_project1_ecommerce_part1.sql) ·
+  [solution reasoning](../solutions/day46_solutions.md) ·
+  [executable solution](../solutions/day46_solutions.sql)
 
-Plan and mental model
-- Revenue at line level: quantity × unit_price × (1 − discount)
-- Order totals: sum of line revenue per order
-- LTV: sum of order totals per customer (optionally net of refunds, taxes)
-- Cohort: date_trunc('month', created_at) per customer
+## Learning objectives
 
-Pipeline (recommended CTEs)
-1) order_values(order_id, customer_id, order_value) — aggregate lines to orders
-2) ltv(customer_id, ltv) — sum order_value
-3) enrich(customers ⋈ ltv) — add country/segment; bucket with NTILE or CASE
-4) cohorts — group customers by cohort_month and summarize profile
+- Calculate customer lifetime value (LTV) at one row per customer.
+- Assign policy-driven segments and measure cohort revenue over lifecycle
+  months.
 
-Key techniques in this project
-- Window NTILE(4) OVER (ORDER BY ltv DESC) for quartiles
-- date_trunc for monthly bucketing; COALESCE for missing segments
-- Validate with sanity checks (top/bottom customers, LTV distribution)
+## Vocabulary and concepts
 
-Common pitfalls
-- Fanout: joining orders to order_items to products without pre‑aggregating order items first will double count
-- Missing returns/refunds handling: define whether ltv is gross or net
-- Inconsistent time zone handling; keep UTC, display local on output
+- **LTV:** lifetime value under a stated revenue, margin, and refund definition.
+- **Signup cohort:** customers grouped by their creation month.
+- **Lifecycle offset:** elapsed whole months from cohort start to activity.
 
-Deliverables
-- A table/view with customer_id, cohort_month, ltv, ltv_segment, country, segment
-- A summary by cohort_month with new_customers, median_ltv, p90_ltv, share by ltv_segment
+## Worked example / walkthrough
 
-Stretch goals
-- Compute LTV at fixed horizons (90/180/365 days since signup) using LEAD/LAG and interval filters
-- Add RFM (Recency, Frequency, Monetary) segmentation and compare to LTV quartiles
+Collapse line items to order value, then orders to one customer LTV row. Left
+join from customers if zero-order customers belong in the population. Reconcile
+summed LTV with the chosen source total before assigning thresholds; segmenting
+at a duplicated order-line grain would bias both counts and value.
 
-Validation checklist
-- Compare LTV sums against total revenue; differences explained by returns/exclusions
-- Spot check five random customers for correctness
+## Exercises
+
+Complete the prompts in the [learner SQL](../day46_project1_ecommerce_part1.sql).
+Add a zero-order-customer test and state whether that customer receives a
+zero-value segment.
+
+## Self-check
+
+- Does every customer contribute at most once to segmentation input?
+- Are threshold ownership, refund/margin scope, and multi-year month offsets
+  explicit?
+
+## Next step
+
+Continue to [Day 47 — cohort retention](day47_project1_ecommerce_part2.md).
+
+## Deep dive and reference
+
+## Project focus
+
+- Calculate lifetime value at one row per customer.
+- Assign explicit gold, silver, and bronze value segments.
+- Measure cohort revenue over lifecycle months 0–12.
+
+## How the learner script uses the current schema
+
+The starter first collapses `order_items` to order value, then sums orders to
+customer LTV and assigns `NTILE(4)` for exploration. Signup cohort is
+`date_trunc('month', customers.created_at)`.
+
+`orders.total_amount` is already reconciled from line-item net revenue by setup,
+so it is also valid for customer LTV when the metric definition is gross booked
+order value. The schema does not model a separate refund fact.
+
+## Practice — match the learner prompts exactly
+
+1. Choose and state numeric thresholds for gold, silver, and bronze LTV. Assign
+   every customer, then report customer count, average LTV, and total LTV by
+   `(country, ltv_segment)`.
+2. Calculate revenue by signup `cohort_month` and lifecycle `month_offset` from
+   0 through 12.
+
+## Grain and date reasoning
+
+- One customer must contribute once to the LTV segmentation input.
+- Customers with no orders need a deliberate policy; a left join can retain
+  them with zero LTV.
+- A multi-year month offset must combine years and months from `age`; extracting
+  only the month component wraps after 11.
+- A missing cohort/offset row means no represented orders, not necessarily a
+  stored zero.
+
+## Validation and limits
+
+- Treat segment thresholds as business policy, not universal cutoffs.
+- Reconcile summed customer LTV to `SUM(orders.total_amount)`.
+- Signup month defines cohort membership; order month defines lifecycle revenue.
+- Synthetic data demonstrates the method, not a real customer-value benchmark.
