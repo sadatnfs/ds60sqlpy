@@ -8,7 +8,6 @@ from a clone or USB drive without a web server or network connection.
 from __future__ import annotations
 
 import argparse
-import html
 import json
 import sys
 from pathlib import Path
@@ -57,7 +56,7 @@ def build_html(payload: dict[str, Any]) -> str:
   <meta name="color-scheme" content="light dark">
   <meta
     http-equiv="Content-Security-Policy"
-    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'self'; form-action 'none'"
   >
   <title>DS60 Learning Guide</title>
   <style>
@@ -266,7 +265,7 @@ def build_html(payload: dict[str, Any]) -> str:
       color: var(--muted);
       font-size: 0.9rem;
     }
-    main section { padding: 4.5rem 0; scroll-margin-top: 4rem; }
+    main section { padding: 4.5rem 0; scroll-margin-top: 9rem; }
     .section-head {
       display: flex;
       align-items: end;
@@ -430,14 +429,18 @@ def build_html(payload: dict[str, Any]) -> str:
     .lesson-phase { margin: 0 0 0.7rem; color: var(--muted); font-size: 0.82rem; }
     .prereqs { margin: 0 0 0.8rem; color: var(--muted); font-size: 0.76rem; }
     .lesson-links { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: auto; }
-    .lesson-links a {
+    .lesson-links a, .lesson-links button {
       border-radius: 7px;
       padding: 0.25rem 0.45rem;
       background: rgb(23 63 95 / 7%);
+      border: 0;
+      min-height: auto;
+      color: var(--navy);
       font-size: 0.74rem;
       font-weight: 700;
       text-decoration: none;
     }
+    .lesson-links button:hover { color: #fff; }
     .empty {
       grid-column: 1 / -1;
       border: 1px dashed var(--line);
@@ -469,6 +472,51 @@ def build_html(payload: dict[str, Any]) -> str:
       background: var(--surface);
       content: attr(data-label);
       font-weight: 850;
+    }
+    .track-progress-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.65rem;
+      margin-top: 1rem;
+    }
+    .track-progress {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
+      background: rgb(255 255 255 / 45%);
+    }
+    .track-progress strong, .track-progress span { display: block; }
+    .track-progress span { color: var(--muted); font-size: 0.78rem; }
+    .progress-bar {
+      height: 0.45rem;
+      overflow: hidden;
+      margin-top: 0.45rem;
+      border-radius: 999px;
+      background: var(--line);
+    }
+    .progress-bar i {
+      display: block;
+      width: var(--track-progress);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--green);
+    }
+    .launcher-panel {
+      border: 2px solid var(--green);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft));
+    }
+    .launcher-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .launcher-status { min-height: 1.35rem; margin: 0.7rem 0 0; }
+    .mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      border-radius: 999px;
+      padding: 0.25rem 0.55rem;
+      color: var(--green);
+      background: #fff;
+      font-size: 0.76rem;
+      font-weight: 800;
     }
     .prompt-box textarea {
       width: 100%;
@@ -509,7 +557,7 @@ def build_html(payload: dict[str, Any]) -> str:
       h1 { font-size: clamp(2.8rem, 17vw, 4.4rem); }
       .grid.three, .grid.two, .lesson-grid, .workflow, .controls { grid-template-columns: 1fr; }
       .section-head { align-items: flex-start; flex-direction: column; }
-      .progress-panel { grid-template-columns: 1fr; }
+      .progress-panel, .track-progress-grid { grid-template-columns: 1fr; }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -529,7 +577,7 @@ def build_html(payload: dict[str, Any]) -> str:
   <a class="skip-link" href="#main">Skip to main content</a>
   <header class="topbar">
     <div class="shell topbar-inner">
-      <a class="brand" href="#top" aria-label="DS60 guide home">
+      <a class="brand" href="START_HERE.html" aria-label="DS60 guide home">
         <span class="brand-mark" aria-hidden="true">DS60</span>
         <span>Learning Guide</span>
       </a>
@@ -567,8 +615,9 @@ def build_html(payload: dict[str, Any]) -> str:
         <div class="stat"><strong>1×</strong><span>connected bootstrap</span></div>
       </div>
       <p class="offline-note">
-        This file contains no external scripts, fonts, analytics, or network
-        requests. Lesson code is designed for offline study after setup.
+        This file contains no external scripts, fonts, analytics, or internet
+        requests. Optional launcher mode talks only to its loopback server.
+        Lesson code is designed for offline study after setup.
       </p>
     </aside>
   </div>
@@ -611,9 +660,15 @@ def build_html(payload: dict[str, Any]) -> str:
             prepares the process safely, creates <code>.venv</code>, installs
             IPython/Jupyter, and registers the course kernel.
           </p>
-          <pre><code>powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap_windows.ps1
-.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+          <pre><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+&amp; .\scripts\bootstrap_windows.ps1
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py doctor
+&amp; $CoursePython -m jupyter lab</code></pre>
           <p class="microcopy">
             Need every optional course package while connected? Add
             <code>-Profile Advanced</code>. System-tool installation and persistent
@@ -693,6 +748,27 @@ def build_html(payload: dict[str, Any]) -> str:
           </div>
         </div>
 
+        <div class="panel launcher-panel" id="launcher-panel" style="margin-top: 1rem" hidden>
+          <span class="mode-badge">● Private localhost mode</span>
+          <h3>Launch your workspace from this page</h3>
+          <p>
+            This optional mode is bound only to <code>127.0.0.1</code>. It can
+            open allowlisted VS Code/Jupyter targets and saves lesson
+            completion to ignored <code>.learning/progress.json</code>. It
+            cannot run arbitrary commands or accept arbitrary file paths.
+          </p>
+          <p class="microcopy">
+            See <a href="docs/learning-portal.md">portal modes, portability,
+            and security</a>.
+          </p>
+          <div class="launcher-actions">
+            <button type="button" data-launch-action="open-repo">Open repository in VS Code</button>
+            <button type="button" class="secondary" data-launch-action="jupyter-python">Launch Python JupyterLab</button>
+            <button type="button" class="secondary" data-launch-action="jupyter-sql">Launch PostgreSQL notebook lab</button>
+          </div>
+          <p class="microcopy launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+
         <div class="panel" style="margin-top: 1rem">
           <h3>Machine readiness checklist</h3>
           <ul class="checklist" id="setup-checklist">
@@ -704,8 +780,10 @@ def build_html(payload: dict[str, Any]) -> str:
             <li><label><input type="checkbox" data-setup-check="offline"> Optional packages and first-use datasets cached before going offline</label></li>
           </ul>
           <p class="microcopy">
-            Checklist state is stored only in this browser. No machine details
-            leave the computer.
+            Checklist state stays in this browser. Lesson completion is also
+            browser-local in the plain HTML file, or saved to the ignored
+            <code>.learning/progress.json</code> file in private launcher mode.
+            No machine details leave the computer.
           </p>
         </div>
       </div>
@@ -816,6 +894,20 @@ def build_html(payload: dict[str, Any]) -> str:
             </div>
           </div>
         </div>
+        <div class="track-progress-grid" id="track-progress" aria-label="Progress by track">
+          <div class="track-progress" data-progress-track="python">
+            <strong>Python</strong><span>0 complete</span>
+            <div class="progress-bar"><i style="--track-progress: 0%"></i></div>
+          </div>
+          <div class="track-progress" data-progress-track="sql">
+            <strong>SQL</strong><span>0 complete</span>
+            <div class="progress-bar"><i style="--track-progress: 0%"></i></div>
+          </div>
+          <div class="track-progress" data-progress-track="bridge">
+            <strong>Bridge</strong><span>0 complete</span>
+            <div class="progress-bar"><i style="--track-progress: 0%"></i></div>
+          </div>
+        </div>
 
         <div class="controls">
           <label class="control">
@@ -851,7 +943,7 @@ def build_html(payload: dict[str, Any]) -> str:
           <div class="actions">
             <button type="button" class="ghost" id="export-progress">Export progress</button>
             <button type="button" class="ghost" id="import-progress">Import progress</button>
-            <button type="button" class="ghost" id="clear-progress">Clear browser progress</button>
+            <button type="button" class="ghost" id="clear-progress">Clear local progress</button>
             <input class="sr-only" id="progress-file" type="file" accept="application/json">
           </div>
         </div>
@@ -922,6 +1014,12 @@ def build_html(payload: dict[str, Any]) -> str:
     const lessons = course.lessons;
     const lessonById = new Map(lessons.map((lesson) => [lesson.id, lesson]));
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
     const state = loadState();
 
     function loadState() {
@@ -946,6 +1044,71 @@ def build_html(payload: dict[str, Any]) -> str:
         // Some file:// privacy modes disable localStorage. The in-memory state
         // still works for this page view.
       }
+    }
+
+    function setLauncherStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || `Portal request failed (${response.status})`);
+      return payload;
+    }
+
+    async function loadServerProgress() {
+      if (!launcherMode) return;
+      document.querySelector("#launcher-panel").hidden = false;
+      try {
+        const payload = await apiRequest("/api/status");
+        state.completed = payload.completed.filter((id) => lessonById.has(id));
+        saveState();
+        renderCatalog();
+        renderProgress();
+        setLauncherStatus(
+          payload.launches_enabled
+            ? "Launcher ready. Progress is synchronized with .learning/progress.json."
+            : "Progress is synchronized; native launches are disabled for this session."
+        );
+      } catch (error) {
+        setLauncherStatus(`Could not synchronize launcher mode: ${error.message}`, true);
+      }
+    }
+
+    async function syncCompletion(lessonId, complete) {
+      if (!launcherMode) return;
+      try {
+        await apiRequest("/api/progress", {
+          method: "POST",
+          body: JSON.stringify({ lesson_id: lessonId, complete })
+        });
+        setLauncherStatus(
+          `${lessonId} ${complete ? "saved as complete" : "saved as incomplete"}.`
+        );
+      } catch (error) {
+        setLauncherStatus(
+          `Browser progress changed, but the progress file was not updated: ${error.message}`,
+          true
+        );
+      }
+    }
+
+    async function replaceServerProgress() {
+      if (!launcherMode) return;
+      await apiRequest("/api/progress/replace", {
+        method: "POST",
+        body: JSON.stringify({ completed: state.completed })
+      });
     }
 
     const completedSet = () => new Set(state.completed);
@@ -995,6 +1158,7 @@ def build_html(payload: dict[str, Any]) -> str:
             <a href="${relativeLink(lesson.guide_path)}">Guide</a>
             <a href="${relativeLink(lesson.lesson_path)}">Learner artifact</a>
             ${solutions}
+            ${launcherMode ? `<button type="button" class="ghost" data-open-lesson="${escapeHtml(lesson.id)}">Open in VS Code</button>` : ""}
           </div>
         </article>`;
     }
@@ -1069,8 +1233,17 @@ def build_html(payload: dict[str, Any]) -> str:
           event.currentTarget.checked ? completed.add(id) : completed.delete(id);
           state.completed = [...completed].sort();
           saveState();
+          void syncCompletion(id, event.currentTarget.checked);
           renderCatalog();
           renderProgress();
+        });
+      });
+      lessonGrid.querySelectorAll("[data-open-lesson]").forEach((button) => {
+        button.addEventListener("click", () => {
+          void launchNative("open-lesson", {
+            lesson_id: button.dataset.openLesson,
+            artifact: "lesson"
+          });
         });
       });
     }
@@ -1089,7 +1262,36 @@ def build_html(payload: dict[str, Any]) -> str:
         : completed.size === lessons.length
           ? "Every cataloged lesson is complete."
           : "Complete prerequisites to unlock the next cataloged lesson.";
+      ["python", "sql", "bridge"].forEach((track) => {
+        const trackLessons = lessons.filter((lesson) => lesson.track === track);
+        const trackComplete = trackLessons.filter((lesson) => completed.has(lesson.id)).length;
+        const trackPercentage = Math.round((trackComplete / trackLessons.length) * 100);
+        const panel = document.querySelector(`[data-progress-track="${track}"]`);
+        panel.querySelector("span").textContent =
+          `${trackComplete} of ${trackLessons.length} complete`;
+        panel.querySelector("i").style.setProperty("--track-progress", `${trackPercentage}%`);
+      });
     }
+
+    async function launchNative(action, detail = {}) {
+      if (!launcherMode) return;
+      setLauncherStatus(`Starting ${action}…`);
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify({ action, ...detail })
+        });
+        setLauncherStatus(`${payload.action} started (process ${payload.process_id}).`);
+      } catch (error) {
+        setLauncherStatus(`Could not launch ${action}: ${error.message}`, true);
+      }
+    }
+
+    document.querySelectorAll("[data-launch-action]").forEach((button) => {
+      button.addEventListener("click", () => {
+        void launchNative(button.dataset.launchAction);
+      });
+    });
 
     [search, trackFilter, levelFilter, statusFilter].forEach((control) => {
       control.addEventListener(control === search ? "input" : "change", () => {
@@ -1182,6 +1384,7 @@ def build_html(payload: dict[str, Any]) -> str:
         state.completed = payload.completed.filter((id) => lessonById.has(id));
         state.setup = payload.setup && typeof payload.setup === "object" ? payload.setup : {};
         saveState();
+        await replaceServerProgress();
         document.querySelectorAll("[data-setup-check]").forEach((input) => {
           input.checked = Boolean(state.setup[input.dataset.setupCheck]);
         });
@@ -1198,6 +1401,9 @@ def build_html(payload: dict[str, Any]) -> str:
       state.completed = [];
       state.setup = {};
       saveState();
+      void replaceServerProgress().catch((error) => {
+        setLauncherStatus(`Could not clear the progress file: ${error.message}`, true);
+      });
       document.querySelectorAll("[data-setup-check]").forEach((input) => {
         input.checked = false;
       });
@@ -1244,6 +1450,7 @@ First verify that I am using the repository interpreter/kernel and ask 2–3 sho
     renderCatalog();
     renderProgress();
     renderPrompt();
+    void loadServerProgress();
   </script>
 </body>
 </html>
@@ -1260,11 +1467,7 @@ First verify that I am using the repository interpreter/kernel and ask 2–3 sho
         document = document.replace(marker, value)
     if "__" in document:
         unresolved = sorted(
-            {
-                token
-                for token in document.split()
-                if token.startswith("__") and token.endswith("__")
-            }
+            {token for token in document.split() if token.startswith("__") and token.endswith("__")}
         )
         if unresolved:
             raise ValueError(f"unresolved template markers: {unresolved}")
@@ -1287,6 +1490,15 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _display_path(path: Path) -> str:
+    """Render repository paths compactly and external output paths safely."""
+
+    try:
+        return path.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def main(argv: list[str] | None = None) -> int:
     """Build or verify the checked-in guide."""
 
@@ -1306,20 +1518,20 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         if current != rendered:
             print(
-                f"{output.relative_to(REPO_ROOT)} is stale; "
-                "run python scripts/build_course_guide.py",
+                f"{_display_path(output)} is stale; run python scripts/build_course_guide.py",
                 file=sys.stderr,
             )
             return 1
-        print(f"{output.relative_to(REPO_ROOT)} matches curriculum/catalog.json")
+        print(f"{_display_path(output)} matches curriculum/catalog.json")
         return 0
 
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(rendered, encoding="utf-8")
-    print(
-        f"Wrote {html.escape(output.relative_to(REPO_ROOT).as_posix())} "
-        f"with {len(_catalog_payload()['lessons'])} lessons"
-    )
+    try:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(rendered, encoding="utf-8")
+    except OSError as exc:
+        print(f"Could not write course guide: {exc}", file=sys.stderr)
+        return 2
+    print(f"Wrote {_display_path(output)} with {len(_catalog_payload()['lessons'])} lessons")
     return 0
 
 

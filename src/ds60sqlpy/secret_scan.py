@@ -15,6 +15,9 @@ ALLOWED_LOCAL_AUTHORITIES: Final = frozenset(
     {
         "postgresql://ds60:ds60@",
         "postgresql://USER:PASSWORD@",
+        "postgresql://env:secret@",
+        "postgresql://cli:top-secret@",
+        "postgresql://cli:***@",
     }
 )
 SENSITIVE_FILENAMES: Final = frozenset(
@@ -58,7 +61,10 @@ PATTERNS: Final = (
     ("GitLab token", re.compile(r"g[l]pat-[A-Za-z0-9_-]{20,}")),
     ("Slack token", re.compile(r"x[o]x[baprs]-[A-Za-z0-9-]{20,}")),
     ("Google API key", re.compile(r"A[I]za[0-9A-Za-z_-]{30,}")),
-    ("OpenAI-style key", re.compile(r"s[k]-[A-Za-z0-9_-]{20,}")),
+    (
+        "OpenAI-style key",
+        re.compile(r"(?<![A-Za-z0-9])s[k]-[A-Za-z0-9_-]{20,}"),
+    ),
     (
         "credential-bearing URL",
         re.compile(
@@ -73,6 +79,16 @@ PATTERNS: Final = (
 class Finding:
     """One filename or content finding without reproducing the secret."""
 
+    path: Path
+    line: int
+    kind: str
+
+
+@dataclass(frozen=True, slots=True)
+class HistoryFinding:
+    """One finding in a reachable Git blob without reproducing the secret."""
+
+    object_id: str
     path: Path
     line: int
     kind: str
@@ -97,9 +113,10 @@ def tracked_and_untracked_paths(repo_root: Path) -> tuple[Path, ...]:
 def sensitive_filename(path: Path) -> bool:
     """Return whether a Git-visible filename usually contains credentials."""
 
-    if path.name == ".env.example":
+    name = path.name.casefold()
+    if name == ".env.example":
         return False
-    return path.name in SENSITIVE_FILENAMES or path.suffix.casefold() in SENSITIVE_SUFFIXES
+    return name in SENSITIVE_FILENAMES or path.suffix.casefold() in SENSITIVE_SUFFIXES
 
 
 def local_sensitive_paths(repo_root: Path) -> tuple[Path, ...]:
@@ -107,7 +124,9 @@ def local_sensitive_paths(repo_root: Path) -> tuple[Path, ...]:
 
     paths: list[Path] = []
     for directory, directory_names, filenames in os.walk(repo_root):
-        directory_names[:] = [name for name in directory_names if name not in GENERATED_DIRECTORIES]
+        directory_names[:] = [
+            name for name in directory_names if name.casefold() not in GENERATED_DIRECTORIES
+        ]
         for filename in filenames:
             path = Path(directory, filename)
             if sensitive_filename(path.relative_to(repo_root)):
@@ -157,4 +176,72 @@ def scan_repository(repo_root: Path = REPO_ROOT) -> list[Finding]:
             continue
         text = payload.decode("utf-8", errors="replace")
         findings.extend(scan_text(relative, text))
+    return findings
+
+
+def scan_git_history(repo_root: Path = REPO_ROOT) -> list[HistoryFinding]:
+    """Scan each unique blob reachable from any local Git reference."""
+
+    root = repo_root.resolve()
+    listed = subprocess.run(
+        ["git", "rev-list", "--objects", "--all"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+    )
+    object_paths: dict[str, Path] = {}
+    findings: list[HistoryFinding] = []
+    for raw_line in listed.stdout.splitlines():
+        object_fields = raw_line.split(b" ", 1)
+        if len(object_fields) != 2:
+            continue
+        object_id = object_fields[0].decode("ascii")
+        path = Path(object_fields[1].decode("utf-8", errors="surrogateescape"))
+        object_paths.setdefault(object_id, path)
+        if sensitive_filename(path):
+            findings.append(
+                HistoryFinding(
+                    object_id=object_id[:12],
+                    path=path,
+                    line=0,
+                    kind="sensitive filename",
+                )
+            )
+
+    object_ids = tuple(object_paths)
+    if not object_ids:
+        return findings
+    batch = subprocess.run(
+        ["git", "cat-file", "--batch"],
+        cwd=root,
+        input=("".join(f"{object_id}\n" for object_id in object_ids)).encode(),
+        check=True,
+        capture_output=True,
+    )
+    offset = 0
+    for requested_id in object_ids:
+        header_end = batch.stdout.find(b"\n", offset)
+        if header_end < 0:
+            raise subprocess.CalledProcessError(1, ["git", "cat-file", "--batch"])
+        header = batch.stdout[offset:header_end].decode("ascii")
+        offset = header_end + 1
+        header_fields = header.split()
+        if len(header_fields) != 3 or header_fields[1] == "missing":
+            raise subprocess.CalledProcessError(1, ["git", "cat-file", "--batch"])
+        object_id, object_type, raw_size = header_fields
+        size = int(raw_size)
+        payload = batch.stdout[offset : offset + size]
+        offset += size + 1
+        if object_type != "blob" or b"\0" in payload:
+            continue
+        path = object_paths[requested_id]
+        for finding in scan_text(path, payload.decode("utf-8", errors="replace")):
+            findings.append(
+                HistoryFinding(
+                    object_id=object_id[:12],
+                    path=finding.path,
+                    line=finding.line,
+                    kind=finding.kind,
+                )
+            )
     return findings

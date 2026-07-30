@@ -1,5 +1,6 @@
 # Operating-system and removable-drive metadata
-.playwright-cli
+.playwright-cli/
+.enrich_*.py
 .DS_Store
 ._*
 .Spotlight-V100/

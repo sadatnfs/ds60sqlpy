@@ -69,10 +69,79 @@ for interval algebra, JSONB for genuinely variable document-shaped attributes,
 and normalized relations for independently identified facts and cross-row
 constraints.
 
+## Exercise 7 — Multirange normalization and gaps
+
+Construct a `datemultirange` from input ranges; PostgreSQL canonicalizes and
+merges overlapping or adjacent discrete date ranges. The August gap is the
+bounded month range minus the normalized availability multirange. Expand only
+for display/testing when the domain is small—range algebra avoids one row per
+day.
+
+Adjacency merging is correct when uninterrupted consecutive dates are one
+availability period. If a handoff at the boundary has business meaning, store
+separate identified periods rather than relying on a multirange that
+canonicalizes them together.
+
+## Exercise 8 — Network containment
+
+Store client endpoints as `inet` and rules as `cidr`. Join where the network
+contains the address (`network >>= address`), then rank by
+`masklen(network) DESC, rule_id` so the longest prefix wins deterministically.
+GiST or SP-GiST network operator classes can support containment; confirm the
+exact operator and plan.
+
+Do not compare addresses as text: lexical order and spelling variants do not
+express network containment. Explicitly define IPv4/IPv6 coexistence and the
+default rule when no network matches.
+
+## Exercise 9 — Monetary representation
+
+`numeric(p,s)` gives exact decimal arithmetic and a declared scale; validate
+rounding at ingestion and choose capacity from maximum business value. Bigint
+minor units are exact and interoperable but require an explicit currency scale
+that may differ by currency. Double precision is approximate and is unsuitable
+for exact equality/accounting totals.
+
+A domain can centralize nonnegative/range rules, but currency compatibility is
+cross-column and usually needs a composite model or reference table. Test sum,
+rounding, multiplication, overflow, serialization, and mixed-currency rejection.
+
+## Exercise 10 — Promote a JSON property
+
+Validate that the payload property is a JSON number before casting it in a
+generated expression, or constrain accepted payload shape first. Index the
+stored typed column and query that column directly; this makes the frequently
+used contract visible to statistics and tools.
+
+The trade-off is stricter writes: a legacy string such as `"30"` may have been
+accepted JSON but now fails the promoted contract. Inventory/backfill bad rows,
+deploy compatible writers, validate, and only then enforce the generated value.
+
+## Exercise 11 — Language-aware full text
+
+`to_tsvector` reveals normalized lexemes and positions after parsing,
+dictionary stop-word removal, and stemming. Weight title/body lexemes before
+ranking. Generate and query with the same explicit configuration.
+
+For multilingual data, store/validate a language configuration per row or route
+rows into language-specific vectors/indexes. A generic `simple` configuration
+avoids stemming but is not automatically better. Evaluate relevance against a
+labeled corpus, including unsupported/mixed-language fallback.
+
+## Exercise 12 — Normalize tags
+
+Create a `tags` vocabulary and a `document_tags(document_id, tag_id)` relation
+with a composite primary key. Containment becomes grouping/HAVING or joins, and
+foreign keys enforce vocabulary and prevent duplicates.
+
+Arrays are simpler for a small row-owned list queried by containment, but cannot
+foreign-key individual elements and preserve duplicates/order. Normalization
+adds join/write cost while supporting tag metadata, independent identity,
+cross-row constraints, and referential updates.
+
 ## Edge cases
 
 - Empty arrays and empty ranges have distinct semantics.
 - Multiranges normalize overlapping/adjacent members.
 - Missing JSON, JSON null, and SQL NULL differ.
 - Search ranking and phrase behavior require corpus-level relevance tests.
-

@@ -138,6 +138,60 @@ enforce the same rule, then state why the hook is preferable here. Use a
 metaclass only when class-creation behavior cannot be expressed by descriptors,
 decorators, or subclass hooks.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 9 — design a structural Protocol
+
+Define a minimal generic `Serializer[T]` Protocol and implement JSON and text serializers without inheritance. Add a consumer and let mypy reject one incompatible implementation.
+
+**Progressive hint:** Protocol methods express only what the consumer needs. Use a 3.11-compatible TypeVar and abstract collection input types.
+
+### Exercise 10 — preserve signatures with ParamSpec
+
+Write a timing decorator that preserves arbitrary positional/keyword parameters and return type, injects a log sink/clock for tests, and re-raises the wrapped exception unchanged.
+
+**Progressive hint:** Use `ParamSpec`, a return `TypeVar`, `Callable[P, R]`, and `functools.wraps`.
+
+### Exercise 11 — narrow decoded data safely
+
+Implement a `TypeGuard` that validates a decoded JSON object as a specific TypedDict, including exact required keys, value types, and the bool-versus-int edge case.
+
+**Progressive hint:** `isinstance(True, int)` is true. Test bool explicitly before accepting integer fields, and reject unknown keys if the boundary is strict.
+
+### Exercise 12 — choose frozen, slots, and hash semantics
+
+Create a small value-object dataclass and compare mutable, frozen, slotted, and `unsafe_hash` choices. Use it as a dictionary key and show which combinations preserve hash invariants.
+
+**Progressive hint:** Hashable keys must not change equality-relevant fields while stored. `unsafe_hash` does not make mutation safe.
+
+### Exercise 13 — implement cooperative equality
+
+Implement `__eq__` for a value type so unrelated types receive `NotImplemented`, subclasses behave deliberately, and hashing remains consistent. Contrast this with returning `False` immediately.
+
+**Progressive hint:** `NotImplemented` lets Python try the reflected comparison and then fall back appropriately; it is not the same object as `NotImplementedError`.
+
+### Exercise 14 — evolve a typed serialization boundary
+
+Version a discriminated TypedDict union, add an optional field to one event, and parse old/new payloads into immutable domain objects. Define unknown-version and unknown-kind failures.
+
+**Progressive hint:** Narrow on literal version/kind only after runtime validation. Keep wire payloads separate from trusted domain types.
+
+### Exercise 15 — trace weak references and caches
+
+Compare a normal dictionary cache with `WeakValueDictionary` for objects that support weak references. Drop strong references, force collection only as an observation, and state when cache disappearance is acceptable.
+
+**Progressive hint:** Weak caches do not own values. Slotted classes need weak-reference support explicitly, and collection timing is not a business deadline.
+
+### Exercise 16 — review typing compatibility
+
+Change a public function from accepting `Sequence[str]` to `list[str]`, and another return from `list[str]` to `Sequence[str]`. Analyze source compatibility for callers and implement a deprecation-safe alternative.
+
+**Progressive hint:** Parameter types are consumer inputs; narrowing them breaks callers. Return types can often become more specific, not arbitrarily more abstract.
+
 ## Self-check
 
 - All examples parse on Python 3.11.

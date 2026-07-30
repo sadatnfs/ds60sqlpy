@@ -104,3 +104,96 @@ Notes
 - Builder and runtime use the same Python minor version, avoiding ABI and script-shebang mismatches
 - The runtime uses a non-root user and the same shell-independent health probe as Exercise 2
 - For compiled packages, install compilers only in the builder stage
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Create a slim dependency file containing only direct API runtime needs.
+
+**How to reason about it:** Trace direct imports from the service and serialized pipeline, install only runtime needs, and rebuild from a clean context. Keep development notebooks, tests, datasets, and credentials out of the image.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Add `GET /health` returning `{"status": "ok"}`.
+
+**How to reason about it:** A liveness endpoint is cheap and local; a readiness endpoint verifies the artifact/schema is loaded. Test both and use a standard-library probe when a slim image does not contain curl.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Optionally push the image to a registry if you intentionally use a connected account.
+
+**How to reason about it:** Registry upload is optional and networked. Use the registry's credential flow, a non-secret versioned tag/digest, image scanning, and never place tokens in Dockerfile instructions or build arguments.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Layer and secret audit
+
+**Prompt:** Create a `.dockerignore`, inspect image history, and prove that `.env`, Git metadata, notebooks, caches, and local artifacts are absent.
+
+**Reasoning before implementation:** The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.
+
+Allow only the service source, locked dependency metadata, and approved model
+artifact into the context. Use runtime secret injection for connected
+extensions; the portable lesson should require no credential.
+
+Inspect final files as a non-root user and scan both source and image. If a
+secret ever entered a built/pushed layer, rotate it—removing the file from the
+latest layer is not sufficient.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Least-privilege runtime
+
+**Prompt:** Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.
+
+**Reasoning before implementation:** Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.
+
+The model artifact and application code should be read-only at runtime.
+Logging should go to stdout/stderr rather than a mutable file beside source.
+If a framework requires a cache, configure a bounded writable temp directory
+and document its lifecycle.
+
+Bind to an unprivileged port such as 8000. Dropping root reduces impact but
+does not replace dependency updates, network policy, or input validation.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Health semantics
+
+**Prompt:** Implement separate `/live` and `/ready` checks and a startup failure when the model manifest is incompatible. Test all three states.
+
+**Reasoning before implementation:** Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.
+
+`/live` should avoid dependency fan-out that could cause restart loops.
+`/ready` can require successful artifact load, schema validation, and critical
+local resources. A malformed artifact should fail startup or keep readiness
+false, not return an “ok” response with later prediction failures.
+
+Tests should simulate absent and mismatched artifacts without requiring Docker
+or a network, then add one container smoke test for the packaged path.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

@@ -27,11 +27,40 @@ returns exactly one value, including `NULL` when no order exists. Contrast that
 with selecting raw order dates, which can raise “more than one row returned by a
 subquery used as an expression.”
 
+## Practice assumptions and review method
+
+- **Focus:** Use scalar and inline subqueries only when their one-row or one-value cardinality is guaranteed and visible.
+- **Assumptions:** A scalar subquery returning no rows becomes NULL; more than one row is an error. Order a `LIMIT 1` subquery deterministically.
+- **Failure to watch for:** Adding `LIMIT 1` to hide an unintended multi-row result creates arbitrary logic unless `ORDER BY` defines the chosen row.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day08_scalar_inline_subqueries.sql).
-Rewrite one scalar aggregate as a grouped derived table plus `LEFT JOIN` and
-compare outputs.
+Use scalar and inline subqueries only when their one-row or one-value cardinality is guaranteed and visible.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Return orders whose total exceeds the overall average order total.
+   **Progressive hint:** The aggregate subquery is guaranteed to return exactly one value.
+   **Expected shape:** Order rows above the global average.
+2. **Query writing:** Add the total customer count as a scalar column beside each country-level customer count.
+   **Progressive hint:** An uncorrelated aggregate subquery is one row and repeats safely for each grouped output row.
+   **Expected shape:** One row per country with a common global total.
+3. **Query writing:** Show each customer with their latest order timestamp using a scalar correlated subquery.
+   **Progressive hint:** Use `MAX` to guarantee one result and let customers without orders receive NULL.
+   **Expected shape:** One row per customer.
+4. **Prediction:** Demonstrate that a scalar subquery with no matching rows returns NULL.
+   **Progressive hint:** Use a deliberately impossible product key and test the scalar result with `IS NULL`.
+   **Expected shape:** One row whose boolean result is true.
+5. **Debugging:** Repair a scalar subquery that returns many product prices by aggregating to the intended single value.
+   **Progressive hint:** Choose the business reduction explicitly; this answer uses maximum price.
+   **Expected shape:** One row per category with a scalar global maximum for comparison.
+6. **Extension:** Rewrite a repeated scalar aggregate as a one-row CTE crossed into a customer-country report.
+   **Progressive hint:** Compute the global total once, then cross join the guaranteed one-row relation.
+   **Expected shape:** One row per country with country share.
 
 ## Self-check
 
@@ -64,12 +93,11 @@ Pitfalls
 - Scalar subqueries in SELECT executed per row; may be slow. Consider pre-aggregating and joining.
 - IN with large sets can be slow; join instead or use EXISTS.
 
-Exercises from the learner script
-1) For each country, return its largest single `orders.total_amount`.
-2) For each customer, show the first order date via a scalar subquery.
-
-Exercise 2 must return exactly one scalar value per customer. `MIN(order_date)`
-is deterministic and returns `NULL` for a customer with no orders.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Subqueries: https://www.postgresql.org/docs/current/sql-select.html#SQL-SELECT-SUBQUERIES

@@ -213,6 +213,32 @@ SELECT
 --
 -- 6. Describe a safe pg_stat_statements review. Query text can contain sensitive
 --    literals; do not enable the extension or expose query text in this lesson.
+--
+-- 7. Detect indexes whose leading columns and predicates make another index
+--    appear redundant. Then list the evidence that can disprove redundancy:
+--    uniqueness, operator class, collation, ordering, INCLUDE columns, and
+--    representative plans. Produce candidates, never an automatic DROP script.
+--
+-- 8. Design an expression index for case-insensitive device lookup. Explain
+--    expression matching, collation/version drift, function volatility, and
+--    when a generated normalized column gives a clearer contract.
+--
+-- 9. Run a controlled update workload and inspect HOT-update and dead-tuple
+--    statistics. Explain how indexed columns, page free space, fillfactor,
+--    autovacuum thresholds, and long transactions affect the result.
+--
+-- 10. Design indexes for a range-partitioned event table. Compare local indexes,
+--     partition pruning, per-partition statistics, attach/detach operations,
+--     and the absence of a general PostgreSQL global index.
+--
+-- 11. Compare EXPLAIN, EXPLAIN ANALYZE, BUFFERS, WAL, and TIMING. State which
+--     forms execute writes, how to test a write safely, and why one warm-cache
+--     plan is not a production benchmark.
+--
+-- 12. Create a maintenance scorecard with owners and budgets for table/index
+--     growth, dead tuples, analyze freshness, invalid indexes, lock wait,
+--     replication lag, and slow-query evidence. Define escalation and review
+--     cadence rather than universal thresholds.
 
 DO $self_check$
 BEGIN
@@ -232,4 +258,3 @@ $self_check$;
 
 ROLLBACK;
 \echo 'SQL-OPS-01 complete: pro_ops_lab was rolled back'
-

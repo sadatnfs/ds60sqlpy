@@ -67,7 +67,7 @@ print("seasonal:", mean_absolute_error(test, seasonal_naive))
 Every candidate must use this same 30-day horizon and metric. A more complex
 model earns its cost only if it improves the relevant evidence reliably.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the
    same test window.
@@ -88,6 +88,23 @@ model earns its cost only if it improves the relevant evidence reliably.
 The reference solution extends the lesson with `TimeSeriesSplit`, shifted
 rolling features, and a seasonal-naive evaluation. It uses a different
 synthetic weekly series to reinforce the method rather than mirror the notebook.
+
+### Additional mastery practice
+
+Evaluate forecasts with forward-only information, multiple origins, meaningful baselines, and timestamp/data-quality checks before adding model complexity.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Rolling-origin evaluation:** Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.
+   **Progressive hint:** At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.
+5. **Prediction intervals:** Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.
+   **Progressive hint:** For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.
+6. **Timestamp/data-quality debugging:** Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.
+   **Progressive hint:** Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

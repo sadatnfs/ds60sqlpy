@@ -28,6 +28,10 @@ jobs:
             python-version: "3.12"
     steps:
       - uses: actions/checkout@v6
+        with:
+          # The credential guard scans every reachable blob, so this job needs
+          # the complete repository history instead of checkout's shallow clone.
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
@@ -46,6 +50,12 @@ jobs:
         run: uv run --no-sync python scripts/build_catalog.py
       - name: Check catalog drift
         run: git diff --exit-code -- curriculum/catalog.json
+      - name: Check practice coverage
+        run: uv run --no-sync python scripts/audit_practice.py --write-report
+      - name: Check practice report drift
+        run: git diff --exit-code -- docs/practice-coverage.md
+      - name: Check generated learning portal drift
+        run: uv run --no-sync python scripts/build_course_guide.py --check
       - name: Lint
         run: uv run --no-sync ruff check src scripts tests bridge python/professional
       - name: Check formatting
@@ -53,7 +63,7 @@ jobs:
           uv run --no-sync ruff format --check
           src scripts tests bridge python/professional
       - name: Scan repository for common credential material
-        run: uv run --no-sync python scripts/scan_secrets.py
+        run: uv run --no-sync python scripts/scan_secrets.py --history
       - name: Type check
         run: uv run --no-sync mypy
       - name: Unit tests
@@ -87,6 +97,10 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Exercise the Windows discovery bootstrap
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
       - name: Run the Windows learner setup
         if: runner.os == 'Windows'
         shell: pwsh

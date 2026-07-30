@@ -26,10 +26,16 @@ code or queries.
    in order: verify/install prerequisites, clone and open the repository, then
    create `.venv`. Do not run the course doctor before Python and the repository
    environment exist.
-5. After setup, run the doctor with the repository interpreter:
+5. After setup, run the doctor with the repository interpreter. On Windows,
+   resolve either layout supported by the discovery bootstrap:
 
    ```powershell
-   .\.venv\Scripts\python.exe scripts\course.py doctor
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   & $CoursePython scripts\course.py doctor
    ```
 
    ```bash
@@ -38,9 +44,15 @@ code or queries.
 
    Use bare `python` only after verifying that it resolves to the same
    repository environment.
-6. For a returning learner, read `.learning/progress.json` only if it exists.
+6. Offer `START_HERE.html` as the zero-server offline navigator. When the
+   learner wants browser progress shared with the CLI/Codex or explicit launch
+   buttons, start the private portal with the repository interpreter and
+   `scripts/learning_portal.py`. Explain that it binds only to `127.0.0.1` and
+   that `--no-launches` keeps file-backed progress while disabling VS
+   Code/Jupyter process actions.
+7. For a returning learner, read `.learning/progress.json` only if it exists.
    Do not create or update it without permission.
-7. Choose one lesson. Load only its catalog entry, companion guide, and learner
+8. Choose one lesson. Load only its catalog entry, companion guide, and learner
    artifact initially. Do not open the official solution yet.
 
 The catalog contains stable named modules such as `sql-found-01`,
@@ -106,10 +118,14 @@ when safe and available.
   copy credentials into source or progress notes.
 - Explain that `00_setup.sql` drops and recreates the course-owned `training`
   schema before asking to run it.
-- Use PowerShell syntax on Windows and POSIX syntax on macOS/Linux. Prefer
-  activation-free `.venv` interpreter paths on Windows.
+- Use PowerShell syntax on Windows and POSIX syntax on macOS/Linux. Prefer the
+  activation-free interpreter printed by the Windows bootstrap; support both
+  `.venv\Scripts\python.exe` and the conda-prefix `.venv\python.exe` layout.
 - Do not run a local diagnostic and present it as evidence about a learner's
   different or remote machine.
+- Do not broaden the learning portal's fixed launch allowlist, accept an
+  arbitrary command/path, bind it beyond loopback, or expose progress through
+  cross-origin access.
 - Seaborn datasets may download on first use and then use their local cache.
   Treat pretrained model downloads as optional advanced enrichments.
 
@@ -125,7 +141,7 @@ After the learner demonstrates the lesson objective, ask whether to record it.
 If approved, use the repository interpreter:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\course.py progress complete TRACK-DAY --notes "short evidence"
+& $CoursePython scripts\course.py progress complete TRACK-DAY --notes "short evidence"
 ```
 
 ```bash
@@ -137,7 +153,7 @@ Use the exact canonical ID printed by the catalog, such as `python-07`,
 next cataloged lesson with the matching interpreter:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\course.py progress show
+& $CoursePython scripts\course.py progress show
 ```
 
 ```bash
@@ -150,6 +166,11 @@ When the request is to improve course content rather than tutor:
 
 - Follow the applicable root, `python/`, or `sql/` `AGENTS.md`.
 - Regenerate the catalog after artifact changes.
+- Preserve `curriculum/practice_baseline.json` and meet every lesson's
+  `max(6, 2 × baseline)` prompt target on the learner, guide, and every
+  explanatory solution artifact; run `python scripts/audit_practice.py`.
+- Generate `START_HERE.html` only through
+  `scripts/build_course_guide.py`, then use `--check` to prove no drift.
 - Run `python scripts/course.py validate`.
 - Use Serena for semantic navigation of importable Python code when available;
   use notebook-aware JSON tooling for `.ipynb` and live PostgreSQL execution

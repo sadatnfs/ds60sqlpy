@@ -69,7 +69,7 @@ The metric arrays describe variation across these particular folds; their
 standard deviation is not automatically a confidence interval. Report how the
 folds were formed so someone else can reproduce the estimate.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Evaluate the pipeline with `accuracy`, `f1`, and `roc_auc`.
 2. Compare the variability from 5-fold and 10-fold cross-validation.
@@ -83,6 +83,23 @@ folds were formed so someone else can reproduce the estimate.
    both mean and spread; do not infer a universal rule from one dataset.
 3. Sketch what the scaler would know if it were fit before the folds existed.
    Repeat the reasoning for imputation and feature selection.
+
+### Additional mastery practice
+
+Match metrics and resampling to the decision being modeled. Keep thresholds, groups, time, and hyperparameter selection inside honest validation boundaries.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Threshold analysis:** Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged.
+   **Progressive hint:** A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.
+5. **Grouped resampling:** Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.
+   **Progressive hint:** Use `StratifiedGroupKFold` when both label balance and entity separation matter; assert that train and validation group sets are disjoint.
+6. **Selection-bias debugging:** Explain why reporting `GridSearchCV.best_score_` as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model.
+   **Progressive hint:** The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

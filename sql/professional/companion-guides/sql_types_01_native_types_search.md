@@ -85,13 +85,41 @@ decision.
 
 ## Exercises
 
-Complete all six learner prompts: multi-tag containment, range-minus-blackout
+Complete all twelve learner prompts. Begin with multi-tag containment, range-minus-blackout
 logic, typed JSONPath filtering, phrase-aware full-text ranking, index/operator
-trade-offs, and type-selection reasoning. Preserve deterministic ordering and
-state all NULL and boundary assumptions.
+trade-offs, and type-selection reasoning; then cover multirange, networks,
+money, promoted JSON, language search, and normalization. Preserve deterministic
+ordering and state all NULL and boundary assumptions.
 
 For JSON, first guard shape/type when data is not controlled. A cast from an
 arbitrary string to integer can fail before a predicate excludes it.
+
+For each choice, name the operators, constraints, index support, boundary rules,
+write cost, and migration cost:
+
+1. **Tag containment:** require both tags, preserve published status, and order
+   ties deterministically.
+2. **Range subtraction:** apply the half-open rule and prove both range
+   boundaries.
+3. **Typed JSONPath:** guard shape/type before numeric comparison.
+4. **Full-text query:** parse the web-style phrase, rank, and add a stable
+   secondary order.
+5. **Index comparison:** map JSONB, text-search, and trigram operators to their
+   useful operator classes.
+6. **Type decision:** defend domain, enum, lookup, array, range, JSONB, or
+   normalized-relation choices field by field.
+7. **Multirange:** normalize availability, find August gaps, and define whether
+   adjacency merges.
+8. **Networks:** match addresses to their most-specific containing `cidr` and
+   identify an operator-compatible index.
+9. **Money:** compare fixed-scale numeric, minor-unit bigint, and floating point
+   using explicit precision and rounding tests.
+10. **Promoted JSON:** validate a generated typed value, index it, and test an
+    old payload against the evolved contract.
+11. **Language search:** inspect lexemes and design configuration selection for
+    non-English rows.
+12. **Normalize tags:** compare normalized keys and joins with array
+    containment, duplicates, order, constraints, and writes.
 
 ## Self-check
 

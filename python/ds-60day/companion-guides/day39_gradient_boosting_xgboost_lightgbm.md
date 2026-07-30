@@ -69,7 +69,7 @@ print(f"{auc=:.3f}")
 This is a survey-scale baseline, not a production prescription. A result on one
 small dataset does not establish a universal library winner.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Tune `learning_rate` and `n_estimators` with a simple loop.
 2. Compare XGBoost with LightGBM if the `ml` dependency group is installed.
@@ -80,6 +80,25 @@ small dataset does not establish a universal library winner.
    with identical folds or an explicit validation set. Record runtime too.
 2. Match the split, metric, approximate capacity, and random seed. For LightGBM,
    `num_leaves` plays a related—but not identical—complexity role to depth.
+
+### Additional mastery practice
+
+Control boosting capacity with honest validation, early stopping, and reproducible optional backends. Ranking, calibration, and runtime are separate outcomes.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+3. **Early-stopping design:** Create train, validation, and final test boundaries for early stopping. Explain why using the test set as the early-stopping evaluation set invalidates the final score.
+   **Progressive hint:** The stopping iteration is a selected hyperparameter. Only the validation set may guide it; the test set remains untouched.
+4. **Calibration check:** Compare ROC AUC, log loss, and a reliability diagram for a boosting classifier. Construct an example where ranking is good but probability estimates are overconfident.
+   **Progressive hint:** AUC depends on ordering; log loss and calibration depend on the numeric probabilities. Use a separate calibration boundary.
+5. **Portable backend contract:** Design a comparison helper that uses scikit-learn's HistGradientBoostingClassifier offline and adds XGBoost/LightGBM only when installed. It must report skipped backends explicitly.
+   **Progressive hint:** Detect availability with importlib, keep the baseline unconditional, and never convert a missing optional package into a silent pass.
+6. **Overfitting diagnosis:** Plot training and validation loss by boosting iteration and diagnose a curve where training loss falls continuously while validation loss starts rising.
+   **Progressive hint:** The iteration at minimum validation loss is the candidate stopping point. Also test depth, minimum leaf support, subsampling, and learning rate.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

@@ -68,7 +68,7 @@ print("average precision:", average_precision_score(y_test, scores))
 The 0.5 threshold is a starting convention, not a law. Select an operating point
 using validation data and an explicit cost, capacity, recall, or precision goal.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Compare `class_weight="balanced"` with a SMOTE strategy.
 2. Tune the threshold to maximize minority-class F1.
@@ -82,6 +82,23 @@ using validation data and an explicit cost, capacity, recall, or precision goal.
    carefully: thresholds have one fewer element than precision and recall.
 3. Plot recall on the x-axis and precision on the y-axis; add class prevalence
    as a simple reference and label average precision.
+
+### Additional mastery practice
+
+Evaluate the minority outcome explicitly and keep resampling, calibration, threshold choice, and entity boundaries inside the correct training scope.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Prevalence-shift reasoning:** Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predict how precision changes and verify it with Bayes' rule.
+   **Progressive hint:** Precision depends on the base rate: TP/(TP+FP). Use a hypothetical population such as 10,000 to make the counts visible.
+5. **Grouped imbalance split:** Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold.
+   **Progressive hint:** Use StratifiedGroupKFold when feasible. Print group overlap, positive count, negative count, and prevalence per validation fold.
+6. **Calibration after resampling:** Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data.
+   **Progressive hint:** Oversampling changes the class distribution seen during fitting. Fit/calibrate inside development data and assess reliability on natural prevalence.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

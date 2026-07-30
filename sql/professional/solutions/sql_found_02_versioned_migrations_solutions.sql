@@ -128,5 +128,75 @@ BEGIN
 END
 $solution$;
 
-\ir ../fixtures/migrations/cleanup.sql
+-- Exercise 2: compatibility is demonstrated above: the stable API query still
+-- has its original interface while migrations 6-8 evolve only storage.
 
+-- Exercise 4: CREATE DATABASE, VACUUM, and CREATE INDEX CONCURRENTLY need a
+-- runner-managed nontransactional boundary. Lossy recovery is a restore or
+-- forward-fix decision, not an automatic down-file convention.
+
+-- Exercise 5: classify retry state before doing anything. Only
+-- (manifest present + exact observed contract) is safely "already applied";
+-- every partial or incompatible state must stop for investigation.
+SELECT
+    EXISTS (
+        SELECT 1
+        FROM pro_migration_lab.schema_migrations AS sm
+        WHERE sm.migration_id = 6
+          AND sm.content_tag = 'course-solution-006-v1'
+    ) AS manifest_matches,
+    EXISTS (
+        SELECT 1
+        FROM information_schema.columns AS c
+        WHERE c.table_schema = 'pro_migration_lab'
+          AND c.table_name = 'service_requests'
+          AND c.column_name = 'assigned_team'
+          AND c.data_type = 'text'
+    ) AS schema_matches;
+
+-- Exercise 6: these reviewed templates are intentionally not executed in this
+-- fixture because CREATE INDEX CONCURRENTLY cannot run in a transaction:
+--   CREATE INDEX CONCURRENTLY service_requests_team_idx
+--     ON pro_migration_lab.service_requests (assigned_team);
+-- A low-lock CHECK rollout uses ADD ... NOT VALID, remediation, and a separate
+-- VALIDATE CONSTRAINT step with timeouts and monitoring.
+
+-- Exercise 7: a compact expected-versus-observed column drift report. Production
+-- contracts should extend this pattern to defaults, constraints, and indexes.
+WITH expected(column_name, data_type, is_nullable) AS (
+    VALUES
+        ('request_key'::text, 'text'::text, 'NO'::text),
+        ('assigned_team'::text, 'text'::text, 'NO'::text)
+),
+observed AS (
+    SELECT c.column_name, c.data_type, c.is_nullable
+    FROM information_schema.columns AS c
+    WHERE c.table_schema = 'pro_migration_lab'
+      AND c.table_name = 'service_requests'
+      AND c.column_name IN ('request_key', 'assigned_team')
+)
+SELECT
+    COALESCE(e.column_name, o.column_name) AS column_name,
+    CASE
+        WHEN e.column_name IS NULL THEN 'unexpected'
+        WHEN o.column_name IS NULL THEN 'missing'
+        WHEN (e.data_type, e.is_nullable)
+             IS DISTINCT FROM (o.data_type, o.is_nullable) THEN 'changed'
+        ELSE 'matches'
+    END AS drift_status
+FROM expected AS e
+FULL JOIN observed AS o USING (column_name)
+ORDER BY column_name;
+
+-- Exercise 8: recovery is phase-specific; this deterministic matrix is a
+-- runbook skeleton, not permission to mutate a real environment.
+SELECT *
+FROM (
+    VALUES
+        ('expand', 'keep additive schema; forward-fix if compatible'),
+        ('backfill', 'pause writers; choose source of truth; reconcile keys'),
+        ('contract', 'keep old writers fenced; restore or forward-fix by evidence')
+) AS recovery(phase, primary_action)
+ORDER BY phase;
+
+\ir ../fixtures/migrations/cleanup.sql

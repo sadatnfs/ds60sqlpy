@@ -26,11 +26,40 @@ At one row per quarter, calculate
 known methods. Reconcile the sum of pivot columns to the long-form payment total
 and decide whether absent combinations display as `NULL` or zero.
 
+## Practice assumptions and review method
+
+- **Focus:** Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.
+- **Assumptions:** PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.
+- **Failure to watch for:** Replacing missing category combinations with zero is a business decision; dynamic columns are difficult for stable downstream schemas.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day27_pivot_unpivot.sql). Add one
-unrecognized category and document whether a static pivot intentionally omits
-it or exposes an “other” column.
+Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Pivot order counts by status into one summary row.
+   **Progressive hint:** Use one filtered count per known status and keep an all-orders denominator.
+   **Expected shape:** Exactly one row.
+2. **Query writing:** Pivot customer counts for US, CA, GB, and DE by segment.
+   **Progressive hint:** Group at segment grain and use filtered counts for known country columns.
+   **Expected shape:** One row per segment.
+3. **Query writing:** Unpivot a wide quarterly sample into quarter/amount rows.
+   **Progressive hint:** Use a lateral `VALUES` relation with one output row per source column.
+   **Expected shape:** Eight rows from two source rows and four quarters.
+4. **Prediction:** Compare a missing pivot combination with a real zero and preserve the distinction.
+   **Progressive hint:** Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero.
+   **Expected shape:** One row per expense category with nullable/zero-aware columns.
+5. **Debugging:** Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.
+   **Progressive hint:** Aggregate category/value pairs into data values so the result schema remains stable.
+   **Expected shape:** One row per UTC month with a JSON object of category revenue.
+6. **Extension:** Round-trip a wide sample to long form and back, verifying values and NULLs.
+   **Progressive hint:** Unpivot with lateral values, then use conditional aggregation keyed by company.
+   **Expected shape:** Two reconstructed rows matching the source.
 
 ## Self-check
 
@@ -78,17 +107,11 @@ Pitfalls
 - NULLs vs zeroes: decide whether to COALESCE NULL to 0 for metrics
 - Unpivoting monetary/numeric columns: ensure data types are preserved
 
-Exercises from the learner script
-1) Pivot payment revenue by method across the latest four quarters.
-2) Unpivot the budget table into category, period, and amount rows.
-
-Ambiguity: `budgets` is already stored in exactly that long form. To practice
-unpivoting, first pivot each period to category columns and then normalize those
-columns with `CROSS JOIN LATERAL (VALUES ...)`. For actual reporting, selecting
-`period, category, amount` from `budgets` is already sufficient.
-
-The seeded payment methods are constrained to `card`, `paypal`, `bank`, and
-`credit`; a static pivot must list them explicitly.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - tablefunc: https://www.postgresql.org/docs/current/tablefunc.html

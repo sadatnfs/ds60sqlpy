@@ -10,7 +10,7 @@ value into `pip install -e ".[VALUE]"`.
 | `data` | NumPy, pandas, plotting, statistics, and scikit-learn | Run the normal setup script |
 | `postgres` | The disposable PostgreSQL course database and `psql` | Follow the [PostgreSQL setup](../sql/postgres-60day/README.md) |
 | `bridge` | psycopg, pooling, and Python/PostgreSQL integration | Run advanced setup, or install the `bridge` extra |
-| `professional` | Packaging (`build`, `setuptools`, and `wheel`), Arrow/Parquet, DuckDB, and property-based tests | Run advanced setup, or install the `professional` extra |
+| `professional` | Packaging (`build`, `pip`, `setuptools`, and `wheel`), Arrow/Parquet, DuckDB, and property-based tests | Run advanced setup, or install the `professional` extra |
 | `quality` | pytest, Hypothesis-aware test tooling, type checking, and linting | Run normal setup plus the `professional` extra for Hypothesis |
 | `sql-notebooks` | Jupyter SQL magics, SQLAlchemy, and the Psycopg 3 PostgreSQL driver | Run advanced setup, or install the `sql-notebooks` extra |
 | `geo` | Geospatial Python packages | Run advanced setup, or install the `geo` extra |

@@ -89,16 +89,37 @@ rejecting the invalid statement while the outer transaction remains usable.
 
 ## Exercises
 
-Complete the four prompts at the bottom of the learner SQL. Design
+Complete all eight prompts at the bottom of the learner SQL. Begin by designing
 `maintenance_visits` from prose, load a valid row, prove an invalid cost is
 rejected, investigate NULL uniqueness, and justify whether the checkout fee
-snapshot is deliberate denormalization. Keep your DDL inside the existing
-transaction so a rerun begins cleanly.
+snapshot is deliberate denormalization; then continue through normalization,
+outer joins, deletion policy, and catalog contracts. Keep your DDL inside the
+existing transaction so a rerun begins cleanly.
 
 Before typing, write the proposed grain and cardinality in comments. For every
 constraint, complete the sentence: “This belongs in the database because
 without it, ___ could become false regardless of which application wrote the
 row.”
+
+Work through these in order; each item names the evidence to leave in your
+scratch SQL:
+
+1. **Maintenance DDL:** translate every visit requirement into a column,
+   constraint, key, default, or generated expression; annotate the table grain.
+2. **Negative cost:** insert one valid visit, isolate the rejected insert in a
+   nested block, and verify the expected SQLSTATE category.
+3. **NULL uniqueness:** insert two NULL references, explain the observed rule,
+   and write—but do not blindly apply—the stricter PostgreSQL 15+ alternative.
+4. **Historical fee:** state the invariant, the historical question, and why the
+   checkout snapshot is or is not deliberate denormalization.
+5. **Many-to-many work:** model providers, technicians, and assignments with
+   one declared grain and key per relation; do not use delimited text.
+6. **Outer-join report:** retain never-borrowed equipment, make date ties
+   deterministic, and test the result with an item that has no loan.
+7. **Deletion policy:** choose and defend one referential action for each named
+   relationship, including what happens to historical records.
+8. **Contract introspection:** prove key, check, generated-value, and uniqueness
+   properties from catalogs without depending on generated object names.
 
 ## Self-check
 

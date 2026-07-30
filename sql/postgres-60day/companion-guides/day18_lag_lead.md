@@ -27,10 +27,40 @@ The first row has no predecessor and returns `NULL`. If a month is absent, the
 previous row is not necessarily the previous calendar month, so build a month
 spine before interpreting the difference as month-over-month.
 
+## Practice assumptions and review method
+
+- **Focus:** Use `LAG` and `LEAD` to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.
+- **Assumptions:** Intervals are computed from `timestamptz` instants. The first/last row in a partition has no adjacent value and therefore returns NULL.
+- **Failure to watch for:** Omitting a partition compares unrelated entities; ordering only by a nonunique timestamp makes adjacency ambiguous.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day18_lag_lead.sql). Remove one
-period from a toy sequence and explain how the offset meaning changes.
+Use `LAG` and `LEAD` to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Show each order with the previous order timestamp for that customer.
+   **Progressive hint:** Partition by customer and order by timestamp plus ID.
+   **Expected shape:** One row per order; first customer order has NULL previous timestamp.
+2. **Query writing:** Calculate days since each customer's previous order.
+   **Progressive hint:** Compute lag in a CTE, subtract timestamps, and preserve NULL for first orders.
+   **Expected shape:** One row per order with nullable interval/days.
+3. **Query writing:** Show each promotion with the next promotion start date for the same product.
+   **Progressive hint:** Partition by product and define a stable chronological order.
+   **Expected shape:** One row per promotion; last product promotion has NULL next date.
+4. **Prediction:** Identify first rows in each customer partition using a NULL lag without replacing it with a fake date.
+   **Progressive hint:** NULL means there is no prior observation; preserve that semantic state.
+   **Expected shape:** One row per customer's first order.
+5. **Debugging:** Compute month-over-month stored-revenue change after aggregating to month grain.
+   **Progressive hint:** Aggregate first; applying lag to raw orders would compare adjacent orders rather than months.
+   **Expected shape:** One row per month with nullable first change.
+6. **Extension:** Compare each product price with the next higher price in its category.
+   **Progressive hint:** Use ascending price order and product ID to define adjacency; equal prices remain separate rows.
+   **Expected shape:** One row per product with nullable next price.
 
 ## Self-check
 
@@ -65,16 +95,11 @@ Pitfalls
 - Sorting by a non-unique timestamp yields unpredictable row pairing; add tiebreakers.
 - Large partitions without indexes increase sort cost; index on (k, t) helps.
 
-Exercises from the learner script
-1) For each product, compute monthly sales and previous-month sales with `LAG`.
-2) For each employee, show salary and the next higher salary within the
-   department using `LEAD`.
-
-“Sales” is ambiguous between units and revenue. The maintained answer uses net
-line revenue and creates a dense product-month calendar, so `LAG` means the
-previous calendar month even when it had zero sales. For exercise 2, window over
-distinct department salaries in ascending order; otherwise duplicate salaries
-make “next higher” non-strict.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - LAG/LEAD: https://www.postgresql.org/docs/current/functions-window.html#FUNCTIONS-WINDOW

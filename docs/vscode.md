@@ -30,7 +30,9 @@ Create the environment first with the OS setup script.
    - macOS: `Cmd+Shift+P`
 2. Run **Python: Select Interpreter**.
 3. Choose:
-   - Windows: `.venv\Scripts\python.exe`
+   - Windows: the interpreter printed by `bootstrap_windows.ps1`:
+     `.venv\Scripts\python.exe` for a standard `venv`, or
+     `.venv\python.exe` for the Anaconda conda-prefix fallback
    - macOS/Linux: `.venv/bin/python`
 4. Open a new integrated terminal.
 5. Run **Terminal → Run Task → Course: Doctor**. If you prefer the terminal,
@@ -38,7 +40,12 @@ Create the environment first with the OS setup script.
 
    ```powershell
    # Windows PowerShell
-   .\.venv\Scripts\python.exe scripts\course.py doctor
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   & $CoursePython scripts\course.py doctor
    ```
 
    ```bash
@@ -46,9 +53,10 @@ Create the environment first with the OS setup script.
    .venv/bin/python scripts/course.py doctor
    ```
 
-The status bar should show the `.venv` interpreter. Selecting an interpreter
-does not guarantee that PowerShell execution policy allowed terminal
-auto-activation, which is why the commands above use the interpreter directly.
+The status bar should show the selected `.venv` interpreter. Selecting it does
+not guarantee that PowerShell execution policy allowed terminal
+auto-activation, which is why the command above resolves and invokes either
+supported Windows layout directly.
 
 ## Select a notebook kernel
 
@@ -61,7 +69,10 @@ Interpreter selection and notebook-kernel selection are related but separate.
 
 If a package imports in the terminal but not the notebook, the notebook almost always has the wrong kernel. Restart the kernel after installing packages.
 
-Start JupyterLab from **Terminal → Run Task → Course: JupyterLab**, or work directly in VS Code’s notebook editor.
+Start at **Terminal → Run Task → Course: Learning portal** for the private
+progress dashboard and allowlisted VS Code/Jupyter launch buttons. You can also
+start JupyterLab directly with **Course: JupyterLab** or work in VS Code's
+notebook editor.
 
 The professional PostgreSQL notebook uses the same Python kernel plus the
 JupySQL extension. Prepare its process-scoped connection and packages with
@@ -73,6 +84,7 @@ password in notebook metadata or VS Code workspace settings.
 Use **Terminal → Run Task**:
 
 - `Course: Setup`
+- `Course: Learning portal`
 - `Course: Doctor`
 - `Course: Catalog`
 - `Course: Validate`
@@ -81,7 +93,11 @@ Use **Terminal → Run Task**:
 - `Course: Bridge tests`
 - `Course: Professional tests`
 
-Tasks contain operating-system-specific interpreter paths so learners do not need to translate them.
+Python-backed tasks use the interpreter selected through **Python: Select
+Interpreter**, so both supported Windows `.venv` layouts work without editing
+the task file. The Windows setup task uses the discovery bootstrap, which can
+find supported Anaconda and PostgreSQL installations even when they are absent
+from `PATH`.
 
 ## PostgreSQL
 

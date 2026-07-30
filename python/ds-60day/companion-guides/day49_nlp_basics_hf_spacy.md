@@ -78,7 +78,7 @@ Record the exact model identifier and package version. A confidence-like score
 is not automatically calibrated probability, and sentiment labels may fail on
 sarcasm, dialect, negation, or domain-specific language.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Try a zero-shot-classification pipeline with your own candidate labels.
 2. Compare tokenization from spaCy with a Hugging Face tokenizer.
@@ -93,6 +93,25 @@ sarcasm, dialect, negation, or domain-specific language.
 The reference solution extends the topic with a 20-step DistilBERT smoke
 fine-tune and a spaCy matcher. That path downloads dataset/model assets unless
 cached and is intentionally not the default offline exercise.
+
+### Additional mastery practice
+
+Treat tokenization, model identity, cache state, evaluation boundaries, and sensitive text handling as first-class NLP pipeline metadata.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+3. **Truncation debugging:** Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost.
+   **Progressive hint:** Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.
+4. **Model-provenance contract:** Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state.
+   **Progressive hint:** Record repository ID, immutable revision/commit when available, library versions, tokenizer settings, and local-files-only mode.
+5. **Evaluation leakage:** Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation.
+   **Progressive hint:** Group by source/document/entity and use normalized hashes or similarity checks before splitting.
+6. **Sensitive-text boundary:** Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis.
+   **Progressive hint:** Use synthetic fixtures, stable opaque IDs, redacted excerpts, bounded retention, and counts rather than raw matched values.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

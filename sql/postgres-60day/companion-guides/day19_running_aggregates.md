@@ -27,11 +27,40 @@ Aggregate orders to daily revenue, then apply
 order dates, not automatically seven calendar days. Compare it with a
 date-spined input that includes zero-revenue days.
 
+## Practice assumptions and review method
+
+- **Focus:** Define cumulative and moving window frames explicitly so peers, boundaries, and partition resets match the business question.
+- **Assumptions:** Ordered money windows use exact numeric. `ROWS` counts physical ordered rows; `RANGE` groups peers with equal ordering values.
+- **Failure to watch for:** Relying on the default frame can include tied peers unexpectedly; a moving-row window is not automatically a moving-time window.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day19_running_aggregates.sql).
-Report both row count and earliest date in each moving frame so its meaning is
-auditable.
+Define cumulative and moving window frames explicitly so peers, boundaries, and partition resets match the business question.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Calculate cumulative stored revenue across all orders.
+   **Progressive hint:** Order by timestamp and unique ID; declare `ROWS ... CURRENT ROW`.
+   **Expected shape:** One row per order with nondecreasing cumulative revenue.
+2. **Query writing:** Calculate each customer's cumulative stored spend.
+   **Progressive hint:** Partition by customer and reset the explicit row frame for every customer.
+   **Expected shape:** One row per order.
+3. **Query writing:** Calculate a trailing seven-order average within each customer.
+   **Progressive hint:** A seven-row frame is based on observations, not seven calendar days.
+   **Expected shape:** One row per order with up to seven observations in its frame.
+4. **Prediction:** Compare `ROWS` and `RANGE` cumulative sums when two rows share the same ordering value.
+   **Progressive hint:** `RANGE` includes ordering peers together; `ROWS` advances one physical row at a time.
+   **Expected shape:** Three rows making the peer difference visible.
+5. **Debugging:** Reset a running expense total at each category and month.
+   **Progressive hint:** Partition by both reset keys and order by date plus expense ID.
+   **Expected shape:** One row per expense.
+6. **Extension:** Prove the final cumulative stored revenue equals the ordinary stored-revenue sum.
+   **Progressive hint:** Select the last ordered cumulative value and compare it with an independent aggregate.
+   **Expected shape:** One row with zero difference.
 
 ## Self-check
 
@@ -67,14 +96,11 @@ Pitfalls
 - Applying window over raw transactional rows when you intended daily aggregates; pre-aggregate first.
 - Filtering on a windowed column in the same SELECT; wrap in subquery to allow WHERE on computed value.
 
-Exercises from the learner script
-1) Compute a 30-day moving revenue sum and average.
-2) For each category and product, compute cumulative quantity sold by product
-   order date.
-
-For a literal 30-calendar-day frame, first create a dense daily calendar and
-fill missing revenue with zero, then use `ROWS BETWEEN 29 PRECEDING AND CURRENT
-ROW`. On raw observed days, 30 rows need not equal 30 calendar days.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Window frames: https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS

@@ -67,7 +67,7 @@ print(search.best_params_, search.best_score_)
 `best_score_` estimates performance inside the search. It is not a score from an
 untouched final test set.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Use `RandomizedSearchCV` with a wider parameter space.
 2. Implement nested cross-validation and compare its result with the non-nested
@@ -80,6 +80,25 @@ untouched final test set.
 2. Build separate inner and outer `StratifiedKFold` objects. Pass the entire
    search object—not its already-selected best estimator—to
    `cross_val_score` with the outer splitter.
+
+### Additional mastery practice
+
+Treat tuning as a finite experimental budget with a declared search space, selection metric, resampling design, and reproducible result table.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+3. **Search-budget calculation:** For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running.
+   **Progressive hint:** Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.
+4. **Multi-metric selection:** Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan.
+   **Progressive hint:** Pass a scoring dictionary and set `refit` to a metric name. Selection changes when metrics rank candidates differently.
+5. **Results-table diagnosis:** Turn `cv_results_` into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates.
+   **Progressive hint:** Large train-validation gaps suggest overfit; large fold standard deviation suggests sensitivity. Sort by the declared rank, not by eye.
+6. **Reproducibility debugging:** A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison.
+   **Progressive hint:** Seed the sampler, splitters, and estimator. Threaded numeric libraries and GPU algorithms can still introduce small nondeterminism.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

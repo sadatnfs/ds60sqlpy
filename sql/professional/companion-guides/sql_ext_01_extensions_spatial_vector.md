@@ -108,10 +108,44 @@ is intentionally omitted.
 
 ## Exercises
 
-Complete all seven prompts: capability classification, case-folding boundary,
+Complete all fourteen prompts. Begin with capability classification, case-folding boundary,
 spatial semantics, vector validation/index trade-offs, cryptographic purpose,
-FDW design, and search-operator comparison. For each optional extension, record
-the built-in fallback, what the fallback cannot do, and cleanup/rollback plan.
+FDW design, and search-operator comparison; then cover lifecycle, collation,
+operable spatial/vector/FDW designs, supply chain, and upgrade rehearsal. For
+each optional extension, record the built-in fallback, what it cannot do, and
+the cleanup/rollback plan.
+
+Do not install, update, or connect externally in these exercises; produce
+capability evidence and reviewed designs:
+
+1. **Capability matrix:** distinguish unavailable, available, and installed
+   versions without treating availability as permission.
+2. **Case folding:** compare generated lowercase storage with `citext` across
+   collation, operators, joins, and writers.
+3. **Spatial meaning:** contrast abstract `point` distance with PostGIS
+   geometry/geography, SRID, and earth units.
+4. **Vector safety:** validate dimensions and compare exact scan with ANN
+   accuracy and lifecycle costs.
+5. **Cryptographic purpose:** separate digest, password hashing, encryption,
+   signing, and external key management.
+6. **FDW boundary:** design ownership, mapping, secret, contract, pushdown,
+   consistency, failure, and snapshot behavior.
+7. **Search operators:** map trigram, prefix, and full-text questions to exact
+   operators and indexes.
+8. **Lifecycle inventory:** record owner, versions, dependencies, trust, source,
+   update path, approval, restore, and rollback.
+9. **Collation drift:** detect provider/version changes and plan impact review,
+   reindex, and validation.
+10. **PostGIS nearest:** design SRID/units-safe prefilter plus exact distance and
+    tie behavior.
+11. **pgvector choice:** compare metric/operator, normalization, HNSW/IVFFlat,
+    recall, filter, dimension, write, and exact fallback.
+12. **FDW operations:** add credential rotation, connection/time limits, drift,
+    failure visibility, and last-known-good behavior.
+13. **Supply chain:** review provenance, native privilege, CVEs, builds,
+    licensing, patch ownership, and removal.
+14. **Upgrade rehearsal:** restore isolation, capture dependencies/plans,
+    canary correctness/performance, compatibility, and rollback limits.
 
 ## Self-check
 

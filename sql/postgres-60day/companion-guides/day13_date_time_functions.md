@@ -27,11 +27,40 @@ Test a row exactly at each boundary. This half-open form prevents double
 counting when adjacent daily queries are combined and is friendlier to a normal
 timestamp index than wrapping the column in a function.
 
+## Practice assumptions and review method
+
+- **Focus:** Treat timestamps as instants, dates as calendar values, and reporting zones/window boundaries as explicit parts of the query.
+- **Assumptions:** Stored event/order timestamps are `timestamptz`. Relative examples use the database clock; reports label UTC explicitly where conversion matters.
+- **Failure to watch for:** `BETWEEN` is inclusive at both ends and is often wrong for adjacent time windows; use half-open `[start, end)` predicates.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day13_date_time_functions.sql).
-Add explicit boundary rows and report the session `TimeZone` beside your
-results.
+Treat timestamps as instants, dates as calendar values, and reporting zones/window boundaries as explicit parts of the query.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** List orders from the last 30 days with their UTC calendar date.
+   **Progressive hint:** Filter the timestamp directly and convert for display only.
+   **Expected shape:** Recent order rows in deterministic order.
+2. **Query writing:** Summarize orders and stored revenue by UTC month.
+   **Progressive hint:** Convert to UTC before truncating when the reporting calendar is UTC.
+   **Expected shape:** One row per observed UTC month.
+3. **Query writing:** Calculate each customer's age in whole days as of the current date.
+   **Progressive hint:** Compare calendar dates after declaring the UTC reporting date.
+   **Expected shape:** One row per customer with nonnegative age days.
+4. **Prediction:** Use a half-open interval to select one UTC calendar month and explain which boundary instant is excluded.
+   **Progressive hint:** Include the month start and exclude the next month start.
+   **Expected shape:** Orders in exactly one UTC month.
+5. **Debugging:** Compare UTC and America/Los_Angeles display times without stripping the stored instant.
+   **Progressive hint:** `AT TIME ZONE` on `timestamptz` produces a local wall-clock display value.
+   **Expected shape:** One row per sampled event with two displays of the same instant.
+6. **Extension:** Create a seven-day UTC calendar and left join daily order counts so missing days appear as zero.
+   **Progressive hint:** Generate the date spine first, aggregate orders by the same UTC date, then `COALESCE` absent counts.
+   **Expected shape:** Exactly seven chronological rows.
 
 ## Self-check
 
@@ -64,19 +93,11 @@ Pitfalls
 - Mixing TIMESTAMP and TIMESTAMPTZ in comparisons; cast explicitly.
 - DST transitions: avoid local timestamps as primary keys.
 
-Exercises from the learner script
-1) Compute the fiscal quarter for every order.
-2) Calculate days since each customer's last order.
-
-The repository does not define a fiscal-year start. To match the maintained
-answer, explicitly assume fiscal quarters equal UTC calendar quarters and use
-`EXTRACT(quarter FROM order_date AT TIME ZONE 'UTC')`. A business with another
-fiscal start month needs a shifted-quarter calculation.
-
-For customers without orders, “days since last order” is undefined and should
-remain `NULL` unless the report defines a substitute. Choose whether a “day” is
-an elapsed 24-hour interval or a difference between calendar dates; the
-maintained answer uses UTC calendar dates.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Date/time: https://www.postgresql.org/docs/current/functions-datetime.html

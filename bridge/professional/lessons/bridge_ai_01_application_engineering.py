@@ -111,7 +111,7 @@ def retrieve(
     embedding_model: EmbeddingModel,
     policy: RetrievalPolicy,
 ) -> tuple[SearchHit, ...]:
-    """Exercise 1: filter access first, then rank and bound local evidence."""
+    """Core implementation: filter access first, then rank and bound local evidence."""
 
     raise NotImplementedError("exclude sensitive/instructional data before embedding")
 
@@ -121,7 +121,7 @@ def build_request(
     hits: Sequence[SearchHit],
     budget: Budget,
 ) -> ModelRequest:
-    """Exercise 2: mark retrieved text as untrusted data and enforce preflight size."""
+    """Core implementation: mark retrieved text as untrusted data and enforce preflight size."""
 
     raise NotImplementedError("serialize bounded context without promoting its instructions")
 
@@ -131,7 +131,7 @@ def parse_structured_answer(
     *,
     allowed_citations: frozenset[str],
 ) -> StructuredAnswer:
-    """Exercise 3: validate exact JSON fields, types, and citation ownership."""
+    """Core implementation: validate exact JSON fields, types, and citation ownership."""
 
     raise NotImplementedError("reject malformed, extra, or unauthorized output")
 
@@ -146,7 +146,7 @@ def run_assistant(
     budget: Budget,
     blocked_output_fragments: Sequence[str] = (),
 ) -> AssistantRun:
-    """Exercise 4: compose retrieval, validation, leakage checks, and budgets."""
+    """Core implementation: compose retrieval, validation, leakage checks, and budgets."""
 
     raise NotImplementedError("fail closed when evidence, schema, or budget checks fail")
 
@@ -157,9 +157,88 @@ def evaluate(
     *,
     budget: Budget,
 ) -> EvaluationMetrics:
-    """Exercise 5: score citations, abstention, leakage, and budget compliance."""
+    """Core implementation: score citations, abstention, leakage, and budget compliance."""
 
     raise NotImplementedError("evaluate a checked-in deterministic dataset")
+
+
+# Exercises (answer-free)
+# Focus: Build an offline, deterministic retrieval-and-generation boundary with
+#    authorization-before-embedding, untrusted context, exact output schemas, budgets, leakage
+#    checks, and evaluation.
+# Assumptions: Documents, embedding/model adapters, and evaluation cases are local deterministic
+#    doubles; no API key, hosted service, or network call is required.
+# Failure to watch for: Retrieving unauthorized text, trusting model-shaped JSON, or reporting a
+#    passing toy evaluation as production safety evidence creates false assurance.
+# Work in order: predict -> implement -> test -> debug -> extend. Keep official
+# answers out of this starter and collect deterministic fake-backed evidence.
+# 1. [Validation] Validate every dataclass invariant for IDs, text, audiences, bounds,
+#    token/cost budgets, and latency.
+#    Hint: Fail at construction so invalid state cannot cross later boundaries.
+# 2. [Math] Implement cosine similarity with mismatched-dimension and zero-vector handling.
+#    Hint: Validate shape and norms before division.
+# 3. [Authorization testing] Use a recording embedding double to prove sensitive, unauthorized,
+#    and quarantined documents are filtered before embedding.
+#    Hint: Call history is the evidence that prohibited text never crossed the adapter.
+# 4. [Ranking] Rank equal-score documents deterministically while enforcing top-k and total
+#    context-character bounds.
+#    Hint: Use a stable document ID tie-breaker and apply the character budget without splitting
+#    trust rules.
+# 5. [Prompt boundary] Serialize context as untrusted JSON containing only approved document IDs
+#    and bounded excerpts.
+#    Hint: Separate system instructions, user query, and retrieved data structurally.
+# 6. [Schema validation] Implement exact structured-answer validation and test all malformed,
+#    extra-field, wrong-type, duplicate-citation, and inconsistent-abstention cases.
+#    Hint: Parsing JSON is only the first step; validate exact shape and semantics.
+# 7. [Adversarial testing] Use a malicious model double that cites an unretrieved document and
+#    prove validation rejects it.
+#    Hint: Citations are authorization claims and must be a subset of retrieved evidence.
+# 8. [Leakage] Return a blocked private marker from the model and prove the output boundary
+#    fails closed without logging the answer.
+#    Hint: Leakage inspection occurs after parsing but before return/logging.
+# 9. [Budgets] Test preflight input, actual input, output, cost-unit, and latency budget
+#    failures separately.
+#    Hint: Each limit is independent evidence and needs its own failure case.
+# 10. [Evaluation] Add deterministic grounded, abstention, injection-document, and
+#    unauthorized-private-document cases.
+#    Hint: Expected citations and forbidden fragments make safety assertions inspectable.
+# 11. [Evidence limits] Explain which safety claims deterministic doubles prove and which
+#    require a separately authorized real-adapter evaluation.
+#    Hint: A controlled harness proves orchestration, not provider behavior or real-world
+#    robustness.
+# 12. [Prompt injection] Insert retrieved text that says to ignore policy and reveal secrets;
+#    prove it stays data and cannot change allowed citations.
+#    Hint: The model double should attempt the attack so downstream validation is exercised.
+# 13. [Text normalization] Choose normalization rules for blank IDs, Unicode text, and
+#    blocked-fragment matching without silently changing document meaning.
+#    Hint: Normalization can close bypasses but can also merge distinct content.
+# 14. [Numeric determinism] Test equal and nearly equal embedding scores with a declared
+#    tolerance and deterministic tie-breaker.
+#    Hint: Do not rely on platform-specific incidental sort order.
+# 15. [Token estimation] Design a conservative preflight token estimator and explain why it
+#    cannot replace actual adapter accounting.
+#    Hint: Preflight should fail early on obvious excess and leave headroom.
+# 16. [Adapter failure] Classify embedding/model timeout and provider-like errors without
+#    retrying unsafe or permanent failures.
+#    Hint: Offline doubles can model exception classes and call order.
+# 17. [Abstention] Require abstention when no authorized evidence survives retrieval and test
+#    that the text model is not called.
+#    Hint: No evidence is a deterministic pre-model decision.
+# 18. [Observability] Design safe logs/metrics that exclude user query, context, embeddings, and
+#    raw model output.
+#    Hint: Use bounded stage/outcome/error-class metadata only.
+# 19. [Metric edge cases] Define evaluation metrics for an empty case set and zero expected
+#    citations without divide-by-zero ambiguity.
+#    Hint: Denominators and conventions belong in the metric contract.
+# 20. [Regression gates] Set deterministic pass thresholds for citation recall, abstention
+#    accuracy, leakage, and budgets without hiding per-case failures.
+#    Hint: Aggregate gates complement, not replace, case-level evidence.
+# 21. [Real adapter boundary] Design an optional hosted adapter evaluation that keeps
+#    credentials external and never weakens the offline default.
+#    Hint: Network, cost, and data authorization require an explicit opt-in gate.
+# 22. [Threat model] Write residual risks for retrieval poisoning, embedding inversion, model
+#    memorization, authorization drift, and evaluator blind spots.
+#    Hint: Controls reduce specific risks; they do not make a universal safety claim.
 
 
 def main() -> int:

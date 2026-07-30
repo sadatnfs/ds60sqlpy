@@ -60,7 +60,7 @@ For a Binomial variable, the theoretical mean is \(np\) and the variance is
 \(np(1-p)\). Compare those values with a large simulated sample as a diagnostic,
 not as a replacement for the formulas.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 Complete these in the learner notebook:
 
@@ -79,6 +79,23 @@ Complete these in the learner notebook:
    Check the empirical values against 0 and 1 before worrying about the plot.
 3. Imagine 10,000 people. Separate true positives from false positives before
    dividing by everyone who tested positive.
+
+### Additional mastery practice
+
+Move between probability models, seeded simulation, and diagnostics. A simulation is useful only when its sample space and uncertainty are explicit.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Prediction and uncertainty:** For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.
+   **Progressive hint:** Compute 1-(1-p)**n first. Treat each simulated experiment as one Bernoulli outcome and use sqrt(p_hat*(1-p_hat)/runs) for its standard error.
+5. **Implementation:** Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support.
+   **Progressive hint:** Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.
+6. **Debugging and boundaries:** Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval.
+   **Progressive hint:** n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

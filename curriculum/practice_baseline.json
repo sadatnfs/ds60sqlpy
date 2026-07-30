@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "audit_commit": "e89e6642d6bf5df653bf0ce66773307fe2756c16",
-  "contract": "Each lesson surface must expose at least max(6, 2 x baseline) numbered practice prompts.",
+  "contract": "Each lesson surface, including every explanatory solution artifact, must expose at least max(6, 2 x baseline) numbered practice prompts.",
   "counting_notes": [
     "Tracked artifacts use their content at audit_commit.",
     "New professional artifacts use the first audited working-tree version.",

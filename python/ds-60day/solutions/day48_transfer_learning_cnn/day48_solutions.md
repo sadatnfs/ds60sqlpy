@@ -162,3 +162,97 @@ Explanation
 Takeaways
 - Start with head-only training to align classifier to features
 - Unfreeze progressively with lower LR on deeper layers
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Load a small image folder with `ImageFolder` and `DataLoader`.
+
+**How to reason about it:** ImageFolder derives class IDs from sorted directory names; preserve `class_to_idx`, use the selected weights' documented transforms, and start with `num_workers=0` for a portable first run.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Train only the classifier head for a few epochs.
+
+**How to reason about it:** When training only the classifier head, pass only trainable head parameters to the optimizer and monitor validation loss and accuracy. Frozen parameters should have no gradients.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Unfreeze the final ResNet block and fine-tune it with a lower learning rate.
+
+**How to reason about it:** Unfreezing the final block increases trainable capacity. Use a smaller backbone learning rate, keep the head rate explicit, and compare against the frozen baseline on the same split.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Transform mismatch diagnosis
+
+**Prompt:** Compare predictions when validation images use the training transform with random crop/flip versus a deterministic validation transform. Explain the metric instability.
+
+**Reasoning before implementation:** Augmentation belongs to training. Validation should apply deterministic resize/crop and the normalization expected by the selected weights.
+
+Random validation transforms make the evaluation population change on every
+pass, so metric movement can reflect crop luck rather than model changes.
+Create separate dataset objects for train and validation transforms even when
+they read the same directory structure.
+
+Record transform configuration with the artifact; serving must reproduce the
+deterministic inference transform exactly.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Frozen-state edge case
+
+**Prompt:** Freeze a pretrained backbone containing BatchNorm. Explain the difference between `requires_grad=False` and putting frozen modules in evaluation mode.
+
+**Reasoning before implementation:** requires_grad controls parameter gradients; train/eval controls BatchNorm running statistics and Dropout behavior.
+
+A frozen parameter can still belong to a BatchNorm module whose running mean
+and variance update in training mode. Decide whether to keep the frozen
+backbone in eval mode while the head trains, and test that its buffers remain
+unchanged.
+
+When partially unfreezing, set modes deliberately rather than calling one
+global `model.train()` and assuming freeze semantics are complete.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Offline fallback design
+
+**Prompt:** Make the lesson runnable when pretrained weights are not cached. Detect cache availability, offer an explicit connected preload step, and provide a tiny randomly initialized CNN smoke path.
+
+**Reasoning before implementation:** Never trigger an undocumented download. Report whether results use pretrained or random weights because their learning goals differ.
+
+The default offline smoke path should validate dataset loading, shapes, forward
+pass, loss, and one optimization step on generated images. It does not claim
+transfer-learning quality. The optional connected path downloads the named
+weight version once and documents the cache location.
+
+On later offline runs, request that exact weight enum rather than an ambiguous
+“latest” default. If absent, fail with a helpful message or select the clearly
+labeled smoke fallback—never silently change the experiment.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

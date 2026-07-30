@@ -4,6 +4,8 @@ BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
 CREATE SCHEMA pro_extensions_lab;
 
+-- Exercise 2: a stored lower-case key is a narrow built-in case-folding
+-- contract; the Markdown solution explains its collation/citext limits.
 CREATE TABLE pro_extensions_lab.items (
     item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     item_name text NOT NULL,
@@ -55,6 +57,8 @@ BEGIN
 END
 $function$;
 
+-- Exercise 3: point distance is planar grid distance, not geodesy.
+-- Exercise 4: checked_l2 validates dimensions and performs an exact tiny scan.
 SELECT
     i.item_name,
     i.location <-> point(1, 1) AS planar_distance,
@@ -66,6 +70,8 @@ SELECT
 FROM pro_extensions_lab.items AS i
 ORDER BY vector_distance, i.item_id;
 
+-- Exercise 5: payload_sha256 is an integrity digest, not encryption or a
+-- password-storage construction.
 DO $solution$
 BEGIN
     BEGIN
@@ -81,6 +87,8 @@ BEGIN
 END
 $solution$;
 
+-- Exercise 6: a timestamped local snapshot is the safe executable stand-in for
+-- an approved FDW design; no remote connection or credential is created.
 CREATE TABLE pro_extensions_lab.remote_snapshot (
     snapshot_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     source_key text NOT NULL,
@@ -118,5 +126,79 @@ BEGIN
     END IF;
 END
 $solution$;
+
+-- Exercise 7: trigram, prefix, and full-text search differ by operator and
+-- operator class. No optional search extension is enabled by this solution.
+
+-- Exercise 1 and Exercise 8: inventory requested extension capability/lifecycle
+-- state without CREATE/ALTER/DROP.
+WITH requested(extension_name) AS (
+    VALUES
+        ('citext'::name),
+        ('pg_trgm'::name),
+        ('pgcrypto'::name),
+        ('postgis'::name),
+        ('postgres_fdw'::name),
+        ('vector'::name)
+)
+SELECT
+    r.extension_name,
+    a.default_version,
+    a.installed_version,
+    pg_catalog.pg_get_userbyid(e.extowner) AS installed_owner
+FROM requested AS r
+LEFT JOIN pg_catalog.pg_available_extensions AS a
+  ON a.name = r.extension_name
+LEFT JOIN pg_catalog.pg_extension AS e
+  ON e.extname = r.extension_name
+ORDER BY r.extension_name;
+
+-- Exercise 9: mismatch detection comes before impact analysis/reindex. Metadata
+-- must be refreshed only after affected objects have been remediated.
+SELECT
+    c.collname,
+    c.collprovider,
+    c.collversion AS recorded_version,
+    pg_catalog.pg_collation_actual_version(c.oid) AS actual_version
+FROM pg_catalog.pg_collation AS c
+WHERE c.collversion IS NOT NULL
+  AND c.collversion IS DISTINCT FROM
+      pg_catalog.pg_collation_actual_version(c.oid)
+ORDER BY c.collname;
+
+-- Exercise 10: approved PostGIS uses ST_DWithin for indexed radius prefiltering,
+-- then exact ST_Distance and a stable ID. SRID, units, coordinate validation,
+-- antimeridian, and poles are part of the query contract.
+
+-- Exercise 11: compare exact metric results before evaluating ANN recall. This
+-- built-in fallback remains exact and validates vector dimensions.
+SELECT
+    i.item_id,
+    i.item_name,
+    pro_extensions_lab.checked_l2(
+        i.embedding,
+        ARRAY[1, 1, 1]::double precision[]
+    ) AS exact_l2
+FROM pro_extensions_lab.items AS i
+ORDER BY exact_l2, i.item_id;
+
+-- Exercise 12: FDW operations require external secret rotation, connection and
+-- statement bounds, schema drift checks, pushdown evidence, observability,
+-- partial-failure policy, and a reconciled last-known-good snapshot.
+SELECT
+    rs.source_key,
+    max(rs.fetched_at) AS snapshot_watermark,
+    COUNT(*) AS retained_versions
+FROM pro_extensions_lab.remote_snapshot AS rs
+GROUP BY rs.source_key
+ORDER BY rs.source_key;
+
+-- Exercise 13: unavailable package review must cover provenance, native-code
+-- authority, dependencies/SBOM, CVEs, licensing, reproducible build, patch
+-- owner/SLA, restore, and removal. Successful compilation is not approval.
+
+-- Exercise 14: an upgrade rehearsal restores a disposable database, captures
+-- dependencies/plans/results before and after, runs application/performance
+-- canaries, and records backup compatibility plus nonreversible rollback limits.
 
 ROLLBACK;

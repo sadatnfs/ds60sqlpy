@@ -61,7 +61,7 @@ Nothing expensive happens until an execution trigger such as `compute`,
 `persist`, or a write. Inspect the task and expected output size before
 triggering it.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Read a large local CSV with Dask and compute groupby aggregations.
 2. Persist the DataFrame and compare repeated timings with and without
@@ -81,6 +81,23 @@ triggering it.
 The reference solution contains an illustrative `s3://...` placeholder. Do not
 run it in the offline lesson. Replace it with a repository-local file or use the
 notebook's generated frame.
+
+### Additional mastery practice
+
+Reason about partitions, task graphs, materialization, and associative reductions before scaling. Validate distributed results against a small exact baseline.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Task-graph tracing:** Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined `dask.compute` call.
+   **Progressive hint:** Building an expression does not read all data. Combining terminal computations can share upstream work without persisting the entire frame.
+5. **Partition-skew diagnosis:** Create a group key where one value owns most rows. Measure partition sizes and groupby runtime, then propose repartitioning or algorithm changes.
+   **Progressive hint:** A balanced row count before a shuffle does not guarantee balanced work after grouping; one hot key can become a straggler.
+6. **Reducer correctness:** Implement a mergeable mean/variance state for chunks and prove it matches NumPy across different chunk boundaries, including an empty chunk.
+   **Progressive hint:** A mean alone is not mergeable without support. Carry count, mean, and M2 (sum of squared deviations) using a stable combine formula.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

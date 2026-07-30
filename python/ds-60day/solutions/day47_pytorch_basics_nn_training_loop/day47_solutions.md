@@ -161,3 +161,108 @@ Line‑by‑line
 - GradScaler and autocast enable float16 math on CUDA with safe dynamic loss scaling
 - scaler.scale(loss).backward and scaler.step handle underflow/overflow automatically
 - On CPU, enabled=False makes this a no‑op; code still runs
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Add dropout to the MLP and compare results.
+
+**How to reason about it:** Dropout is active only in training mode and its effect is noisy. Compare seeded runs or validation curves, and place it deliberately after an activation rather than assuming one final score proves benefit.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Implement a small minibatch training loop with `DataLoader`.
+
+**How to reason about it:** A minibatch loop keeps zero-grad, forward, loss, backward, and step inside the batch iteration. Shuffle training only, use float features and class-index long targets, and aggregate epoch metrics by support.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Shape and dtype contract
+
+**Prompt:** Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.
+
+**Reasoning before implementation:** CrossEntropyLoss expects floating logits `(batch, classes)` and integer class indices `(batch,)` with dtype long.
+
+```python
+def validate_classification_batch(features, targets, logits, class_count):
+    assert features.ndim == 2 and features.is_floating_point()
+    assert targets.ndim == 1 and targets.dtype == torch.long
+    assert logits.shape == (features.shape[0], class_count)
+    assert torch.isfinite(logits).all()
+```
+
+One-hot targets require a different explicit contract. Avoid `squeeze()`
+without a dimension because a batch of size one can lose its batch axis.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 4 — Validation implementation
+
+**Prompt:** Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller's prior train/eval mode, and never retains an autograd graph.
+
+**Reasoning before implementation:** Remember `was_training = model.training`, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.
+
+Save mode before validation so a reusable helper does not unexpectedly alter
+its caller. Sum loss times batch size and correct predictions, divide by the
+total, and raise for an empty loader.
+
+`torch.inference_mode()` is an even stronger evaluation context when its
+restrictions fit. Keep all returned values as plain Python numbers so the
+history does not retain tensors or device memory.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — DataLoader reproducibility
+
+**Prompt:** Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes.
+
+**Reasoning before implementation:** Pass a seeded `torch.Generator`; worker initialization and external NumPy/Python randomness need their own deliberate seeds.
+
+Use a generator created specifically for the training loader so other random
+draws do not silently advance its state. With multiple workers, seed each
+worker's Python/NumPy operations and keep transforms deterministic for the
+comparison.
+
+Exact reproducibility can vary across devices and algorithms. Record device,
+PyTorch version, deterministic settings, and seed; also test that conclusions
+hold across more than one seed.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Portable checkpoint
+
+**Prompt:** Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain `state_dict` versus serializing the entire model object.
+
+**Reasoning before implementation:** Save plain state dictionaries plus architecture/config metadata. Use `map_location='cpu'` and recreate the model class before loading.
+
+State dictionaries are less coupled to source-module paths than pickling a
+whole model object. Validate configuration and tensor shapes before loading,
+then set the intended mode explicitly.
+
+Checkpoint files are still loaded through PyTorch serialization and should be
+treated as trusted artifacts. Save RNG state as well when exact mid-run resume
+is a requirement.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

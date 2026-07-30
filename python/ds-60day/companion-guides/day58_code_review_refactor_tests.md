@@ -87,7 +87,7 @@ Windows PowerShell:
 Ruff is the repository's sole Python formatter and linter; keep its checked-in
 configuration as the source of truth.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Move at least two notebook functions into a `src/` package and add tests.
 2. Add type hints and docstrings, then run mypy.
@@ -105,6 +105,23 @@ configuration as the source of truth.
 The separate solution demonstrates a small extraction, local pre-commit hooks,
 and GitHub Actions. Treat CI as remote repetition of checks you can already run
 locally.
+
+### Additional mastery practice
+
+Refactor behind tests, review risk at boundaries, and preserve behavior while improving structure. Type checks and formatting support—not replace—domain evidence.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Characterization testing:** Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change.
+   **Progressive hint:** Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.
+5. **Risk-based review:** Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.
+   **Progressive hint:** Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.
+6. **Compatibility change:** Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan.
+   **Progressive hint:** Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

@@ -6,8 +6,20 @@
       "type": "shell",
       "command": "bash scripts/setup.sh",
       "windows": {
-        "command": "powershell -ExecutionPolicy Bypass -File .\\scripts\\setup.ps1"
+        "command": "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap_windows.ps1"
       },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Learning portal",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/learning_portal.py"
+      ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -16,10 +28,7 @@
     {
       "label": "Course: Doctor",
       "type": "process",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "windows": {
-        "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"
-      },
+      "command": "${command:python.interpreterPath}",
       "args": [
         "scripts/course.py",
         "doctor"
@@ -32,10 +41,7 @@
     {
       "label": "Course: Catalog",
       "type": "process",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "windows": {
-        "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"
-      },
+      "command": "${command:python.interpreterPath}",
       "args": [
         "scripts/course.py",
         "catalog"
@@ -48,10 +54,7 @@
     {
       "label": "Course: Validate",
       "type": "process",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "windows": {
-        "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"
-      },
+      "command": "${command:python.interpreterPath}",
       "args": [
         "scripts/course.py",
         "validate"
@@ -64,10 +67,7 @@
     {
       "label": "Course: JupyterLab",
       "type": "process",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "windows": {
-        "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"
-      },
+      "command": "${command:python.interpreterPath}",
       "args": [
         "-m",
         "jupyterlab",
@@ -81,10 +81,7 @@
     {
       "label": "Course: PostgreSQL Notebook",
       "type": "process",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "windows": {
-        "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"
-      },
+      "command": "${command:python.interpreterPath}",
       "args": [
         "-m",
         "jupyterlab",
@@ -98,10 +95,7 @@
     {
       "label": "Course: Bridge tests",
       "type": "process",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "windows": {
-        "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"
-      },
+      "command": "${command:python.interpreterPath}",
       "args": [
         "-m",
         "pytest",
@@ -115,10 +109,7 @@
     {
       "label": "Course: Professional tests",
       "type": "process",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "windows": {
-        "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"
-      },
+      "command": "${command:python.interpreterPath}",
       "args": [
         "-m",
         "pytest",

@@ -70,28 +70,61 @@ For a genuinely dynamic table, first restrict choices, then use
 
 ## Exercises
 
-1. Write `FIND_CUSTOMERS_SQL` using the course `customers` and `orders` tables.
-   Return customer ID, full name, and total order value for one country at or
-   above a minimum. Choose deterministic ordering.
-2. Implement `find_customers()` with two bound parameters. Convert each row to
-   `Customer`, preserving monetary values as `Decimal`.
-3. Create a recording cursor that stores `(query, params)` and returns fixed
-   rows. Use an input such as `"US' OR true --"` to prove it never appears in
-   the SQL text.
-4. Implement `build_count_query()`. Allow only `customers`, `orders`, and
-   `order_items`; then compose `training.<table>` with `psycopg.sql.Identifier`.
-5. Explain why an allowlist is valuable even though `Identifier` already quotes
+### Practice contract
+
+- **Focus:** Keep SQL structure trusted, bind data values separately, and compose the rare dynamic identifier through an allowlist plus Psycopg.
+- **Assumptions:** The course uses PostgreSQL semantics, `Decimal` money, and fake-backed imports that remain usable without Psycopg installed.
+- **Primary failure mode:** String interpolation, quoted placeholders, and treating identifiers as value parameters all break the security boundary.
+- **Evidence loop:** predict the boundary, implement the smallest change,
+  verify success and failure with a deterministic fake, then explain which
+  behavior still requires an explicitly enabled PostgreSQL integration test.
+
+1. **SQL implementation:** Write `FIND_CUSTOMERS_SQL` for customer ID, name, and lifetime order
+   value by country and minimum total with deterministic ordering.
+   - **Progressive hint:** Left join orders, aggregate at customer grain, and keep two `%s`
+     placeholders unquoted.
+2. **Implementation:** Implement `find_customers()` with two bound parameters and map rows to
+   `Customer` while preserving `Decimal` money.
+   - **Progressive hint:** Execute once, fetch once, and make row conversion explicit at the
+     application boundary.
+3. **Security testing:** Use a recording cursor and an injection-shaped country to prove values
+   never enter SQL text.
+   - **Progressive hint:** Assert both halves: placeholder remains in structure and hostile text
+     appears only in parameters.
+4. **Identifier safety:** Implement `build_count_query()` for only `customers`, `orders`, and
+   `order_items` using `psycopg.sql.Identifier`.
+   - **Progressive hint:** Allowlist first, import Psycopg inside the optional boundary, then
+     compose schema and table identifiers.
+5. **Reasoning:** Explain why an allowlist remains valuable when `Identifier` already quotes
    safely.
+   - **Progressive hint:** Quoting protects syntax; authorization controls which valid object
+     may be selected.
+6. **Prediction:** Predict the result for a customer with no orders and explain the roles of
+   `LEFT JOIN`, `COALESCE`, `GROUP BY`, and `HAVING`.
+   - **Progressive hint:** Track row preservation first, then aggregation, then threshold
+     filtering.
+7. **Boundary testing:** Test rows containing integer, string, and already-Decimal values plus
+   an empty result; document conversion failures.
+   - **Progressive hint:** Mapping is application validation, not a blind cast after trust.
+8. **Debugging:** Repair queries that use `f"...{country}..."` or `WHERE country = '%s'` and
+   explain both failures.
+   - **Progressive hint:** Placeholders are driver syntax and must not be interpolated or
+     quoted.
+9. **Protocol testing:** Verify that `find_customers()` does not depend on the return value of
+   `execute()` and calls `fetchall()` exactly once.
+   - **Progressive hint:** Model only the cursor behavior the consumer uses.
+10. **Optional integration:** Design a bounded, read-only PostgreSQL smoke test gated by
+   `DS60_DATABASE_URL` without importing Psycopg during normal fake tests.
+   - **Progressive hint:** Skip clearly when the opt-in dependency or variable is absent; never
+     print the URL.
 
-### Progressive hints
+### Before opening the solution
 
-1. Aggregate order amounts after a left join so customers without orders have
-   zero.
-2. Group before applying the minimum-total condition.
-3. The driver may return `Decimal` already, but an explicit conversion makes
-   the application boundary testable.
-4. Import Psycopg inside the identifier-composition function so fake-backed
-   tests can import the rest of the module without it.
+- State the input/output and ownership boundary in one sentence.
+- Show one normal case, one edge case, and one failure case.
+- Inspect recorded calls rather than relying on plausible output.
+- Confirm no credential, payload, or high-cardinality identifier was emitted.
+
 
 ## Optional live-DB step
 

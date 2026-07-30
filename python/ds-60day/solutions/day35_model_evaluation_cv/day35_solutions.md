@@ -62,3 +62,113 @@ Takeaways
 - Choose metrics aligned with the business goal (e.g., recall@k for safety-critical)
 - Always cross-validate with proper fold type (stratified vs time series)
 - Use pipelines to control leakage and keep code reproducible
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Evaluate the pipeline with `accuracy`, `f1`, and `roc_auc`.
+
+**How to reason about it:** Accuracy and F1 use thresholded labels, while ROC AUC uses ranking scores. Keep folds identical and report class prevalence so readers can understand why the metrics may disagree.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Compare the variability from 5-fold and 10-fold cross-validation.
+
+**How to reason about it:** Five and ten folds trade training-set size against compute and fold variance. Compare the paired fold procedure across repeated seeds rather than announcing a universal winner from one split.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Explain leakage risks and how placing preprocessing in a pipeline helps.
+
+**How to reason about it:** Any transform learned before cross-validation leaks validation-fold information. A pipeline causes preprocessing to be cloned and refit inside every fold, but it cannot repair leakage already baked into features.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Threshold analysis
+
+**Prompt:** Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged.
+
+**Reasoning before implementation:** A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.
+
+Build the matrix with an explicit label order such as `[0, 1]` and record
+support beside rates. Threshold selection is a policy decision; choose it on
+validation data using error costs or a documented constraint, then evaluate
+that frozen threshold once on the final holdout.
+
+ROC AUC is unchanged because it considers ranking across all possible
+thresholds. Precision, recall, F1, and the confusion matrix do change because
+they consume the thresholded labels.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Grouped resampling
+
+**Prompt:** Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.
+
+**Reasoning before implementation:** Use `StratifiedGroupKFold` when both label balance and entity separation matter; assert that train and validation group sets are disjoint.
+
+Rows from one entity are correlated, so random row-level folds can let the
+model recognize entity-specific patterns rather than generalize to new
+entities.
+
+```python
+import numpy as np
+from sklearn.model_selection import StratifiedGroupKFold
+
+X = np.arange(80, dtype=float).reshape(40, 2)
+y = np.tile([0, 1], 20)
+entity_ids = np.repeat(np.arange(20), 2)
+splitter = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=35)
+for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
+    train_groups = set(entity_ids[train_index])
+    valid_groups = set(entity_ids[valid_index])
+    assert train_groups.isdisjoint(valid_groups)
+```
+
+If deployment predicts future rows for already-known entities, a different
+split may be appropriate; align the split with that real decision explicitly.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Selection-bias debugging
+
+**Prompt:** Explain why reporting `GridSearchCV.best_score_` as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model.
+
+**Reasoning before implementation:** The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.
+
+`best_score_` is the highest noisy estimate among tried configurations, so
+selection favors candidates that benefited from sampling noise. In nested CV:
+
+1. the inner splitter selects hyperparameters using only the outer-training rows;
+2. the selected pipeline predicts the untouched outer-validation rows;
+3. outer scores summarize the complete model-selection procedure.
+
+`cross_val_predict` can generate out-of-fold predictions for a fixed estimator,
+but it is not automatically nested. Passing the entire search object to the
+outer loop is what repeats selection honestly.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

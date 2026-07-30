@@ -52,7 +52,7 @@ def create_job_once(
     idempotency_key: str,
     payload: str,
 ) -> int | None:
-    """Exercise 1: use ``ON CONFLICT`` and a unique idempotency key."""
+    """Core implementation: use ``ON CONFLICT`` and a unique idempotency key."""
 
     raise NotImplementedError("perform an idempotent parameterized insert")
 
@@ -61,7 +61,7 @@ def run_in_transaction(
     connection: TransactionConnection,
     operation: Callable[[], T],
 ) -> T:
-    """Exercise 2: commit success and roll back failure."""
+    """Core implementation: commit success and roll back failure."""
 
     raise NotImplementedError("define one explicit transaction boundary")
 
@@ -72,9 +72,63 @@ def run_with_retry(
     policy: RetryPolicy = DEFAULT_RETRY_POLICY,
     sleep: Callable[[float], None],
 ) -> T:
-    """Exercise 3: retry only transient failures with a bounded delay schedule."""
+    """Core implementation: retry only transient failures with a bounded delay schedule."""
 
     raise NotImplementedError("implement bounded retry behavior")
+
+
+# Exercises (answer-free)
+# Focus: Make writes safe to repeat by combining a database uniqueness boundary, explicit
+#    transaction ownership, and narrowly classified retries.
+# Assumptions: One stable source key identifies one logical job; each retry executes a fresh
+#    transaction attempt; fake sleepers keep tests deterministic.
+# Failure to watch for: Retrying a non-idempotent or ambiguously committed write can duplicate
+#    effects even when backoff logic is correct.
+# Work in order: predict -> implement -> test -> debug -> extend. Keep official
+# answers out of this starter and collect deterministic fake-backed evidence.
+# 1. [Validation] Validate `RetryPolicy` so attempts are at least one and base delay is finite
+#    and non-negative.
+#    Hint: Reject unusable policy at construction rather than inside a failing retry loop.
+# 2. [SQL implementation] Implement `create_job_once()` with one parameterized `INSERT`, a
+#    unique idempotency key, `ON CONFLICT DO NOTHING`, and `RETURNING job_id`.
+#    Hint: Let the uniqueness constraint arbitrate concurrency; do not pre-read.
+# 3. [Mapping] Return the inserted ID when `fetchone()` yields a row and `None` for a duplicate
+#    without issuing a second statement.
+#    Hint: Treat `None` as the documented `DO NOTHING` result.
+# 4. [Transaction] Implement `run_in_transaction()` so success commits and any operation failure
+#    rolls back before re-raising.
+#    Hint: The wrapper owns the boundary; the operation owns only domain work.
+# 5. [Retry] Implement `run_with_retry()` for only `TransientDatabaseError`, stopping at
+#    `max_attempts` with delays `base * 2**(attempt - 1)`.
+#    Hint: Never sleep after the last failed attempt and never catch permanent errors.
+# 6. [Testing] Test two transient failures followed by success with a list append sleeper, plus
+#    a permanent `ValueError` that escapes immediately.
+#    Hint: Assert result, call count, and the complete delay sequence.
+# 7. [Design] Decide whether retry owns a statement, a complete transaction attempt, or an
+#    entire command and justify the chosen scope.
+#    Hint: A failed PostgreSQL transaction cannot safely continue; retry needs fresh state.
+# 8. [Composition] Compose retry with transaction ownership so every attempt receives fresh
+#    connection state and cleanup happens before delay.
+#    Hint: The retry operation should create and finish one complete transaction attempt.
+# 9. [Extension] Add optional jitter through an injected function while keeping tests
+#    deterministic and delays bounded.
+#    Hint: Randomness is another effect boundary and should be injected.
+# 10. [Failure analysis] Explain how a connection loss during commit creates an uncertain
+#    outcome and how the idempotency key resolves the next attempt.
+#    Hint: The client may not know whether the server committed.
+# 11. [Input validation] Define and test boundaries for blank idempotency keys and oversized
+#    payloads before opening a transaction.
+#    Hint: Fast local validation avoids obviously invalid database work but does not replace
+#    constraints.
+# 12. [Concurrency] Model two workers racing on the same idempotency key and identify which
+#    outcome the unique constraint guarantees.
+#    Hint: A read-then-insert sequence cannot provide the same atomic guarantee.
+# 13. [Observability] Design retry metrics with low-cardinality tags and no payload, key,
+#    exception message, or request ID.
+#    Hint: Dimensions should describe bounded classes, not individual events.
+# 14. [Interruption] Decide how cancellation or `KeyboardInterrupt` crosses transaction and
+#    retry layers without being mistaken for a transient database error.
+#    Hint: Cleanup may be broad, but retry classification should remain narrow.
 
 
 def main() -> int:

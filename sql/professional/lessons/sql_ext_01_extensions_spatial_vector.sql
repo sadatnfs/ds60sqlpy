@@ -221,6 +221,27 @@ ORDER BY
 --    failure isolation, and local snapshot fallback.
 -- 7. Explain pg_trgm similarity versus prefix LIKE and full-text search. Name
 --    the exact operators an optional trigram index must serve.
+-- 8. Build an extension lifecycle inventory: owner, installed/default/available
+--    versions, dependencies, trusted flag, update path, publisher, approval,
+--    backup/restore needs, and rollback test. Do not upgrade anything here.
+-- 9. Detect collation provider/version drift and explain why affected indexes
+--    may require REINDEX after operating-system or ICU changes. Separate
+--    detection, impact analysis, remediation, and validation.
+-- 10. If PostGIS is approved elsewhere, design a nearest-resource query using
+--     geography and a GiST index. Address SRID, units, antimeridian/poles,
+--     ST_DWithin prefiltering, exact distance, and deterministic ties.
+-- 11. If pgvector is approved elsewhere, compare cosine, inner-product, and L2
+--     operators plus HNSW and IVFFlat. State normalization, recall benchmark,
+--     build/update cost, filtering, dimension, and exact fallback requirements.
+-- 12. Extend the FDW design for credential rotation, connection limits, remote
+--     schema drift, timeouts, pushdown inspection, partial failure, observability,
+--     and a last-known-good snapshot. Never put credentials in learner SQL.
+-- 13. Write a supply-chain review for an extension unavailable from the trusted
+--     package source. Cover source/build provenance, native-code privilege,
+--     CVEs, reproducibility, licensing, patch ownership, and removal testing.
+-- 14. Plan an extension upgrade rehearsal in a restored disposable database.
+--     Capture dependencies and plans before/after, application canaries,
+--     performance/correctness checks, backup compatibility, and rollback limits.
 
 DO $self_check$
 BEGIN

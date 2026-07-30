@@ -59,7 +59,7 @@ understanding the algebra, but production numerical code should prefer
 `np.linalg.lstsq` or a tested library estimator. Forming `X.T @ X` squares the
 condition number and can amplify error.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Add an intercept column of ones and recompute the coefficients.
 2. Compare the closed-form result with scikit-learn's `LinearRegression` on the
@@ -76,6 +76,23 @@ condition number and can amplify error.
 3. Construct two almost-duplicate feature columns and inspect
    `np.linalg.cond(X)` or the singular values. Think about both memory and
    computational complexity as dimensions grow.
+
+### Additional mastery practice
+
+Treat shapes, rank, and conditioning as part of every matrix contract. Prefer stable solvers to symbolic formulas that require an explicit inverse.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Shape tracing:** For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1).
+   **Progressive hint:** Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.
+5. **Rank-deficiency debugging:** Construct a design matrix whose third column equals the sum of the first two. Compare `np.linalg.solve(X.T @ X, X.T @ y)` with `np.linalg.lstsq(X, y, rcond=None)` and interpret the rank.
+   **Progressive hint:** The dependent column makes X.T @ X singular. `lstsq` returns a minimum-norm solution plus rank information without forming an inverse.
+6. **Robust vector operation:** Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector.
+   **Progressive hint:** Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

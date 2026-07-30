@@ -70,7 +70,7 @@ Hardware and library differences can still affect exact floating-point results,
 so reproducibility means bounded, explainable variation—not bitwise identity
 everywhere.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Plot the loss over epochs.
 2. Replace SGD with Adam and compare convergence.
@@ -88,6 +88,23 @@ everywhere.
 The separate solution extends these ideas with train/validation curves,
 capacity comparisons, and gradient-stability techniques. Treat those as deeper
 reference material after completing the notebook's three exercises.
+
+### Additional mastery practice
+
+Trace tensor shapes, gradients, modes, and loss aggregation through a complete training step. Deep-learning code is correct only when its state transitions are explicit.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Autograd tracing:** For one scalar regression batch, annotate every line from `zero_grad()` through `step()`: which tensors receive gradients, when are they accumulated, and when do parameters change?
+   **Progressive hint:** Gradients accumulate in parameter `.grad` fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.
+5. **Mode debugging:** Build a model with Dropout and BatchNorm, then compare repeated predictions in `train()` and `eval()` modes. Explain why `torch.no_grad()` is related but not interchangeable.
+   **Progressive hint:** Mode changes module behavior; no_grad disables graph recording. Validation usually needs both `model.eval()` and `with torch.no_grad()`.
+6. **Loss-aggregation edge case:** Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.
+   **Progressive hint:** Multiply each mean batch loss by batch size, sum, then divide by the number of examples.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

@@ -64,3 +64,105 @@ Notes
 Takeaways
 - Use ensembles (RF) for stronger performance and robustness
 - Control overfitting via max_depth/min_samples_leaf and validate choices
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Plot tree depth versus accuracy.
+
+**How to reason about it:** Plot training and validation accuracy together across depth. An unbounded tree is a distinct setting, and one split is not enough to separate true capacity effects from sampling noise.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Inspect feature importances and discuss their reliability.
+
+**How to reason about it:** Impurity importance is fast but biased toward high-cardinality and frequently split features. Compare held-out permutation importance, retain names, and discuss correlated-feature masking.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Pruning implementation
+
+**Prompt:** Use a decision tree's cost-complexity pruning path to evaluate candidate `ccp_alpha` values with cross-validation. Freeze the chosen value before final holdout evaluation.
+
+**Reasoning before implementation:** The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.
+
+Call `cost_complexity_pruning_path` on the current training fold, fit a tree
+for a bounded subset of alphas, and compare mean plus spread of validation
+scores. Very small alpha retains a complex tree; sufficiently large alpha
+collapses it toward the root.
+
+If the path is computed once using the entire dataset before CV, the candidate
+set itself has seen validation rows. A nested search or a fixed, documented
+alpha grid provides the cleanest evaluation.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 4 — Out-of-bag reasoning
+
+**Prompt:** Enable `oob_score=True` in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.
+
+**Reasoning before implementation:** Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.
+
+OOB evaluation reuses training data efficiently and can support fast iteration,
+but it is not a final untouched test. Confirm that bootstrapping is enabled and
+use enough trees so each row receives many OOB votes.
+
+Large discrepancies between OOB and held-out results can reveal distribution
+shift, grouping leakage, time ordering, or insufficient forest size. Do not
+average them into one reassuring number; investigate the boundary mismatch.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Imbalance debugging
+
+**Prompt:** Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test `class_weight='balanced'`.
+
+**Reasoning before implementation:** A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.
+
+Class weights change the fitting objective, not merely the report. They can
+improve minority recall while reducing precision or overall accuracy. Evaluate
+both classes and use the metric tied to the real error cost.
+
+If probability quality matters, assess calibration after weighting. Never
+oversample or compute weights using the final holdout labels.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Correlated-importance edge case
+
+**Prompt:** Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.
+
+**Reasoning before implementation:** The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.
+
+Correlated substitutes let the model recover from permuting only one column.
+Use domain-aware grouped permutation, conditional methods, or report the
+correlation cluster together. SHAP and impurity scores also require careful
+interpretation under dependence.
+
+An importance score answers how this fitted model used available inputs under
+a particular perturbation—not what would happen if the real-world feature were
+intervened upon.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

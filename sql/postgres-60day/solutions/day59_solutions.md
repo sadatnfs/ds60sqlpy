@@ -159,3 +159,50 @@ For a hypothetical 100M-row deployment, record:
   marketing queries that must also be discussed in the final write-up.
 - All DDL in the solution transaction rolls back. Production changes require a
   separate reviewed migration.
+
+## Exercise 1 — Make every grain transition explicit
+
+The executable `grain_map` states the key and row meaning for order values,
+customer LTV, and cohort/segment summary. A lower-grain join after aggregation
+would invalidate the metric.
+
+## Exercise 2 — Calculate funnel rates with a stable population
+
+Start from all customers, left-join recent events, and use EXISTS for recent
+purchases. Buyers without a page-view stay visible. Each rate divides by the
+preceding stage with `NULLIF` protection.
+
+## Exercise 3 — Reconcile candidate money measures
+
+Line values and payments each aggregate to `order_id` before joining orders.
+The answer retains stored total, calculated line total, paid amount, and both
+differences so stakeholders can choose a named measure.
+
+## Exercise 4 — Include direct attribution
+
+Start from purchases and choose at most one latest qualifying touch with a
+LATERAL query. Missing touches become `(direct)`, so attribution counts
+reconcile to the purchase population.
+
+## Exercise 5 — Compare index column order
+
+`(customer_id, order_date)` supports one customer's history; `(order_date,
+customer_id)` better anchors a global date-bound scan. EXPLAIN evidence is
+environment-specific and both indexes add write cost.
+
+## Exercise 6 — Publish a metric contract
+
+The answer records metric name, grain, numerator, denominator, UTC window, NULL
+policy, exclusions, and owner as queryable values. This prevents silent semantic
+changes between teams.
+
+## Exercise 7 — Publish defensible basket metrics
+
+Distinct baskets feed support, confidence, and lift. A minimum pair count limits
+noise, and product IDs resolve ordering ties deterministically.
+
+## Exercise 8 — Assemble cross-domain controls
+
+Named counts and money totals provide a small sign-off surface for customer,
+order, line, and payment domains. Any non-equivalence must be explained by a
+declared metric definition rather than hidden.

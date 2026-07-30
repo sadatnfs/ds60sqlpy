@@ -194,6 +194,54 @@ Create deterministic scripts for:
 Assert request count, delays, identities, timeout propagation, returned items,
 and redacted logs.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 8 — allocate an end-to-end timeout budget
+
+Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts. Reject a retry when the remaining budget cannot support another useful attempt.
+
+**Progressive hint:** Use an injected monotonic clock and compute a deadline once per logical request. Per-attempt timeouts must shrink with remaining time.
+
+### Exercise 9 — support Retry-After dates safely
+
+Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.
+
+**Progressive hint:** HTTP-date parsing needs wall time; sleeping and deadline accounting need monotonic time. Invalid server guidance falls back to local backoff.
+
+### Exercise 10 — model a circuit breaker
+
+Design closed, open, and half-open states around the existing retrying client. Specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.
+
+**Progressive hint:** A breaker protects a dependency across logical requests; it does not replace per-attempt timeout or retry policy.
+
+### Exercise 11 — bound concurrent requests
+
+Add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately. Prove permits release on success, exception, timeout, and cancellation.
+
+**Progressive hint:** The concurrency permit surrounds only the scarce external call. A `finally` block or context manager owns release.
+
+### Exercise 12 — close streaming responses
+
+Define a streaming-response protocol with explicit close and cancellation semantics. Test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.
+
+**Progressive hint:** Ownership must say who closes the response. Use a context manager and enforce size while reading chunks, not after buffering everything.
+
+### Exercise 13 — inject a credential provider
+
+Replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge. Preserve redaction and prevent refresh loops.
+
+**Progressive hint:** Credential acquisition is a separate boundary. Cache/expiry policy and single-flight refresh belong to the provider.
+
+### Exercise 14 — build an adversarial transport contract suite
+
+Extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.
+
+**Progressive hint:** Assert bounded attempts, exact request identity, closed resources, typed errors, and the absence of secret material in every diagnostic.
+
 ## Self-check
 
 - Every attempt has a positive timeout.

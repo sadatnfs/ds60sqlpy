@@ -1,21 +1,29 @@
 # Suggested commands
 
-Run from the repository root. Prefer the repository interpreter: `\.venv\Scripts\python.exe` on Windows and `.venv/bin/python` on macOS/Linux.
+Run from the repository root. Prefer the repository interpreter:
+`.venv/bin/python` on macOS/Linux. On Windows, use the exact path printed by
+the discovery bootstrap: `.venv\Scripts\python.exe` for standard `venv` or
+`.venv\python.exe` for its conda-prefix fallback.
 
 ## Setup and learner navigation
 
-- Windows core: `powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1`
-- Windows advanced: `powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced`
+- Windows core/discovery: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; & .\scripts\bootstrap_windows.ps1`
+- Windows advanced: `& .\scripts\bootstrap_windows.ps1 -Profile Advanced`
 - macOS/Linux core: `bash scripts/setup.sh`
 - macOS/Linux advanced: `bash scripts/setup.sh --advanced`
 - Environment: `.venv/bin/python scripts/course.py doctor`
 - Inventory: `.venv/bin/python scripts/course.py catalog`
 - Track inventory: add `--track python`, `--track sql`, or `--track bridge`
 - Progress: `.venv/bin/python scripts/course.py progress show`
+- Private progress portal: `.venv/bin/python scripts/learning_portal.py`
+- Static portal only: open `START_HERE.html`; its progress stays in browser localStorage
 
 ## Fast validation
 
 - `.venv/bin/python scripts/course.py validate --all`
+- `.venv/bin/python scripts/audit_practice.py`
+- `.venv/bin/python scripts/build_course_guide.py --check`
+- `.venv/bin/python scripts/scan_secrets.py --history`
 - `.venv/bin/python scripts/validate_notebooks.py`
 - `.venv/bin/python scripts/normalize_notebooks.py --check`
 - `.venv/bin/python scripts/build_solution_notebooks.py --check`
@@ -26,7 +34,9 @@ Run from the repository root. Prefer the repository interpreter: `\.venv\Scripts
 - `.venv/bin/pytest -p no:cacheprovider`
 - `git diff --check`
 
-Use the equivalent `.venv\Scripts\...exe` paths in PowerShell. On Windows, choose a writable temporary mypy cache directory rather than `/tmp`.
+Use the selected Windows environment's `python.exe -m TOOL` equivalent in
+PowerShell. On Windows, choose a writable temporary mypy cache directory rather
+than `/tmp`.
 
 ## Notebook execution
 

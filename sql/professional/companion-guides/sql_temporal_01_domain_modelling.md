@@ -89,10 +89,38 @@ backup-copy handling, dry run, and bounded recoverability.
 
 ## Exercises
 
-Complete all six prompts: retroactive bitemporal correction, boundary tests,
+Complete all twelve prompts. Begin with retroactive bitemporal correction, boundary tests,
 optional exclusion design, ledger reversal, held-retention workflow, and an
-explicit domain-assumption record. Add negative controls for overlap, mutation,
-duplicate idempotency, and held deletion.
+explicit domain-assumption record; then cover civil time, three clocks, Type-2
+joins, temporal parents, gaps/overlaps, and hold-aware archival. Add negative
+controls for overlap, mutation, duplicate idempotency, and held deletion.
+
+For every temporal answer, name the clock, zone, lower/upper inclusivity,
+late-arrival policy, overlap/gap rule, correction authority, and audit evidence:
+
+1. **Retroactive correction:** compare valid-at/known-at answers before and
+   after the recorded correction.
+2. **Range boundaries:** test every upper endpoint and require at most one row.
+3. **Overlap enforcement:** compare an optional exclusion constraint with the
+   locking trigger fallback.
+4. **Ledger reversal:** append rather than update and verify idempotency and
+   reversal links.
+5. **Retention decision:** preserve approver, reason, time, hold, and immutable
+   audit without deleting fixtures.
+6. **Assumption register:** document time, authority, lateness, gaps/overlaps,
+   privacy/deletion, ledger meaning, and correction roles.
+7. **Civil time:** test ambiguous/nonexistent DST times while retaining source
+   zone and UTC instant.
+8. **Three clocks:** separate event, ingestion, and processing time; define
+   watermark, lateness, correction, and notification.
+9. **Type-2 join:** use business/surrogate keys and half-open effective periods;
+   require at most one match per fact.
+10. **Temporal parent:** design period containment, concurrency protection,
+    deferred checking, and repair.
+11. **Gap/overlap report:** use deterministic window/multirange logic and define
+    adjacency, duplicates, and empty periods.
+12. **Archival:** plan partition detach, legal-hold exceptions, verification,
+    protected storage, restore tests, and deletion proof.
 
 ## Self-check
 

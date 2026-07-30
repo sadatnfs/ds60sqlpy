@@ -160,6 +160,72 @@ secret management, distributed limits, reverse-proxy timeouts, network policy,
 WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy,
 artifact distribution, deployment rollback, and on-call response.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 11 — drain and shut down gracefully
+
+Add a draining transition that makes readiness false, rejects new work, allows active leases a bounded grace period, and records unfinished requests before shutdown. Make repeated drain calls idempotent.
+
+**Progressive hint:** Stop admission before waiting. Track active work through the existing concurrency gate and use an injected clock/event for deterministic tests.
+
+### Exercise 12 — add a dependency circuit breaker
+
+Wrap one dependency probe/call in a closed/open/half-open breaker with injected time. Define which failures count, one bounded probe, readiness interaction, and recovery metrics.
+
+**Progressive hint:** The breaker protects request work; readiness may report degraded dependency state without performing the expensive call on every probe.
+
+### Exercise 13 — define distributed limiting semantics
+
+Explain how the local token bucket behaves with four service processes, then design a shared limiter contract covering atomicity, key, window/token semantics, timeout, fail-open/closed choice, and privacy.
+
+**Progressive hint:** Four independent buckets multiply effective capacity. A shared backend becomes another dependency with its own failure policy.
+
+### Exercise 14 — bound telemetry backpressure
+
+Make the log/metric exporter slow or unavailable. Define a bounded queue, drop/coalesce policy, priority for security events, and counters that reveal lost telemetry without blocking request handling indefinitely.
+
+**Progressive hint:** Telemetry is work and memory. Producers need a nonblocking or bounded-time contract, and the service needs visibility into dropped events.
+
+### Exercise 15 — propagate trace context safely
+
+Accept or create a request/trace ID, validate its bounded format, carry it through local logs and an outbound fake client, and prove malformed or attacker-sized IDs are replaced rather than reflected.
+
+**Progressive hint:** Correlation identifiers are untrusted input. Keep them out of metric labels and separate from authentication identity.
+
+### Exercise 16 — rehearse credential rotation
+
+Model a credential provider accepting active and previous key versions during a bounded overlap. Rotate, verify new requests use the active key, expire the old key, and ensure neither value reaches repr/log/metrics.
+
+**Progressive hint:** Reference credentials by version/opaque handle. Inject provider and clock; never hard-code lesson secrets.
+
+### Exercise 17 — compose dependency timeout budgets
+
+For a 750 ms request budget calling two dependencies, allocate local queue, dependency, retry, parsing, and response budgets. Propagate a monotonic deadline and stop work when useful completion is impossible.
+
+**Progressive hint:** Nested calls cannot each assume the full caller timeout. Reserve cleanup/response time and record which budget exhausted.
+
+### Exercise 18 — run a fault-injection matrix
+
+Inject dependency false/exception/latency, artifact tampering, auth outage, limiter saturation, log-export failure, handler exception, and drain. For each, predict status, readiness/health, cleanup, log, and metric evidence.
+
+**Progressive hint:** Faults are local fakes, not destructive infrastructure tests. Assert invariants and recovery after each isolated scenario.
+
+### Exercise 19 — define an SLO and error budget
+
+Define one availability and one latency SLI over eligible requests, target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action. Use generated local events to compute a small example.
+
+**Progressive hint:** SLIs need exact numerator/denominator and route/outcome policy. Avoid user/request IDs or arbitrary URLs as labels.
+
+### Exercise 20 — audit privacy, retention, and cardinality
+
+Inventory every log field, metric label, trace attribute, and local artifact. Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and owner; then test representative forbidden values.
+
+**Progressive hint:** Use allowlists for structured fields and labels. Counts/opaque IDs often replace raw values; request bodies remain excluded by default.
+
 ## Self-check
 
 - Unsafe configuration fails before handling requests.

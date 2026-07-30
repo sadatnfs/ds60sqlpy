@@ -28,11 +28,40 @@ missing values separately. For XML, extract the first XPath result, validate its
 text form, cast to integer, and left-join orders so malformed or unmatched
 documents remain visible.
 
+## Practice assumptions and review method
+
+- **Focus:** Query JSONB and XML with explicit path, type, missing-key, and safe-cast behavior instead of assuming semi-structured data is schema-free.
+- **Assumptions:** JSON text extraction with `->>` returns text or NULL. XML XPath results are arrays. Course metadata keys are small and deterministic.
+- **Failure to watch for:** Casting missing or malformed JSON text directly raises; broad JSON containment or regex extraction needs validation and appropriate indexing evidence.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day28_json_xml.sql). Add one row
-with a missing key and one with the wrong JSON value type; define the expected
-result before running the query.
+Query JSONB and XML with explicit path, type, missing-key, and safe-cast behavior instead of assuming semi-structured data is schema-free.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Extract customer acquisition channel and referrer from JSONB attributes.
+   **Progressive hint:** `->>` returns text and naturally yields NULL for a missing key.
+   **Expected shape:** One row per customer.
+2. **Query writing:** Find mobile-channel customers using JSONB containment.
+   **Progressive hint:** `@>` tests whether the left JSONB contains the declared object.
+   **Expected shape:** Customer rows whose channel is mobile.
+3. **Query writing:** Count event rows with missing device metadata separately from present values.
+   **Progressive hint:** Use `?` to test key existence rather than comparing extracted text to NULL.
+   **Expected shape:** One summary row.
+4. **Prediction:** Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
+   **Progressive hint:** JSON objects are mappings; do not treat key order as a semantic contract.
+   **Expected shape:** One row per customer with events.
+5. **Debugging:** Extract order ID and status text from XML documents without assuming XPath returns a scalar.
+   **Progressive hint:** Index the XML array returned by `xpath`, cast through text, and strip element markup with `string(...)` XPath.
+   **Expected shape:** One row per XML document.
+6. **Extension:** Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
+   **Progressive hint:** Validate extracted text with a numeric regex before casting.
+   **Expected shape:** One row per sample payload.
 
 ## Self-check
 
@@ -80,14 +109,11 @@ Pitfalls
 - Casting: ->> returns text; cast to numeric/date before arithmetic/comparison
 - Overusing schemaless: retain core relational columns for keys, dates, and major filters; use JSONB for optional/rare attributes
 
-Exercises from the learner script
-1) Count events by the first directory in `metadata->>'path'`.
-2) Extract order IDs from `xml_docs.payload`, cast them to integers, and join
-   to `orders` to validate each stored status.
-
-`xpath` returns an XML array. Extract element `[1]`, cast the ID through text to
-integer, and use a left join so malformed or unmatched documents remain
-visible.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - JSON functions: https://www.postgresql.org/docs/current/functions-json.html

@@ -29,10 +29,40 @@ Separately deduplicate activity to one row per customer/order month, derive
 month offset, and count active customers. Join numerator to denominator only
 after both relations are stable, then guard and range-check the retention rate.
 
+## Practice assumptions and review method
+
+- **Focus:** Build a cohort-retention analysis through explicit grains, a stable denominator, a dense calendar, reconciled revenue, and clearly limited projections.
+- **Assumptions:** Cohort month is customer creation month in UTC. Active means at least one order in the order month. Net revenue is computed from line items.
+- **Failure to watch for:** Observed rows are not a complete calendar; active customers must not exceed original cohort size, and a moving average is not a production CLV model.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Implement the project in the [learner SQL](../day30_phase2_project.sql). Add a
-cohort/offset spine and compare absent rows with explicit zero-activity rows.
+Build a cohort-retention analysis through explicit grains, a stable denominator, a dense calendar, reconciled revenue, and clearly limited projections.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Calculate original customer count for each UTC signup cohort month.
+   **Progressive hint:** Build the denominator from customers, including customers who never order.
+   **Expected shape:** One row per cohort month.
+2. **Query writing:** Calculate active customers and net line revenue for each cohort/order month.
+   **Progressive hint:** Aggregate line items to order grain before cohort joins, then count distinct active customers.
+   **Expected shape:** One row per observed cohort/order month.
+3. **Query writing:** Calculate cohort month offset and retention using original cohort size.
+   **Progressive hint:** Use year-plus-month age components and guard the denominator.
+   **Expected shape:** Observed cohort/offset rows with retention from 0 to 1.
+4. **Prediction:** Create a dense cohort/offset spine from offset 0 through 12 and show missing activity as zero.
+   **Progressive hint:** Cross join cohort months with generate_series, then left join observed activity at the same offset grain.
+   **Expected shape:** Thirteen rows per cohort.
+5. **Debugging:** Calculate revenue per active customer and a trailing three-observation annualized teaching projection.
+   **Progressive hint:** Compute stable cohort metrics before applying the window; disclose that observed rows may have month gaps.
+   **Expected shape:** One row per observed cohort/month with nullable guarded measures.
+6. **Extension:** Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0–12.
+   **Progressive hint:** Calculate violations and compare totals at the same scoped population.
+   **Expected shape:** One row with zero retention violations and zero revenue difference.
 
 ## Self-check
 
@@ -51,11 +81,10 @@ Goal
 - Extend the starter customer-cohort analysis with retention rates and an
   illustrative customer-lifetime-value projection.
 
-Deliverable from the learner script
-1) Define cohort size from customer creation month.
-2) Count active customers and revenue for each cohort/order month.
-3) Compute retention as active customers divided by original cohort size.
-4) Project CLV with a moving average, documenting the model and its limits.
+Current practice map
+- The six maintained prompts above are the complete deliverable: denominator,
+  activity and revenue, retention, a dense offset spine, a limited teaching
+  projection, and a reconciliation/constraint audit.
 
 Guidance
 1) Aggregate net order-line value to one row per order before cohort joins.

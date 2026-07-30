@@ -29,10 +29,40 @@ country from that relation, then calculate a separate category-total relation
 for the overall rank. Joining those stable grains avoids incorrectly ranking
 every country/category pair as though it were one global category.
 
+## Practice assumptions and review method
+
+- **Focus:** Combine named windows, explicit frames, exclusions, and gap/session logic while keeping each intermediate grain inspectable.
+- **Assumptions:** Event sessions use a 30-minute inactivity threshold and UTC instants. Named windows share partition/order clauses but may still need different frames.
+- **Failure to watch for:** Layered window calculations require CTEs because one window result cannot generally be nested directly inside another at the same query level.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day22_advanced_windows.sql). Define
-one named window and compare a full average with a leave-one-out average.
+Combine named windows, explicit frames, exclusions, and gap/session logic while keeping each intermediate grain inspectable.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Use a named window to show each order with customer count, average, first date, and last date.
+   **Progressive hint:** Name a full-partition customer window once and reuse it.
+   **Expected shape:** One row per order.
+2. **Query writing:** Compare each employee salary with the average of other employees in the department.
+   **Progressive hint:** Use `EXCLUDE CURRENT ROW`; a one-person partition yields NULL.
+   **Expected shape:** One row per employee with nullable peer average.
+3. **Query writing:** Show each order's distance from its customer's average and standard deviation.
+   **Progressive hint:** Compute independent partition windows and guard interpretation when variation is zero.
+   **Expected shape:** One row per order.
+4. **Prediction:** Sessionize events using a 30-minute gap and predict why the first event starts a session.
+   **Progressive hint:** Lag event time per customer, flag NULL/large gaps, then cumulative-sum flags in a second layer.
+   **Expected shape:** One row per event with session number starting at one.
+5. **Debugging:** Find consecutive calendar-day islands in customer order dates without nesting windows.
+   **Progressive hint:** Deduplicate dates, use row number to derive a stable grouping key, then aggregate islands.
+   **Expected shape:** One row per customer/date island.
+6. **Extension:** Summarize sessions from the sessionized event stream with start, end, event count, and duration.
+   **Progressive hint:** Aggregate only after session IDs exist at event grain.
+   **Expected shape:** One row per customer session.
 
 ## Self-check
 
@@ -68,16 +98,11 @@ Pitfalls
 - Window after GROUP BY changes row cardinality; ensure you window the intended grain.
 - Excessive repeated specs without WINDOW harms readability.
 
-Exercises from the learner script
-1) For each country, rank categories by net line revenue and also compute the
-   category's overall rank.
-2) For each employee, compute salary rank within department and across the
-   whole company.
-
-“Overall category rank” means rank categories by their revenue summed across
-all countries, then attach that category-level rank to each country-category
-row. Ranking every country-category pair globally would answer a different
-question.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - WINDOW clause: https://www.postgresql.org/docs/current/sql-select.html#SQL-WINDOW

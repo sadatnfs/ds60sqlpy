@@ -5,8 +5,14 @@ foundations and professional practice that do not fit honestly into one more
 linear countdown. The generated catalog is the source of truth for exact
 prerequisites and artifact paths:
 
-```text
-python scripts/course.py catalog
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\python.exe scripts\course.py catalog
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python scripts/course.py catalog
 ```
 
 Choose a lane from demonstrated prerequisites. You do not need every
@@ -91,6 +97,14 @@ A module is complete when the learner can:
 
 Use the exact stable ID when recording optional progress:
 
-```text
-python scripts/course.py progress complete python-pro-01 --notes "Built and inspected a wheel from a clean target."
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\python.exe scripts\course.py progress complete python-pro-01 `
+    --notes "Built and inspected a wheel from a clean target."
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python scripts/course.py progress complete python-pro-01 \
+  --notes "Built and inspected a wheel from a clean target."
 ```

@@ -1,6 +1,8 @@
 -- Day 47 solutions: cohort retention
 SET search_path TO training, public;
 
+-- Exercise 1: calculate active-customer rate with cohort size retained.
+-- Exercise 2: restrict the final tidy output to the latest six cohorts.
 WITH cohorts AS (
   SELECT customer_id,
          date_trunc('month', created_at)::date AS cohort_month

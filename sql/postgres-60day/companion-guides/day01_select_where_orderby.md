@@ -33,11 +33,40 @@ produces candidate rows, `WHERE country IN ('US', 'CA')` filters them,
 keeps the first ten. Remove the `customer_id` tie-breaker and explain why rows
 with equal timestamps no longer have a guaranteed relative order.
 
+## Practice assumptions and review method
+
+- **Focus:** Build a result deliberately from projection, filtering, deterministic ordering, and a bounded row count.
+- **Assumptions:** Timestamps are `timestamptz`; relative-date exercises use the database clock. A result is stable only when its final sort key breaks ties.
+- **Failure to watch for:** Never use `= NULL`, depend on implicit row order, or apply `LIMIT` without first defining which rows are first.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the three prompts in the [learner SQL](../day01_select_where_orderby.sql).
-Then change one filter to include `NULL` deliberately with `IS NULL` or
-`IS NOT NULL`; do not use `= NULL`.
+Build a result deliberately from projection, filtering, deterministic ordering, and a bounded row count.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** List the 20 newest orders with customer ID and total amount.
+   **Progressive hint:** Sort by `order_date DESC` and add `order_id DESC` as a unique tie-breaker before applying `LIMIT`.
+   **Expected shape:** At most 20 rows; one row per order, newest first.
+2. **Query writing:** Find the 10 most expensive products created in the last 90 days.
+   **Progressive hint:** Filter the timestamp directly, then sort by price and a stable product key.
+   **Expected shape:** At most 10 product rows; every row is in the 90-day window.
+3. **Query writing:** Show customers from GB or DE created in the last year, newest first.
+   **Progressive hint:** Use `IN` for the country set, combine the time condition with `AND`, and break timestamp ties.
+   **Expected shape:** Only GB/DE customers from the declared window.
+4. **Prediction:** Predict which rows survive `email = NULL`, then write a query that counts missing and present emails correctly.
+   **Progressive hint:** Comparisons with `NULL` are unknown; use `IS NULL` and `IS NOT NULL`.
+   **Expected shape:** Exactly one summary row with counts whose sum equals all customers.
+5. **Debugging:** Repair a top-price query that uses `LIMIT 10` without `ORDER BY` and explain why the original is nondeterministic.
+   **Progressive hint:** Define the business ranking first; use a unique final key for tied prices.
+   **Expected shape:** At most 10 rows, highest prices first, stable across repeated runs on unchanged data.
+6. **Extension:** Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than `OFFSET`.
+   **Progressive hint:** Use the last `(order_date, order_id)` pair from page one and compare row values in the same descending order.
+   **Expected shape:** Up to 10 rows strictly after the first page with no overlap.
 
 ## Self-check
 
@@ -82,13 +111,11 @@ Anti-patterns and pitfalls
 - Assuming WHERE matches NULLs; use IS NULL/IS NOT NULL explicitly.
 - Depending on implicit order without ORDER BY; SQL does not guarantee row order otherwise.
 
-Exercises from the learner script
-1) List the 20 newest orders with `customer_id` and `total_amount`.
-2) Find the top 10 most expensive products created in the last 90 days.
-3) Show customers from GB or DE created within the last year, newest first.
-
-Use `order_date DESC, order_id DESC` and `created_at DESC, customer_id DESC`
-when you want deterministic ordering among timestamp ties.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Check your understanding
 - In what order are WHERE and ORDER BY evaluated, and why does that matter for derived columns?

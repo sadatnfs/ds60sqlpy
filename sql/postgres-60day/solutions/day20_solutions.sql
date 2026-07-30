@@ -1,60 +1,167 @@
--- Day 20 solutions: FIRST_VALUE and LAST_VALUE
+-- Day 20 executable solutions
+-- Target: PostgreSQL 16+; run only in advanced_sql_training.
+-- ON_ERROR_STOP is supplied by the documented psql command.
+
+BEGIN;
 SET search_path TO training, public;
 
--- Exercise 1: current-month product revenue compared with first observed month.
-WITH monthly AS (
-  SELECT p.product_id,
-         date_trunc('month', o.order_date)::date AS month,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM products p
-  JOIN order_items oi ON oi.product_id = p.product_id
-  JOIN orders o ON o.order_id = oi.order_id
-  GROUP BY p.product_id, date_trunc('month', o.order_date)
-), windowed AS (
-  SELECT product_id,
-         month,
-         revenue,
-         FIRST_VALUE(revenue) OVER (
-           PARTITION BY product_id
-           ORDER BY month
-           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-         ) AS first_month_revenue
-  FROM monthly
-), firsts AS (
-  SELECT DISTINCT product_id, first_month_revenue FROM windowed
-), current_month AS (
-  SELECT product_id, revenue
-  FROM monthly
-  WHERE month = date_trunc('month', CURRENT_DATE)::date
-)
-SELECT p.product_id,
-       p.name,
-       ROUND(COALESCE(cm.revenue, 0), 2) AS current_month_revenue,
-       ROUND(f.first_month_revenue, 2) AS first_month_revenue,
-       ROUND(COALESCE(cm.revenue, 0) - f.first_month_revenue, 2)
-         AS change_from_first_month
-FROM products p
-LEFT JOIN firsts f USING (product_id)
-LEFT JOIN current_month cm USING (product_id)
-ORDER BY p.product_id;
+-- Shared teaching contract
+-- Focus: Use `FIRST_VALUE` and `LAST_VALUE` only with an ordering and frame that covers the intended partition.
+-- Assumptions: First/last refer to ordered rows, not minimum/maximum values unless ordering states that. Ties need unique keys for deterministic row identity.
+-- Pitfall: The default `LAST_VALUE` frame ends at the current row/peer group, often making it return the current value rather than the partition's final value.
 
--- Exercise 2: salary versus the earliest-hired employee's salary in a department.
--- This is only a simulation: the course schema has no salary-history table.
-SELECT d.name AS department,
-       e.employee_id,
-       e.full_name,
-       e.hire_date,
-       e.salary,
-       FIRST_VALUE(e.salary) OVER (
-         PARTITION BY e.department_id
-         ORDER BY e.hire_date, e.employee_id
+-- ---------------------------------------------------------------------------
+-- Exercise 1: Query writing
+-- Prompt: Show every order with the customer's first and last order timestamps.
+-- Why: Use one full-partition frame from unbounded preceding through unbounded following.
+-- Expected: One row per order with constant first/last values per customer.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `PARTITION BY`: restarts a window calculation independently for each partition key.
+-- - window frame: states exactly which rows or peers contribute to the current row's window result.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+SELECT o.order_id,
+       o.customer_id,
+       o.order_date,
+       FIRST_VALUE(o.order_date) OVER customer_orders AS first_order_date,
+       LAST_VALUE(o.order_date) OVER customer_orders AS last_order_date
+FROM orders AS o
+WINDOW customer_orders AS (
+  PARTITION BY o.customer_id
+  ORDER BY o.order_date, o.order_id
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+)
+ORDER BY o.customer_id, o.order_date, o.order_id;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 2: Query writing
+-- Prompt: Show each product with the cheapest and most expensive price in its category.
+-- Why: Order by price and use a full frame; values tie without needing row identity.
+-- Expected: One row per product.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `PARTITION BY`: restarts a window calculation independently for each partition key.
+-- - window frame: states exactly which rows or peers contribute to the current row's window result.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+SELECT p.product_id,
+       p.category,
+       p.price,
+       FIRST_VALUE(p.price) OVER category_prices AS category_min_price,
+       LAST_VALUE(p.price) OVER category_prices AS category_max_price
+FROM products AS p
+WINDOW category_prices AS (
+  PARTITION BY p.category
+  ORDER BY p.price, p.product_id
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+)
+ORDER BY p.category, p.price, p.product_id;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 3: Query writing
+-- Prompt: Compare every payment with the first and last payment amount for its order.
+-- Why: Partition by order, order by timestamp/payment ID, and keep the full frame.
+-- Expected: One row per payment.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `PARTITION BY`: restarts a window calculation independently for each partition key.
+-- - window frame: states exactly which rows or peers contribute to the current row's window result.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+SELECT p.payment_id,
+       p.order_id,
+       p.payment_date,
+       p.amount,
+       FIRST_VALUE(p.amount) OVER payment_sequence AS first_payment_amount,
+       LAST_VALUE(p.amount) OVER payment_sequence AS last_payment_amount
+FROM payments AS p
+WINDOW payment_sequence AS (
+  PARTITION BY p.order_id
+  ORDER BY p.payment_date, p.payment_id
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+)
+ORDER BY p.order_id, p.payment_date, p.payment_id;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 4: Prediction
+-- Prompt: Demonstrate the default `LAST_VALUE` result versus a full-partition frame on values 10, 20, 30.
+-- Why: The default ends at the current row; explicit following reaches the true last row.
+-- Expected: Three rows showing default current value and full-frame 30.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
+-- - window frame: states exactly which rows or peers contribute to the current row's window result.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+SELECT value,
+       LAST_VALUE(value) OVER (ORDER BY value) AS default_last_value,
+       LAST_VALUE(value) OVER (
+         ORDER BY value
          ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS earliest_hire_salary,
-       e.salary - FIRST_VALUE(e.salary) OVER (
-         PARTITION BY e.department_id
-         ORDER BY e.hire_date, e.employee_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS difference
-FROM employees e
-JOIN departments d ON d.department_id = e.department_id
-ORDER BY department, e.hire_date, e.employee_id;
+       ) AS partition_last_value
+FROM (VALUES (10), (20), (30)) AS sample(value)
+ORDER BY value;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 5: Debugging
+-- Prompt: Return one first and one last order per customer without using window output as an accidental duplicate report.
+-- Why: Compute first/last IDs with full-frame windows, then select distinct customer-level output.
+-- Expected: One row per customer with orders.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `PARTITION BY`: restarts a window calculation independently for each partition key.
+-- - window frame: states exactly which rows or peers contribute to the current row's window result.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+WITH annotated AS (
+  SELECT o.customer_id,
+         FIRST_VALUE(o.order_id) OVER customer_orders AS first_order_id,
+         LAST_VALUE(o.order_id) OVER customer_orders AS last_order_id
+  FROM orders AS o
+  WINDOW customer_orders AS (
+    PARTITION BY o.customer_id
+    ORDER BY o.order_date, o.order_id
+    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+  )
+)
+SELECT DISTINCT customer_id,
+       first_order_id,
+       last_order_id
+FROM annotated
+ORDER BY customer_id;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 6: Extension
+-- Prompt: Solve latest order per customer with PostgreSQL `DISTINCT ON` and compare its ordering contract with row number.
+-- Why: `DISTINCT ON` keeps the first row under its mandatory leading order keys.
+-- Expected: At most one latest order per customer.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `DISTINCT ON`: keeps the first row in each declared group, so its matching leading sort keys determine which row wins.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+SELECT DISTINCT ON (o.customer_id)
+       o.customer_id,
+       o.order_id,
+       o.order_date,
+       o.total_amount
+FROM orders AS o
+ORDER BY o.customer_id, o.order_date DESC, o.order_id DESC;
+
+-- No course answer persists changes or temporary objects.
+ROLLBACK;

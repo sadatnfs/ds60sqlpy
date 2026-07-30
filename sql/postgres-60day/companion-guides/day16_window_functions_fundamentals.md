@@ -28,11 +28,40 @@ Pre-aggregate net revenue to one row per category, then calculate
 the category grain; the window exposes the grand total without removing those
 category rows.
 
+## Practice assumptions and review method
+
+- **Focus:** Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.
+- **Assumptions:** Window aggregates do not collapse rows. When order matters, use a unique tie-breaker and declare the frame in later cumulative lessons.
+- **Failure to watch for:** Filtering a window result in the same query level is invalid; compute it in a subquery or CTE first.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day16_window_functions_fundamentals.sql).
-Create tied ordering values and compare the default frame with
-`ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`.
+Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Show each order with the customer's average order total.
+   **Progressive hint:** Partition by customer ID and keep one output row per order.
+   **Expected shape:** One row per order.
+2. **Query writing:** Show each employee salary with department average, minimum, and maximum.
+   **Progressive hint:** Partition all three window aggregates by department.
+   **Expected shape:** One row per employee.
+3. **Query writing:** Calculate every order's share of its customer's stored revenue.
+   **Progressive hint:** Use a partition total denominator and guard it with `NULLIF`.
+   **Expected shape:** One row per order with shares summing near one per customer.
+4. **Prediction:** Compare `GROUP BY customer_id` with `AVG(...) OVER (PARTITION BY customer_id)` and report their row counts.
+   **Progressive hint:** Grouping collapses to one row per customer; a window preserves every order row.
+   **Expected shape:** Two labeled count rows.
+5. **Debugging:** Return orders above their customer average without placing a window function in `WHERE`.
+   **Progressive hint:** Compute the window value in a CTE, then filter the named column outside.
+   **Expected shape:** Order rows above their customer mean.
+6. **Extension:** Show order count and revenue context at both customer and country levels in the same row.
+   **Progressive hint:** Use different partitions for independent analytical contexts.
+   **Expected shape:** One row per order with customer and country totals.
 
 ## Self-check
 
@@ -86,15 +115,11 @@ Pitfalls
 - Window functions run after WHERE but before ORDER BY LIMIT at the outermost level; to filter on a windowed value, wrap in a subquery.
 - Performance: Heavy windows over millions of rows may spill; ensure indexes on partition/order keys.
 
-Exercises from the learner script
-1) For each order, show its total and the customer's lifetime total alongside
-   it.
-2) For each category, show each product's net line revenue and its share of
-   category revenue.
-
-The maintained answer also computes each order's share of customer lifetime
-revenue as a useful extension. Include unsold products with a dimension-first
-`LEFT JOIN` if the report must cover the entire catalog.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Postgres windows: https://www.postgresql.org/docs/current/tutorial-window.html

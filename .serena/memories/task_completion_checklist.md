@@ -1,7 +1,7 @@
 # Task completion checklist
 
 1. Read root `AGENTS.md` and the closest nested guidance; inspect `git status --short --branch` and preserve unrelated work.
-2. Keep each learner artifact, companion guide, solution artifacts, builder metadata, and generated catalog aligned. For bridge work, keep starters, guides, executable solutions, reasoning guides, and fake-backed tests aligned.
+2. Keep each learner artifact, companion guide, solution artifacts, builder metadata, and generated catalog aligned. Meet the immutable practice target `max(6, 2 x baseline)` on learner, guide, and explanatory-solution surfaces and regenerate `docs/practice-coverage.md`. For bridge work, keep starters, guides, executable solutions, reasoning guides, and fake-backed tests aligned.
 3. Regenerate `curriculum/catalog.json` after artifact or metadata changes and require `python scripts/course.py validate --all` to pass.
 4. For notebook changes, run `scripts/normalize_notebooks.py --check`, `scripts/build_solution_notebooks.py --check` when generated Day 46-60 solutions are affected, and `scripts/validate_notebooks.py`; execute the relevant fresh-kernel smoke path when behavior changed.
 5. Keep notebooks nbformat 4.5 with unique stable IDs, kernel name `ds60sqlpy`, display name `Python (ds60sqlpy)`, course tags, cleared outputs, ignored artifact paths, and no hidden execution order.
@@ -14,7 +14,7 @@
 7. For bridge changes, run `python bridge/scripts/validate_bridge.py`, fake-backed pytest, starter offline execution, and solution import checks without requiring psycopg or a live database unless the lesson explicitly tests integration.
 8. Check Windows PowerShell and POSIX command variants; native command failures in PowerShell must be surfaced. Do not put Bash syntax in PowerShell blocks. Use repository-relative paths and `pathlib`.
 9. Preserve offline-after-bootstrap behavior. Seaborn first-run cached downloads are accepted and disclosed; other network/model/map work must be explicit and tagged, with a fallback where practical.
-10. Run Ruff, Ruff formatting, strict mypy, pytest, Markdown-link/catalog validation, `git diff --check`, JSON/YAML/TOML/Compose syntax checks, and `uv lock --check` proportionally to the change.
+10. Run Ruff, Ruff formatting, strict mypy, pytest, Markdown-link/catalog validation, the practice audit, generated portal drift check, `git diff --check`, JSON/YAML/TOML/Compose syntax checks, and `uv lock --check` proportionally to the change. Portal changes must also test loopback/token/origin/path/launch allowlist boundaries while preserving static `file://` use.
 11. Do not commit `.venv`, `__pycache__`, tool caches, notebook checkpoints, downloaded data/models, secrets, `.env`, learner progress, `mlruns/`, or generated lesson artifacts.
 12. Report evidence precisely: distinguish structural validation, smoke execution, full execution, offline validation, and untested platform/heavy surfaces.
 13. Before handoff, inspect the final diff, update maintained

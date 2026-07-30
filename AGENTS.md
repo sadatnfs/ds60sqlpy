@@ -24,6 +24,12 @@ historical “60-day” shape.
 - `docs/setup/`: operating-system setup
 - `docs/content-authoring.md`: lesson contract
 - `docs/validation.md`: verification policy
+- `curriculum/practice_baseline.json` and `scripts/audit_practice.py`:
+  immutable pre-enrichment counts and the per-surface exercise-doubling gate
+- `scripts/build_course_guide.py`: source for generated `START_HERE.html`; never
+  hand-edit the HTML
+- `src/ds60sqlpy/portal.py`: optional loopback launcher and shared
+  `.learning/progress.json` boundary
 - `docs/curriculum-gap-backlog.md`: implemented gap record and maintenance
   rules
 - `.agents/skills/guide-ds60sqlpy-learning/`: Codex tutoring workflow
@@ -59,7 +65,11 @@ Use `python -m pip`, repository-relative paths, and `pathlib`. Never add a devel
 
 - Shared prose must include valid Windows PowerShell and POSIX variants when commands differ.
 - Do not use Bash syntax in a PowerShell block.
-- On Windows, prefer `.\.venv\Scripts\python.exe` so activation policy is not a blocker.
+- On Windows, use the interpreter printed by `bootstrap_windows.ps1` so
+  activation policy is not a blocker. A standard environment uses
+  `.\.venv\Scripts\python.exe`; the conda-prefix fallback uses
+  `.\.venv\python.exe`. When the layout is not known, test those two paths in
+  that order rather than assuming one.
 - PostgreSQL notebooks read only `DS60_DATABASE_URL`, pass an engine object to
   `%sql`, hide connection display, bind values, and tag live/non-Python magic
   cells for notebook-aware validation. Never put `%pip` or a password in a
@@ -81,6 +91,9 @@ For each lesson change:
 4. Declare every direct dependency.
 5. Include a self-check or expected behavior.
 6. Update documentation when commands or behavior change.
+7. Meet the audited practice target on the learner, guide, and every
+   explanatory-solution artifact: at least `max(6, 2 × baseline)`, using
+   distinct prompts rather than relabeled answer steps.
 
 Do not expand the curriculum merely to increase lesson count. Add content only when it closes a documented learning gap.
 
@@ -92,7 +105,9 @@ Use the narrowest relevant check during iteration, then run:
 python scripts/course.py doctor
 python scripts/course.py catalog
 python scripts/course.py validate
-python scripts/scan_secrets.py
+python scripts/audit_practice.py
+python scripts/build_course_guide.py --check
+python scripts/scan_secrets.py --history
 ```
 
 SQL commands must use:
@@ -115,6 +130,13 @@ Definition of done:
 - Offline behavior is preserved.
 - Windows and POSIX instructions remain valid.
 - Generated artifacts, caches, credentials, and unrelated diffs are absent.
+
+Portal changes must retain both delivery modes. `START_HERE.html` remains
+self-contained and useful over `file://`; launcher mode binds only to
+`127.0.0.1`, authenticates mutations with an in-memory session token, permits
+no cross-origin writes, blocks hidden/sensitive paths, and maps explicit clicks
+to a fixed VS Code/Jupyter action allowlist. Never add arbitrary shell text,
+arbitrary path launch, remote binding, CORS, or a credential to the portal.
 
 If a heavy or external prerequisite prevents a check, report the exact unverified surface.
 

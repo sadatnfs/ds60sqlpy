@@ -155,5 +155,113 @@ SELECT pro_contract_test_lab.assert_true(
     'reported total differs from line total including zero-line orders'
 );
 
-ROLLBACK;
+-- Exercise 5: every assertion raises on failure under ON_ERROR_STOP, fixtures
+-- live in this rollback-isolated schema, and earlier negative controls prove
+-- the harness can fail.
 
+-- Exercise 6: require the intended SQLSTATE category and fail if no error or a
+-- different error occurs. Full localized error text is deliberately ignored.
+DO $solution$
+BEGIN
+    BEGIN
+        INSERT INTO pro_contract_test_lab.orders (
+            order_key, reported_total
+        )
+        VALUES ('ORD-200', 5.00);
+        RAISE EXCEPTION 'duplicate order key unexpectedly succeeded';
+    EXCEPTION
+        WHEN unique_violation THEN
+            RAISE NOTICE 'Expected unique violation observed';
+    END;
+END
+$solution$;
+
+-- Exercise 7: table-driven exact-boundary cases. The expected outcome is data,
+-- so an accidentally omitted or misclassified case is visible.
+CREATE TABLE pro_contract_test_lab.boundary_probe (
+    quantity integer NOT NULL CHECK (quantity BETWEEN 1 AND 100)
+);
+
+CREATE TABLE pro_contract_test_lab.boundary_results (
+    case_id text PRIMARY KEY,
+    expected_accept boolean NOT NULL,
+    observed_accept boolean NOT NULL
+);
+
+DO $solution$
+DECLARE
+    test_case record;
+    accepted boolean;
+BEGIN
+    FOR test_case IN
+        SELECT *
+        FROM (
+            VALUES
+                ('below'::text, 0, false),
+                ('lower', 1, true),
+                ('upper', 100, true),
+                ('above', 101, false)
+        ) AS cases(case_id, quantity, expected_accept)
+        ORDER BY case_id
+    LOOP
+        accepted := true;
+        BEGIN
+            INSERT INTO pro_contract_test_lab.boundary_probe (quantity)
+            VALUES (test_case.quantity);
+        EXCEPTION
+            WHEN check_violation THEN
+                accepted := false;
+        END;
+
+        INSERT INTO pro_contract_test_lab.boundary_results (
+            case_id, expected_accept, observed_accept
+        )
+        VALUES (test_case.case_id, test_case.expected_accept, accepted);
+    END LOOP;
+END
+$solution$;
+
+SELECT pro_contract_test_lab.assert_true(
+    'all quantity boundaries match',
+    NOT EXISTS (
+        SELECT 1
+        FROM pro_contract_test_lab.boundary_results AS r
+        WHERE r.expected_accept IS DISTINCT FROM r.observed_accept
+    ),
+    'a boundary case differed from its expected acceptance'
+);
+
+-- Exercise 8: concurrency needs two independent sessions, named barriers,
+-- bounded timeouts, captured outcomes, deterministic final assertions, and
+-- cleanup. One transaction cannot simulate every conflicting snapshot.
+
+-- Exercise 9: inspect ordered semantic properties; omit OIDs/statistics and
+-- compare rows before hashing so any drift remains diagnosable.
+SELECT
+    c.ordinal_position,
+    c.column_name,
+    c.data_type,
+    c.is_nullable,
+    c.column_default
+FROM information_schema.columns AS c
+WHERE c.table_schema = 'pro_contract_test_lab'
+  AND c.table_name = 'orders'
+ORDER BY c.ordinal_position;
+
+SELECT
+    con.contype,
+    pg_catalog.pg_get_constraintdef(con.oid) AS definition
+FROM pg_catalog.pg_constraint AS con
+JOIN pg_catalog.pg_class AS rel
+  ON rel.oid = con.conrelid
+JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = rel.relnamespace
+WHERE n.nspname = 'pro_contract_test_lab'
+  AND rel.relname = 'orders'
+ORDER BY con.contype, definition;
+
+-- Exercise 10: destructive migration validation belongs in a restored,
+-- disposable database with baseline/post counts, checksums, rejected keys,
+-- critical application queries, elapsed time, rollback evidence, and approval.
+
+ROLLBACK;

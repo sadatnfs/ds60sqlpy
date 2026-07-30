@@ -61,3 +61,126 @@ Exercise 3 — Stability and iterative methods
 Takeaways
 - Prefer library solvers (sklearn) that use robust decompositions
 - Add regularization (Ridge/Lasso) when features are collinear or high-dimensional
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Add an intercept column of ones and recompute the coefficients.
+
+**How to reason about it:** Adding a ones column changes X from (rows, features) to (rows, features+1). Decide which coefficient is the intercept and verify predictions by multiplying the augmented matrix by the full coefficient vector.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Compare the closed-form result with scikit-learn's `LinearRegression` on the same data.
+
+**How to reason about it:** scikit-learn stores intercept_ separately when fit_intercept=True. Compare both predictions and aligned coefficients on the same inputs; matching rounded coefficients alone can hide a column-order error.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.
+
+**How to reason about it:** The normal equation magnifies numerical problems when columns are nearly dependent and requires a costly inverse. Use condition number as a warning and `lstsq`/QR/SVD-based solvers as the default.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Shape tracing
+
+**Prompt:** For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1).
+
+**Reasoning before implementation:** Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.
+
+`X.T` is `(8, 120)`, `X.T @ X` is `(8, 8)`, `X @ beta` is `(120,)`,
+and `(X @ beta) - y` is `(120,)`. With `beta` shaped `(8, 1)`,
+the prediction is `(120, 1)`. Subtracting a `(120,)` target from it broadcasts
+to `(120, 120)`, a severe bug that can still produce numeric output.
+
+Use `assert prediction.shape == y.shape` at the modeling boundary. Reshape
+deliberately with `ravel()` only when a one-dimensional target is truly the
+contract.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Rank-deficiency debugging
+
+**Prompt:** Construct a design matrix whose third column equals the sum of the first two. Compare `np.linalg.solve(X.T @ X, X.T @ y)` with `np.linalg.lstsq(X, y, rcond=None)` and interpret the rank.
+
+**Reasoning before implementation:** The dependent column makes X.T @ X singular. `lstsq` returns a minimum-norm solution plus rank information without forming an inverse.
+
+An exact linear dependency means multiple coefficient vectors make identical
+predictions. A direct solve can raise `LinAlgError` or become unstable, while
+least squares reports the deficient rank.
+
+```python
+import numpy as np
+
+x1 = np.array([0.0, 1.0, 2.0, 3.0])
+x2 = np.array([1.0, 0.0, 1.0, 2.0])
+X = np.column_stack([x1, x2, x1 + x2])
+y = np.array([1.0, 2.0, 4.0, 6.0])
+coefficients, residuals, rank, singular_values = np.linalg.lstsq(
+    X, y, rcond=None
+)
+assert rank == 2
+assert np.allclose(X @ coefficients, y, atol=1.0)
+```
+
+The coefficient values are not uniquely identifiable. Remove redundant
+features, regularize with a documented purpose, or interpret predictions
+rather than inventing meaning for unstable individual coefficients.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Robust vector operation
+
+**Prompt:** Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector.
+
+**Reasoning before implementation:** Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.
+
+```python
+import numpy as np
+
+
+def cosine_similarity(left: np.ndarray, right: np.ndarray) -> float:
+    if left.ndim != 1 or right.ndim != 1 or left.shape != right.shape:
+        raise ValueError("vectors must be one-dimensional with equal length")
+    denominator = float(np.linalg.norm(left) * np.linalg.norm(right))
+    if denominator == 0.0:
+        raise ValueError("cosine similarity is undefined for a zero vector")
+    return float(np.dot(left, right) / denominator)
+
+
+assert np.isclose(
+    cosine_similarity(np.array([1.0, 0.0]), np.array([0.0, 1.0])),
+    0.0,
+)
+```
+
+Clipping a computed result into `[-1, 1]` can protect a later `arccos` from
+tiny floating-point overshoot, but it must not conceal incorrect shapes or a
+zero denominator.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

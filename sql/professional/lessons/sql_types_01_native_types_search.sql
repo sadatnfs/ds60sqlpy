@@ -199,6 +199,30 @@ WHERE e.name = 'pg_trgm';
 --
 -- 6. Decide which modeled fields deserve a domain, enum, reference table,
 --    array, range, JSONB document, or ordinary normalized relation.
+--
+-- 7. Model recurring availability with datemultirange. Normalize overlapping
+--    input ranges, find gaps inside August 2026, and state whether adjacent
+--    ranges should merge for this domain.
+--
+-- 8. Add inet client addresses and cidr network rules. Return the most-specific
+--    containing network for each address using network operators, prefix length,
+--    and deterministic tie-breaking; identify a suitable index family.
+--
+-- 9. Define a domain for a nonnegative monetary amount with fixed scale.
+--    Compare numeric with bigint minor units and double precision for equality,
+--    aggregation, range, rounding, and application interoperability.
+--
+-- 10. Promote one frequently queried JSONB property into a stored generated
+--     column. Guard shape and type, index the promoted value, and explain how
+--     schema evolution can make a formerly valid payload fail on write.
+--
+-- 11. Inspect to_tsvector output and explain dictionaries, stop words,
+--     stemming, weights, and language configuration. Design a policy for rows
+--     whose language differs from the default English configuration.
+--
+-- 12. Replace the tags array with normalized document_tags rows and a foreign
+--     key to tags. Compare containment queries, order/duplicates, constraints,
+--     write amplification, and when an array remains the clearer model.
 
 DO $self_check$
 BEGIN
@@ -220,4 +244,3 @@ $self_check$;
 
 ROLLBACK;
 \echo 'SQL-TYPES-01 complete: pro_types_lab was rolled back'
-

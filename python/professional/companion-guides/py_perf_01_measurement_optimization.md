@@ -172,6 +172,66 @@ Complete `choose_next_step` in priority order:
 
 Thresholds are a transparent lesson policy, not universal laws.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 10 — compare timing distributions
+
+Run interleaved repeated batches for baseline and candidate, report median, spread, paired ratios/differences, environment, and correctness. Avoid a binary CI speed assertion.
+
+**Progressive hint:** Alternate order to reduce drift and choose repetitions from timer resolution/runtime. Keep raw measurements for review.
+
+### Exercise 11 — diagnose warmup, GC, and environment noise
+
+Measure cold import/first call separately from steady state. Repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.
+
+**Progressive hint:** GC configuration can change real semantics/latency. Report it; do not simply disable GC to obtain a preferred number.
+
+### Exercise 12 — trade algorithm speed for memory
+
+Compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget. Preserve 'first second occurrence' semantics and report time/peak memory across unique-heavy and duplicate-early inputs.
+
+**Progressive hint:** An algorithm with lower expected time can retain O(n) state. Alternative semantics or external sorting must be stated honestly.
+
+### Exercise 13 — test vectorized dtype boundaries
+
+Compare Python integer sum-of-squares with NumPy int32, int64, float, and object arrays near overflow. Detect silent overflow and choose a validated dtype.
+
+**Progressive hint:** Python integers grow; fixed-width NumPy integers wrap unless the operation/dtype is widened deliberately.
+
+### Exercise 14 — evaluate shared-memory process input
+
+Compare normal process serialization with read-only shared memory for one large numeric payload. Include setup/copy, worker mapping, cleanup, spawn compatibility, and ownership failure cases.
+
+**Progressive hint:** Pass only shared-memory name/shape/dtype to spawned workers. One owner closes/unlinks after every worker releases.
+
+### Exercise 15 — separate I/O concurrency from CPU optimization
+
+Benchmark a local fake I/O wait and a pure-Python CPU loop under sequential, async/thread, and process designs. Explain why each model helps one workload and may hurt another.
+
+**Progressive hint:** Use deterministic waits and fixed computations; include scheduling/startup and bounded active work.
+
+### Exercise 16 — prevent a cache stampede
+
+Model many callers missing one expensive cache key. Add single-flight ownership, bounded wait, success publication, failure cleanup, and stale/retry policy with injected time.
+
+**Progressive hint:** One caller computes; others await the same owned result. A failed owner must wake waiters and remove poisoned in-flight state.
+
+### Exercise 17 — review an FFI ownership boundary
+
+Specify one batched native function: accepted buffer dtype/layout, length, ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception containment, and platform wheel matrix.
+
+**Progressive hint:** Batch work across the boundary and validate before calling native code. Never let a borrowed buffer outlive its Python owner.
+
+### Exercise 18 — design a continuous performance gate
+
+Define a stable local/CI benchmark artifact with workload version, correctness hash, environment, raw timings, peak memory, practical regression budget, comparison policy, and an investigation path instead of an immediate flaky fail.
+
+**Progressive hint:** Separate noisy pull-request signal from controlled scheduled runs. Gate only after runner variance and minimum practical effect are characterized.
+
 ## Self-check
 
 - Baseline and candidate return the same first duplicate for every test case.

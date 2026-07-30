@@ -248,6 +248,23 @@ $lesson$;
 -- 4. Classify daily_fee_at_checkout as normalized duplication, an accidental
 --    inconsistency, or deliberate denormalization. State the invariant and the
 --    historical question that justify your choice.
+--
+-- 5. A provider can perform many visits and a visit can involve several
+--    technicians. Model providers, technicians, and visit assignments without
+--    storing comma-separated names. State the grain and keys of every table.
+--
+-- 6. Write a query that reports every equipment item, including items with no
+--    loans, plus its loan count and latest checkout date. Explain why filtering
+--    the loan table in WHERE can accidentally turn the LEFT JOIN into an inner
+--    join, and make ties deterministic.
+--
+-- 7. Choose ON DELETE behavior for category -> equipment, equipment -> loans,
+--    and equipment -> maintenance_visits. Defend each RESTRICT, CASCADE, or
+--    SET NULL decision in terms of historical truth rather than convenience.
+--
+-- 8. Write catalog queries that prove the maintenance_visits primary key,
+--    foreign key, checks, generated column, and NULL-aware uniqueness contract.
+--    Do not depend on PostgreSQL-generated constraint names.
 
 \echo 'Self-check: the worked model has the expected deterministic row counts'
 DO $lesson$
@@ -275,4 +292,3 @@ $lesson$;
 
 ROLLBACK;
 \echo 'SQL-FOUND-01 complete: pro_relational_lab was rolled back'
-

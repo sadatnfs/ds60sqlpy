@@ -13,7 +13,7 @@
 - The repository environment created during connected setup
 - Comfort running a Python file from the repository root
 
-The complete lesson is offline after `build`, `setuptools`, and `wheel` have
+The complete lesson is offline after `build`, `pip`, `setuptools`, and `wheel` have
 been installed. It does not publish anything or contact a package index.
 
 ## Learning objectives
@@ -183,6 +183,42 @@ tree, put only that target on `PYTHONPATH`, and print:
 
 Implement `installed_origin_is_safe` so it accepts only a resolved path under
 the fresh target.
+
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 6 — build a wheel from the source distribution
+
+Build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with `--no-isolation`, and compare the result with the direct wheel build. Record every required local tool.
+
+**Progressive hint:** A direct wheel and an sdist exercise different inclusion paths. Use temporary directories and inspect archive members before rebuilding.
+
+### Exercise 7 — inspect installed metadata without importing
+
+Use `importlib.metadata` against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package. Reject unexpected or missing metadata.
+
+**Progressive hint:** Distribution metadata and import packages are related but distinct. Place only the target on the child process search path.
+
+### Exercise 8 — separate reproducibility from equivalence
+
+Build twice from the same clean staged source. Compare file hashes, archive member lists, metadata contents, and installed behavior. Explain which differences are harmless and which invalidate the release.
+
+**Progressive hint:** Start with semantic equivalence. Byte-for-byte reproducibility requires controlled timestamps, toolchains, environment variables, and ordering.
+
+### Exercise 9 — test dependency markers across targets
+
+Create a review matrix for the fixture's build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.
+
+**Progressive hint:** Parse marker intent with packaging metadata; do not infer it from the developer machine where the lesson happens to run.
+
+### Exercise 10 — design a local release gate
+
+Write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.
+
+**Progressive hint:** Every gate should produce bounded evidence and fail closed. Keep index credentials, signing services, and publication outside this local lab.
 
 ## Self-check
 

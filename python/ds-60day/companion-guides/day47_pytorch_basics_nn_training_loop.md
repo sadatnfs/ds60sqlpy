@@ -75,7 +75,7 @@ The learner notebook scales before splitting for compactness. In your exercise,
 improve the boundary: split first, fit `StandardScaler` only on training
 features, then transform train and test separately.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Add dropout to the MLP and compare results.
 2. Implement a small minibatch training loop with `DataLoader`.
@@ -91,6 +91,25 @@ features, then transform train and test separately.
 The separate solution proceeds to early stopping, `StepLR`, and CUDA mixed
 precision. Mixed precision is an optional GPU optimization; the code path must
 remain correct on CPU.
+
+### Additional mastery practice
+
+Build a training loop whose dtype, shape, mode, randomness, and checkpoint state can be inspected and resumed on CPU without hidden notebook state.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+3. **Shape and dtype contract:** Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.
+   **Progressive hint:** CrossEntropyLoss expects floating logits `(batch, classes)` and integer class indices `(batch,)` with dtype long.
+4. **Validation implementation:** Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller's prior train/eval mode, and never retains an autograd graph.
+   **Progressive hint:** Remember `was_training = model.training`, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.
+5. **DataLoader reproducibility:** Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes.
+   **Progressive hint:** Pass a seeded `torch.Generator`; worker initialization and external NumPy/Python randomness need their own deliberate seeds.
+6. **Portable checkpoint:** Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain `state_dict` versus serializing the entire model object.
+   **Progressive hint:** Save plain state dictionaries plus architecture/config metadata. Use `map_location='cpu'` and recreate the model class before loading.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

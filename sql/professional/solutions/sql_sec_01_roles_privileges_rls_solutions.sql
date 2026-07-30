@@ -193,6 +193,95 @@ SELECT COALESCE(
         END
         $solution$;
 
+        -- Exercise 5: run RLS assertions as low-privilege roles. Owners,
+        -- superusers, and BYPASSRLS roles are not valid tenant test identities.
+
+        -- Exercise 6: has_*_privilege reports effective access, including
+        -- ownership, membership, and PUBLIC. Keep privilege kinds separate.
+        SELECT
+            role_name,
+            pg_catalog.has_schema_privilege(
+                role_name, 'pro_security_lab', 'USAGE'
+            ) AS schema_usage,
+            pg_catalog.has_table_privilege(
+                role_name, 'pro_security_lab.documents', 'SELECT'
+            ) AS table_select,
+            pg_catalog.has_column_privilege(
+                role_name,
+                'pro_security_lab.documents',
+                'title',
+                'SELECT'
+            ) AS title_select,
+            pg_catalog.has_sequence_privilege(
+                role_name,
+                'pro_security_lab.documents_document_id_seq',
+                'USAGE'
+            ) AS identity_sequence_usage,
+            pg_catalog.has_function_privilege(
+                role_name,
+                'pro_security_lab.document_count_for_tenant(text)',
+                'EXECUTE'
+            ) AS count_function_execute
+        FROM (
+            VALUES
+                ('ds60_sec_north'::text),
+                ('ds60_sec_south'::text),
+                ('ds60_sec_auditor'::text)
+        ) AS roles(role_name)
+        ORDER BY role_name;
+
+        -- Exercise 7: SESSION_USER remains the authenticated identity while
+        -- CURRENT_USER follows SET ROLE and becomes a SECURITY DEFINER owner
+        -- inside that function. Audit both identities when the distinction
+        -- matters.
+        SELECT
+            SESSION_USER AS authenticated_identity,
+            CURRENT_USER AS effective_identity;
+        SET LOCAL ROLE ds60_sec_auditor;
+        SELECT
+            SESSION_USER AS authenticated_identity,
+            CURRENT_USER AS effective_identity;
+        RESET ROLE;
+
+        -- Exercise 8: unknown/NULL identities map to NULL, so the policy
+        -- predicate is not true. A pooled-session tenant setting would need the
+        -- same validation plus guaranteed reset.
+        SELECT
+            candidate,
+            candidate = CASE candidate
+                WHEN 'ds60_sec_north' THEN 'ds60_sec_north'
+                WHEN 'ds60_sec_south' THEN 'ds60_sec_south'
+                ELSE NULL
+            END AS accepted_identity
+        FROM (
+            VALUES
+                ('ds60_sec_north'::text),
+                ('DS60_SEC_NORTH'::text),
+                ('unknown'::text),
+                (NULL::text)
+        ) AS identities(candidate)
+        ORDER BY candidate NULLS LAST;
+
+        -- Exercise 9: a production writer needs column-level INSERT, sequence
+        -- USAGE, a tenant WITH CHECK policy, and SELECT only for permitted
+        -- RETURNING columns. The course auditor intentionally has none.
+        DO $solution$
+        BEGIN
+            IF pg_catalog.has_table_privilege(
+                'ds60_sec_auditor',
+                'pro_security_lab.documents',
+                'INSERT,UPDATE,DELETE'
+            ) THEN
+                RAISE EXCEPTION 'auditor unexpectedly has a write privilege';
+            END IF;
+        END
+        $solution$;
+
+        -- Exercise 10: offboarding must cover login/session access, memberships,
+        -- ownership, direct/default grants, dependent APIs, verification, audit,
+        -- and a preserved recovery administrator. It is deliberately runbook
+        -- text rather than destructive cluster-wide SQL.
+
         ROLLBACK;
         \echo 'SQL-SEC-01 solution complete: all roles and objects rolled back'
     \else
@@ -208,4 +297,3 @@ SELECT COALESCE(
     FROM pg_catalog.pg_roles AS r
     WHERE r.rolname = CURRENT_USER;
 \endif
-

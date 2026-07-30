@@ -61,7 +61,7 @@ The scaler and PCA must be fitted inside each training fold when measuring model
 performance. Fitting them once on the full dataset gives validation folds
 information about global means, variances, and component directions.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Plot cumulative explained variance and choose a component count.
 2. Compare PCA before and after feature standardization.
@@ -76,6 +76,23 @@ information about global means, variances, and component directions.
    features use different physical units and spreads.
 3. Put each alternative in its own pipeline. `f_classif` sees the target; PCA
    does not, so the comparison includes an interpretability tradeoff.
+
+### Additional mastery practice
+
+Use dimensionality reduction as a fitted transformation with measurable information loss. Keep scaling and supervised feature selection inside validation.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Reconstruction analysis:** Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components.
+   **Progressive hint:** Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.
+5. **Interpretation edge case:** Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent.
+   **Progressive hint:** Eigenvectors are direction axes: v and -v describe the same axis. Compare subspaces or absolute loading patterns, not raw signs alone.
+6. **Leakage debugging:** Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference.
+   **Progressive hint:** Selection performed globally can choose noise features that happen to correlate with all labels, including validation labels.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

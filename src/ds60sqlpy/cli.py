@@ -13,6 +13,7 @@ from typing import Any
 from ds60sqlpy.catalog import Catalog, Track, find_repo_root
 from ds60sqlpy.checks import CheckResult, run_checks
 from ds60sqlpy.doctor import Diagnostic, diagnose
+from ds60sqlpy.portal import serve_portal
 from ds60sqlpy.progress import ProgressStore
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
 
@@ -110,12 +111,23 @@ def _cmd_progress(args: argparse.Namespace, catalog: Catalog) -> int:
             print(f"  {completion.lesson_id} ({completion.completed_at}){suffix}")
     else:
         print("No local progress recorded yet.")
-    for track in ("python", "sql", "bridge"):
+    tracks: tuple[Track, ...] = ("python", "sql", "bridge")
+    for track in tracks:
         next_lesson = store.next_lesson(track)
         if next_lesson:
             print(f"Next {track}: {next_lesson.id} — {next_lesson.title}")
         else:
             print(f"{track.capitalize()} track complete.")
+    return 0
+
+
+def _cmd_portal(args: argparse.Namespace, catalog: Catalog) -> int:
+    serve_portal(
+        catalog,
+        port=args.port,
+        open_browser=not args.no_browser,
+        allow_launches=not args.no_launches,
+    )
     return 0
 
 
@@ -229,6 +241,27 @@ def _parser() -> argparse.ArgumentParser:
     reset_parser = progress_subparsers.add_parser("reset", help="Delete local progress.")
     reset_parser.add_argument("--yes", action="store_true")
 
+    portal_parser = subparsers.add_parser(
+        "portal",
+        help="Open the private progress dashboard on 127.0.0.1.",
+    )
+    portal_parser.add_argument(
+        "--port",
+        type=int,
+        default=0,
+        help="Loopback port; 0 chooses a free port.",
+    )
+    portal_parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Print the URL without opening the browser.",
+    )
+    portal_parser.add_argument(
+        "--no-launches",
+        action="store_true",
+        help="Disable native VS Code and Jupyter actions.",
+    )
+
     sql_parser = subparsers.add_parser("sql", help="Run PostgreSQL course scripts with psql.")
     sql_parser.add_argument(
         "--database",
@@ -281,6 +314,7 @@ def main(argv: list[str] | None = None) -> int:
         "catalog": _cmd_catalog,
         "validate": _cmd_validate,
         "progress": _cmd_progress,
+        "portal": _cmd_portal,
         "sql": _cmd_sql,
     }
     return handlers[args.command](args, catalog)

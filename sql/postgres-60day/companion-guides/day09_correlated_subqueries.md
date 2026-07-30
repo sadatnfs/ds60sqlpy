@@ -26,11 +26,40 @@ subquery may stop after its first qualifying order, and it never adds order
 columns or duplicates the customer. Replace it temporarily with a join to see
 why `DISTINCT` may become necessary in the join form.
 
+## Practice assumptions and review method
+
+- **Focus:** Use correlated subqueries for row-specific existence or comparison while keeping correlation keys and NULL behavior explicit.
+- **Assumptions:** `EXISTS` tests whether at least one row qualifies and ignores selected values. `NOT EXISTS` remains safe when inner columns can be NULL.
+- **Failure to watch for:** A correlated subquery can run conceptually per outer row; do not use it when a join or pre-aggregation states the grain more clearly.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day09_correlated_subqueries.sql).
-Implement one exclusion with `NOT EXISTS` and test it against a nullable-key
-counterexample before considering `NOT IN`.
+Use correlated subqueries for row-specific existence or comparison while keeping correlation keys and NULL behavior explicit.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Return customers who have at least one delivered order.
+   **Progressive hint:** `EXISTS` expresses the yes/no question without multiplying customer rows.
+   **Expected shape:** One row per qualifying customer.
+2. **Query writing:** Return products that have never been sold.
+   **Progressive hint:** `NOT EXISTS` correlates on product ID and is not confused by NULL membership.
+   **Expected shape:** One row per unsold product.
+3. **Query writing:** Return each customer's orders that are above that customer's average order total.
+   **Progressive hint:** Correlate the average to the current order's customer, not to the current order ID.
+   **Expected shape:** Order rows above their own customer average.
+4. **Prediction:** Explain and avoid the `NOT IN` plus NULL trap by finding customers without orders using `NOT EXISTS`.
+   **Progressive hint:** Correlate on the customer key; a matching row alone determines exclusion.
+   **Expected shape:** One row per customer with no order.
+5. **Debugging:** Return only each customer's most recent order without an arbitrary `LIMIT 1`.
+   **Progressive hint:** Compare to the correlated `MAX(order_date)` and break timestamp ties with the maximum ID at that timestamp.
+   **Expected shape:** At most one deterministic order per customer.
+6. **Extension:** Return customers for whom every order has at least one payment, excluding customers with no orders.
+   **Progressive hint:** Require an order to exist, then prove no order lacks a payment using double `NOT EXISTS`.
+   **Expected shape:** One row per customer satisfying the universal condition.
 
 ## Self-check
 
@@ -61,13 +90,11 @@ Pitfalls
 - Correlated subqueries in SELECT list scale poorly; precompute and join.
 - NOT IN with NULLs can drop all rows unexpectedly; prefer NOT EXISTS with correlated subquery.
 
-Exercises from the learner script
-1) Find customers with any order over 1,000 using a correlated `EXISTS`.
-2) Find products never purchased using correlated `NOT EXISTS`.
-
-Use `orders.total_amount > 1000` for the first prompt. For the second, correlate
-`order_items.product_id` to the outer `products.product_id`; do not use
-`NOT IN`, whose NULL behavior is less robust.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - EXISTS: https://www.postgresql.org/docs/current/functions-subquery.html

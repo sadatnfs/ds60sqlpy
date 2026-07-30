@@ -11,13 +11,25 @@ ownership.
 
 ## 1. Install the notebook database profile
 
-The aggregate advanced setup installs the required packages.
+The Windows discovery bootstrap's default `Core` profile installs the required
+packages. On macOS/Linux, use the aggregate advanced setup.
 
 Windows PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+& .\scripts\bootstrap_windows.ps1
+
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
 ```
+
+The resolver supports both a standard `venv` and the Anaconda conda-prefix
+fallback. Reuse `$CoursePython` for the remaining Windows commands in this
+PowerShell window.
 
 macOS/Linux:
 
@@ -29,7 +41,7 @@ For a smaller targeted installation after normal setup:
 
 ```powershell
 # Windows PowerShell
-.\.venv\Scripts\python.exe -m pip install -e ".[sql-notebooks]"
+& $CoursePython -m pip install -e ".[sql-notebooks]"
 ```
 
 ```bash
@@ -89,7 +101,7 @@ silently.
 Windows PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m jupyter lab .\bridge\professional\notebooks
+& $CoursePython -m jupyter lab .\bridge\professional\notebooks
 ```
 
 macOS/Linux:
@@ -100,7 +112,7 @@ macOS/Linux:
 
 In VS Code, open
 `bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb`
-and select the `ds60sqlpy` kernel.
+and select **Python (ds60sqlpy)** (internal kernel name `ds60sqlpy`).
 
 The notebook parses the environment value, refuses any target except the
 disposable course database, and selects the explicit Psycopg 3 driver:
@@ -164,7 +176,7 @@ Run the notebook checks while connected:
 
 ```powershell
 # Windows PowerShell
-.\.venv\Scripts\python.exe scripts\validate_notebooks.py
+& $CoursePython scripts\validate_notebooks.py
 ```
 
 ```bash

@@ -80,3 +80,126 @@ Takeaways
 - Tune inside the cross-validation loop to avoid optimistic bias (nested CV)
 - Keep all preprocessing inside Pipelines
 - Pick metrics aligned with the problem and validate on held-out data
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Use `RandomizedSearchCV` with a wider parameter space.
+
+**How to reason about it:** Randomized search samples a bounded number of candidates, so state the distributions and seed. Log-scaled parameters should be sampled over orders of magnitude rather than uniformly on the raw scale.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Implement nested cross-validation and compare its result with the non-nested search score.
+
+**How to reason about it:** Nested CV evaluates the complete search procedure. Use distinct inner and outer splitters, and pass the unfitted search object into the outer evaluation so selection repeats independently.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Search-budget calculation
+
+**Prompt:** For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running.
+
+**Reasoning before implementation:** Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.
+
+The naive grid has `5*4*3 = 60` candidates and `60*5 = 300` validation fits,
+plus one refit of the selected configuration. Invalid combinations waste time
+and can fill results with errors.
+
+Represent compatible spaces as a list of dictionaries—one dictionary per
+solver family—or use a constrained sampler. Estimate runtime from a small
+pilot before launching the full budget, especially on Windows laptops.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 4 — Multi-metric selection
+
+**Prompt:** Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan.
+
+**Reasoning before implementation:** Pass a scoring dictionary and set `refit` to a metric name. Selection changes when metrics rank candidates differently.
+
+```python
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.pipeline import Pipeline
+
+scoring = {
+    "roc_auc": "roc_auc",
+    "average_precision": "average_precision",
+    "balanced_accuracy": "balanced_accuracy",
+}
+pipeline = Pipeline(
+    [("model", LogisticRegression(max_iter=1_000, random_state=40))]
+)
+param_grid = {"model__C": [0.1, 1.0, 10.0]}
+inner_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=40)
+search = GridSearchCV(
+    pipeline,
+    param_grid,
+    scoring=scoring,
+    refit="average_precision",
+    cv=inner_cv,
+    return_train_score=True,
+)
+```
+
+The refitted estimator is selected by average precision here. Other metrics
+remain diagnostics, not additional opportunities to choose whichever winner
+looks best after the run.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Results-table diagnosis
+
+**Prompt:** Turn `cv_results_` into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates.
+
+**Reasoning before implementation:** Large train-validation gaps suggest overfit; large fold standard deviation suggests sensitivity. Sort by the declared rank, not by eye.
+
+Use a DataFrame and select only columns relevant to the decision. Compute a
+generalization gap as `mean_train_score - mean_test_score`, but interpret it
+relative to metric scale and fold spread.
+
+A candidate with a trivial score improvement, double the fit time, and much
+higher variability may be a poor operational choice. Preserve the full table
+as evidence instead of retaining only `best_params_`.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Reproducibility debugging
+
+**Prompt:** A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison.
+
+**Reasoning before implementation:** Seed the sampler, splitters, and estimator. Threaded numeric libraries and GPU algorithms can still introduce small nondeterminism.
+
+Record random states for `RandomizedSearchCV`, shuffled CV, data generation,
+and every stochastic estimator. Pin the data snapshot and dependency versions.
+For strict debugging, reduce parallelism and compare full score tables with a
+tolerance rather than requiring bitwise-identical floats.
+
+Determinism improves diagnosis, but robustness is stronger evidence: repeat a
+small set of seeds and prefer conclusions that do not depend on one lucky
+partition.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

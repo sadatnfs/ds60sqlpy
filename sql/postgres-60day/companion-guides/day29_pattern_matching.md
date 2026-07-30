@@ -26,11 +26,40 @@ Compare `email ~ 'customer1[0-9]{2}'` with the anchored
 value and show why an unanchored validation can accept only a matching
 substring.
 
+## Practice assumptions and review method
+
+- **Focus:** Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.
+- **Assumptions:** PostgreSQL `LIKE` is case-sensitive, `ILIKE` is case-insensitive, and POSIX regex operators use `~`/`~*`. Collation can affect text behavior.
+- **Failure to watch for:** Leading wildcards can prevent ordinary b-tree use; unanchored or overly broad regex patterns can match more text than intended.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day29_pattern_matching.sql). Build
-a small valid/invalid `VALUES` suite and return every expected versus observed
-match.
+Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Find customer names beginning with `Customer 1` case-insensitively.
+   **Progressive hint:** `ILIKE 'Customer 1%'` uses `%` for any suffix.
+   **Expected shape:** Matching customer rows in stable ID order.
+2. **Query writing:** Find emails that match the course's simple lowercase example.com pattern.
+   **Progressive hint:** Anchor both ends and escape the literal dot in the POSIX regex.
+   **Expected shape:** Only matching non-null email rows.
+3. **Query writing:** Return event paths under `/p/` using JSON extraction and an anchored pattern.
+   **Progressive hint:** Extract path text, then anchor the literal prefix.
+   **Expected shape:** Events whose path begins `/p/`.
+4. **Prediction:** Match literal percent and underscore characters in sample text and contrast them with wildcard behavior.
+   **Progressive hint:** Declare an escape character and prefix each literal wildcard.
+   **Expected shape:** Only the two rows containing the requested literal symbols.
+5. **Debugging:** Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.
+   **Progressive hint:** First assert the anchored grammar, then use `substring(... FROM regex)`.
+   **Expected shape:** One row per valid course customer name.
+6. **Extension:** Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.
+   **Progressive hint:** Handle NULL first, then most specific anchored pattern, then a bounded general pattern.
+   **Expected shape:** One row per customer with one classification.
 
 ## Self-check
 
@@ -77,14 +106,11 @@ Pitfalls
 - Locale issues in case-folding; consider citext for equality semantics
 - Regex backtracking on catastrophic patterns; keep patterns simple and specific
 
-Exercises from the learner script
-1) Find customer emails that begin with `customer1`, followed by exactly two
-   digits.
-2) Use full-text search to find products matching both `home` and `product`.
-
-The maintained regex assumes the seeded `@example.com` domain and anchors the
-whole string: `^customer1[0-9]{2}@example\.com$`. In the full-text query, `&`
-means both lexemes are required; `|` would change the prompt to OR.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Pattern matching: https://www.postgresql.org/docs/current/functions-matching.html

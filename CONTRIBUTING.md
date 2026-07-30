@@ -24,7 +24,8 @@ Contributions should make the course more accurate, runnable, teachable, and por
 Windows:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+& .\scripts\bootstrap_windows.ps1
 .\.venv\Scripts\python.exe scripts\course.py doctor
 .\.venv\Scripts\python.exe scripts\course.py catalog
 ```
@@ -64,6 +65,10 @@ Every learner-facing lesson should provide:
 10. A separately located solution
 
 Do not put the complete answer directly below an exercise in the learner artifact. Preserve the hint-first experience.
+Every cataloged learner, guide, and explanatory-solution artifact must also
+meet its immutable `curriculum/practice_baseline.json` target:
+`max(6, 2 × audited baseline)`. Run `python scripts/audit_practice.py`; do not
+lower the baseline or inflate counts with answer steps.
 
 ## Cross-platform requirements
 
@@ -142,6 +147,10 @@ Do not hand-edit the lock.
 - Keep commands rooted at the repository root.
 - Avoid duplicating long setup procedures; link to the canonical OS guide.
 - Replace stale progress prose with catalog-derived status where possible.
+- Edit `scripts/build_course_guide.py`, not generated `START_HERE.html`, and
+  run its `--check` mode.
+- Preserve both portal modes and the loopback/token/origin/path/launch
+  allowlist boundary documented in `docs/learning-portal.md`.
 
 ## Catalog changes
 
@@ -164,7 +173,9 @@ Run:
 ```text
 python scripts/course.py doctor
 python scripts/course.py validate
-python scripts/scan_secrets.py
+python scripts/audit_practice.py
+python scripts/build_course_guide.py --check
+python scripts/scan_secrets.py --history
 ```
 
 Then check:

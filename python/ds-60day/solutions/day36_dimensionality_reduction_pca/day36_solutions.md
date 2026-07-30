@@ -85,3 +85,124 @@ print('KBest acc:', cross_val_score(clf_kbest, X, y, cv=5).mean())
 Notes
 - PCA is unsupervised; SelectKBest uses label information
 - Pick based on validation performance and downstream interpretability
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Plot cumulative explained variance and choose a component count.
+
+**How to reason about it:** Fit the maximum useful component count first, compute cumulative explained variance, and choose a threshold before reading the answer. Variance retained is not the same as predictive signal retained.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Compare PCA before and after feature standardization.
+
+**How to reason about it:** PCA is driven by variance, so features with larger units can dominate without scaling. Compare both variance ratios and downstream validation using pipelines; never scale from the full dataset before the split.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Try `SelectKBest` on a classification dataset and compare its validated performance with PCA.
+
+**How to reason about it:** SelectKBest sees the target while PCA does not. Both must be fitted inside each training fold, and the comparison should include stability and interpretability rather than only the largest score.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Reconstruction analysis
+
+**Prompt:** Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components.
+
+**Reasoning before implementation:** Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.
+
+Reconstruction error measures information discarded in the coordinate system
+PCA optimized. It should be non-increasing as components are added, apart from
+tiny floating-point noise.
+
+```python
+import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+
+X, _ = load_iris(return_X_y=True)
+scaled = StandardScaler().fit_transform(X)
+errors = []
+for components in range(1, scaled.shape[1] + 1):
+    pca = PCA(n_components=components, random_state=36)
+    reconstructed = pca.inverse_transform(pca.fit_transform(scaled))
+    errors.append(float(np.mean((scaled - reconstructed) ** 2)))
+assert all(a + 1e-12 >= b for a, b in zip(errors, errors[1:]))
+```
+
+Low reconstruction error does not guarantee good class separation. Evaluate
+the reduced representation against the actual downstream objective.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Interpretation edge case
+
+**Prompt:** Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent.
+
+**Reasoning before implementation:** Eigenvectors are direction axes: v and -v describe the same axis. Compare subspaces or absolute loading patterns, not raw signs alone.
+
+PCA's sign is not identifiable. If a component vector is multiplied by -1,
+its projected scores are also multiplied by -1, so reconstruction and explained
+variance are unchanged. Libraries may choose different signs across versions
+or equivalent fits.
+
+When monitoring a pipeline, align component signs before comparing loadings or
+compare invariant quantities such as absolute cosine similarity and projection
+matrices. Do not interpret a sign flip as learned behavioral drift.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Leakage debugging
+
+**Prompt:** Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference.
+
+**Reasoning before implementation:** Selection performed globally can choose noise features that happen to correlate with all labels, including validation labels.
+
+The globally selected feature set has already inspected every target, so the
+fold score is contaminated even if the classifier itself is refit. The correct
+object is:
+
+```python
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    [
+        ("select", SelectKBest(score_func=f_classif, k=10)),
+        ("model", LogisticRegression(max_iter=1_000)),
+    ]
+)
+```
+
+Pass raw features and this complete pipeline to cross-validation. Repeat the
+simulation across seeds; one dataset can understate or overstate the leakage.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

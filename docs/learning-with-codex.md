@@ -4,6 +4,30 @@ Codex can act as a tutor, reviewer, debugger, and study planner for this reposit
 
 Codex itself may require a network connection even when a lesson does not. “Offline course” and “online tutor” are separate capabilities.
 
+Start with `START_HERE.html` for a completely static offline dashboard. After
+the repository environment exists, the private launcher mode gives the browser
+and Codex the same ignored progress file:
+
+```powershell
+# Windows PowerShell
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\learning_portal.py
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python scripts/learning_portal.py
+```
+
+The launcher binds only to `127.0.0.1`. It can open the repository, one
+cataloged lesson artifact, or the two documented JupyterLab folders; it cannot
+accept arbitrary commands or paths. Pass `--no-launches` if you only want
+file-backed progress.
+
 ## Start Codex in the repository root
 
 Open the directory containing `README.md`. From there, Codex can discover:
@@ -131,7 +155,8 @@ A useful local progress note records:
 - One misconception or blocker
 - Next review date
 
-The course CLI can keep a minimal ignored progress record:
+The course CLI and private portal share the same minimal ignored progress
+record:
 
 ```text
 python scripts/course.py progress show
@@ -139,6 +164,12 @@ python scripts/course.py progress complete python-01 --notes "Can explain values
 ```
 
 Use the stable lesson ID printed by `catalog`. Codex should ask before marking a lesson complete and should base completion on your explanation or working attempt—not on merely opening the file.
+On Windows, substitute `& $CoursePython` from the launcher block for `python`
+when the repository environment is not activated.
+
+The portal's **Export progress** button creates a portable JSON backup. In
+static-file mode, import/export is also the deliberate bridge between browsers.
+Never commit either the `.learning/` directory or a personal progress export.
 
 ## Avoid answer leakage
 

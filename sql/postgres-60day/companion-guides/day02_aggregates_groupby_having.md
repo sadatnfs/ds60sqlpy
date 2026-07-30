@@ -28,11 +28,40 @@ Next group those rows by product category, calculate the revenue aggregate, and
 only then apply `HAVING`. Compare that flow with a date predicate in `WHERE`,
 which removes rows before the category totals are computed.
 
+## Practice assumptions and review method
+
+- **Focus:** Aggregate rows only after naming the grouping grain, then filter groups with `HAVING` and preserve numeric meaning.
+- **Assumptions:** Money columns are exact `numeric`; round only presentation values. `COUNT(column)` excludes NULL while `COUNT(*)` counts rows.
+- **Failure to watch for:** Selecting a non-grouped, non-aggregated column or using `WHERE` for an aggregate condition changes or invalidates the question.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the three prompts in the [learner SQL](../day02_aggregates_groupby_having.sql).
-Add a `COUNT(*)` beside `COUNT(column)` for a nullable column and explain any
-difference.
+Aggregate rows only after naming the grouping grain, then filter groups with `HAVING` and preserve numeric meaning.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Count customers by country and order countries by count then country.
+   **Progressive hint:** The output grain is one row per country; include a deterministic secondary sort.
+   **Expected shape:** One row per country.
+2. **Query writing:** Calculate net revenue and average unit price by product category, keeping categories above 100,000 in revenue.
+   **Progressive hint:** Join at line grain, aggregate once per category, and place the aggregate predicate in `HAVING`.
+   **Expected shape:** One row per qualifying category.
+3. **Query writing:** Summarize order count and average total by status, retaining statuses with at least 100 orders.
+   **Progressive hint:** Filter groups after aggregation with `HAVING COUNT(*)`.
+   **Expected shape:** One row per qualifying order status.
+4. **Prediction:** Show `COUNT(*)`, `COUNT(email)`, and missing-email count together; predict their relationship.
+   **Progressive hint:** `COUNT(email)` ignores NULL, while a filtered count makes missingness explicit.
+   **Expected shape:** One row; present plus missing equals total.
+5. **Debugging:** Repair a query that tries to filter `SUM(amount)` in `WHERE` by moving the aggregate condition to the correct clause.
+   **Progressive hint:** `WHERE` filters expense rows before grouping; `HAVING` filters category groups afterward.
+   **Expected shape:** One row per expense category over the threshold.
+6. **Extension:** Produce monthly order count, total revenue, and returned-order count for the last 12 complete or partial months.
+   **Progressive hint:** Group by a month expression, use conditional aggregation, and keep the timestamp predicate sargable.
+   **Expected shape:** Up to 12 month rows in chronological order.
 
 ## Self-check
 
@@ -95,16 +124,11 @@ Anti-patterns and pitfalls
 - Confusing WHERE and HAVING; using HAVING for row-level filters degrades performance.
 - Relying on integer AVG without casting (integer division truncates). Cast to numeric: AVG(col::numeric).
 
-Exercises from the learner script
-1) Compute total payments per method and show only methods over 1,000,000.
-2) For each country, compute average customer age in the system
-   (`CURRENT_TIMESTAMP - created_at`).
-3) Return the top five categories by gross margin, defined by the prompt as
-   `SUM((products.price - products.cost) * order_items.quantity)`.
-
-The third exercise deliberately uses catalog price and cost. It does not apply
-the line discount or historical `unit_price`; document that business assumption
-if you extend the metric.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Check your understanding
 - When do you use HAVING instead of WHERE? Give an example that would be wrong with WHERE.

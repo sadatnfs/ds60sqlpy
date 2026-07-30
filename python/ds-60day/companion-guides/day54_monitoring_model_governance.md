@@ -64,7 +64,7 @@ Quantile edges are learned from the reference and extended to infinity so
 current out-of-range observations are counted. Duplicated quantiles, missing
 values, and tiny samples need explicit handling in real code.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Compute PSI for multiple features or score windows over time.
 2. Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.
@@ -78,6 +78,23 @@ values, and tiny samples need explicit handling in real code.
    model version. Mark missing/delayed labels instead of filling fake metrics.
 3. For every threshold, name an owner, review clock, evidence source, action,
    escalation path, and recovery test.
+
+### Additional mastery practice
+
+Design monitoring around observable data, delayed truth, action thresholds, ownership, and rehearsed recovery—not dashboards that merely display numbers.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Label-delay analysis:** Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
+   **Progressive hint:** Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.
+5. **Alert hysteresis:** Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping.
+   **Progressive hint:** Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.
+6. **Rollback drill:** Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence.
+   **Progressive hint:** A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

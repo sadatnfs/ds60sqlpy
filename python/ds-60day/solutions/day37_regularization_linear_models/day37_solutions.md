@@ -69,3 +69,127 @@ s = cross_val_score(enet, X, y, cv=5).mean()
 Takeaways
 - Use CV to pick alpha (and l1_ratio for ElasticNet)
 - Inspect coefficients for stability and sparsity relative to domain knowledge
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Sweep `alpha` values and plot validation scores for Ridge and Lasso.
+
+**How to reason about it:** Use a logarithmic alpha grid because meaningful penalty strengths span orders of magnitude. Reuse folds, plot uncertainty, and include an unregularized or very-weak-penalty baseline for context.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Inspect fitted coefficients and compare their sparsity. The separate solution also demonstrates Elastic Net as a useful extension.
+
+**How to reason about it:** L1 can set coefficients exactly to zero; L2 usually shrinks all of them. Compare coefficients only after identical scaling and remember that correlated predictors can exchange weight.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Prediction
+
+**Prompt:** Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept.
+
+**Reasoning before implementation:** Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.
+
+As alpha approaches zero, Ridge approaches ordinary least squares when that
+solution is well defined. As alpha becomes very large, slope coefficients move
+toward zero and training error generally rises. The intercept remains available
+to represent the target mean when the estimator does not penalize it.
+
+Validation error can have a U shape: moderate shrinkage may reduce variance,
+while excessive shrinkage underfits. Confirm the estimator's intercept policy
+rather than assuming every implementation uses the same objective.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 4 — Elastic Net implementation
+
+**Prompt:** Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity.
+
+**Reasoning before implementation:** Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.
+
+```python
+import numpy as np
+from sklearn.linear_model import ElasticNetCV
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+elastic = Pipeline(
+    [
+        ("scale", StandardScaler()),
+        (
+            "model",
+            ElasticNetCV(
+                alphas=np.logspace(-4, 1, 30),
+                l1_ratio=[0.1, 0.5, 0.9, 1.0],
+                cv=5,
+                max_iter=20_000,
+                random_state=37,
+            ),
+        ),
+    ]
+)
+```
+
+Fit only on training data, then report the selected parameters, held-out error,
+and near-zero coefficient count. Selection stability across folds matters more
+than presenting zeros as automatic feature discovery.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Scaling bug
+
+**Prompt:** Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison.
+
+**Reasoning before implementation:** The L1 penalty operates on coefficient magnitude; rescaling a feature changes the coefficient needed for the same prediction.
+
+Without scaling, equivalent predictive effects can require coefficients with
+very different numeric magnitudes, so the penalty is not comparable across
+features. Place `StandardScaler` inside the pipeline before Lasso and evaluate
+the complete pipeline in each fold.
+
+If a sparse matrix is used, choose a scaler compatible with sparsity (often
+`with_mean=False`) rather than densifying unexpectedly. For final
+interpretation, translate standardized coefficients back carefully or explain
+their standardized unit.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Stability investigation
+
+**Prompt:** Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions.
+
+**Reasoning before implementation:** Lasso may alternate which correlated feature receives weight; Ridge often distributes weight while predictions remain similar.
+
+Record coefficient vectors and held-out predictions for every resample.
+Selection frequency exposes instability that one fitted coefficient table
+hides. If two interchangeable variables are selected 55% and 45% of the time,
+claiming that only one “matters” is not supported.
+
+Elastic Net can encourage grouped behavior, and domain-driven feature grouping
+can improve interpretation. Always separate predictive usefulness from causal
+importance.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

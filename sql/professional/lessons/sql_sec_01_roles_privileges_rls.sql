@@ -348,6 +348,29 @@ SELECT COALESCE(
         -- 5. Explain the RLS bypass behavior for a table owner, a superuser, and
         --    a role with BYPASSRLS. When can FORCE ROW LEVEL SECURITY subject an
         --    ordinary table owner to policies, and who still bypasses them?
+        --
+        -- 6. Build an effective-access inventory for every course role across
+        --    schema, table, column, sequence, and routine privileges. Include
+        --    inherited membership and PUBLIC; do not mistake ACL text for the
+        --    final answer.
+        --
+        -- 7. Demonstrate SESSION_USER versus CURRENT_USER before, during, and
+        --    after SET ROLE, then explain their values inside a SECURITY DEFINER
+        --    routine. Which identity should an audit record preserve?
+        --
+        -- 8. Add negative tests for NULL, mixed-case, and unknown tenant
+        --    identifiers. Prove the policy fails closed and explain why a
+        --    session setting used for tenancy must be validated and reset.
+        --
+        -- 9. Create a narrow writer role in a scratch transaction. Grant only
+        --    the columns and identity-sequence privileges needed for INSERT,
+        --    prove RETURNING does not leak forbidden columns, and prove UPDATE
+        --    and DELETE remain denied.
+        --
+        -- 10. Write an offboarding and incident-revocation runbook. Cover login
+        --     revocation, active sessions, memberships, owned objects, default
+        --     privileges, dependent grants, verification, and recoverable audit
+        --     evidence; do not execute destructive cluster-wide commands here.
 
         ROLLBACK;
         \echo 'SQL-SEC-01 complete: roles and pro_security_lab were rolled back'
@@ -367,4 +390,3 @@ SELECT COALESCE(
     FROM pg_catalog.pg_roles AS r
     WHERE r.rolname = CURRENT_USER;
 \endif
-

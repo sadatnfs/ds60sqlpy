@@ -1,119 +1,231 @@
-# Day 20 solutions — FIRST_VALUE and LAST_VALUE
+# Day 20 solutions — FIRST_VALUE, LAST_VALUE, NTH_VALUE
 
-These answers match the exercises in [Day 20](../day20_first_last_value.sql).
+These answers align one-for-one with [day20_first_last_value.sql](../day20_first_last_value.sql).
+Run only against the disposable `advanced_sql_training` database.
+The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
+The snippets below assume the lesson's
+`SET search_path TO training, public;` statement. Run the complete
+executable companion when you want a self-contained check.
 
-## Exercise 1 — Current-month revenue versus first-month revenue
+## Reading contract
 
-This solution interprets “current month” as the calendar month containing `CURRENT_DATE`. Products without any sale have no first-sales month; products without a sale this month receive zero current-month revenue.
+- **Focus:** Use `FIRST_VALUE` and `LAST_VALUE` only with an ordering and frame that covers the intended partition.
+- **Assumptions:** First/last refer to ordered rows, not minimum/maximum values unless ordering states that. Ties need unique keys for deterministic row identity.
+- **Primary pitfall:** The default `LAST_VALUE` frame ends at the current row/peer group, often making it return the current value rather than the partition's final value.
+- **Safety:** all writes are bounded and rollback-protected; read-only
+  queries still use deterministic ordering whenever row order is claimed.
 
-```sql
-WITH monthly_sales AS (
-  SELECT
-    oi.product_id,
-    DATE_TRUNC(
-      'month',
-      o.order_date AT TIME ZONE 'UTC'
-    )::date AS sales_month,
-    SUM(
-      oi.unit_price * oi.quantity * (1 - oi.discount)
-    ) AS month_revenue
-  FROM training.order_items AS oi
-  JOIN training.orders AS o
-    ON o.order_id = oi.order_id
-  GROUP BY
-    oi.product_id,
-    DATE_TRUNC('month', o.order_date AT TIME ZONE 'UTC')::date
-),
-sales_with_first AS (
-  SELECT
-    ms.*,
-    FIRST_VALUE(ms.sales_month) OVER product_history AS first_sales_month,
-    FIRST_VALUE(ms.month_revenue) OVER product_history AS first_month_revenue
-  FROM monthly_sales AS ms
-  WINDOW product_history AS (
-    PARTITION BY ms.product_id
-    ORDER BY ms.sales_month
-    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-  )
-),
-product_summary AS (
-  SELECT
-    swf.product_id,
-    MIN(swf.first_sales_month) AS first_sales_month,
-    MAX(swf.first_month_revenue) AS first_month_revenue,
-    COALESCE(
-      MAX(swf.month_revenue) FILTER (
-        WHERE swf.sales_month = DATE_TRUNC('month', CURRENT_DATE)::date
-      ),
-      0
-    ) AS current_month_revenue
-  FROM sales_with_first AS swf
-  GROUP BY swf.product_id
-)
-SELECT
-  p.product_id,
-  p.name,
-  ps.first_sales_month,
-  ROUND(ps.first_month_revenue, 2) AS first_month_revenue,
-  ROUND(COALESCE(ps.current_month_revenue, 0), 2) AS current_month_revenue,
-  CASE
-    WHEN ps.first_month_revenue IS NULL THEN NULL
-    ELSE ROUND(
-      COALESCE(ps.current_month_revenue, 0) - ps.first_month_revenue,
-      2
-    )
-  END AS change_from_first_month
-FROM training.products AS p
-LEFT JOIN product_summary AS ps
-  ON ps.product_id = p.product_id
-ORDER BY p.product_id;
-```
+## Exercise 1 — Query writing
 
-The full frame makes the first value available to every monthly row in a product partition. The outer product join retains the intentionally unsold products.
+**Prompt:** Show every order with the customer's first and last order timestamps.
 
-## Exercise 2 — Synthetic first-salary comparison
+**Reasoning:** Use one full-partition frame from unbounded preceding through unbounded following.
 
-The course schema has one current salary per employee and no salary-history table. It cannot recover an employee’s original salary. Following the prompt, this simulation compares each employee with the salary of the earliest-hired employee in the same department.
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `PARTITION BY`: restarts a window calculation independently for each partition key.
+- window frame: states exactly which rows or peers contribute to the current row's window result.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-WITH salary_reference AS (
-  SELECT
-    d.name AS department,
-    e.department_id,
-    e.employee_id,
-    e.full_name,
-    e.hire_date,
-    e.salary,
-    FIRST_VALUE(e.full_name) OVER department_hire_order
-      AS earliest_hired_employee,
-    FIRST_VALUE(e.salary) OVER department_hire_order
-      AS earliest_hire_salary
-  FROM training.employees AS e
-  JOIN training.departments AS d
-    ON d.department_id = e.department_id
-  WINDOW department_hire_order AS (
-    PARTITION BY e.department_id
-    ORDER BY e.hire_date, e.employee_id
+SELECT o.order_id,
+       o.customer_id,
+       o.order_date,
+       FIRST_VALUE(o.order_date) OVER customer_orders AS first_order_date,
+       LAST_VALUE(o.order_date) OVER customer_orders AS last_order_date
+FROM orders AS o
+WINDOW customer_orders AS (
+  PARTITION BY o.customer_id
+  ORDER BY o.order_date, o.order_id
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+)
+ORDER BY o.customer_id, o.order_date, o.order_id;
+```
+
+**Expected shape:** One row per order with constant first/last values per customer.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 2 — Query writing
+
+**Prompt:** Show each product with the cheapest and most expensive price in its category.
+
+**Reasoning:** Order by price and use a full frame; values tie without needing row identity.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `PARTITION BY`: restarts a window calculation independently for each partition key.
+- window frame: states exactly which rows or peers contribute to the current row's window result.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT p.product_id,
+       p.category,
+       p.price,
+       FIRST_VALUE(p.price) OVER category_prices AS category_min_price,
+       LAST_VALUE(p.price) OVER category_prices AS category_max_price
+FROM products AS p
+WINDOW category_prices AS (
+  PARTITION BY p.category
+  ORDER BY p.price, p.product_id
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+)
+ORDER BY p.category, p.price, p.product_id;
+```
+
+**Expected shape:** One row per product.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 3 — Query writing
+
+**Prompt:** Compare every payment with the first and last payment amount for its order.
+
+**Reasoning:** Partition by order, order by timestamp/payment ID, and keep the full frame.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `PARTITION BY`: restarts a window calculation independently for each partition key.
+- window frame: states exactly which rows or peers contribute to the current row's window result.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT p.payment_id,
+       p.order_id,
+       p.payment_date,
+       p.amount,
+       FIRST_VALUE(p.amount) OVER payment_sequence AS first_payment_amount,
+       LAST_VALUE(p.amount) OVER payment_sequence AS last_payment_amount
+FROM payments AS p
+WINDOW payment_sequence AS (
+  PARTITION BY p.order_id
+  ORDER BY p.payment_date, p.payment_id
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+)
+ORDER BY p.order_id, p.payment_date, p.payment_id;
+```
+
+**Expected shape:** One row per payment.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 4 — Prediction
+
+**Prompt:** Demonstrate the default `LAST_VALUE` result versus a full-partition frame on values 10, 20, 30.
+
+**Reasoning:** The default ends at the current row; explicit following reaches the true last row.
+
+**Clause-by-clause reading:**
+
+- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
+- window frame: states exactly which rows or peers contribute to the current row's window result.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT value,
+       LAST_VALUE(value) OVER (ORDER BY value) AS default_last_value,
+       LAST_VALUE(value) OVER (
+         ORDER BY value
+         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+       ) AS partition_last_value
+FROM (VALUES (10), (20), (30)) AS sample(value)
+ORDER BY value;
+```
+
+**Expected shape:** Three rows showing default current value and full-frame 30.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 5 — Debugging
+
+**Prompt:** Return one first and one last order per customer without using window output as an accidental duplicate report.
+
+**Reasoning:** Compute first/last IDs with full-frame windows, then select distinct customer-level output.
+
+**Clause-by-clause reading:**
+
+- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `PARTITION BY`: restarts a window calculation independently for each partition key.
+- window frame: states exactly which rows or peers contribute to the current row's window result.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+WITH annotated AS (
+  SELECT o.customer_id,
+         FIRST_VALUE(o.order_id) OVER customer_orders AS first_order_id,
+         LAST_VALUE(o.order_id) OVER customer_orders AS last_order_id
+  FROM orders AS o
+  WINDOW customer_orders AS (
+    PARTITION BY o.customer_id
+    ORDER BY o.order_date, o.order_id
     ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
   )
 )
-SELECT
-  department,
-  employee_id,
-  full_name,
-  hire_date,
-  salary,
-  earliest_hired_employee,
-  earliest_hire_salary,
-  salary - earliest_hire_salary AS difference_from_reference
-FROM salary_reference
-ORDER BY department, hire_date, employee_id;
+SELECT DISTINCT customer_id,
+       first_order_id,
+       last_order_id
+FROM annotated
+ORDER BY customer_id;
 ```
 
-This is a ranking-based reference, not salary history. A real answer to “first salary recorded” needs a table such as `employee_salary_history(employee_id, effective_at, salary)`.
+**Expected shape:** One row per customer with orders.
 
-## Check yourself
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
 
-- An unsold product has `NULL` first-month revenue and zero current-month revenue.
-- Every employee in a department sees the same earliest-hire reference.
-- Do not describe the synthetic reference as an employee’s historical starting salary.
+## Exercise 6 — Extension
+
+**Prompt:** Solve latest order per customer with PostgreSQL `DISTINCT ON` and compare its ordering contract with row number.
+
+**Reasoning:** `DISTINCT ON` keeps the first row under its mandatory leading order keys.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `DISTINCT ON`: keeps the first row in each declared group, so its matching leading sort keys determine which row wins.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT DISTINCT ON (o.customer_id)
+       o.customer_id,
+       o.order_id,
+       o.order_date,
+       o.total_amount
+FROM orders AS o
+ORDER BY o.customer_id, o.order_date DESC, o.order_id DESC;
+```
+
+**Expected shape:** At most one latest order per customer.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Final self-check
+
+- Can you explain the logical grain before and after every aggregation?
+- Are missing values preserved or converted only by an explicit rule?
+- Does every ordered result have a deterministic final tie-breaker?
+- Are money and time assumptions visible beside the calculation?
+- Does the complete executable solution finish with `ROLLBACK`?

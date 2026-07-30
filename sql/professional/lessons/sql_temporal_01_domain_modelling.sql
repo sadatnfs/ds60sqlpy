@@ -347,6 +347,24 @@ ORDER BY rr.record_key;
 -- 6. State domain assumptions: time zone, clock authority, late arrival,
 --    overlap/gap policy, deletion/anonymization, ledger meaning, and who may
 --    correct system history.
+-- 7. Model a local-time business rule across a daylight-saving transition.
+--    Store the source zone and UTC instant, test ambiguous/nonexistent local
+--    times, and explain why a bare timestamp or fixed UTC offset is insufficient.
+-- 8. Distinguish event time, ingestion time, and processing time for late data.
+--    Define a watermark and allowed lateness, then show how a late event changes
+--    a previously published aggregate and how the correction is communicated.
+-- 9. Implement a Type-2 dimension as-of join with surrogate key, business key,
+--    effective half-open range, current marker, and correction metadata. Prove
+--    every fact resolves to at most one dimension row.
+-- 10. Design temporal referential integrity when a child period must be
+--     contained by a parent period. Compare trigger/exclusion approaches,
+--     concurrency locking, deferred validation, and repair of historical gaps.
+-- 11. Produce a deterministic gap-and-overlap report per business key using
+--     lag/lead and multirange operations. Define whether adjacency is valid and
+--     fail on duplicate or empty periods.
+-- 12. Plan time-based partition archival without violating legal holds.
+--     Inventory cross-partition keys, indexes, detach/archive/verify steps,
+--     encryption and access, hold exceptions, restore tests, and deletion proof.
 
 DO $self_check$
 BEGIN
@@ -368,4 +386,3 @@ $self_check$;
 
 ROLLBACK;
 \echo 'SQL-TEMPORAL-01 complete: pro_temporal_lab was rolled back'
-

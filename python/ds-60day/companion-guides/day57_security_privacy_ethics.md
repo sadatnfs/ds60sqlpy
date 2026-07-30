@@ -71,7 +71,7 @@ pseudonymization key belongs in an approved secret manager, must be rotated
 under policy, and should use a keyed construction such as HMAC—not a public,
 reused repository constant.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Build a DataFrame PII scanner covering column names and free text.
 2. Add a function that masks email addresses and phone numbers in text.
@@ -88,6 +88,25 @@ reused repository constant.
    conclusion when groups are too small for a stable estimate.
 4. Name intended use, excluded use, affected people, owners, data rights,
    retention, access, monitoring, appeals, and incident response.
+
+### Additional mastery practice
+
+Combine data minimization, access control, threat modeling, privacy limits, fairness uncertainty, and incident response. Detection or masking alone is not protection.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+5. **Threat modeling:** Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner.
+   **Progressive hint:** Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.
+6. **Re-identification reasoning:** Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information.
+   **Progressive hint:** Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.
+7. **Fairness uncertainty:** Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group's denominator is nearly zero.
+   **Progressive hint:** Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.
+8. **Incident response:** Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps.
+   **Progressive hint:** Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

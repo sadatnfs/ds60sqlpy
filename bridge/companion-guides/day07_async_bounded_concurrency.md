@@ -64,28 +64,71 @@ move blocking work to a thread when the library is thread-safe.
 
 ## Exercises
 
-1. Implement `managed_async_connection()`. Await the factory, yield once, commit
-   on success, roll back on failure, and always close.
-2. Implement `map_bounded()` with `asyncio.Semaphore` and `TaskGroup`. Reject
-   limits below one and preserve input order.
-3. Build a fake operation that increments an active counter, awaits
-   `asyncio.sleep(0)`, decrements it, and returns. Assert the measured maximum
-   never exceeds the limit.
-4. Test that results retain input order even when fake delays cause a different
-   completion order.
-5. Define an `AsyncReadCursor` Protocol and implement one query using
-   `customer_id = ANY(%s)`. Bind the Python list as the single parameter.
-6. Test empty input without calling the cursor and reject non-positive IDs.
-7. Stretch: discuss why a semaphore bounds active operations but still creates
-   one task per item. Design a worker-queue version for a million inputs.
+### Practice contract
 
-### Progressive hints
+- **Focus:** Own async connection cleanup, bound active work with structured concurrency, preserve input order, and keep PostgreSQL value binding safe.
+- **Assumptions:** Cancellation must propagate after cleanup; `asyncio.Semaphore` bounds active operations but not the number of created tasks.
+- **Primary failure mode:** Blocking calls, shared unsafe cursors, swallowed cancellation, and unbounded task creation turn async code into a reliability hazard.
+- **Evidence loop:** predict the boundary, implement the smallest change,
+  verify success and failure with a deterministic fake, then explain which
+  behavior still requires an explicitly enabled PostgreSQL integration test.
 
-1. An async context manager uses `@asynccontextmanager` and an async generator.
-2. Store each result by original index, then rebuild the ordered list.
-3. Use `async with asyncio.TaskGroup() as group`.
-4. Pass `(list(customer_ids),)`—the trailing comma makes a one-element tuple.
-5. Let cancellation propagate after cleanup; do not translate it to success.
+1. **Implementation:** Implement `managed_async_connection()` with awaited factory, one yield,
+   commit on success, rollback on failure, and close on every path.
+   - **Progressive hint:** Mirror the synchronous state machine with awaited lifecycle calls.
+2. **Concurrency:** Implement `map_bounded()` with `asyncio.Semaphore` and `TaskGroup`, reject
+   limits below one, and preserve input order.
+   - **Progressive hint:** Associate each task with its original index rather than
+     append-on-completion order.
+3. **Testing:** Measure active fake operations and assert maximum concurrency never exceeds the
+   configured limit.
+   - **Progressive hint:** Increment before an await point and decrement in `finally`.
+4. **Ordering:** Use different fake completion delays to prove output order follows input order
+   rather than completion order.
+   - **Progressive hint:** Choose a completion schedule that visibly differs from the input.
+5. **Async SQL:** Define `AsyncReadCursor` and implement one query using `customer_id = ANY(%s)`
+   with the Python ID list as one bound parameter.
+   - **Progressive hint:** The parameter sequence is a one-element tuple containing the list.
+6. **Validation:** Return early for empty customer IDs without touching the cursor and reject
+   any non-positive ID.
+   - **Progressive hint:** Validate the complete collection before the first database effect.
+7. **Scale design:** Explain why a semaphore still creates one task per item and design a
+   fixed-worker queue for a million inputs.
+   - **Progressive hint:** Separate active-operation bounds from task-count and memory bounds.
+8. **Cancellation:** Cancel a task inside `managed_async_connection()` and verify rollback/close
+   happen before cancellation escapes.
+   - **Progressive hint:** Never translate `CancelledError` into an empty or successful result.
+9. **Failure analysis:** Trigger two concurrent task failures and inspect `ExceptionGroup`
+   behavior from `TaskGroup`.
+   - **Progressive hint:** Structured concurrency cancels siblings and reports grouped failures.
+10. **Empty work:** Test `map_bounded([], operation, limit=1)` and prove the operation is never
+   called.
+   - **Progressive hint:** An empty collection is a successful no-op, not an invalid concurrency
+     request.
+11. **Duplicates:** Define whether duplicate customer IDs are preserved, deduplicated, or
+   rejected and test the chosen contract.
+   - **Progressive hint:** Input-order promises and dictionary outputs have different duplicate
+     semantics.
+12. **Architecture:** Compare a semaphore-per-item design with the worker queue on fairness,
+   memory, cancellation, and complexity.
+   - **Progressive hint:** Choose based on workload scale rather than treating one pattern as
+     universally superior.
+13. **Database ownership:** Decide whether concurrent operations may share one connection/cursor
+   or require a pool-acquired resource per worker.
+   - **Progressive hint:** Driver concurrency guarantees and transaction scope determine the
+     safe choice.
+14. **Deterministic testing:** Replace timing-based async assertions with events/barriers and
+   explain why wall-clock sleeps make tests flaky.
+   - **Progressive hint:** Coordinate state transitions directly instead of hoping a scheduler
+     runs in time.
+
+### Before opening the solution
+
+- State the input/output and ownership boundary in one sentence.
+- Show one normal case, one edge case, and one failure case.
+- Inspect recorded calls rather than relying on plausible output.
+- Confirm no credential, payload, or high-cardinality identifier was emitted.
+
 
 ## Optional live-DB step
 

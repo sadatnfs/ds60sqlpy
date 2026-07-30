@@ -85,3 +85,97 @@ Discussion
 - IsolationForest works well for high-dimensional data and is model-based
 - LOF is density-based and local; can catch local anomalies but is sensitive to neighborhood size
 - Always validate detected anomalies with domain knowledge; synthetic labels can be used for benchmarking if available
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Try several values of `k` and plot inertia versus `k` (the elbow plot).
+
+**How to reason about it:** Inertia always falls as k increases, so the elbow is a judgment rather than an optimizer. Fit each candidate on the same scaled representation and inspect stability and usefulness alongside the curve.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Compute silhouette scores for `k` from 2 through 6 and discuss the result.
+
+**How to reason about it:** Silhouette requires at least two clusters and rewards compact separation under its distance metric. A maximum is a candidate, not proof that the data contains that many real-world groups.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Compare Isolation Forest with Local Outlier Factor.
+
+**How to reason about it:** Isolation Forest and LOF use different notions of unusualness. Match contamination, understand LOF's novelty mode, and compare known synthetic outliers or reviewed cases instead of label overlap alone.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Scaling sensitivity
+
+**Prompt:** Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization.
+
+**Reasoning before implementation:** Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.
+
+Scaling changes the geometry, not just presentation. Place the scaler and
+K-Means in one pipeline and fit on the intended training/reference population.
+Compare cluster centers after inverse transformation so stakeholders can read
+them in original units.
+
+Standardization is not automatically correct: a domain-approved unit or
+feature weight can be meaningful. State why the chosen metric represents
+similarity for this problem.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Cluster stability
+
+**Prompt:** Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up.
+
+**Reasoning before implementation:** Labels can permute. Use adjusted Rand index or align centers before comparing assignments.
+
+A solution that appears only for one initialization is weak evidence of
+structure. Summarize score distributions and pairwise adjusted Rand index.
+Inspect whether small or ambiguous clusters dissolve across resamples.
+
+High stability still does not prove business meaning; it only shows the
+algorithm consistently finds the same geometry. Validate profiles with domain
+knowledge and downstream usefulness.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Anomaly validation without labels
+
+**Prompt:** Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity.
+
+**Reasoning before implementation:** Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.
+
+Measure recall on carefully designed synthetic anomalies only as a unit test
+of detectable patterns—not as full real-world accuracy. Review a bounded top-k
+sample with blinded domain experts and track confirmed-yield plus false-alarm
+cost. Sweep contamination and report how the review queue changes.
+
+Preserve raw scores so policy thresholds can change without refitting. Never
+describe the detector's `-1` output as a confirmed incident.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

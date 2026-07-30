@@ -287,6 +287,24 @@ ORDER BY ci.consumer_name;
 -- 6. Write a failover runbook covering health/quorum, fencing the old primary,
 --    data-loss evidence, DNS/client reconnect, timeline, slot/subscriber state,
 --    RPO/RTO, rollback, and post-failover backups.
+-- 7. Design a logical publication for one table with a row filter and column
+--    list. Explain replica identity for UPDATE/DELETE, unsupported schema
+--    changes, sequence state, initial copy, and how to prove no tenant leaks.
+-- 8. Document a consistent snapshot-to-stream bootstrap. Relate exported
+--    snapshot, start LSN, replication slot, initial copy, handoff, deduplication,
+--    restart, WAL retention, and cleanup after an abandoned bootstrap.
+-- 9. Specify a read-after-write contract for traffic sent to replicas. Compare
+--    primary pinning, LSN tokens/waits, bounded staleness, session guarantees,
+--    timeout fallback, and what lag metric users actually experience.
+-- 10. Design conflict handling for accidental multi-writer topology. Explain
+--     why wall-clock last-write-wins is unsafe, and compare single-writer
+--     ownership, version checks, deterministic merge, quarantine, and repair.
+-- 11. Create a DDL compatibility matrix for publisher/subscriber versions.
+--     Sequence additive columns, defaults, constraints, type changes, indexes,
+--     application deployments, validation, and removal without stopping CDC.
+-- 12. Write failback/reseed steps after promotion. Cover new-primary backup,
+--     old-primary fencing, timeline divergence, rewind or rebuild choice,
+--     replication slots, subscriptions, client routing, data checks, and audit.
 
 DO $self_check$
 BEGIN

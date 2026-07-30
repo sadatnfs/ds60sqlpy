@@ -149,5 +149,137 @@ BEGIN
 END
 $solution$;
 
-ROLLBACK;
+-- Exercise 4: the row audit grain is one changed item. A statement-level
+-- transition-table summary below records one row per UPDATE statement.
 
+-- Exercise 5: status vocabulary is row-local and belongs in CHECK. Trigger
+-- logic is reserved here for OLD/NEW transition and audit behavior.
+
+-- Exercise 6: inspect the promises PostgreSQL's planner relies on.
+SELECT
+    p.proname,
+    CASE p.provolatile
+        WHEN 'i' THEN 'immutable'
+        WHEN 's' THEN 'stable'
+        ELSE 'volatile'
+    END AS volatility,
+    CASE p.proparallel
+        WHEN 's' THEN 'safe'
+        WHEN 'r' THEN 'restricted'
+        ELSE 'unsafe'
+    END AS parallel_mode
+FROM pg_catalog.pg_proc AS p
+JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = p.pronamespace
+WHERE n.nspname = 'pro_routines_lab'
+ORDER BY p.proname;
+
+-- Exercise 7: transition tables expose the complete affected set once per
+-- statement, including a legitimate zero-change status summary.
+CREATE TABLE pro_routines_lab.statement_status_summary (
+    summary_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    matched_rows integer NOT NULL,
+    changed_status_rows integer NOT NULL
+);
+
+CREATE FUNCTION pro_routines_lab.summarize_status_statement()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = pg_catalog
+AS $function$
+BEGIN
+    INSERT INTO pro_routines_lab.statement_status_summary (
+        matched_rows, changed_status_rows
+    )
+    SELECT
+        COUNT(*)::integer,
+        COUNT(*) FILTER (
+            WHERE o.status IS DISTINCT FROM n.status
+        )::integer
+    FROM old_rows AS o
+    JOIN new_rows AS n USING (item_id);
+    RETURN NULL;
+END
+$function$;
+
+CREATE TRIGGER work_items_statement_status_summary
+AFTER UPDATE ON pro_routines_lab.work_items
+REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
+FOR EACH STATEMENT
+EXECUTE FUNCTION pro_routines_lab.summarize_status_statement();
+
+UPDATE pro_routines_lab.work_items AS wi
+SET title = wi.title || ' (reviewed)'
+WHERE wi.item_id IN (1, 3);
+
+SELECT
+    s.summary_id,
+    s.matched_rows,
+    s.changed_status_rows
+FROM pro_routines_lab.statement_status_summary AS s
+ORDER BY s.summary_id;
+
+-- Exercise 8: only the inner duplicate insert rolls back. The outer marker
+-- remains, and an unexpected condition is never swallowed.
+CREATE TABLE pro_routines_lab.exception_probe (
+    probe_key text PRIMARY KEY
+);
+
+DO $solution$
+BEGIN
+    INSERT INTO pro_routines_lab.exception_probe VALUES ('outer-survives');
+    BEGIN
+        INSERT INTO pro_routines_lab.exception_probe VALUES ('duplicate');
+        INSERT INTO pro_routines_lab.exception_probe VALUES ('duplicate');
+        RAISE EXCEPTION 'duplicate insert unexpectedly succeeded';
+    EXCEPTION
+        WHEN unique_violation THEN
+            RAISE NOTICE 'Expected unique violation rolled back inner work';
+    END;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pro_routines_lab.exception_probe AS p
+        WHERE p.probe_key = 'outer-survives'
+    ) OR EXISTS (
+        SELECT 1
+        FROM pro_routines_lab.exception_probe AS p
+        WHERE p.probe_key = 'duplicate'
+    ) THEN
+        RAISE EXCEPTION 'subtransaction rollback boundary was incorrect';
+    END IF;
+END
+$solution$;
+
+-- Exercise 9: SECURITY DEFINER would additionally require a narrow NOLOGIN
+-- owner, fixed path, qualified objects, validated inputs, PUBLIC revocation,
+-- and explicit EXECUTE grants. Security-invoker remains the safer default.
+
+-- Exercise 10: claim a deterministic batch under row locks. Production workers
+-- commit quickly, recover stale leases, and keep external work out of this lock.
+CREATE TABLE pro_routines_lab.claim_queue (
+    queue_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    claimed_by text,
+    claimed_at timestamptz
+);
+
+INSERT INTO pro_routines_lab.claim_queue (claimed_by)
+VALUES (NULL), (NULL), (NULL);
+
+WITH claimable AS (
+    SELECT q.queue_id
+    FROM pro_routines_lab.claim_queue AS q
+    WHERE q.claimed_by IS NULL
+    ORDER BY q.queue_id
+    FOR UPDATE SKIP LOCKED
+    LIMIT 2
+)
+UPDATE pro_routines_lab.claim_queue AS q
+SET claimed_by = 'worker-1',
+    claimed_at = TIMESTAMPTZ '2026-06-01 00:00:00+00'
+FROM claimable AS c
+WHERE q.queue_id = c.queue_id
+RETURNING q.queue_id, q.claimed_by, q.claimed_at;
+
+ROLLBACK;

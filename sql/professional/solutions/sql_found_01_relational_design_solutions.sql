@@ -143,5 +143,101 @@ BEGIN
 END
 $solution$;
 
-ROLLBACK;
+-- Exercise 4: daily_fee_at_checkout belongs on a loan because it is the quoted
+-- historical value. A later equipment price change must not rewrite it.
 
+-- Exercise 5: names become referenced entities; the bridge grain is one
+-- technician assignment to one maintenance visit.
+CREATE TABLE pro_relational_lab.providers (
+    provider_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    provider_name text NOT NULL UNIQUE CHECK (btrim(provider_name) <> '')
+);
+
+CREATE TABLE pro_relational_lab.technicians (
+    technician_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    technician_name text NOT NULL CHECK (btrim(technician_name) <> '')
+);
+
+CREATE TABLE pro_relational_lab.visit_technicians (
+    visit_id bigint NOT NULL
+        REFERENCES pro_relational_lab.maintenance_visits (visit_id)
+        ON DELETE CASCADE,
+    technician_id bigint NOT NULL
+        REFERENCES pro_relational_lab.technicians (technician_id)
+        ON DELETE RESTRICT,
+    PRIMARY KEY (visit_id, technician_id)
+);
+
+INSERT INTO pro_relational_lab.providers (provider_name)
+VALUES ('Community repair desk');
+
+INSERT INTO pro_relational_lab.technicians (technician_name)
+VALUES ('Riley Chen'), ('Sam Rivera');
+
+INSERT INTO pro_relational_lab.visit_technicians (visit_id, technician_id)
+SELECT mv.visit_id, t.technician_id
+FROM pro_relational_lab.maintenance_visits AS mv
+CROSS JOIN pro_relational_lab.technicians AS t
+WHERE mv.external_reference = 'VISIT-100';
+
+-- Exercise 6: count a nullable-side key, not COUNT(*), so never-loaned items
+-- correctly report zero. A loan-side date predicate would belong in ON.
+CREATE TABLE pro_relational_lab.loans (
+    loan_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    item_id bigint NOT NULL
+        REFERENCES pro_relational_lab.equipment_items (item_id)
+        ON DELETE RESTRICT,
+    checked_out_on date NOT NULL
+);
+
+INSERT INTO pro_relational_lab.loans (item_id, checked_out_on)
+SELECT i.item_id, DATE '2026-03-15'
+FROM pro_relational_lab.equipment_items AS i
+WHERE i.asset_tag = 'AUD-001';
+
+SELECT
+    i.item_id,
+    i.asset_tag,
+    COUNT(l.loan_id) AS loan_count,
+    MAX(l.checked_out_on) AS latest_checkout
+FROM pro_relational_lab.equipment_items AS i
+LEFT JOIN pro_relational_lab.loans AS l
+  ON l.item_id = i.item_id
+GROUP BY i.item_id, i.asset_tag
+ORDER BY i.asset_tag;
+
+-- Exercise 7: RESTRICT preserves visits and loans as historical facts. CASCADE
+-- is used only for the assignment bridge, which has no meaning without a visit.
+
+-- Exercise 8: inspect semantic catalog properties instead of generated names.
+SELECT
+    con.contype,
+    pg_catalog.pg_get_constraintdef(con.oid) AS constraint_definition
+FROM pg_catalog.pg_constraint AS con
+JOIN pg_catalog.pg_class AS rel
+  ON rel.oid = con.conrelid
+JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = rel.relnamespace
+WHERE n.nspname = 'pro_relational_lab'
+  AND rel.relname = 'maintenance_visits'
+ORDER BY con.contype, constraint_definition;
+
+SELECT
+    a.attname AS column_name,
+    a.attgenerated,
+    pg_catalog.pg_get_expr(def.adbin, def.adrelid) AS generated_expression
+FROM pg_catalog.pg_attribute AS a
+JOIN pg_catalog.pg_class AS rel
+  ON rel.oid = a.attrelid
+JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = rel.relnamespace
+LEFT JOIN pg_catalog.pg_attrdef AS def
+  ON def.adrelid = a.attrelid
+ AND def.adnum = a.attnum
+WHERE n.nspname = 'pro_relational_lab'
+  AND rel.relname = 'maintenance_visits'
+  AND a.attnum > 0
+  AND NOT a.attisdropped
+ORDER BY a.attnum;
+
+ROLLBACK;

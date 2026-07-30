@@ -191,6 +191,48 @@ List three repairs:
 - a lock protects the complete read/modify/write unit, or
 - an external system performs an atomic update.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 7 — prove cancellation cleanup
+
+Cancel `bounded_map` while workers are active. Instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.
+
+**Progressive hint:** Put cleanup in `finally`, do not suppress `CancelledError`, and use TaskGroup as the child ownership boundary.
+
+### Exercise 8 — inspect structured failures
+
+Run multiple workers that fail with different typed exceptions. Use `except*` to handle one expected category while preserving unexpected failures and their original tracebacks.
+
+**Progressive hint:** ExceptionGroup is a tree. Match by exception type and re-raise what the current layer cannot translate.
+
+### Exercise 9 — stream a backpressured producer
+
+Adapt `bounded_map` from a finite Sequence to an async iterator whose length is unknown. Preserve output order without retaining every input or creating one task per item.
+
+**Progressive hint:** Assign increasing indexes at production, use a bounded queue, and emit completed results through a second bounded channel.
+
+### Exercise 10 — trace context across boundaries
+
+Set a request ID in `contextvars`, then observe propagation through an async task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any explicit propagation visible.
+
+**Progressive hint:** Async tasks and `to_thread` copy context by design; arbitrary executors and processes need deliberate value transfer.
+
+### Exercise 11 — design graceful executor shutdown
+
+Own a thread or process pool through a context manager. Stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.
+
+**Progressive hint:** Lifecycle ownership belongs to the component that created the executor. Differentiate pending work from already-running calls.
+
+### Exercise 12 — make an evidence-based model decision
+
+Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.
+
+**Progressive hint:** Use generous repeated measurements and interpret each model only for the workload it matches. A tiny workload can legitimately stay sequential.
+
 ## Self-check
 
 - Async results preserve input order even when completion order differs.

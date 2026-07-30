@@ -100,5 +100,87 @@ BEGIN
 END
 $solution$;
 
-ROLLBACK;
+-- Exercise 2: access methods are meaningful only with type/operator class and
+-- target operator. The Markdown solution maps GIN, GiST, SP-GiST, and BRIN.
 
+-- Exercise 5: this transaction does not run VACUUM. VACUUM reclaims dead-tuple
+-- space/freeze safety/visibility; ANALYZE samples values for estimates.
+
+-- Exercise 6: this solution neither enables pg_stat_statements nor exposes
+-- query text. Production access and retention require privacy review.
+
+-- Exercise 7: show semantic index properties for human review. Similarity is a
+-- candidate signal, never an automatic DROP decision.
+SELECT
+    ci.relname AS index_name,
+    i.indisunique,
+    i.indisprimary,
+    pg_catalog.pg_get_indexdef(i.indexrelid) AS index_definition,
+    pg_catalog.pg_get_expr(i.indpred, i.indrelid) AS predicate
+FROM pg_catalog.pg_index AS i
+JOIN pg_catalog.pg_class AS ci
+  ON ci.oid = i.indexrelid
+JOIN pg_catalog.pg_class AS ct
+  ON ct.oid = i.indrelid
+JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = ct.relnamespace
+WHERE n.nspname = 'pro_ops_lab'
+  AND ct.relname = 'events'
+ORDER BY ci.relname;
+
+-- Exercise 8: the query expression must match the indexed expression and its
+-- collation/operator semantics.
+CREATE INDEX events_device_lower_idx
+ON pro_ops_lab.events (lower(device_id));
+
+EXPLAIN (COSTS OFF)
+SELECT e.event_id, e.device_id
+FROM pro_ops_lab.events AS e
+WHERE lower(e.device_id) = 'device-007'
+ORDER BY e.event_id;
+
+-- Exercise 9: observe rather than assert a HOT rate; page space, indexed
+-- columns, vacuum horizons, and asynchronous statistics affect the result.
+UPDATE pro_ops_lab.events AS e
+SET category = CASE e.category
+    WHEN 'routine' THEN 'routine-reviewed'
+    ELSE e.category
+END
+WHERE e.event_id <= 100;
+
+SELECT
+    s.relname,
+    s.n_tup_upd,
+    s.n_tup_hot_upd,
+    s.n_dead_tup,
+    s.last_autovacuum,
+    s.last_autoanalyze
+FROM pg_catalog.pg_stat_user_tables AS s
+WHERE s.schemaname = 'pro_ops_lab'
+  AND s.relname = 'events';
+
+-- Exercise 10: partition pruning and indexes are validated per partition.
+-- PostgreSQL has no general global index, so cross-partition uniqueness usually
+-- includes the partition key or uses another ownership design.
+
+-- Exercise 11: ANALYZE executes this read. BUFFERS is cache/I/O evidence for
+-- this fixture, not a production benchmark.
+EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, TIMING OFF)
+SELECT COUNT(*)
+FROM pro_ops_lab.events AS e
+WHERE e.device_id = 'device-007'
+  AND e.severity >= 4;
+
+-- Exercise 12: an owned scorecard attaches source, budget, cadence, and action
+-- instead of pretending one threshold fits every workload.
+SELECT *
+FROM (
+    VALUES
+        ('dead tuples'::text, 'pg_stat_user_tables'::text, 'table owner'::text),
+        ('invalid indexes', 'pg_index.indisvalid', 'database operator'),
+        ('lock wait', 'pg_stat_activity/pg_locks', 'service owner'),
+        ('replication lag', 'replay LSN and user SLO', 'HA owner')
+) AS scorecard(signal, evidence_source, owner)
+ORDER BY signal;
+
+ROLLBACK;

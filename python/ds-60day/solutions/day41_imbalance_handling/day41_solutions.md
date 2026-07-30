@@ -93,3 +93,98 @@ plt.legend(); plt.tight_layout(); plt.show()
 Notes
 - PR curves reflect performance on the positive class directly; small AP indicates difficulty under imbalance
 - Compare class_weight vs SMOTE curves to decide which to deploy
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Compare `class_weight="balanced"` with a SMOTE strategy.
+
+**How to reason about it:** Class weights change the loss; SMOTE changes the training sample. Resample only within each training fold and compare precision, recall, average precision, calibration, and runtime on untouched validation rows.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Tune the threshold to maximize minority-class F1.
+
+**How to reason about it:** Threshold optimization consumes validation data. Align the shorter threshold array from `precision_recall_curve`, state the target metric or constraint, and freeze the threshold before final testing.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Plot precision–recall curves and discuss the tradeoff.
+
+**How to reason about it:** A precision-recall curve should include class prevalence and support. Use model scores rather than hard labels and do not compare curves drawn from different evaluation populations without labeling that difference.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Prevalence-shift reasoning
+
+**Prompt:** Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predict how precision changes and verify it with Bayes' rule.
+
+**Reasoning before implementation:** Precision depends on the base rate: TP/(TP+FP). Use a hypothetical population such as 10,000 to make the counts visible.
+
+With lower prevalence, true positives become rarer while false positives from
+the much larger negative population can dominate. For sensitivity `s`,
+specificity `c`, and prevalence `p`:
+
+`precision = s*p / (s*p + (1-c)*(1-p))`.
+
+This is why a threshold tuned on a balanced development sample may not deliver
+the expected precision after deployment. Re-estimate operating metrics for the
+deployment base rate and monitor it over time.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Grouped imbalance split
+
+**Prompt:** Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold.
+
+**Reasoning before implementation:** Use StratifiedGroupKFold when feasible. Print group overlap, positive count, negative count, and prevalence per validation fold.
+
+No splitter can create positives that do not exist across enough independent
+groups. Before modeling, count positive groups and reduce the fold count when
+necessary. Then assert group disjointness and report fold support.
+
+If a fold has zero positives, recall and average precision are not meaningful;
+do not replace that condition with a reassuring zero. Consider repeated
+grouped holdouts or a time-aware group design that matches deployment.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Calibration after resampling
+
+**Prompt:** Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data.
+
+**Reasoning before implementation:** Oversampling changes the class distribution seen during fitting. Fit/calibrate inside development data and assess reliability on natural prevalence.
+
+Oversampling is a training intervention; it must never be applied to validation
+or test rows. Evaluate reliability diagrams, Brier score, and log loss on
+unresampled data. If calibration is needed, use a separate calibration split or
+cross-validated calibrator after the resampling pipeline has been selected.
+
+Also compare ranking metrics: calibration can improve probability meaning
+without changing rank-based AUC very much.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

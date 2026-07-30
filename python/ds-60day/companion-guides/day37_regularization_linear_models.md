@@ -64,7 +64,7 @@ A stronger penalty usually increases bias and decreases variance, but the
 validation curve is empirical. Select `alpha` using training folds rather than
 the final test set.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Sweep `alpha` values and plot validation scores for Ridge and Lasso.
 2. Inspect fitted coefficients and compare their sparsity.
@@ -77,6 +77,25 @@ The separate solution also demonstrates Elastic Net as a useful extension.
    strengths often span orders of magnitude. Keep folds identical.
 2. Fit the chosen pipelines on the same training data. Access the final model
    through `named_steps` and count values equal or very close to zero.
+
+### Additional mastery practice
+
+Connect regularization strength to coefficient geometry, validation, and feature scaling. Sparse or stable coefficients are model behaviors, not causal truths.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+3. **Prediction:** Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept.
+   **Progressive hint:** Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.
+4. **Elastic Net implementation:** Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity.
+   **Progressive hint:** Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.
+5. **Scaling bug:** Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison.
+   **Progressive hint:** The L1 penalty operates on coefficient magnitude; rescaling a feature changes the coefficient needed for the same prediction.
+6. **Stability investigation:** Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions.
+   **Progressive hint:** Lasso may alternate which correlated feature receives weight; Ridge often distributes weight while predictions remain similar.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

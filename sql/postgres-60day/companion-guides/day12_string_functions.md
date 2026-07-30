@@ -27,10 +27,40 @@ duplicate grouping, but keep the original column visible so a reviewer can
 audit what changed. Explain why silently overwriting the raw value would lose
 evidence.
 
+## Practice assumptions and review method
+
+- **Focus:** Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.
+- **Assumptions:** Course emails use one `@`; Unicode/collation behavior can vary. Text ordering is deterministic only with an explicit sort and tie-breaker.
+- **Failure to watch for:** Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day12_string_functions.sql). Add
-inputs with leading spaces, mixed case, a missing delimiter, and `NULL`.
+Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Return normalized customer names and lowercase emails.
+   **Progressive hint:** Use `btrim` for outer whitespace and `lower` for a declared case-normalized display value.
+   **Expected shape:** One row per customer.
+2. **Query writing:** Extract the email domain and count customers by domain, preserving missing emails.
+   **Progressive hint:** `split_part` parses the second component; CASE keeps NULL distinct.
+   **Expected shape:** One row per domain label.
+3. **Query writing:** Create an ordered comma-separated list of department employee names.
+   **Progressive hint:** Put `ORDER BY` inside `string_agg` so concatenation order is deliberate.
+   **Expected shape:** One row per department.
+4. **Prediction:** Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled.
+   **Progressive hint:** Use a POSIX whitespace class and the global regex flag.
+   **Expected shape:** Three input/output rows.
+5. **Debugging:** Safely find customer names containing a literal percent or underscore rather than treating them as wildcards.
+   **Progressive hint:** Escape wildcard characters and declare the escape character.
+   **Expected shape:** Rows only when the literal character occurs.
+6. **Extension:** Parse the numeric suffix from names like `Customer 42`, returning NULL for nonmatching text.
+   **Progressive hint:** Use a captured regex replacement only after a match predicate establishes the format.
+   **Expected shape:** One row per customer with a numeric suffix.
 
 ## Self-check
 
@@ -60,13 +90,11 @@ Examples
 - Build labels from `products.category`, `products.name`, and formatted
   `products.price`.
 
-Exercises from the learner script
-1) Normalize `customers.country` to upper-case after trimming whitespace.
-2) Build the product label `"<category> - <name> ($<price>)"`.
-
-`FORMAT('%s - %s ($%s)', category, name, to_char(price, 'FM999999990.00'))`
-avoids a dependency on `pg_trgm` or another extension and keeps two decimal
-places in the displayed price.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - String functions: https://www.postgresql.org/docs/current/functions-string.html

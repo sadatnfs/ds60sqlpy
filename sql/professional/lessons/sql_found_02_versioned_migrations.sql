@@ -73,8 +73,23 @@ ORDER BY sr.request_key;
 -- 4. Name three PostgreSQL operations that require an explicit nontransactional
 --    runner boundary. Explain why "just run the down migration" is not a safe
 --    universal recovery policy after a lossy data change.
+--
+-- 5. Make the version-006 expand migration safely retryable after a client loses
+--    its connection between DDL and metadata recording. Explain why sprinkling
+--    IF NOT EXISTS everywhere can hide drift instead of proving idempotency.
+--
+-- 6. Design a large-table index rollout using CREATE INDEX CONCURRENTLY and a
+--    CHECK constraint rollout using NOT VALID followed by VALIDATE CONSTRAINT.
+--    Mark the transaction boundaries and the monitoring/abort evidence.
+--
+-- 7. Write a schema-drift report comparing an expected manifest of columns,
+--    types, nullability, defaults, constraints, and indexes with pg_catalog.
+--    Distinguish missing, unexpected, and changed objects deterministically.
+--
+-- 8. Draft a failed-deployment recovery plan for each expand/contract phase.
+--    State which application versions can run, which writes must be paused,
+--    what is reversible, and what backup or reconciliation evidence is needed.
 
 \echo 'SQL-FOUND-02: remove the isolated migration lab after normal completion'
 \ir ../fixtures/migrations/cleanup.sql
 \echo 'SQL-FOUND-02 complete'
-

@@ -352,6 +352,27 @@ ORDER BY r.cohort_month, r.month_number;
 --    independently before division.
 -- 7. Add an event exactly at a tier valid_to boundary and prove it joins the
 --    successor [valid_from, valid_to) row, not both rows.
+-- 8. Compute a trailing seven-day active-user metric over a dense date spine.
+--    Compare ROWS and RANGE frames and prove missing calendar dates do not
+--    silently change the business window.
+-- 9. Calculate median and 90th-percentile session duration with percentile_cont.
+--    State input/output grain, interpolation behavior, NULL handling, and why
+--    an average cannot answer the same distribution question.
+-- 10. Return the top two event types per user with row_number, rank, and
+--     dense_rank side by side. Define a deterministic tie policy and explain
+--     when each ranking function changes the number of returned rows.
+-- 11. Traverse a parent/child campaign hierarchy with a recursive CTE. Include
+--     depth, a path, and cycle detection; prove malformed cyclic input
+--     terminates rather than looping until a resource limit.
+-- 12. Build a daily funnel report that retains zero-activity dates. Keep event
+--     filters in the appropriate JOIN condition, make each denominator
+--     explicit, and distinguish zero from missing data.
+-- 13. Compare an exact distinct-user count with a documented approximate
+--     strategy suitable for very large data. Define acceptable error, memory,
+--     mergeability, refresh, and verification requirements before choosing.
+-- 14. Turn one analysis into a reusable parameterized query. Validate time-zone,
+--     interval, and cohort inputs; preserve half-open bounds and deterministic
+--     order; add grain, duplicate, NULL, and boundary contract checks.
 
 DO $self_check$
 BEGIN
@@ -376,4 +397,3 @@ $self_check$;
 
 ROLLBACK;
 \echo 'SQL-ANALYTICS-01 complete: pro_analytics_lab was rolled back'
-

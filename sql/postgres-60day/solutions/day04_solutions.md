@@ -1,64 +1,231 @@
-# Day 04 solutions — OUTER JOINs and unmatched rows
+# Day 04 solutions — OUTER JOINs: Preserving Unmatched Rows
 
-These answers match the exercises in [Day 04](../day04_outer_joins.sql). The course seed intentionally includes unpaid orders and unsold products so the unmatched cases are visible.
+These answers align one-for-one with [day04_outer_joins.sql](../day04_outer_joins.sql).
+Run only against the disposable `advanced_sql_training` database.
+The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
+The snippets below assume the lesson's
+`SET search_path TO training, public;` statement. Run the complete
+executable companion when you want a self-contained check.
 
-## Exercise 1 — Reconcile orders and payments
+## Reading contract
+
+- **Focus:** Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.
+- **Assumptions:** Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.
+- **Primary pitfall:** A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.
+- **Safety:** all writes are bounded and rollback-protected; read-only
+  queries still use deterministic ordering whenever row order is claimed.
+
+## Exercise 1 — Query writing
+
+**Prompt:** List every customer with order count, including customers with zero orders.
+
+**Reasoning:** Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT
-  COALESCE(o.order_id, p.order_id) AS order_id,
-  o.total_amount,
-  p.payment_id,
-  p.amount AS payment_amount,
-  CASE
-    WHEN o.order_id IS NULL THEN 'payment_without_order'
-    WHEN p.order_id IS NULL THEN 'order_without_payment'
-  END AS mismatch
-FROM training.orders AS o
-FULL OUTER JOIN training.payments AS p
-  ON p.order_id = o.order_id
-WHERE o.order_id IS NULL
-   OR p.order_id IS NULL
-ORDER BY order_id, p.payment_id;
+SELECT c.customer_id,
+       c.full_name,
+       COUNT(o.order_id) AS order_count
+FROM customers AS c
+LEFT JOIN orders AS o
+  ON o.customer_id = c.customer_id
+GROUP BY c.customer_id, c.full_name
+ORDER BY order_count DESC, c.customer_id;
 ```
 
-`FULL OUTER JOIN` preserves unmatched rows from both sides. In the current schema, `payments.order_id` is a required foreign key, so a payment without an order should not exist. Orders without payments are valid and should appear.
+**Expected shape:** One row per customer; zero is visible.
 
-## Exercise 2 — Find products never purchased
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 2 — Query writing
+
+**Prompt:** Find products that have never appeared in an order item.
+
+**Reasoning:** Left join and retain rows where the right-side primary key is NULL.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
+- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT
-  p.product_id,
-  p.name,
-  p.category
-FROM training.products AS p
-LEFT JOIN training.order_items AS oi
+SELECT p.product_id,
+       p.name,
+       p.category
+FROM products AS p
+LEFT JOIN order_items AS oi
   ON oi.product_id = p.product_id
 WHERE oi.order_item_id IS NULL
 ORDER BY p.product_id;
 ```
 
-Test a non-nullable column from the optional side of the join. The seed deliberately leaves products 276–300 unsold, so this query has a visible result.
+**Expected shape:** One row per unsold product.
 
-## Exercise 3 — Customers with no orders in the last 90 days
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 3 — Query writing
+
+**Prompt:** Compare monthly budgets and expenses by category with a full outer join.
+
+**Reasoning:** Aggregate each side to the same category/month grain before joining; preserve keys from either side.
+
+**Clause-by-clause reading:**
+
+- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
+- `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT
-  c.customer_id,
-  c.full_name,
-  c.country
-FROM training.customers AS c
-LEFT JOIN training.orders AS o
-  ON o.customer_id = c.customer_id
- AND o.order_date >= CURRENT_TIMESTAMP - INTERVAL '90 days'
-WHERE o.order_id IS NULL
-ORDER BY c.country, c.customer_id;
+WITH expense_months AS (
+  SELECT e.category,
+         date_trunc('month', e.expense_date)::date AS period,
+         SUM(e.amount) AS actual_amount
+  FROM expenses AS e
+  GROUP BY e.category, date_trunc('month', e.expense_date)
+), budget_months AS (
+  SELECT b.category,
+         b.period,
+         SUM(b.amount) AS budget_amount
+  FROM budgets AS b
+  GROUP BY b.category, b.period
+)
+SELECT COALESCE(bm.category, em.category) AS category,
+       COALESCE(bm.period, em.period) AS period,
+       ROUND(bm.budget_amount, 2) AS budget_amount,
+       ROUND(em.actual_amount, 2) AS actual_amount
+FROM budget_months AS bm
+FULL JOIN expense_months AS em
+  ON em.category = bm.category
+ AND em.period = bm.period
+ORDER BY period, category;
 ```
 
-The date predicate belongs in `ON`. Putting it in `WHERE` would discard the null-extended rows and accidentally turn the outer join into an inner join. This result includes customers who never ordered and customers whose orders are all older than 90 days.
+**Expected shape:** One row per category/month present in either source.
 
-## Check yourself
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
 
-- Exercise 1 should have no `payment_without_order` rows unless referential integrity was bypassed.
-- Exercise 2 includes the intentionally unsold tail of the product catalog.
-- Exercise 3 still includes unmatched customers.
+## Exercise 4 — Prediction
+
+**Prompt:** Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.
+
+**Reasoning:** Place `o.status = 'delivered'` in `ON`; `WHERE` would remove NULL-extended customers.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT c.customer_id,
+       c.full_name,
+       COUNT(o.order_id) AS delivered_orders
+FROM customers AS c
+LEFT JOIN orders AS o
+  ON o.customer_id = c.customer_id
+ AND o.status = 'delivered'
+GROUP BY c.customer_id, c.full_name
+ORDER BY delivered_orders DESC, c.customer_id;
+```
+
+**Expected shape:** One row per customer, including zero delivered orders.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 5 — Debugging
+
+**Prompt:** Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.
+
+**Reasoning:** Count a non-nullable right-side key that becomes NULL for an unmatched row.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT c.customer_id,
+       COUNT(o.order_id) AS order_count
+FROM customers AS c
+LEFT JOIN orders AS o
+  ON o.customer_id = c.customer_id
+GROUP BY c.customer_id
+ORDER BY c.customer_id;
+```
+
+**Expected shape:** One row per customer with correct zero counts.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 6 — Extension
+
+**Prompt:** Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.
+
+**Reasoning:** Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
+- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
+- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
+
+```sql
+SELECT COUNT(DISTINCT p.product_id) FILTER (
+         WHERE p.product_id IS NOT NULL AND oi.product_id IS NOT NULL
+       ) AS matched_products,
+       COUNT(DISTINCT p.product_id) FILTER (
+         WHERE p.product_id IS NOT NULL AND oi.product_id IS NULL
+       ) AS unsold_products,
+       COUNT(DISTINCT oi.product_id) FILTER (
+         WHERE p.product_id IS NULL AND oi.product_id IS NOT NULL
+       ) AS orphan_item_product_ids
+FROM products AS p
+FULL JOIN order_items AS oi
+  ON oi.product_id = p.product_id;
+```
+
+**Expected shape:** One summary row with three mutually interpretable counts.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Final self-check
+
+- Can you explain the logical grain before and after every aggregation?
+- Are missing values preserved or converted only by an explicit rule?
+- Does every ordered result have a deterministic final tie-breaker?
+- Are money and time assumptions visible beside the calculation?
+- Does the complete executable solution finish with `ROLLBACK`?

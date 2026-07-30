@@ -66,6 +66,7 @@ professional = [
   "build>=1.2",
   "duckdb>=1.1",
   "hypothesis>=6.100",
+  "pip>=24.0",
   "pyarrow>=17",
   "setuptools>=77",
   "wheel>=0.45",
@@ -128,6 +129,7 @@ extend-exclude = [
 select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PTH"]
 
 [tool.ruff.lint.per-file-ignores]
+"scripts/build_course_guide.py" = ["E501"]
 "tests/*" = ["S101"]
 
 [tool.mypy]
@@ -136,7 +138,6 @@ strict = true
 explicit_package_bases = true
 mypy_path = [
   "src",
-  "scripts",
 ]
 files = [
   "src",

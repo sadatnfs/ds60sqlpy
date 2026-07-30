@@ -66,7 +66,7 @@ print(model.score(X_test, y_test))
 dataset before splitting would leak global means and variances into the test
 evaluation.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Swap `LinearRegression` for `Ridge` and compare test scores.
 2. Inspect the coefficients and discuss how feature scaling changes their
@@ -80,6 +80,25 @@ evaluation.
 2. Reach the fitted model through `pipeline.named_steps`. A coefficient from
    standardized inputs represents a one-standard-deviation feature change, but
    correlated features still complicate causal interpretation.
+
+### Additional mastery practice
+
+Make preprocessing and estimation one fitted object. Data boundaries, feature names, and unknown-category behavior are part of the model contract.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+3. **Leakage prediction:** Predict how cross-validation scores can change when a scaler is fit on the complete dataset before `cross_val_score`, then explain why the code still runs without warning.
+   **Progressive hint:** The globally fitted mean and scale contain information from each validation fold. A Pipeline refits them using only the fold's training rows.
+4. **Mixed-type implementation:** Build a `ColumnTransformer` for numeric imputation/scaling and categorical imputation/one-hot encoding, followed by LogisticRegression. Use a tiny DataFrame containing a missing value.
+   **Progressive hint:** Use separate nested pipelines and `handle_unknown='ignore'`; keep column lists explicit so schema drift is visible.
+5. **Unknown-category debugging:** Fit on regions `north` and `south`, then predict a row with region `west`. Compare `OneHotEncoder` default behavior with `handle_unknown='ignore'` and explain the resulting representation.
+   **Progressive hint:** The default raises on an unseen category. Ignore maps the unknown to all zeros for that feature block, which is operationally safe but lossy.
+6. **Inspection and schema contract:** After fitting the mixed-type pipeline, recover transformed feature names, pair them with coefficients, and assert that an inference DataFrame has the required columns in a safe order.
+   **Progressive hint:** Use `get_feature_names_out()` from the fitted ColumnTransformer. Select by column name rather than trusting an incoming positional order.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

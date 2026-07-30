@@ -27,10 +27,40 @@ Start from `products` and left-join `order_items`. A product with no line item
 still appears, with `oi.product_id IS NULL`. Moving a right-side filter from
 `ON` into `WHERE` removes that row; run both shapes and explain the change.
 
+## Practice assumptions and review method
+
+- **Focus:** Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.
+- **Assumptions:** Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.
+- **Failure to watch for:** A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day04_outer_joins.sql). For one
-result, report both the preserved-entity count and the matched-fact count.
+Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** List every customer with order count, including customers with zero orders.
+   **Progressive hint:** Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`.
+   **Expected shape:** One row per customer; zero is visible.
+2. **Query writing:** Find products that have never appeared in an order item.
+   **Progressive hint:** Left join and retain rows where the right-side primary key is NULL.
+   **Expected shape:** One row per unsold product.
+3. **Query writing:** Compare monthly budgets and expenses by category with a full outer join.
+   **Progressive hint:** Aggregate each side to the same category/month grain before joining; preserve keys from either side.
+   **Expected shape:** One row per category/month present in either source.
+4. **Prediction:** Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.
+   **Progressive hint:** Place `o.status = 'delivered'` in `ON`; `WHERE` would remove NULL-extended customers.
+   **Expected shape:** One row per customer, including zero delivered orders.
+5. **Debugging:** Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.
+   **Progressive hint:** Count a non-nullable right-side key that becomes NULL for an unmatched row.
+   **Expected shape:** One row per customer with correct zero counts.
+6. **Extension:** Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.
+   **Progressive hint:** Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero.
+   **Expected shape:** One summary row with three mutually interpretable counts.
 
 ## Self-check
 
@@ -72,14 +102,11 @@ Pitfalls
 - Filtering on right-side columns in WHERE after LEFT JOIN removes the NULL-extended rows.
 - Aggregations with NULLs: COUNT(oi.*) counts only non-null matches; use COUNT(*) with CASE WHEN to count zeroes explicitly.
 
-Exercises from the learner script
-1) Identify orders with no payments and payments without orders.
-2) Find products that were never purchased.
-3) Find customers with no orders in the last 90 days.
-
-The setup foreign key means an ordinary `payments` row without an order cannot
-exist. Keep that side of exercise 1 as a reconciliation check that should return
-zero unless constraints were bypassed in imported data.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Outer joins: https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-FROM

@@ -110,11 +110,39 @@ cluster merely to make an exercise appear complete.
 
 ## Exercises
 
-Complete all six prompts: publisher crash, consumer uncertainty, out-of-order
+Complete all twelve prompts. Begin with publisher crash, consumer uncertainty, out-of-order
 versions, physical/logical semantics, slot retention operations, and a fenced
-failover runbook. For every failure, identify durable state before retry and the
-evidence needed to distinguish “not applied” from “applied but acknowledgement
-lost.”
+failover runbook; then cover publications, bootstrap, replica consistency,
+conflict handling, DDL sequencing, and failback. For every failure, identify
+durable state before retry and the evidence needed to distinguish “not applied”
+from “applied but acknowledgement lost.”
+
+Keep the local SQL as a single-node model; multi-node actions remain reviewed
+runbook work:
+
+1. **Publisher crash:** prove a committed, unacknowledged outbox row is durable.
+2. **Consumer uncertainty:** distinguish database-local idempotency from an
+   external side effect and design its key.
+3. **Ordering:** deliver versions out of order, prevent regression, and detect
+   gaps.
+4. **Mechanisms:** compare physical streaming with logical publication,
+   including DDL and sequence behavior.
+5. **Slots:** define WAL-byte, active-state, lag, disk, alert, ownership, and
+   retirement evidence.
+6. **Failover:** cover quorum, fencing, loss, routing, timeline, CDC state,
+   objectives, fallback, verification, and new backup.
+7. **Publication contract:** design row/column scope, replica identity, initial
+   copy, updates/deletes, and tenant-leak tests.
+8. **Bootstrap:** align consistent snapshot and start LSN with slot retention,
+   deduplication, restart, handoff, and abandoned-run cleanup.
+9. **Read consistency:** define user-visible staleness and compare primary
+   pinning, LSN waits, bounded lag, timeout, and fallback.
+10. **Conflicts:** compare single-writer ownership, versions, merge, quarantine,
+    and repair; reject naive wall-clock wins.
+11. **DDL sequencing:** build publisher/subscriber/application compatibility
+    across additive, validating, contract, and removal phases.
+12. **Failback/reseed:** choose rewind/rebuild safely and verify timelines,
+    slots, subscriptions, routing, data, backup, and audit.
 
 ## Self-check
 

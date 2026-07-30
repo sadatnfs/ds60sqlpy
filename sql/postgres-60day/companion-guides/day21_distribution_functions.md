@@ -27,10 +27,40 @@ Apply `NTILE(4)`, `PERCENT_RANK`, and `CUME_DIST` to a five-row `VALUES` set
 containing a tie. Observe that buckets need not have equal value ranges and that
 peer-aware distribution functions treat equal ordering values together.
 
+## Practice assumptions and review method
+
+- **Focus:** Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.
+- **Assumptions:** `PERCENT_RANK` ranges from 0 to 1 using rank; `CUME_DIST` is the fraction at or below the current value; `NTILE` balances row counts.
+- **Failure to watch for:** A percentile rank is not a probability or causal score, and `NTILE(10)` does not guarantee equal value ranges.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day21_distribution_functions.sql).
-Repeat one calculation on a partition smaller than the requested bucket count.
+Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Assign customers to four stored-spend buckets.
+   **Progressive hint:** Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker.
+   **Expected shape:** One row per ordering customer with bucket 1–4.
+2. **Query writing:** Calculate salary percent rank within each department.
+   **Progressive hint:** Partition by department and rank on salary alone so tied salaries share rank.
+   **Expected shape:** One row per employee with values from 0 to 1.
+3. **Query writing:** Calculate cumulative distribution of product price within category.
+   **Progressive hint:** Partition by category and order on price.
+   **Expected shape:** One row per product with cume_dist in (0, 1].
+4. **Prediction:** Compare percent rank and cumulative distribution for tied values 10, 10, and 20.
+   **Progressive hint:** Tied values share rank and cumulative endpoint, but the two functions use different formulas.
+   **Expected shape:** Three rows making tie behavior visible.
+5. **Debugging:** Audit the row count in each customer spend decile rather than assuming exact equality.
+   **Progressive hint:** NTILE bucket sizes differ by at most one when row count is not divisible by ten.
+   **Expected shape:** Up to 10 bucket rows with counts.
+6. **Extension:** Return customers in the top stored-spend decile with their spend and population share.
+   **Progressive hint:** Filter an outer query after assigning deciles; state that bucket 1 is highest because ordering is descending.
+   **Expected shape:** Customers in decile 1.
 
 ## Self-check
 
@@ -66,14 +96,11 @@ Pitfalls
 - Non-unique ORDER BY yields arbitrary rankings among ties; define tie policy.
 - NTILE with small partitions creates imbalanced tiles; consider minimum partition size.
 
-Exercises from the learner script
-1) Bucket products into deciles by units sold during the last 90 days.
-2) Compute each order's percentile rank by `total_amount` within its customer.
-
-Aggregate to one row per product before `NTILE(10)` and retain unsold products
-with a left join. `PERCENT_RANK` is ordered ascending in the maintained answer,
-so 0 is the customer's lowest order and 1 is the highest when the partition has
-more than one row.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Distribution: https://www.postgresql.org/docs/current/functions-window.html#FUNCTIONS-WINDOW

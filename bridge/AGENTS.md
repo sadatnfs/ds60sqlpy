@@ -26,6 +26,9 @@ interactive SQL. PostgreSQL magic cells must be tagged
 Companion guides include objectives, prerequisites, vocabulary, worked
 examples, exercises, self-checks, common pitfalls, and a next step. Solution
 notes discuss tradeoffs and failure behavior instead of merely repeating code.
+Each cataloged bridge module must meet its immutable
+`curriculum/practice_baseline.json` target on learner, guide, and explanatory
+solution surfaces with aligned, distinct numbered prompts.
 
 ## Database and security rules
 
@@ -64,6 +67,7 @@ Run from the repository root:
 python -m compileall -q bridge
 python -m pytest bridge/tests -q
 python bridge/scripts/validate_bridge.py
+python scripts/audit_practice.py
 ruff check bridge
 ruff format --check bridge
 ```

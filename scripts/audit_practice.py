@@ -238,9 +238,11 @@ def audit() -> list[ArtifactCounts]:
                 target=target,
                 learner=count_practice(learner_path),
                 guide=count_practice(guide_path),
-                solution=max(
-                    count_practice(path, solution=True) for path in solution_paths
-                ),
+                # A lesson can expose both Markdown and notebook explanations.
+                # The least-complete explanatory artifact is the honest course
+                # surface; using the maximum would allow a sparse duplicate to
+                # hide behind its richer counterpart.
+                solution=min(count_practice(path, solution=True) for path in solution_paths),
             )
         )
 
@@ -265,8 +267,8 @@ def render_report(rows: list[ArtifactCounts]) -> str:
         "This generated report checks the repository-wide exercise-enrichment",
         "contract recorded in `curriculum/practice_baseline.json`. For every",
         "cataloged lesson, the target is `max(6, 2 × audited baseline)` and must",
-        "be visible in the learner artifact, companion guide, and explanatory",
-        "solution.",
+        "be visible in the learner artifact, companion guide, and every",
+        "explanatory solution artifact.",
         "",
         f"- Lessons passing all three surfaces: **{passing}/{len(rows)}**",
         f"- Audited baseline prompts: **{baseline_total}**",
@@ -275,7 +277,7 @@ def render_report(rows: list[ArtifactCounts]) -> str:
         f"- Current companion-guide prompts: **{guide_total}**",
         f"- Current explanatory-solution prompts: **{solution_total}**",
         "",
-        "| Lesson | Baseline | Target | Learner | Guide | Solution | Status |",
+        "| Lesson | Baseline | Target | Learner | Guide | Solution minimum | Status |",
         "| --- | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
     for row in rows:

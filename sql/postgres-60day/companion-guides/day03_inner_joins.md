@@ -27,11 +27,40 @@ line item, so summing `orders.total_amount` at that point repeats the order
 total. The learner query instead calculates value from each line and aggregates
 at the requested customer or category grain.
 
+## Practice assumptions and review method
+
+- **Focus:** Use inner joins only when unmatched rows should disappear, and verify key cardinality before aggregating.
+- **Assumptions:** Foreign keys define expected many-to-one relationships. Net line revenue is `unit_price * quantity * (1 - discount)`.
+- **Failure to watch for:** A missing or incomplete `ON` condition creates row multiplication; joining two detail tables before aggregation can multiply measures.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day03_inner_joins.sql). Before each
-final aggregate, compare `COUNT(*)` with `COUNT(DISTINCT order_id)` to expose
-join fanout.
+Use inner joins only when unmatched rows should disappear, and verify key cardinality before aggregating.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** List orders with customer names and countries.
+   **Progressive hint:** Join the order foreign key to the customer primary key and qualify every selected column.
+   **Expected shape:** One row per order.
+2. **Query writing:** Calculate each order item's net line revenue with the product name and category.
+   **Progressive hint:** Remain at one row per order item; do not aggregate until the desired grain changes.
+   **Expected shape:** One row per order item.
+3. **Query writing:** List payments with order status and customer name.
+   **Progressive hint:** Follow payments → orders → customers using each declared foreign key.
+   **Expected shape:** One row per payment.
+4. **Prediction:** Predict the row count from joining one order with three items and two payments directly, then write a safe per-order reconciliation.
+   **Progressive hint:** Aggregate items and payments separately to one row per order before joining those aggregates.
+   **Expected shape:** One row per order; no six-row multiplication.
+5. **Debugging:** Repair a customer/order join whose `ON` clause compares unrelated IDs.
+   **Progressive hint:** Join `orders.customer_id` to `customers.customer_id`; verify output cannot exceed the order count for an inner many-to-one join.
+   **Expected shape:** Exactly one customer match per order.
+6. **Extension:** Calculate net line revenue by customer country without double-counting order totals.
+   **Progressive hint:** Start from line items, join through orders and customers, then aggregate at country grain.
+   **Expected shape:** One row per country represented by an order.
 
 ## Self-check
 
@@ -77,16 +106,11 @@ Anti-patterns and pitfalls
 - Using LIKE to join keys; always use exact key equality unless justified.
 - Ambiguity in column names after join; qualify columns to avoid surprises.
 
-Exercises from the learner script
-1) List the top 20 customers by total net line revenue by joining customers,
-   orders, and order items.
-2) Show the last 100 paid orders with the payment method used.
-3) For each department, list employees and their manager names using a
-   self-join.
-
-An order can have more than one payment, so exercise 2 can return more than one
-row per order. If “one row per order” is required, aggregate payment methods or
-state a deterministic choice.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Joins: https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-JOINS

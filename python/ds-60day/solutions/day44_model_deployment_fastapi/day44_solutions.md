@@ -88,3 +88,96 @@ Notes
 Deployment pointers
 - Freeze dependencies into a minimal requirements.txt (fastapi, uvicorn, scikit-learn, joblib, numpy)
 - Set `workers` via gunicorn/uvicorn in production; pin model and library versions for reproducibility
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Add input validation and friendly error behavior.
+
+**How to reason about it:** Let Pydantic reject malformed requests with field-level messages, but validate domain rules such as finite values and exact feature count. Do not catch programming defects and relabel them as client mistakes.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Return the class name as well as the numeric class identifier.
+
+**How to reason about it:** Map numeric classes through metadata saved with the model and test every valid identifier. A class-name list copied independently into the service can drift from the fitted encoder.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Create a minimal runtime dependency file for this API.
+
+**How to reason about it:** A runtime dependency list contains direct imports needed to load the artifact and serve requests—not the entire notebook environment. Build and smoke-test it in a clean environment.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Boundary-case testing
+
+**Prompt:** Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each.
+
+**Reasoning before implementation:** Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.
+
+Prefer named request fields when the feature set is stable; they make missing
+and extra values visible. If a numeric vector is required, constrain its length
+and reject non-finite values before NumPy/model calls.
+
+Tests should assert a stable error shape without pinning every word of
+framework-generated prose. A valid request should assert response schema,
+probability range, class mapping, and model version.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Batch contract
+
+**Prompt:** Design a `/predict-batch` request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata.
+
+**Reasoning before implementation:** Validate the entire batch before scoring or define explicit partial failure semantics. Never rely only on list position to identify rows.
+
+Include `request_id` per input and return it with each prediction. Enforce a
+bounded batch size to protect memory and latency. Score one matrix rather than
+looping through individual model calls, then preserve request order explicitly.
+
+Choose atomic failure for a teaching service: if any row is invalid, return a
+4xx response with indexed details and score none. Partial success is possible
+but requires a more complex, versioned response contract.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Artifact-compatibility check
+
+**Prompt:** At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe.
+
+**Reasoning before implementation:** Persist a small manifest beside the artifact and compare required fields. Python pickle/joblib loading can execute code.
+
+Fail fast if artifact files are absent, hashes or schema versions disagree, or
+the model lacks required prediction methods. Health/readiness should remain
+false until these checks pass.
+
+Only load artifacts produced through the trusted course pipeline. Hashes detect
+accidental change but do not make an untrusted pickle safe; artifact provenance
+and controlled storage are security boundaries.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

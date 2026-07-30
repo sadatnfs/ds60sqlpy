@@ -97,7 +97,7 @@ Follow the CLI output for the local API URL and open the displayed local UI
 For scheduling practice in Prefect 3, prefer a local `flow.serve(...)` example
 after the direct flow is correct, and keep its serving process running.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Add `test_size` and `random_state` parameters to the training flow.
 2. Split the training task into separate train and evaluate tasks with explicit
@@ -117,6 +117,23 @@ after the direct flow is correct, and keep its serving process running.
 The separate solution reinforces retry, notification, and scheduling concepts.
 Use the Prefect 3 execution path in this guide and the current learner
 environment when translating those concepts.
+
+### Additional mastery practice
+
+Orchestrate explicit, typed tasks whose retries are safe, artifacts are versioned, and failures are observable. A flow wrapper does not repair an unsafe task.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Retry and idempotence:** Add retries to a task that writes an artifact. Make the write idempotent so a failure after writing cannot create duplicate or partially valid outputs.
+   **Progressive hint:** Write to a temporary path, validate, then atomically replace a versioned destination. A retry should produce the same logical result.
+5. **Cache-key design:** Design a task cache key that changes when data fingerprint, code/config, or relevant parameters change, but not when an unrelated log message changes.
+   **Progressive hint:** Hash canonical semantic inputs and include a task/schema version. Do not cache a task whose hidden external state is untracked.
+6. **Failure observability:** Instrument a three-task flow so logs and a final summary identify run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category without logging sensitive rows.
+   **Progressive hint:** Use structured fields and task/run context. Emit counts and opaque IDs rather than raw feature values.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

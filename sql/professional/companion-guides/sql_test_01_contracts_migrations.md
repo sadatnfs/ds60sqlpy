@@ -77,13 +77,38 @@ unexpected error. This tests the test rather than trusting its appearance.
 
 ## Exercises
 
-Complete all five prompts: migrate and update the contract, detect producer
+Complete all ten prompts. Begin by migrating and updating the contract, detecting producer
 duplicates with precise grains, inspect key/default constraints without brittle
 generated names, reconcile zero-line orders correctly, and explain ownership
-and CI behavior.
+and CI behavior; then test SQLSTATEs, boundaries, concurrency, schema drift, and
+a destructive-migration rehearsal.
 
 For each check, write expected result, observed result, result grain, and failure
 action. Detection is not automatic remediation permission.
+
+Make every test fail loudly on the wrong result and independently verify the
+test harness with a negative control:
+
+1. **Currency migration:** update migration manifest and expected contract for
+   the new required defaulted column.
+2. **Producer duplicates:** report duplicate groups and participating detail
+   rows without confusing their grains.
+3. **Key contracts:** inspect defaults, primary/unique keys, and foreign keys
+   by properties rather than generated names.
+4. **Zero-line reconciliation:** preserve every order and distinguish absent
+   detail from a numeric zero.
+5. **Harness:** document fixture ownership, isolation, negative control, CI exit,
+   and cleanup.
+6. **Expected SQLSTATE:** reject a duplicate for the intended category and fail
+   if no error or the wrong error occurs.
+7. **Boundary matrix:** drive below/exact/above/malformed/NULL cases from data
+   with an expected outcome for each.
+8. **Concurrency:** specify sessions, barriers, timeouts, observed states,
+   deterministic assertions, and cleanup.
+9. **Schema fingerprint:** compare stable semantic properties while excluding
+   OIDs and unstable generated names.
+10. **Destructive rehearsal:** restore, migrate, reconcile, test critical
+    queries, measure, assess rollback, and preserve approval evidence.
 
 ## Self-check
 

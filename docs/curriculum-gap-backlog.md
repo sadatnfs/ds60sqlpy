@@ -25,6 +25,27 @@ This is a finite planning backlog, not a claim that any repository can teach lit
 
 Do not renumber existing Days 1–60. A future implementer should select stable catalog IDs and place additions at clear checkpoints, as described in [the curriculum map](curriculum-map.md#adding-lessons-beyond-60).
 
+## Implementation verification status
+
+The checked backlog and the repository-wide practice-enrichment gate answer
+different questions. The checklist records whether each audited topic has a
+dedicated runnable learning experience; it does not, by itself, prove that
+every historical lesson has doubled practice on every learner, guide, and
+solution surface.
+
+| Gate | 2026-07-30 state | Evidence and boundary |
+| --- | --- | --- |
+| 25 audited curriculum gaps | **Implemented** | Every P0, P1, and P2 item below has a stable catalog entry, learner artifact, companion guide, and separate solution. |
+| Catalog and navigation | **Implemented** | `curriculum/catalog.json` contains 154 lessons: 70 Python, 72 SQL, and 12 bridge. The 26 named modules comprise the 25 audited gaps plus the requested `bridge-jupyter-01` module. |
+| Windows discovery bootstrap | **Implemented; platform verification remains explicit** | `scripts/bootstrap_windows.ps1` discovers supported Anaconda/Python and PostgreSQL installations even when they are absent from `PATH`, creates `.venv`, installs notebook/kernel dependencies, and avoids database or credential operations. Native PowerShell execution is still a Windows validation result, not something inferred from a macOS/Linux review. |
+| PostgreSQL and notebook workflow | **Implemented and locally live-validated** | On 2026-07-30, PostgreSQL 16.14 executed all 72 learner SQL scripts, all 72 executable solution scripts, and 18/18 PostgreSQL notebook code cells, including 9 live database cells. `bridge-jupyter-01` uses JupySQL, an SQLAlchemy engine with the Psycopg 3 dialect, and the disposable course database. This evidence applies to the validated local environment; another machine must still prove its own service state, role, port, and authentication. |
+| Portable portal | **Implemented; generated-output drift is gated** | `START_HERE.html` and private launcher mode derive lesson paths and prerequisites from the generated catalog. `python scripts/build_course_guide.py --check` must pass after catalog or lesson changes. |
+| Exercise doubling | **Complete** | `python scripts/audit_practice.py` passes all 154 lessons across learner, guide, and solution surfaces. The generated `docs/practice-coverage.md` records the immutable-baseline comparison, and repository validation resolves its links. |
+
+These boundaries are deliberate: “implemented,” “structure validated,”
+“executed on Windows,” and “connected to live PostgreSQL” are separate claims.
+See [Validation](validation.md) for the commands and evidence labels.
+
 ## Evidence and non-duplication notes
 
 The current course is stronger than a title-only audit suggests:

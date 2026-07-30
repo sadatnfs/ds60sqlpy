@@ -67,6 +67,70 @@ complete scope, replay continuity, restore time, application behavior, or team
 ability to execute the runbook. Only repeated isolated restore rehearsals with
 recorded verification support a recoverability claim.
 
+## Exercise 7 — Encryption, authenticity, and custody
+
+Encrypt artifacts in transit and at rest with approved rotated keys held
+separately from the backup. Restrict backup/WAL/manifests to recovery roles,
+audit access, test emergency key retrieval, and preserve old keys for every
+retained generation. Define immutable retention and verified deletion.
+
+Database page or dump checksums detect some accidental corruption; they do not
+authenticate an artifact against malicious replacement. Sign or MAC trusted
+manifests and verify them before restore without putting secrets in commands,
+logs, or repository files.
+
+## Exercise 8 — Restore the whole contract
+
+Set sequence/identity state beyond current maxima and test the next insert.
+Inventory large objects, extension versions, owners, memberships, object/default
+privileges, RLS policies, security labels, routines, and external configuration.
+Cluster-global roles/settings may be outside a database dump.
+
+Classify each component by artifact/source of truth and test it explicitly. A
+successful SELECT does not prove that a writer can generate a new identity or
+that a low-privilege caller has intended access.
+
+## Exercise 9 — Recover across a major version
+
+Logical dump/restore rebuilds objects through SQL and supports transformation
+but can be slow. `pg_upgrade` is faster under strict source/target binary and
+extension requirements; it still needs backup and verification.
+
+Rehearse exact versions with extensions, drivers, collations, and critical
+queries. Run post-upgrade checks/ANALYZE, detect collation drift, time cutover,
+verify applications, and preserve a fenced rollback window before accepting
+incompatible new writes.
+
+## Exercise 10 — Selective restore dependency boundary
+
+Traverse types, sequences, functions, extensions, foreign keys in both
+directions, views, triggers, policies, owners/ACLs, and downstream consumers.
+Decide how external references and intentionally omitted rows remain valid.
+
+When scope is uncertain, restore the full artifact to an isolated target first
+and export/reconcile the intended subset. Selective recovery can be syntactically
+successful but semantically incomplete.
+
+## Exercise 11 — Capacity and RTO test
+
+Measure discovery/transfer, decrypt/decompress, CPU, I/O, parallel jobs, WAL,
+constraint/index creation, statistics, verification, application startup, and
+routing. Record peak disk/memory/network, locks, throttling, and safety margin.
+
+Small fixtures miss saturation, random I/O, checkpoint pressure, sort spills,
+catalog contention, and skew. RTO ends at verified service readiness, not when
+one restore command exits.
+
+## Exercise 12 — Recovery game-day record
+
+Preassign incident commander, operators, owners, observers, and stop authority.
+Timestamp detection, decisions, commands, artifacts, injected failures,
+verification, achieved data point/service time, and runbook deviations.
+
+End with fenced cleanup, protected logs, unresolved risks with owners/dates,
+runbook changes, and the next rehearsal. A narrative without raw evidence and
+accountable follow-up is not a recovery control.
+
 ## Edge cases
 
 - Long-running logical dumps observe a consistent snapshot but may increase
@@ -74,4 +138,3 @@ recorded verification support a recoverability claim.
 - Large objects and cluster-global roles need explicit scope.
 - Encryption keys must remain recoverable but separate from protected backups.
 - Legal retention and deletion requirements apply to backup copies too.
-

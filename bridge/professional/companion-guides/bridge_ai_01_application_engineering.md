@@ -243,28 +243,98 @@ integration evaluation. None of that belongs in the default offline path.
 
 ## Exercises
 
-1. Validate every dataclass invariant: IDs, text, audiences, bounds, and budget
-   values.
-2. Implement cosine similarity, including mismatched dimensions and zero
-   vectors.
-3. Build a recording embedding double. Prove that sensitive, unauthorized, and
-   quarantined documents are filtered before embedding.
-4. Rank equal-score documents deterministically and enforce top-k plus the
-   total character bound.
-5. Serialize retrieved context as untrusted JSON data. Include only approved
-   document IDs and bounded excerpts.
-6. Implement exact structured-output validation. Test every rejected shape
-   listed above.
-7. Build a malicious text-model double that cites a non-retrieved document.
-   Prove the parser rejects it.
-8. Make the model return a blocked private marker. Prove the leakage boundary
+### Practice contract
+
+- **Focus:** Build an offline, deterministic retrieval-and-generation boundary with authorization-before-embedding, untrusted context, exact output schemas, budgets, leakage checks, and evaluation.
+- **Assumptions:** Documents, embedding/model adapters, and evaluation cases are local deterministic doubles; no API key, hosted service, or network call is required.
+- **Primary failure mode:** Retrieving unauthorized text, trusting model-shaped JSON, or reporting a passing toy evaluation as production safety evidence creates false assurance.
+- **Evidence loop:** state the boundary and prediction, implement against
+  deterministic local doubles, test success/failure/cleanup, and label any
+  optional live-adapter evidence separately from offline proof.
+
+1. **Validation:** Validate every dataclass invariant for IDs, text, audiences, bounds,
+   token/cost budgets, and latency.
+   - **Progressive hint:** Fail at construction so invalid state cannot cross later boundaries.
+2. **Math:** Implement cosine similarity with mismatched-dimension and zero-vector handling.
+   - **Progressive hint:** Validate shape and norms before division.
+3. **Authorization testing:** Use a recording embedding double to prove sensitive, unauthorized,
+   and quarantined documents are filtered before embedding.
+   - **Progressive hint:** Call history is the evidence that prohibited text never crossed the
+     adapter.
+4. **Ranking:** Rank equal-score documents deterministically while enforcing top-k and total
+   context-character bounds.
+   - **Progressive hint:** Use a stable document ID tie-breaker and apply the character budget
+     without splitting trust rules.
+5. **Prompt boundary:** Serialize context as untrusted JSON containing only approved document
+   IDs and bounded excerpts.
+   - **Progressive hint:** Separate system instructions, user query, and retrieved data
+     structurally.
+6. **Schema validation:** Implement exact structured-answer validation and test all malformed,
+   extra-field, wrong-type, duplicate-citation, and inconsistent-abstention cases.
+   - **Progressive hint:** Parsing JSON is only the first step; validate exact shape and
+     semantics.
+7. **Adversarial testing:** Use a malicious model double that cites an unretrieved document and
+   prove validation rejects it.
+   - **Progressive hint:** Citations are authorization claims and must be a subset of retrieved
+     evidence.
+8. **Leakage:** Return a blocked private marker from the model and prove the output boundary
    fails closed without logging the answer.
-9. Test preflight input, actual input, output, cost-unit, and latency budget
+   - **Progressive hint:** Leakage inspection occurs after parsing but before return/logging.
+9. **Budgets:** Test preflight input, actual input, output, cost-unit, and latency budget
    failures separately.
-10. Add at least four evaluation cases: grounded answer, abstention, injection
-    document, and unauthorized private document.
-11. Explain which safety claims the deterministic doubles prove and which need
-    a separately authorized real-adapter evaluation.
+   - **Progressive hint:** Each limit is independent evidence and needs its own failure case.
+10. **Evaluation:** Add deterministic grounded, abstention, injection-document, and
+   unauthorized-private-document cases.
+   - **Progressive hint:** Expected citations and forbidden fragments make safety assertions
+     inspectable.
+11. **Evidence limits:** Explain which safety claims deterministic doubles prove and which
+   require a separately authorized real-adapter evaluation.
+   - **Progressive hint:** A controlled harness proves orchestration, not provider behavior or
+     real-world robustness.
+12. **Prompt injection:** Insert retrieved text that says to ignore policy and reveal secrets;
+   prove it stays data and cannot change allowed citations.
+   - **Progressive hint:** The model double should attempt the attack so downstream validation
+     is exercised.
+13. **Text normalization:** Choose normalization rules for blank IDs, Unicode text, and
+   blocked-fragment matching without silently changing document meaning.
+   - **Progressive hint:** Normalization can close bypasses but can also merge distinct content.
+14. **Numeric determinism:** Test equal and nearly equal embedding scores with a declared
+   tolerance and deterministic tie-breaker.
+   - **Progressive hint:** Do not rely on platform-specific incidental sort order.
+15. **Token estimation:** Design a conservative preflight token estimator and explain why it
+   cannot replace actual adapter accounting.
+   - **Progressive hint:** Preflight should fail early on obvious excess and leave headroom.
+16. **Adapter failure:** Classify embedding/model timeout and provider-like errors without
+   retrying unsafe or permanent failures.
+   - **Progressive hint:** Offline doubles can model exception classes and call order.
+17. **Abstention:** Require abstention when no authorized evidence survives retrieval and test
+   that the text model is not called.
+   - **Progressive hint:** No evidence is a deterministic pre-model decision.
+18. **Observability:** Design safe logs/metrics that exclude user query, context, embeddings,
+   and raw model output.
+   - **Progressive hint:** Use bounded stage/outcome/error-class metadata only.
+19. **Metric edge cases:** Define evaluation metrics for an empty case set and zero expected
+   citations without divide-by-zero ambiguity.
+   - **Progressive hint:** Denominators and conventions belong in the metric contract.
+20. **Regression gates:** Set deterministic pass thresholds for citation recall, abstention
+   accuracy, leakage, and budgets without hiding per-case failures.
+   - **Progressive hint:** Aggregate gates complement, not replace, case-level evidence.
+21. **Real adapter boundary:** Design an optional hosted adapter evaluation that keeps
+   credentials external and never weakens the offline default.
+   - **Progressive hint:** Network, cost, and data authorization require an explicit opt-in
+     gate.
+22. **Threat model:** Write residual risks for retrieval poisoning, embedding inversion, model
+   memorization, authorization drift, and evaluator blind spots.
+   - **Progressive hint:** Controls reduce specific risks; they do not make a universal safety
+     claim.
+
+### Before opening the solution
+
+- Record what the offline doubles prove and what they cannot prove.
+- Inspect exact call order, parameters, schema, and failure behavior.
+- Keep credentials, payloads, and high-cardinality identifiers out of output.
+- Require deterministic reruns before considering an exercise complete.
+
 
 ## Self-check
 

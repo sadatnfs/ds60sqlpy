@@ -94,7 +94,7 @@ Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:8000/predict' `
   -ContentType 'application/json' -Body $body
 ```
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Add input validation and friendly error behavior.
 2. Return the class name as well as the numeric class identifier.
@@ -108,6 +108,23 @@ Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:8000/predict' `
    identifiers.
 3. Include only direct runtime imports. Pin or lock versions through the
    repository tooling rather than copying the entire development environment.
+
+### Additional mastery practice
+
+Make an API boundary explicit: validate shape and meaning, map model outputs to a versioned schema, and test behavior without relying on a manually running server.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Boundary-case testing:** Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each.
+   **Progressive hint:** Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.
+5. **Batch contract:** Design a `/predict-batch` request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata.
+   **Progressive hint:** Validate the entire batch before scoring or define explicit partial failure semantics. Never rely only on list position to identify rows.
+6. **Artifact-compatibility check:** At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe.
+   **Progressive hint:** Persist a small manifest beside the artifact and compare required fields. Python pickle/joblib loading can execute code.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

@@ -104,15 +104,34 @@ syntax is technically transactional.
 
 ## Exercises
 
-Complete the four prompts in the learner file. First build a deterministic
+Complete all eight prompts in the learner file. First build a deterministic
 manifest query. Then narrate the compatibility window and deployment order.
 Finally design versions 6–8 for `assigned_team` without modifying versions 1–5,
-and explain transactional boundaries and why a lossy migration cannot be
-universally reversed.
+then cover retry state, low-lock boundaries, drift evidence, and failed-phase
+recovery. Explain why a lossy migration cannot be universally reversed.
 
 Use a scratch copy for migration experiments. Keep version numbers unique,
 record metadata only after invariants pass, qualify every object, and rerun the
 fixture verifier after each change.
+
+For every migration, record precondition, change, verification, compatibility
+window, recovery action, and cleanup:
+
+1. **Manifest:** return versions 1–5 once and in order with stable metadata.
+2. **Compatibility:** explain the version-2 view and order schema, reader,
+   writer, backfill, validation, and contract deployments.
+3. **Forward series:** design versions 6–8 for `assigned_team` as separate
+   expand, backfill, and contract steps.
+4. **Runner boundaries:** identify nontransactional operations and explain why
+   lossy changes do not have universal “down” migrations.
+5. **Interrupted retry:** make version 6 recoverable after an uncertain client
+   disconnect, while detecting rather than concealing incompatible drift.
+6. **Low-lock rollout:** mark boundaries and evidence for concurrent index
+   creation and `NOT VALID`/`VALIDATE CONSTRAINT`.
+7. **Drift report:** compare expected and observed columns, constraints, and
+   indexes; label missing, unexpected, and changed objects deterministically.
+8. **Failed deployment:** write phase-specific compatibility, pause, restore,
+   reconciliation, and decision evidence for recovery.
 
 ## Self-check
 

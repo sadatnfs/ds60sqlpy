@@ -83,6 +83,55 @@ This snapshot answers historical billing questions reliably. Copying a
 category's display name into each equipment row would not provide that benefit
 and would create an update anomaly when the category is renamed.
 
+## Exercise 5 — Providers, technicians, and assignments
+
+Use one row per provider, one row per technician, and one row per
+visit/technician assignment. A provider-to-technician relationship may be
+modeled separately if employment changes independently of a visit. The
+assignment table needs a composite key such as `(visit_id, technician_id)` (or
+an identity plus that unique constraint) so the same technician cannot be
+silently assigned twice.
+
+Delimited names fail because the database cannot enforce a technician foreign
+key, distinguish a comma inside a name, or update/query one participant without
+parsing text. The executable solution creates normalized tables and demonstrates
+the join at one row per visit/technician assignment.
+
+## Exercise 6 — Preserve equipment with no loans
+
+Start from `equipment_items`, LEFT JOIN `loans`, and aggregate by item. Put a
+loan-side time filter in the `ON` clause when equipment with no qualifying loan
+must remain. The latest date is `max(checked_out_on)` and count should use a
+non-NULL loan key, not `count(*)`, which counts the preserved outer row.
+
+If the report also needs columns from the latest loan, rank loans by
+`checked_out_on DESC, loan_id DESC` before joining. The identity is the stated
+tie-break; a date alone does not impose a total order.
+
+## Exercise 7 — Referential deletion policy
+
+`category -> equipment` and `equipment -> loans` should normally RESTRICT
+physical deletion because silently deleting assets or historical checkouts
+destroys facts. `equipment -> maintenance_visits` should also RESTRICT under the
+same audit requirement. Retire a category/item with status or effective dates.
+
+CASCADE is appropriate for components that have no meaning outside their
+parent, not merely because cleanup is easy. `SET NULL` is valid only when the
+child remains truthful without its parent and the column is deliberately
+nullable. Every choice is a domain rule and requires a deletion test.
+
+## Exercise 8 — Catalog-level contract
+
+Join `pg_constraint`, `pg_class`, `pg_namespace`, and `pg_attribute`, and inspect
+constraint type plus `pg_get_constraintdef`. Inspect `pg_attribute.attgenerated`
+and `pg_get_expr(pg_attrdef.adbin, ...)` for the generated expression. This
+checks semantic properties without coupling a test to a generated name.
+
+For NULL-aware uniqueness, inspect `pg_index.indnullsnotdistinct` on PostgreSQL
+15+. The ordinary solution expects it to be false. A robust contract also
+checks column order/types and the referenced relation/columns rather than
+searching rendered text alone.
+
 ## Edge cases and alternatives
 
 - If overlapping loans must be impossible, a same-day `UNIQUE` constraint is
@@ -96,4 +145,3 @@ and would create an update anomaly when the category is renamed.
 - A generated value is convenient for row-local immutable arithmetic. Values
   depending on the current clock or another table need a query, snapshot, or
   reviewed update process instead.
-

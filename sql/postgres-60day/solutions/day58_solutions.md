@@ -188,3 +188,50 @@ back, including the procedure and customer changes.
   inventing a destination. Persisting phone requires a reviewed migration.
 - The phone regex is intentionally narrow; use country-aware normalization for
   international data.
+
+## Exercise 1 — Parse multiple datetime formats
+
+Guard each cast with a pattern-specific CASE branch. Unrecognized text maps to
+NULL and an invalid-datetime reason instead of aborting the batch.
+
+## Exercise 2 — Normalize phone safely
+
+The answer removes non-digits, then applies a deliberately narrow length check.
+It retains the normalized staging value but does not invent a destination
+column absent from `training.customers`.
+
+## Exercise 4 — Choose duplicate winners deterministically
+
+Normalize email before partitioning. Newest parsed timestamp wins, followed by
+stable name/email tie-breakers; source input order never decides.
+
+## Exercise 5 — Partition accepted and rejected outcomes
+
+A CASE expression assigns one diagnostic outcome per cleaned row. Grouped counts
+are useful for monitoring, while detail remains available for remediation.
+
+## Exercise 6 — Normalize before conflict handling
+
+The lowercased, trimmed email is both deduplication key and target conflict key.
+Case-only variants therefore compete under one declared identity.
+
+## Exercise 7 — Separate missing and unrecognized countries
+
+Missing raw text, recognized codes/aliases, and unknown values receive distinct
+states. Raw source text remains alongside its normalized candidate for audit.
+
+## Exercise 8 — Make batch replay idempotent
+
+`(batch_id, source_row_number)` is a stable source identity. Replaying the same
+batch uses `ON CONFLICT DO NOTHING`; the count remains unchanged.
+
+## Exercise 9 — Quarantine malformed JSON
+
+PostgreSQL 16's `IS JSON` predicate checks text without raising. Invalid text is
+kept with an `invalid_json` code instead of becoming an unexplained `{}` default.
+
+## Exercise 10 — Reconcile every row outcome
+
+Staged count must equal accepted plus rejected count. The procedure's affected
+row count does not distinguish inserts from updates, so a production contract
+needs explicit merge/audit evidence for those sub-outcomes.

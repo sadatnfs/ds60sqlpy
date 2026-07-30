@@ -161,5 +161,99 @@ SELECT
 FROM pro_recovery_lab.recovery_plan AS rp
 ORDER BY rp.service_name;
 
-ROLLBACK;
+-- Exercise 4: exact pg_dump/pg_restore commands remain in the guide because
+-- this safe SQL script creates neither files nor databases. It verifies the
+-- same schema/data behavior a restore rehearsal must prove.
 
+-- Exercise 5: PITR requires a compatible base backup plus an unbroken WAL chain
+-- through the target and timeline history. Archived WAL alone is insufficient.
+
+-- Exercise 6: exit zero is only one evidence field; restore and application
+-- verification must be recorded separately.
+
+-- Exercise 7: keep backup artifacts and key custody as separate controls.
+CREATE TABLE pro_recovery_lab.artifact_controls (
+    artifact_kind text PRIMARY KEY,
+    encrypted boolean NOT NULL,
+    integrity_manifest boolean NOT NULL,
+    key_owner text NOT NULL,
+    restore_role text NOT NULL
+);
+
+INSERT INTO pro_recovery_lab.artifact_controls
+VALUES
+    ('logical_dump', true, true, 'security-recovery', 'database-recovery'),
+    ('base_backup', true, true, 'security-recovery', 'database-recovery'),
+    ('wal_archive', true, true, 'security-recovery', 'database-recovery');
+
+SELECT *
+FROM pro_recovery_lab.artifact_controls
+ORDER BY artifact_kind;
+
+-- Exercise 8: restoration scope includes semantic objects and external sources
+-- of truth, not only table rows.
+SELECT *
+FROM (
+    VALUES
+        ('data/schema'::text, 'database dump or physical backup'::text),
+        ('roles/memberships', 'cluster-global reviewed export'),
+        ('sequences/identity', 'restored catalog plus next-value test'),
+        ('extensions', 'DDL plus compatible installed binaries'),
+        ('external configuration', 'separate configuration source')
+) AS restore_scope(component, expected_source)
+ORDER BY component;
+
+-- Exercise 9: capture exact server/tool/extension/collation compatibility during
+-- a major-version rehearsal. This local query is capability evidence only.
+SELECT
+    current_setting('server_version') AS server_version,
+    current_setting('server_version_num') AS server_version_num,
+    pg_catalog.pg_database.datcollate,
+    pg_catalog.pg_database.datctype
+FROM pg_catalog.pg_database
+WHERE pg_catalog.pg_database.datname = current_database();
+
+-- Exercise 10: catalog dependencies are an input to selective-restore review.
+-- A full isolated restore is safer when dependency closure is uncertain.
+SELECT
+    con.contype,
+    pg_catalog.pg_get_constraintdef(con.oid) AS dependency_contract
+FROM pg_catalog.pg_constraint AS con
+JOIN pg_catalog.pg_class AS rel
+  ON rel.oid = con.conrelid
+JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = rel.relnamespace
+WHERE n.nspname = 'pro_recovery_lab'
+ORDER BY rel.relname, con.contype, dependency_contract;
+
+-- Exercise 11: total RTO ends after validation and application readiness.
+CREATE TABLE pro_recovery_lab.capacity_budget (
+    phase text PRIMARY KEY,
+    measured_seconds numeric,
+    peak_bytes bigint,
+    evidence_note text NOT NULL
+);
+
+INSERT INTO pro_recovery_lab.capacity_budget
+VALUES
+    ('transfer', NULL, NULL, 'measure representative artifact and network'),
+    ('restore', NULL, NULL, 'measure CPU, I/O, jobs, WAL, and index work'),
+    ('verify', NULL, NULL, 'measure contracts and application smoke tests'),
+    ('route', NULL, NULL, 'measure safe client cutover and readiness');
+
+SELECT *
+FROM pro_recovery_lab.capacity_budget
+ORDER BY phase;
+
+-- Exercise 12: a game-day record assigns authority and preserves evidence.
+SELECT *
+FROM (
+    VALUES
+        ('incident_commander'::text, 'owns decisions and stop authority'::text),
+        ('recovery_operator', 'executes reviewed recovery runbook'),
+        ('application_owner', 'verifies critical read/write behavior'),
+        ('observer', 'records chronology, gaps, and follow-up owners')
+) AS game_day(role_name, responsibility)
+ORDER BY role_name;
+
+ROLLBACK;

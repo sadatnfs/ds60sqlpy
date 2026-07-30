@@ -142,6 +142,60 @@ Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day
 53. MLflow can store evidence; it does not define your compatibility or
 approval policy automatically.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 9 — rebuild a bundle deterministically
+
+Build the JSON model bundle twice from canonical records and the same configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.
+
+**Progressive hint:** Keep build time and machine paths outside content-addressed payloads. Canonical JSON requires sorted keys, stable ordering, and finite values.
+
+### Exercise 10 — write a claim-bounded model card
+
+Create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.
+
+**Progressive hint:** Generate measured fields from the same result object and keep policy prose versioned. Do not claim causality or production readiness from offline metrics.
+
+### Exercise 11 — design shadow and canary evidence
+
+Specify a no-side-effect shadow comparison followed by a bounded canary. Define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.
+
+**Progressive hint:** Shadow predictions do not affect decisions; canary output does. Both need versioned request/prediction identity and privacy-safe telemetry.
+
+### Exercise 12 — separate drift from compatibility
+
+Create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation. Route each to reject, monitor/investigate, or rollback/retrain policy.
+
+**Progressive hint:** Compatibility is a hard interface check; drift and quality are statistical evidence with support, reference, and action thresholds.
+
+### Exercise 13 — test forward and backward compatibility
+
+Build a matrix of producer/consumer schema and model versions. Test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.
+
+**Progressive hint:** Define compatibility from each consumer's contract; semantic changes may be breaking even when JSON types match.
+
+### Exercise 14 — capture dependency and supply-chain evidence
+
+Create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.
+
+**Progressive hint:** Keep portable names/versions/hashes; omit credentials and developer paths. An inventory is evidence, not a vulnerability verdict.
+
+### Exercise 15 — verify artifact trust before parsing
+
+Model a trusted local manifest root and verify every bundle file's relative path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape, extra required files, and pickle.
+
+**Progressive hint:** Resolve paths under the bundle root without following an escape. Hash bytes first and accept only an allowlisted safe format.
+
+### Exercise 16 — rehearse rollback dependency failure
+
+Archive version 1, promote version 2, then discover that version 1's runtime dependency is unavailable. Define rollback-target readiness, fallback decision, event trail, and prevention.
+
+**Progressive hint:** A registry stage is not enough; periodically load and smoke-test retained rollback bundles in their compatible runtime.
+
 ## Self-check
 
 - Snapshot hashes ignore row order but detect content changes.

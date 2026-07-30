@@ -1,40 +1,175 @@
--- Day 21 solutions: distribution functions
+-- Day 21 executable solutions
+-- Target: PostgreSQL 16+; run only in advanced_sql_training.
+-- ON_ERROR_STOP is supplied by the documented psql command.
+
+BEGIN;
 SET search_path TO training, public;
 
--- Exercise 1: product deciles by units sold during the last 90 days.
-WITH product_units AS (
-  SELECT p.product_id,
-         p.name,
-         p.category,
-         COALESCE(
-           SUM(oi.quantity) FILTER (
-             WHERE o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
-           ),
-           0
-         ) AS units_90d
-  FROM products p
-  LEFT JOIN order_items oi ON oi.product_id = p.product_id
-  LEFT JOIN orders o ON o.order_id = oi.order_id
-  GROUP BY p.product_id, p.name, p.category
-)
-SELECT product_id,
-       name,
-       category,
-       units_90d,
-       NTILE(10) OVER (ORDER BY units_90d DESC, product_id) AS sales_decile
-FROM product_units
-ORDER BY sales_decile, units_90d DESC, product_id;
+-- Shared teaching contract
+-- Focus: Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.
+-- Assumptions: `PERCENT_RANK` ranges from 0 to 1 using rank; `CUME_DIST` is the fraction at or below the current value; `NTILE` balances row counts.
+-- Pitfall: A percentile rank is not a probability or causal score, and `NTILE(10)` does not guarantee equal value ranges.
 
--- Exercise 2: each order's percentile rank within its customer.
+-- ---------------------------------------------------------------------------
+-- Exercise 1: Query writing
+-- Prompt: Assign customers to four stored-spend buckets.
+-- Why: Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker.
+-- Expected: One row per ordering customer with bucket 1–4.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+WITH customer_spend AS (
+  SELECT o.customer_id,
+         SUM(o.total_amount) AS stored_spend
+  FROM orders AS o
+  GROUP BY o.customer_id
+)
 SELECT customer_id,
-       order_id,
-       total_amount,
-       ROUND(
-         PERCENT_RANK() OVER (
-           PARTITION BY customer_id
-           ORDER BY total_amount
-         )::numeric,
-         4
-       ) AS customer_percentile_rank
-FROM orders
-ORDER BY customer_id, total_amount, order_id;
+       ROUND(stored_spend, 2) AS stored_spend,
+       NTILE(4) OVER (
+         ORDER BY stored_spend DESC, customer_id
+       ) AS spend_quartile
+FROM customer_spend
+ORDER BY spend_quartile, stored_spend DESC, customer_id;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 2: Query writing
+-- Prompt: Calculate salary percent rank within each department.
+-- Why: Partition by department and rank on salary alone so tied salaries share rank.
+-- Expected: One row per employee with values from 0 to 1.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
+-- - `PARTITION BY`: restarts a window calculation independently for each partition key.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+SELECT e.employee_id,
+       e.department_id,
+       e.salary,
+       PERCENT_RANK() OVER (
+         PARTITION BY e.department_id ORDER BY e.salary
+       ) AS salary_percent_rank
+FROM employees AS e
+ORDER BY e.department_id, e.salary, e.employee_id;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 3: Query writing
+-- Prompt: Calculate cumulative distribution of product price within category.
+-- Why: Partition by category and order on price.
+-- Expected: One row per product with cume_dist in (0, 1].
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
+-- - `PARTITION BY`: restarts a window calculation independently for each partition key.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+SELECT p.product_id,
+       p.category,
+       p.price,
+       CUME_DIST() OVER (
+         PARTITION BY p.category ORDER BY p.price
+       ) AS price_cume_dist
+FROM products AS p
+ORDER BY p.category, p.price, p.product_id;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 4: Prediction
+-- Prompt: Compare percent rank and cumulative distribution for tied values 10, 10, and 20.
+-- Why: Tied values share rank and cumulative endpoint, but the two functions use different formulas.
+-- Expected: Three rows making tie behavior visible.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+SELECT row_id,
+       value,
+       PERCENT_RANK() OVER (ORDER BY value) AS percent_rank_value,
+       CUME_DIST() OVER (ORDER BY value) AS cume_dist_value
+FROM (VALUES (1, 10), (2, 10), (3, 20)) AS sample(row_id, value)
+ORDER BY row_id;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 5: Debugging
+-- Prompt: Audit the row count in each customer spend decile rather than assuming exact equality.
+-- Why: NTILE bucket sizes differ by at most one when row count is not divisible by ten.
+-- Expected: Up to 10 bucket rows with counts.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+WITH spend AS (
+  SELECT o.customer_id,
+         SUM(o.total_amount) AS total_spend
+  FROM orders AS o
+  GROUP BY o.customer_id
+), bucketed AS (
+  SELECT customer_id,
+         NTILE(10) OVER (
+           ORDER BY total_spend DESC, customer_id
+         ) AS decile
+  FROM spend
+)
+SELECT decile,
+       COUNT(*) AS customers
+FROM bucketed
+GROUP BY decile
+ORDER BY decile;
+
+-- ---------------------------------------------------------------------------
+-- Exercise 6: Extension
+-- Prompt: Return customers in the top stored-spend decile with their spend and population share.
+-- Why: Filter an outer query after assigning deciles; state that bucket 1 is highest because ordering is descending.
+-- Expected: Customers in decile 1.
+-- Review the selected keys, grain, NULL behavior, and ordering before
+-- treating the output as evidence.
+-- Clause-by-clause reading:
+-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
+-- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+-- - `FROM`: establishes the starting relation and therefore the initial row grain.
+-- - `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
+-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
+-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+WITH spend AS (
+  SELECT o.customer_id,
+         SUM(o.total_amount) AS total_spend
+  FROM orders AS o
+  GROUP BY o.customer_id
+), bucketed AS (
+  SELECT customer_id,
+         total_spend,
+         NTILE(10) OVER (
+           ORDER BY total_spend DESC, customer_id
+         ) AS decile,
+         COUNT(*) OVER () AS population
+  FROM spend
+)
+SELECT customer_id,
+       ROUND(total_spend, 2) AS total_spend,
+       decile,
+       population
+FROM bucketed
+WHERE decile = 1
+ORDER BY total_spend DESC, customer_id;
+
+-- No course answer persists changes or temporary objects.
+ROLLBACK;

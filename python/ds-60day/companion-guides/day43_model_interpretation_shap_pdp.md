@@ -67,7 +67,7 @@ else:
 The lesson is fully offline after packages are installed. It uses package-bundled
 data and a small sample because SHAP can be computationally heavy.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Compare a SHAP summary for the top five important features.
 2. Plot PDP for the most important feature and interpret it.
@@ -85,6 +85,23 @@ second explanation library.
    single local case. Look for regions with little data support.
 3. If you intentionally install LIME during a connected session, fix its random
    seed and compare direction, magnitude, and stability—not just wording.
+
+### Additional mastery practice
+
+Treat explanations as model diagnostics tied to a dataset and baseline. Distinguish global from local behavior and predictive association from causation.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Local-versus-global diagnosis:** Construct a case where a feature is globally important but contributes little to one prediction. Explain why those statements do not conflict.
+   **Progressive hint:** Global importance aggregates across rows; a local explanation is conditioned on one row and its baseline.
+5. **Explanation leakage:** Explain why selecting the 'most important' features with the final test set and then retraining a smaller model contaminates evaluation.
+   **Progressive hint:** The explanation becomes a supervised feature-selection step. Keep the test set unavailable until the complete selection procedure is frozen.
+6. **Correlated-feature and causality check:** Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, and write a cautious stakeholder explanation.
+   **Progressive hint:** Credit can move or split between substitutes; marginal perturbations can create implausible combinations.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

@@ -68,28 +68,69 @@ schema.
 
 ## Exercises
 
-1. Implement `customer_order_total()` against `OrderRepository`. Validate a
-   positive ID and return `Decimal("0.00")` when no amounts exist.
-2. Implement `FakeOrderRepository` with configured per-customer values and a
-   public call history. Do not make assertions inside the fake.
-3. Test totals, the empty case, invalid IDs, and the exact repository call.
-4. Create a cursor-backed repository adapter. Test its SQL and parameters with a
-   recording cursor.
-5. Implement `rollback_only()`. It must roll back after a passing body and after
-   a failing body without suppressing the body failure.
-6. Gate live tests on both `DS60_RUN_LIVE_DB_TESTS=1` and
-   `DS60_DATABASE_URL`. Skip with a clear reason otherwise.
-7. Write one optional integration test that inserts an order inside a
-   transaction, queries it, and lets the fixture roll it back.
+### Practice contract
 
-### Progressive hints
+- **Focus:** Separate deterministic domain tests, recording database adapters, and explicitly opt-in rollback-only PostgreSQL integration tests.
+- **Assumptions:** Money remains `Decimal`; fake-backed tests do not import Psycopg; live tests require both an opt-in flag and the disposable database URL.
+- **Primary failure mode:** A fake that asserts internally or a fixture that skips cleanup on failure hides ownership and can leave persistent learner data.
+- **Evidence loop:** predict the boundary, implement the smallest change,
+  verify success and failure with a deterministic fake, then explain which
+  behavior still requires an explicitly enabled PostgreSQL integration test.
 
-1. Accept abstract `Sequence[Decimal]`; do not require a list.
-2. `sum(values, start=Decimal("0.00"))` preserves the money type for an empty
-   sequence.
-3. A fixture's cleanup belongs in `finally`.
-4. `pytest.skip()` is appropriate when an explicitly optional dependency is not
-   enabled; silent pass logic is not.
+1. **Implementation:** Implement `customer_order_total()` against `OrderRepository`, reject
+   non-positive IDs, and return exact zero for no amounts.
+   - **Progressive hint:** Use a Decimal start value so the empty case keeps the money type.
+2. **Test double:** Implement `FakeOrderRepository` with configured values and public call
+   history but no internal assertions.
+   - **Progressive hint:** A fake supplies behavior and observations; the test owns
+     expectations.
+3. **Testing:** Test totals, exact zero, invalid IDs, Decimal preservation, and the precise
+   repository call sequence.
+   - **Progressive hint:** Verify behavior and collaboration separately.
+4. **Adapter:** Create a cursor-backed repository and test its SQL text and bound customer
+   parameter with a recording cursor.
+   - **Progressive hint:** Keep SQL structure static and adapt returned rows to Decimal values.
+5. **Fixture:** Implement `rollback_only()` so rollback occurs after a passing or failing body
+   without suppressing the body failure.
+   - **Progressive hint:** Fixture cleanup belongs in `finally`.
+6. **Live-test gate:** Require both `DS60_RUN_LIVE_DB_TESTS=1` and `DS60_DATABASE_URL`; skip
+   with a clear reason when either is absent.
+   - **Progressive hint:** Opt-in state and connection location are independent requirements.
+7. **Integration:** Write one optional test that inserts, queries, and observes a temporary
+   order inside a transaction that the fixture rolls back.
+   - **Progressive hint:** Use a unique fixture key and verify disappearance after rollback when
+     practical.
+8. **Design:** Compare a fake, a recording stub, and a mock for the repository boundary; choose
+   one for each test purpose.
+   - **Progressive hint:** Prefer the simplest double that expresses the evidence needed.
+9. **Failure analysis:** Test what happens when rollback itself fails while the test body is
+   already failing and document exception chaining.
+   - **Progressive hint:** Cleanup failures can mask the primary assertion.
+10. **Database semantics:** Explain why SQLite is not a PostgreSQL substitute for `ON CONFLICT`,
+   numeric, isolation, or driver behavior tests.
+   - **Progressive hint:** A fast substitute is useful only when it shares the semantics under
+     test.
+11. **Security testing:** Pass an injection-shaped value through the cursor adapter and prove it
+   appears only in the parameter tuple.
+   - **Progressive hint:** Recording fakes should keep query and parameters in separate fields.
+12. **Property reasoning:** Define invariants for order totals over empty, single, and multiple
+   non-negative Decimal sequences.
+   - **Progressive hint:** Useful invariants complement example cases without changing domain
+     policy.
+13. **Sensitive fixtures:** Design fixture credentials and failure assertions so secret-scan
+   markers remain explicit and secrets never enter test IDs or assertion messages.
+   - **Progressive hint:** Parameterized test IDs and reprs are output channels.
+14. **Isolation:** Run the optional integration case twice and prove rollback makes repetition
+   independent.
+   - **Progressive hint:** A passing test that leaves data behind is not isolated.
+
+### Before opening the solution
+
+- State the input/output and ownership boundary in one sentence.
+- Show one normal case, one edge case, and one failure case.
+- Inspect recorded calls rather than relying on plausible output.
+- Confirm no credential, payload, or high-cardinality identifier was emitted.
+
 
 ## Optional live-DB fixture
 

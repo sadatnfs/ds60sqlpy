@@ -107,7 +107,7 @@ Use roughly this story:
 - Questions about data lineage, leakage, failure cases, and cost have concise
   evidence-backed answers.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 The notebook's final checklist is the exercise:
 
@@ -127,6 +127,27 @@ The notebook's final checklist is the exercise:
 
 The reference solution adds a direct smoke-test and automation template. Use
 portable direct Python commands as the canonical Windows path; Make is optional.
+
+### Additional mastery practice
+
+Finish with cold-start reproduction, evidence-backed claims, failure-tolerant demonstration, ownership, and honest limits. Completion means another person can rerun and assess the work.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+6. **Cold-start reproduction:** Clone/copy the project into a fresh temporary directory, follow only the README on Windows or POSIX, and log every ambiguity, manual step, network access, output, and elapsed stage.
+   **Progressive hint:** Use a clean environment and no notebook state. Verify the documented offline path after the one connected bootstrap.
+7. **Claim-to-evidence matrix:** Create a table mapping every headline claim to metric/visual, dataset and split, sample size, uncertainty, reproduction command, limitation, and owner.
+   **Progressive hint:** Remove or soften claims with no direct evidence. Distinguish predictive association, operational estimate, and causal conclusion.
+8. **Failure-tolerant demo:** Prepare and rehearse a five-minute demo with a preflight check, time budget, local fixtures, screenshots/static fallback, and recovery from one intentionally broken dependency or service.
+   **Progressive hint:** The core result must not depend on live internet. Demonstrate the reproducible workflow, not a fragile sequence of manual notebook cells.
+9. **Operational handoff:** Write an ownership and maintenance section covering artifact/data refresh, dependency updates, monitoring, incident contact, rollback, known limitations, and end-of-life criteria.
+   **Progressive hint:** Name roles and cadences, not personal credentials. Connect each maintenance action to a test or acceptance gate.
+10. **Retrospective and next experiment:** Write a retrospective with what changed your belief, strongest and weakest evidence, one discarded path, remaining risk, and one bounded next experiment with a predeclared decision rule.
+   **Progressive hint:** The next experiment should resolve the highest-value uncertainty, not simply try a more complex model.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

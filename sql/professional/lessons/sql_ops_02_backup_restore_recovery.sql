@@ -294,6 +294,24 @@ SELECT
 -- 5. Explain WAL archiving, base backups, timelines, recovery target time, and
 --    retention. State why archived WAL without a usable base backup is not PITR.
 -- 6. Explain why “backup command exited zero” is not recovery evidence.
+-- 7. Design encryption and custody for dump files, base backups, WAL archives,
+--    manifests, and keys. Separate transport/storage encryption from database
+--    checksums; include rotation, least privilege, restore access, and deletion.
+-- 8. Extend the restore checklist for sequences/identity state, large objects,
+--    owners, memberships, default privileges, security labels, extensions, and
+--    configuration outside the database. Classify what each backup format omits.
+-- 9. Plan a PostgreSQL major-version recovery rehearsal. Compare logical restore
+--    with pg_upgrade, extension compatibility, collation changes, ANALYZE,
+--    application-driver tests, rollback window, and cutover evidence.
+-- 10. Design a selective table/schema restore without violating dependencies.
+--     Inventory foreign keys, types, functions, sequences, privileges, and
+--     downstream consumers; explain when full isolated restore is safer.
+-- 11. Create a restore-capacity test: artifact size, transfer throughput, CPU,
+--     I/O, parallel jobs, WAL volume, index build, validation, and safety margin.
+--     Explain why a small-fixture linear extrapolation can miss bottlenecks.
+-- 12. Write a recovery-game-day record with incident commander, operators,
+--     observers, decision log, timestamps, injected failures, achieved RPO/RTO,
+--     unresolved gaps, cleanup, follow-up owners, and the next rehearsal date.
 
 DO $self_check$
 BEGIN
@@ -323,4 +341,3 @@ $self_check$;
 
 ROLLBACK;
 \echo 'SQL-OPS-02 complete: pro_recovery_lab was rolled back'
-

@@ -53,6 +53,17 @@ and learners do not mistake it for a hard gate.
 
 ## Exercises and solutions
 
+- Treat `curriculum/practice_baseline.json` as immutable audit evidence, not a
+  target to edit downward. Every cataloged lesson must contain at least
+  `max(6, 2 × baseline)` distinct numbered prompts on the learner, guide, and
+  every explanatory-solution artifact.
+- Run `python scripts/audit_practice.py` after changing practice content. The
+  generated `docs/practice-coverage.md` must agree with the live audit.
+- Count real learner actions, questions, predictions, diagnoses, and
+  explanations. Repeated sub-bullets, headings, hints, and answer steps do not
+  become separate exercises merely to satisfy the count.
+- Sequence practice from retrieval and prediction through implementation,
+  debugging, edge cases, and transfer to a new context.
 - Keep learner exercises answer-free.
 - Provide hints that do not collapse immediately into the answer.
 - Make solution reasoning more important than syntax.

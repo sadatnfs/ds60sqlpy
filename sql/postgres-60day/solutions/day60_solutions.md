@@ -171,3 +171,56 @@ decision.
   and expects a clean course setup.
 - Days 59–60 are sign-off checkpoints, so some deliverables are documentation
   and measured evidence rather than new SQL exercises.
+
+## Exercise 1 — Identify clock dependence
+
+Snapshot summaries depend only on table state. Trailing/current-period reports
+also depend on the clock and need a bound `as_of_date` for reproducible review.
+
+## Exercise 2 — Return executable sign-off checks
+
+Each check contains observed/expected values, computed pass status, severity,
+and remediation. A typed label cannot substitute for the equality expression.
+
+## Exercise 3 — Calculate LAG once
+
+`monthly` establishes grain; `with_previous` computes LAG one time; the outer
+query calculates growth. The first month remains NULL because it has no valid
+comparison.
+
+## Exercise 4 — Flag an incomplete month
+
+The current calendar month is marked explicitly. Production evaluation should
+bind an as-of date and avoid comparing a partial period with a complete one.
+
+## Exercise 5 — Retain structured plan evidence
+
+`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` captures plan shape, estimates, actual
+rows, buffer activity, and timing. Evidence applies only to the tested server,
+data volume, parameters, and cache state.
+
+## Exercise 6 — Complete the operational release checklist
+
+Rollback, ownership, privileges, refresh, monitoring, contracts, and limits all
+have named owners/evidence. Query correctness alone is not production readiness.
+
+## Exercise 7 — Publish lineage
+
+Every published metric maps to sources, transformation grain, and a validation
+query. This gives Codex and human maintainers a compact impact-analysis trail.
+
+## Exercise 8 — Reconcile dashboard totals
+
+Monthly-view revenue is summed and compared with the simplest order total.
+Nonzero difference blocks sign-off before any optimization is accepted.
+
+## Exercise 9 — Test edge fixtures
+
+The in-query fixture represents NULL, one-row-like, and duplicate-key cases
+without changing course data. Counts expose assumptions that production
+constraints or quarantine rules must enforce.
+
+## Exercise 10 — Distinguish FAIL from NOT_RUN
+
+Executed checks compare observed and expected values. An unexecuted Windows CI
+bootstrap remains `NOT_RUN`; prose or confidence must never upgrade it to PASS.

@@ -64,7 +64,7 @@ print(trainable)
 Only the new `fc.weight` and `fc.bias` should be trainable initially. Build the
 optimizer from trainable parameters so the intended phase is explicit.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Load a small image folder with `ImageFolder` and `DataLoader`.
 2. Train only the classifier head for a few epochs.
@@ -82,6 +82,23 @@ optimizer from trainable parameters so the intended phase is explicit.
 
 The separate solution also demonstrates augmentation and `OneCycleLR`. Add
 those only after the head-only and fine-tuning baselines are reproducible.
+
+### Additional mastery practice
+
+Make pretrained weights, image transforms, frozen state, and offline fallback part of one explicit transfer-learning contract.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Transform mismatch diagnosis:** Compare predictions when validation images use the training transform with random crop/flip versus a deterministic validation transform. Explain the metric instability.
+   **Progressive hint:** Augmentation belongs to training. Validation should apply deterministic resize/crop and the normalization expected by the selected weights.
+5. **Frozen-state edge case:** Freeze a pretrained backbone containing BatchNorm. Explain the difference between `requires_grad=False` and putting frozen modules in evaluation mode.
+   **Progressive hint:** requires_grad controls parameter gradients; train/eval controls BatchNorm running statistics and Dropout behavior.
+6. **Offline fallback design:** Make the lesson runnable when pretrained weights are not cached. Detect cache availability, offer an explicit connected preload step, and provide a tiny randomly initialized CNN smoke path.
+   **Progressive hint:** Never trigger an undocumented download. Report whether results use pretrained or random weights because their learning goals differ.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

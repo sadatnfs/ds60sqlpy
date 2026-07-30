@@ -36,6 +36,10 @@ CREATE TEMP TABLE cleaned_customer_ingest_solution (
   attributes jsonb
 ) ON COMMIT DROP;
 
+-- Exercise 1: guarded CASE branches parse each supported datetime format and
+-- leave unrecognized input NULL instead of raising.
+-- Exercise 2: phone text is normalized to digits and validated in staging;
+-- there is deliberately no destination column in training.customers.
 -- Exercise 3: an INOUT procedure returns a two-column DQ/load summary.
 CREATE OR REPLACE PROCEDURE ingest_customer_stage_solution(
   INOUT upserted_rows integer,

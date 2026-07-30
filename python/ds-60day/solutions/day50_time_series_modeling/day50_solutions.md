@@ -102,3 +102,97 @@ Notes
 - Prefer pinball/quantile loss for asymmetric costs
 - For multi-step forecasting, compare direct and recursive strategies with
   validated ARIMA or lag-feature baselines before adding a heavier model
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the same test window.
+
+**How to reason about it:** Compare seasonal periods on the identical training window and forecast horizon. Bound auto-ARIMA search, report runtime, and remember that the best period may change across forecast origins.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.
+
+**How to reason about it:** Last-value and seasonal-naive forecasts are required baselines. Build them only from information available at each origin and align prediction indices exactly with the test targets.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Difference the training series and inspect autocorrelation without using test-period observations.
+
+**How to reason about it:** Differencing and autocorrelation diagnostics use training data only. Inspect stationarity assumptions and avoid differencing mechanically without understanding what must be inverted for forecasts.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Rolling-origin evaluation
+
+**Prompt:** Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.
+
+**Reasoning before implementation:** At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.
+
+One holdout period can favor a model by chance or season. A tidy result table
+should contain model, origin, horizon step, actual, prediction, and absolute
+error. Aggregate by model and also inspect variation across origins.
+
+Never fit one candidate on the full series and slice its in-sample predictions
+for earlier origins. That uses future observations and invalidates the
+backtest.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Prediction intervals
+
+**Prompt:** Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.
+
+**Reasoning before implementation:** For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.
+
+Coverage and sharpness must be read together. A trivially wide interval can
+cover nearly everything, while an overconfident narrow interval misses often.
+Report coverage by horizon because uncertainty usually grows farther ahead.
+
+Model-based intervals rely on residual/distribution assumptions. Residual
+bootstrap or conformal methods offer alternatives, but still require
+forward-only calibration data and exchangeability assumptions.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Timestamp/data-quality debugging
+
+**Prompt:** Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.
+
+**Reasoning before implementation:** Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.
+
+Do not let a library silently reinterpret irregular observations as regular.
+Create an expected date range, compare it with observed timestamps, and report
+duplicates/missing periods. Aggregate duplicates only with a documented rule.
+
+Timezone-aware series should be normalized deliberately, often to UTC for
+storage while retaining local-calendar features separately. Imputation is a
+fitted or policy step and must not read future values in a forecasting
+evaluation.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

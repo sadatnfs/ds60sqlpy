@@ -64,7 +64,7 @@ Scaling is appropriate when each numeric dimension should contribute comparably
 to Euclidean distance. Do not scale mechanically when original distances have a
 meaningful common unit.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Try several values of `k` and plot inertia versus `k` (the elbow plot).
 2. Compute silhouette scores for `k` from 2 through 6 and discuss the result.
@@ -78,6 +78,23 @@ meaningful common unit.
    and whether known generated structure is recovered.
 3. Both label outliers as `-1`, but LOF usually uses `fit_predict` for the
    training set. Match their `contamination` values before comparing counts.
+
+### Additional mastery practice
+
+Make unsupervised assumptions observable through scaling, stability, domain checks, and synthetic controls. A cluster ID or anomaly label is not ground truth.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Scaling sensitivity:** Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization.
+   **Progressive hint:** Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.
+5. **Cluster stability:** Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up.
+   **Progressive hint:** Labels can permute. Use adjusted Rand index or align centers before comparing assignments.
+6. **Anomaly validation without labels:** Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity.
+   **Progressive hint:** Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

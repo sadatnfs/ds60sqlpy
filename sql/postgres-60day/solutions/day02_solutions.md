@@ -1,53 +1,201 @@
-# Day 02 solutions — aggregates, GROUP BY, and HAVING
+# Day 02 solutions — Aggregations, GROUP BY, HAVING, Grouping Sets
 
-These answers match the exercises in [Day 02](../day02_aggregates_groupby_having.sql). Every selected non-aggregate column appears in `GROUP BY`.
+These answers align one-for-one with [day02_aggregates_groupby_having.sql](../day02_aggregates_groupby_having.sql).
+Run only against the disposable `advanced_sql_training` database.
+The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
+The snippets below assume the lesson's
+`SET search_path TO training, public;` statement. Run the complete
+executable companion when you want a self-contained check.
 
-## Exercise 1 — Total payments by method
+## Reading contract
+
+- **Focus:** Aggregate rows only after naming the grouping grain, then filter groups with `HAVING` and preserve numeric meaning.
+- **Assumptions:** Money columns are exact `numeric`; round only presentation values. `COUNT(column)` excludes NULL while `COUNT(*)` counts rows.
+- **Primary pitfall:** Selecting a non-grouped, non-aggregated column or using `WHERE` for an aggregate condition changes or invalidates the question.
+- **Safety:** all writes are bounded and rollback-protected; read-only
+  queries still use deterministic ordering whenever row order is claimed.
+
+## Exercise 1 — Query writing
+
+**Prompt:** Count customers by country and order countries by count then country.
+
+**Reasoning:** The output grain is one row per country; include a deterministic secondary sort.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT
-  p.method,
-  ROUND(SUM(p.amount), 2) AS total_payments
-FROM training.payments AS p
-GROUP BY p.method
-HAVING SUM(p.amount) > 1000000
-ORDER BY total_payments DESC, p.method;
-```
-
-`WHERE` filters input rows before grouping. `HAVING` filters the completed groups, so it is the correct place for the `SUM(...) > 1000000` condition.
-
-## Exercise 2 — Average customer age in the system by country
-
-```sql
-SELECT
-  c.country,
-  COUNT(*) AS customers,
-  AVG(CURRENT_TIMESTAMP - c.created_at) AS average_time_as_customer
-FROM training.customers AS c
+SELECT c.country,
+       COUNT(*) AS customer_count
+FROM customers AS c
 GROUP BY c.country
-ORDER BY c.country;
+ORDER BY customer_count DESC, c.country;
 ```
 
-Subtracting a timestamp from `CURRENT_TIMESTAMP` produces an interval. PostgreSQL can average intervals directly, which keeps the result readable as elapsed time.
+**Expected shape:** One row per country.
 
-## Exercise 3 — Top five categories by gross margin
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 2 — Query writing
+
+**Prompt:** Calculate net revenue and average unit price by product category, keeping categories above 100,000 in revenue.
+
+**Reasoning:** Join at line grain, aggregate once per category, and place the aggregate predicate in `HAVING`.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- `HAVING`: filters completed groups after aggregation, unlike `WHERE`, which filters source rows first.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT
-  p.category,
-  ROUND(SUM((p.price - p.cost) * oi.quantity), 2) AS gross_margin
-FROM training.order_items AS oi
-JOIN training.products AS p
+SELECT p.category,
+       ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue,
+       ROUND(AVG(oi.unit_price), 2) AS average_unit_price
+FROM order_items AS oi
+JOIN products AS p
   ON p.product_id = oi.product_id
 GROUP BY p.category
-ORDER BY gross_margin DESC, p.category
-LIMIT 5;
+HAVING SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) > 100000
+ORDER BY net_revenue DESC, p.category;
 ```
 
-The exercise defines gross margin as `(price - cost) * quantity`, so the solution follows that formula exactly. It does not subtract the order-item discount; that would answer a different net-margin question.
+**Expected shape:** One row per qualifying category.
 
-## Check yourself
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
 
-- Exercise 1 has at most one row per payment method.
-- Exercise 2 has one row per country.
-- Exercise 3 has at most five rows and is ordered by the calculated margin.
+## Exercise 3 — Query writing
+
+**Prompt:** Summarize order count and average total by status, retaining statuses with at least 100 orders.
+
+**Reasoning:** Filter groups after aggregation with `HAVING COUNT(*)`.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- `HAVING`: filters completed groups after aggregation, unlike `WHERE`, which filters source rows first.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT o.status,
+       COUNT(*) AS order_count,
+       ROUND(AVG(o.total_amount), 2) AS average_order_total
+FROM orders AS o
+GROUP BY o.status
+HAVING COUNT(*) >= 100
+ORDER BY order_count DESC, o.status;
+```
+
+**Expected shape:** One row per qualifying order status.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 4 — Prediction
+
+**Prompt:** Show `COUNT(*)`, `COUNT(email)`, and missing-email count together; predict their relationship.
+
+**Reasoning:** `COUNT(email)` ignores NULL, while a filtered count makes missingness explicit.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
+
+```sql
+SELECT COUNT(*) AS all_rows,
+       COUNT(c.email) AS nonnull_email_rows,
+       COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_rows
+FROM customers AS c;
+```
+
+**Expected shape:** One row; present plus missing equals total.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 5 — Debugging
+
+**Prompt:** Repair a query that tries to filter `SUM(amount)` in `WHERE` by moving the aggregate condition to the correct clause.
+
+**Reasoning:** `WHERE` filters expense rows before grouping; `HAVING` filters category groups afterward.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- `HAVING`: filters completed groups after aggregation, unlike `WHERE`, which filters source rows first.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT e.category,
+       ROUND(SUM(e.amount), 2) AS total_expense
+FROM expenses AS e
+GROUP BY e.category
+HAVING SUM(e.amount) > 1000000
+ORDER BY total_expense DESC, e.category;
+```
+
+**Expected shape:** One row per expense category over the threshold.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Exercise 6 — Extension
+
+**Prompt:** Produce monthly order count, total revenue, and returned-order count for the last 12 complete or partial months.
+
+**Reasoning:** Group by a month expression, use conditional aggregation, and keep the timestamp predicate sargable.
+
+**Clause-by-clause reading:**
+
+- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
+- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
+- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
+- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
+- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+
+```sql
+SELECT date_trunc('month', o.order_date)::date AS order_month,
+       COUNT(*) AS order_count,
+       ROUND(SUM(o.total_amount), 2) AS order_revenue,
+       COUNT(*) FILTER (WHERE o.status = 'returned') AS returned_orders
+FROM orders AS o
+WHERE o.order_date >= date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months'
+GROUP BY date_trunc('month', o.order_date)
+ORDER BY order_month;
+```
+
+**Expected shape:** Up to 12 month rows in chronological order.
+
+Check the result at the stated grain. An alternative formulation is
+valid only if it preserves the same NULL, ordering, time, money, and
+cardinality contract.
+
+## Final self-check
+
+- Can you explain the logical grain before and after every aggregation?
+- Are missing values preserved or converted only by an explicit rule?
+- Does every ordered result have a deterministic final tie-breaker?
+- Are money and time assumptions visible beside the calculation?
+- Does the complete executable solution finish with `ROLLBACK`?

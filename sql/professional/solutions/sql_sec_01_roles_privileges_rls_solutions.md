@@ -90,6 +90,66 @@ not the migration owner or administrator. `FORCE RLS` can provide defense in
 depth for an ordinary owner, but it does not turn a superuser into a meaningful
 tenant-policy test identity.
 
+## Exercise 6 — Effective-access inventory
+
+Use `has_*_privilege` functions for the final yes/no matrix because they account
+for ownership, membership inheritance, and PUBLIC grants. Pair that with
+`aclexplode`/catalog ACLs and `pg_auth_members` to explain *why* access exists.
+Report schema, table, column, sequence, and routine privileges separately;
+table `INSERT` and sequence `USAGE` are independent.
+
+Evaluate both the login role and every reachable `SET ROLE` target. ACL text
+alone misses ownership and inherited capability, while role attributes such as
+SUPERUSER or BYPASSRLS can dominate ordinary grants.
+
+## Exercise 7 — Session and execution identity
+
+`SESSION_USER` is the authenticated session identity. `CURRENT_USER` changes
+during `SET ROLE` and becomes the routine owner during SECURITY DEFINER
+execution. After `RESET ROLE`, current identity returns to the session's active
+identity.
+
+An audit commonly records both authenticated actor and effective authorization
+identity, plus an application/request identity established through a trusted
+channel. Recording only `CURRENT_USER` inside a definer function can make every
+action appear to come from its owner.
+
+## Exercise 8 — Fail-closed tenant context
+
+The safe policy maps only exact allowed identities/context values and returns
+NULL/false for everything else. Test NULL, empty, case variants, unknown values,
+and a reused pooled connection. If a custom setting is used, read it with the
+missing-ok form, validate it through a trusted entry point, and reset it on
+checkout/check-in.
+
+Never treat a client-writable session variable as authorization by itself. Bind
+the tenant to authenticated server-side state and preserve negative tests for
+cross-tenant SELECT, INSERT, UPDATE, and DELETE.
+
+## Exercise 9 — A narrow writer
+
+Grant schema `USAGE`, `INSERT` on only permitted columns, and sequence `USAGE`
+when an identity sequence requires it. Grant `SELECT` only on columns allowed in
+`RETURNING`; otherwise a write can succeed while the return expression is
+denied. Add an RLS `WITH CHECK` policy for the writer's tenant.
+
+Prove the intended insert, then assert that forbidden columns, another tenant,
+UPDATE, DELETE, and broad RETURNING all fail. PostgreSQL may require column
+references used by policies or expressions to be readable through a carefully
+designed API; test the actual statement shape.
+
+## Exercise 10 — Offboarding and emergency revocation
+
+First disable login/rotate the external credential and terminate or drain
+approved sessions according to incident authority. Revoke memberships and
+direct grants, reassign or explicitly handle owned objects, update the relevant
+creator's default privileges, and inspect dependent grants/routines/policies.
+
+Use a preserved admin path to avoid locking out recovery. Verify effective
+access as the real principal, record exact objects and approvals, keep audit
+records, and distinguish reversible access removal from destructive ownership
+changes. Cluster-wide commands remain reviewed runbook steps, not lesson SQL.
+
 ## Edge cases and alternatives
 
 - Membership inheritance and `SET ROLE` options deserve explicit review in
@@ -102,4 +162,3 @@ tenant-policy test identity.
 - Views and functions are API boundaries. Version and test their grants,
   execution context, path, parameters, errors, and row behavior like
   application code.
-

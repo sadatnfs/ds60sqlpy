@@ -76,7 +76,7 @@ Windows PowerShell:
 Open `http://127.0.0.1:5000`, and stop the process with Ctrl+C when finished.
 The server binds locally and the lesson works offline.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Log additional parameters such as Logistic Regression `C` and compare runs.
 2. Save a confusion-matrix PNG and log it as an artifact.
@@ -94,6 +94,23 @@ The server binds locally and the lesson works offline.
 The reference solution adds scikit-learn autologging and model reload. Start
 with explicit logging so you know which information is essential; use autolog
 as a supplement, not as a substitute for experiment design.
+
+### Additional mastery practice
+
+Make experiment records reconstructable: status, parameters, data/code identity, metrics, artifacts, and model signature must describe one coherent run.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Failure-state handling:** Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.
+   **Progressive hint:** Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.
+5. **Provenance manifest:** Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.
+   **Progressive hint:** Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.
+6. **Reload and signature check:** Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.
+   **Progressive hint:** The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

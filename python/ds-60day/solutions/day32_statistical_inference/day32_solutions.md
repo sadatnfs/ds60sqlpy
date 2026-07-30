@@ -62,3 +62,126 @@ print({'chi2': chi2, 'p': pval, 'dof': dof})
 Pitfalls
 - p-values quantify inconsistency with H0, not effect size; report effect sizes and CIs too
 - Multiple tests inflate false positives; control FDR or adjust alpha
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Draw groups from `Normal(0, 1)` and `Normal(0.3, 1)`, then test the difference in means with Welch's t-test.
+
+**How to reason about it:** Welch's t-test does not assume equal group variances, but it still assumes independent observations and reasonably stable means. Report sample sizes, the signed mean difference, a confidence interval, and the test result; significance alone does not describe importance.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Build a contingency table from categorical data and run a chi-square test. For a fully offline run, construct a small table directly; a cached Seaborn dataset is optional.
+
+**How to reason about it:** A chi-square test consumes counts, not raw category labels or percentages. Inspect expected cell counts and combine levels or choose an exact method when sparse cells make the asymptotic approximation weak.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Compute 90% and 99% confidence intervals for the same mean and compare their widths.
+
+**How to reason about it:** For the same data and method, a 99% interval is wider than a 90% interval because it must cover the parameter under more repeated samples. The center should stay the same; only the critical value changes.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Prediction
+
+**Prompt:** Hold the true mean difference and variance fixed, then predict how increasing each group's sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.
+
+**Reasoning before implementation:** Standard error shrinks approximately with 1/sqrt(n); the underlying standardized effect does not grow merely because more rows were collected.
+
+Larger samples generally narrow the interval and increase power because the
+sampling distribution of the mean becomes tighter. The population difference
+and standardized effect remain unchanged. A tiny effect can therefore become
+statistically detectable without becoming practically important.
+
+Simulate many datasets at both sizes with one seeded generator, but summarize
+the distribution of rejection rates rather than selecting a convenient run.
+Also verify that the observations are independent; duplicated customers would
+inflate the apparent sample size.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Implementation
+
+**Prompt:** Build a seeded percentile-bootstrap confidence interval for a median difference. Validate empty groups and expose the number of resamples as a parameter.
+
+**Reasoning before implementation:** Resample each group independently with replacement, compute one median difference per resample, then take symmetric quantiles.
+
+The bootstrap approximates the estimator's sampling distribution without
+assuming that the raw values are Normal.
+
+```python
+import numpy as np
+
+
+def bootstrap_median_difference(
+    left: np.ndarray,
+    right: np.ndarray,
+    *,
+    confidence: float = 0.95,
+    resamples: int = 5_000,
+    seed: int = 32,
+) -> tuple[float, float]:
+    if left.size == 0 or right.size == 0:
+        raise ValueError("both groups must contain observations")
+    if not 0.0 < confidence < 1.0 or resamples < 100:
+        raise ValueError("invalid confidence or too few resamples")
+    rng = np.random.default_rng(seed)
+    differences = np.empty(resamples)
+    for index in range(resamples):
+        a = rng.choice(left, size=left.size, replace=True)
+        b = rng.choice(right, size=right.size, replace=True)
+        differences[index] = np.median(a) - np.median(b)
+    tail = (1.0 - confidence) / 2.0
+    low, high = np.quantile(differences, [tail, 1.0 - tail])
+    return float(low), float(high)
+```
+
+This percentile interval is a useful teaching baseline. Strong skew, tiny
+samples, dependence, or clustered observations call for a more suitable
+resampling design or a BCa/analytic interval.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Multiple-comparison reasoning
+
+**Prompt:** You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis.
+
+**Reasoning before implementation:** Under independent true nulls, use 1-(1-alpha)**20. Bonferroni controls family-wise error; Benjamini-Hochberg targets the expected false-discovery proportion among rejections.
+
+The chance of at least one false positive is about
+`1 - 0.95**20`, or 64%, under the simplified independence assumption.
+Bonferroni would compare each p-value with `0.05/20`; it is conservative and
+fits a small set of confirmatory claims. Benjamini-Hochberg is often more
+powerful for exploratory discovery, but answers a different error question.
+
+Choose the hypothesis family and correction before inspecting results. Tests
+that were added after seeing the data should be labeled exploratory rather
+than quietly folded into the confirmatory analysis.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

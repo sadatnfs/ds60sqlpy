@@ -86,8 +86,7 @@ Migration(
     commands=(
         SqlCommand("ALTER TABLE training.bridge_release_lab ADD COLUMN source_label text"),
         SqlCommand(
-            "UPDATE training.bridge_release_lab SET source_label = %s "
-            "WHERE source_label IS NULL",
+            "UPDATE training.bridge_release_lab SET source_label = %s WHERE source_label IS NULL",
             ("legacy",),
         ),
     ),
@@ -228,27 +227,94 @@ checksums. Resetting `training` through the course setup removes the lab state.
 
 ## Exercises
 
-1. Implement validation and stable checksum generation for `Migration`.
-2. Implement `redact_fields()`. Test sensitive key names, URL-shaped values,
-   non-serializable objects, and ordinary scalar fields.
-3. Implement `plan_pending()`. Reject duplicate or out-of-order IDs, unknown
-   applied versions, and checksum drift.
-4. Build a recording session fake. Record SQL text separately from parameter
-   tuples and never parse PostgreSQL with SQLite.
-5. Implement delivery in the nine-step order above. Make the fake fail once
-   with `RetryableDatabaseError` and prove that rollback and close precede the
-   injected delay.
-6. Simulate an uncertain commit by making the retry observe a matching metadata
-   row. Prove that commands are not applied twice.
-7. Add structured event and metric fakes. Assert request/migration IDs are
-   present in logs, request IDs are absent from metric tags, and secrets never
-   appear.
-8. Implement read-only readiness for current, pending, drifted, and unreachable
-   states. Keep liveness independent of the database.
-9. Build a table of recovery scenarios and expected decisions. Include one
-   incomplete-evidence case that must pause.
-10. Only after fake tests pass, run the optional live lab twice and inspect the
-    metadata with a read-only query.
+### Practice contract
+
+- **Focus:** Deliver immutable ordered PostgreSQL migrations with fake-tested retry/commit uncertainty, redacted observability, readiness probes, and evidence-driven recovery.
+- **Assumptions:** Each migration has stable identity/content/checksum; every attempt owns a fresh transaction; optional live work targets only the disposable course database.
+- **Primary failure mode:** Mutable history, retry after uncertain commit without re-checking metadata, or recovery without complete evidence can corrupt schema state.
+- **Evidence loop:** state the boundary and prediction, implement against
+  deterministic local doubles, test success/failure/cleanup, and label any
+  optional live-adapter evidence separately from offline proof.
+
+1. **Validation:** Implement `Migration` validation and a stable checksum over identity,
+   description, command text/parameters, and verification.
+   - **Progressive hint:** Canonical serialization must distinguish structure and parameter
+     types without depending on object repr.
+2. **Redaction:** Implement `redact_fields()` for sensitive key names, URL-shaped values,
+   non-serializable objects, and ordinary scalars.
+   - **Progressive hint:** Use key classification and safe type conversion; never echo rejected
+     values.
+3. **Planning:** Implement `plan_pending()` with duplicate/order validation, unknown
+   applied-version rejection, and checksum-drift detection.
+   - **Progressive hint:** Applied history is immutable and must be a prefix of known ordered
+     migrations.
+4. **Test double:** Build a recording session fake that stores SQL separately from parameter
+   tuples and never parses PostgreSQL through SQLite.
+   - **Progressive hint:** Model transactional state and prepared query results explicitly.
+5. **Delivery:** Implement the documented nine-step delivery order and prove rollback/close
+   happen before injected retry delay.
+   - **Progressive hint:** One attempt must acquire, lock, re-check, apply, verify, record,
+     commit, close, then report.
+6. **Commit uncertainty:** Simulate an uncertain commit whose retry sees a matching metadata row
+   and prove commands are not applied twice.
+   - **Progressive hint:** Re-check immutable metadata under lock before every attempt.
+7. **Observability:** Add event and metric fakes; require request/migration IDs in logs, exclude
+   request IDs from metric tags, and prove secrets are absent.
+   - **Progressive hint:** Logs support correlation; metrics require bounded dimensions.
+8. **Readiness:** Implement read-only readiness for current, pending, drifted, and unreachable
+   states while keeping liveness database-independent.
+   - **Progressive hint:** Readiness describes safe traffic acceptance, not process existence.
+9. **Recovery:** Build a scenario table for recovery decisions, including incomplete evidence
+   that must pause.
+   - **Progressive hint:** Destructive or forward actions require rehearsed, compatible
+     evidence.
+10. **Optional integration:** After fake tests, run the disposable live lab twice and inspect
+   migration metadata with a read-only query.
+   - **Progressive hint:** The second run demonstrates idempotency; cleanup evidence is part of
+     completion.
+11. **Immutability:** Change only SQL whitespace after a migration is applied and decide whether
+   checksum drift should be accepted.
+   - **Progressive hint:** A stored checksum is an immutable history contract, not a semantic
+     SQL parser.
+12. **Concurrency:** Model two deployers contending for the same advisory lock and specify
+   timeout/ownership behavior.
+   - **Progressive hint:** Only one delivery transaction may make planning decisions at a time.
+13. **PostgreSQL semantics:** Identify which DDL is transactional in PostgreSQL and how
+   non-transactional commands alter the migration policy.
+   - **Progressive hint:** Do not assume every administrative statement can share ordinary
+     transaction rollback.
+14. **Timeouts:** Set statement and lock timeouts per attempt without leaking settings to later
+   pooled work.
+   - **Progressive hint:** Transaction-local settings should expire with commit/rollback.
+15. **Telemetry design:** Define a bounded migration metric schema and a redaction test for
+   exception objects and URL-like fields.
+   - **Progressive hint:** Migration IDs may still become unbounded over years; choose
+     dimensions deliberately.
+16. **Probe semantics:** Distinguish current-but-stale application readiness from database
+   reachability and migration currency.
+   - **Progressive hint:** Each probe should answer one operational question.
+17. **Decision analysis:** Compare forward fix and release rollback when the new schema has
+   already received writes.
+   - **Progressive hint:** Data written under the new contract can make old code incompatible
+     even if DDL reversal is possible.
+18. **Expand-contract:** Design a three-release expand/migrate/contract sequence for renaming a
+   populated column.
+   - **Progressive hint:** Maintain compatibility while old and new application versions
+     overlap.
+19. **Cleanup:** Prove the optional live lab leaves no table, metadata row, lock, connection, or
+   credential-bearing output behind.
+   - **Progressive hint:** A passing mutation test is incomplete without postconditions.
+20. **Failure simulation:** Inject a network-like error immediately after fake commit and
+   require the retry to gather evidence rather than blindly replay.
+   - **Progressive hint:** Client exceptions after commit do not prove server rollback.
+
+### Before opening the solution
+
+- Record what the offline doubles prove and what they cannot prove.
+- Inspect exact call order, parameters, schema, and failure behavior.
+- Keep credentials, payloads, and high-cardinality identifiers out of output.
+- Require deterministic reruns before considering an exercise complete.
+
 
 ## Self-check
 

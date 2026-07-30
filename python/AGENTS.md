@@ -15,6 +15,10 @@ This file extends the root [AGENTS.md](../AGENTS.md) for `python/`.
 - Keep notebooks valid `nbformat` documents with the repository kernelspec.
 - Prefer small, purposeful cells. Introduce one idea at a time.
 - A lesson should contain objectives, explanation, runnable examples, exercises, self-checks, and next steps.
+- Each cataloged lesson must meet its immutable
+  `curriculum/practice_baseline.json` target on the learner notebook, guide,
+  and explanatory solution. Count distinct numbered prompts, not hint or
+  answer-step inflation.
 - Keep full worked answers in `solutions/`, not directly below learner exercises.
 - Clear incidental execution outputs before committing unless an output is intentionally instructional.
 - Do not commit widgets, local interpreter paths, timestamps, credentials, or machine metadata.
@@ -51,6 +55,7 @@ Run:
 
 ```text
 python scripts/course.py validate
+python scripts/audit_practice.py
 ```
 
 For a changed lesson, also verify:

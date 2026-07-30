@@ -119,15 +119,38 @@ still bypass policies; test with ordinary application-like roles.
 
 ## Exercises
 
-Complete the five prompts in the learner file. Extend privilege introspection,
+Complete all ten prompts in the learner file. Begin with privilege introspection,
 add a read-only auditor role and policy, prove the owner-specific default grant,
-review the definer routine's boundary, and explain RLS bypass cases. Keep the
-new role inside the existing transaction and do not add `LOGIN`, passwords,
+review the definer routine's boundary and RLS bypass, then cover effective
+access, identity context, fail-closed tenancy, a narrow writer, and revocation.
+Keep new roles inside the existing transaction and do not add `LOGIN`, passwords,
 `SUPERUSER`, `BYPASSRLS`, database-wide grants, or `PUBLIC` access.
 
 For denied operations, use a small exception-catching test like the worked
 examples. A forbidden action that succeeds must fail the lesson rather than
 print a reassuring message.
+
+Security work is complete only when both allowed and denied paths are proven:
+
+1. **Two-layer reads:** show schema `USAGE` and table `SELECT` independently.
+2. **Auditor:** create a NOLOGIN read-only role, explicit policy, positive read
+   test, and negative write tests.
+3. **Default privileges:** prove which object owner’s future table receives the
+   grant and which different owner does not.
+4. **Definer boundary:** inventory owner, search path, qualification, parameter,
+   PUBLIC, grant, and RLS risks around the routine.
+5. **RLS bypass:** compare ordinary caller, owner, forced owner, BYPASSRLS, and
+   superuser semantics without granting bypass attributes.
+6. **Effective access:** reconcile schema, relation, column, sequence, routine,
+   membership, inheritance, and PUBLIC access.
+7. **Identity context:** observe `SESSION_USER` and `CURRENT_USER` across
+   `SET ROLE` and a definer call; choose audit identities deliberately.
+8. **Fail-closed tenancy:** test NULL, case variants, unknown tenants, and
+   unvalidated/reset session context.
+9. **Narrow writer:** prove only required insert columns/sequence/return values
+   work and all unrelated writes or reads fail.
+10. **Revocation runbook:** document sessions, membership, ownership, default
+    grants, dependent ACLs, verification, recovery, and durable audit evidence.
 
 ## Self-check
 

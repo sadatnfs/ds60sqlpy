@@ -294,22 +294,89 @@ where critical production behavior exists.
 
 ## Exercises
 
-1. Run the line diagnostic and multi-line training query. Explain which syntax
-   is easier to review for each.
-2. Bind an injection-shaped string such as `"US' OR true --"` to a harmless
-   read-only comparison. Verify that it behaves as data, then remove it.
-3. Query US customers whose lifetime order total meets a Python threshold.
-   Bind country and threshold with `:name`, order deterministically, and limit
-   the result to 10 rows.
-4. Convert the result with `.DataFrame()` and assert the expected columns.
-5. Repeat one small query with `autopandas=True`, then restore it to false.
-6. Explain why `displaylimit=25` is not a memory limit.
-7. Explain why `FROM :table_name` cannot work as identifier binding and how a
-   Psycopg application handles a validated identifier.
-8. Write a short decision note: keep this query as interactive exploration, or
-   move it to Psycopg application code? Name at least three criteria.
-9. List active connections, close `ds60-course`, dispose the engine, and verify
-   no output or connection literal was saved.
+### Practice contract
+
+- **Focus:** Use JupySQL for bounded, reviewable PostgreSQL exploration while keeping credentials out of cells and values separate from SQL structure.
+- **Assumptions:** The notebook reads `DS60_DATABASE_URL`, binds an explicit SQLAlchemy `postgresql+psycopg` engine, disables connection display, and keeps live cells tagged.
+- **Primary failure mode:** Notebook output, connection displays, Jinja rendering, or unbounded result materialization can leak secrets or turn exploration into unsafe application behavior.
+- **Evidence loop:** state the boundary and prediction, implement against
+  deterministic local doubles, test success/failure/cleanup, and label any
+  optional live-adapter evidence separately from offline proof.
+
+1. **Magic selection:** Run the line diagnostic and multi-line training query; explain why one
+   `%sql` form is easier to review for each statement.
+   - **Progressive hint:** Choose from statement shape and reviewability, not from different
+     security semantics.
+2. **Security testing:** Bind an injection-shaped string to a harmless read-only comparison,
+   verify it behaves as data, then remove the value.
+   - **Progressive hint:** Use `:name`; never paste the sentinel into SQL or notebook output.
+3. **SQL practice:** Query US customers whose lifetime order total meets a Python threshold;
+   bind country and threshold, order deterministically, and limit to 10.
+   - **Progressive hint:** Aggregate after a left join, apply the threshold after grouping, and
+     add customer ID as tie-breaker.
+4. **DataFrame boundary:** Convert the assigned result with `.DataFrame()` and assert the
+   expected columns in order.
+   - **Progressive hint:** Treat conversion as an explicit boundary and validate shape before
+     analysis.
+5. **Configuration:** Repeat one small query with `autopandas=True`, identify the changed return
+   type, then restore it to false.
+   - **Progressive hint:** Notebook-global magic configuration is hidden state unless restored
+     visibly.
+6. **Memory reasoning:** Explain why `displaylimit=25` does not bound memory and identify the
+   setting/query clause that does.
+   - **Progressive hint:** Rendering fewer rows is different from fetching fewer rows.
+7. **Identifier boundary:** Explain why `FROM :table_name` is not identifier binding and how a
+   Psycopg application handles a validated dynamic identifier.
+   - **Progressive hint:** Bound parameters represent data values, never SQL grammar.
+8. **Architecture decision:** Write a decision note choosing interactive exploration or Psycopg
+   application code using at least three criteria.
+   - **Progressive hint:** Consider reuse, transaction ownership, tests, dynamic structure,
+     scale, and operational observability.
+9. **Cleanup:** List active aliases, close `ds60-course`, dispose the engine, and verify no
+   connection literal or output remains saved.
+   - **Progressive hint:** Both JupySQL alias state and SQLAlchemy pool state need explicit
+     cleanup.
+10. **Setup review:** Trace how the environment URL becomes a SQLAlchemy engine without ever
+   being displayed and identify every validation step.
+   - **Progressive hint:** Validate scheme, driver, host/database target, and display settings
+     before connecting.
+11. **Prediction:** Predict the difference between a `%sql` line assignment and a `%%sql` cell
+   when both return the same rows.
+   - **Progressive hint:** Compare Python assignment syntax, multi-line readability, and result
+     access.
+12. **Capacity:** Design a query/result-size check for a table with millions of rows and explain
+   what remains unbounded after `LIMIT 25`.
+   - **Progressive hint:** Bound output, scan scope, and server work separately.
+13. **Type binding:** Bind a `Decimal`, date, boolean, and list value in small read-only queries
+   and record their PostgreSQL result types.
+   - **Progressive hint:** Let SQLAlchemy/JupySQL adapt Python values; do not pre-render
+     literals.
+14. **Transaction reasoning:** Use `engine.begin()` for a rollback-safe teaching write in a
+   disposable temporary scope, then explain why magics are not the transaction owner.
+   - **Progressive hint:** The checked-in notebook remains read-only; describe or run writes
+     only in an explicitly authorized disposable lab.
+15. **Jinja boundary:** Demonstrate conceptually why `{{value}}` is code generation rather than
+   safe value binding, including a harmless fixed example.
+   - **Progressive hint:** Rendered text becomes SQL before the driver sees parameters.
+16. **Notebook hygiene:** Validate nbformat, stable IDs, kernel metadata, live/static tags,
+   empty outputs, and the absence of package-install magics, shell installs, URLs, and
+   destructive SQL.
+   - **Progressive hint:** Inspect the serialized artifact, not only the visible notebook UI.
+17. **Offline review:** Explain how a learner without a running PostgreSQL server can still
+   review this module and which claims remain unexecuted.
+   - **Progressive hint:** Separate structural/offline evidence from live query evidence.
+18. **Handoff:** Extract the capstone query into a Psycopg function design with typed inputs, a
+   small cursor Protocol, and a fake-backed test.
+   - **Progressive hint:** Carry over SQL and value semantics while changing the
+     ownership/testing surface.
+
+### Before opening the solution
+
+- Record what the offline doubles prove and what they cannot prove.
+- Inspect exact call order, parameters, schema, and failure behavior.
+- Keep credentials, payloads, and high-cardinality identifiers out of output.
+- Require deterministic reruns before considering an exercise complete.
+
 
 ## Self-check
 

@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
-from ds60sqlpy.secret_scan import local_sensitive_paths, scan_text, sensitive_filename
+from ds60sqlpy.secret_scan import (
+    local_sensitive_paths,
+    scan_git_history,
+    scan_text,
+    sensitive_filename,
+)
 
 
 def test_secret_scan_detects_token_without_echoing_it() -> None:
@@ -23,6 +29,25 @@ def test_secret_scan_allows_documented_disposable_and_placeholder_urls() -> None
     )
 
     assert scan_text(Path(".env.example"), text) == []
+
+
+def test_sensitive_filenames_are_case_insensitive() -> None:
+    assert sensitive_filename(Path(".ENV"))
+    assert sensitive_filename(Path("ID_RSA"))
+    assert sensitive_filename(Path("certificate.PEM"))
+    assert not sensitive_filename(Path(".ENV.EXAMPLE"))
+
+
+def test_secret_scan_allows_known_bridge_fixtures_and_risk_url() -> None:
+    text = "\n".join(
+        (
+            "postgresql://env:secret@localhost/course",
+            "postgresql://cli:top-secret@db.example:5432/course",
+            "https://www.nist.gov/itl/ai-risk-management-framework",
+        )
+    )
+
+    assert scan_text(Path("historical-fixture.txt"), text) == []
 
 
 def test_secret_scan_reports_unapproved_url_without_reproducing_password() -> None:
@@ -66,3 +91,48 @@ def test_local_sensitive_paths_checks_ignored_files_but_prunes_venv(tmp_path: Pa
     relative = {path.relative_to(tmp_path) for path in local_sensitive_paths(tmp_path)}
 
     assert relative == {Path(".env"), Path("nested/credentials.json")}
+
+
+def test_git_history_scan_finds_deleted_secret_without_echoing_it(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    fake_key = "AK" + "IA" + ("B" * 16)
+    secret_path = tmp_path / "deleted.txt"
+    secret_path.write_text(f"token={fake_key}\n", encoding="utf-8")
+    subprocess.run(["git", "add", "deleted.txt"], cwd=tmp_path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=DS60 Test",
+            "-c",
+            "user.email=ds60@example.test",
+            "commit",
+            "-qm",
+            "fixture",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    secret_path.unlink()
+    subprocess.run(["git", "add", "-u"], cwd=tmp_path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=DS60 Test",
+            "-c",
+            "user.email=ds60@example.test",
+            "commit",
+            "-qm",
+            "delete fixture",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+
+    findings = scan_git_history(tmp_path)
+
+    assert [(finding.path, finding.line, finding.kind) for finding in findings] == [
+        (Path("deleted.txt"), 1, "AWS access key")
+    ]
+    assert fake_key not in repr(findings[0])

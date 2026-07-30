@@ -8,11 +8,16 @@ The bootstrapper:
 
 1. Finds Python 3.11 or 3.12 through the Python launcher, `PATH`, conda,
    Windows registry entries, and common Anaconda, Miniconda, and Python.org
-   locations.
+   locations. If Anaconda/Miniconda exists but its base Python is newer than
+   the supported range, it uses conda to create a repository-local Python 3.12
+   environment instead of reinstalling the distribution.
 2. Finds PostgreSQL 16 or newer through `PATH`, Windows registry entries, and
    versioned `Program Files\PostgreSQL` directories.
 3. Adds the selected tool directories to the current PowerShell process only.
-4. Creates or reuses this repository's `.venv`.
+4. Creates or reuses this repository's `.venv`. A standard `venv` uses
+   `.venv\Scripts\python.exe`; the conda-prefix fallback uses
+   `.venv\python.exe`. The bootstrapper detects, validates, and prints the
+   exact interpreter.
 5. Installs the selected course dependency profile, including IPython,
    JupyterLab, Notebook, ipykernel, JupySQL, SQLAlchemy, and Psycopg 3.
 6. Registers `Python (ds60sqlpy)` as a per-user Jupyter kernel.
@@ -49,21 +54,28 @@ It does not install the largest deep-learning, NLP, geospatial, production, or
 specialized ML profiles.
 
 Activation is optional. Always-safe commands use the environment interpreter
-directly:
+directly. Resolve either supported Windows layout once in the current shell:
 
 ```powershell
-.\.venv\Scripts\python.exe --version
-.\.venv\Scripts\python.exe -c "import IPython, ipykernel, jupyterlab, notebook, psycopg, sql, sqlalchemy; print('Notebook stack imports passed.')"
-.\.venv\Scripts\python.exe -m jupyter --version
-.\.venv\Scripts\python.exe -m notebook --version
-.\.venv\Scripts\python.exe -m jupyter kernelspec list
-.\.venv\Scripts\python.exe scripts\course.py doctor
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+
+& $CoursePython --version
+& $CoursePython -c "import IPython, ipykernel, jupyterlab, notebook, psycopg, sql, sqlalchemy; print('Notebook stack imports passed.')"
+& $CoursePython -m jupyter --version
+& $CoursePython -m notebook --version
+& $CoursePython -m jupyter kernelspec list
+& $CoursePython scripts\course.py doctor
 psql --version
-.\.venv\Scripts\python.exe -m jupyter lab
+& $CoursePython -m jupyter lab
 ```
 
-In VS Code, select `.venv\Scripts\python.exe` as the Python interpreter and
-`Python (ds60sqlpy)` as the notebook kernel.
+In VS Code, select the interpreter path printed by the bootstrapper—normally
+`.venv\Scripts\python.exe`, or `.venv\python.exe` for the conda-prefix
+fallback—and `Python (ds60sqlpy)` as the notebook kernel.
 
 The `psql` command above works in the same PowerShell process used to invoke
 the script. In a new terminal it requires `-PersistUserPath` or the full
@@ -124,9 +136,8 @@ does not silently fall back when you explicitly requested the lock.
 
 ## Make selected tools available in future terminals
 
-By default, the bootstrapper does not change the user or machine `PATH`. To
-append only narrowly needed executable directories to the current user's
-`PATH`:
+By default, the bootstrapper does not change the user or machine `PATH`. To add
+only narrowly needed executable directories to the current user's `PATH`:
 
 ```powershell
 & .\scripts\bootstrap_windows.ps1 -PersistUserPath
@@ -139,9 +150,9 @@ never persists an Anaconda or Miniconda root. Conda's own activation mechanism
 is safer because it manages the distribution's interdependent directories.
 Open a new terminal after the command to receive the updated user environment.
 
-You do not need persistence for Python course commands because they use
-`.\.venv\Scripts\python.exe`. Persistence is convenient for running `psql`
-directly in later PowerShell windows.
+You do not need persistence for Python course commands because they use the
+repository interpreter printed by the bootstrapper. Persistence is convenient
+for running `psql` directly in later PowerShell windows.
 
 ## Opt in to installing a truly missing system tool
 
@@ -185,25 +196,38 @@ separate from software installation.
 Start the professional notebook folder with:
 
 ```powershell
-.\.venv\Scripts\python.exe -m jupyter lab .\bridge\professional\notebooks
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython -m jupyter lab .\bridge\professional\notebooks
 ```
 
 Never paste a workplace or valuable database credential into a notebook.
 
 ## Troubleshooting
 
-### Anaconda was found, but its Python version is unsupported
+### Anaconda was found, but its base Python version is unsupported
 
-The course supports Python 3.11-3.12. A newer base Anaconda environment is not
-silently accepted because compiled course dependencies may not support it.
-Install a supported Python or conda distribution, then rerun.
+The course supports Python 3.11-3.12. A newer base Anaconda interpreter is not
+silently used because compiled course dependencies may not support it. When
+conda is discoverable, the bootstrapper creates `.venv` as a conda prefix with
+Python 3.12, then installs the same course profiles and kernel there. This
+requires internet access the first time unless the needed conda packages are
+already cached. This uses conda's documented
+[`--prefix` environment location](https://docs.conda.io/projects/conda/en/stable/commands/create.html#target-environment-specification).
+On Windows that prefix's interpreter is `.venv\python.exe`, not the
+standard-`venv` path under `Scripts`. Locked mode explicitly points uv at this
+repository prefix; project mode invokes its Python and pip directly.
 
 ### `.venv` exists but is broken or uses the wrong Python
 
-The bootstrapper never deletes an environment automatically. Preserve anything
-you need, then rename or remove only this repository's `.venv` and rerun. A
-`.venv` is generated machine-local state and should not be copied to another
-computer or USB drive.
+The bootstrapper accepts either `.venv\Scripts\python.exe` (standard `venv`) or
+`.venv\python.exe` (conda prefix), then verifies Python 3.11-3.12. It never
+deletes an environment automatically. Preserve anything you need, then rename
+or remove only this repository's `.venv` and rerun. A `.venv` is generated
+machine-local state and should not be copied to another computer or USB drive.
 
 ### `psql` works during bootstrap but not in a new terminal
 
@@ -212,11 +236,12 @@ The default PATH change is intentionally process-scoped. Rerun with
 
 ### The kernel appears in Jupyter but not VS Code
 
-Restart VS Code, select `.venv\Scripts\python.exe`, then choose
-`Python (ds60sqlpy)` from the notebook kernel picker. Confirm its interpreter:
+Restart VS Code, select the interpreter path printed by bootstrap, then choose
+`Python (ds60sqlpy)` from the notebook kernel picker. Confirm its interpreter
+using the `$CoursePython` resolver from the first command block:
 
 ```powershell
-.\.venv\Scripts\python.exe -m jupyter kernelspec list
+& $CoursePython -m jupyter kernelspec list
 ```
 
 ### Package installation fails

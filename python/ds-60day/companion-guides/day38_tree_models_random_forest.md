@@ -59,7 +59,7 @@ The gap between training and held-out accuracy is one diagnostic, not a complete
 model-selection procedure. Choose complexity with validation or CV and report a
 separate test estimate.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Plot tree depth versus accuracy.
 2. Inspect feature importances and discuss their reliability.
@@ -71,6 +71,25 @@ separate test estimate.
 2. Compare `feature_importances_` with
    `sklearn.inspection.permutation_importance` on held-out data. Preserve feature
    names from `load_breast_cancer().feature_names`.
+
+### Additional mastery practice
+
+Diagnose tree capacity with train/validation evidence and inspect importance with methods that respect held-out data, correlation, and class costs.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+3. **Pruning implementation:** Use a decision tree's cost-complexity pruning path to evaluate candidate `ccp_alpha` values with cross-validation. Freeze the chosen value before final holdout evaluation.
+   **Progressive hint:** The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.
+4. **Out-of-bag reasoning:** Enable `oob_score=True` in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.
+   **Progressive hint:** Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.
+5. **Imbalance debugging:** Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test `class_weight='balanced'`.
+   **Progressive hint:** A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.
+6. **Correlated-importance edge case:** Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.
+   **Progressive hint:** The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

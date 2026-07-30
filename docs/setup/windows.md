@@ -9,13 +9,18 @@ Run course commands from the repository root—the directory containing `README.
 Install:
 
 1. [Git for Windows](https://git-scm.com/download/win)
-2. [Python 3.12](https://www.python.org/downloads/windows/)
+2. [Python 3.12](https://www.python.org/downloads/windows/) or an Anaconda
+   distribution whose Python is 3.11 or 3.12
 3. [Visual Studio Code](https://code.visualstudio.com/download)
 4. [PostgreSQL 16+](https://www.postgresql.org/download/windows/) or
    [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)
    for the SQL track
 
-During Python installation, install the Python launcher (`py`). Adding Python to `PATH` is useful, but the launcher is the important part for these instructions.
+If Anaconda3 and PostgreSQL are already installed, do not reinstall them just
+because `python`, `conda`, or `psql` is missing from `PATH`. The course
+bootstrap searches the registry and common installation directories first.
+During a new Python.org installation, installing the Python launcher (`py`) is
+still useful.
 
 If you choose Docker Desktop, use its WSL 2 backend when your machine supports
 it and complete Docker's documented virtualization/WSL prerequisites before
@@ -25,11 +30,12 @@ Open a new PowerShell window and verify:
 
 ```powershell
 git --version
-py -3.12 --version
 code --version
 ```
 
-If `code` is not found, open VS Code from the Start menu and use **File → Open Folder** instead.
+`py -3.12 --version`, `python --version`, and `psql --version` may fail at this
+point; that is exactly what the discovery bootstrap handles. If `code` is not
+found, open VS Code from the Start menu and use **File → Open Folder** instead.
 
 ## 2. Clone and open the repository
 
@@ -58,23 +64,41 @@ The result should be `True`.
 
 ## 3. Create the Python environment
 
-Run the repository setup script:
+Run the discovery bootstrap. This is the recommended path for a new Windows
+machine and for existing Anaconda/PostgreSQL installations that are not on
+`PATH`:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+& .\scripts\bootstrap_windows.ps1
 ```
 
-The process-scoped execution-policy flag applies only to this command. It does not change the machine-wide policy.
+Using `&` keeps the script's process-local `PATH` discoveries available in this
+PowerShell window. The execution-policy change also applies only to the current
+window. The script creates `.venv`, installs IPython, JupyterLab, Notebook,
+ipykernel, JupySQL, SQLAlchemy, and Psycopg 3, registers
+`Python (ds60sqlpy)`, and runs verification. It never connects to PostgreSQL or
+asks for its password.
 
 Verify with the virtual environment’s interpreter:
 
 ```powershell
-.\.venv\Scripts\python.exe --version
-.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe scripts\course.py catalog
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+
+& $CoursePython --version
+& $CoursePython scripts\course.py doctor
+& $CoursePython scripts\course.py catalog
 ```
 
-Activation is optional. Using the interpreter’s full relative path avoids PowerShell activation-policy issues and guarantees that packages install into the intended environment.
+Activation is optional. A normal `venv` uses
+`.venv\Scripts\python.exe`; the Anaconda fallback creates a conda prefix and
+uses `.venv\python.exe`. Resolve `$CoursePython` once in each new PowerShell
+window. Invoking it directly avoids activation-policy issues and guarantees
+that commands use the intended environment.
 
 Core setup installs notebook, data, and quality tooling. Before the engineering
 bridge, PostgreSQL-in-Jupyter lesson, professional modules, or later
@@ -82,7 +106,7 @@ machine-learning, production, deep-learning, natural-language-processing, or
 geospatial lessons, install the advanced profile while connected:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
+& .\scripts\bootstrap_windows.ps1 -Profile Advanced
 ```
 
 This can take substantially longer and some packages use platform-specific
@@ -91,7 +115,16 @@ optional dependency. Use the
 [catalog-label mapping](../dependency-profiles.md): labels such as `core`,
 `postgres`, and `advanced` are not literal package extras.
 
-If you prefer activation:
+See the [one-command bootstrap reference](windows-bootstrap.md) for
+`-WhatIf`, locked dependency installation, optional user-level `PATH`
+persistence, and the explicit `-InstallMissingWithWinget` opt-in. Use the
+smaller historical `scripts\setup.ps1` only when a supported Python is already
+discoverable and you do not need PostgreSQL or Jupyter discovery. That legacy
+script always creates a standard `venv` at
+`.venv\Scripts\python.exe`; do not run it over a conda-prefix `.venv`.
+
+If you used the legacy setup or the bootstrap created a standard `venv`, you
+may activate it:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
@@ -99,16 +132,22 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 python scripts\course.py doctor
 ```
 
+The conda-prefix fallback does not contain that activation script. Keep using
+`& $CoursePython ...`; activation is not required.
+
 ## 4. Configure VS Code
 
 1. Open the repository root.
 2. Accept the recommended extensions, or install them from [the VS Code guide](../vscode.md).
 3. Open the Command Palette with `Ctrl+Shift+P`.
 4. Run **Python: Select Interpreter**.
-5. Select `.venv\Scripts\python.exe`.
+5. Select the interpreter path printed by bootstrap:
+   `.venv\Scripts\python.exe` for a standard `venv`, or
+   `.venv\python.exe` for the conda-prefix fallback.
 6. Open a notebook and select the same `.venv` interpreter as its kernel.
 
-The checked-in tasks under **Terminal → Run Task** can run setup, doctor, catalog, validation, and JupyterLab.
+The checked-in tasks under **Terminal → Run Task** can run setup, the private
+learning portal, doctor, catalog, validation, and JupyterLab.
 
 ## 5. Set up PostgreSQL
 
@@ -173,10 +212,17 @@ See [Validation](../validation.md) for repository-wide checks and the distinctio
 
 ## 6. Verify a lesson
 
+Start the private course dashboard. It saves completion in ignored
+`.learning\progress.json` and can open allowlisted VS Code/Jupyter targets:
+
+```powershell
+& $CoursePython scripts\learning_portal.py
+```
+
 Python:
 
 ```powershell
-.\.venv\Scripts\python.exe -m jupyter lab .\python\ds-60day\notebooks
+& $CoursePython -m jupyter lab .\python\ds-60day\notebooks
 ```
 
 SQL:

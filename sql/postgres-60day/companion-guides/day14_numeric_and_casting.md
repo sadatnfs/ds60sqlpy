@@ -26,11 +26,40 @@ Evaluate `1 / 3`, `1::numeric / 3`, and
 `ROUND(1::numeric / NULLIF(3, 0), 2)`. Explain the result type at each step and
 why guarding the denominator belongs before rounding.
 
+## Practice assumptions and review method
+
+- **Focus:** Choose numeric types and casts from domain precision, validate text before casting, and postpone rounding until presentation.
+- **Assumptions:** Money is exact `numeric`; division casts denominators to numeric where fractions matter. NULL/zero denominators return NULL through `NULLIF`.
+- **Failure to watch for:** Integer division truncates, unsafe text casts abort the statement, and repeated early rounding introduces avoidable error.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day14_numeric_and_casting.sql).
-Test a zero denominator and a text value that cannot be cast, then choose an
-explicit validation policy.
+Choose numeric types and casts from domain precision, validate text before casting, and postpone rounding until presentation.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Calculate product gross margin amount and percentage, returning NULL percentage for zero price.
+   **Progressive hint:** Keep exact numeric arithmetic and guard the denominator with `NULLIF`.
+   **Expected shape:** One row per product.
+2. **Query writing:** Safely cast a set of text values to numeric only when they match a numeric grammar.
+   **Progressive hint:** Validate with a regex before casting; otherwise return NULL.
+   **Expected shape:** One row per sample text.
+3. **Query writing:** Show order-item net revenue rounded only after summing.
+   **Progressive hint:** Aggregate exact line expressions first; round the final display value.
+   **Expected shape:** One row per order.
+4. **Prediction:** Compare integer division with numeric division for 1 divided by 4.
+   **Progressive hint:** At least one operand must be numeric to preserve the fraction.
+   **Expected shape:** One row showing 0 and 0.25.
+5. **Debugging:** Calculate average payment amount per paid order without dividing by zero or counting payment rows as orders.
+   **Progressive hint:** Aggregate payment amount and count distinct order IDs at one common scope.
+   **Expected shape:** Exactly one summary row.
+6. **Extension:** Compare sum-of-rounded line values with rounded exact total and quantify the rounding difference.
+   **Progressive hint:** This diagnostic makes the consequence of early rounding visible.
+   **Expected shape:** One row with two totals and their signed difference.
 
 ## Self-check
 
@@ -63,14 +92,11 @@ Pitfalls
 - Silent rounding when casting to narrower numeric precision.
 - Dividing by zero — use NULLIF(den,0) to avoid errors.
 
-Exercises from the learner script
-1) Apply `CEIL` and `FLOOR` to product prices to create price buckets.
-2) Extract `customers.attributes->>'channel'`, cast it to text, and group by
-   that channel.
-
-The `->>` operator already returns text, so the explicit cast in exercise 2 is
-pedagogical rather than necessary. Preserve `NULL` as its own group or label it
-with `COALESCE`, but state the choice.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - Numeric types: https://www.postgresql.org/docs/current/datatype-numeric.html

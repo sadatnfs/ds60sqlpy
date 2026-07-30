@@ -155,4 +155,112 @@ BEGIN
 END
 $solution$;
 
+-- Exercise 1: E-v1 models a committed business/outbox event whose publisher
+-- acknowledgement was lost. It remains discoverable for retry.
+SELECT
+    o.event_id,
+    o.aggregate_key,
+    o.aggregate_version
+FROM pro_replication_lab.outbox AS o
+WHERE NOT o.published
+ORDER BY o.aggregate_key, o.aggregate_version;
+
+-- Exercise 2: the duplicate E-v3 call produced only one inbox row. An external
+-- side effect also needs event_id plus a canonical request fingerprint as a
+-- durable idempotency contract at the external service.
+SELECT
+    i.consumer_name,
+    i.event_id,
+    COUNT(*) AS accepted_rows
+FROM pro_replication_lab.inbox AS i
+GROUP BY i.consumer_name, i.event_id
+ORDER BY i.consumer_name, i.event_id;
+
+-- Exercise 4: this single-node fixture creates no replication object. Physical
+-- streaming covers cluster storage/WAL; logical publications select table DML
+-- and require separate DDL/sequence handling.
+SELECT
+    pg_catalog.pg_is_in_recovery() AS connected_to_recovery_node,
+    current_setting('server_version') AS server_version;
+
+-- Exercise 5: read-only slot inventory. Empty results are a valid capability
+-- state; never drop a disconnected slot without consumer ownership evidence.
+SELECT
+    s.slot_name,
+    s.slot_type,
+    s.active,
+    s.restart_lsn,
+    s.confirmed_flush_lsn
+FROM pg_catalog.pg_replication_slots AS s
+ORDER BY s.slot_name;
+
+-- Exercise 6: promotion requires quorum-aware diagnosis, old-primary fencing,
+-- data-loss evidence, controlled routing, timeline/CDC verification, a new
+-- replica and backup, and recorded RPO/RTO plus stop/fallback boundaries.
+
+-- Exercise 7: publication scope needs row/column leak tests and an UPDATE/DELETE
+-- replica identity. The local table's primary key is the intended identity.
+SELECT
+    n.nspname AS schema_name,
+    rel.relname AS table_name,
+    CASE rel.relreplident
+        WHEN 'd' THEN 'default'
+        WHEN 'n' THEN 'nothing'
+        WHEN 'f' THEN 'full'
+        WHEN 'i' THEN 'index'
+    END AS replica_identity
+FROM pg_catalog.pg_class AS rel
+JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = rel.relnamespace
+WHERE n.nspname = 'pro_replication_lab'
+  AND rel.relname = 'outbox';
+
+-- Exercise 8: a consistent bootstrap owns one exported snapshot/start LSN,
+-- initial copy, stream handoff, durable checkpoint, WAL budget, retry, and
+-- abandoned-slot cleanup record.
+SELECT *
+FROM (
+    VALUES
+        (1, 'create slot and export snapshot'::text),
+        (2, 'copy under snapshot and record progress'),
+        (3, 'consume from matching LSN with idempotency'),
+        (4, 'verify handoff, then release bootstrap resources')
+) AS bootstrap(step_number, required_evidence)
+ORDER BY step_number;
+
+-- Exercise 9: read-your-write should use transaction visibility evidence such
+-- as a commit/replay LSN token, not byte lag alone.
+SELECT
+    CASE
+        WHEN pg_catalog.pg_is_in_recovery()
+        THEN pg_catalog.pg_last_wal_replay_lsn()
+        ELSE pg_catalog.pg_current_wal_lsn()
+    END AS local_visibility_lsn;
+
+-- Exercise 10: wall-clock last-write-wins is unsafe under skew. Prefer one
+-- writer per key; otherwise use expected versions, deterministic merge, or
+-- quarantine with canonical snapshot/replay repair and an audit.
+SELECT
+    p.aggregate_key,
+    p.aggregate_version,
+    p.status
+FROM pro_replication_lab.projection AS p
+ORDER BY p.aggregate_key;
+
+-- Exercise 11: DDL uses an explicit compatibility sequence outside logical
+-- replication, with publisher/subscriber/application checks at every phase.
+SELECT *
+FROM (
+    VALUES
+        ('expand'::text, 'nullable/additive on compatible endpoints'::text),
+        ('deploy', 'tolerant readers and dual-compatible writers'),
+        ('backfill', 'reconcile before validating constraints'),
+        ('contract', 'remove only after all consumers stop old shape')
+) AS ddl_matrix(phase, compatibility_gate)
+ORDER BY phase;
+
+-- Exercise 12: failback/reseed begins with a protected new-primary backup and a
+-- fenced former primary, then chooses rewind or rebuild from timeline/WAL
+-- evidence and revalidates data, slots, subscriptions, routing, backup, and HA.
+
 ROLLBACK;

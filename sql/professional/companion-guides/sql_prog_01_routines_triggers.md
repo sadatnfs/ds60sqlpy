@@ -73,15 +73,39 @@ client identifier API; never interpolate untrusted text as SQL.
 
 ## Exercises
 
-Implement the five prompts in a scratch copy of the learner script: a stable
+Implement all ten prompts in a scratch copy of the learner script. Start with a
 audit-count function, a reassigning procedure, a transition guard trigger,
-row-versus-statement grain reconciliation, and an explanation of constraint and
-transaction boundaries. Keep tests deterministic and inside the outer
-transaction.
+row-versus-statement grain reconciliation, and constraint/transaction
+boundaries; then address routine promises, transition tables, exact errors,
+definer hardening, and concurrent claims. Keep tests deterministic and inside
+the outer transaction.
 
 The guard exercise is intentionally debatable. A complex workflow may deserve
 an explicit transition table and service command rather than a growing trigger.
 State the trade-off in your answer.
+
+Use a scratch transaction and label routine volatility, caller/owner identity,
+input contract, output grain, side effects, and failure behavior:
+
+1. **Audit count function:** define NULL behavior and verify zero, one, and
+   multiple matching rows.
+2. **Reassignment procedure:** reject blank owners and prove closed rows remain
+   unchanged.
+3. **Transition guard:** catch the expected denial and compare a trigger with an
+   explicit workflow model.
+4. **Audit grain:** reconcile one row per changed row with one row per statement.
+5. **Declarative boundary:** explain checks, trigger use, function transactions,
+   and top-level procedure transactions.
+6. **Routine promises:** justify volatility and parallel-safety declarations;
+   identify the failure caused by an over-strong promise.
+7. **Transition tables:** record a statement summary, including the zero-row
+   update contract, and reconcile it to row audit.
+8. **Expected error:** catch one exact SQLSTATE in a nested block, prove outer
+   work survives, and re-raise anything unexpected.
+9. **Definer hardening:** review fixed search path, qualified objects, owner,
+   inputs, PUBLIC revocation, and explicit execution grants.
+10. **Concurrent claims:** design deterministic `FOR UPDATE SKIP LOCKED`
+    batching with transaction, retry, fairness, and starvation boundaries.
 
 ## Self-check
 

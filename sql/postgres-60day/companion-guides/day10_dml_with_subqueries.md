@@ -28,11 +28,40 @@ keys with `UPDATE ... RETURNING`, verify the affected count, and leave the
 course transaction at `ROLLBACK`. This preview/modify/reconcile pattern is safer
 than starting with an unbounded write.
 
+## Practice assumptions and review method
+
+- **Focus:** Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.
+- **Assumptions:** Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.
+- **Failure to watch for:** Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day10_dml_with_subqueries.sql).
-Run an upsert twice inside the disposable transaction and prove the second run
-does not create a duplicate.
+Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Materialize category net revenue into a temporary table with `INSERT ... SELECT`.
+   **Progressive hint:** Declare the temporary schema and aggregate source rows before inserting.
+   **Expected shape:** One temporary row per product category.
+2. **Query writing:** Give Sales and Engineering employees a 5% demonstration raise and return affected rows.
+   **Progressive hint:** Select departments by key, round exact numeric salary, and inspect `RETURNING`.
+   **Expected shape:** Affected employee rows only; no change persists.
+3. **Query writing:** Delete orders older than one year only when no payment exists, returning candidate keys.
+   **Progressive hint:** Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.
+   **Expected shape:** Deleted-candidate order rows, then fully restored state.
+4. **Prediction:** Run an upsert twice against a temporary key-value table and prove only one row exists for the key.
+   **Progressive hint:** A primary key supplies the conflict target; the second statement updates rather than inserts.
+   **Expected shape:** One row for `source_a` with the second value.
+5. **Debugging:** Preview and update a bounded product set while reconciling selected and returned key counts.
+   **Progressive hint:** Store candidate keys in a temporary table and update only through that reviewed set.
+   **Expected shape:** One summary row with equal candidate and updated counts.
+6. **Extension:** Stage product prices and update only rows whose incoming price is nonnegative and actually differs.
+   **Progressive hint:** Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.
+   **Expected shape:** Returned rows only for valid changed products.
 
 ## Self-check
 
@@ -68,15 +97,11 @@ Pitfalls
 - Multi-row subqueries in scalar contexts; ensure uniqueness or add LIMIT 1.
 - Upserts racing under concurrency; consider locking or version columns.
 
-Exercises from the learner script
-- There is no separate exercise block on Day 10. Run the three demonstrated DML
-  patterns, inspect their returned rows, and verify after `ROLLBACK` that
-  employee salaries and order counts are unchanged.
-
-Optional extension: stage a price feed keyed by `product_id` and upsert all
-required `products` columns. The current schema has no `updated_at` column, so
-add one explicitly inside the same rollback-safe transaction if you want to
-practice timestamped updates.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - INSERT: https://www.postgresql.org/docs/current/sql-insert.html

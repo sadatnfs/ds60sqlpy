@@ -62,19 +62,14 @@ ROLLBACK;
 
 
 def test_practice_baseline_covers_the_catalog() -> None:
-    catalog = json.loads(
-        (REPO_ROOT / "curriculum" / "catalog.json").read_text(encoding="utf-8")
-    )
+    catalog = json.loads((REPO_ROOT / "curriculum" / "catalog.json").read_text(encoding="utf-8"))
     baseline = json.loads(
-        (REPO_ROOT / "curriculum" / "practice_baseline.json").read_text(
-            encoding="utf-8"
-        )
+        (REPO_ROOT / "curriculum" / "practice_baseline.json").read_text(encoding="utf-8")
     )
 
     assert set(baseline["lessons"]) == {lesson["id"] for lesson in catalog["lessons"]}
     assert all(
-        value["target"] == max(6, 2 * value["baseline"])
-        for value in baseline["lessons"].values()
+        value["target"] == max(6, 2 * value["baseline"]) for value in baseline["lessons"].values()
     )
 
 

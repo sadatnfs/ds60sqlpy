@@ -84,7 +84,7 @@ lock is the more complete project form taught by the current repository.
 | Reproduction | Fresh-environment setup and exact baseline command |
 | Plan | Remaining experiments ranked by expected learning value |
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Write the problem statement and success metric in the notebook.
 2. Create the project skeleton.
@@ -101,6 +101,23 @@ lock is the more complete project form taught by the current repository.
 The reference solution includes example warehouse/API source text as a planning
 template. Those are placeholders, not course dependencies; your default
 capstone must remain reproducible offline.
+
+### Additional mastery practice
+
+Start the capstone with a decision, bounded scope, data contract, baseline, and experiment log. A small reproducible question is stronger than an expansive vague project.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Scope and stop rules:** Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum baseline value.
+   **Progressive hint:** Time-box discovery and name the evidence that triggers pivot, pause, or stop. Do not make deployment the default capstone requirement.
+5. **Capstone data contract:** Create a versioned schema and quality report for your chosen local dataset, including source/license, row unit, target, types, ranges, missingness, duplicates, split keys, and fingerprint.
+   **Progressive hint:** Use a tiny valid fixture and deliberately invalid fixture to test the validator.
+6. **Decision log:** Record at least five project decisions with date, question, alternatives, evidence, chosen action, consequences, and revisit trigger.
+   **Progressive hint:** Include split/metric/baseline choices, not only model hyperparameters. Link each result to a reproducible command or notebook cell.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

@@ -1,6 +1,19 @@
 # DS60 Python, Data Science, SQL, and Engineering Learning Lab
 
+[![Course validation](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml/badge.svg)](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml)
+
 DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.
+
+> [!TIP]
+> Double-click [START_HERE.html](START_HERE.html) for the offline, guided course
+> portal. It walks through machine setup, learning paths, the study loop, all
+> 154 cataloged lessons, browser-local progress, and a copy-ready Codex tutoring
+> prompt. It contains no external scripts, fonts, analytics, or network calls.
+> After setup, use the environment-specific launcher command in
+> [Quick start](#3-see-what-is-ready) for the enhanced private localhost mode:
+> progress is synchronized to ignored
+> `.learning/progress.json`, and explicit buttons can open only cataloged
+> VS Code files or the two course JupyterLab folders.
 
 The repository is designed for:
 
@@ -56,9 +69,30 @@ Follow the guide for your operating system:
 Windows PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
-.\.venv\Scripts\python.exe scripts\course.py doctor
+# Recommended on a new Windows machine, including when Anaconda or PostgreSQL
+# is installed but not on PATH:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+& .\scripts\bootstrap_windows.ps1
+
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\course.py doctor
 ```
+
+The discovery bootstrap leaves PATH process-local by default, installs
+IPython, JupyterLab, classic Notebook, ipykernel, and the course dependency
+profile, registers `Python (ds60sqlpy)`, and verifies `psql` without connecting
+to a database. A standard `venv` puts Python under `.venv\Scripts`; the
+Anaconda fallback creates a conda prefix whose interpreter is
+`.venv\python.exe`. Resolve `$CoursePython` once per PowerShell window and
+reuse it for the commands below. See the
+[one-command Windows bootstrap guide](docs/setup/windows-bootstrap.md).
+Use the smaller historical `scripts\setup.ps1` only when a supported Python is
+already discoverable and you specifically want its standard-`venv`
+`.venv\Scripts\python.exe` layout; do not run it over a conda-prefix `.venv`.
 
 macOS or Linux:
 
@@ -74,7 +108,7 @@ Core setup installs notebook, data, and quality tooling. Before later machine-le
 Windows PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
+& .\scripts\bootstrap_windows.ps1 -Profile Advanced
 ```
 
 macOS or Linux:
@@ -98,7 +132,25 @@ python scripts/course.py catalog
 python scripts/course.py validate
 ```
 
-If `python` does not resolve to the repository environment, use `.venv/bin/python` on macOS/Linux or `.\.venv\Scripts\python.exe` on Windows.
+If `python` does not resolve to the repository environment, use
+`.venv/bin/python` on macOS/Linux or `& $CoursePython` on Windows. In a new
+PowerShell window, rerun the resolver from step 2 first.
+
+To use the progress dashboard and launcher:
+
+```powershell
+# Windows PowerShell
+& $CoursePython scripts\learning_portal.py
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python scripts/learning_portal.py
+```
+
+The server binds only to `127.0.0.1`, chooses a free port, uses a per-session
+request token, and accepts no arbitrary commands or paths. Use
+`--no-launches` for progress synchronization without native launch buttons.
 
 ### 4. Start a lesson
 
@@ -183,18 +235,38 @@ lessons, and 26 named foundation/professional/specialization modules. The
 generated catalog indexes 154 learning modules and reports their exact artifact
 paths.
 
+Every lesson also has a checked exercise-enrichment target. The immutable
+baseline lives in `curriculum/practice_baseline.json`; the target for each
+learner artifact, guide, and every explanatory solution artifact is at least
+`max(6, 2 × audited baseline)`. Run `python scripts/audit_practice.py` or read
+the generated [practice coverage report](docs/practice-coverage.md).
+
 ## Documentation
 
 - [Curriculum map](docs/curriculum-map.md)
+- [Portable guided course portal](START_HERE.html)
+- [Portal modes, progress, and launcher security](docs/learning-portal.md)
 - [Professional and specialization paths](docs/professional-paths.md)
 - [VS Code workflow](docs/vscode.md)
+- [One-command Windows bootstrap](docs/setup/windows-bootstrap.md)
 - [Offline use](docs/setup/offline.md)
 - [PostgreSQL in Jupyter](docs/setup/jupyter-postgresql.md)
+- [Practice coverage](docs/practice-coverage.md)
 - [Local environments and caches](docs/local-files-and-caches.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Validation](docs/validation.md)
 - [Content authoring](docs/content-authoring.md)
 - [Contributing](CONTRIBUTING.md)
+
+## Continuous validation
+
+The badge at the top reflects `.github/workflows/ci.yml`. Every push and pull
+request runs locked core checks on Ubuntu (Python 3.11 and 3.12), Windows
+(3.12), and macOS (3.12), exercises the learner bootstrap, and executes the
+complete learner/solution SQL sequence against PostgreSQL 17. A scheduled or
+manual job also verifies every optional dependency group on Windows and
+Ubuntu. See [Validation](docs/validation.md) for the exact local equivalents
+and the difference between structural, smoke, and full execution evidence.
 
 ## Scope and expectations
 

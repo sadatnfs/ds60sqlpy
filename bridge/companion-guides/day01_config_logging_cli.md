@@ -77,26 +77,64 @@ For this course, use these settings:
 
 ## Exercises
 
-1. Implement `load_settings()`. Normalize log levels to uppercase, accept only
-   the five declared values, and keep a missing database URL as `None`.
-2. Implement `redact_database_url()`. Preserve only enough information to
-   identify the scheme, user, host, port, and database. Remove the password,
-   query string, and fragment. Return a safe generic marker for malformed or
-   non-URL input.
-3. Implement `build_parser()` with `--database-url`, `--log-level`, and
-   `--dry-run`.
-4. Add a `main(argv)` that parses the supplied sequence, loads settings, and
-   logs a safe summary. Do not log the `Settings` object directly.
-5. Test environment defaults, CLI precedence, mixed-case levels, invalid
-   levels, a password-containing URL, a malformed URL, and a missing URL.
+### Practice contract
 
-### Progressive hints
+- **Focus:** Build one typed configuration boundary that combines environment and CLI input without leaking connection credentials.
+- **Assumptions:** CLI values override environment values; a missing database URL remains `None`; log levels are normalized to the five declared values.
+- **Primary failure mode:** Configuration objects and exception text can expose passwords just as easily as an explicit print statement.
+- **Evidence loop:** predict the boundary, implement the smallest change,
+  verify success and failure with a deterministic fake, then explain which
+  behavior still requires an explicitly enabled PostgreSQL integration test.
 
-1. Start with a frozen `dataclass`.
-2. Keep normalization in a small helper so invalid input has one error path.
-3. `urllib.parse.urlsplit()` understands URL components; parsing alone is not
-   validation.
-4. Pass `argv` to `ArgumentParser.parse_args()` instead of changing `sys.argv`.
+1. **Implementation:** Implement `load_settings()` with CLI-over-environment precedence,
+   uppercase log-level normalization, and `None` for a missing URL.
+   - **Progressive hint:** Resolve each source once, then validate the final selected value at
+     the boundary.
+2. **Security:** Implement `redact_database_url()` so diagnostics retain scheme, user, host,
+   port, and database but remove password, query, and fragment.
+   - **Progressive hint:** Parsing components is safer than replacing substrings in an opaque
+     secret.
+3. **Implementation:** Implement `build_parser()` with `--database-url`, `--log-level`, and
+   `--dry-run` without reading global process state during parser construction.
+   - **Progressive hint:** Parser construction and argument parsing are separate
+     responsibilities.
+4. **Integration:** Implement `main(argv)` so it parses the supplied sequence, loads settings,
+   configures logging, and emits only a safe summary.
+   - **Progressive hint:** A testable CLI accepts an argument sequence instead of rewriting
+     `sys.argv`.
+5. **Testing:** Create a table-driven test matrix for defaults, CLI precedence, mixed-case
+   levels, invalid levels, malformed URLs, credentials, and a missing URL.
+   - **Progressive hint:** Include both successful values and exact failure types; assert
+     secrets are absent from all diagnostics.
+6. **Prediction:** Predict the result when the environment says `WARNING`, the CLI supplies
+   `debug`, `dry_run=True`, and no database URL exists; then verify it.
+   - **Progressive hint:** Apply precedence independently per setting rather than treating one
+     source as an all-or-nothing bundle.
+7. **Debugging:** Repair a redactor that catches parse errors but returns `f'invalid:
+   {database_url}'` and explain why the exception path is still a leak.
+   - **Progressive hint:** Failure messages are an output boundary and need the same secrecy
+     rule as normal logs.
+8. **Design:** Add configuration provenance such as `cli`, `environment`, or `default` without
+   storing or logging the selected secret value twice.
+   - **Progressive hint:** Metadata about a source can be safe even when the source value is
+     not.
+9. **Security testing:** Use a recording logger or `caplog` to prove that startup, success, and
+   validation-failure paths contain no password, query token, or full URL.
+   - **Progressive hint:** Test the emitted boundary, not only the return value of the redaction
+     helper.
+10. **Portability:** Write equivalent Windows PowerShell and POSIX invocations that set
+   environment values outside Python and pass CLI overrides through `argv`; identify what
+   remains platform-neutral.
+   - **Progressive hint:** Environment-setting syntax differs, but `argparse`, `Mapping`, and
+     the Python entry point do not.
+
+### Before opening the solution
+
+- State the input/output and ownership boundary in one sentence.
+- Show one normal case, one edge case, and one failure case.
+- Inspect recorded calls rather than relying on plausible output.
+- Confirm no credential, payload, or high-cardinality identifier was emitted.
+
 
 ## Self-check
 
@@ -127,4 +165,3 @@ Continue to [Day 2](day02_protocols_context_decorators.md), where Protocols and
 context managers isolate concrete database resources. After attempting the
 exercises, compare reasoning in
 [the Day 1 solution notes](../solutions/day01_solutions.md).
-

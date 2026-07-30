@@ -186,3 +186,106 @@ Line‑by‑line highlights
 
 Takeaway
 - Combine proper nonlinearity, init, normalization, residuals, and clipping for stable deep training.
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Plot the loss over epochs.
+
+**How to reason about it:** Store one scalar loss per epoch after aggregating by example, not an arbitrary last batch. Compare train and validation curves and label the optimizer, learning rate, seed, and capacity.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Replace SGD with Adam and compare convergence.
+
+**How to reason about it:** Recreate identically initialized models for optimizer comparisons. Adam and SGD often need different learning rates, so compare documented tuning budgets rather than forcing one shared setting.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Add one hidden layer and a ReLU activation.
+
+**How to reason about it:** A hidden layer adds capacity only when dimensions and activation order are correct. Track `(batch, features)` through Linear-ReLU-Linear and compare validation evidence, not merely lower training loss.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Autograd tracing
+
+**Prompt:** For one scalar regression batch, annotate every line from `zero_grad()` through `step()`: which tensors receive gradients, when are they accumulated, and when do parameters change?
+
+**Reasoning before implementation:** Gradients accumulate in parameter `.grad` fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.
+
+Forward computation builds an autograd graph because model parameters require
+gradients. `loss.backward()` applies the chain rule and *adds* into each
+parameter's `.grad`. `optimizer.step()` then updates parameter values; it does
+not clear gradients.
+
+Call `zero_grad()` once per optimization step before backward. Deliberate
+gradient accumulation is possible, but then scale the loss and document the
+effective batch size. Inspect at least one gradient norm and assert it is
+finite before the update.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Mode debugging
+
+**Prompt:** Build a model with Dropout and BatchNorm, then compare repeated predictions in `train()` and `eval()` modes. Explain why `torch.no_grad()` is related but not interchangeable.
+
+**Reasoning before implementation:** Mode changes module behavior; no_grad disables graph recording. Validation usually needs both `model.eval()` and `with torch.no_grad()`.
+
+Dropout remains random in training mode, and BatchNorm updates/runs from batch
+statistics. Evaluation mode disables Dropout and uses stored BatchNorm state.
+`no_grad()` saves memory and prevents gradient tracking, but it does not switch
+those modules into evaluation behavior.
+
+After validation, call `model.train()` before the next training epoch. A common
+bug is evaluating correctly once and then continuing training while the model
+is still in evaluation mode.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Loss-aggregation edge case
+
+**Prompt:** Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.
+
+**Reasoning before implementation:** Multiply each mean batch loss by batch size, sum, then divide by the number of examples.
+
+```python
+loss_sum = 0.0
+example_count = 0
+for features, targets in data_loader:
+    predictions = model(features)
+    loss = loss_function(predictions, targets)
+    loss_sum += float(loss.item()) * features.size(0)
+    example_count += features.size(0)
+epoch_loss = loss_sum / example_count
+```
+
+An unweighted mean of batch means gives the short final batch the same weight
+as every full batch. It is correct only when all batches are the same size or
+the loss function returns a sum and the denominator is handled accordingly.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

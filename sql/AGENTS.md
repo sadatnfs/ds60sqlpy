@@ -44,6 +44,10 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 - Do not claim an executable solution exists when only prose is present.
 - Use repository-root commands in documentation.
 - Provide PowerShell-safe alternatives for pipes, file redirection, and API examples.
+- Meet the immutable `curriculum/practice_baseline.json` target on the learner
+  SQL, guide, and explanatory solution. Number distinct prompts consistently
+  across surfaces and explain each solution statement/clause rather than
+  merely presenting a final query.
 
 ## Validation
 
@@ -59,6 +63,7 @@ Then run:
 
 ```text
 python scripts/course.py validate
+python scripts/audit_practice.py
 ```
 
 Verify that:

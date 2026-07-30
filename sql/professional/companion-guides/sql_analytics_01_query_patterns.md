@@ -78,12 +78,37 @@ size. Month arithmetic is calendar-based, not a fixed number of days.
 
 ## Exercises
 
-Complete all seven prompts and add fail-fast checks from SQL-TEST-01. For every
+Complete all fourteen prompts and add fail-fast checks from SQL-TEST-01. For every
 query, write input grain, output grain, duplicate rule, time zone, interval
 bounds, NULL behavior, and deterministic order before editing SQL.
 
 Treat attribution and retention as definitions that stakeholders must approve,
 not universal mathematical truths.
+
+For every answer, state input grain, output grain, duplicate policy, NULL
+policy, time zone, half-open bounds, tie-break, and an invariant query:
+
+1. **Deduplication:** prove one canonical row per source event and justify the
+   winner order.
+2. **Sessions:** use a 60-minute rule, calculate duration, and test the exact
+   threshold.
+3. **Funnel:** produce one ordered row per user and reject step regressions.
+4. **Islands:** retain islands with at least two active days and verify gaps.
+5. **Attribution:** test missing touches and timestamp ties with a deterministic
+   winner.
+6. **Retention:** independently verify cohort size, retained numerator, and
+   division.
+7. **As-of join:** test an event at an upper boundary and require one successor.
+8. **Trailing window:** use a dense date spine and compare `ROWS` with `RANGE`.
+9. **Percentiles:** calculate median/P90 session duration and document
+   interpolation and NULL behavior.
+10. **Top-N:** compare `row_number`, `rank`, and `dense_rank` under ties.
+11. **Hierarchy:** traverse recursively with depth, path, and cycle protection.
+12. **Zero-activity funnel:** retain empty dates and make denominators explicit.
+13. **Approximation:** specify error, scale, merge, refresh, and exact-check
+    requirements before proposing approximate distinct counts.
+14. **Reusable query:** validate parameters and add grain, duplicate, NULL,
+    ordering, and time-boundary contracts.
 
 ## Self-check
 

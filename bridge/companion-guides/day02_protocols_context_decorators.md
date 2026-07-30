@@ -73,27 +73,67 @@ multi-error reporting requires an explicit policy.
 
 ## Exercises
 
-1. Review the starter `Cursor` and `Connection` Protocols. Remove any method your
-   context manager does not actually need, or explain why the broader boundary
-   is useful for the next exercise.
-2. Implement `managed_connection(factory)`. Acquire once, yield once, commit
-   only on success, roll back on failure, re-raise, and close in `finally`.
-3. Build a fake connection that records event strings. Test exact ordering for
-   success and failure.
-4. Implement `logged()` with `ParamSpec`, `TypeVar`, `functools.wraps`, and an
-   injected or module logger.
-5. Log only function identity and outcome. Do not log positional arguments,
-   keyword arguments, return values, or connection objects.
-6. Test that the decorated callable preserves its name, return value, exception,
-   and statically visible signature.
+### Practice contract
 
-### Progressive hints
+- **Focus:** Express resource ownership with small Protocols, a transaction-aware context manager, and a signature-preserving safe logger.
+- **Assumptions:** The factory acquires exactly one connection; success commits; failure rolls back and re-raises; every path closes.
+- **Primary failure mode:** Logging arguments or allowing cleanup to suppress the original failure can violate both security and debugging contracts.
+- **Evidence loop:** predict the boundary, implement the smallest change,
+  verify success and failure with a deterministic fake, then explain which
+  behavior still requires an explicitly enabled PostgreSQL integration test.
 
-1. A generator-based manager needs `@contextmanager` and exactly one `yield`.
-2. Put `close()` in a `finally` block.
-3. `except BaseException` also protects cleanup during cancellation and
-   keyboard interrupts; discuss whether your application wants that scope.
-4. Type wrapper arguments as `P.args` and `P.kwargs`, then return `R`.
+1. **Design:** Review the starter `Cursor` and `Connection` Protocols; minimize each boundary or
+   justify every retained method.
+   - **Progressive hint:** A consumer Protocol should describe what the consumer calls, not an
+     entire driver object.
+2. **Implementation:** Implement `managed_connection(factory)` with acquire-once, yield-once,
+   commit-on-success, rollback-on-failure, re-raise, and close-in-finally behavior.
+   - **Progressive hint:** Place closure in `finally`; keep commit after the yielded body
+     returns.
+3. **Testing:** Build a fake connection that records exact event order and test success, body
+   failure, rollback, and close.
+   - **Progressive hint:** The order is part of the contract, so assert the entire event list.
+4. **Implementation:** Implement `logged()` with `ParamSpec`, `TypeVar`, `functools.wraps`, and
+   an injected or module logger.
+   - **Progressive hint:** Type wrapper parameters as `P.args`/`P.kwargs` and return the
+     original `R`.
+5. **Security:** Restrict decorator logs to function identity and outcome; prove arguments,
+   keyword values, return values, and connection representations are absent.
+   - **Progressive hint:** Treat every callable value as potentially sensitive.
+6. **Typing:** Verify that decoration preserves name, docstring, return behavior, exception
+   identity, and a statically visible signature.
+   - **Progressive hint:** `wraps` fixes runtime metadata; `ParamSpec` preserves the type-level
+     call shape.
+7. **Prediction:** Predict cleanup when the managed body raises `KeyboardInterrupt` or
+   cancellation-like `BaseException`; state whether your boundary catches it.
+   - **Progressive hint:** The exception scope is a policy decision, but closure must still be
+     guaranteed.
+8. **Debugging:** Analyze what happens if rollback or close raises while a body exception is
+   active, and design a test that exposes exception masking.
+   - **Progressive hint:** Cleanup failures can replace the error that caused cleanup.
+9. **Design:** Compose two nested managed resources and decide which layer owns commit,
+   rollback, and close.
+   - **Progressive hint:** Exactly one layer should own each lifecycle transition.
+10. **Comparison:** Sketch the async equivalent and identify which operations require `await`
+   and which typing primitives change.
+   - **Progressive hint:** Preserve the same ownership state machine while changing the
+     execution protocol.
+11. **Typing:** Define a callable Protocol for the connection factory and compare it with
+   `Callable[[], Connection]` in tests and adapters.
+   - **Progressive hint:** Use a Protocol when the boundary needs attributes or overloads beyond
+     a bare call.
+12. **Extension:** Design a timing decorator with an injected monotonic clock while retaining
+   the no-argument/no-result logging policy.
+   - **Progressive hint:** Compute duration from two injected clock calls and emit a bounded
+     numeric field.
+
+### Before opening the solution
+
+- State the input/output and ownership boundary in one sentence.
+- Show one normal case, one edge case, and one failure case.
+- Inspect recorded calls rather than relying on plausible output.
+- Confirm no credential, payload, or high-cardinality identifier was emitted.
+
 
 ## Self-check
 
@@ -122,4 +162,3 @@ success and `["work", "rollback", "close"]` on body failure.
 [Day 3](day03_safe_psycopg_queries.md) uses a cursor Protocol to test SQL and
 parameters separately. After your attempt, see
 [the Day 2 solution notes](../solutions/day02_solutions.md).
-

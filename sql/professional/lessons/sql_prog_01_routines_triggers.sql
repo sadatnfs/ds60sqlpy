@@ -213,6 +213,27 @@ ORDER BY wi.item_id;
 -- 5. Explain why a CHECK constraint, not a trigger, enforces the allowed status
 --    values. Explain why functions cannot COMMIT, and when a top-level procedure
 --    may control transactions.
+--
+-- 6. Classify the lesson routines as VOLATILE, STABLE, or IMMUTABLE and decide
+--    whether each can be PARALLEL SAFE. Explain why an incorrect promise can
+--    produce wrong plans or results even when a demo appears to work.
+--
+-- 7. Add an AFTER UPDATE statement trigger with transition tables that records
+--    one summary row per statement. Reconcile affected rows against the
+--    row-level audit and define behavior for an update that changes zero rows.
+--
+-- 8. Use a nested PL/pgSQL block to catch one expected unique_violation, then
+--    prove only the inner subtransaction was rolled back. Re-raise every
+--    unexpected SQLSTATE instead of using WHEN OTHERS as silent control flow.
+--
+-- 9. Harden a SECURITY DEFINER reporting function: fixed search_path,
+--    schema-qualified objects, validated parameters, revoked PUBLIC execution,
+--    narrow owner privileges, and explicit grants. State why ownership itself
+--    is part of the security boundary.
+--
+-- 10. Simulate two workers claiming open items. Design one solution using
+--     SELECT ... FOR UPDATE SKIP LOCKED, define deterministic batch order, and
+--     explain starvation, retry, and transaction-length trade-offs.
 
 DO $self_check$
 BEGIN
@@ -233,4 +254,3 @@ $self_check$;
 
 ROLLBACK;
 \echo 'SQL-PROG-01 complete: pro_routines_lab was rolled back'
-

@@ -117,13 +117,42 @@ restart belong in the same approved change plan.
 
 ## Exercises
 
-Complete all six prompts: a predicate-compatible covering index, access-method
+Complete all twelve prompts. Begin with a predicate-compatible covering index, access-method
 operator mapping, extended statistics, a cautious lifecycle review, maintenance
-semantics, and a safe statement-statistics plan. Include the exact target query
-beside every proposed index.
+semantics, and a safe statement-statistics plan; then address redundancy,
+expressions, HOT, partitioning, plan instrumentation, and an owned scorecard.
+Include the exact target query beside every proposed index.
 
 Use `EXPLAIN` as evidence, not as a pass/fail assertion that one node type must
 appear on every machine or data size.
+
+Every recommendation needs target query, operator, representative data,
+before/after evidence, write/storage cost, owner, review date, and rollback:
+
+1. **Covering partial index:** make the query predicate imply the index
+   predicate and identify which columns are keys versus payload.
+2. **Access methods:** map each GIN, GiST, SP-GiST, and BRIN index to supported
+   operators and one nonmatching query.
+3. **Extended statistics:** choose correlated columns, analyze, inspect, and
+   explain the planner’s freedom.
+4. **Lifecycle review:** combine usage window, size, writes, constraints, and
+   plans without producing an automatic drop list.
+5. **Maintenance:** connect vacuum/analyze, visibility, dead tuples, bloat,
+   autovacuum, and long transactions.
+6. **Statement statistics:** design restricted, privacy-aware collection and
+   review without enabling or exposing it here.
+7. **Redundancy candidates:** compare keys, order, predicate, operator class,
+   collation, INCLUDE data, uniqueness, and plans.
+8. **Expression index:** test expression matching and document collation,
+   function-volatility, and generated-column alternatives.
+9. **HOT updates:** observe a controlled workload and relate indexed columns,
+   free space, fillfactor, vacuum, and old snapshots.
+10. **Partition indexes:** account for pruning, local indexes, statistics,
+    attach/detach, and global uniqueness limitations.
+11. **Plan instrumentation:** distinguish execution and overhead across
+    `EXPLAIN` options, especially for writes and cache state.
+12. **Maintenance scorecard:** define owners, budgets, cadence, escalation, and
+    evidence for growth, health, waits, lag, and slow queries.
 
 ## Self-check
 

@@ -127,3 +127,96 @@ Guidance
 - Resolve `run_date` when each run starts, so a daily deployment does not reuse
   a date captured when it was registered
 - Keep tasks idempotent; retries and re-runs must not double-load data
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Add `test_size` and `random_state` parameters to the training flow.
+
+**How to reason about it:** Flow parameters such as test size and random state must reach the task and be logged with outputs. Defaults are part of the reproducibility contract, not hidden UI settings.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Split the training task into separate train and evaluate tasks with explicit outputs.
+
+**How to reason about it:** Separate train and evaluate tasks with small explicit results. Passing large in-memory objects can be acceptable locally but should trigger a documented artifact/reference design for distributed execution.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Explore the optional local Prefect UI and scheduling basics.
+
+**How to reason about it:** Prove direct local flow execution first. Prefect UI/deployment/scheduling is an optional local extension whose commands must match Prefect 3, and the core lesson must remain useful offline without a running server.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Retry and idempotence
+
+**Prompt:** Add retries to a task that writes an artifact. Make the write idempotent so a failure after writing cannot create duplicate or partially valid outputs.
+
+**Reasoning before implementation:** Write to a temporary path, validate, then atomically replace a versioned destination. A retry should produce the same logical result.
+
+Retries are safe only when repeated execution has a known effect. Derive the
+artifact ID from flow/run inputs, avoid append-only side effects without a
+deduplication key, and write a completion manifest last.
+
+Use retries for transient failures, not deterministic schema or programming
+errors. Classify the exception and preserve the original cause in task state.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Cache-key design
+
+**Prompt:** Design a task cache key that changes when data fingerprint, code/config, or relevant parameters change, but not when an unrelated log message changes.
+
+**Reasoning before implementation:** Hash canonical semantic inputs and include a task/schema version. Do not cache a task whose hidden external state is untracked.
+
+A cache hit is a correctness claim that prior output is interchangeable with a
+new execution. Include data identity, transformation version, dependency/model
+configuration, and meaningful parameters. Exclude timestamps and machine
+paths that would defeat reuse.
+
+If a task reads “latest.csv” or a mutable service without a snapshot ID, a
+reliable cache key cannot be constructed from visible inputs. Fix the source
+contract or disable caching.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Failure observability
+
+**Prompt:** Instrument a three-task flow so logs and a final summary identify run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category without logging sensitive rows.
+
+**Reasoning before implementation:** Use structured fields and task/run context. Emit counts and opaque IDs rather than raw feature values.
+
+The final state must distinguish completed, failed, retried, cached, and
+skipped tasks. Propagate an upstream failure rather than producing a misleading
+downstream success with empty data.
+
+Keep the core lesson's logging local. Optional Prefect server telemetry should
+be explicitly enabled, and no secret or credential should be printed during
+diagnosis.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

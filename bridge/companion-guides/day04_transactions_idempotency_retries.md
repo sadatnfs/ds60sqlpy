@@ -63,27 +63,70 @@ For idempotency, the database must enforce uniqueness. An application-side
 
 ## Exercises
 
-1. Validate `RetryPolicy`: attempts must be at least one and delay non-negative.
-2. Implement `create_job_once()` using one parameterized `INSERT`, a unique
-   `idempotency_key`, `ON CONFLICT ... DO NOTHING`, and `RETURNING job_id`.
-3. Return the new ID when inserted and `None` for a duplicate. Do not run a
-   preliminary `SELECT`.
-4. Implement `run_in_transaction()`. Commit after the operation returns; on any
-   failure, roll back and re-raise.
-5. Implement `run_with_retry()`. Retry only `TransientDatabaseError`, stop after
-   `max_attempts`, and use delays `base * 2**(attempt - 1)`.
-6. Test with a closure that fails twice, a list's `append` method as the fake
-   sleeper, and a permanent `ValueError` that must escape immediately.
-7. Explain whether the retry should wrap one statement, one transaction, or the
-   entire command in your design.
+### Practice contract
 
-### Progressive hints
+- **Focus:** Make writes safe to repeat by combining a database uniqueness boundary, explicit transaction ownership, and narrowly classified retries.
+- **Assumptions:** One stable source key identifies one logical job; each retry executes a fresh transaction attempt; fake sleepers keep tests deterministic.
+- **Primary failure mode:** Retrying a non-idempotent or ambiguously committed write can duplicate effects even when backoff logic is correct.
+- **Evidence loop:** predict the boundary, implement the smallest change,
+  verify success and failure with a deterministic fake, then explain which
+  behavior still requires an explicitly enabled PostgreSQL integration test.
 
-1. `fetchone()` returns `None` after `DO NOTHING ... RETURNING`.
-2. Do not sleep after the final failed attempt.
-3. Run rollback before the exception crosses the transaction boundary.
-4. A stable source event ID usually makes a better idempotency key than a random
-   ID generated on each attempt.
+1. **Validation:** Validate `RetryPolicy` so attempts are at least one and base delay is finite
+   and non-negative.
+   - **Progressive hint:** Reject unusable policy at construction rather than inside a failing
+     retry loop.
+2. **SQL implementation:** Implement `create_job_once()` with one parameterized `INSERT`, a
+   unique idempotency key, `ON CONFLICT DO NOTHING`, and `RETURNING job_id`.
+   - **Progressive hint:** Let the uniqueness constraint arbitrate concurrency; do not pre-read.
+3. **Mapping:** Return the inserted ID when `fetchone()` yields a row and `None` for a duplicate
+   without issuing a second statement.
+   - **Progressive hint:** Treat `None` as the documented `DO NOTHING` result.
+4. **Transaction:** Implement `run_in_transaction()` so success commits and any operation
+   failure rolls back before re-raising.
+   - **Progressive hint:** The wrapper owns the boundary; the operation owns only domain work.
+5. **Retry:** Implement `run_with_retry()` for only `TransientDatabaseError`, stopping at
+   `max_attempts` with delays `base * 2**(attempt - 1)`.
+   - **Progressive hint:** Never sleep after the last failed attempt and never catch permanent
+     errors.
+6. **Testing:** Test two transient failures followed by success with a list append sleeper, plus
+   a permanent `ValueError` that escapes immediately.
+   - **Progressive hint:** Assert result, call count, and the complete delay sequence.
+7. **Design:** Decide whether retry owns a statement, a complete transaction attempt, or an
+   entire command and justify the chosen scope.
+   - **Progressive hint:** A failed PostgreSQL transaction cannot safely continue; retry needs
+     fresh state.
+8. **Composition:** Compose retry with transaction ownership so every attempt receives fresh
+   connection state and cleanup happens before delay.
+   - **Progressive hint:** The retry operation should create and finish one complete transaction
+     attempt.
+9. **Extension:** Add optional jitter through an injected function while keeping tests
+   deterministic and delays bounded.
+   - **Progressive hint:** Randomness is another effect boundary and should be injected.
+10. **Failure analysis:** Explain how a connection loss during commit creates an uncertain
+   outcome and how the idempotency key resolves the next attempt.
+   - **Progressive hint:** The client may not know whether the server committed.
+11. **Input validation:** Define and test boundaries for blank idempotency keys and oversized
+   payloads before opening a transaction.
+   - **Progressive hint:** Fast local validation avoids obviously invalid database work but does
+     not replace constraints.
+12. **Concurrency:** Model two workers racing on the same idempotency key and identify which
+   outcome the unique constraint guarantees.
+   - **Progressive hint:** A read-then-insert sequence cannot provide the same atomic guarantee.
+13. **Observability:** Design retry metrics with low-cardinality tags and no payload, key,
+   exception message, or request ID.
+   - **Progressive hint:** Dimensions should describe bounded classes, not individual events.
+14. **Interruption:** Decide how cancellation or `KeyboardInterrupt` crosses transaction and
+   retry layers without being mistaken for a transient database error.
+   - **Progressive hint:** Cleanup may be broad, but retry classification should remain narrow.
+
+### Before opening the solution
+
+- State the input/output and ownership boundary in one sentence.
+- Show one normal case, one edge case, and one failure case.
+- Inspect recorded calls rather than relying on plausible output.
+- Confirm no credential, payload, or high-cardinality identifier was emitted.
+
 
 ## Optional live-DB step
 

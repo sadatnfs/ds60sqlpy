@@ -84,3 +84,126 @@ Exercise 3 — Model card template
 - Versioning, monitoring, rollback plan
 - Contact for incidents
 ```
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Build a DataFrame PII scanner covering column names and free text.
+
+**How to reason about it:** A PII scanner should return finding type, safe row identifier, column, and count—not the matched secret. Test false positives, missed formats, Unicode, nulls, and nested/free-text fields.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Add a function that masks email addresses and phone numbers in text.
+
+**How to reason about it:** Masking must preserve only the minimum structure needed for the stated purpose and be idempotent. Regex is incomplete, so pair it with minimization, access controls, retention, and review.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Simulate subgroup precision and recall for a classifier and compare groups.
+
+**How to reason about it:** Subgroup precision/recall requires support, positive counts, uncertainty, and consistent thresholds. Avoid conclusions for tiny groups and distinguish observed disparity from a causal explanation.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Original lesson practice
+
+**Prompt:** Draft a one-page data-ethics checklist for your project.
+
+**How to reason about it:** An ethics checklist names intended use, excluded use, stakeholders, harms, data rights, fairness evaluation, human oversight, monitoring, appeals, owners, and stop/rollback criteria.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 5 — Threat modeling
+
+**Prompt:** Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner.
+
+**Reasoning before implementation:** Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.
+
+Prioritize threats by credible impact and likelihood, then connect each
+control to a verification step: access review, secret scan, encryption check,
+retention deletion test, redacted-log test, or incident drill.
+
+A diagram is not a security guarantee. Record residual risk and an accountable
+owner; risks beyond the project's authority require escalation rather than a
+checkbox marked complete.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Re-identification reasoning
+
+**Prompt:** Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information.
+
+**Reasoning before implementation:** Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.
+
+k-anonymity limits uniqueness under the selected quasi-identifiers, but a
+group whose members all share one sensitive value can still reveal that value.
+Unmodeled external data can also re-identify records.
+
+Use the exercise to understand limits, not to certify a dataset as safe.
+Privacy review may require stronger techniques, restricted access, synthetic
+data, or differential privacy with an explicit threat model and privacy budget.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 7 — Fairness uncertainty
+
+**Prompt:** Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group's denominator is nearly zero.
+
+**Reasoning before implementation:** Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.
+
+Report the distribution of gaps/ratios, not only point estimates. Wide
+intervals signal insufficient evidence, which may require more representative
+data or a safer deployment constraint. A zero predicted-positive denominator
+makes precision undefined and must be surfaced.
+
+Metric parity choices can conflict and depend on base rates and harm. Select
+the monitored criterion with affected stakeholders and domain/legal review,
+not by whichever metric looks most favorable.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 8 — Incident response
+
+**Prompt:** Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps.
+
+**Reasoning before implementation:** Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.
+
+Follow the organization's incident process and involve repository/security
+owners before rewriting shared history. Remove outputs from current artifacts,
+rotate exposed credentials if any, assess clones/releases/caches, and notify
+affected parties according to policy.
+
+Add preventive controls: clean-output notebook validation, secret/PII scans,
+synthetic fixtures, `.gitignore`, review checks, and least-privilege data
+access. Do not reproduce the sensitive value in tickets or logs.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

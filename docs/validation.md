@@ -27,7 +27,14 @@ python scripts/course.py validate
 Sensitive-content guard:
 
 ```text
-python scripts/scan_secrets.py
+python scripts/scan_secrets.py --history
+```
+
+Practice-enrichment and generated portal drift:
+
+```text
+python scripts/audit_practice.py
+python scripts/build_course_guide.py --check
 ```
 
 Add `--all` to print passing details as well as failures, warnings, and summaries. This command performs fast structural checks; it does not execute every notebook or SQL lesson.
@@ -38,7 +45,9 @@ On Windows, use:
 .\.venv\Scripts\python.exe scripts\course.py doctor
 .\.venv\Scripts\python.exe scripts\course.py catalog
 .\.venv\Scripts\python.exe scripts\course.py validate
-.\.venv\Scripts\python.exe scripts\scan_secrets.py
+.\.venv\Scripts\python.exe scripts\scan_secrets.py --history
+.\.venv\Scripts\python.exe scripts\audit_practice.py
+.\.venv\Scripts\python.exe scripts\build_course_guide.py --check
 ```
 
 On macOS/Linux, use:
@@ -47,7 +56,9 @@ On macOS/Linux, use:
 .venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py catalog
 .venv/bin/python scripts/course.py validate
-.venv/bin/python scripts/scan_secrets.py
+.venv/bin/python scripts/scan_secrets.py --history
+.venv/bin/python scripts/audit_practice.py
+.venv/bin/python scripts/build_course_guide.py --check
 ```
 
 The course CLI uses the standard library for pre-install inspection so catalog and environment diagnostics remain available before third-party packages are installed.
@@ -73,28 +84,34 @@ Core setup installs the quality tools used by continuous integration:
 
 ```text
 python scripts/build_catalog.py
+python scripts/build_course_guide.py --check
+python scripts/audit_practice.py
 python -m ruff check src scripts tests bridge python/professional
 python -m mypy
 python -m pytest
 python scripts/course.py validate
-python scripts/scan_secrets.py
+python scripts/scan_secrets.py --history
 ```
 
 Review the regenerated catalog diff. CI runs these core checks on Python 3.12
 for Windows, macOS, and Linux, then executes the full SQL sequence separately
 against PostgreSQL 17.
 
-The sensitive-content scan is deliberately offline and reports only a path,
-line number, and finding category so it does not copy a suspected credential
-into logs. It catches common token/key formats, private-key files, and
-credential-bearing URLs. It is a guardrail, not proof that arbitrary prose or
-historical commits contain no secret; review changes and use an organization
-scanner when available.
+The sensitive-content scan is deliberately offline and reports only an object
+ID, path, line number, and finding category so it does not copy a suspected
+credential into logs. It catches common token/key formats, private-key files,
+credential-bearing URLs, ignored credential-shaped local files, and reachable
+Git-history blobs. Its narrow fixture allowances are covered by tests. It is a
+guardrail, not proof against every secret format; still review changes and use
+an organization scanner when available.
 
 Every push and pull request also runs the actual learner `setup.ps1` or
 `setup.sh` flow on fresh Windows, macOS, and Ubuntu Python 3.12 runners, reruns
 doctor through the generated `.venv`, and checks that setup produced no
-trackable files.
+trackable files. The Windows runner first executes
+`bootstrap_windows.ps1 -SkipPostgreSql -WhatIf`, which exercises native
+PowerShell parsing and discovery without changing PATH, installing packages,
+registering a kernel, or requiring a database server on the CI image.
 
 The weekly and manually dispatched heavy job resolves, installs, and imports
 every direct package in the `bridge`, `professional`, `sql-notebooks`, `ml`,
@@ -113,6 +130,25 @@ not prove model training, GPU support, asset availability, live APIs, or every
 advanced lesson's runtime behavior. macOS receives the core matrix but not this
 heavy all-extras gate.
 
+## Local validation evidence (2026-07-30)
+
+The comprehensive local run recorded this evidence:
+
+- Locked Python 3.11 suite: **167 passed, 2 expected skips**.
+- Locked Python 3.12 suite: **167 passed, 2 expected skips**.
+- PostgreSQL 16.14: **72/72 learner scripts** and **72/72 executable
+  solutions** passed.
+- The JupySQL solution notebook executed **18/18 code cells**, including
+  **9/9 live SQL cells**.
+- Notebook smoke checks passed **13/13**.
+- Practice coverage passed **154/154 lessons**.
+- The current-tree and reachable-Git-history sensitive-content scan passed.
+
+Native Windows execution was not verified locally and remains CI-only for this
+snapshot. These results describe this checkout and environment on the stated
+date; they are evidence, not a promise that later revisions or other machines
+will produce the same results.
+
 ## Validation layers
 
 ### 1. Inventory and structure
@@ -125,6 +161,11 @@ Check:
 - Declared companion guides and solutions exist.
 - Notebook files are valid JSON and valid `nbformat`.
 - Markdown internal links resolve.
+- Every lesson surface meets its immutable
+  `curriculum/practice_baseline.json` doubling target.
+- `START_HERE.html` matches a fresh deterministic portal render.
+- The loopback portal rejects hidden files, invalid tokens, cross-origin
+  mutations, unknown lesson IDs, and non-allowlisted launch actions.
 - No unexpected generated artifacts are tracked.
 
 This layer is fast but does not prove lesson semantics.
@@ -289,8 +330,16 @@ Use focused checks first, then the full validation:
    git diff -- curriculum/catalog.json
    ```
 
-5. Run `python scripts/course.py validate`.
-6. Run:
+5. When lessons or portal behavior changed, regenerate the maintained outputs:
+
+   ```text
+   python scripts/audit_practice.py --write-report
+   python scripts/build_course_guide.py
+   git diff -- docs/practice-coverage.md START_HERE.html
+   ```
+
+6. Run `python scripts/course.py validate`.
+7. Run:
 
    ```text
    git diff --check

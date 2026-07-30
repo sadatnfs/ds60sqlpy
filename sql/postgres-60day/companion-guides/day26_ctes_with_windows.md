@@ -29,10 +29,40 @@ growth in the outer query with a guarded denominator. Keeping the ratio outside
 the `LAG` layer makes the prior value visible and lets you inspect both values
 before interpreting the percentage.
 
+## Practice assumptions and review method
+
+- **Focus:** Combine CTE grain control with window comparisons so time-series and ranking logic remain readable and reconcilable.
+- **Assumptions:** Monthly reporting uses UTC. Window order always includes chronological keys; revenue uses exact numeric and is rounded only in final output.
+- **Failure to watch for:** Applying windows before aggregation compares detail rows, while filtering too early can remove the history a lag or moving frame needs.
+- **Review loop:** predict the row grain and NULL/order behavior, run the
+  query, inspect a bounded sample, and reconcile counts or totals before
+  accepting the result.
+
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day26_ctes_with_windows.sql). For
-the top-five exercise, compare `ROW_NUMBER` with `RANK` on a tied value.
+Combine CTE grain control with window comparisons so time-series and ranking logic remain readable and reconcilable.
+
+Attempt each prompt in a scratch SQL file before opening the solution.
+For every result, write its row grain and expected shape first.
+
+1. **Query writing:** Calculate monthly stored revenue and its prior-month value/change.
+   **Progressive hint:** Aggregate to month in a CTE, then lag the monthly measure.
+   **Expected shape:** One row per observed month.
+2. **Query writing:** Rank product categories by net revenue within each UTC order month.
+   **Progressive hint:** Aggregate month/category first, then rank the stable aggregate.
+   **Expected shape:** One row per observed month/category.
+3. **Query writing:** Return the top three category revenue levels per month.
+   **Progressive hint:** Rank in one CTE and filter the window result outside.
+   **Expected shape:** Top three revenue ranks for each observed month.
+4. **Prediction:** Calculate each category's cumulative share of monthly revenue in descending contribution order.
+   **Progressive hint:** Divide running category revenue by the full monthly total; use explicit frames.
+   **Expected shape:** One row per month/category with final share equal to one.
+5. **Debugging:** Calculate a three-month moving average after building a dense month calendar.
+   **Progressive hint:** Join observed monthly revenue onto the calendar and treat absent observed revenue as zero only because the report defines it that way.
+   **Expected shape:** A continuous chronological month series.
+6. **Extension:** Reconcile the final cumulative monthly revenue with the independent order total.
+   **Progressive hint:** Compare at the end of the CTE/window chain instead of assuming transformations preserved totals.
+   **Expected shape:** One row with zero difference.
 
 ## Self-check
 
@@ -67,15 +97,11 @@ Pitfalls
 - Windowing raw rows creates noisy and heavy computations; pre-aggregate first.
 - Filtering on windowed values in the same SELECT; wrap in another SELECT to filter.
 
-Exercises from the learner script
-1) Build a multi-stage CTE that computes monthly totals and then
-   month-over-month growth with `LAG`.
-2) For each product, return its top five orders by that product's net line
-   value using a CTE plus a window rank.
-
-Filter a window rank in an outer query because PostgreSQL has no `QUALIFY`
-clause. Use `ROW_NUMBER` for at most five rows per product or a tie-aware rank
-when the requirement allows more than five.
+Current practice map
+- The authoritative six prompts, progressive hints, and expected shapes
+  are maintained in **Exercises** above. They map
+  one-for-one to both solution companions; older short exercise lists
+  were removed to prevent prompt drift.
 
 Further reading
 - CTEs: https://www.postgresql.org/docs/current/queries-with.html

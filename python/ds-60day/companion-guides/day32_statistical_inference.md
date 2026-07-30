@@ -63,7 +63,7 @@ The estimate and interval communicate location and uncertainty. The p-value
 addresses compatibility with the specific null value `0.0`. Report all three
 with the sample size and assumptions; a p-value alone hides the effect magnitude.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Draw groups from `Normal(0, 1)` and `Normal(0.3, 1)`, then test the
    difference in means with Welch's t-test.
@@ -81,6 +81,23 @@ with the sample size and assumptions; a p-value alone hides the effect magnitude
    labels. Inspect the expected counts returned by `chi2_contingency`.
 3. Only the critical value changes when the sample and standard error remain
    fixed. Higher confidence should require a wider interval.
+
+### Additional mastery practice
+
+Separate effect estimation from decision thresholds. Report uncertainty, assumptions, and practical magnitude rather than treating a p-value as a verdict.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Prediction:** Hold the true mean difference and variance fixed, then predict how increasing each group's sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.
+   **Progressive hint:** Standard error shrinks approximately with 1/sqrt(n); the underlying standardized effect does not grow merely because more rows were collected.
+5. **Implementation:** Build a seeded percentile-bootstrap confidence interval for a median difference. Validate empty groups and expose the number of resamples as a parameter.
+   **Progressive hint:** Resample each group independently with replacement, compute one median difference per resample, then take symmetric quantiles.
+6. **Multiple-comparison reasoning:** You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis.
+   **Progressive hint:** Under independent true nulls, use 1-(1-alpha)**20. Bonferroni controls family-wise error; Benjamini-Hochberg targets the expected false-discovery proportion among rejections.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

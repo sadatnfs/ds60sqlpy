@@ -9,13 +9,18 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 import nbformat
 from nbformat import NotebookNode
-from normalize_notebooks import normalize_notebook
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.normalize_notebooks import normalize_notebook  # noqa: E402
+
 SOLUTIONS_ROOT = REPO_ROOT / "python" / "ds-60day" / "solutions"
 GENERATED_DAYS = range(46, 61)
 PYTHON_FENCE_LANGUAGES = frozenset({"python", "py"})

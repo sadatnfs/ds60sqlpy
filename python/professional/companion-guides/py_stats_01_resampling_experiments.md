@@ -143,6 +143,66 @@ attrition permit a causal interpretation under additional assumptions.
 Observational grouping, compromised randomization, or severe differential
 attrition returns an associational scope.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 10 — bootstrap clustered assignments
+
+Extend the experiment fixture with multiple rows per account. Bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.
+
+**Progressive hint:** Sample independent assignment units with replacement and carry all of each selected account's observations into the resample.
+
+### Exercise 11 — bootstrap a ratio metric
+
+Estimate treatment lift for revenue per active user, preserving each user's numerator and denominator. Handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
+
+**Progressive hint:** Define the estimand first; the two ratio formulas answer different questions. Resample complete user records.
+
+### Exercise 12 — apply covariate adjustment without leakage
+
+Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
+
+**Progressive hint:** The covariate must be measured before assignment and not affected by treatment. Center it with a documented analysis-sample mean.
+
+### Exercise 13 — separate intention-to-treat from treatment-on-treated
+
+Simulate assigned treatment with imperfect compliance. Compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
+
+**Progressive hint:** Random assignment protects the assignment groups, not the self-selected compliance groups.
+
+### Exercise 14 — perform missing-outcome sensitivity
+
+Create differential attrition by arm. Report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
+
+**Progressive hint:** Missing outcomes are not automatically zero or missing completely at random. Show how strong an assumption is needed to reverse the conclusion.
+
+### Exercise 15 — simulate sequential false positives
+
+Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability. Compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
+
+**Progressive hint:** Use a seeded outer simulation and record the first crossing. The simple split illustrates budgeting; it is not an optimized group-sequential design.
+
+### Exercise 16 — pre-specify heterogeneous effects
+
+Choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family. Contrast this with mining many cuts for the largest lift.
+
+**Progressive hint:** An interaction test addresses whether effects differ; significance in one subgroup and not another is not itself evidence of difference.
+
+### Exercise 17 — run clustered randomization inference
+
+For a site-randomized experiment, permute site assignments while keeping all rows within a site together. Compare with invalid row-level permutation and state the sharp-null interpretation.
+
+**Progressive hint:** Enumerate or sample assignments consistent with the original design, including treated-site count and any stratification.
+
+### Exercise 18 — produce an auditable analysis packet
+
+Write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.
+
+**Progressive hint:** Generate machine-readable values and prose from one result object. Keep random seeds and units visible; exclude raw sensitive rows.
+
 ## Self-check
 
 - Fixture mean difference equals 2.

@@ -5,10 +5,17 @@ bridge, and 26 named foundation, professional, and specialization modules. The
 day number is an ordering key, not a promise that every learner should finish
 in that many calendar days.
 
-Use:
+Use the repository environment directly so navigation does not depend on an
+activated shell:
 
-```text
-python scripts/course.py catalog
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\python.exe scripts\course.py catalog
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python scripts/course.py catalog
 ```
 
 for the checked-in generated inventory in `curriculum/catalog.json`. The index is built from lesson artifact filenames plus metadata rules in `src/ds60sqlpy/catalog_builder.py`; do not edit the JSON by hand.

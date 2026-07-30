@@ -66,31 +66,70 @@ Decide separately:
 
 ## Exercises
 
-1. Implement `parse_sale()` for `source_id`, positive integer `customer_id`,
-   finite positive `amount`, and ISO `occurred_on`. Do not mutate the input.
-2. Quantize money to two decimal places and document the rounding rule your
-   domain expects.
-3. Implement `partition_rows()`. Retain accepted `Sale` objects and rejected
-   source IDs with safe reasons. Do not place the entire raw mapping in errors.
-4. Implement `batches()`. Reject sizes below one and test empty, exact, and
-   remainder cases.
-5. Implement a parameterized `executemany()` upsert into
-   `pg_temp.bridge_sales`. Keep values out of SQL text.
-6. Record accepted, rejected, submitted, inserted, and updated counts
-   separately; explain which counts `executemany()` can and cannot provide
-   cheaply.
-7. Stretch: implement the same adapter with Psycopg `cursor.copy()`. Feed typed
-   rows through `write_row()` rather than hand-building tab-separated text.
+### Practice contract
 
-### Progressive hints
+- **Focus:** Validate untrusted rows before I/O, retain minimal rejection evidence, batch deterministically, and submit typed parameters through an idempotent bulk boundary.
+- **Assumptions:** Money is finite, positive, and quantized to two decimals; source IDs are stable replay keys; raw records may contain sensitive fields.
+- **Primary failure mode:** Bulk speed does not excuse weak validation, unbounded materialization, or diagnostics that copy entire rejected records.
+- **Evidence loop:** predict the boundary, implement the smallest change,
+  verify success and failure with a deterministic fake, then explain which
+  behavior still requires an explicitly enabled PostgreSQL integration test.
 
-1. Catch only the conversion errors you can turn into a useful row-level
-   rejection.
-2. `date.fromisoformat()` handles the required date shape.
-3. A stable `source_id` supports an upsert and restart.
-4. Validate everything before opening a transaction when practical.
-5. COPY is fastest for many rows, but merge/upsert commonly needs a staging
-   table followed by set-based SQL.
+1. **Validation:** Implement `parse_sale()` for non-blank source ID, positive integer customer
+   ID, finite positive amount, and ISO date without mutating input.
+   - **Progressive hint:** Convert each field explicitly and translate only expected conversion
+     failures.
+2. **Money:** Quantize accepted amounts to two decimals and document the chosen rounding rule.
+   - **Progressive hint:** Quantization is a domain decision, not merely display formatting.
+3. **Partitioning:** Implement `partition_rows()` so accepted sales and rejected source
+   IDs/reasons retain input order without storing full raw rows.
+   - **Progressive hint:** Catch only `RowValidationError` from the conversion boundary.
+4. **Batching:** Implement `batches()` with positive-size validation and tests for empty, exact,
+   and remainder cases.
+   - **Progressive hint:** Slice deterministic tuples from the original sequence.
+5. **Bulk SQL:** Implement a parameterized `executemany()` upsert into `pg_temp.bridge_sales`
+   with no values in SQL text.
+   - **Progressive hint:** Convert typed sales to one parameter tuple per row.
+6. **Accounting:** Track accepted, rejected, submitted, inserted, and updated counts separately
+   and state what `executemany()` cannot cheaply distinguish.
+   - **Progressive hint:** Do not infer business outcomes from submitted row count.
+7. **Extension:** Design the Psycopg COPY variant using typed `write_row()` calls and a staging
+   table instead of hand-built delimited text.
+   - **Progressive hint:** COPY handles transport; a later set-based statement owns merge
+     semantics.
+8. **Edge cases:** Test NaN, infinities, zero, negatives, whitespace IDs, leading-zero customer
+   IDs, and invalid dates.
+   - **Progressive hint:** Classify each rejection at the field boundary and keep its reason
+     safe.
+9. **Idempotency:** Choose a policy for duplicate `source_id` values within one input batch and
+   test it before database submission.
+   - **Progressive hint:** Database upsert resolves persisted conflicts but may hide
+     contradictory source rows.
+10. **Scale design:** Compare materializing all accepted rows with a streaming validator and
+   identify where bounded memory changes APIs.
+   - **Progressive hint:** A tuple return is convenient for lessons but not for unlimited
+     sources.
+11. **Capacity:** Select batch size from parameter count, row width, memory, and transaction
+   duration rather than a universal constant.
+   - **Progressive hint:** Measure the real adapter and keep a safe configurable default.
+12. **Transaction failure:** Specify behavior when `executemany()` fails halfway and identify
+   which layer owns rollback and retry.
+   - **Progressive hint:** Submission count is not committed count.
+13. **Observability:** Create a bounded rejection taxonomy and metrics that do not use source
+   IDs or raw reasons as tags.
+   - **Progressive hint:** Metric labels must come from a fixed vocabulary.
+14. **Reconciliation:** Design a replay test that loads the same accepted sales twice and
+   reconciles source IDs and total amount.
+   - **Progressive hint:** Idempotency is proven by stable final state, not by absence of
+     exceptions.
+
+### Before opening the solution
+
+- State the input/output and ownership boundary in one sentence.
+- Show one normal case, one edge case, and one failure case.
+- Inspect recorded calls rather than relying on plausible output.
+- Confirm no credential, payload, or high-cardinality identifier was emitted.
+
 
 ## Optional live-DB step
 

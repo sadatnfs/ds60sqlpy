@@ -89,6 +89,55 @@ discarded values or undo side effects. If an applied migration is wrong, freeze
 it, assess impact, and normally ship a reviewed forward fix. Restore or rollback
 is an evidence-based incident decision, not a filename convention.
 
+## Exercise 5 — Retry after uncertain completion
+
+Serialize the runner, begin a transaction, lock/read the manifest row, and
+compare both recorded checksum and observed schema precondition. If neither
+version nor column exists, apply DDL, verify its exact properties, then insert
+metadata and commit. If both match, report “already applied.” If only one exists
+or properties differ, stop for investigation.
+
+`IF NOT EXISTS` is not a drift detector: it accepts any same-named object even
+when its type, default, nullability, or ownership is wrong. Idempotency means
+repeating the operation reaches the same verified state, not suppressing every
+error.
+
+## Exercise 6 — Low-lock index and constraint rollout
+
+`CREATE INDEX CONCURRENTLY` must run outside a transaction block and can leave
+an invalid index after interruption. Record progress, validity, locks, lag, and
+disk before retrying or explicitly dropping only the known invalid artifact.
+Attach it as a constraint in a later reviewed transaction when appropriate.
+
+Add a CHECK as `NOT VALID` in a short transaction, observe that new writes are
+still checked, remediate existing violations in batches, then run `VALIDATE
+CONSTRAINT` separately. “Lower lock” is not “no impact”; define timeouts,
+abort thresholds, and postcondition queries.
+
+## Exercise 7 — Semantic drift report
+
+Build expected rows with stable identities such as
+`(schema, table, column, ordinal)` and compare them to catalog-derived observed
+rows using full joins or `EXCEPT` in both directions. Canonicalize types with
+`format_type`, expressions with `pg_get_expr`, constraints with catalog keys and
+definitions, and indexes with semantic columns/predicate/operator classes.
+
+Emit `missing`, `unexpected`, and `changed` rows in a deterministic order. Do
+not hash OIDs, physical file locations, statistics, or generated names into the
+contract unless they are deliberately contractual.
+
+## Exercise 8 — Phase-specific recovery
+
+During expand, old code should still work; recovery may be a forward fix while
+the additive object remains. During dual-write/backfill, pause or fence writers
+before choosing a source of truth and reconcile every key. During contract,
+old writers must already be absent; re-enabling them can corrupt the new rule.
+
+Record compatible application versions, traffic state, lock/lag/error evidence,
+backup restore point, lossy transformations, and decision owner at each gate.
+A schema rollback is unsafe once new-only writes or external side effects have
+occurred unless their data path is explicitly reversible and verified.
+
 ## Edge cases and alternatives
 
 - Parallel deployers need an advisory lock or a migration tool that serializes
@@ -101,4 +150,3 @@ is an evidence-based incident decision, not a filename convention.
   operator-owned changes if ownership is not clear.
 - An additive view contract helps readers, but writers need a deliberately
   compatible API, trigger, or application rollout plan of their own.
-

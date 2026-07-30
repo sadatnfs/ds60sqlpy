@@ -294,7 +294,26 @@ $negative_control$;
 --
 -- 5. Explain fixture ownership, rollback isolation, negative controls, and why
 --    a test that only prints failures is unsafe in CI.
+--
+-- 6. Assert that duplicate source_order_key fails with the expected SQLSTATE and
+--    constraint category. Explain why matching the entire localized error text
+--    or accepting any exception makes a brittle or false-positive test.
+--
+-- 7. Build table-driven boundary fixtures for quantity, money, dates, NULL, and
+--    Unicode text. Include just-below, exact-boundary, just-above, and malformed
+--    cases, with an explicit expected outcome for every row.
+--
+-- 8. Design a two-session concurrency test for lost updates or double claims.
+--    Document synchronization barriers, timeouts, cleanup, deterministic pass
+--    criteria, and why a single transaction cannot reproduce every anomaly.
+--
+-- 9. Capture a stable schema fingerprint before and after a migration. Exclude
+--    volatile OIDs and generated names, but detect changed types, defaults,
+--    nullability, constraints, indexes, privileges, and routine signatures.
+--
+-- 10. Rehearse a destructive migration against a disposable restored database.
+--     Compare row counts, checksums, rejected rows, critical queries, rollback
+--     feasibility, elapsed time, and application compatibility before approval.
 
 ROLLBACK;
 \echo 'SQL-TEST-01 complete: pro_contract_test_lab was rolled back'
-

@@ -120,11 +120,36 @@ PITR by overwriting the active course cluster.
 
 ## Exercises
 
-Complete all six prompts: schema fingerprinting, corruption negative control,
+Complete all twelve prompts. Begin with schema fingerprinting, corruption negative control,
 RPO/RTO strategy, exact isolated logical restore plan, PITR/retention reasoning,
-and evidence standards. Record backup and restore elapsed time, artifact size,
-server/tool versions, verification results, and cleanup when performing an
-approved optional rehearsal.
+and evidence standards; then cover custody, completeness, major versions,
+selective recovery, capacity, and game days. Record backup and restore elapsed
+time, artifact size, server/tool versions, verification results, and cleanup
+when performing an approved optional rehearsal.
+
+Treat commands as reviewed plans unless you have explicit authority and an
+isolated target:
+
+1. **Schema fingerprint:** verify semantic structure in addition to data.
+2. **Corruption control:** make verification fail, roll back only the injected
+   change, and show it passes again.
+3. **RPO/RTO:** choose complementary recovery and availability mechanisms from
+   written requirements.
+4. **Logical rehearsal:** write exact isolated dump/restore/verify/cleanup steps.
+5. **PITR:** connect base backup, WAL, timelines, target, retention, and proof.
+6. **Evidence:** define why exit zero is necessary but insufficient.
+7. **Encryption/custody:** cover artifacts, manifests, keys, access, rotation,
+   transport, retention, and deletion evidence.
+8. **Completeness:** verify sequences, large objects, owners, ACLs, defaults,
+   extensions, security metadata, and external configuration.
+9. **Major version:** compare logical restore and `pg_upgrade`, then plan
+   compatibility, collation, statistics, application, cutover, and rollback.
+10. **Selective restore:** inventory dependencies and state when full isolated
+    restore is safer.
+11. **Capacity:** measure transfer, CPU, I/O, parallelism, WAL, rebuild,
+    validation, bottlenecks, and safety margin.
+12. **Game day:** assign roles and preserve chronology, decisions, injected
+    failures, achieved objectives, gaps, cleanup, owners, and next rehearsal.
 
 ## Self-check
 

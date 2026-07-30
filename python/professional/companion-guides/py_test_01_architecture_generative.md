@@ -124,6 +124,48 @@ Create a deliberately broken store that never overwrites values. Run the shared
 contract and locate the exact violated behavior. Contract tests complement,
 rather than replace, implementation-specific failure tests.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 7 — model a state machine
+
+Create a deterministic rule-based state machine for `ExpiringCache`: put, get, delete, advance time, and overwrite. Compare every action with a simple in-memory model.
+
+**Progressive hint:** Keep keys/values bounded, use the injected FixedClock, and assert observable state after each rule rather than inspecting implementation fields.
+
+### Exercise 8 — add metamorphic tests
+
+Write metamorphic relations for interval merging when the exact output is inconvenient: input permutation, duplicate insertion, endpoint translation, and applying merge twice.
+
+**Progressive hint:** A valid relation transforms input and predicts a corresponding output relationship without copying the implementation.
+
+### Exercise 9 — evaluate mutation-test survivors
+
+Make three deliberate mutations: change expiry `<` to `<=`, stop merging adjacent intervals, and skip store overwrite. Predict which test should fail and add a focused test for any survivor.
+
+**Progressive hint:** Mutation testing evaluates the tests, not code quality by itself. Use tiny manual mutations if no optional tool is installed.
+
+### Exercise 10 — test concurrency without timing races
+
+Design a two-worker cache/store test using barriers/events to force a specific interleaving. State whether the contract promises thread safety; if it does not, test the synchronization wrapper instead.
+
+**Progressive hint:** Control checkpoints explicitly. Do not assert that a race happens within a tiny sleep window.
+
+### Exercise 11 — triage a flaky test
+
+Take a test that depends on wall-clock sleep, random data, shared files, or unordered output. Classify the cause, collect repeat evidence, and replace the unstable boundary rather than adding retries.
+
+**Progressive hint:** Control clock/randomness, isolate storage, sort only when order is not contractual, and keep the original failure seed/input.
+
+### Exercise 12 — design a layered verification portfolio
+
+Map one feature across pure unit/property tests, shared store contract, real temporary-file integration, CLI/process smoke, and optional external system test. Define what each layer proves and does not prove.
+
+**Progressive hint:** Keep the default suite offline and fast. Use the fewest expensive tests that cover serialization, process, or external boundaries.
+
 ## Self-check
 
 - No test sleeps or depends on wall-clock time.

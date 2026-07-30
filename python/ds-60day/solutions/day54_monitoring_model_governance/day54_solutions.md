@@ -68,3 +68,97 @@ Exercise 3 — Approval flow
 - Register candidate model to Registry as Staging; run shadow deployment A/B tests
 - Approval gate requires: model card, fairness metrics, governance checklist
 - Promote to Production with change record; set up monitoring alerts and rollback plan
+
+---
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Compute PSI for multiple features or score windows over time.
+
+**How to reason about it:** Freeze reference bins, include support, and test no shift plus controlled mean/variance shifts. PSI depends on binning and is a heuristic signal, not proof of performance degradation.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.
+
+**How to reason about it:** A weekly dashboard should retain model/data version, score volume, label coverage, AUC uncertainty, PSI, and missingness. Mark delayed labels rather than inventing or forward-filling performance.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Draft a governance policy covering roles, approvals, alerts, and rollback.
+
+**How to reason about it:** Every governance threshold needs an owner, evidence source, review clock, action, escalation, and recovery test. Separate automated alerts from human approval for promotion/rollback.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+### Exercise 4 — Label-delay analysis
+
+**Prompt:** Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
+
+**Reasoning before implementation:** Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.
+
+Current-week AUC is not available when outcomes arrive later. Operational
+signals such as schema failures, missingness, score distribution, latency, and
+volume can be monitored immediately. Performance metrics belong to matured
+prediction cohorts with explicit cutoff dates.
+
+Late or selectively missing labels can bias results. Compare coverage across
+slices and investigate the label process rather than treating unlabeled rows
+as negatives.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 5 — Alert hysteresis
+
+**Prompt:** Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping.
+
+**Reasoning before implementation:** Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.
+
+For example, enter warning after PSI exceeds a reviewed threshold for two
+consecutive supported windows, but clear only after it stays below a lower
+threshold for two windows. Critical conditions can bypass the delay when a
+hard safety constraint fails.
+
+Thresholds are policy, not universal PSI constants. Validate them on historical
+incidents and false-alarm cost, assign ownership, and version changes.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+### Exercise 6 — Rollback drill
+
+**Prompt:** Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence.
+
+**Reasoning before implementation:** A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.
+
+Run the drill in a disposable/local environment and time each step. Verify
+artifact hashes and input compatibility before switching. After rollback,
+confirm health, prediction shape, representative fixture outputs, and
+monitoring recovery.
+
+Keep version B and incident evidence for investigation; do not overwrite or
+delete the failed artifact as part of the emergency path.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.

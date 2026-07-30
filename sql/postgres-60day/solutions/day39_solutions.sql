@@ -2,8 +2,8 @@
 BEGIN;
 SET search_path TO training, public;
 
--- Deadlocks require two concurrent sessions. The prevention rule is to lock
--- shared keys in a consistent order in every transaction.
+-- Exercise 2: deadlocks are prevented when every writer locks shared keys in
+-- the same consistent order.
 WITH keys AS (
   SELECT order_id
   FROM orders
@@ -35,7 +35,7 @@ LIMIT 2;
 -- Transaction-scoped advisory locks release automatically at transaction end.
 SELECT pg_try_advisory_xact_lock(3901) AS acquired_course_lock;
 
--- Manual deadlock reproduction:
+-- Exercise 1: manual deadlock reproduction requires two concurrent sessions:
 -- A: BEGIN; UPDATE orders SET status=status WHERE order_id=1;
 -- B: BEGIN; UPDATE orders SET status=status WHERE order_id=2;
 -- A: UPDATE orders SET status=status WHERE order_id=2;

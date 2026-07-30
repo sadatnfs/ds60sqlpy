@@ -125,3 +125,76 @@ score is a ranking heuristic; it is not a calibrated probability.
 - The anomaly query groups only days with orders, unlike the forecast query's
   complete calendar. Choose and document the intended population.
 - Anomaly detection flags candidates for investigation, not proven incidents.
+
+## Annotated query anatomy
+
+The exact runnable answers are in
+[`day57_solutions.sql`](day57_solutions.sql). The notes below explain why every
+stage exists, so the query can be rebuilt rather than memorized.
+
+## Exercise 1 — Compare two forecasts without leakage
+
+- `bounds` finds the observed date extent; it avoids assuming that course data
+  ends today.
+- `calendar` generates one row per date. Without it, `LAG(..., 7)` means seven
+  observed rows rather than seven calendar days.
+- `daily` aggregates orders to the forecasting grain: one amount per date.
+- `complete` left-joins those amounts to the calendar and makes the explicit
+  policy choice that no-order days have zero revenue.
+- `forecasts` calculates MA(7) over `7 PRECEDING` through `1 PRECEDING`, which
+  excludes the target actual. It also calculates the weekly seasonal naive with
+  `LAG(revenue, 7)`.
+- The two final SELECT branches use the same window and eligibility rules.
+  `NULLIF(revenue, 0)` removes undefined percentage errors; that exclusion must
+  be reported.
+
+`UNION ALL` retains one row per model. `ORDER BY model` makes the small result
+stable but has no analytical effect.
+
+## Exercise 2 — Rank robust anomaly candidates
+
+- `daily` establishes one observation per represented order date.
+- `moments` calculates the mean and sample standard deviation used by the
+  conventional z-score.
+- `median` calculates the robust center.
+- `deviations` retains the raw value, center, and absolute distance for audit.
+- `mad` takes the median of those distances, producing median absolute
+  deviation.
+- `scored` computes both scores and uses `NULLIF` for zero dispersion.
+- `ranked` separates positive and negative direction, then applies a
+  deterministic row number. The combined absolute score is a ranking heuristic,
+  not a probability.
+
+The final filter keeps ten per direction *after* ranking. Ordering direction
+then rank makes review reproducible.
+
+## Exercise 3 — Prove what seven means
+
+The answer calculates `observed_row_lag7` before building a spine and
+`calendar_day_lag7` after it. Joining the outputs by date makes any gaps visible.
+Neither population is automatically correct; the metric contract decides.
+
+## Exercise 4 — Compare MAE, RMSE, and MAPE fairly
+
+`calendar_daily` and `forecasts` repeat the leakage-free foundation.
+`common_scoring_rows` uses LATERAL `VALUES` to reshape model columns into
+`(model_name, forecast)` rows and requires both forecasts to exist. This gives
+both models one evaluation population.
+
+- MAE reports average absolute currency error.
+- RMSE squares error before averaging, so large misses receive more weight.
+- MAPE reports relative error but is undefined at zero actual.
+- `scored_rows` and `zero_actual_rows` disclose denominators and exclusions.
+
+## Exercise 5 — Detect a leaky frame
+
+The leaky window ends at `CURRENT ROW`, so the day's actual helps predict itself.
+The corrected frame ends at `1 PRECEDING`. Displaying both columns is a direct
+proof of the semantic difference.
+
+## Exercise 6 — Preserve undefined zero-dispersion scores
+
+The constant three-day fixture has standard deviation and MAD equal to zero.
+Both score formulas divide by `NULLIF(dispersion, 0)`, yielding NULL. That means
+“this scoring method is undefined for this population,” not “the observation is
+normal.”

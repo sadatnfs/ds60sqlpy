@@ -267,25 +267,102 @@ deployment safety; those need separate stateful exercises.
 
 ## Exercises
 
-1. Add primary-key validation and a failing duplicate fixture case to each
+### Practice contract
+
+- **Focus:** Build a local dbt-style DuckDB project with producer contracts, deterministic DAG order, layered grain, table/metric contracts, violation tests, and independent reconciliation.
+- **Assumptions:** The project runs offline on deterministic local fixtures; source rows preserve types/order; trusted model names are validated before DDL structure is generated.
+- **Primary failure mode:** A model can execute successfully while still duplicating grain, drifting schema, misdefining a metric, or failing reconciliation.
+- **Evidence loop:** state the boundary and prediction, implement against
+  deterministic local doubles, test success/failure/cleanup, and label any
+  optional live-adapter evidence separately from offline proof.
+
+1. **Producer contract:** Add primary-key validation and a duplicate fixture failure for every
    producer contract.
-2. Draw the DAG from `depends_on`, then implement deterministic topological
-   ordering and cycle detection.
-3. Implement the three staging models without aggregation or `DISTINCT`.
-4. Declare the grain of `int_order_revenue`, then write its join and aggregate.
-   Predict the row count before execution.
-5. Build `mart_daily_revenue` and document the exact status exclusions.
-6. Implement trusted model-name validation before using an identifier in DDL.
-7. Compare `DESCRIBE` output to `MART_CONTRACT`. Make one column-name and one
-   type change and observe each failure.
-8. Write violation queries for uniqueness, not-null, accepted status,
+   - **Progressive hint:** Validate the complete key tuple and report only safe row position/key
+     metadata.
+2. **DAG:** Draw dependencies and implement deterministic topological order with
+   missing-dependency and cycle detection.
+   - **Progressive hint:** Break ties by stable model name so valid independent branches are
+     reproducible.
+3. **Staging:** Implement the three staging models without aggregation or `DISTINCT` and state
+   each row grain.
+   - **Progressive hint:** Staging should rename/cast, not hide duplicate producer rows.
+4. **Intermediate model:** Declare `int_order_revenue` grain, predict row count, then implement
+   its join and aggregate.
+   - **Progressive hint:** Aggregate line items to one row per order before joining other facts.
+5. **Mart:** Build `mart_daily_revenue` and document exact status exclusions and UTC/date
+   semantics.
+   - **Progressive hint:** Every selected non-aggregate must belong to the daily grain.
+6. **Identifier safety:** Validate trusted model names before using them in generated DDL.
+   - **Progressive hint:** Parameters cannot bind identifiers; constrain structure with a strict
+     grammar/allowlist.
+7. **Schema contract:** Compare `DESCRIBE` output with `MART_CONTRACT`; make separate name and
+   type drift fixtures.
+   - **Progressive hint:** Check position, normalized type prefix, and nullability according to
+     declared policy.
+8. **Data tests:** Write zero-row violation queries for uniqueness, not-null, accepted status,
    relationships, and positive money/quantity rules.
-9. Add an independently written reconciliation for all three mart measures.
-10. Define one additional semantic metric, including aggregation, grain, time
-    dimension, unit, exclusions, and denominator if applicable.
-11. Run the project twice in one connection and prove identical snapshots.
-12. Add one deterministic source row, predict every downstream change, then
-    update tests and reconciliation without weakening the contracts.
+   - **Progressive hint:** A test query returns violating rows; passing means count zero.
+9. **Reconciliation:** Write an independent reconciliation for mart revenue, orders, and
+   customers by day.
+   - **Progressive hint:** Do not reuse the mart's exact transformation path for its check.
+10. **Semantic metric:** Define one extra metric with aggregation, grain, time dimension, unit,
+   exclusions, and denominator.
+   - **Progressive hint:** A metric definition is a contract, not merely a SQL expression.
+11. **Idempotency:** Run the project twice in one connection and prove identical ordered
+   snapshots.
+   - **Progressive hint:** Rebuild semantics should replace trusted models rather than append.
+12. **Impact analysis:** Add one deterministic source row, predict every downstream change, then
+   update tests without weakening contracts.
+   - **Progressive hint:** Write expected deltas before executing the rebuild.
+13. **Freshness:** Add a producer freshness contract with an injected as-of time and distinguish
+   stale from missing data.
+   - **Progressive hint:** Time-based tests must not call the wall clock directly.
+14. **Build strategy:** Compare full rebuild and incremental processing for this local project
+   and state what evidence is missing for incrementality.
+   - **Progressive hint:** Idempotent full rebuild is the reference correctness baseline.
+15. **Money correctness:** Trace exact revenue from producer Decimal through DuckDB type,
+   aggregation, Python snapshot, and reconciliation.
+   - **Progressive hint:** Reject silent float conversion and premature rounding.
+16. **NULL semantics:** Choose behavior for missing dimension labels and prove it does not
+   change fact row count or measure totals.
+   - **Progressive hint:** An `unknown` label is a business rule; a filtering join is a
+     data-loss bug unless declared.
+17. **Time semantics:** Define daily boundaries for timezone-aware source instants and test an
+   order around midnight.
+   - **Progressive hint:** Convert the instant to the reporting zone before deriving its date.
+18. **Late data:** Model a late-arriving order for a previously built day and compare full
+   rebuild with an incremental repair.
+   - **Progressive hint:** Watermarks based only on event time can miss late records.
+19. **Snapshot determinism:** Require explicit ordering and stable serialization for mart
+   snapshots across platforms.
+   - **Progressive hint:** Database row order is undefined without final `ORDER BY`.
+20. **Performance:** Inspect a bounded `EXPLAIN` for the intermediate/mart build and identify
+   one optimization that preserves grain.
+   - **Progressive hint:** Optimize after contracts and reconciliation pass.
+21. **Lineage:** Produce a compact source-to-metric lineage table from `depends_on` and metric
+   definitions.
+   - **Progressive hint:** Lineage should be derivable from checked-in contracts rather than
+     hand-maintained prose alone.
+22. **Transaction:** Design build publication so readers do not observe half-rebuilt models
+   after a failure.
+   - **Progressive hint:** Check DuckDB transaction/DDL semantics rather than assuming
+     atomicity.
+23. **Failure policy:** Make any contract, data-test, or reconciliation failure stop publication
+   while retaining inspectable results.
+   - **Progressive hint:** Do not continue to a green artifact after a red quality gate.
+24. **Portable artifact:** Export a deterministic local result with manifest, metric
+   definitions, test evidence, and cleanup instructions.
+   - **Progressive hint:** Separate generated artifacts from source and never include local
+     paths or credentials.
+
+### Before opening the solution
+
+- Record what the offline doubles prove and what they cannot prove.
+- Inspect exact call order, parameters, schema, and failure behavior.
+- Keep credentials, payloads, and high-cardinality identifiers out of output.
+- Require deterministic reruns before considering an exercise complete.
+
 
 ## Self-check
 

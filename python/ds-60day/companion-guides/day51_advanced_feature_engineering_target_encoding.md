@@ -71,7 +71,7 @@ The rare category has an extreme mean based on one row. Smoothing combines its
 estimate with the global training mean, with the count determining how strongly
 to trust the category-specific value.
 
-## Learner exercises
+## Learner exercises and progressive hints
 
 1. Add K-fold target encoding to a scikit-learn pipeline through a custom
    transformer or `FunctionTransformer`.
@@ -92,6 +92,23 @@ to trust the category-specific value.
 The notebook's `kfold_target_encode` is an instructional utility, not a
 drop-in production transformer. Its Series indexes and positional fold indexes
 must remain aligned.
+
+### Additional mastery practice
+
+Implement target-derived features with row-level lineage. Training encodings must be out-of-fold; validation, test, and future rows use mappings fitted only on prior data.
+
+Predict or plan before you run code. Use the hint only after an honest
+attempt, and record the evidence that would prove your result correct.
+
+4. **Out-of-fold invariant:** Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead.
+   **Progressive hint:** For a category absent from the fold's training partition, there is no valid category statistic; use the fold training prior.
+5. **Unknown and missing categories:** Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three.
+   **Progressive hint:** Normalize missing values to an explicit sentinel if missingness is a category; unseen categories generally receive the training global prior.
+6. **Temporal leakage:** Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation.
+   **Progressive hint:** Sort by event time and compute each row's category statistics from strictly earlier labeled rows; handle ties deliberately.
+
+Before opening the reference solution, explain the relevant assumption,
+failure mode, and validation check for every answer.
 
 ## Self-check
 

@@ -68,7 +68,7 @@ SELECT relid::regclass AS partition_name,
 FROM pg_partition_tree('solution_events') pt
 JOIN pg_class c ON c.oid = pt.relid
 WHERE pt.isleaf
-ORDER BY partition_name::text;
+ORDER BY c.relname;
 
 -- Exercise 6: the exact February boundary belongs to February because lower
 -- FROM bounds are inclusive and upper TO bounds are exclusive.

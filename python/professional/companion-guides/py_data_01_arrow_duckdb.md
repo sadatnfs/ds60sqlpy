@@ -193,6 +193,54 @@ pandas exists, it uses typed `read_csv`; otherwise it uses the standard
 library. Confirm the same row count, null count, region set, and revenue across
 engines.
 
+### Extended professional practice
+
+These exercises move from prediction and implementation through debugging,
+operational trade-offs, and review. Keep the default path deterministic and
+offline; optional connected behavior must remain explicit.
+
+### Exercise 8 — plan schema evolution
+
+Create version 2 of the sales schema with one nullable additive column and one proposed type change. Define which readers remain compatible and write a migration/rejection policy.
+
+**Progressive hint:** Adding a nullable field is often backward-compatible; changing decimal scale, nullability, meaning, or type may require a new dataset version.
+
+### Exercise 9 — control file and row-group size
+
+Generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups. Record metadata count, scan planning, file sizes, and filtered query behavior.
+
+**Progressive hint:** Partition values and file size solve different problems. Keep the total dataset small enough for a laptop and repeat measurements.
+
+### Exercise 10 — validate a dataset before querying
+
+Build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.
+
+**Progressive hint:** Read metadata and bounded columns first where possible; include failing row counts and opaque IDs without dumping sensitive data.
+
+### Exercise 11 — reconcile a local analytical join
+
+Create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic. Include an unknown region and duplicate lookup key.
+
+**Progressive hint:** Validate lookup-key uniqueness before the join and choose inner versus left semantics explicitly.
+
+### Exercise 12 — find a non-pushdown filter
+
+Compare `units >= ?` with a transformed predicate such as a function of units. Inspect plans and scan evidence, then rewrite only when semantics remain identical.
+
+**Progressive hint:** Simple comparisons often map to row-group statistics; arbitrary functions may need evaluation after scanning.
+
+### Exercise 13 — publish a dataset atomically
+
+Write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.
+
+**Progressive hint:** Readers must never see a half-written dataset. The manifest is written after data files and verified before promotion.
+
+### Exercise 14 — reconcile decimals and timestamps across engines
+
+Add boundary decimal values and timezone-aware timestamps to a local round trip. Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.
+
+**Progressive hint:** Declare decimal precision/scale and one timestamp storage timezone. Compare canonical values, not default display strings.
+
 ## Self-check
 
 - Raw CSV values are recognized as text until parsed.

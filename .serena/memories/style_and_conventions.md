@@ -35,5 +35,6 @@
 - Ruff line length is 100. Strict mypy and pytest cover shared tooling, the
   core bridge, and the Python and bridge professional solutions/tests as
   configured in `pyproject.toml`.
-- Do not hand-edit `curriculum/catalog.json` or generated Day 46-60 solution notebooks; update their inputs and regenerate.
+- Do not hand-edit `curriculum/catalog.json`, `START_HERE.html`, `docs/practice-coverage.md`, or generated Day 46-60 solution notebooks; update their inputs and regenerate. Keep `curriculum/practice_baseline.json` immutable after the initial audit.
+- The optional portal stays loopback-only with token-protected same-origin writes, sensitive-path blocking, and fixed VS Code/Jupyter actions. Static HTML must remain self-contained and usable without a server.
 - Preserve unrelated work and do not commit environments, caches, secrets, checkpoints, progress, MLflow runs, or generated outputs.
