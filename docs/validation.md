@@ -24,6 +24,12 @@ Repository validation:
 python scripts/course.py validate
 ```
 
+Sensitive-content guard:
+
+```text
+python scripts/scan_secrets.py
+```
+
 Add `--all` to print passing details as well as failures, warnings, and summaries. This command performs fast structural checks; it does not execute every notebook or SQL lesson.
 
 On Windows, use:
@@ -32,6 +38,7 @@ On Windows, use:
 .\.venv\Scripts\python.exe scripts\course.py doctor
 .\.venv\Scripts\python.exe scripts\course.py catalog
 .\.venv\Scripts\python.exe scripts\course.py validate
+.\.venv\Scripts\python.exe scripts\scan_secrets.py
 ```
 
 On macOS/Linux, use:
@@ -40,6 +47,7 @@ On macOS/Linux, use:
 .venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py catalog
 .venv/bin/python scripts/course.py validate
+.venv/bin/python scripts/scan_secrets.py
 ```
 
 The course CLI uses the standard library for pre-install inspection so catalog and environment diagnostics remain available before third-party packages are installed.
@@ -55,7 +63,7 @@ uv lock --check
 Maintainers with `uv` can reproduce the CI core environment with:
 
 ```text
-uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality
+uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
 uv run --no-sync pytest
 ```
 
@@ -65,15 +73,23 @@ Core setup installs the quality tools used by continuous integration:
 
 ```text
 python scripts/build_catalog.py
-python -m ruff check src scripts tests bridge
+python -m ruff check src scripts tests bridge python/professional
 python -m mypy
 python -m pytest
 python scripts/course.py validate
+python scripts/scan_secrets.py
 ```
 
 Review the regenerated catalog diff. CI runs these core checks on Python 3.12
 for Windows, macOS, and Linux, then executes the full SQL sequence separately
 against PostgreSQL 17.
+
+The sensitive-content scan is deliberately offline and reports only a path,
+line number, and finding category so it does not copy a suspected credential
+into logs. It catches common token/key formats, private-key files, and
+credential-bearing URLs. It is a guardrail, not proof that arbitrary prose or
+historical commits contain no secret; review changes and use an organization
+scanner when available.
 
 Every push and pull request also runs the actual learner `setup.ps1` or
 `setup.sh` flow on fresh Windows, macOS, and Ubuntu Python 3.12 runners, reruns
@@ -81,8 +97,9 @@ doctor through the generated `.venv`, and checks that setup produced no
 trackable files.
 
 The weekly and manually dispatched heavy job resolves, installs, and imports
-every direct package in the `bridge`, `ml`, `production`, `deep-learning`,
-`nlp`, and `geo` extras on fresh Windows and Ubuntu Python 3.12 runners:
+every direct package in the `bridge`, `professional`, `sql-notebooks`, `ml`,
+`production`, `deep-learning`, `nlp`, and `geo` extras on fresh Windows and
+Ubuntu Python 3.12 runners:
 
 ```text
 uv sync --frozen --all-extras
@@ -122,6 +139,8 @@ Check:
 - Exercise notebooks do not depend on hidden execution order.
 - Expected failure demonstrations fail for the documented reason.
 - Heavy or network-tagged cells are reported distinctly.
+- SQL-magic cells are structurally checked through notebook tags; live
+  PostgreSQL execution is recorded separately.
 
 Run the notebook-aware validator after installing the core environment:
 
@@ -129,6 +148,27 @@ Run the notebook-aware validator after installing the core environment:
 python scripts/validate_notebooks.py
 python scripts/validate_notebooks.py --smoke
 ```
+
+The normal smoke set excludes the live PostgreSQL notebook. After setting
+`DS60_DATABASE_URL` to the disposable database, execute its solution from a
+clean kernel:
+
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\python.exe -m nbconvert --execute --to notebook `
+    --output-dir .\artifacts\notebook-validation `
+    .\bridge\professional\solutions\bridge_jupyter_01_postgresql_magics_solution.ipynb
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python -m nbconvert --execute --to notebook \
+  --output-dir artifacts/notebook-validation \
+  bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb
+```
+
+The executed copy belongs under ignored `artifacts/`; keep the checked-in
+notebook output-free.
 
 Cleared notebook outputs are normal. Record execution evidence in validation logs or CI rather than committing noisy, machine-specific output.
 
@@ -172,6 +212,12 @@ Run a lesson:
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
 ```
 
+Named professional SQL modules live under `sql/professional/`. Run the
+learner and solution artifact in separate clean sessions. Role administration,
+extensions, physical recovery, and replication modules include capability
+boundaries; report an instructional skip separately from the default
+rollback-safe SQL that did execute.
+
 Check:
 
 - Setup completes from a clean database.
@@ -189,6 +235,7 @@ The bridge's default validation does not require a database:
 
 ```text
 python -m pytest bridge/tests
+python -m pytest bridge/professional/tests
 python -m compileall -q bridge
 ```
 
@@ -204,7 +251,21 @@ Check:
 Fake-backed success does not prove server permissions, network behavior, or a
 real query plan. Label a live PostgreSQL check separately when one is run.
 
-### 6. Platform checks
+### 6. Professional Python modules
+
+Run the professional solution tests independently from the learner scaffolds:
+
+```text
+python -m pytest python/professional/tests
+```
+
+Package-build tests install only into a temporary target. Arrow/DuckDB tests
+use generated local files. HTTP, concurrency, AI, analytics, migration, and
+service tests use deterministic fakes or local fixtures. No professional
+default test should require a public endpoint, hosted model, cloud account, or
+credential.
+
+### 7. Platform checks
 
 Core setup and doctor should run on:
 

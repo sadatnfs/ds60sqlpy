@@ -72,3 +72,27 @@ that ordinary statistics do not model well.
 - Planning cost units are not milliseconds. Actual time is shown separately.
 - A sequential scan is often correct for a small table or a low-selectivity
   predicate.
+
+## Exercise 3 — Predict broad and selective plans
+
+The two queries differ only in threshold, so estimated/actual rows and buffers
+are comparable. `> 0` should be broader than `> 900`; scan choice still depends
+on table size and cost. See the fully runnable query in
+[`day31_solutions.sql`](day31_solutions.sql).
+
+## Exercise 4 — Read a verbose join plan
+
+Start at each scan, follow rows into the join, then into the aggregate and root.
+`VERBOSE` identifies qualified output expressions; it does not make the query
+faster.
+
+## Exercise 5 — Analyze DML safely
+
+`EXPLAIN ANALYZE UPDATE` performs the update. The answer uses an impossible key
+and a savepoint, then rolls back to and releases that savepoint.
+
+## Exercise 6 — Interpret an empty result
+
+The negative-total predicate returns zero because the schema forbids negative
+totals. A zero actual with a small nonzero estimate can be ordinary statistical
+uncertainty; it is not, alone, proof statistics are stale.

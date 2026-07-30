@@ -18,6 +18,11 @@ Every day must have:
   solution in `solutions/`;
 - deterministic, fake-backed coverage in `tests/`.
 
+Named modules under `bridge/professional/` follow the same separation but may
+use a clean notebook as the learner/reference executable when the objective is
+interactive SQL. PostgreSQL magic cells must be tagged
+`skip-static-validation` and live cells must also be tagged `live-postgres`.
+
 Companion guides include objectives, prerequisites, vocabulary, worked
 examples, exercises, self-checks, common pitfalls, and a next step. Solution
 notes discuss tradeoffs and failure behavior instead of merely repeating code.
@@ -34,6 +39,10 @@ notes discuss tradeoffs and failure behavior instead of merely repeating code.
   is still required when the application controls the set of acceptable names.
 - Do not use SQLite as a PostgreSQL test substitute.
 - Make live steps opt-in, rollback-safe, and explicit about the target database.
+- JupySQL notebooks use a SQLAlchemy engine with the explicit
+  `postgresql+psycopg://` dialect, keep connection display disabled, and use
+  named binding for values. Jinja SQL rendering is code generation and must
+  not be presented as safe parameter binding.
 
 ## Teaching and typing style
 

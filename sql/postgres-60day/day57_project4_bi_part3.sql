@@ -87,7 +87,15 @@ ORDER BY d DESC
 LIMIT 30;
 
 -- Exercises
--- 1) Replace MA(7) with seasonal naive (value from 7 days ago) and compare MAPE.
--- 2) Flag top-10 positive and negative anomalies in the last 6 months with both SD and MAD methods.
+-- 1. Replace MA(7) with seasonal naive (value from 7 days ago) and compare MAPE.
+-- 2. Flag top-10 positive and negative anomalies in the last 6 months with both SD and MAD methods.
+-- 3. Prediction: remove the calendar spine and explain why LAG(revenue, 7) now
+--    means seven observed rows rather than seven calendar days.
+-- 4. Construction: calculate MAE, RMSE, MAPE, and the number of scored rows for
+--    both models over one identical evaluation window.
+-- 5. Debugging: repair a backtest whose moving-average frame includes CURRENT
+--    ROW, and prove the corrected forecast uses no information from the target day.
+-- 6. Edge case: create a constant-valued test series and preserve NULL SD/MAD
+--    scores when dispersion is zero; do not silently label them normal.
 
 ROLLBACK;

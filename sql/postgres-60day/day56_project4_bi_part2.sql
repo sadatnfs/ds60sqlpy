@@ -58,7 +58,15 @@ GROUP BY CUBE (country, category)
 ORDER BY country NULLS FIRST, category NULLS FIRST;
 
 -- Exercises
--- 1) Add payment method to the CUBE and measure row count increase.
--- 2) Compute p50/p90 of order values per category-month.
+-- 1. Add payment method to the CUBE and measure row count increase.
+-- 2. Compute p50/p90 of order values per category-month.
+-- 3. Prediction: explain why joining raw payments to raw order_items multiplies
+--    revenue when an order has several rows in both tables.
+-- 4. Construction: pre-aggregate payment methods at order grain before joining
+--    line revenue, and reconcile the result to total line revenue.
+-- 5. Debugging: correct a percentile query that calculates percentiles over
+--    line items when the metric definition says order value.
+-- 6. Edge case: compare percentile_cont and percentile_disc for a category-month
+--    with an even number of orders and explain which output is an observed value.
 
 ROLLBACK;

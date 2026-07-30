@@ -24,7 +24,16 @@ FROM customers c LEFT JOIN agg a ON a.customer_id = c.customer_id;
 -- Prefer set-based queries over per-row queries.
 
 -- Exercises
--- 1) Rewrite 3 queries to avoid functions on indexed columns.
--- 2) Replace correlated subqueries with joins/CTEs.
+-- 1. Rewrite 3 queries to avoid functions on indexed columns.
+-- 2. Replace correlated subqueries with joins/CTEs.
+-- 3. Prediction: compare LIKE 'A%' with LIKE '%A%'. State which pattern can use
+--    a normal B-tree text index more directly and why the leading wildcard
+--    changes the search.
+-- 4. Construction: replace an OFFSET-based “next page” query with keyset
+--    pagination ordered by (order_date DESC, order_id DESC).
+-- 5. Debugging: find and repair a join that calculates revenue after joining
+--    both payments and order_items at their raw grains.
+-- 6. Edge case: compare COUNT(*) and COUNT(email) for customers, and explain
+--    why nullable inputs make the two counts intentionally different.
 
 ROLLBACK;

@@ -1,1 +1,49 @@
+# Operating-system and removable-drive metadata
+.playwright-cli
 .DS_Store
+._*
+.Spotlight-V100/
+.Trashes/
+Thumbs.db
+Desktop.ini
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Jupyter and course-generated files
+.ipynb_checkpoints/
+.learning/
+artifacts/
+mlruns/
+python/ds-60day/data/cache/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+.pgpass
+pgpass.conf
+.npmrc
+.pypirc
+credentials
+credentials.json
+id_dsa
+id_ecdsa
+id_ed25519
+id_rsa
+*.jks
+*.key
+*.p12
+*.pfx
+*.pem

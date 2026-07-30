@@ -114,3 +114,26 @@ batch.
   wait for user input while holding them.
 - `total_amount = total_amount` is used only to request a write lock without
   changing course data; do not use no-op updates as a production lock pattern.
+
+## Exercise 4 — Predict NOWAIT
+
+`FOR UPDATE NOWAIT` raises SQLSTATE `55P03` immediately when a conflicting lock
+already exists. The executable solution explains the two-session check without
+blocking automated validation.
+
+## Exercise 5 — Claim and update queue rows
+
+The locking CTE selects up to five unprocessed jobs with `SKIP LOCKED`; the
+UPDATE joins only those keys and `RETURNING` proves exactly what this worker
+claimed.
+
+## Exercise 6 — Preserve lock order
+
+Keys and the final locking SELECT both order by the unique `order_id`. Every
+writer must share that order for the pattern to prevent cycles.
+
+## Exercise 7 — Prefer transaction advisory locks
+
+`pg_try_advisory_xact_lock` is non-blocking and releases automatically when the
+transaction ends. It works only if all cooperating applications derive the same
+lock key.

@@ -1,0 +1,17 @@
+participant_id,variant,pre_score,outcome,completed
+c01,control,9,10,true
+c02,control,10,11,true
+c03,control,8,9,true
+c04,control,11,12,true
+c05,control,9,10,true
+c06,control,10,11,true
+c07,control,8,8,true
+c08,control,9,9,true
+t01,treatment,9,12,true
+t02,treatment,10,13,true
+t03,treatment,8,11,true
+t04,treatment,11,14,true
+t05,treatment,9,12,true
+t06,treatment,10,13,true
+t07,treatment,8,10,true
+t08,treatment,9,11,true

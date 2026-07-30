@@ -90,3 +90,23 @@ Expected grain: up to five rows per `(country, category, status)`.
 - Aggregate product revenue before ranking.
 - `ROW_NUMBER` plus `product_id` yields exactly five deterministic rows when at
   least five products exist; `RANK` can return more because of ties.
+
+## Exercise 3 — Enumerate ROLLUP levels
+
+PostgreSQL's `GROUPING(country, category)` returns a bit mask: detail, country
+subtotal, and grand total have stable numeric identities.
+
+## Exercise 4 — Label levels from the bit mask
+
+The display label is derived from that mask, not from `column IS NULL`. This
+keeps machine-readable level identity beside human-readable text.
+
+## Exercise 5 — Return exactly five products
+
+Revenue aggregates before ranking. `ROW_NUMBER` with `product_id` as final key
+limits every partition deterministically even when revenue ties.
+
+## Exercise 6 — Preserve unknown versus ALL
+
+The stored member label and generated-total flag are separate fields. A real
+NULL/unknown member retains flag zero; ALL has flag one.

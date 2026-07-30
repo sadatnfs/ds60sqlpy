@@ -64,20 +64,24 @@ class RecordingWriteCursor:
 def test_settings_precedence_validation_and_redaction() -> None:
     settings = load_settings(
         {
+            # secret-scan: allow-fixture
             "DS60_DATABASE_URL": "postgresql://env:secret@localhost/course",
             "DS60_LOG_LEVEL": "warning",
         },
+        # secret-scan: allow-fixture
         database_url="postgresql://cli:top-secret@db.example:5432/course?sslmode=require",
         log_level="error",
         dry_run=True,
     )
 
     assert settings == Settings(
+        # secret-scan: allow-fixture
         "postgresql://cli:top-secret@db.example:5432/course?sslmode=require",
         "ERROR",
         True,
     )
     safe = redact_database_url(settings.database_url)
+    # secret-scan: allow-fixture
     assert safe == "postgresql://cli:***@db.example:5432/course"
     assert "top-secret" not in safe
     assert "sslmode" not in safe

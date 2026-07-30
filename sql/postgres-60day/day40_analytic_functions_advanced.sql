@@ -46,7 +46,15 @@ FROM cat
 ORDER BY revenue DESC;
 
 -- Exercises
--- 1) Compute z-score for daily revenue: (rev - avg15)/sd15.
--- 2) For each category, compute P50 and P90 of order totals.
+-- 1. Compute z-score for daily revenue: (rev - avg15)/sd15.
+-- 2. For each category, compute P50 and P90 of order totals.
+-- 3. Prediction: compare percentile_disc(0.5) with percentile_cont(0.5) for
+--    the values (10, 20, 100, 200). Predict both medians before running.
+-- 4. Construction: calculate each category's revenue share within its month,
+--    with a deterministic rank for equal revenue.
+-- 5. Debugging: repair a rolling average that includes the current row when the
+--    intended forecast must use only prior observations.
+-- 6. Edge case: compute a z-score for a constant three-row series and preserve
+--    NULL when standard deviation is zero.
 
 ROLLBACK;

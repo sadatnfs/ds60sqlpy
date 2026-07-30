@@ -83,4 +83,47 @@ SELECT (SELECT COUNT(*) FROM fact_sales_temporal_solution) AS mapped_fact_rows,
        (SELECT COUNT(*) FROM training.order_items) AS source_item_rows,
        (SELECT COUNT(*) FROM dim_customer WHERE customer_id = 1) AS customer_versions;
 
+-- Exercise 3: date-grain closed intervals cannot represent two ordered changes
+-- on one date without an invalid or overlapping range. Surface that limitation.
+SELECT customer_id, valid_from, valid_to,
+       (valid_to IS NOT NULL AND valid_to < valid_from) AS invalid_range
+FROM dim_customer
+WHERE customer_id = 1
+ORDER BY valid_from;
+
+-- Exercise 4: each pair is compared once. Inclusive validity ranges overlap
+-- when neither ends before the other begins.
+SELECT a.customer_id,
+       a.customer_sk AS version_a,
+       b.customer_sk AS version_b,
+       a.valid_from AS a_from,
+       a.valid_to AS a_to,
+       b.valid_from AS b_from,
+       b.valid_to AS b_to
+FROM dim_customer a
+JOIN dim_customer b
+  ON b.customer_id = a.customer_id
+ AND b.customer_sk > a.customer_sk
+ AND a.valid_from <= COALESCE(b.valid_to, 'infinity'::date)
+ AND b.valid_from <= COALESCE(a.valid_to, 'infinity'::date)
+ORDER BY a.customer_id, version_a, version_b;
+
+-- Exercise 5: an unchanged current source should produce zero differences;
+-- this is the idempotency gate before closing/inserting a new version.
+SELECT COUNT(*) AS unchanged_rows_that_would_version
+FROM dim_customer dc
+JOIN training.customers c USING (customer_id)
+WHERE dc.is_current
+  AND (
+    dc.full_name IS DISTINCT FROM c.full_name
+    OR dc.country IS DISTINCT FROM c.country
+    OR dc.segment IS DISTINCT FROM COALESCE(c.segment, 'standard')
+  );
+
+-- Exercise 6: timestamp-effective ranges support same-day ordering, but require
+-- source effective timestamps (or a source sequence), not load time guesses.
+SELECT '[2026-01-15 09:00+00,2026-01-15 12:00+00)'::tstzrange
+         AS first_version,
+       '[2026-01-15 12:00+00,infinity)'::tstzrange AS second_version;
+
 ROLLBACK;

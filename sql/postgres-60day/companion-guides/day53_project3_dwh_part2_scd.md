@@ -31,9 +31,16 @@ surrogate key—not zero and not two.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day53_project3_dwh_part2_scd.sql).
-Add checks for multiple current versions, validity gaps, and overlapping
-intervals.
+Complete these in the [learner SQL](../day53_project3_dwh_part2_scd.sql):
+
+1. Map facts to the effective SCD Type 2 version.
+2. Add/set audit columns on inserts and closes.
+3. Diagnose same-day date-grain version closure.
+4. Detect overlapping effective ranges per natural key.
+5. Make an unchanged-source rerun idempotent.
+6. Define a same-day change sequence policy.
+
+Check multiple-current versions, gaps, and overlaps.
 
 ## Self-check
 

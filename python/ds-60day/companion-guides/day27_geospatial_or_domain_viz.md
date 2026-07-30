@@ -88,6 +88,28 @@ GeoJSON file, or choose the NetworkX exercise for fully offline work.
    nodes/edges mean, use a fixed layout seed, and encode only a small number of
    meaningful attributes.
 
+### Additional mastery practice
+
+Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters.
+   **Progressive hint:** Layers must use compatible coordinate reference systems (CRSs).
+4. **Tracing:** Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location.
+   **Progressive hint:** Both numbers may fall in legal ranges, so semantic order matters.
+5. **Implementation:** Implement a longitude/latitude bounding-box validator with clear ordering and range checks.
+   **Progressive hint:** Require west ≤ east, south ≤ north, and geographic bounds.
+6. **Debugging:** Repair a spatial join or overlay attempted before CRS comparison and reprojection.
+   **Progressive hint:** Inspect `.crs`; transform one layer to the other's CRS.
+7. **Edge case and explanation:** Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative.
+   **Progressive hint:** A missing basemap should not erase the analytical data layer.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why is assigning a CRS different from reprojecting?

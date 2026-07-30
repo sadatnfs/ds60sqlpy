@@ -1,8 +1,10 @@
 # Python + PostgreSQL engineering bridge
 
-The main Python and SQL tracks teach each language well. This optional eight-lesson
-bridge teaches the engineering habits needed to use them together safely in an
-application, data pipeline, or command-line tool.
+The main Python and SQL tracks teach each language well. This optional
+eight-lesson bridge teaches the engineering habits needed to use them together
+safely in an application, data pipeline, or command-line tool. Four named
+professional modules then add PostgreSQL notebooks, migration observability,
+local AI application engineering, and a local analytics-engineering project.
 
 ## Who this is for
 
@@ -69,6 +71,20 @@ instructions live in [the PostgreSQL track](../sql/postgres-60day/README.md).
 | 7 | Async I/O and bounded concurrency | [lesson](lessons/day07_async_bounded_concurrency.py) | [guide](companion-guides/day07_async_bounded_concurrency.md) |
 | 8 | Production capstone | [lesson](lessons/day08_production_capstone.py) | [guide](companion-guides/day08_production_capstone.md) |
 
+### Professional bridge modules
+
+| Stable ID | Topic | Learner artifact | Guide |
+|---|---|---|---|
+| `bridge-jupyter-01` | PostgreSQL in Jupyter with `%sql` and `%%sql` | [notebook](professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb) | [guide](professional/companion-guides/bridge_jupyter_01_postgresql_magics.md) |
+| `bridge-ops-01` | Migration delivery and application observability | [lesson](professional/lessons/bridge_ops_01_migration_observability.py) | [guide](professional/companion-guides/bridge_ops_01_migration_observability.md) |
+| `bridge-ai-01` | Local AI application engineering | [lesson](professional/lessons/bridge_ai_01_application_engineering.py) | [guide](professional/companion-guides/bridge_ai_01_application_engineering.md) |
+| `bridge-analytics-01` | Local analytics engineering | [lesson](professional/lessons/bridge_analytics_01_local_project.py) | [guide](professional/companion-guides/bridge_analytics_01_local_project.md) |
+
+The Jupyter module has its own
+[Windows/macOS/Linux setup guide](../docs/setup/jupyter-postgresql.md). It uses
+the same disposable `advanced_sql_training` database and reads the connection
+string from `DS60_DATABASE_URL`; the notebook never stores a password.
+
 ## How to study
 
 For each day:
@@ -104,6 +120,18 @@ From the repository root:
 
 `compileall` creates disposable `__pycache__` directories. They are ignored by
 Git and can be deleted at any time; they are not course content.
+
+Validate the professional bridge tests and notebook structure too:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest bridge\professional\tests -q -p no:cacheprovider
+.\.venv\Scripts\python.exe scripts\validate_notebooks.py
+```
+
+```bash
+.venv/bin/python -m pytest bridge/professional/tests -q -p no:cacheprovider
+.venv/bin/python scripts/validate_notebooks.py
+```
 
 ## Safety rules
 

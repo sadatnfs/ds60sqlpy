@@ -182,3 +182,119 @@ Check Your Understanding
 - Why check the combined case first in FizzBuzz?
 - When do you use try/except/else/finally?
 - What benefits do custom exceptions provide in larger programs?
+
+---
+
+## Exercise-by-exercise reference
+
+Every numbered learner exercise has a matching entry here. The original
+worked examples remain above; the expanded answers below add heavily
+commented code, explicit reasoning, and executable checks.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Print FizzBuzz for 1 through 30. **Hint:** test the most specific case (divisible by both numbers) before either individual case.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Parse user input while handling `ValueError`. **Hint:** keep only the conversion inside `try`; code outside should not be accidentally swallowed.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Define an exception for negative inputs and raise it when encountered. **Hint:** subclass `ValueError` because the type is acceptable but its value violates the function's contract.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 4 — Prediction
+
+**Prompt:** Predict which branch handles 0, 9, and 12 when checks are ordered as `x % 2 == 0`, `x % 3 == 0`, then both. Explain the bug.
+
+**Reasoning checkpoint:** Only the first true branch runs; test the most specific rule first. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 5 — Tracing
+
+**Prompt:** Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path?
+
+**Reasoning checkpoint:** `else` follows success; `finally` runs in both cases. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 6 — Implementation
+
+**Prompt:** Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`.
+
+**Reasoning checkpoint:** Validate the domain before choosing a result branch. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 7 — Debugging
+
+**Prompt:** Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface.
+
+**Reasoning checkpoint:** Keep only the conversion inside the protected block. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 8 — Edge case and explanation
+
+**Prompt:** Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it.
+
+**Reasoning checkpoint:** A reusable library function usually should not invent a numeric result. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+## Expanded mastery lab solutions
+
+Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.
+
+Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
+
+### Practices 1–2 — Branch and exception traces
+
+The combined-divisibility check must come first; otherwise values such as 12
+are consumed by the even branch. On successful parsing, `else` and `finally`
+run. On `ValueError`, `except` and `finally` run.
+
+### Practices 3–5 — Explicit contracts
+
+```python
+def classify_score(score: float) -> str:
+    """Classify a score whose valid domain is the closed interval 0..100."""
+
+    if not 0 <= score <= 100:
+        raise ValueError("score must be between 0 and 100")
+    if score >= 80:
+        return "distinction"
+    if score >= 60:
+        return "pass"
+    return "fail"
+
+
+assert classify_score(80) == "distinction"  # Boundary belongs to upper band.
+assert classify_score(59.9) == "fail"
+
+
+def parse_count(text: str) -> int | None:
+    """Return None only when text is not a valid integer."""
+
+    try:
+        # Keep the try block narrow: later calculations may reveal real bugs.
+        value = int(text)
+    except ValueError:
+        return None
+    else:
+        return value
+
+
+def safe_ratio(numerator: float, denominator: float) -> float:
+    """Return a ratio, rejecting an undefined zero-denominator operation."""
+
+    if denominator == 0:
+        raise ZeroDivisionError("denominator must be non-zero")
+    return numerator / denominator
+
+
+assert parse_count("12") == 12
+assert parse_count("twelve") is None
+assert safe_ratio(3, 4) == 0.75
+```
+
+Raising in `safe_ratio` preserves the fact that the result is undefined. A
+calling application can translate that exception into `None` or a user message
+if its own contract calls for one.

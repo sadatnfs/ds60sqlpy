@@ -77,3 +77,25 @@ loaded; otherwise an explanatory notice and an empty result.
   view; dynamic SQL defers that reference until the view is known to exist.
 - These are diagnostic reads. Do not cancel or terminate sessions without
   confirming ownership and operational impact.
+
+## Exercise 3 — Separate query and transaction age
+
+`query_start` belongs to the current statement; `xact_start` belongs to its
+transaction. The latter can reveal long-lived snapshots hidden behind a short
+or currently idle statement.
+
+## Exercise 4 — Summarize connections safely
+
+Grouping by database, user, and state supports capacity triage without exposing
+complete SQL text in a broadly shared report.
+
+## Exercise 5 — Retain mean and total workload views
+
+Mean duration highlights individually expensive calls; total execution time
+highlights cumulative cost. The answer keeps both rather than declaring one
+universal “slow query” ranking.
+
+## Exercise 6 — Identify idle-in-transaction sessions
+
+The read-only diagnostic returns age and wait fields. It does not cancel a
+backend; ownership and operational impact must be confirmed first.

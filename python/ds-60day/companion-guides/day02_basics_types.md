@@ -57,6 +57,28 @@ For transfer practice, the separate solution uses parallel tasks: format a
 percentage, build a slug, and parse two numeric strings. Those are intentionally
 not line-for-line copies of the notebook answers.
 
+### Additional mastery practice
+
+Separate parsing, calculation, and presentation. Predict a value's type before relying on an operator or truthiness rule.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** Predict the value and type of `"7" * 2`, `7 / 2`, `7 // 2`, `bool("")`, and `bool("0")` before running them.
+   **Progressive hint:** Operators follow operand types; non-empty strings are truthy.
+5. **Tracing:** Trace `raw = ' 0042 '; cleaned = raw.strip(); number = int(cleaned)` and record the value/type after every assignment.
+   **Progressive hint:** String methods return new strings; conversion constructs an integer.
+6. **Implementation:** Implement `parse_temperature(text)` so surrounding whitespace is accepted and the result is a float, then format one decimal place.
+   **Progressive hint:** Keep parsing separate from f-string presentation.
+7. **Debugging:** Repair `enabled = bool(raw)` for inputs such as `"true"`, `"false"`, and `" FALSE "`. Reject unknown spellings.
+   **Progressive hint:** Normalize the text and compare explicit accepted tokens.
+8. **Edge case and explanation:** Model an optional discount where `None` means not supplied and `0.0` means supplied but zero. Explain why a truthiness check loses meaning.
+   **Progressive hint:** Use `is None` when absence is distinct from a numeric zero.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What is the difference between `"8" + "2"` and `8 + 2`?

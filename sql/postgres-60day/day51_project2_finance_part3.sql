@@ -57,7 +57,15 @@ ORDER BY month DESC, category
 LIMIT 120;
 
 -- Exercises
--- 1) Compute operating margin: (cash_in - COGS - Payroll - Infrastructure - G&A) / cash_in.
--- 2) Project next 3 months net cash as the average of last 12 matching months (seasonal naive).
+-- 1. Compute operating margin: (cash_in - COGS - Payroll - Infrastructure - G&A) / cash_in.
+-- 2. Project next 3 months net cash as the average of last 12 matching months (seasonal naive).
+-- 3. Prediction: compare cash-basis payments with order revenue and explain why
+--    timing differences make them unsuitable for one unlabeled margin metric.
+-- 4. Construction: produce monthly beginning cash, inflows, outflows, net cash,
+--    and ending cash with a running window.
+-- 5. Debugging: preserve months with expenses but no payments by replacing an
+--    inner join with a calendar spine and left joins.
+-- 6. Edge case: keep operating margin NULL when cash_in is zero and provide a
+--    separate status column explaining why the ratio is undefined.
 
 ROLLBACK;

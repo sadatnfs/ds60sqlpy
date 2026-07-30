@@ -83,3 +83,25 @@ code, allow PostgreSQL to inline a CTE unless an optimization fence is needed.
   query requires.
 - Faster on one tiny seeded database is not sufficient evidence for a
   production rewrite.
+
+## Exercise 3 — Compare CTE planner boundaries
+
+`MATERIALIZED` computes/stores the CTE as a boundary. `NOT MATERIALIZED` permits
+folding into the parent query. Compare plans; neither spelling is universally
+faster.
+
+## Exercise 4 — Pre-aggregate to order grain
+
+`item_totals` emits one row per order before customer/country joins. This
+reduces fanout while preserving the unit total.
+
+## Exercise 5 — Repair two-many-side fanout
+
+Payments and items are independently many-to-one with orders. Each is grouped
+by `order_id` before their results are joined, so amounts are never multiplied.
+
+## Exercise 6 — Write a NULL-safe anti-join
+
+`NOT EXISTS` asks whether a matching order exists for the current customer.
+Unlike nullable `NOT IN`, one NULL produced by the inner relation cannot turn
+every comparison into UNKNOWN.

@@ -32,9 +32,17 @@ before considering the refresh successful.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day54_project3_dwh_part3_aggregations.sql).
-Call the period refresh twice inside the disposable transaction and compare row
-counts and totals.
+Complete these in the
+[learner SQL](../day54_project3_dwh_part3_aggregations.sql):
+
+1. Add and validate `agg_sales_product_month`.
+2. Refresh all aggregates for a supplied year/month.
+3. Explain late-fact effects on closed months.
+4. Implement transactional delete/insert for one month.
+5. Make missing-side reconciliation NULL-safe.
+6. Prove the refresh is idempotent.
+
+Refresh twice and compare row counts and totals.
 
 ## Self-check
 

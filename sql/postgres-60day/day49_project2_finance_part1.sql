@@ -59,7 +59,15 @@ WITH monthly AS (
 SELECT * FROM ma ORDER BY month DESC LIMIT 6;
 
 -- Exercises
--- 1) Build MA(6) and MA(12) and compare MAPEs vs seasonal naive.
--- 2) Produce a combined forecast blending 50% seasonal-naive and 50% MA(6).
+-- 1. Build MA(6) and MA(12) and compare MAPEs vs seasonal naive.
+-- 2. Produce a combined forecast blending 50% seasonal-naive and 50% MA(6).
+-- 3. Prediction: explain why evaluating a moving average on the same rows used
+--    to calculate it leaks the current actual and understates error.
+-- 4. Construction: create a complete monthly spine before LAG(..., 12), then
+--    distinguish a missing month from a true zero-revenue month.
+-- 5. Debugging: repair MAPE when actual revenue is zero and report how many
+--    observations were excluded from the percentage error.
+-- 6. Edge case: compare MAE and MAPE when one low-revenue month has a modest
+--    absolute miss but a very large percentage miss.
 
 ROLLBACK;

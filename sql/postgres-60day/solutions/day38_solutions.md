@@ -158,3 +158,25 @@ DROP TABLE IF EXISTS training.isolation_lab;
 
 Do not leave terminals “idle in transaction.” Results depend on exact
 interleaving, and the setup state must be reset between experiments.
+
+## Exercise 4 — Reuse and release a savepoint
+
+`ROLLBACK TO` reverses later work but retains the named savepoint. `RELEASE`
+then removes it explicitly before the outer transaction continues.
+
+## Exercise 5 — Transfer atomically
+
+The solution locks/reads the debit account, rejects insufficient funds, and
+updates both balances in one unit. A final SUM proves conservation of money.
+
+## Exercise 6 — Recover from a constraint error
+
+A PL/pgSQL exception block creates an internal subtransaction. It catches the
+expected unique violation and demonstrates that the outer transaction can
+still execute a query.
+
+## Exercise 7 — Choose isolation for read-only work
+
+Several SELECT statements that must describe one consistent snapshot justify
+`REPEATABLE READ`. If per-statement freshness is intended, `READ COMMITTED` may
+be correct. “Read-only” does not decide the snapshot contract.

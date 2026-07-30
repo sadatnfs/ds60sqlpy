@@ -92,3 +92,24 @@ history supports each estimate; a `NULL` projection means there was none.
 - A seasonal average needs multiple years to be convincing. Treat a one-point
   average as a naive forecast and disclose the sample count.
 - Both answers are read-only.
+
+## Exercise 3 — Separate cash and booked revenue
+
+Orders are grouped by order month and payments by payment month. Displaying both
+reveals timing differences; combining them under one unlabeled “revenue” metric
+would be misleading.
+
+## Exercise 4 — Build a cash balance
+
+Payment and expense entries are unioned at month grain. Net flow is accumulated
+with a running SUM, and LAG supplies the next month's beginning balance.
+
+## Exercise 5 — Preserve one-sided months
+
+A calendar spine spans both sources, then left joins monthly cash and costs.
+This retains expense-only and payment-only periods with an explicit zero policy.
+
+## Exercise 6 — Explain undefined margin
+
+`NULLIF(cash_in, 0)` preserves NULL for an undefined ratio. A companion status
+column explains the reason instead of leaving consumers to guess.

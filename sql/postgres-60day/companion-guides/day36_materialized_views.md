@@ -30,9 +30,16 @@ become stale and who would own refresh failures.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day36_materialized_views.sql).
-Write a freshness service-level expectation and a validation query beside the
-refresh design.
+Complete these in the [learner SQL](../day36_materialized_views.sql):
+
+1. Create weekly country revenue materialization.
+2. Compare source-query and materialized-query plans.
+3. Predict and verify stale results before refresh.
+4. Design the unique index required by concurrent refresh.
+5. Reconcile line revenue with the chosen business definition.
+6. Explain absent dimension combinations versus explicit zeros.
+
+Write a freshness expectation and validation query beside the refresh design.
 
 ## Self-check
 
@@ -84,3 +91,15 @@ stores rows and can be indexed, but those rows are stale until refreshed.
 - The compact seed may make the raw query as fast as or faster than the MV.
 - Document refresh ownership and failure behavior before relying on an MV.
 - The learner transaction safely removes the demonstration MV at rollback.
+
+## Expanded practice lab
+
+Prompts 3–6 focus on the materialized view's data contract. A new base row is
+invisible until refresh, so record both data time and refresh time. Concurrent
+refresh requires a qualifying unique index and cannot be demonstrated as a
+first population inside this rollback-only lesson.
+
+Reconcile the view to the exact line-revenue definition it materializes; stored
+order totals are a separate measure. Grouped aggregates emit no row for an
+absent dimension combination, so any displayed zero must come from an explicit
+dimension/date spine and outer join.

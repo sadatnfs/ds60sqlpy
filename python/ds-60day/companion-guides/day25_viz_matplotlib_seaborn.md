@@ -71,6 +71,28 @@ constructed/local frame.
    the figure object, create the directory with `Path`, call `tight_layout`, and
    save before any display/close step.
 
+### Additional mastery practice
+
+Choose a chart from the question and data types, then make units, denominators, ordering, uncertainty, and accessibility explicit.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship.
+   **Progressive hint:** Match the mark and axes to the analytical question.
+4. **Tracing:** Trace figure and axes ownership when using `fig, ax = plt.subplots()` and explain where title, labels, and save operations belong.
+   **Progressive hint:** The figure owns the canvas; the axes owns one plot region.
+5. **Implementation:** Implement a reusable distribution function accepting an axes object, units, and title without calling `show`.
+   **Progressive hint:** Returning the axes makes composition and testing easier.
+6. **Debugging:** Repair an export that calls `show()` or closes the figure before `savefig`, producing a blank file in some environments.
+   **Progressive hint:** Save through the figure before display/close.
+7. **Edge case and explanation:** Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution.
+   **Progressive hint:** Do not communicate meaning through color alone.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - When should a histogram, box plot, line plot, or scatter plot be used?

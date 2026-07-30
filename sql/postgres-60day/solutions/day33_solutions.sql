@@ -25,4 +25,36 @@ WHERE total_amount > 1000
   AND order_date >= CURRENT_TIMESTAMP - interval '90 days'
 ORDER BY total_amount DESC;
 
+-- Exercise 3: without the leftmost category equality, created_at alone cannot
+-- use the full composite search prefix as efficiently.
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT product_id, created_at
+FROM products
+WHERE created_at >= CURRENT_TIMESTAMP - interval '1 year';
+
+-- Exercise 4: customer/date are search keys; status and total are payload that
+-- may permit an index-only scan once visibility-map state allows it.
+CREATE INDEX idx_orders_history_cover_solution
+  ON orders(customer_id, order_date DESC)
+  INCLUDE (status, total_amount);
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT order_id, order_date, status, total_amount
+FROM orders
+WHERE customer_id = 1
+ORDER BY order_date DESC;
+
+-- Exercise 5: only the first predicate implies total_amount > 1000. The second
+-- query is correct but is not eligible for the partial index.
+EXPLAIN SELECT order_id FROM orders WHERE total_amount > 1200;
+EXPLAIN SELECT order_id FROM orders WHERE total_amount > 500;
+
+-- Exercise 6: measure the candidate subset before paying for another index.
+SELECT COUNT(*) AS all_customers,
+       COUNT(*) FILTER (WHERE segment IS NULL) AS null_segments
+FROM customers;
+CREATE INDEX idx_customers_null_segment_solution
+  ON customers(customer_id)
+  WHERE segment IS NULL;
+EXPLAIN SELECT customer_id FROM customers WHERE segment IS NULL;
+
 ROLLBACK;

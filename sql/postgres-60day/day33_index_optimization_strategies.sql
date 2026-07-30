@@ -32,7 +32,16 @@ WHERE oi.order_id IN (
 );
 
 -- Exercises
--- 1) Add a composite index for (category, created_at) on products and test.
--- 2) Create a partial index for high-value orders (total_amount > 1000) and test.
+-- 1. Add a composite index for (category, created_at) on products and test.
+-- 2. Create a partial index for high-value orders (total_amount > 1000) and test.
+-- 3. Prediction: test the composite product index with created_at alone. Explain
+--    why the leftmost category column affects how useful the index can be.
+-- 4. Construction: build an INCLUDE index for a customer order-history query
+--    that returns order_id, order_date, status, and total_amount.
+-- 5. Debugging: write a query whose WHERE clause does not imply the partial
+--    index predicate. Compare it with a query that does and explain eligibility
+--    separately from the planner's final cost choice.
+-- 6. Edge case: query a nullable column (customers.segment) with IS NULL and
+--    discuss whether a partial index for only NULL rows would be worthwhile.
 
 ROLLBACK;

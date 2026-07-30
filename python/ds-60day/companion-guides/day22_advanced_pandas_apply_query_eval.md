@@ -63,6 +63,28 @@ the example above keeps this lesson fully offline.
    compare `memory_usage(deep=True)` before and after, record unique/row counts,
    and do not assume a high-cardinality column will improve.
 
+### Additional mastery practice
+
+Prefer vectorized operations and labeled expressions, but measure rather than assuming. Use categoricals only when repetition justifies them.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict why row-wise `apply(axis=1)` is usually slower than column arithmetic for a simple ratio.
+   **Progressive hint:** Vectorized operations avoid constructing/calling Python work per row.
+4. **Tracing:** Trace `frame.query('amount > @threshold')`: which name comes from a column and which comes from Python scope?
+   **Progressive hint:** `@` marks an external Python variable.
+5. **Implementation:** Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory.
+   **Progressive hint:** Use `memory_usage(deep=True)` on the Series.
+6. **Debugging:** Replace a row-wise conditional `apply` with `np.select` or `.where` while preserving missing-value behavior.
+   **Progressive hint:** List conditions from most specific to fallback.
+7. **Edge case and explanation:** Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation.
+   **Progressive hint:** Categories store both codes and a level table.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why does group `transform` preserve row count while `agg` does not?

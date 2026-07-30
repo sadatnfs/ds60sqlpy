@@ -67,3 +67,102 @@ query/eval tip
 th = 0.2
 subset = df.query('pct > @th')      # pass local variable with @
 ```
+
+---
+
+## Exercise-by-exercise reference
+
+Every numbered learner exercise has a matching entry here. The original
+worked examples remain above; the expanded answers below add heavily
+commented code, explicit reasoning, and executable checks.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Find a slow row-wise `apply` and replace it with vectorized logic. **Hint:** classify the operation as arithmetic, conditional selection, string method, mapping, or group transform; pandas has primitives for each.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Convert a repeated string column to categorical and profile memory. **Hint:** compare `memory_usage(deep=True)` before and after, record unique/row counts, and do not assume a high-cardinality column will improve.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 3 — Prediction
+
+**Prompt:** Predict why row-wise `apply(axis=1)` is usually slower than column arithmetic for a simple ratio.
+
+**Reasoning checkpoint:** Vectorized operations avoid constructing/calling Python work per row. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 4 — Tracing
+
+**Prompt:** Trace `frame.query('amount > @threshold')`: which name comes from a column and which comes from Python scope?
+
+**Reasoning checkpoint:** `@` marks an external Python variable. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 5 — Implementation
+
+**Prompt:** Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory.
+
+**Reasoning checkpoint:** Use `memory_usage(deep=True)` on the Series. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 6 — Debugging
+
+**Prompt:** Replace a row-wise conditional `apply` with `np.select` or `.where` while preserving missing-value behavior.
+
+**Reasoning checkpoint:** List conditions from most specific to fallback. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 7 — Edge case and explanation
+
+**Prompt:** Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation.
+
+**Reasoning checkpoint:** Categories store both codes and a level table. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+## Expanded mastery lab solutions
+
+Prefer vectorized operations and labeled expressions, but measure rather than assuming. Use categoricals only when repetition justifies them.
+
+Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
+
+### Practices 1–2 — Vectorization and query scope
+
+Column arithmetic runs through optimized array operations; row-wise `apply`
+creates a Series and calls Python code repeatedly. In `query`, `amount` is a
+column and `@threshold` is a Python variable.
+
+### Practices 3–5 — Measure categorical memory and vectorize conditions
+
+```python
+import numpy as np
+import pandas as pd
+
+
+def category_if_smaller(series: pd.Series) -> tuple[pd.Series, dict[str, int]]:
+    """Return the lower-memory representation plus measured byte counts."""
+
+    before = int(series.memory_usage(deep=True))
+    candidate = series.astype("category")
+    after = int(candidate.memory_usage(deep=True))
+    chosen = candidate if after < before else series.copy()
+    return chosen, {"before": before, "after": after}
+
+
+frame = pd.DataFrame(
+    {"amount": [5.0, 20.0, 100.0, np.nan], "segment": ["A", "A", "B", "A"]}
+)
+threshold = 10
+assert frame.query("amount > @threshold")["amount"].tolist() == [20.0, 100.0]
+
+conditions = [frame["amount"].ge(100), frame["amount"].ge(10)]
+labels = np.select(conditions, ["high", "medium"], default="low")
+frame["band"] = pd.Series(labels, index=frame.index).where(frame["amount"].notna())
+assert frame["band"].tolist()[:3] == ["low", "medium", "high"]
+assert pd.isna(frame.loc[3, "band"])
+
+optimized, memory = category_if_smaller(frame["segment"])
+assert memory["before"] > 0 and memory["after"] > 0
+```
+
+For an almost-unique ID, the level table repeats nearly all original strings
+in addition to codes. Concatenating categoricals also requires reconciling their
+level sets; measure the final workflow, not a toy column alone.

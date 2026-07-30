@@ -30,7 +30,15 @@ can make reading the table cheaper than traversing an index.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day32_index_fundamentals.sql).
+Complete these in the [learner SQL](../day32_index_fundamentals.sql):
+
+1. Create and test an index on `products(category)`.
+2. Compare plans before and after dropping/recreating that index.
+3. Predict the scan choice from category frequency, then measure it.
+4. Index `payments(payment_date)` and test a half-open date range.
+5. Diagnose `lower(country)` and test a matching expression index.
+6. Prove that index order does not replace an explicit `ORDER BY`.
+
 Compare selective and unselective predicates against the same indexed column.
 
 ## Self-check
@@ -88,3 +96,14 @@ the same.
 - Do not disable sequential scans as proof that an index is beneficial.
 - Index names are schema-local; use exercise-specific names to avoid collisions.
 - The learner transaction rolls all index experiments back safely.
+
+## Expanded practice lab
+
+Prompts 3–6 separate index *eligibility* from a planner's cost decision. First
+measure category frequency: on a compact table, reading every page can be
+cheaper than bouncing through an index. Use a half-open timestamp range for the
+payment-date index so boundary semantics are explicit.
+
+`lower(country)` is a different indexed expression from `country`; an
+expression index must match the query expression. Finally, remember that an
+index's physical order never replaces `ORDER BY` in the SQL result contract.

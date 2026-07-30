@@ -13,13 +13,15 @@ def test_advanced_import_manifest_is_complete_and_unique() -> None:
     assert validate_target_manifest() == []
     assert {target.group for target in ADVANCED_IMPORT_TARGETS} == {
         "bridge",
+        "professional",
+        "sql-notebooks",
         "ml",
         "production",
         "deep-learning",
         "nlp",
         "geo",
     }
-    assert len(ADVANCED_IMPORT_TARGETS) == 25
+    assert len(ADVANCED_IMPORT_TARGETS) == 33
 
 
 def test_probe_code_uses_distribution_and_module_names() -> None:

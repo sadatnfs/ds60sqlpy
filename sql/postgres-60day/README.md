@@ -1,6 +1,9 @@
 # PostgreSQL track
 
-This track contains 60 ordered PostgreSQL lessons, companion guides, and projects. The number is a sequence, not a deadline.
+This track contains 60 ordered PostgreSQL lessons, companion guides, and
+projects. Two relational-foundation modules come before Day 1, and ten named
+professional modules continue after Day 60. The number is a sequence, not a
+deadline.
 
 Start at the repository [README](../../README.md), and run every command from the repository root.
 
@@ -98,7 +101,22 @@ Both `--reset` commands recreate the disposable `training` schema first.
 4. Attempt exercises in your own scratch file or transaction.
 5. Read the separate solution only after an honest attempt.
 
-Start with:
+If you are new to relational databases, start with the professional
+foundations before Day 1:
+
+- [Relational design guide](../professional/companion-guides/sql_found_01_relational_design.md)
+- [Relational design learner SQL](../professional/lessons/sql_found_01_relational_design.sql)
+- [Versioned migrations guide](../professional/companion-guides/sql_found_02_versioned_migrations.md)
+- [Versioned migrations learner SQL](../professional/lessons/sql_found_02_versioned_migrations.sql)
+
+Run a named module through the cross-platform course CLI:
+
+```text
+python scripts/course.py sql run-id sql-found-01
+python scripts/course.py sql run-id sql-found-02
+```
+
+Then continue with:
 
 - [Day 1 guide](companion-guides/day01_select_where_orderby.md)
 - [Day 1 SQL](day01_select_where_orderby.sql)
@@ -115,12 +133,19 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_
 
 ## Track map
 
+- Foundations: relational design, integrity constraints, and versioned schema
+  migration
 - Days 1–15: relational querying, joins, subqueries, DML, functions, and a report project
 - Days 16–30: windows, CTEs, recursion, pivots, JSON/XML, patterns, and a project
 - Days 31–45: plans, indexes, optimization, partitioning, transactions, locks, quality, and operations
 - Days 46–60: e-commerce, finance, data warehouse, BI, and capstone projects
+- Professional modules: roles and row security, routines and triggers,
+  PostgreSQL-native types and search, physical design and maintenance, SQL
+  contracts, analytical patterns, recovery, extensions, replication/CDC, and
+  temporal modelling
 
-See the [curriculum map](../../docs/curriculum-map.md) or:
+See the [professional paths](../../docs/professional-paths.md), the
+[curriculum map](../../docs/curriculum-map.md), or:
 
 ```text
 python scripts/course.py catalog --track sql
@@ -128,10 +153,10 @@ python scripts/course.py catalog --track sql
 
 ## Artifact coverage
 
-- Learner SQL scripts: Days 1–60
-- Companion guides: Days 1–60
-- Markdown solutions: Days 1–60
-- Executable solution SQL: Days 1–60
+- Learner SQL scripts: 72 (two foundations, Days 1–60, and ten professional modules)
+- Companion guides: 72
+- Markdown solutions: 72
+- Executable solution SQL: 72
 
 Use the catalog for the exact learner, guide, and solution paths.
 

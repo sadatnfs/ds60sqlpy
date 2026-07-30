@@ -16,6 +16,11 @@ track-specific rules live in [python/AGENTS.md](../python/AGENTS.md),
 
 Do not add a lesson solely to increase the count.
 
+Established Days 1–60 keep their IDs and filenames. New professional modules
+use the stable named specifications in `src/ds60sqlpy/catalog_builder.py` and
+live under the applicable `professional/` directory. Do not force a
+foundation, elective, or specialization into a misleading sequential day.
+
 ## Lesson contract
 
 Every lesson should include:
@@ -33,6 +38,10 @@ Every lesson should include:
 11. **Separate solution** — reasoning, alternatives, and edge cases
 
 Prefer “write a query that returns…” or “implement and verify…” over “understand…”.
+For a named professional module, list every direct catalog prerequisite by its
+exact backticked stable ID inside `## Level and prerequisites`. Put transitive
+background and merely helpful material in separately labeled prose so Codex
+and learners do not mistake it for a hard gate.
 
 ## Difficulty and pacing
 
@@ -59,8 +68,16 @@ Prefer “write a query that returns…” or “implement and verify…” over
 - Prefer `pathlib`, local data, explicit seeds, and small cells.
 - Do not embed environment setup in dozens of notebooks; link to canonical setup.
 - Tag heavy, manual, and network cells.
+- Tag non-Python magic cells `skip-static-validation`; tag live PostgreSQL
+  cells `live-postgres` as well.
 - Keep generated output and models in ignored directories.
 - Add direct imports to the appropriate dependency group.
+
+For PostgreSQL-in-Jupyter lessons, use JupySQL from the selected course kernel.
+Read `DS60_DATABASE_URL`, select SQLAlchemy's explicit Psycopg 3 dialect, pass
+the engine object to `%sql`, disable connection display, bound results, and use
+named binding for values. Never add `%pip`, a credential, or an untrusted Jinja
+fragment to a lesson notebook.
 
 ## PostgreSQL
 

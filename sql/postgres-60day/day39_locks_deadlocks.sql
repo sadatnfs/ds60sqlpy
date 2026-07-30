@@ -29,8 +29,16 @@ FOR UPDATE; -- consistent order prevents deadlocks
 -- SELECT pg_advisory_unlock(42);
 
 -- Exercises
--- 1) Simulate a deadlock in two sessions and capture with pg_locks.
--- 2) Implement consistent lock ordering to avoid the deadlock.
--- 3) Use SELECT FOR UPDATE SKIP LOCKED for job-queue style processing.
+-- 1. Simulate a deadlock in two sessions and capture with pg_locks.
+-- 2. Implement consistent lock ordering to avoid the deadlock.
+-- 3. Use SELECT FOR UPDATE SKIP LOCKED for job-queue style processing.
+-- 4. Prediction: compare FOR UPDATE NOWAIT with ordinary FOR UPDATE when
+--    another session already owns the row lock.
+-- 5. Construction: claim at most five queued rows with FOR UPDATE SKIP LOCKED,
+--    update them, and return exactly the rows claimed.
+-- 6. Debugging: identify why ordering inside a CTE is not enough unless the
+--    locking SELECT preserves that same deterministic key order.
+-- 7. Edge case: use pg_try_advisory_xact_lock and explain why transaction-level
+--    advisory locks avoid a forgotten manual unlock.
 
 ROLLBACK;

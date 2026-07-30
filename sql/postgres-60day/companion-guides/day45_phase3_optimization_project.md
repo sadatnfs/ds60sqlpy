@@ -31,9 +31,18 @@ from comparable observations without promising 70%.
 
 ## Exercises
 
-Complete the project in the [learner SQL](../day45_phase3_optimization_project.sql).
-Produce a short decision record covering plan, buffers, timing, correctness,
-index cost, and whether the candidate should proceed.
+Complete these in the
+[learner SQL](../day45_phase3_optimization_project.sql):
+
+1. Predict the effect of replacing the non-sargable timestamp expression.
+2. Capture/compare JSON plans for baseline and rewrite.
+3. Prove direct and pre-aggregated results equivalent with two-way `EXCEPT`.
+4. Test an empty-window boundary.
+5. Design and justify one workload-specific index.
+6. Write an optimization report separating semantics, plans, and timing.
+
+Produce a decision record covering plan, buffers, correctness, index cost, and
+whether the candidate should proceed.
 
 ## Self-check
 
@@ -88,3 +97,16 @@ representative-scale dataset before recommending production changes.
 Production index creation requires a separate reviewed migration and may need
 `CREATE INDEX CONCURRENTLY`; the tutorial transaction intentionally persists
 nothing.
+
+## Expanded practice lab
+
+The six explicit prompts make this a measured project instead of a single
+rewrite. Begin with a prediction, capture JSON plans, and prove equivalence with
+two-way `EXCEPT` before comparing performance. JSON makes the root execution
+time and buffer fields machine-readable, but repeated trials and environment
+notes are still required.
+
+Test the empty-window boundary and document any proposed index as a workload
+tradeoff, not free speed. The final report must keep three claims separate:
+same result semantics, observed planner evidence, and timing that may change on
+different hardware, cache state, cardinality, or PostgreSQL versions.

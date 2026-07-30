@@ -28,8 +28,16 @@ counts duplicate groups, while remediation needs the member records.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day42_data_quality_validation.sql).
-For one rule, return both a summary row and the failing-record detail.
+Complete these in the [learner SQL](../day42_data_quality_validation.sql):
+
+1. Build a named core-table validation report.
+2. Detect invalid/null customer emails.
+3. Explain CHECK behavior for NULL without `NOT NULL`.
+4. Reconcile order totals with calculated line revenue.
+5. Retain raw case variants in a normalized-email duplicate report.
+6. Detect overlapping inclusive promotion ranges.
+
+For one rule, return both a summary and failing-record detail.
 
 ## Self-check
 
@@ -82,3 +90,14 @@ changes.
 - Do not auto-delete failed rows from a validation query.
 - The deterministic seed should return zero for every core failure check and no
   invalid emails.
+
+## Expanded practice lab
+
+Prompts 3–6 progress from constraint semantics to reconciliations and diagnostic
+evidence. SQL CHECK constraints pass both TRUE and UNKNOWN, so nullable fields
+need a separate `NOT NULL` rule when NULL is invalid.
+
+Reconcile stored totals to line revenue at order grain and use a one-cent
+tolerance deliberately. A duplicate report should retain raw email variants.
+For inclusive promotion dates, ranges overlap when each start is less than or
+equal to the other range's end; compare each pair only once.

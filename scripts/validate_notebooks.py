@@ -16,13 +16,19 @@ from nbformat import NotebookNode
 
 REPO_ROOT: Final = Path(__file__).resolve().parents[1]
 COURSE_ROOT_RELATIVE: Final = Path("python") / "ds-60day"
+BRIDGE_NOTEBOOK_ROOT_RELATIVE: Final = Path("bridge") / "professional"
 DAY_PATTERN: Final = re.compile(r"day(?P<day>\d{2})_")
 DEFAULT_SMOKE_DAYS: Final = (1, 3, 5, 8, 10, 12, 13, 16, 21, 31, 33, 34, 35)
 SKIP_SMOKE_TAGS: Final = frozenset({"network", "slow", "gpu", "geo", "docker"})
 
 
 def notebook_paths(repo_root: Path) -> Iterable[Path]:
-    return sorted((repo_root / COURSE_ROOT_RELATIVE).rglob("*.ipynb"))
+    return sorted(
+        [
+            *(repo_root / COURSE_ROOT_RELATIVE).rglob("*.ipynb"),
+            *(repo_root / BRIDGE_NOTEBOOK_ROOT_RELATIVE).rglob("*.ipynb"),
+        ]
+    )
 
 
 def _clean_python_source(source: str) -> str:

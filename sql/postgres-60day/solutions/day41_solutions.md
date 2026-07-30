@@ -112,3 +112,24 @@ ordered from highest to lowest product revenue.
 - Use `DISTINCT` inside counts when the input is at line-item grain.
 - Add a deterministic tie-breaker (`product_id`) to `ROW_NUMBER`.
 - Both answers are read-only and safe to run repeatedly.
+
+## Exercise 3 — Compare grouping sets and CUBE
+
+The `CUBE(country, category)` answer emits detail, both one-dimensional
+subtotals, and the grand total. `GROUPING(country, category)` identifies each
+generated level.
+
+## Exercise 4 — State metric populations with FILTER
+
+Each status/time population appears beside its aggregate, making several
+country metrics readable without repeating the whole grouped relation.
+
+## Exercise 5 — Distinguish stored and generated NULLs
+
+`GROUPING(country)` is one only for the generated subtotal. A stored NULL, if
+allowed by the model, keeps grouping flag zero and receives a different label.
+
+## Exercise 6 — Return a typed empty collection
+
+`array_agg` over no qualifying inputs is NULL. The answer uses
+`COALESCE(..., '{}'::text[])`; the explicit type must match the aggregate type.

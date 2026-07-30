@@ -93,3 +93,23 @@ category.
   long-form BI result.
 - Treat zero or absent budgets explicitly; `NULL` percentage is safer than a
   fabricated infinite or zero rate.
+
+## Exercise 3 — Preserve missing-budget meaning
+
+The FULL JOIN retains actual-only and budget-only rows. Status is assigned before
+display-time `COALESCE`, so missing planning data is not relabeled zero.
+
+## Exercise 4 — Calculate YTD windows
+
+The `monthly` CTE first establishes canonical coalesced keys. Windows then
+partition by category and calendar year and order by month.
+
+## Exercise 5 — Normalize joined keys once
+
+Every later expression references `monthly.month` and `monthly.category`,
+avoiding inconsistent use of nullable columns from one join side.
+
+## Exercise 6 — Separate unbudgeted spend
+
+The CASE checks missing and zero budgets before normal overspend. This prevents
+an absent plan from becoming an ordinary variance percentage.

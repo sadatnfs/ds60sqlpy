@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Literal
 
 from ds60sqlpy.catalog import Catalog
-from ds60sqlpy.catalog_builder import build_catalog
+from ds60sqlpy.catalog_builder import PROFESSIONAL_LESSON_SPECS, build_catalog
 
 Severity = Literal["pass", "warn", "fail"]
 
@@ -48,7 +48,7 @@ def check_catalog(catalog: Catalog) -> list[CheckResult]:
 
     root = catalog.repo_root
     results: list[CheckResult] = []
-    expected_counts = {"python": 60, "sql": 60, "bridge": 8}
+    expected_counts = {"python": 70, "sql": 72, "bridge": 12}
     for track, expected in expected_counts.items():
         count = len(catalog.lessons(track))  # type: ignore[arg-type]
         severity: Severity = "pass" if count == expected else "fail"
@@ -109,6 +109,31 @@ def check_catalog(catalog: Catalog) -> list[CheckResult]:
                 )
             )
 
+    remaining = {lesson.id: set(lesson.prerequisites) & lesson_ids for lesson in catalog}
+    while ready := {
+        lesson_id for lesson_id, prerequisites in remaining.items() if not prerequisites
+    }:
+        for lesson_id in ready:
+            del remaining[lesson_id]
+        for prerequisites in remaining.values():
+            prerequisites.difference_update(ready)
+    if remaining:
+        results.append(
+            _result(
+                "fail",
+                "catalog.prerequisite.cycle",
+                f"Prerequisite cycle includes: {', '.join(sorted(remaining))}",
+            )
+        )
+    else:
+        results.append(
+            _result(
+                "pass",
+                "catalog.prerequisite.cycle",
+                "Catalog prerequisite graph is acyclic",
+            )
+        )
+
     checked_path = root / "curriculum" / "catalog.json"
     checked_payload = json.loads(checked_path.read_text(encoding="utf-8"))
     if checked_payload != build_catalog(root):
@@ -139,7 +164,12 @@ def check_notebooks(catalog: Catalog) -> list[CheckResult]:
     """Validate notebook JSON, format metadata, and ordinary Python syntax."""
 
     root = catalog.repo_root
-    notebook_paths = sorted((root / "python" / "ds-60day").rglob("*.ipynb"))
+    notebook_paths = sorted(
+        [
+            *(root / "python" / "ds-60day").rglob("*.ipynb"),
+            *(root / "bridge" / "professional").rglob("*.ipynb"),
+        ]
+    )
     results: list[CheckResult] = []
     invalid = 0
     syntax_errors = 0
@@ -243,6 +273,9 @@ def check_notebooks(catalog: Catalog) -> list[CheckResult]:
                         root,
                     )
                 )
+            tags = cell.get("metadata", {}).get("tags", [])
+            if "skip-static-validation" in tags:
+                continue
             source = _clean_notebook_source("".join(cell.get("source", [])))
             if not source.strip():
                 continue
@@ -262,9 +295,9 @@ def check_notebooks(catalog: Catalog) -> list[CheckResult]:
 
     results.append(
         _result(
-            "pass" if len(notebook_paths) == 120 else "fail",
+            "pass" if len(notebook_paths) == 122 else "fail",
             "notebook.count",
-            f"Notebook artifacts: {len(notebook_paths)}/120",
+            f"Notebook artifacts: {len(notebook_paths)}/122",
         )
     )
     results.append(
@@ -414,7 +447,7 @@ def check_sql_guide_contract(catalog: Catalog) -> list[CheckResult]:
     results: list[CheckResult] = []
     contract_errors = 0
 
-    for index, lesson in enumerate(lessons):
+    for lesson in lessons:
         path = catalog.resolve(lesson.guide_path)
         if not path.is_file():
             continue  # check_catalog reports the missing artifact.
@@ -482,20 +515,21 @@ def check_sql_guide_contract(catalog: Catalog) -> list[CheckResult]:
                 )
             )
 
-        expected_prerequisite = (
-            "../README.md" if lesson.day == 1 else Path(lessons[index - 1].guide_path).name
-        )
-        if expected_prerequisite not in overview:
-            contract_errors += 1
-            results.append(
-                _result(
-                    "fail",
-                    "sql.guide.prerequisite",
-                    f"{lesson.id} must link prerequisite {expected_prerequisite}",
-                    path,
-                    root,
+        expected_prerequisites = [
+            Path(catalog.get(prerequisite).guide_path).name for prerequisite in lesson.prerequisites
+        ]
+        for expected_prerequisite in expected_prerequisites:
+            if expected_prerequisite not in overview:
+                contract_errors += 1
+                results.append(
+                    _result(
+                        "fail",
+                        "sql.guide.prerequisite",
+                        f"{lesson.id} must link prerequisite {expected_prerequisite}",
+                        path,
+                        root,
+                    )
                 )
-            )
 
         lesson_filename = Path(lesson.lesson_path).name
         if lesson_filename not in overview:
@@ -528,19 +562,14 @@ def check_sql_guide_contract(catalog: Catalog) -> list[CheckResult]:
                     )
                 )
 
-        next_target = (
-            Path(lessons[index + 1].guide_path).name
-            if index + 1 < len(lessons)
-            else "../../../bridge/README.md"
-        )
         next_body = sections.get("Next step", [""])[0]
-        if next_target not in next_body:
+        if not re.search(r"\[[^\]]+\]\([^)]+\)", next_body):
             contract_errors += 1
             results.append(
                 _result(
                     "fail",
                     "sql.guide.next",
-                    f"{lesson.id} must link next target {next_target}",
+                    f"{lesson.id} must link a concrete next target",
                     path,
                     root,
                 )
@@ -548,9 +577,9 @@ def check_sql_guide_contract(catalog: Catalog) -> list[CheckResult]:
 
     results.append(
         _result(
-            "pass" if len(lessons) == 60 else "fail",
+            "pass" if len(lessons) == 72 else "fail",
             "sql.guide.count",
-            f"SQL companion guides: {len(lessons)}/60",
+            f"SQL companion guides: {len(lessons)}/72",
         )
     )
     results.append(
@@ -609,6 +638,121 @@ def check_bridge(catalog: Catalog) -> list[CheckResult]:
     return results
 
 
+PROFESSIONAL_GUIDE_REQUIRED_SECTIONS = (
+    "Level and prerequisites",
+    "Learning objectives",
+    "Vocabulary and concepts",
+    "Worked example / walkthrough",
+    "Exercises",
+    "Self-check",
+    "Common pitfalls",
+    "Next step",
+)
+
+
+def check_professional_lessons(catalog: Catalog) -> list[CheckResult]:
+    """Check named professional modules across all three tracks."""
+
+    root = catalog.repo_root
+    professional_ids = {str(spec["id"]) for spec in PROFESSIONAL_LESSON_SPECS}
+    lessons = [lesson for lesson in catalog if lesson.id in professional_ids]
+    results: list[CheckResult] = []
+    syntax_errors = 0
+    guide_errors = 0
+
+    for lesson in lessons:
+        paths = [
+            catalog.resolve(lesson.lesson_path),
+            *(catalog.resolve(path) for path in lesson.solution_paths),
+        ]
+        for path in paths:
+            if path.suffix != ".py" or not path.is_file():
+                continue
+            try:
+                ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            except SyntaxError as exc:
+                syntax_errors += 1
+                results.append(
+                    _result(
+                        "fail",
+                        "professional.syntax",
+                        f"Invalid Python: {exc.msg} (line {exc.lineno})",
+                        path,
+                        root,
+                    )
+                )
+
+        guide_path = catalog.resolve(lesson.guide_path)
+        if not guide_path.is_file():
+            continue
+        sections = _markdown_h2_sections(guide_path.read_text(encoding="utf-8"))
+        prerequisite_sections = sections.get("Level and prerequisites", [])
+        if len(prerequisite_sections) == 1:
+            prerequisite_body = prerequisite_sections[0]
+            for prerequisite in lesson.prerequisites:
+                if f"`{prerequisite}`" not in prerequisite_body:
+                    guide_errors += 1
+                    results.append(
+                        _result(
+                            "fail",
+                            "professional.guide.prerequisite",
+                            (
+                                f"{lesson.id} must name catalog prerequisite "
+                                f"`{prerequisite}` in '## Level and prerequisites'"
+                            ),
+                            guide_path,
+                            root,
+                        )
+                    )
+        for heading in PROFESSIONAL_GUIDE_REQUIRED_SECTIONS:
+            bodies = sections.get(heading, [])
+            if len(bodies) != 1:
+                guide_errors += 1
+                results.append(
+                    _result(
+                        "fail",
+                        "professional.guide.section",
+                        f"{lesson.id} needs exactly one '## {heading}' section",
+                        guide_path,
+                        root,
+                    )
+                )
+                continue
+            minimum_characters = 30 if heading == "Next step" else 60
+            if len(re.sub(r"\s+", " ", bodies[0]).strip()) < minimum_characters:
+                guide_errors += 1
+                results.append(
+                    _result(
+                        "fail",
+                        "professional.guide.section.content",
+                        f"{lesson.id} section '## {heading}' is too thin",
+                        guide_path,
+                        root,
+                    )
+                )
+
+    results.extend(
+        (
+            _result(
+                "pass" if len(lessons) == len(professional_ids) else "fail",
+                "professional.count",
+                f"Named professional modules: {len(lessons)}/{len(professional_ids)}",
+            ),
+            _result(
+                "pass" if syntax_errors == 0 else "fail",
+                "professional.syntax.summary",
+                f"Professional Python syntax errors: {syntax_errors}",
+            ),
+            _result(
+                "pass" if guide_errors == 0 else "fail",
+                "professional.guide.contract.summary",
+                f"Professional companion-guide contract errors: {guide_errors}",
+            ),
+        )
+    )
+    return results
+
+
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\((?P<target>[^)]+)\)")
 
 
@@ -660,6 +804,7 @@ def run_checks(catalog: Catalog) -> tuple[CheckResult, ...]:
         check_sql(catalog),
         check_sql_guide_contract(catalog),
         check_bridge(catalog),
+        check_professional_lessons(catalog),
         check_markdown_links(catalog),
     )
     return tuple(result for group in groups for result in group)

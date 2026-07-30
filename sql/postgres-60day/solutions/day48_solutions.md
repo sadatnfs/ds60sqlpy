@@ -86,3 +86,25 @@ its distinct campaigns sum to 1.
   excludes the purchase timestamp itself.
 - Campaign value `'none'` makes missing metadata visible; decide whether it
   should receive attribution in production.
+
+## Exercise 3 — Credit distinct campaigns
+
+The solution collapses repeated touches to `(purchase, campaign)` before
+dividing. That implements equal credit per distinct campaign rather than per
+event.
+
+## Exercise 4 — Compute basket association metrics
+
+Distinct order/product membership defines baskets. Pair counts feed support;
+single-product basket counts feed directional confidence; lift compares the
+observed pair rate with independence.
+
+## Exercise 5 — Assign a touch only once
+
+A LATERAL subquery chooses the earliest qualifying purchase after each touch.
+`ORDER BY order_date, order_id LIMIT 1` prevents reuse and makes ties stable.
+
+## Exercise 6 — Reconcile direct purchases
+
+The query starts from every order and left-joins its most recent qualifying
+touch. Missing touches become `(direct)`, so bucket counts sum to purchases.

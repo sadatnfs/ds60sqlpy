@@ -135,10 +135,14 @@ class Catalog:
             raise KeyError(f"Unknown lesson ID: {lesson_id}") from exc
 
     def by_day(self, track: Track, day: int) -> Lesson:
-        """Return a lesson by track and one-based day number."""
+        """Return a lesson by track and ordering number."""
 
-        lesson_id = f"{track}-{day:02d}"
-        return self.get(lesson_id)
+        try:
+            return next(
+                lesson for lesson in self._lessons if lesson.track == track and lesson.day == day
+            )
+        except StopIteration as exc:
+            raise KeyError(f"Unknown lesson day: {track} {day}") from exc
 
     def resolve(self, relative_path: str) -> Path:
         """Resolve a catalog path inside the repository."""

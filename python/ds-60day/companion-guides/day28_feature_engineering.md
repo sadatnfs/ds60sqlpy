@@ -68,6 +68,28 @@ behavior as earlier lessons. A constructed DataFrame keeps practice offline.
    random state, and all other transforms identical; compare held-out or
    cross-validated performance, not training score.
 
+### Additional mastery practice
+
+Fit learned transformations only on training data and keep every feature inside a reproducible pipeline with explicit unknown/missing behavior.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict how fitting a scaler or category encoder before the train/test split leaks information from evaluation data.
+   **Progressive hint:** Learned means, scales, and categories become evaluation-derived parameters.
+4. **Tracing:** Trace numeric and categorical columns through a `ColumnTransformer` and state the output order/shape.
+   **Progressive hint:** Each branch selects columns, transforms them, then outputs are concatenated.
+5. **Implementation:** Add deterministic date features (weekday and month) without retaining the original target or post-outcome timestamp.
+   **Progressive hint:** Validate timezone and the moment at which a feature becomes known.
+6. **Debugging:** Repair a pipeline that scales one-hot indicator columns unnecessarily and fails on an unseen category.
+   **Progressive hint:** Use separate branches and `handle_unknown='ignore'`.
+7. **Edge case and explanation:** Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each.
+   **Progressive hint:** The fitted pipeline—not ad hoc notebook code—owns these policies.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Which preprocessing steps learn parameters from data?

@@ -85,3 +85,23 @@ lesson.
   explicitly when closing versions.
 - Do not run this before Day 52; the executable file raises a clear exception if
   `dwh.dim_customer` is absent.
+
+## Exercise 3 — Diagnose same-day changes
+
+Inclusive DATE ranges cannot order two changes on one day without overlap or an
+invalid close-before-open interval. The answer surfaces invalid ranges.
+
+## Exercise 4 — Detect overlapping versions
+
+The self-join compares each customer-version pair once and applies the inclusive
+overlap condition. Any row can map one fact date to multiple surrogates.
+
+## Exercise 5 — Gate unchanged reruns
+
+`IS DISTINCT FROM` compares nullable attributes safely. Only real source/current
+differences should close and insert a version; zero differences prove idempotency.
+
+## Exercise 6 — Define a same-day policy
+
+Half-open `tstzrange` examples show how effective timestamps can order changes.
+They require trustworthy source effective time or sequence, not load-time guesswork.

@@ -1,6 +1,9 @@
 # Python and data-science track
 
-This track contains 60 ordered lessons covering practical Python, data analysis, statistics, machine learning, and selected production topics. The number is a sequence, not a deadline.
+This track contains 60 ordered lessons covering practical Python, data
+analysis, statistics, machine learning, and selected production topics. Ten
+named professional modules continue the path after Day 60. The number is a
+sequence, not a deadline.
 
 Start at the repository [README](../../README.md), and run all commands from the repository root.
 
@@ -86,10 +89,27 @@ You can also open notebooks directly in VS Code. Select the repository `.venv` a
 - Companion guides: Days 1–60
 - Markdown solutions: Days 1–60
 - Runnable solution notebooks: Days 1–60
+- Professional learner scripts, guides, executable solutions, and solution
+  explanations: ten named modules
 
 Use `python scripts/course.py catalog --track python` rather than inferring that every solution format exists.
 
 Learner notebooks and solutions are intentionally separate. Lessons vary in depth; repository validation checks structure, syntax, and a fast execution subset without treating file presence as proof of pedagogical completeness.
+
+## Continue into professional Python
+
+After the numbered track—or earlier when you meet a module's catalog
+prerequisites—continue with the [professional learning paths](../../docs/professional-paths.md).
+The extension covers package builds, reliable HTTP clients, concurrency,
+Arrow/DuckDB, generative testing, advanced typing, experiments, reproducible
+model delivery, service hardening, and measurement-first performance work.
+
+Use stable lesson IDs rather than inventing Day 61 filenames:
+
+```text
+python scripts/course.py catalog --track python
+python scripts/course.py progress complete python-pro-01
+```
 
 ## Offline behavior
 

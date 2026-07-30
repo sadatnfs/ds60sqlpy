@@ -77,9 +77,9 @@ Verify with the virtual environment’s interpreter:
 Activation is optional. Using the interpreter’s full relative path avoids PowerShell activation-policy issues and guarantees that packages install into the intended environment.
 
 Core setup installs notebook, data, and quality tooling. Before the engineering
-bridge or later machine-learning, production, deep-learning,
-natural-language-processing, or geospatial lessons, install the advanced
-profile while connected:
+bridge, PostgreSQL-in-Jupyter lesson, professional modules, or later
+machine-learning, production, deep-learning, natural-language-processing, or
+geospatial lessons, install the advanced profile while connected:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
@@ -186,6 +186,10 @@ psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f 
 ```
 
 The SQL lesson ends with `ROLLBACK`, so normal lesson examples should not persist changes.
+
+To run PostgreSQL from the course's Python notebook kernel with `%sql` and
+`%%sql`, follow [PostgreSQL in Jupyter](jupyter-postgresql.md). Its connection
+is limited to the same disposable training database.
 
 ## 7. PowerShell equivalents used in later lessons
 

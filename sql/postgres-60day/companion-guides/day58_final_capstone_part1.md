@@ -29,9 +29,20 @@ Return staged, valid, invalid, and affected counts that reconcile.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day58_final_capstone_part1.sql).
-Add one malformed value for each parser and verify it becomes an explained
-rejection rather than an exception or silent default.
+Complete these in the [learner SQL](../day58_final_capstone_part1.sql):
+
+1. Parse additional datetime formats safely.
+2. Normalize/validate staged phone values.
+3. Build a transactional ingest procedure with DQ counts.
+4. Make source-duplicate winner selection deterministic.
+5. Split accepted/rejected rows with reason codes and reconcile counts.
+6. Normalize email before deduplication.
+7. Distinguish missing from unrecognized countries and retain raw values.
+8. Add source batch/row identity and make replay idempotent.
+9. Quarantine malformed JSON without aborting the batch.
+10. Reconcile staged, accepted, rejected, inserted, and updated outcomes.
+
+Malformed inputs must become explained rejections.
 
 ## Self-check
 

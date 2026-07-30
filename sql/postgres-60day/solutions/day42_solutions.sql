@@ -48,3 +48,50 @@ FROM customers
 WHERE email IS NULL
    OR email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$'
 ORDER BY customer_id;
+
+-- Exercise 3: a CHECK passes TRUE or UNKNOWN. The catalog query shows which
+-- course columns also carry NOT NULL, the separate rule that rejects NULL.
+SELECT table_name, column_name, is_nullable
+FROM information_schema.columns
+WHERE table_schema = 'training'
+  AND table_name IN ('orders', 'payments')
+  AND column_name IN ('total_amount', 'amount')
+ORDER BY table_name, column_name;
+
+-- Exercise 4: aggregate lines to order grain before comparing with the stored
+-- header. The one-cent tolerance is an explicit currency policy.
+WITH calculated AS (
+  SELECT order_id,
+         SUM(quantity * unit_price * (1 - discount)) AS line_total
+  FROM order_items
+  GROUP BY order_id
+)
+SELECT o.order_id, o.total_amount, c.line_total,
+       o.total_amount - c.line_total AS difference
+FROM orders o
+JOIN calculated c USING (order_id)
+WHERE ABS(o.total_amount - c.line_total) > 0.01
+ORDER BY o.order_id;
+
+-- Exercise 5: keep both normalized key and raw variants for remediation.
+SELECT lower(trim(email)) AS normalized_email,
+       array_agg(email ORDER BY email) AS raw_variants,
+       COUNT(*) AS rows
+FROM customers
+WHERE email IS NOT NULL
+GROUP BY lower(trim(email))
+HAVING COUNT(*) > 1
+ORDER BY normalized_email;
+
+-- Exercise 6: compare each promotion pair once. Inclusive endpoints overlap
+-- when neither range ends strictly before the other starts.
+SELECT a.promotion_id AS promotion_a,
+       b.promotion_id AS promotion_b,
+       a.product_id
+FROM promotions a
+JOIN promotions b
+  ON b.product_id = a.product_id
+ AND b.promotion_id > a.promotion_id
+ AND a.start_date <= b.end_date
+ AND b.start_date <= a.end_date
+ORDER BY a.product_id, promotion_a, promotion_b;

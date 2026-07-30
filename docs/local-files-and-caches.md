@@ -10,7 +10,7 @@ Each learner creates local state on their own computer.
 | --- | --- | --- | --- |
 | `.venv/` | Yes, for the normal local Python workflow | No | Created by the setup script for this clone; recreate it after a Python or dependency change |
 | `__pycache__/`, `*.pyc` | No | No | Python bytecode cache; recreated automatically |
-| `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/` | No | No | Tool acceleration only; deleting it makes the next run slower, not different |
+| `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.hypothesis/` | No | No | Tool/generated test state only; deleting it makes later checks slower, not semantically different |
 | `.ipynb_checkpoints/` | No | No | VS Code/Jupyter recovery state, not an official notebook |
 | `.learning/` | Optional | No | Learner-owned progress, not a cache; deleting it loses recorded progress |
 | `artifacts/` | Optional | No | Learner-generated models, reports, or outputs; inspect or back up before deleting |
@@ -21,6 +21,7 @@ Each learner creates local state on their own computer.
 | `.serena/cache/`, `.serena/logs/`, `.serena/project.local.yml` | No | No | Machine-local Serena index, diagnostics, and overrides |
 | `.DS_Store` | No | No | macOS Finder metadata |
 | Docker `postgres-data` volume | Yes only for the container SQL environment | No | Local database state; `docker compose down` preserves it |
+| `~/.jupysql/` | Optional user-level JupySQL configuration | No | May contain connection definitions or credentials; never copy it into the repository or a shared USB bundle |
 
 An ignored path is not automatically disposable. `.learning/`, `artifacts/`, `mlruns/`,
 model caches, and a Docker volume can contain work or offline assets that the
@@ -58,6 +59,11 @@ package inside the selected `.venv`, not merely a durable user-profile cache.
 Recreating `.venv` removes that installed pipeline, so reinstall it while
 online before returning to the spaCy lesson.
 
+DuckDB, Arrow, and packaging labs create their measured outputs in a temporary
+directory or under ignored `artifacts/`. Built wheels, Parquet files, local
+DuckDB databases, and extracted test installs are results—not maintained
+course source—unless a fixture is explicitly checked in.
+
 See [Offline use](setup/offline.md) for preparation and typical locations.
 
 ## Check before cleanup
@@ -82,3 +88,30 @@ python scripts/course.py progress reset --yes
 For the SQL container, `docker compose down` stops services and preserves the
 named database volume. Removing the volume is a separate destructive action
 and is not needed for normal study.
+
+## Prepare a source-only USB copy
+
+Before copying the repository to removable storage:
+
+1. Close VS Code, Jupyter, Python, and database clients.
+2. Preserve `.learning/`, `artifacts/`, or `mlruns/` separately if they contain
+   learner work.
+3. Remove only confirmed generated directories such as `.venv/`,
+   `__pycache__/`, tool caches, notebook checkpoints, build output, and
+   machine-local `.serena/cache/`.
+4. Keep `uv.lock`, `.python-version`, `.serena/project.yml`,
+   `.serena/memories/`, source fixtures, and all hidden Git/configuration files.
+5. Run:
+
+   ```text
+   git status --short --untracked-files=all
+   git status --ignored --short
+   python scripts/scan_secrets.py
+   ```
+
+6. Inspect the USB copy with hidden files visible. It should not contain
+   `.venv`, `.env`, `.pgpass`, `.jupysql`, a private-key file, or a tool cache.
+
+The receiving machine must create its own `.venv`; copying one across
+operating systems is unsupported. The sensitive-content scanner reports
+credential-shaped files even when common secret filenames are ignored by Git.

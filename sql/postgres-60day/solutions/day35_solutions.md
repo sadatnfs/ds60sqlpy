@@ -93,3 +93,24 @@ the answer.
 - PostgreSQL can decorrelate some subqueries. Confirm the plan instead of
   assuming every correlated expression runs once per outer row.
 - Do not hide fanout with `DISTINCT`; fix the join grain.
+
+## Exercise 3 — Diagnose wildcard search
+
+`LIKE 'A%'` has a fixed starting prefix; `LIKE '%A%'` does not. A normal B-tree
+therefore has a more direct opportunity on the first pattern, subject to
+collation/operator-class details.
+
+## Exercise 4 — Replace OFFSET with a seek tuple
+
+The boundary tuple comes from `(order_date DESC, order_id DESC)`. The next page
+uses the matching tuple comparison and repeats that deterministic order.
+
+## Exercise 5 — Fix payment/item fanout
+
+The answer groups each many-side by `order_id` before joining. `DISTINCT` would
+only conceal duplicated output, not repair multiplied sums.
+
+## Exercise 6 — Define nullable counts
+
+`COUNT(*)` measures customer rows; `COUNT(email)` measures customers with a
+non-NULL email. The difference is a useful missingness count, not a discrepancy.

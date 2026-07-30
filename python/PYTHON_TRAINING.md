@@ -217,6 +217,28 @@ Day 60 — Capstone completion & presentation: finalize model, prepare report & 
 
 ---
 
+## Professional extension (named modules after Day 60)
+
+The maintained course now continues with ten executable modules. They retain
+stable descriptive IDs so the original Days 1–60 never need renumbering:
+
+- `python-pro-01`: package engineering and a local release workflow
+- `python-svc-01`: reliable HTTP clients and service boundaries
+- `python-pro-02`: concurrency and parallelism decisions
+- `python-data-01`: Arrow, Parquet, and embedded DuckDB analytics
+- `python-test-01`: test architecture, doubles, and generative testing
+- `python-lang-01`: advanced typing and the Python data model
+- `python-stats-01`: resampling, experiments, and causal boundaries
+- `python-ml-01`: reproducible data and model delivery
+- `python-svc-02`: service hardening and observability
+- `python-perf-01`: measurement-first performance engineering
+
+Follow each module's declared prerequisites rather than assuming this list must
+be linear. See [professional paths](../docs/professional-paths.md) for direct
+learner, guide, and solution links.
+
+---
+
 ## Suggested rhythm
 - 5 focused weekdays (learning + exercises), 1 lighter day for reading/recap, 1 day for mini-projects or catch-up.  
 - Keep a daily journal: what you learned, 3 takeaways, 1 blocker.

@@ -29,8 +29,17 @@ snapshot difference; clean up the shared disposable table afterward.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day38_transactions_isolation.sql)
-and the documented two-session exercises. Record exact ordering and SQLSTATEs.
+Complete these in the [learner SQL](../day38_transactions_isolation.sql):
+
+1. Reproduce a non-repeatable read under `READ COMMITTED`.
+2. Reproduce a phantom with two counts and a concurrent insert.
+3. Cause/retry a `SERIALIZABLE` failure.
+4. Predict savepoint state after `ROLLBACK TO SAVEPOINT`.
+5. Build an atomic checked transfer between two temp accounts.
+6. Recover after a unique-key error at a savepoint.
+7. Explain an isolation choice for a multi-query read-only report.
+
+Record exact two-session ordering and SQLSTATEs.
 
 ## Self-check
 
@@ -87,3 +96,14 @@ demo against important shared rows.
 - Retry the whole serializable unit of work, not only the statement that failed.
 - Record the exact statement order in both terminals so the anomaly is
   reproducible.
+
+## Expanded practice lab
+
+Prompts 4–7 add single-session recovery patterns to the concurrency exercises.
+After `ROLLBACK TO SAVEPOINT`, PostgreSQL keeps that savepoint available until
+it is released or the transaction ends. This is why error recovery must first
+return to a valid savepoint before more statements run.
+
+For the transfer, lock/check/update both balances as one transaction and verify
+that total money is unchanged. A multi-query read-only report can still need
+`REPEATABLE READ` when all results must describe one consistent snapshot.

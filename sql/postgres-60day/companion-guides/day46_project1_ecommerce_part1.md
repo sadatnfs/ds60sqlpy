@@ -29,9 +29,16 @@ at a duplicated order-line grain would bias both counts and value.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day46_project1_ecommerce_part1.sql).
-Add a zero-order-customer test and state whether that customer receives a
-zero-value segment.
+Complete these in the [learner SQL](../day46_project1_ecommerce_part1.sql):
+
+1. Define fixed LTV segments and analyze them by country.
+2. Calculate cohort revenue for offsets 0–12.
+3. Predict how `NTILE` labels change when unrelated customers arrive.
+4. Produce LTV, orders, AOV, and recency at customer grain.
+5. Repair payment/item fanout in LTV.
+6. Retain no-order customers with an explicit zero-LTV policy.
+
+Add a zero-order-customer test and state its segment.
 
 ## Self-check
 

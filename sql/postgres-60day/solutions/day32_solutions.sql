@@ -26,4 +26,35 @@ FROM products
 WHERE category = 'Electronics';
 
 -- On a 300-row table PostgreSQL may rationally choose a sequential scan.
+-- Exercise 3: frequency supplies the selectivity evidence behind that choice.
+SELECT category, COUNT(*) AS products
+FROM products
+GROUP BY category
+ORDER BY products DESC, category;
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT product_id FROM products WHERE category = 'Electronics';
+
+-- Exercise 4: B-tree indexes support bounded range predicates. Half-open
+-- bounds avoid double-counting a timestamp at an adjacent window boundary.
+CREATE INDEX idx_payments_date_solution ON payments(payment_date);
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT payment_id, amount
+FROM payments
+WHERE payment_date >= CURRENT_TIMESTAMP - interval '180 days'
+  AND payment_date < CURRENT_TIMESTAMP;
+
+-- Exercise 5: lower(country) needs an index on that same expression.
+CREATE INDEX idx_customers_lower_country_solution ON customers(lower(country));
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT customer_id FROM customers WHERE lower(country) = 'us';
+
+-- Exercise 6: only the second query promises order. The first is intentionally
+-- a control whose apparent order must not be treated as an API contract.
+SELECT customer_id, country FROM customers LIMIT 10;
+SELECT customer_id, country
+FROM customers
+ORDER BY country, customer_id
+LIMIT 10;
+
 ROLLBACK;

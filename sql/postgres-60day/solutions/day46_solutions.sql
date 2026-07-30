@@ -57,3 +57,64 @@ SELECT cohort_month,
 FROM cohort_revenue
 WHERE month_offset BETWEEN 0 AND 12
 ORDER BY cohort_month DESC, month_offset;
+
+-- Exercise 3: NTILE is population-relative; fixed thresholds encode a stable
+-- policy. Show both so consumers can choose rather than conflate them.
+WITH lifetime AS (
+  SELECT c.customer_id, COALESCE(SUM(o.total_amount), 0) AS ltv
+  FROM customers c LEFT JOIN orders o USING (customer_id)
+  GROUP BY c.customer_id
+)
+SELECT customer_id,
+       ROUND(ltv, 2) AS ltv,
+       NTILE(4) OVER (ORDER BY ltv DESC, customer_id) AS population_quartile,
+       CASE WHEN ltv >= 5000 THEN 'gold'
+            WHEN ltv >= 2000 THEN 'silver'
+            ELSE 'bronze' END AS fixed_segment
+FROM lifetime
+ORDER BY ltv DESC, customer_id;
+
+-- Exercise 4: orders aggregate to one customer row before joining customers.
+-- This preserves the requested customer grain and all no-order customers.
+WITH behavior AS (
+  SELECT customer_id,
+         COUNT(*) AS order_count,
+         SUM(total_amount) AS ltv,
+         AVG(total_amount) AS average_order_value,
+         MAX(order_date) AS last_order_at
+  FROM orders
+  GROUP BY customer_id
+)
+SELECT c.customer_id,
+       COALESCE(b.order_count, 0) AS order_count,
+       COALESCE(b.ltv, 0) AS ltv,
+       b.average_order_value,
+       CURRENT_DATE - b.last_order_at::date AS days_since_last_order
+FROM customers c
+LEFT JOIN behavior b USING (customer_id)
+ORDER BY ltv DESC, c.customer_id;
+
+-- Exercise 5: line revenue is first reduced to order grain. Joining raw
+-- payments too would multiply line rows, so payment behavior belongs in a
+-- separate order-grain CTE if the metric needs it.
+WITH order_value AS (
+  SELECT o.order_id, o.customer_id,
+         SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS value
+  FROM orders o JOIN order_items oi USING (order_id)
+  GROUP BY o.order_id, o.customer_id
+)
+SELECT customer_id, ROUND(SUM(value), 2) AS line_ltv
+FROM order_value
+GROUP BY customer_id
+ORDER BY line_ltv DESC, customer_id;
+
+-- Exercise 6: COALESCE is applied after the LEFT JOIN. Applying an order filter
+-- in WHERE would discard no-order customers and accidentally make it inner.
+SELECT c.customer_id,
+       COALESCE(SUM(o.total_amount), 0) AS ltv,
+       CASE WHEN COUNT(o.order_id) = 0 THEN 'no-order'
+            ELSE 'has-order' END AS activity_status
+FROM customers c
+LEFT JOIN orders o USING (customer_id)
+GROUP BY c.customer_id
+ORDER BY c.customer_id;

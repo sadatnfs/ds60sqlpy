@@ -3,7 +3,7 @@
 BEGIN;
 SET search_path TO training, public;
 
--- 1) Business KPI Suite (multi-level calculations)
+-- 1. Business KPI Suite (multi-level calculations)
 -- a) LTV by cohort and segment
 WITH order_values AS (
   SELECT o.customer_id, o.order_id,
@@ -71,7 +71,7 @@ JOIN products p2 ON p2.product_id = pairs.p2
 ORDER BY together DESC
 LIMIT 20;
 
--- 2) Performance Aids (indexes/partitioning hints) - run EXPLAIN before/after
+-- 2. Performance Aids (indexes/partitioning hints) - run EXPLAIN before/after
 -- Note: These DDLs are rolled back unless you COMMIT intentionally
 CREATE INDEX IF NOT EXISTS idx_orders_customer_date ON orders(customer_id, order_date);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
@@ -85,7 +85,7 @@ GROUP BY o.customer_id
 ORDER BY SUM(o.total_amount) DESC
 LIMIT 50;
 
--- 3) Stakeholder Views
+-- 3. Stakeholder Views
 -- a) Finance: Budget vs Actual YTD by category
 WITH ytd_exp AS (
   SELECT date_trunc('year', expense_date)::date AS yr,
@@ -129,8 +129,27 @@ GROUP BY t.campaign
 ORDER BY assisted_customers DESC
 LIMIT 20;
 
--- 4) Large-scale considerations
+-- 4. Large-scale considerations
 -- For 100M+ rows, favor partitioning by time on orders/events, and use partial indexes on recent partitions.
 -- Ensure queries constrain partition key (order_date, event_time) to enable pruning.
+
+-- Exercises
+-- 1. Prediction: state the grain of every CTE in the LTV query and identify the
+--    exact step where order-grain values become customer-grain values.
+-- 2. Construction: turn the funnel counts into step-to-step and overall
+--    conversion rates while preserving customers who purchased without a
+--    recorded event.
+-- 3. Debugging: reconcile stored order totals, calculated line revenue, and
+--    payments before choosing which measure each stakeholder KPI should use.
+-- 4. Edge case: assign purchases with no qualifying campaign touch to a
+--    '(direct)' bucket and prove attribution counts reconcile to purchases.
+-- 5. Performance: compare the customer/date index with a date/customer index
+--    for the date-bounded aggregation; explain the leftmost-column tradeoff.
+-- 6. Explanation: write a metric contract for one KPI covering name, grain,
+--    numerator, denominator, time zone, NULL policy, exclusions, and owner.
+-- 7. Construction: produce a stakeholder-safe product-pair report with support,
+--    confidence, lift, minimum basket count, and deterministic ordering.
+-- 8. Sign-off: assemble one result set that reconciles the customer, finance,
+--    funnel, attribution, and market-basket outputs to named control totals.
 
 ROLLBACK;

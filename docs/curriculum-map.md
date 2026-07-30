@@ -1,8 +1,9 @@
 # Curriculum map
 
-DS60 contains two substantial 60-lesson tracks and an eight-lesson engineering
-bridge. The day number is an ordering key, not a promise that every learner
-should finish in that many calendar days.
+DS60 contains two substantial 60-lesson cores, an eight-lesson engineering
+bridge, and 26 named foundation, professional, and specialization modules. The
+day number is an ordering key, not a promise that every learner should finish
+in that many calendar days.
 
 Use:
 
@@ -17,7 +18,7 @@ for the checked-in generated inventory in `curriculum/catalog.json`. The index i
 ### New to programming and databases
 
 1. Complete Python Days 1–15.
-2. Begin SQL Days 1–15.
+2. Complete `sql-found-01` and `sql-found-02`, then begin SQL Days 1–15.
 3. Continue Python Days 16–30.
 4. Continue SQL Days 16–30.
 5. Add the engineering bridge after Python Day 15 and SQL Day 15 when you want
@@ -26,7 +27,9 @@ for the checked-in generated inventory in `curriculum/catalog.json`. The index i
 
 ### Comfortable with another programming language
 
-Review Python Days 1–9, then focus on testing, tooling, data work, and projects. Start SQL at Day 1 unless relational querying is already familiar.
+Review Python Days 1–9, then focus on testing, tooling, data work, and
+projects. Complete the two SQL foundations before Day 1 unless you can already
+design constraints and explain a versioned migration workflow.
 
 ### Comfortable with SQL
 
@@ -41,6 +44,7 @@ Follow the Python track in order through Day 45. Days 46–60 introduce larger o
 Complete Python Days 1–15 and SQL Days 1–15, then follow the
 [engineering bridge](../bridge/README.md). Continue the main tracks alongside
 it when a bridge lesson identifies a deeper Python or PostgreSQL prerequisite.
+Use the [professional paths](professional-paths.md) after the shared bridge.
 
 ## Python and data-science track
 
@@ -60,6 +64,8 @@ Artifacts currently present:
 - Companion guides: Days 1–60
 - Markdown solutions: Days 1–60
 - Solution notebooks: Days 1–60
+- Named professional learner modules: 10, each with a guide and two solution
+  artifacts
 
 The track is a practical Python-for-data-science curriculum. It does not replace the complete Python language reference, and some advanced topics are surveys rather than mastery in one session.
 
@@ -81,6 +87,8 @@ Artifacts currently present:
 - Companion guides: Days 1–60
 - Markdown solutions: Days 1–60
 - Executable solution SQL: Days 1–60
+- Relational foundations: 2 named modules before Day 1
+- Professional and specialization SQL: 10 named modules after the shared core
 
 Runnable material and the maintained high-level plan both target PostgreSQL
 16 or newer.
@@ -106,6 +114,9 @@ executable reference solution, and reasoning guide. Default tests use fakes and
 run offline. Optional live PostgreSQL work uses `DS60_DATABASE_URL` and the
 disposable course database.
 
+Four named bridge modules add PostgreSQL notebook magics, migration delivery
+and observability, AI application boundaries, and analytics engineering.
+
 ## Artifact roles
 
 - **Plan:** broad learning sequence and goals
@@ -113,6 +124,8 @@ disposable course database.
 - **Learner notebook or SQL file:** examples and exercises
 - **Bridge learner module:** application-engineering exercises with testable
   boundaries and optional live integration
+- **Named professional module:** a stable-ID foundation, cumulative lab, or
+  elective that does not renumber an established day
 - **Solution:** worked reasoning after an honest attempt
 - **Generated catalog:** machine-readable mapping of artifact names plus authoring metadata such as prerequisites, dependency groups, network behavior, and solution availability
 
@@ -146,3 +159,9 @@ Use Codex for a diagnostic quiz with [Learning with Codex](learning-with-codex.m
 The repository may grow beyond the historical numbering. New material should close a documented gap, declare prerequisites, and receive a stable catalog ID. Do not renumber established lessons merely to preserve a marketing total.
 
 See [Content authoring](content-authoring.md).
+
+For the audited gap record and implementation criteria, see the
+[curriculum gap backlog](curriculum-gap-backlog.md).
+
+The implemented named modules and recommended lanes are in
+[Professional and specialization paths](professional-paths.md).

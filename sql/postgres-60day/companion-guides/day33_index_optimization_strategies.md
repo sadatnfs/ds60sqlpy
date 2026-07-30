@@ -29,9 +29,17 @@ not enough for PostgreSQL to use that index safely.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day33_index_optimization_strategies.sql).
-For each candidate, write the exact query shape and expected maintenance tradeoff
-before creating it.
+Complete these in the
+[learner SQL](../day33_index_optimization_strategies.sql):
+
+1. Test `(category, created_at)` on products.
+2. Build/test a partial index for orders above 1000.
+3. Predict how the product composite index behaves for `created_at` alone.
+4. Design an `INCLUDE` index for customer order history.
+5. Compare a query that implies a partial predicate with one that does not.
+6. Evaluate a NULL-only partial index for `customers.segment`.
+
+For each candidate, name the exact query and maintenance tradeoff.
 
 ## Self-check
 
@@ -93,3 +101,15 @@ plan, row estimate, timing, and index size if useful.
 - The compact seed may prefer a sequential scan; correctness and measured cost
   come before forcing a plan.
 - All exercise indexes roll back with the learner transaction.
+
+## Expanded practice lab
+
+Prompts 3–6 test the contracts behind composite, covering, and partial indexes.
+For `(category, created_at)`, queries anchored on the leftmost equality have a
+more useful search prefix than `created_at` alone. `INCLUDE` columns can satisfy
+the output list without changing the index's search key.
+
+A partial index is eligible only when PostgreSQL can prove the query predicate
+implies its stored predicate; eligibility does not guarantee selection. For
+nullable segments, measure the NULL subset before deciding whether a tiny
+partial index earns its write and maintenance cost.

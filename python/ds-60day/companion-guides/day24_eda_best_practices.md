@@ -73,6 +73,28 @@ use and is then cached. Constructed/local data is the fully offline route.
    issue record evidence, possible impact, proposed treatment, and how that
    treatment will be validated.
 
+### Additional mastery practice
+
+Organize exploratory data analysis around questions, grain, quality, and evidence. Separate observed patterns from hypotheses and causal claims.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict how one extreme value can change mean, median, standard deviation, and a scatterplot.
+   **Progressive hint:** Robust and non-robust summaries respond differently to outliers.
+4. **Tracing:** Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward.
+   **Progressive hint:** Aggregation discards within-customer event detail.
+5. **Implementation:** Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts.
+   **Progressive hint:** Bound the result rather than dumping every row/value.
+6. **Debugging:** Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal.
+   **Progressive hint:** Remove leakage and label correlations as associations.
+7. **Edge case and explanation:** Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful.
+   **Progressive hint:** A calculation returning a number does not guarantee interpretability.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What does one row represent, and can that grain change?

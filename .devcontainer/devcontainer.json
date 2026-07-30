@@ -1,0 +1,25 @@
+{
+  "name": "DS60 Python and SQL",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "postCreateCommand": "python -m pip install -e '.[notebooks,data,bridge,quality]' && python -m ipykernel install --user --name ds60sqlpy --display-name 'Python (ds60sqlpy)'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-toolsai.jupyter"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python"
+      }
+    }
+  },
+  "forwardPorts": [5432, 8888],
+  "remoteEnv": {
+    "DS60_DATABASE_URL": "postgresql://ds60:ds60@host.docker.internal:5432/advanced_sql_training"
+  }
+}

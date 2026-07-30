@@ -31,8 +31,16 @@ campaign count; verify allocated credit sums to one for every assisted purchase.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day48_project1_ecommerce_part3.sql).
-Add touches exactly at both seven-day boundaries and document which qualify.
+Complete these in the [learner SQL](../day48_project1_ecommerce_part3.sql):
+
+1. Calculate seven-day assisted conversions.
+2. Allocate equal fractional multi-touch credit.
+3. Predict repeated-campaign behavior at touch versus campaign grain.
+4. Calculate product-pair support, bidirectional confidence, and lift.
+5. Assign a touch only to the next purchase.
+6. Add a direct bucket and reconcile credit to eligible purchases.
+
+Test touches exactly at both seven-day boundaries.
 
 ## Self-check
 

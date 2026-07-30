@@ -41,4 +41,56 @@ SELECT * FROM isolation_solution ORDER BY id;
 -- Clean up after the manual exercises:
 -- DROP TABLE training.isolation_solution_shared;
 
+-- Exercise 4: ROLLBACK TO keeps the named savepoint available. RELEASE removes
+-- it after the partial recovery is complete.
+SAVEPOINT reusable_point;
+UPDATE isolation_solution SET quantity = quantity + 1 WHERE id = 2;
+ROLLBACK TO SAVEPOINT reusable_point;
+RELEASE SAVEPOINT reusable_point;
+SELECT * FROM isolation_solution ORDER BY id;
+
+-- Exercise 5: both balance changes are one atomic unit. The guarded DO block
+-- raises before either UPDATE if the debit account cannot cover the transfer.
+CREATE TEMP TABLE transfer_accounts (
+  account_id int PRIMARY KEY,
+  balance numeric(12, 2) NOT NULL CHECK (balance >= 0)
+);
+INSERT INTO transfer_accounts VALUES (1, 100.00), (2, 40.00);
+DO $transfer$
+DECLARE
+  transfer_amount numeric(12, 2) := 25.00;
+  available numeric(12, 2);
+BEGIN
+  SELECT balance INTO available
+  FROM transfer_accounts
+  WHERE account_id = 1
+  FOR UPDATE;
+  IF available < transfer_amount THEN
+    RAISE EXCEPTION 'insufficient balance';
+  END IF;
+  UPDATE transfer_accounts
+  SET balance = balance - transfer_amount WHERE account_id = 1;
+  UPDATE transfer_accounts
+  SET balance = balance + transfer_amount WHERE account_id = 2;
+END
+$transfer$;
+SELECT SUM(balance) AS conserved_total FROM transfer_accounts;
+
+-- Exercise 6: an EXCEPTION block is implemented with an internal savepoint.
+-- Catching the expected unique violation leaves the outer transaction usable.
+DO $recover_unique$
+BEGIN
+  BEGIN
+    INSERT INTO isolation_solution VALUES (1, 999);
+  EXCEPTION WHEN unique_violation THEN
+    RAISE NOTICE 'duplicate rejected; outer transaction remains usable';
+  END;
+END
+$recover_unique$;
+SELECT COUNT(*) AS still_usable FROM isolation_solution;
+
+-- Exercise 7 is a design answer: use REPEATABLE READ for several SELECTs that
+-- must describe one snapshot; READ COMMITTED is fine when per-statement
+-- freshness is intended. Read-only does not mean snapshot choice is irrelevant.
+
 ROLLBACK;

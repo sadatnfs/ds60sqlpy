@@ -11,6 +11,8 @@ DS60 is designed for a one-time connected bootstrap followed by offline study. â
 - The PostgreSQL training schema after the server or container image is installed
 - Bridge fake-backed exercises and tests; optional live checks work after the
   local PostgreSQL environment is prepared
+- PostgreSQL notebook magics after the `sql-notebooks` profile and local
+  database are installed; no remote notebook service is required
 - Local plots, files, APIs, MLflow, and orchestration examples that do not opt into cloud services
 - Codex-independent course navigation and validation
 
@@ -23,6 +25,7 @@ Run these while connected before relying on the corresponding lessons offline:
 | Seaborn sample datasets | Several data-analysis lessons | Accepted first-run download; Seaborn reuses its local cache afterward |
 | Python packages and platform wheels | Course environment | Installed once by the setup script |
 | PostgreSQL or PostgreSQL container image | SQL track | Runs locally after installation or image pull |
+| JupySQL, SQLAlchemy, and Psycopg wheels | PostgreSQL notebook bridge | Installed by advanced setup; queries stay local afterward |
 | torchvision pretrained weights | Transfer-learning lesson | Must already be cached, or use the lessonâ€™s non-pretrained fallback |
 | Hugging Face model/tokenizer | NLP lesson | Must already be cached, or use the local fallback |
 | spaCy language model | NLP lesson | Must be installed while connected, or use `spacy.blank(...)` where the lesson permits |

@@ -62,6 +62,28 @@ number turns a malformed record into actionable evidence.
    one responsibility, preserve laziness, and make the final partial batch part
    of the contract.
 
+### Additional mastery practice
+
+Build one-responsibility lazy stages with explicit resource ownership, error policy, and final-partial-batch behavior.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization.
+   **Progressive hint:** Calling a generator function creates an iterator; its body starts on iteration.
+4. **Tracing:** Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see.
+   **Progressive hint:** Consumption is stateful and does not rewind automatically.
+5. **Implementation:** Implement `batch_rows(rows, size)` yielding tuples and preserving the final partial batch.
+   **Progressive hint:** Validate positive size and reset the accumulator after each yield.
+6. **Debugging:** Repair a function that returns a generator expression over a file after the surrounding `with` block has already closed the file.
+   **Progressive hint:** Own the `with` block inside the generator that performs iteration.
+7. **Edge case and explanation:** Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file.
+   **Progressive hint:** Pass a callback/list for bounded error records or yield tagged results.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - When does a generator function begin executing?

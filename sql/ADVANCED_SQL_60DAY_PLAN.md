@@ -274,6 +274,28 @@ The capstone has no hardware-independent runtime threshold. Define acceptance
 criteria for the database and dataset you actually test, preserve before/after
 plans, reconcile business totals, and explain any remaining quality exception.
 
+## Relational foundations and professional extensions
+
+The original Days 1–60 remain stable. New learners should first complete
+`sql-found-01` (relational design and constraints) and `sql-found-02`
+(versioned migrations). Ten named professional modules then extend the track:
+
+- `sql-sec-01`: roles, privileges, safe search paths, and row-level security
+- `sql-prog-01`: functions, procedures, triggers, and auditing boundaries
+- `sql-types-01`: native PostgreSQL types and searchable documents
+- `sql-ops-01`: index types, statistics, vacuum, and maintenance lifecycle
+- `sql-test-01`: SQL tests, migration checks, and data contracts
+- `sql-analytics-01`: reusable analytical-query patterns
+- `sql-ops-02`: logical backup/restore and recovery rehearsal design
+- `sql-ext-01`: extension, spatial, and vector capability boundaries
+- `sql-repl-01`: replication, CDC, and high-availability reasoning
+- `sql-temporal-01`: temporal, ledger, and retention modelling
+
+The default labs stay inside the disposable `advanced_sql_training` database.
+Administrator-only features use capability checks and explanatory exercises
+instead of changing server configuration. See
+[professional paths](../docs/professional-paths.md) for direct artifact links.
+
 ## What completion means
 
 Completing the track means more than executing every file. You should be able

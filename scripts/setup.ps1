@@ -60,7 +60,8 @@ Invoke-Native -FilePath $VenvPython -ArgumentList @(
 
 if ($Advanced) {
     Invoke-Native -FilePath $VenvPython -ArgumentList @(
-        "-m", "pip", "install", "-e", ".[ml,production,bridge,deep-learning,nlp,geo]"
+        "-m", "pip", "install", "-e",
+        ".[ml,production,bridge,professional,sql-notebooks,deep-learning,nlp,geo]"
     )
 }
 

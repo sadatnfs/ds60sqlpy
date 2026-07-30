@@ -69,6 +69,28 @@ first use. The constructed example above avoids that dependency.
    the network before the final check and inspect whether all required
    JavaScript/data were embedded.
 
+### Additional mastery practice
+
+Use interaction to answer a question, not to decorate a chart. Keep tooltips, filters, payload size, and offline HTML behavior intentional.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy.
+   **Progressive hint:** A CDN reference needs network access when opened.
+4. **Tracing:** Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding.
+   **Progressive hint:** A field retained only in source data is not visibly encoded.
+5. **Implementation:** Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files.
+   **Progressive hint:** Separate figure construction from export.
+6. **Debugging:** Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names.
+   **Progressive hint:** Validate the schema before calling the plotting library.
+7. **Edge case and explanation:** Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups.
+   **Progressive hint:** Browser rendering and HTML size are part of the data contract.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What question does each interaction answer?

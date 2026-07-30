@@ -60,6 +60,28 @@ the function is deterministic for a given integer.
    **Hint:** identify the argument that stays constant across many calls and
    bind only that argument.
 
+### Additional mastery practice
+
+Use functional tools when they make data flow clearer. Preserve laziness intentionally and keep side effects at explicit boundaries.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict what remains after calling `next` on a `map` object and then converting it to a list.
+   **Progressive hint:** `map` is a lazy one-shot iterator in Python 3.
+4. **Tracing:** Trace `sorted(records, key=lambda row: (row['team'], -row['score']))` and explain the tuple key.
+   **Progressive hint:** Tuple components are compared left to right.
+5. **Implementation:** Implement `compose(*functions)` so `compose(f, g)(x)` applies `g` then `f`, and handle no functions as identity.
+   **Progressive hint:** Apply the reversed function sequence to the current value.
+6. **Debugging:** Repair lambdas created in a loop that all use the final loop value.
+   **Progressive hint:** Bind the current value as a default argument or use a factory function.
+7. **Edge case and explanation:** Refactor a pipeline that prints inside `map` into pure transforms plus one explicit presentation step.
+   **Progressive hint:** Pure stages are easier to test and reuse.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why does `groupby` usually require sorted input?

@@ -1,0 +1,1090 @@
+{
+  "schema_version": 1,
+  "audit_commit": "e89e6642d6bf5df653bf0ce66773307fe2756c16",
+  "contract": "Each lesson surface must expose at least max(6, 2 x baseline) numbered practice prompts.",
+  "counting_notes": [
+    "Tracked artifacts use their content at audit_commit.",
+    "New professional artifacts use the first audited working-tree version.",
+    "Baseline is max(1, learner prompt count, companion-guide prompt count)."
+  ],
+  "lessons": {
+    "python-01": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 4,
+      "guide_baseline": 5,
+      "basis": "git-head"
+    },
+    "python-02": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-03": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-04": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-05": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-06": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-07": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-08": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-09": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-10": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-11": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-12": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-13": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-14": {
+      "baseline": 1,
+      "target": 6,
+      "learner_baseline": 0,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "python-15": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 0,
+      "guide_baseline": 5,
+      "basis": "git-head"
+    },
+    "python-16": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-17": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-18": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-19": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-20": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-21": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-22": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-23": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-24": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-25": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-26": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-27": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-28": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-29": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-30": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 0,
+      "guide_baseline": 5,
+      "basis": "git-head"
+    },
+    "python-31": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-32": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-33": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-34": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-35": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-36": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-37": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-38": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-39": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-40": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-41": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-42": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-43": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-44": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-45": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 0,
+      "guide_baseline": 7,
+      "basis": "git-head"
+    },
+    "python-46": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-47": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-48": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-49": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "python-50": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-51": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-52": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-53": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-54": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-55": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-56": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-57": {
+      "baseline": 4,
+      "target": 8,
+      "learner_baseline": 4,
+      "guide_baseline": 4,
+      "basis": "git-head"
+    },
+    "python-58": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-59": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "python-60": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 0,
+      "guide_baseline": 5,
+      "basis": "git-head"
+    },
+    "python-pro-01": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 0,
+      "guide_baseline": 5,
+      "basis": "first-audit"
+    },
+    "python-svc-01": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 0,
+      "guide_baseline": 7,
+      "basis": "first-audit"
+    },
+    "python-pro-02": {
+      "baseline": 6,
+      "target": 12,
+      "learner_baseline": 0,
+      "guide_baseline": 6,
+      "basis": "first-audit"
+    },
+    "python-data-01": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 0,
+      "guide_baseline": 7,
+      "basis": "first-audit"
+    },
+    "python-test-01": {
+      "baseline": 6,
+      "target": 12,
+      "learner_baseline": 0,
+      "guide_baseline": 6,
+      "basis": "first-audit"
+    },
+    "python-lang-01": {
+      "baseline": 8,
+      "target": 16,
+      "learner_baseline": 0,
+      "guide_baseline": 8,
+      "basis": "first-audit"
+    },
+    "python-stats-01": {
+      "baseline": 9,
+      "target": 18,
+      "learner_baseline": 0,
+      "guide_baseline": 9,
+      "basis": "first-audit"
+    },
+    "python-ml-01": {
+      "baseline": 8,
+      "target": 16,
+      "learner_baseline": 0,
+      "guide_baseline": 8,
+      "basis": "first-audit"
+    },
+    "python-svc-02": {
+      "baseline": 10,
+      "target": 20,
+      "learner_baseline": 0,
+      "guide_baseline": 10,
+      "basis": "first-audit"
+    },
+    "python-perf-01": {
+      "baseline": 9,
+      "target": 18,
+      "learner_baseline": 0,
+      "guide_baseline": 9,
+      "basis": "first-audit"
+    },
+    "sql-found-01": {
+      "baseline": 4,
+      "target": 8,
+      "learner_baseline": 4,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-found-02": {
+      "baseline": 4,
+      "target": 8,
+      "learner_baseline": 4,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-01": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-02": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-03": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-04": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-05": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-06": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-07": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-08": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-09": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-10": {
+      "baseline": 1,
+      "target": 6,
+      "learner_baseline": 0,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-11": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-12": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-13": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-14": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-15": {
+      "baseline": 1,
+      "target": 6,
+      "learner_baseline": 0,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-16": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-17": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-18": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-19": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-20": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-21": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-22": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-23": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-24": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-25": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-26": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-27": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-28": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-29": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-30": {
+      "baseline": 1,
+      "target": 6,
+      "learner_baseline": 0,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-31": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-32": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-33": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-34": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-35": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-36": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-37": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-38": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "sql-39": {
+      "baseline": 3,
+      "target": 6,
+      "learner_baseline": 3,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "sql-40": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-41": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-42": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-43": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-44": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-45": {
+      "baseline": 1,
+      "target": 6,
+      "learner_baseline": 0,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-46": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-47": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-48": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-49": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-50": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-51": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-52": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-53": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-54": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-55": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-56": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-57": {
+      "baseline": 2,
+      "target": 6,
+      "learner_baseline": 2,
+      "guide_baseline": 2,
+      "basis": "git-head"
+    },
+    "sql-58": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 5,
+      "guide_baseline": 3,
+      "basis": "git-head"
+    },
+    "sql-59": {
+      "baseline": 4,
+      "target": 8,
+      "learner_baseline": 4,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-60": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 5,
+      "guide_baseline": 0,
+      "basis": "git-head"
+    },
+    "sql-sec-01": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 5,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-prog-01": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 5,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-types-01": {
+      "baseline": 6,
+      "target": 12,
+      "learner_baseline": 6,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-ops-01": {
+      "baseline": 6,
+      "target": 12,
+      "learner_baseline": 6,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-test-01": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 5,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-analytics-01": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 7,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-ops-02": {
+      "baseline": 6,
+      "target": 12,
+      "learner_baseline": 6,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-ext-01": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 7,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-repl-01": {
+      "baseline": 6,
+      "target": 12,
+      "learner_baseline": 6,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "sql-temporal-01": {
+      "baseline": 6,
+      "target": 12,
+      "learner_baseline": 6,
+      "guide_baseline": 0,
+      "basis": "first-audit"
+    },
+    "bridge-01": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 0,
+      "guide_baseline": 5,
+      "basis": "git-head"
+    },
+    "bridge-02": {
+      "baseline": 6,
+      "target": 12,
+      "learner_baseline": 0,
+      "guide_baseline": 6,
+      "basis": "git-head"
+    },
+    "bridge-03": {
+      "baseline": 5,
+      "target": 10,
+      "learner_baseline": 0,
+      "guide_baseline": 5,
+      "basis": "git-head"
+    },
+    "bridge-04": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 0,
+      "guide_baseline": 7,
+      "basis": "git-head"
+    },
+    "bridge-05": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 0,
+      "guide_baseline": 7,
+      "basis": "git-head"
+    },
+    "bridge-06": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 0,
+      "guide_baseline": 7,
+      "basis": "git-head"
+    },
+    "bridge-07": {
+      "baseline": 7,
+      "target": 14,
+      "learner_baseline": 0,
+      "guide_baseline": 7,
+      "basis": "git-head"
+    },
+    "bridge-08": {
+      "baseline": 8,
+      "target": 16,
+      "learner_baseline": 0,
+      "guide_baseline": 8,
+      "basis": "git-head"
+    },
+    "bridge-jupyter-01": {
+      "baseline": 9,
+      "target": 18,
+      "learner_baseline": 0,
+      "guide_baseline": 9,
+      "basis": "first-audit"
+    },
+    "bridge-ops-01": {
+      "baseline": 10,
+      "target": 20,
+      "learner_baseline": 0,
+      "guide_baseline": 10,
+      "basis": "first-audit"
+    },
+    "bridge-ai-01": {
+      "baseline": 11,
+      "target": 22,
+      "learner_baseline": 0,
+      "guide_baseline": 11,
+      "basis": "first-audit"
+    },
+    "bridge-analytics-01": {
+      "baseline": 12,
+      "target": 24,
+      "learner_baseline": 0,
+      "guide_baseline": 12,
+      "basis": "first-audit"
+    }
+  }
+}

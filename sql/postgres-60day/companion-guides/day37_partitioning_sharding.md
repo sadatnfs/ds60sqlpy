@@ -29,9 +29,16 @@ pruned rather than assuming it.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day37_partitioning_sharding.sql).
-Test values exactly on every partition boundary and one value with no matching
-partition.
+Complete these in the [learner SQL](../day37_partitioning_sharding.sql):
+
+1. Add partitions and test pruning.
+2. Add local indexes and compare plans.
+3. Predict partition scans with and without a time predicate.
+4. Add a DEFAULT partition and inspect row placement via `tableoid`.
+5. Diagnose an insert into an uncovered range.
+6. Test the inclusive-FROM/exclusive-TO boundary at February 1.
+
+Test every boundary and one value without a matching named partition.
 
 ## Self-check
 
@@ -86,3 +93,14 @@ query.
 - PostgreSQL indexes are implemented per partition; plan index creation for new
   partitions.
 - All demo tables and indexes disappear at the learner script's `ROLLBACK`.
+
+## Expanded practice lab
+
+Prompts 3–6 turn partition pruning into observable evidence. Compare plans with
+and without the partition-key predicate and inspect `tableoid::regclass` to see
+physical row placement. Add the DEFAULT partition only after observing the
+helpful “no partition found” error for an uncovered date.
+
+Range bounds are `[FROM, TO)`: midnight on February 1 belongs to the February
+partition, not January. A DEFAULT partition improves ingest availability but
+also needs monitoring so unexpected dates do not accumulate unnoticed.

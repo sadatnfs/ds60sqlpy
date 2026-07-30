@@ -63,3 +63,70 @@ SELECT month,
 FROM variance
 GROUP BY month
 ORDER BY month DESC;
+
+-- Exercise 3: preserve missingness before display. A NULL budget is unknown,
+-- not automatically a policy-approved zero.
+WITH actual AS (
+  SELECT date_trunc('month', expense_date)::date AS month, category,
+         SUM(amount) AS actual
+  FROM expenses GROUP BY 1, 2
+), budget AS (
+  SELECT period AS month, category, SUM(amount) AS budget
+  FROM budgets GROUP BY 1, 2
+)
+SELECT COALESCE(a.month, b.month) AS month,
+       COALESCE(a.category, b.category) AS category,
+       a.actual, b.budget,
+       CASE WHEN b.category IS NULL THEN 'missing budget'
+            WHEN a.category IS NULL THEN 'no actual'
+            ELSE 'comparable' END AS comparison_status
+FROM actual a
+FULL JOIN budget b USING (month, category)
+ORDER BY month DESC, category;
+
+-- Exercise 4: first normalize joined keys/values, then apply YTD windows to the
+-- single canonical month/category columns.
+WITH monthly AS (
+  SELECT COALESCE(a.month, b.month) AS month,
+         COALESCE(a.category, b.category) AS category,
+         a.actual, b.budget
+  FROM (
+    SELECT date_trunc('month', expense_date)::date AS month, category,
+           SUM(amount) AS actual
+    FROM expenses GROUP BY 1, 2
+  ) a
+  FULL JOIN (
+    SELECT period AS month, category, SUM(amount) AS budget
+    FROM budgets GROUP BY 1, 2
+  ) b USING (month, category)
+)
+SELECT month, category,
+       SUM(actual) OVER (PARTITION BY category, EXTRACT(year FROM month)
+                         ORDER BY month) AS actual_ytd,
+       SUM(budget) OVER (PARTITION BY category, EXTRACT(year FROM month)
+                         ORDER BY month) AS budget_ytd,
+       SUM(actual - budget) OVER (
+         PARTITION BY category, EXTRACT(year FROM month) ORDER BY month
+       ) AS variance_ytd
+FROM monthly
+ORDER BY month DESC, category;
+
+-- Exercise 5 is embodied by the canonical `monthly` CTE above: every later
+-- window references its coalesced keys, never one nullable join side.
+
+-- Exercise 6: classify missing plans before applying an overspend threshold.
+WITH totals AS (
+  SELECT e.category, SUM(e.amount) AS actual, SUM(b.amount) AS budget
+  FROM expenses e
+  FULL JOIN budgets b
+    ON b.category = e.category
+   AND b.period = date_trunc('month', e.expense_date)::date
+  GROUP BY e.category
+)
+SELECT category, actual, budget,
+       CASE WHEN budget IS NULL THEN 'unbudgeted spend'
+            WHEN budget = 0 THEN 'zero budget'
+            WHEN actual > budget THEN 'overspend'
+            ELSE 'within budget' END AS status
+FROM totals
+ORDER BY category;

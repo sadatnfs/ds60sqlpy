@@ -29,8 +29,16 @@ policy.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day43_backup_recovery.sql). Repeat
-the staged merge and prove it does not create duplicate customers.
+Complete these in the [learner SQL](../day43_backup_recovery.sql):
+
+1. Export/import a filtered subset with `COPY (...)` or psql `\copy`.
+2. Restore staged customers with deterministic conflict handling.
+3. Explain server-side `COPY` versus client-side `\copy`.
+4. Build a deterministic row-count/key-range export manifest.
+5. Deduplicate staged emails with an explicit winner rule.
+6. Compare source/restored values with `IS DISTINCT FROM`.
+
+Repeat the staged merge and prove it creates no duplicates.
 
 ## Self-check
 
@@ -80,3 +88,14 @@ on the learner's Windows, macOS, or Linux client.
 Logical export is not point-in-time recovery. Production PITR needs tested base
 backups, WAL archiving, retention, encryption, and measured RPO/RTO outside this
 SQL-only lesson.
+
+## Expanded practice lab
+
+Prompts 3–6 distinguish server-side `COPY` from client-side psql `\copy`.
+`\copy` reads or writes on the learner's machine and normally avoids needing
+database-server filesystem access. A useful manifest records scope and counts;
+cryptographic file checksums belong to the surrounding backup workflow.
+
+Deduplicate a stage with an explicit winner rule before upsert. Compare restored
+columns with `IS DISTINCT FROM`, which treats two NULLs as equal and one NULL as
+different—exactly the behavior a reconciliation usually needs.

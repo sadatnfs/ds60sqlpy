@@ -106,3 +106,23 @@ solutions and roll back. Day 54 does not require Day 53 changes to persist.
   warehouse-design exercise.
 - Reconcile independently aggregated sides; joining aggregates to detail rows
   before summing can fan out both measures.
+
+## Exercise 3 — Account for late facts
+
+The period inventory identifies every loaded month. A late fact requires
+refreshing its own affected period, not merely the newest month.
+
+## Exercise 4 — Refresh atomically
+
+Delete and all aggregate inserts run in one transaction through the procedure.
+Failure rolls back the whole period instead of leaving partial tables.
+
+## Exercise 5 — Make reconciliation NULL-safe
+
+FULL JOIN preserves a period missing on either side, and coalesced arithmetic
+turns that absence into a visible nonzero difference.
+
+## Exercise 6 — Prove idempotency
+
+The answer snapshots category aggregates, reruns the same latest period, and
+uses two-way `EXCEPT`. Both difference sets must be empty.

@@ -8,7 +8,7 @@
 BEGIN;
 SET search_path TO training, public;
 
--- 1) DQ Summary Views (re-usable) ------------------------------------------
+-- 1. DQ Summary Views (re-usable) ------------------------------------------
 CREATE OR REPLACE VIEW v_dq_customers AS
 SELECT COUNT(*) AS total,
        SUM(CASE WHEN email IS NULL OR email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' THEN 1 ELSE 0 END) AS invalid_email,
@@ -25,7 +25,7 @@ FROM orders;
 SELECT * FROM v_dq_customers;
 SELECT * FROM v_dq_orders;
 
--- 2) Core Business Views ----------------------------------------------------
+-- 2. Core Business Views ----------------------------------------------------
 -- Lifetime value per customer
 CREATE OR REPLACE VIEW v_customer_ltv AS
 WITH line AS (
@@ -51,7 +51,7 @@ SELECT m.month,
        ROUND((m.revenue - COALESCE(LAG(m.revenue) OVER (ORDER BY m.month),0)) / NULLIF(LAG(m.revenue) OVER (ORDER BY m.month),0), 4) AS mom_growth
 FROM m;
 
--- 3) Stakeholder-ready Queries ---------------------------------------------
+-- 3. Stakeholder-ready Queries ---------------------------------------------
 -- Finance: Budget vs Actual by month/category (YTD)
 WITH exp AS (
   SELECT date_trunc('month', expense_date)::date AS month, category, SUM(amount) AS actual
@@ -96,7 +96,7 @@ WHERE o.order_date >= now() - interval '180 days'
 GROUP BY p.category
 ORDER BY qty DESC;
 
--- 4) Performance Checklist ---------------------------------------------------
+-- 4. Performance Checklist ---------------------------------------------------
 -- Indexes helpful for above queries (will be rolled back unless COMMIT)
 CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(order_date);
 CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
@@ -108,12 +108,34 @@ CREATE INDEX IF NOT EXISTS idx_budgets_period ON budgets(period);
 -- Validate plan improvements quickly
 EXPLAIN ANALYZE SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 12;
 
--- 5) Documentation Hints ----------------------------------------------------
+-- 5. Documentation Hints ----------------------------------------------------
 -- Include in your write-up:
 --  - Data quality findings (from v_dq_*) and remediation steps
 --  - Core model entities used and rationale (customers/orders/items/events/etc.)
 --  - Queries and indexes that moved the needle, with before/after EXPLAIN metrics
 --  - Any compromises (freshness vs speed, materialized views, partitioning)
+
+-- Exercises
+-- 1. Prediction: identify which views are snapshot-independent and which use
+--    CURRENT_DATE/now(), then explain the reproducibility consequence.
+-- 2. Construction: build a single sign-off query whose rows are named checks
+--    with observed_value, expected_value, pass, severity, and remediation.
+-- 3. Debugging: remove repeated LAG expressions from v_monthly_revenue by using
+--    a second CTE, while preserving the first month's NULL growth rate.
+-- 4. Edge case: represent an incomplete current month separately so it is not
+--    compared directly with a complete prior month.
+-- 5. Performance: capture before/after plans in JSON and document plan shape,
+--    estimates, actual rows, buffers, and timing without promising universal gains.
+-- 6. Explanation: produce a release checklist covering rollback, ownership,
+--    permissions, refresh cadence, monitoring, data contracts, and known limits.
+-- 7. Construction: create a lineage table that maps each published metric to
+--    its source tables, transformation grain, and validation query.
+-- 8. Debugging: prove every dashboard subtotal reconciles to a simpler control
+--    query before approving any performance optimization.
+-- 9. Edge case: test empty, one-row, NULL-heavy, and duplicate-key fixtures and
+--    record which assumptions prevent each from reaching production.
+-- 10. Final sign-off: return PASS/FAIL/NOT_RUN for every acceptance criterion;
+--     prose alone must never turn an unexecuted check into PASS.
 
 -- When ready to persist created views/indexes, replace ROLLBACK with COMMIT.
 ROLLBACK;

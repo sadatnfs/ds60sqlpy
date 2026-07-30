@@ -68,7 +68,16 @@ SELECT * FROM ranked WHERE rnk <= 5
 ORDER BY country, category, rnk;
 
 -- Exercises
--- 1) Replace ROLLUP with CUBE to get all subtotal combinations and compare row counts.
--- 2) Add a dimension for order status and re-run the drill-down with top-5.
+-- 1. Replace ROLLUP with CUBE to get all subtotal combinations and compare row counts.
+-- 2. Add a dimension for order status and re-run the drill-down with top-5.
+-- 3. Prediction: list the grouping sets produced by ROLLUP(country, category,
+--    month) and contrast them with CUBE before running either query.
+-- 4. Construction: use PostgreSQL's GROUPING(country, category) bit mask to
+--    assign stable detail/subtotal/grand-total labels without mistaking stored
+--    NULLs for subtotal markers.
+-- 5. Debugging: replace RANK with ROW_NUMBER plus a deterministic tie-breaker
+--    when the dashboard must show exactly five products per group.
+-- 6. Edge case: preserve a real '(unknown)' country member separately from the
+--    ALL-countries subtotal in both machine-readable and display columns.
 
 ROLLBACK;

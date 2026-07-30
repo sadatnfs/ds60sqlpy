@@ -34,7 +34,15 @@ SELECT * FROM orders WHERE total_amount < 0 LIMIT 10;
 SELECT * FROM payments WHERE amount < 0 LIMIT 10;
 
 -- Exercises
--- 1) Build a validation report summarizing nulls, duplicates, and constraint violations across core tables.
--- 2) Detect customers with invalid email patterns using regex.
+-- 1. Build a validation report summarizing nulls, duplicates, and constraint violations across core tables.
+-- 2. Detect customers with invalid email patterns using regex.
+-- 3. Prediction: explain why CHECK (amount >= 0) rejects negative values but,
+--    without NOT NULL, would accept NULL under SQL's three-valued logic.
+-- 4. Construction: reconcile each order's stored total_amount with calculated
+--    line-item revenue and return only differences greater than one cent.
+-- 5. Debugging: repair a duplicate check that groups by lower(email) but reports
+--    only the normalized value, losing the raw variants needed for diagnosis.
+-- 6. Edge case: detect overlapping promotion date ranges for the same product,
+--    treating touching inclusive endpoints as an overlap.
 
 ROLLBACK;

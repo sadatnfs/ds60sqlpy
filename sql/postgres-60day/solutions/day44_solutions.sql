@@ -53,4 +53,34 @@ SELECT *
 FROM top_statement_stats
 ORDER BY ranking, total_exec_time DESC;
 
+-- Exercise 3: transaction age can exceed statement age, especially for
+-- idle-in-transaction sessions.
+SELECT pid, usename, state,
+       clock_timestamp() - xact_start AS transaction_age,
+       clock_timestamp() - query_start AS statement_age
+FROM pg_stat_activity
+WHERE pid <> pg_backend_pid()
+  AND state <> 'idle'
+ORDER BY transaction_age DESC NULLS LAST;
+
+-- Exercise 4: aggregate rather than exposing full statement text.
+SELECT datname, usename, state, COUNT(*) AS connections
+FROM pg_stat_activity
+GROUP BY datname, usename, state
+ORDER BY datname, usename, state;
+
+-- Exercise 5: retain both rankings. Mean identifies costly calls; total time
+-- captures cumulative workload impact.
+SELECT ranking, query, calls, mean_exec_time, total_exec_time
+FROM top_statement_stats
+ORDER BY ranking, total_exec_time DESC, mean_exec_time DESC;
+
+-- Exercise 6: this is diagnostic only; do not cancel or terminate sessions.
+SELECT pid, usename, datname,
+       clock_timestamp() - xact_start AS transaction_age,
+       wait_event_type, wait_event
+FROM pg_stat_activity
+WHERE state = 'idle in transaction'
+ORDER BY transaction_age DESC NULLS LAST;
+
 ROLLBACK;

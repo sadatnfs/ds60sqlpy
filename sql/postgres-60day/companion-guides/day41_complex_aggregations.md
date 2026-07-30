@@ -28,9 +28,16 @@ combined dashboard.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day41_complex_aggregations.sql).
-Add a category with no qualifying recent rows and decide whether its measures
-should be `NULL` or zero.
+Complete these in the [learner SQL](../day41_complex_aggregations.sql):
+
+1. Build six category metrics with `FILTER`.
+2. List each country's top five products with `string_agg`.
+3. Predict explicit grouping sets versus a two-column `CUBE`.
+4. Build country status/revenue/customer metrics with `FILTER`.
+5. Distinguish stored NULLs from subtotal NULLs with `GROUPING`.
+6. Return a typed empty array for an empty aggregate input.
+
+Decide explicitly when an absent measure should be `NULL` or zero.
 
 ## Self-check
 
@@ -85,3 +92,14 @@ by the course setup.
 - Add a deterministic tie-break such as `product_id`.
 - Validate dashboard totals against a simpler single-metric query before
   trusting the combined report.
+
+## Expanded practice lab
+
+Prompts 3–6 make aggregate grain and subtotal identity explicit. A two-column
+`CUBE` emits detail, both one-dimensional subtotals, and a grand total; the
+listed `GROUPING SETS` intentionally omits detail. Use `GROUPING(column)` rather
+than `column IS NULL` to detect a subtotal.
+
+`FILTER` keeps several metric definitions readable in one grouped query.
+Aggregates over no input rows often return NULL, so `COALESCE(array_agg(...),
+'{}'::text[])` needs an explicit type matching the aggregate result.

@@ -47,7 +47,7 @@ Impact: final output is blocked instead of silently changing those rows.
 This is more useful than an unexplained `dropna()` because it preserves the
 reasoning and a way to verify the consequence.
 
-## Project exercises and progressive hints
+## Exercises and progressive hints
 
 1. **Load and scope.** Use a local file, constructed dataset, or already-cached
    Seaborn sample; record provenance, row grain, shape, and analytical question.
@@ -69,6 +69,28 @@ reasoning and a way to verify the consequence.
 
 If the dataset includes a prediction target, split before learning imputation,
 encoding, scaling, or target-aware decisions.
+
+### Additional mastery practice
+
+Build a restartable evidence chain: question and provenance → raw checks → decisions → clean data → validation → artifacts → limitations.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+6. **Prediction:** Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure.
+   **Progressive hint:** A declared expectation turns a surprise into a testable discrepancy.
+7. **Tracing:** Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries.
+   **Progressive hint:** Every material change needs a reason and reconciliation.
+8. **Implementation:** Implement a structured decision log entry containing evidence, action, rationale, validation, and impact.
+   **Progressive hint:** Make decisions data, not scattered comments.
+9. **Debugging:** Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning.
+   **Progressive hint:** Put parameters/imports first and make `clean(raw)` return a copy.
+10. **Edge case and explanation:** Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version.
+   **Progressive hint:** Block artifact creation when acceptance criteria fail.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
 
 ## Self-check and acceptance criteria
 

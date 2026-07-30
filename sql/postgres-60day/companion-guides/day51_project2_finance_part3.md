@@ -29,9 +29,16 @@ supporting observation count beside the projection.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day51_project2_finance_part3.sql).
-Add a future calendar generator and show all three target months even when one
-has no matching history.
+Complete these in the [learner SQL](../day51_project2_finance_part3.sql):
+
+1. Calculate policy-defined monthly operating margin.
+2. Project three months of seasonal-naive net cash.
+3. Explain cash-basis versus order-revenue timing.
+4. Produce beginning cash, flows, net cash, and ending cash.
+5. Preserve expense-only/payment-only months with a calendar spine.
+6. Keep zero-cash-in margin NULL with an explanatory status.
+
+Show all three forecast months even without matching history.
 
 ## Self-check
 

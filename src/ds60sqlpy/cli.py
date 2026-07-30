@@ -52,10 +52,12 @@ def _cmd_catalog(args: argparse.Namespace, catalog: Catalog) -> int:
     if args.json:
         print(json.dumps(rows, indent=2))
         return 0
-    for lesson in catalog.lessons(track):
+    lessons = catalog.lessons(track)
+    id_width = max((len(lesson.id) for lesson in lessons), default=9)
+    for lesson in lessons:
         solutions = len(lesson.solution_paths)
         print(
-            f"{lesson.id:9} {lesson.level:12} {lesson.estimated_minutes:>3}m "
+            f"{lesson.id:{id_width}} {lesson.level:12} {lesson.estimated_minutes:>3}m "
             f"{lesson.title} "
             f"[deps={lesson.dependency_group}; network={lesson.network}; "
             f"solutions={solutions}]"
@@ -109,7 +111,7 @@ def _cmd_progress(args: argparse.Namespace, catalog: Catalog) -> int:
     else:
         print("No local progress recorded yet.")
     for track in ("python", "sql", "bridge"):
-        next_lesson = store.next_lesson(track)  # type: ignore[arg-type]
+        next_lesson = store.next_lesson(track)
         if next_lesson:
             print(f"Next {track}: {next_lesson.id} — {next_lesson.title}")
         else:
@@ -144,6 +146,14 @@ def _cmd_sql(args: argparse.Namespace, catalog: Catalog) -> int:
         run = runner.lesson(args.day)
         return run.returncode
 
+    if args.sql_action == "run-id":
+        try:
+            run = runner.lesson_id(args.lesson_id)
+        except (KeyError, SqlRunnerError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        return run.returncode
+
     if args.sql_action == "all":
         if args.reset:
             setup_run = runner.setup()
@@ -154,8 +164,9 @@ def _cmd_sql(args: argparse.Namespace, catalog: Catalog) -> int:
                 return verify_run.returncode
         runs = runner.all_lessons()
         passed = sum(run.returncode == 0 for run in runs)
-        print(f"SQL lessons passed: {passed}/60")
-        return 0 if len(runs) == 60 and passed == 60 else 1
+        expected = len(catalog.lessons("sql"))
+        print(f"SQL lessons passed: {passed}/{expected}")
+        return 0 if len(runs) == expected and passed == expected else 1
 
     if args.sql_action == "solutions":
         if args.reset:
@@ -167,8 +178,13 @@ def _cmd_sql(args: argparse.Namespace, catalog: Catalog) -> int:
                 return verify_run.returncode
         runs = runner.all_solutions()
         passed = sum(run.returncode == 0 for run in runs)
-        print(f"Executable SQL solutions passed: {passed}/60")
-        return 0 if len(runs) == 60 and passed == 60 else 1
+        expected = sum(
+            Path(path).suffix == ".sql"
+            for lesson in catalog.lessons("sql")
+            for path in lesson.solution_paths
+        )
+        print(f"Executable SQL solutions passed: {passed}/{expected}")
+        return 0 if len(runs) == expected and passed == expected else 1
 
     raise AssertionError(f"Unhandled SQL action: {args.sql_action}")
 
@@ -225,13 +241,21 @@ def _parser() -> argparse.ArgumentParser:
     sql_subparsers.add_parser("verify", help="Verify course seed-data invariants.")
     run_parser = sql_subparsers.add_parser("run", help="Run one SQL lesson.")
     run_parser.add_argument("day", type=int, choices=range(1, 61), metavar="DAY")
+    run_id_parser = sql_subparsers.add_parser(
+        "run-id",
+        help="Run one SQL lesson by stable catalog ID.",
+    )
+    run_id_parser.add_argument(
+        "lesson_id",
+        help="For example: sql-found-01, sql-18, or sql-ops-01",
+    )
     all_parser = sql_subparsers.add_parser("all", help="Run all SQL lessons sequentially.")
     all_parser.add_argument(
         "--reset", action="store_true", help="Run destructive course setup first."
     )
     solutions_parser = sql_subparsers.add_parser(
         "solutions",
-        help="Run all 60 executable SQL solutions sequentially.",
+        help="Run every cataloged executable SQL solution sequentially.",
     )
     solutions_parser.add_argument(
         "--reset",

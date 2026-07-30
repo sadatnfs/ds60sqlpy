@@ -75,3 +75,34 @@ to export or pass to a notebook/BI tool.
   left join activity.
 - The seed is synthetic, so chart shape demonstrates technique rather than a
   business retention benchmark.
+
+## Exercise 1 — Calculate retention rates
+
+`cohort_sizes` supplies the denominator and active distinct customers supply the
+numerator. Numeric casting prevents integer truncation.
+
+## Exercise 2 — Return six tidy curves
+
+The final rows retain cohort month, offset, size, active count, and rate. “Chart
+it” is downstream presentation; SQL should preserve the auditable components.
+
+## Exercise 3 — Choose a cohort anchor
+
+Signup month measures post-registration behavior; first-order month measures
+repeat purchasing. The answer displays both per customer so the semantic choice
+is visible.
+
+## Exercise 4 — Complete the cohort grid
+
+Cross joining cohorts with offsets creates every expected cell. A left join
+then turns missing observed activity into zero without losing cohort size.
+
+## Exercise 5 — Reject negative chronology
+
+The diagnostic returns customers whose first order precedes recorded signup.
+Such rows should be corrected or explicitly excluded before retention math.
+
+## Exercise 6 — Preserve future unknowns
+
+An offset beyond the latest observed month is not a measured zero. The
+`is_observable` flag keeps not-yet-available periods distinct.

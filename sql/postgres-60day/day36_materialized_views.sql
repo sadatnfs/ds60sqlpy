@@ -19,7 +19,15 @@ SELECT * FROM mv_category_month_revenue ORDER BY month DESC, revenue DESC LIMIT 
 REFRESH MATERIALIZED VIEW mv_category_month_revenue;
 
 -- Exercises
--- 1) Create a MV for weekly revenue by country.
--- 2) Compare query time against base tables vs MV.
+-- 1. Create a MV for weekly revenue by country.
+-- 2. Compare query time against base tables vs MV.
+-- 3. Prediction: insert a temporary order after the materialized view is built.
+--    Predict whether the view changes before REFRESH, then verify.
+-- 4. Construction: add a unique index that would make a concurrent refresh
+--    structurally possible; explain why this lesson still uses ordinary refresh.
+-- 5. Debugging: compare SUM(orders.total_amount) with line-item revenue and
+--    identify which business definition the materialized view actually stores.
+-- 6. Edge case: query a month/category combination with no source rows and
+--    explain why a materialized aggregate has no automatic zero-valued row.
 
 ROLLBACK;

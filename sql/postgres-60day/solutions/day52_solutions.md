@@ -96,3 +96,25 @@ Day 54 depends on committed Day 52 state, not on rolled-back Day 53 changes.
 - Dimension validity uses inclusive date bounds. Close an old version on the
   day before the new version starts.
 - A fact load must reconcile to source counts before it is trusted.
+
+## Exercise 3 — State the sales fact grain
+
+`COUNT(*)`, distinct orders, and distinct order-item keys prove that
+`fact_sales` is one row per order line. An order can therefore repeat.
+
+## Exercise 4 — Route unknown members deliberately
+
+The solution reserves surrogate key `-1` in referenced dimensions and shows a
+missing natural customer key mapping to it. This policy must not hide a broken
+required mapping.
+
+## Exercise 5 — Reconcile completeness and amount
+
+Fact/source row counts and rounded line amounts appear together. Either a row
+or amount difference blocks trust in the warehouse load.
+
+## Exercise 6 — Handle late dates explicitly
+
+The query lists payments outside `dim_date`. The chosen policy is fail and
+extend the dimension because silently mapping a real accounting date to unknown
+would destroy time analysis.

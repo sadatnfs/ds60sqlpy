@@ -68,6 +68,28 @@ cleaning.
    cleaning, validate the returned frame, then write only the validated result;
    preserve the failure report when validation stops the write.
 
+### Additional mastery practice
+
+Translate business rules into executable boundary contracts and prove both acceptance and informative failure before persisting data.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict the difference between coercing a value to the schema dtype and validating it without coercion.
+   **Progressive hint:** Coercion transforms compatible representations; validation checks a state.
+4. **Tracing:** Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write?
+   **Progressive hint:** Validate the actual final frame immediately before persistence.
+5. **Implementation:** Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture.
+   **Progressive hint:** Derive constraints from stated business rules, not observed values alone.
+6. **Debugging:** Repair a pipeline that writes output before validating it or catches and discards every schema error.
+   **Progressive hint:** Validation failure is a blocked output, not a warning-only event.
+7. **Edge case and explanation:** Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures.
+   **Progressive hint:** One failure fixture per rule makes contract coverage auditable.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Which rules belong in a schema versus a cleaning function?

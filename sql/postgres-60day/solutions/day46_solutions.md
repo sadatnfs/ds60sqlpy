@@ -89,3 +89,27 @@ equivalent to a stored zero.
 - Signup month defines the cohort here, while LTV includes all available order
   history.
 - These answers are read-only and repeatable.
+
+## Exercise 3 — Compare relative and fixed segments
+
+`NTILE(4)` is recalculated over the current population, so another customer's
+arrival can move a boundary. Fixed monetary thresholds are stable but require a
+reviewed business policy. The executable answer displays both.
+
+## Exercise 4 — Build a customer-grain feature row
+
+The `behavior` CTE aggregates orders once per customer. Its outer join preserves
+no-order customers and supports LTV, frequency, average order value, and recency
+without mixing grains.
+
+## Exercise 5 — Prevent LTV fanout
+
+Line revenue is reduced to one row per order before it becomes customer LTV.
+Payments would need their own order-grain aggregation; joining both raw sources
+would multiply values.
+
+## Exercise 6 — Retain no-order customers
+
+The answer keeps the LEFT JOIN outer and applies `COALESCE` only after grouping.
+A WHERE predicate on order columns would accidentally remove the intended
+zero-LTV population.

@@ -94,7 +94,15 @@ FROM diffs d;
 -- Fact table joins should point to is_current at load time; for historical facts you would key by date to choose appropriate SCD version.
 
 -- Exercises
--- 1) Implement SCD2 change capture keyed by date_key (choose version where valid_from <= order_date <= coalesce(valid_to,'infinity')).
--- 2) Add audit columns (updated_by, updated_at) to dim tables.
+-- 1. Implement SCD2 change capture keyed by date_key (choose version where valid_from <= order_date <= coalesce(valid_to,'infinity')).
+-- 2. Add audit columns (updated_by, updated_at) to dim tables.
+-- 3. Prediction: explain why closing a version at CURRENT_DATE - 1 can create an
+--    invalid range when two changes for one key arrive on the same date.
+-- 4. Construction: add a constraint or exclusion-style validation that detects
+--    overlapping effective ranges for each natural customer key.
+-- 5. Debugging: make the SCD2 load idempotent so rerunning an unchanged source
+--    creates no new version.
+-- 6. Edge case: define a same-day change policy using timestamptz boundaries or
+--    source sequence numbers, and explain the tradeoff.
 
 ROLLBACK;

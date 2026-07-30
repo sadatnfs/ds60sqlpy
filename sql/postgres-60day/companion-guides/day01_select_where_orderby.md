@@ -3,9 +3,11 @@
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** Complete the [SQL track setup](../README.md), reset the
-  disposable `advanced_sql_training` database, and know how to run a `.sql`
-  file with `psql`.
+- **Prerequisites:** Complete
+  [SQL-FOUND-02 — versioned migrations](../../professional/companion-guides/sql_found_02_versioned_migrations.md)
+  and the [SQL track setup](../README.md), reset the disposable
+  `advanced_sql_training` database, and know how to run a `.sql` file with
+  `psql`.
 - **Artifacts:** [learner SQL](../day01_select_where_orderby.sql) ·
   [solution reasoning](../solutions/day01_solutions.md) ·
   [executable solution](../solutions/day01_solutions.sql)

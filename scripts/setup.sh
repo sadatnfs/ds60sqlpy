@@ -34,7 +34,8 @@ venv_python="${repo_root}/.venv/bin/python"
 "${venv_python}" -m pip install -e ".[notebooks,data,quality]"
 
 if [ "${profile}" = advanced ]; then
-  "${venv_python}" -m pip install -e ".[ml,production,bridge,deep-learning,nlp,geo]"
+  "${venv_python}" -m pip install \
+    -e ".[ml,production,bridge,professional,sql-notebooks,deep-learning,nlp,geo]"
 fi
 
 "${venv_python}" -m ipykernel install \

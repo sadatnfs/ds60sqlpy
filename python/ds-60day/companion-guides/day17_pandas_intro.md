@@ -64,6 +64,28 @@ small constructed DataFrame like the one above.
 3. Sort descending by tip percentage (`tip / total_bill`). **Hint:** derive a
    named column first so you can inspect divide-by-zero or missing results.
 
+### Additional mastery practice
+
+State a DataFrame's row grain, column meanings, and index role before selecting or deriving data. Prefer vectorized, explicit assignments.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** Predict the difference between `.loc[labels]` and `.iloc[positions]` after an integer index has been reordered.
+   **Progressive hint:** Labels are not automatically row positions.
+5. **Tracing:** Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ?
+   **Progressive hint:** Pandas aligns many labeled objects by index.
+6. **Implementation:** Create a safe `tip_rate` column that yields missing values rather than infinity when `total_bill` is zero.
+   **Progressive hint:** Mask or replace the zero denominator before division.
+7. **Debugging:** Repair chained assignment on a filtered DataFrame and explain when to use `.loc` or an explicit `.copy()`.
+   **Progressive hint:** Make ownership and target rows explicit.
+8. **Edge case and explanation:** Compute a statistic for a possibly empty selection and return `None` instead of silently presenting `NaN` as a real result.
+   **Progressive hint:** Check `.empty` before aggregating when absence has business meaning.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What determines whether `df["col"]` returns a Series or DataFrame?

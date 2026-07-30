@@ -24,9 +24,13 @@ historical “60-day” shape.
 - `docs/setup/`: operating-system setup
 - `docs/content-authoring.md`: lesson contract
 - `docs/validation.md`: verification policy
+- `docs/curriculum-gap-backlog.md`: implemented gap record and maintenance
+  rules
 - `.agents/skills/guide-ds60sqlpy-learning/`: Codex tutoring workflow
 - `bridge/README.md` and `bridge/AGENTS.md`: the integration track's learning
   and engineering contracts
+- `python/professional/`, `sql/professional/`, and `bridge/professional/`:
+  named modules that extend the stable Days 1–60 without renumbering them
 
 Do not hand-maintain a second lesson inventory when it can be derived from the generated catalog.
 
@@ -35,6 +39,8 @@ Do not hand-maintain a second lesson inventory when it can be derived from the g
 - Python 3.11-3.12; 3.12 is the canonical and recommended version
 - PostgreSQL 16+; canonical automation uses PostgreSQL 17
 - VS Code as the documented editor
+- JupySQL with SQLAlchemy's explicit Psycopg 3 dialect for the optional
+  PostgreSQL-in-Jupyter lesson
 - One connected bootstrap, then offline study
 
 Use `python -m pip`, repository-relative paths, and `pathlib`. Never add a developer-specific absolute path.
@@ -54,6 +60,10 @@ Use `python -m pip`, repository-relative paths, and `pathlib`. Never add a devel
 - Shared prose must include valid Windows PowerShell and POSIX variants when commands differ.
 - Do not use Bash syntax in a PowerShell block.
 - On Windows, prefer `.\.venv\Scripts\python.exe` so activation policy is not a blocker.
+- PostgreSQL notebooks read only `DS60_DATABASE_URL`, pass an engine object to
+  `%sql`, hide connection display, bind values, and tag live/non-Python magic
+  cells for notebook-aware validation. Never put `%pip` or a password in a
+  lesson notebook.
 - Default lesson execution must work offline after setup.
 - First-run Seaborn downloads are accepted but must be disclosed and cacheable.
 - Pretrained model downloads and optional web resources must be explicit, tagged, and accompanied by a local fallback where practical.
@@ -65,6 +75,8 @@ For each lesson change:
 
 1. Confirm prerequisites and level.
 2. Keep guide, learner artifact, solution, catalog inputs, generated index, and navigation aligned.
+   Named professional guides must spell out every direct catalog prerequisite
+   with its exact backticked stable ID.
 3. Use deterministic examples unless randomness is the topic.
 4. Declare every direct dependency.
 5. Include a self-check or expected behavior.
@@ -80,6 +92,7 @@ Use the narrowest relevant check during iteration, then run:
 python scripts/course.py doctor
 python scripts/course.py catalog
 python scripts/course.py validate
+python scripts/scan_secrets.py
 ```
 
 SQL commands must use:
@@ -92,6 +105,8 @@ Definition of done:
 
 - A regenerated catalog has no drift and its paths agree.
 - Notebook and JSON structure is valid.
+- SQL-magic notebooks receive structural validation offline and an explicitly
+  reported live execution check against only the disposable course database.
 - Relevant runnable examples execute.
 - SQL is tested against a clean disposable database.
 - Bridge modules pass fake-backed tests; optional live checks use only the

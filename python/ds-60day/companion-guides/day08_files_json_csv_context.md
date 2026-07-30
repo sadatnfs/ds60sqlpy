@@ -63,6 +63,28 @@ repository's ignored location for disposable generated data.
    `csv.DictReader`/`DictWriter`, decide which object supplies field names, and
    open CSV output with `newline=""`.
 
+### Additional mastery practice
+
+Treat files as fallible boundaries. Specify encoding, newline behavior, schema, and failure policy, and keep writes recoverable.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** After `handle.read(2)` on a text file containing `abcd`, predict what a second `handle.read()` returns and explain the cursor.
+   **Progressive hint:** Reads advance the file object's current position.
+4. **Tracing:** Trace when a file is open and closed through a `with` block, including when JSON decoding raises inside the block.
+   **Progressive hint:** Context-manager cleanup runs on both normal and exceptional exit.
+5. **Implementation:** Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination.
+   **Progressive hint:** Use explicit UTF-8, `json.dump`, and `Path.replace`.
+6. **Debugging:** Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names.
+   **Progressive hint:** Open with `newline=''` and `encoding='utf-8'`.
+7. **Edge case and explanation:** Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs.
+   **Progressive hint:** Validate each row at the boundary rather than failing much later.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why does JSON not preserve tuples as tuples?

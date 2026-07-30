@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ds60-secret-scan
+        name: DS60 sensitive-content scan
+        entry: python scripts/scan_secrets.py
+        language: system
+        pass_filenames: false
+      - id: ds60-ruff-check
+        name: DS60 Ruff check
+        entry: python -m ruff check
+        language: system
+        types_or: [python, pyi]
+      - id: ds60-ruff-format
+        name: DS60 Ruff format check
+        entry: python -m ruff format --check
+        language: system
+        types_or: [python, pyi]

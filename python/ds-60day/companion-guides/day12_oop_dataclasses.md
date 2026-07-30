@@ -60,6 +60,28 @@ dictionary and rejects unexpected attributes.
    **Hint:** dataclass equality compares declared fields between compatible
    instances; create two equivalent and one different instance.
 
+### Additional mastery practice
+
+Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict how a class attribute shared by instances differs from an instance attribute assigned through `self`.
+   **Progressive hint:** Class lookup is shared until an instance shadows the name.
+4. **Tracing:** Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using `is`.
+   **Progressive hint:** Value equality and identity answer different questions.
+5. **Implementation:** Create immutable `OrderLine` and `Order` dataclasses whose total sums quantity × unit price and applies a validated fractional discount.
+   **Progressive hint:** Validate non-negative values in `__post_init__`.
+6. **Debugging:** Repair a dataclass field declared as `items: list[str] = []`.
+   **Progressive hint:** Use `field(default_factory=list)` to create one list per instance.
+7. **Edge case and explanation:** Decide whether a discount policy should be a subclass of `Order` or a composed callable; justify the dependency direction.
+   **Progressive hint:** A replaceable rule is usually behavior the order uses, not a kind of order.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What methods does `@dataclass` generate by default?

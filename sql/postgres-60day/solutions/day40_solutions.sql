@@ -47,3 +47,54 @@ SELECT category,
 FROM category_orders
 GROUP BY category
 ORDER BY category;
+
+-- Exercise 3: discrete chooses an observed input; continuous interpolates.
+WITH values(value) AS (VALUES (10::numeric), (20), (100), (200))
+SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY value) AS discrete_median,
+       percentile_cont(0.5) WITHIN GROUP (ORDER BY value) AS continuous_median
+FROM values;
+
+-- Exercise 4: first aggregate at month/category grain; the window denominator
+-- then sums only peer category rows within that month.
+WITH category_month AS (
+  SELECT date_trunc('month', o.order_date)::date AS month,
+         p.category,
+         SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS revenue
+  FROM orders o
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+  GROUP BY date_trunc('month', o.order_date), p.category
+)
+SELECT month,
+       category,
+       ROUND(revenue, 2) AS revenue,
+       ROUND(revenue / NULLIF(SUM(revenue) OVER (PARTITION BY month), 0), 4)
+         AS month_share,
+       ROW_NUMBER() OVER (
+         PARTITION BY month ORDER BY revenue DESC, category
+       ) AS category_rank
+FROM category_month
+ORDER BY month DESC, category_rank;
+
+-- Exercise 5: CURRENT ROW would leak the target actual into its forecast.
+WITH daily AS (
+  SELECT order_date::date AS day, SUM(total_amount) AS revenue
+  FROM orders GROUP BY order_date::date
+)
+SELECT day,
+       revenue,
+       AVG(revenue) OVER (
+         ORDER BY day ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING
+       ) AS prior_seven_forecast
+FROM daily
+ORDER BY day DESC
+LIMIT 20;
+
+-- Exercise 6: NULLIF preserves “undefined” when all values are identical.
+WITH constant(value) AS (VALUES (5::numeric), (5), (5)), moments AS (
+  SELECT value, AVG(value) OVER () AS mean_value,
+         STDDEV_SAMP(value) OVER () AS sd_value
+  FROM constant
+)
+SELECT value, (value - mean_value) / NULLIF(sd_value, 0) AS z_score
+FROM moments;

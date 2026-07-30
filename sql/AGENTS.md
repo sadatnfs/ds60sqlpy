@@ -21,6 +21,11 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 - Multi-part projects need an idempotent fixture or explicit, validated persistence instructions.
 - Days 52–54 are the declared stateful warehouse sequence: Day 52 resets and commits the course-owned `dwh` schema, then Days 53 and 54 run in order.
 - Superuser-only operations must be optional and labeled.
+- The two `sql-found-*` modules precede SQL Day 1. Other named modules under
+  `sql/professional/` extend the track without renumbering established days.
+- Role administration, extensions, physical recovery, and replication need a
+  capability check plus a useful default path when the local server cannot
+  perform the optional operation.
 
 ## Lesson SQL
 

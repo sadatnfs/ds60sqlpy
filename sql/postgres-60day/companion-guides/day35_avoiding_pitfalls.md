@@ -28,9 +28,16 @@ matching `order_date` index.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day35_avoiding_pitfalls.sql).
-For each rewrite, add an edge-case result check before the performance
-comparison.
+Complete these in the [learner SQL](../day35_avoiding_pitfalls.sql):
+
+1. Rewrite three non-sargable predicates.
+2. Replace correlated aggregates with one pre-aggregation and join.
+3. Predict B-tree usefulness for prefix versus leading-wildcard patterns.
+4. Replace `OFFSET` paging with deterministic keyset paging.
+5. Repair payment/item fanout.
+6. Explain `COUNT(*)` versus `COUNT(email)` with NULLs.
+
+Add an edge-case result check before every performance comparison.
 
 ## Self-check
 
@@ -85,3 +92,14 @@ value should remain `NULL` or become zero.
   when the expression is the real search key.
 - Preserve outer-join behavior for entities with no facts.
 - Compare result keys and totals before comparing timing.
+
+## Expanded practice lab
+
+Prompts 3–6 cover four common production surprises: leading-wildcard searches,
+deep `OFFSET` pages, fanout, and nullable counts. Keyset pagination must use a
+unique deterministic tuple such as `(order_date, order_id)` and repeat the same
+ordering in the seek predicate.
+
+Fix fanout at the grain boundary instead of hiding it with `DISTINCT`.
+`COUNT(*)` counts rows; `COUNT(email)` counts only non-NULL emails. Neither is
+universally “correct”—the metric definition decides.

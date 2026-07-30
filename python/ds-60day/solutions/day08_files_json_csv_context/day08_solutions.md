@@ -90,3 +90,121 @@ def json_to_csv(json_path: Path, csv_path: Path) -> None:
 Notes
 - Always specify encoding; use newline='' when writing CSVs (especially on Windows).
 - For large files, stream row-by-row rather than building a list in memory.
+
+---
+
+## Exercise-by-exercise reference
+
+Every numbered learner exercise has a matching entry here. The original
+worked examples remain above; the expanded answers below add heavily
+commented code, explicit reasoning, and executable checks.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Write `safe_load_json(path)` that returns `None` for expected read/decode failures and logs the cause. **Hint:** identify the narrow exception types raised by a missing file and malformed JSON; avoid catching every exception.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Convert CSV rows to JSON records and JSON records back to CSV. **Hint:** use `csv.DictReader`/`DictWriter`, decide which object supplies field names, and open CSV output with `newline=""`.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 3 — Prediction
+
+**Prompt:** After `handle.read(2)` on a text file containing `abcd`, predict what a second `handle.read()` returns and explain the cursor.
+
+**Reasoning checkpoint:** Reads advance the file object's current position. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 4 — Tracing
+
+**Prompt:** Trace when a file is open and closed through a `with` block, including when JSON decoding raises inside the block.
+
+**Reasoning checkpoint:** Context-manager cleanup runs on both normal and exceptional exit. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 5 — Implementation
+
+**Prompt:** Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination.
+
+**Reasoning checkpoint:** Use explicit UTF-8, `json.dump`, and `Path.replace`. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 6 — Debugging
+
+**Prompt:** Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names.
+
+**Reasoning checkpoint:** Open with `newline=''` and `encoding='utf-8'`. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 7 — Edge case and explanation
+
+**Prompt:** Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs.
+
+**Reasoning checkpoint:** Validate each row at the boundary rather than failing much later. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+## Expanded mastery lab solutions
+
+Treat files as fallible boundaries. Specify encoding, newline behavior, schema, and failure policy, and keep writes recoverable.
+
+Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
+
+### Practices 1–2 — Cursor and context-manager behavior
+
+The second read returns `"cd"` because the cursor is already after `"ab"`.
+Leaving a `with` block closes the handle even when decoding raises.
+
+### Practices 3–5 — Recoverable writes and explicit row validation
+
+```python
+from __future__ import annotations
+
+import csv
+import json
+from collections.abc import Iterable, Mapping
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Any
+
+
+def write_json_atomic(path: Path, value: Any) -> None:
+    """Replace ``path`` only after a complete sibling file is written."""
+
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    temporary.replace(path)
+
+
+def partition_rows(
+    rows: Iterable[Mapping[str, str]], required: set[str]
+) -> tuple[list[dict[str, str]], list[tuple[dict[str, str], str]]]:
+    """Separate valid rows from rows that violate the required-column contract."""
+
+    accepted: list[dict[str, str]] = []
+    rejected: list[tuple[dict[str, str], str]] = []
+    for source_row in rows:
+        row = dict(source_row)
+        missing = sorted(name for name in required if not row.get(name, "").strip())
+        if missing:
+            rejected.append((row, f"missing values: {', '.join(missing)}"))
+        else:
+            accepted.append(row)
+    return accepted, rejected
+
+
+with TemporaryDirectory() as directory:
+    destination = Path(directory) / "people.json"
+    write_json_atomic(destination, [{"name": "Zoë"}])
+    assert json.loads(destination.read_text(encoding="utf-8"))[0]["name"] == "Zoë"
+
+    csv_path = Path(directory) / "people.csv"
+    with csv_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["name"])
+        writer.writeheader()
+        writer.writerow({"name": "Zoë"})
+
+accepted, rejected = partition_rows(
+    [{"id": "1", "name": "Ada"}, {"id": "2", "name": ""}], {"id", "name"}
+)
+assert len(accepted) == 1 and rejected[0][1] == "missing values: name"
+```

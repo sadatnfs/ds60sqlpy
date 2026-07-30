@@ -57,6 +57,28 @@ until it is iterated.
    distinct item, but first consider the repeated-work cost; compare it with
    `collections.Counter`.
 
+### Additional mastery practice
+
+Trace iteration boundaries and laziness. Prefer a clear loop when a comprehension would hide state changes or several decisions.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** Create a generator expression, consume one item with `next`, then convert the rest to a list. Predict what remains and why.
+   **Progressive hint:** Iterators remember their current position and are usually one-shot.
+5. **Tracing:** Trace `[n * 10 for n in range(6) if n % 2]` one input at a time.
+   **Progressive hint:** Evaluate the filter before the output expression.
+6. **Implementation:** Implement `batched(items, size)` yielding lists of at most `size`, including a final partial batch.
+   **Progressive hint:** Accumulate, yield when full, then handle leftovers after the loop.
+7. **Debugging:** Explain and repair a loop that removes negative values from the same list it is iterating over.
+   **Progressive hint:** Build a new list or iterate over a copy.
+8. **Edge case and explanation:** Define whether an even-number generator 'up to N' includes N and test N values -1, 0, 1, 2, and 3.
+   **Progressive hint:** Boundary examples turn ambiguous English into a contract.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why can iterating over the same generator twice produce different results?

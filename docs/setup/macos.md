@@ -51,9 +51,9 @@ python scripts/course.py doctor
 In VS Code, select `.venv/bin/python` as the interpreter and notebook kernel. See [VS Code](../vscode.md).
 
 Core setup installs notebook, data, and quality tooling. Before the engineering
-bridge or later machine-learning, production, deep-learning,
-natural-language-processing, or geospatial lessons, install the advanced
-profile while connected:
+bridge, PostgreSQL-in-Jupyter lesson, professional modules, or later
+machine-learning, production, deep-learning, natural-language-processing, or
+geospatial lessons, install the advanced profile while connected:
 
 ```bash
 bash scripts/setup.sh --advanced
@@ -108,6 +108,9 @@ SQL:
 ```bash
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
 ```
+
+For `%sql` and `%%sql` in the course kernel, continue with
+[PostgreSQL in Jupyter](jupyter-postgresql.md).
 
 ## 6. Prepare for offline study
 

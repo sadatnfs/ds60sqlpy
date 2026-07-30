@@ -31,8 +31,17 @@ score so early, undersized windows are visible.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day40_analytic_functions_advanced.sql).
-Add one constant-value window and verify its undefined z-score remains `NULL`.
+Complete these in the
+[learner SQL](../day40_analytic_functions_advanced.sql):
+
+1. Calculate a trailing daily-revenue z-score.
+2. Calculate category order-total P50/P90.
+3. Predict `percentile_disc` versus `percentile_cont` on four values.
+4. Calculate monthly category revenue share and deterministic rank.
+5. Repair a forecasting frame that includes the current row.
+6. Preserve NULL z-scores for a constant series.
+
+Verify that the undefined constant-series z-score remains `NULL`.
 
 ## Self-check
 
@@ -86,3 +95,14 @@ precisely 15 observed order dates.
 - Undefined zero-dispersion z-scores should remain `NULL`, not be asserted as
   normal.
 - Validate that category revenue shares sum to one, allowing for rounding.
+
+## Expanded practice lab
+
+Prompts 3–6 distinguish continuous interpolation, observed-value percentiles,
+partitioned shares, leakage-free windows, and undefined dispersion. For
+`(10,20,100,200)`, `percentile_disc(0.5)` returns an observed middle choice,
+while `percentile_cont(0.5)` interpolates between the two central values.
+
+Monthly category share partitions by month; ranking should add a stable category
+tie-break. A forecasting window ends at `1 PRECEDING`, and a constant series
+uses `NULLIF(sd, 0)` so “undefined” is not mislabeled as a score of zero.

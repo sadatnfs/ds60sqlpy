@@ -1,0 +1,1198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'"
+  >
+  <title>DS60 Learning Guide</title>
+  <style>
+    :root {
+      --paper: #f7f3ea;
+      --surface: #fffdf8;
+      --surface-strong: #ffffff;
+      --ink: #17221e;
+      --muted: #56635d;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 45px rgb(28 45 37 / 10%);
+      --radius: 18px;
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 5% 0%, rgb(15 107 79 / 10%), transparent 28rem),
+        radial-gradient(circle at 100% 10%, rgb(23 63 95 / 11%), transparent 30rem),
+        var(--paper);
+      line-height: 1.55;
+    }
+    a { color: var(--navy); text-underline-offset: 0.18em; }
+    a:hover { color: var(--green); }
+    button, input, select { font: inherit; }
+    button, .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      min-height: 2.65rem;
+      border: 1px solid var(--navy);
+      border-radius: 999px;
+      padding: 0.55rem 1rem;
+      color: #fff;
+      background: var(--navy);
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    button:hover, .button:hover { background: var(--green); border-color: var(--green); color: #fff; }
+    button.secondary, .button.secondary { color: var(--navy); background: transparent; }
+    button.secondary:hover, .button.secondary:hover { color: #fff; background: var(--navy); }
+    button.ghost { color: var(--ink); background: transparent; border-color: var(--line); }
+    button.ghost:hover { color: var(--ink); background: var(--gold-soft); border-color: var(--gold); }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid #efb74c;
+      outline-offset: 3px;
+    }
+    code, pre {
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    }
+    code {
+      border-radius: 0.35rem;
+      padding: 0.08rem 0.3rem;
+      background: rgb(23 63 95 / 8%);
+    }
+    pre {
+      margin: 0.75rem 0 0;
+      overflow: auto;
+      border: 1px solid #294958;
+      border-radius: 12px;
+      padding: 1rem;
+      color: #eaf4ef;
+      background: #152d35;
+      white-space: pre-wrap;
+    }
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 0.5rem;
+      left: 0.5rem;
+      transform: translateY(-150%);
+      padding: 0.65rem 1rem;
+      color: #fff;
+      background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    .shell { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; }
+    #top { scroll-margin-top: 9rem; }
+    .topbar {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      border-bottom: 1px solid rgb(215 215 202 / 75%);
+      background: rgb(247 243 234 / 90%);
+      backdrop-filter: blur(14px);
+    }
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 4rem;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+    .brand-mark {
+      display: grid;
+      width: 2.35rem;
+      height: 2.35rem;
+      place-items: center;
+      border-radius: 0.7rem;
+      color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: 0.76rem;
+      letter-spacing: 0.04em;
+    }
+    nav { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    nav a {
+      border-radius: 999px;
+      padding: 0.45rem 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 650;
+    }
+    nav a:hover { color: var(--navy); background: var(--navy-soft); }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(17rem, 0.7fr);
+      align-items: center;
+      gap: 3rem;
+      padding: clamp(3rem, 8vw, 7rem) 0 4rem;
+    }
+    .eyebrow {
+      margin: 0 0 0.65rem;
+      color: var(--green);
+      font-size: 0.82rem;
+      font-weight: 850;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3 { margin-top: 0; line-height: 1.13; text-wrap: balance; }
+    h1 {
+      max-width: 13ch;
+      margin-bottom: 1.25rem;
+      font-size: clamp(3rem, 7vw, 6.2rem);
+      letter-spacing: -0.065em;
+    }
+    h2 { font-size: clamp(2rem, 4vw, 3.25rem); letter-spacing: -0.045em; }
+    h3 { letter-spacing: -0.025em; }
+    .hero-copy {
+      max-width: 63ch;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2vw, 1.25rem);
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.5rem; }
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 1.5rem;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .hero-card::before {
+      position: absolute;
+      top: -5rem;
+      right: -5rem;
+      width: 12rem;
+      height: 12rem;
+      border-radius: 50%;
+      background: var(--green-soft);
+      content: "";
+    }
+    .stats {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      background: var(--surface-strong);
+    }
+    .stat strong { display: block; color: var(--navy); font-size: 1.8rem; line-height: 1; }
+    .stat span { color: var(--muted); font-size: 0.82rem; }
+    .offline-note {
+      position: relative;
+      margin: 1rem 0 0;
+      border-left: 4px solid var(--green);
+      padding-left: 0.8rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    main section { padding: 4.5rem 0; scroll-margin-top: 4rem; }
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.7rem;
+    }
+    .section-head p { max-width: 64ch; margin: 0; color: var(--muted); }
+    .grid { display: grid; gap: 1rem; }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.35rem;
+      background: var(--surface);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 5%);
+    }
+    .panel h3 { margin-bottom: 0.55rem; }
+    .panel p:last-child { margin-bottom: 0; }
+    .step-number {
+      display: grid;
+      width: 2.3rem;
+      height: 2.3rem;
+      place-items: center;
+      margin-bottom: 1rem;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--green);
+      font-weight: 850;
+    }
+    .os-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+    .os-tabs button[aria-selected="true"] { color: #fff; background: var(--green); border-color: var(--green); }
+    .os-panel[hidden] { display: none; }
+    .checklist { display: grid; gap: 0.7rem; padding: 0; list-style: none; }
+    .checklist label { display: flex; align-items: flex-start; gap: 0.65rem; }
+    .checklist input { width: 1.15rem; height: 1.15rem; margin-top: 0.2rem; accent-color: var(--green); }
+    .path-card { position: relative; overflow: hidden; }
+    .path-card::after {
+      position: absolute;
+      right: -1.8rem;
+      bottom: -2rem;
+      width: 6rem;
+      height: 6rem;
+      border-radius: 50%;
+      background: var(--navy-soft);
+      content: "";
+    }
+    .path-card ul { padding-left: 1.2rem; color: var(--muted); }
+    .path-card .button { position: relative; z-index: 1; }
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      counter-reset: workflow;
+    }
+    .workflow article {
+      position: relative;
+      border-top: 4px solid var(--navy);
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 1.15rem;
+      background: var(--surface);
+      counter-increment: workflow;
+    }
+    .workflow article::before {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--green);
+      content: "0" counter(workflow);
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+    }
+    .workflow p { margin-bottom: 0; color: var(--muted); }
+    .callout {
+      border: 1px solid #bfd7cb;
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      background: var(--green-soft);
+    }
+    .callout.warning { border-color: #ead09c; background: var(--gold-soft); }
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(15rem, 2fr) repeat(3, minmax(9rem, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .control {
+      display: grid;
+      gap: 0.3rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 750;
+    }
+    .control input, .control select {
+      width: 100%;
+      min-height: 2.75rem;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 0.6rem 0.75rem;
+      color: var(--ink);
+      background: var(--surface-strong);
+    }
+    .catalog-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+    .catalog-toolbar p { margin: 0; color: var(--muted); }
+    .catalog-toolbar .actions { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .lesson-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+    .lesson-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: 1rem;
+      background: var(--surface);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    .lesson-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgb(28 45 37 / 9%); }
+    .lesson-card.complete { border-color: #78ad96; background: linear-gradient(145deg, var(--surface), var(--green-soft)); }
+    .lesson-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.6rem; }
+    .lesson-id {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 0.25rem 0.55rem;
+      color: var(--navy);
+      background: var(--navy-soft);
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 0.73rem;
+      font-weight: 800;
+    }
+    .completion {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .completion input { width: 1rem; height: 1rem; accent-color: var(--green); }
+    .lesson-card h3 { margin: 0.75rem 0 0.45rem; font-size: 1.04rem; }
+    .lesson-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.65rem; }
+    .tag {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.16rem 0.45rem;
+      color: var(--muted);
+      background: var(--surface-strong);
+      font-size: 0.68rem;
+    }
+    .lesson-phase { margin: 0 0 0.7rem; color: var(--muted); font-size: 0.82rem; }
+    .prereqs { margin: 0 0 0.8rem; color: var(--muted); font-size: 0.76rem; }
+    .lesson-links { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: auto; }
+    .lesson-links a {
+      border-radius: 7px;
+      padding: 0.25rem 0.45rem;
+      background: rgb(23 63 95 / 7%);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .empty {
+      grid-column: 1 / -1;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 2rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .progress-panel {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 1rem;
+    }
+    .progress-ring {
+      display: grid;
+      width: 5.5rem;
+      height: 5.5rem;
+      place-items: center;
+      border-radius: 50%;
+      background: conic-gradient(var(--green) var(--progress), var(--line) 0);
+    }
+    .progress-ring::before {
+      display: grid;
+      width: 4.35rem;
+      height: 4.35rem;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--surface);
+      content: attr(data-label);
+      font-weight: 850;
+    }
+    .prompt-box textarea {
+      width: 100%;
+      min-height: 10rem;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.9rem;
+      color: var(--ink);
+      background: var(--surface-strong);
+      font: 0.9rem/1.5 "Cascadia Code", Consolas, monospace;
+    }
+    .prompt-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.7rem; }
+    .microcopy { color: var(--muted); font-size: 0.82rem; }
+    footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--muted); }
+    footer .shell { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .noscript { border: 2px solid var(--red); padding: 1rem; background: #fff; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid.three, .lesson-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .workflow { grid-template-columns: repeat(2, 1fr); }
+      .controls { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 1.15rem, 1180px); }
+      .topbar-inner { align-items: flex-start; flex-direction: column; padding: 0.6rem 0; }
+      nav { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.25rem; }
+      .hero { padding-top: 2.5rem; }
+      h1 { font-size: clamp(2.8rem, 17vw, 4.4rem); }
+      .grid.three, .grid.two, .lesson-grid, .workflow, .controls { grid-template-columns: 1fr; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+      .progress-panel { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+    @media print {
+      .topbar, .hero-actions, .controls, .catalog-toolbar .actions, .completion, .prompt-actions { display: none; }
+      body { background: #fff; }
+      .shell { width: 100%; }
+      .hero { padding: 1rem 0; }
+      .lesson-grid { grid-template-columns: repeat(2, 1fr); }
+      .lesson-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#top" aria-label="DS60 guide home">
+        <span class="brand-mark" aria-hidden="true">DS60</span>
+        <span>Learning Guide</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#setup">Set up</a>
+        <a href="#paths">Choose a path</a>
+        <a href="#workflow">Study loop</a>
+        <a href="#catalog">Lessons</a>
+        <a href="#codex">Codex coach</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="top" class="shell hero">
+    <div>
+      <p class="eyebrow">Python · PostgreSQL · Engineering</p>
+      <h1>Learn by doing, one honest attempt at a time.</h1>
+      <p class="hero-copy">
+        This is the portable front door to the DS60 repository. Set up a new
+        machine, choose a route, open the right artifacts, track local progress,
+        and ask Codex for coaching without giving away the solution.
+      </p>
+      <div class="hero-actions">
+        <a class="button" href="#setup">Start setup</a>
+        <a class="button secondary" href="#catalog">Browse all lessons</a>
+      </div>
+    </div>
+    <aside class="hero-card" aria-label="Course inventory">
+      <div class="stats">
+        <div class="stat"><strong>154</strong><span>cataloged lessons</span></div>
+        <div class="stat"><strong>3</strong><span>connected tracks</span></div>
+        <div class="stat"><strong>70</strong><span>Python modules</span></div>
+        <div class="stat"><strong>72</strong><span>SQL modules</span></div>
+        <div class="stat"><strong>12</strong><span>bridge modules</span></div>
+        <div class="stat"><strong>1×</strong><span>connected bootstrap</span></div>
+      </div>
+      <p class="offline-note">
+        This file contains no external scripts, fonts, analytics, or network
+        requests. Lesson code is designed for offline study after setup.
+      </p>
+    </aside>
+  </div>
+
+  <noscript>
+    <div class="shell noscript">
+      JavaScript is disabled. The setup links still work, but catalog filtering
+      and browser-local progress require JavaScript. Use
+      <a href="README.md">README.md</a> and
+      <a href="docs/curriculum-map.md">the curriculum map</a> instead.
+    </div>
+  </noscript>
+
+  <main id="main">
+    <section id="setup">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2>Prepare this machine once.</h2>
+          </div>
+          <p>
+            Work from the repository root in VS Code. Choose your operating
+            system; the commands below deliberately use the repository
+            interpreter so PATH and activation mistakes are visible.
+          </p>
+        </div>
+
+        <div class="os-tabs" role="tablist" aria-label="Operating system">
+          <button class="secondary" type="button" role="tab" aria-selected="true" aria-controls="os-windows" id="tab-windows" data-os-tab="windows">Windows</button>
+          <button class="secondary" type="button" role="tab" aria-selected="false" aria-controls="os-macos" id="tab-macos" data-os-tab="macos">macOS</button>
+          <button class="secondary" type="button" role="tab" aria-selected="false" aria-controls="os-linux" id="tab-linux" data-os-tab="linux">Linux</button>
+        </div>
+
+        <div id="os-windows" class="os-panel panel" role="tabpanel" aria-labelledby="tab-windows" data-os-panel="windows">
+          <h3>Windows PowerShell</h3>
+          <p>
+            If Anaconda and PostgreSQL are installed but absent from PATH, use
+            the one-off discovery bootstrap. It detects common installs,
+            prepares the process safely, creates <code>.venv</code>, installs
+            IPython/Jupyter, and registers the course kernel.
+          </p>
+          <pre><code>powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap_windows.ps1
+.\.venv\Scripts\python.exe scripts\course.py doctor
+.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+          <p class="microcopy">
+            Need every optional course package while connected? Add
+            <code>-Profile Advanced</code>. System-tool installation and persistent
+            PATH changes are opt-in; read
+            <a href="docs/setup/windows.md">the Windows guide</a> first.
+          </p>
+        </div>
+
+        <div id="os-macos" class="os-panel panel" role="tabpanel" aria-labelledby="tab-macos" data-os-panel="macos" hidden>
+          <h3>macOS terminal</h3>
+          <pre><code>bash scripts/setup.sh
+.venv/bin/python scripts/course.py doctor
+.venv/bin/python -m jupyter lab</code></pre>
+          <p class="microcopy">
+            See <a href="docs/setup/macos.md">the complete macOS guide</a> for
+            Python, PostgreSQL, VS Code, Apple Silicon, and shell details.
+          </p>
+        </div>
+
+        <div id="os-linux" class="os-panel panel" role="tabpanel" aria-labelledby="tab-linux" data-os-panel="linux" hidden>
+          <h3>Linux terminal</h3>
+          <pre><code>bash scripts/setup.sh
+.venv/bin/python scripts/course.py doctor
+.venv/bin/python -m jupyter lab</code></pre>
+          <p class="microcopy">
+            See <a href="docs/setup/linux.md">the complete Linux guide</a> for
+            supported package-manager examples and PostgreSQL service setup.
+          </p>
+        </div>
+
+        <div class="grid three" style="margin-top: 1rem">
+          <article class="panel">
+            <span class="step-number">1</span>
+            <h3>Open the root</h3>
+            <p>
+              In VS Code, open the folder containing <code>README.md</code>,
+              <code>AGENTS.md</code>, and <code>pyproject.toml</code>.
+            </p>
+          </article>
+          <article class="panel">
+            <span class="step-number">2</span>
+            <h3>Select the kernel</h3>
+            <p>
+              Pick <strong>Python (ds60sqlpy)</strong> in the notebook kernel
+              picker. A terminal interpreter and notebook kernel can differ.
+            </p>
+          </article>
+          <article class="panel">
+            <span class="step-number">3</span>
+            <h3>Verify, then study</h3>
+            <p>
+              Run the doctor and fix failures before a lesson. Warnings identify
+              optional groups you may not need yet.
+            </p>
+          </article>
+        </div>
+
+        <div class="grid two" style="margin-top: 1rem">
+          <div class="callout">
+            <h3>PostgreSQL inside Jupyter</h3>
+            <p>
+              The optional <code>bridge-jupyter-01</code> lab uses JupySQL
+              <code>%sql</code>/<code>%%sql</code> magics, SQLAlchemy, and
+              Psycopg 3. The database URL stays in
+              <code>DS60_DATABASE_URL</code>; it never belongs in a notebook.
+            </p>
+            <a href="docs/setup/jupyter-postgresql.md">Open the safe setup guide</a>
+          </div>
+          <div class="callout warning">
+            <h3>Database safety boundary</h3>
+            <p>
+              <code>sql/postgres-60day/00_setup.sql</code> drops and recreates
+              the course-owned <code>training</code> schema. Use only the
+              disposable <code>advanced_sql_training</code> database—never a
+              shared or valuable database.
+            </p>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 1rem">
+          <h3>Machine readiness checklist</h3>
+          <ul class="checklist" id="setup-checklist">
+            <li><label><input type="checkbox" data-setup-check="root"> VS Code opened at the repository root</label></li>
+            <li><label><input type="checkbox" data-setup-check="venv"> Repository <code>.venv</code> created successfully</label></li>
+            <li><label><input type="checkbox" data-setup-check="kernel"> <strong>Python (ds60sqlpy)</strong> selected as notebook kernel</label></li>
+            <li><label><input type="checkbox" data-setup-check="doctor"> Course doctor has no unexplained failures</label></li>
+            <li><label><input type="checkbox" data-setup-check="postgres"> PostgreSQL course database verified, if studying SQL</label></li>
+            <li><label><input type="checkbox" data-setup-check="offline"> Optional packages and first-use datasets cached before going offline</label></li>
+          </ul>
+          <p class="microcopy">
+            Checklist state is stored only in this browser. No machine details
+            leave the computer.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="paths">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Step 2</p>
+            <h2>Choose a route, not a deadline.</h2>
+          </div>
+          <p>
+            “Day” is an ordering key. Repeat difficult material and use
+            prerequisites—not calendar pressure—to decide what comes next.
+          </p>
+        </div>
+        <div class="grid three">
+          <article class="panel path-card">
+            <h3>New to both</h3>
+            <ul>
+              <li>Python Days 1–15</li>
+              <li><code>sql-found-01</code> and <code>sql-found-02</code></li>
+              <li>SQL Days 1–15</li>
+              <li>Alternate Python/SQL and add the bridge</li>
+            </ul>
+            <button type="button" class="secondary" data-path-filter="new">Show the starting sequence</button>
+          </article>
+          <article class="panel path-card">
+            <h3>Python and data science</h3>
+            <ul>
+              <li>Language and engineering habits</li>
+              <li>NumPy, pandas, and visualization</li>
+              <li>Statistics and machine learning</li>
+              <li>Professional delivery specializations</li>
+            </ul>
+            <button type="button" class="secondary" data-path-filter="python">Show Python</button>
+          </article>
+          <article class="panel path-card">
+            <h3>PostgreSQL and engineering</h3>
+            <ul>
+              <li>Relational foundations before Day 1</li>
+              <li>Querying and analytical SQL</li>
+              <li>Performance, operations, and projects</li>
+              <li>Python/PostgreSQL application bridge</li>
+            </ul>
+            <button type="button" class="secondary" data-path-filter="sql-bridge">Show SQL + bridge</button>
+          </article>
+        </div>
+        <p class="microcopy" style="margin-top: 1rem">
+          See the narrative <a href="docs/curriculum-map.md">curriculum map</a>
+          and <a href="docs/professional-paths.md">professional paths</a> for
+          milestone advice and specialization lanes.
+        </p>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Step 3</p>
+            <h2>Use the same learning loop every time.</h2>
+          </div>
+          <p>
+            The course separates explanation, active work, and solutions on
+            purpose. Keep that friction—it is where learning happens.
+          </p>
+        </div>
+        <div class="workflow">
+          <article>
+            <h3>Read the guide</h3>
+            <p>Define vocabulary, check prerequisites, and predict the worked example.</p>
+          </article>
+          <article>
+            <h3>Run the learner artifact</h3>
+            <p>Execute one cell or statement at a time. Explain the result before moving on.</p>
+          </article>
+          <article>
+            <h3>Attempt every exercise</h3>
+            <p>Use progressive hints. Save error messages and revise from evidence.</p>
+          </article>
+          <article>
+            <h3>Study the solution</h3>
+            <p>Compare reasoning and edge cases, then reproduce the idea from a blank file.</p>
+          </article>
+        </div>
+        <div class="callout" style="margin-top: 1rem">
+          <strong>Completion means evidence.</strong>
+          Mark a lesson complete when you can explain the core idea and produce
+          a working attempt—not when you merely opened every file.
+        </div>
+      </div>
+    </section>
+
+    <section id="catalog">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Step 4</p>
+            <h2>Find your next lesson.</h2>
+          </div>
+          <div class="progress-panel" aria-live="polite">
+            <div class="progress-ring" id="progress-ring" style="--progress: 0%" data-label="0%"></div>
+            <div>
+              <strong id="progress-count">0 of 154 complete</strong>
+              <div class="microcopy" id="next-ready">Choose a track to see a next step.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <label class="control">
+            Search title, ID, phase, or prerequisite
+            <input id="lesson-search" type="search" placeholder="Try “window functions” or “python-06”" autocomplete="off">
+          </label>
+          <label class="control">
+            Track
+            <select id="track-filter">
+              <option value="">All tracks</option>
+              <option value="python">Python</option>
+              <option value="sql">SQL</option>
+              <option value="bridge">Bridge</option>
+            </select>
+          </label>
+          <label class="control">
+            Level
+            <select id="level-filter"><option value="">All levels</option></select>
+          </label>
+          <label class="control">
+            Status
+            <select id="status-filter">
+              <option value="">All lessons</option>
+              <option value="ready">Ready now</option>
+              <option value="incomplete">Incomplete</option>
+              <option value="complete">Complete</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="catalog-toolbar">
+          <p id="result-count" aria-live="polite">Loading catalog…</p>
+          <div class="actions">
+            <button type="button" class="ghost" id="export-progress">Export progress</button>
+            <button type="button" class="ghost" id="import-progress">Import progress</button>
+            <button type="button" class="ghost" id="clear-progress">Clear browser progress</button>
+            <input class="sr-only" id="progress-file" type="file" accept="application/json">
+          </div>
+        </div>
+
+        <div id="lesson-grid" class="lesson-grid" aria-live="polite"></div>
+        <div style="display: grid; place-items: center; margin-top: 1.25rem">
+          <button type="button" class="secondary" id="load-more">Show 30 more</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="codex">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Optional coach</p>
+            <h2>Give Codex a disciplined tutoring brief.</h2>
+          </div>
+          <p>
+            Open this repository root in Codex. Its <code>AGENTS.md</code>,
+            catalog, and repo-local tutor skill explain the course. The prompt
+            below keeps the session active rather than answer-first.
+          </p>
+        </div>
+        <div class="grid two">
+          <div class="panel prompt-box">
+            <label for="codex-lesson"><strong>Lesson to coach</strong></label>
+            <select id="codex-lesson" style="width: 100%; margin: 0.5rem 0 0.8rem"></select>
+            <label for="codex-prompt"><strong>Copy-ready prompt</strong></label>
+            <textarea id="codex-prompt" readonly></textarea>
+            <div class="prompt-actions">
+              <button type="button" id="copy-prompt">Copy prompt</button>
+              <a class="button secondary" href="docs/learning-with-codex.md">Full Codex guide</a>
+            </div>
+            <p class="microcopy" id="copy-status" aria-live="polite"></p>
+          </div>
+          <div class="panel">
+            <h3>What the coach should do</h3>
+            <ul>
+              <li>Inspect the actual OS, selected interpreter, kernel, and lesson entry.</li>
+              <li>Check prerequisites with short questions before teaching.</li>
+              <li>Ask for a prediction and an attempt before revealing code.</li>
+              <li>Use conceptual, structural, and partial hints in that order.</li>
+              <li>Run safe local evidence and explain the first failure precisely.</li>
+              <li>Open official solutions only when requested or after the attempt.</li>
+            </ul>
+            <div class="callout warning">
+              Codex can be online while the course runs offline. Never paste a
+              password, private database URL, token, or production data into a
+              prompt, notebook, progress note, or source file.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <span>DS60 portable learning guide · generated from <code>curriculum/catalog.json</code></span>
+      <span><a href="README.md">README</a> · <a href="AGENTS.md">Agent guide</a> · <a href="docs/validation.md">Validation</a></span>
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const course = {"schema_version":1,"generated_from":"course artifact filenames and professional lesson specifications","tracks":{"python":{"title":"Python and data science","plan":"python/PYTHON_TRAINING.md"},"sql":{"title":"PostgreSQL","plan":"sql/ADVANCED_SQL_60DAY_PLAN.md"},"bridge":{"title":"Python and PostgreSQL engineering","plan":"bridge/README.md"}},"lessons":[{"id":"python-01","track":"python","day":1,"title":"Setup and REPL","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":[],"lesson_path":"python/ds-60day/notebooks/day01_setup_and_repl.ipynb","guide_path":"python/ds-60day/companion-guides/day01_setup_and_repl.md","solution_paths":["python/ds-60day/solutions/day01_setup_and_repl/day01_solutions.md","python/ds-60day/solutions/day01_setup_and_repl/day01_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-02","track":"python","day":2,"title":"Basics Types","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-01"],"lesson_path":"python/ds-60day/notebooks/day02_basics_types.ipynb","guide_path":"python/ds-60day/companion-guides/day02_basics_types.md","solution_paths":["python/ds-60day/solutions/day02_basics_types/day02_solutions.md","python/ds-60day/solutions/day02_basics_types/day02_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-03","track":"python","day":3,"title":"Control Flow Exceptions","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-02"],"lesson_path":"python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb","guide_path":"python/ds-60day/companion-guides/day03_control_flow_exceptions.md","solution_paths":["python/ds-60day/solutions/day03_control_flow_exceptions/day03_solutions.md","python/ds-60day/solutions/day03_control_flow_exceptions/day03_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-04","track":"python","day":4,"title":"Loops Comprehensions Generators","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-03"],"lesson_path":"python/ds-60day/notebooks/day04_loops_comprehensions_generators.ipynb","guide_path":"python/ds-60day/companion-guides/day04_loops_comprehensions_generators.md","solution_paths":["python/ds-60day/solutions/day04_loops_comprehensions_generators/day04_solutions.md","python/ds-60day/solutions/day04_loops_comprehensions_generators/day04_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-05","track":"python","day":5,"title":"Functions Type Hints","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-04"],"lesson_path":"python/ds-60day/notebooks/day05_functions_type_hints.ipynb","guide_path":"python/ds-60day/companion-guides/day05_functions_type_hints.md","solution_paths":["python/ds-60day/solutions/day05_functions_type_hints/day05_solutions.md","python/ds-60day/solutions/day05_functions_type_hints/day05_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-06","track":"python","day":6,"title":"Data Structures","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-05"],"lesson_path":"python/ds-60day/notebooks/day06_data_structures.ipynb","guide_path":"python/ds-60day/companion-guides/day06_data_structures.md","solution_paths":["python/ds-60day/solutions/day06_data_structures/day06_solutions.md","python/ds-60day/solutions/day06_data_structures/day06_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-07","track":"python","day":7,"title":"Strings Regex Pathlib","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-06"],"lesson_path":"python/ds-60day/notebooks/day07_strings_regex_pathlib.ipynb","guide_path":"python/ds-60day/companion-guides/day07_strings_regex_pathlib.md","solution_paths":["python/ds-60day/solutions/day07_strings_regex_pathlib/day07_solutions.md","python/ds-60day/solutions/day07_strings_regex_pathlib/day07_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-08","track":"python","day":8,"title":"Files JSON Csv Context","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-07"],"lesson_path":"python/ds-60day/notebooks/day08_files_json_csv_context.ipynb","guide_path":"python/ds-60day/companion-guides/day08_files_json_csv_context.md","solution_paths":["python/ds-60day/solutions/day08_files_json_csv_context/day08_solutions.md","python/ds-60day/solutions/day08_files_json_csv_context/day08_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-09","track":"python","day":9,"title":"Modules Packages","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-08"],"lesson_path":"python/ds-60day/notebooks/day09_modules_packages.ipynb","guide_path":"python/ds-60day/companion-guides/day09_modules_packages.md","solution_paths":["python/ds-60day/solutions/day09_modules_packages/day09_solutions.md","python/ds-60day/solutions/day09_modules_packages/day09_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-10","track":"python","day":10,"title":"Testing Pytest","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-09"],"lesson_path":"python/ds-60day/notebooks/day10_testing_pytest.ipynb","guide_path":"python/ds-60day/companion-guides/day10_testing_pytest.md","solution_paths":["python/ds-60day/solutions/day10_testing_pytest/day10_solutions.md","python/ds-60day/solutions/day10_testing_pytest/day10_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-11","track":"python","day":11,"title":"Debug Logging Profiling","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-10"],"lesson_path":"python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb","guide_path":"python/ds-60day/companion-guides/day11_debug_logging_profiling.md","solution_paths":["python/ds-60day/solutions/day11_debug_logging_profiling/day11_solutions.md","python/ds-60day/solutions/day11_debug_logging_profiling/day11_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-12","track":"python","day":12,"title":"OOP Dataclasses","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-11"],"lesson_path":"python/ds-60day/notebooks/day12_oop_dataclasses.ipynb","guide_path":"python/ds-60day/companion-guides/day12_oop_dataclasses.md","solution_paths":["python/ds-60day/solutions/day12_oop_dataclasses/day12_solutions.md","python/ds-60day/solutions/day12_oop_dataclasses/day12_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-13","track":"python","day":13,"title":"Functional Tools","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-12"],"lesson_path":"python/ds-60day/notebooks/day13_functional_tools.ipynb","guide_path":"python/ds-60day/companion-guides/day13_functional_tools.md","solution_paths":["python/ds-60day/solutions/day13_functional_tools/day13_solutions.md","python/ds-60day/solutions/day13_functional_tools/day13_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-14","track":"python","day":14,"title":"Code Quality Tooling","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-13"],"lesson_path":"python/ds-60day/notebooks/day14_code_quality_tooling.ipynb","guide_path":"python/ds-60day/companion-guides/day14_code_quality_tooling.md","solution_paths":["python/ds-60day/solutions/day14_code_quality_tooling/day14_solutions.md","python/ds-60day/solutions/day14_code_quality_tooling/day14_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-15","track":"python","day":15,"title":"CLI Project","level":"foundation","phase":"Python foundations","estimated_minutes":75,"prerequisites":["python-14"],"lesson_path":"python/ds-60day/notebooks/day15_cli_project.ipynb","guide_path":"python/ds-60day/companion-guides/day15_cli_project.md","solution_paths":["python/ds-60day/solutions/day15_cli_project/day15_solutions.md","python/ds-60day/solutions/day15_cli_project/day15_solutions.ipynb"],"dependency_group":"core","network":"offline"},{"id":"python-16","track":"python","day":16,"title":"NumPy Fundamentals","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-15"],"lesson_path":"python/ds-60day/notebooks/day16_numpy_fundamentals.ipynb","guide_path":"python/ds-60day/companion-guides/day16_numpy_fundamentals.md","solution_paths":["python/ds-60day/solutions/day16_numpy_fundamentals/day16_solutions.md","python/ds-60day/solutions/day16_numpy_fundamentals/day16_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-17","track":"python","day":17,"title":"pandas Intro","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-16"],"lesson_path":"python/ds-60day/notebooks/day17_pandas_intro.ipynb","guide_path":"python/ds-60day/companion-guides/day17_pandas_intro.md","solution_paths":["python/ds-60day/solutions/day17_pandas_intro/day17_solutions.md","python/ds-60day/solutions/day17_pandas_intro/day17_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-18","track":"python","day":18,"title":"pandas Io Cleaning","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-17"],"lesson_path":"python/ds-60day/notebooks/day18_pandas_io_cleaning.ipynb","guide_path":"python/ds-60day/companion-guides/day18_pandas_io_cleaning.md","solution_paths":["python/ds-60day/solutions/day18_pandas_io_cleaning/day18_solutions.md","python/ds-60day/solutions/day18_pandas_io_cleaning/day18_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-19","track":"python","day":19,"title":"pandas Groupby Pivot","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-18"],"lesson_path":"python/ds-60day/notebooks/day19_pandas_groupby_pivot.ipynb","guide_path":"python/ds-60day/companion-guides/day19_pandas_groupby_pivot.md","solution_paths":["python/ds-60day/solutions/day19_pandas_groupby_pivot/day19_solutions.md","python/ds-60day/solutions/day19_pandas_groupby_pivot/day19_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-20","track":"python","day":20,"title":"pandas Merging Joins","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-19"],"lesson_path":"python/ds-60day/notebooks/day20_pandas_merging_joins.ipynb","guide_path":"python/ds-60day/companion-guides/day20_pandas_merging_joins.md","solution_paths":["python/ds-60day/solutions/day20_pandas_merging_joins/day20_solutions.md","python/ds-60day/solutions/day20_pandas_merging_joins/day20_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-21","track":"python","day":21,"title":"Time Series pandas","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-20"],"lesson_path":"python/ds-60day/notebooks/day21_time_series_pandas.ipynb","guide_path":"python/ds-60day/companion-guides/day21_time_series_pandas.md","solution_paths":["python/ds-60day/solutions/day21_time_series_pandas/day21_solutions.md","python/ds-60day/solutions/day21_time_series_pandas/day21_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-22","track":"python","day":22,"title":"Advanced pandas Apply Query Eval","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-21"],"lesson_path":"python/ds-60day/notebooks/day22_advanced_pandas_apply_query_eval.ipynb","guide_path":"python/ds-60day/companion-guides/day22_advanced_pandas_apply_query_eval.md","solution_paths":["python/ds-60day/solutions/day22_advanced_pandas_apply_query_eval/day22_solutions.md","python/ds-60day/solutions/day22_advanced_pandas_apply_query_eval/day22_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-23","track":"python","day":23,"title":"Data Pipelines Generators","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-22"],"lesson_path":"python/ds-60day/notebooks/day23_data_pipelines_generators.ipynb","guide_path":"python/ds-60day/companion-guides/day23_data_pipelines_generators.md","solution_paths":["python/ds-60day/solutions/day23_data_pipelines_generators/day23_solutions.md","python/ds-60day/solutions/day23_data_pipelines_generators/day23_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-24","track":"python","day":24,"title":"EDA Best Practices","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-23"],"lesson_path":"python/ds-60day/notebooks/day24_eda_best_practices.ipynb","guide_path":"python/ds-60day/companion-guides/day24_eda_best_practices.md","solution_paths":["python/ds-60day/solutions/day24_eda_best_practices/day24_solutions.md","python/ds-60day/solutions/day24_eda_best_practices/day24_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-25","track":"python","day":25,"title":"Visualization Matplotlib Seaborn","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-24"],"lesson_path":"python/ds-60day/notebooks/day25_viz_matplotlib_seaborn.ipynb","guide_path":"python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md","solution_paths":["python/ds-60day/solutions/day25_viz_matplotlib_seaborn/day25_solutions.md","python/ds-60day/solutions/day25_viz_matplotlib_seaborn/day25_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-26","track":"python","day":26,"title":"Visualization Plotly Altair","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-25"],"lesson_path":"python/ds-60day/notebooks/day26_viz_plotly_altair.ipynb","guide_path":"python/ds-60day/companion-guides/day26_viz_plotly_altair.md","solution_paths":["python/ds-60day/solutions/day26_viz_plotly_altair/day26_solutions.md","python/ds-60day/solutions/day26_viz_plotly_altair/day26_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-27","track":"python","day":27,"title":"Geospatial or Domain Visualization","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-26"],"lesson_path":"python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb","guide_path":"python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md","solution_paths":["python/ds-60day/solutions/day27_geospatial_or_domain_viz/day27_solutions.md","python/ds-60day/solutions/day27_geospatial_or_domain_viz/day27_solutions.ipynb"],"dependency_group":"geo","network":"optional-map-download"},{"id":"python-28","track":"python","day":28,"title":"Feature Engineering","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-27"],"lesson_path":"python/ds-60day/notebooks/day28_feature_engineering.ipynb","guide_path":"python/ds-60day/companion-guides/day28_feature_engineering.md","solution_paths":["python/ds-60day/solutions/day28_feature_engineering/day28_solutions.md","python/ds-60day/solutions/day28_feature_engineering/day28_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-29","track":"python","day":29,"title":"Data Validation Schemas","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-28"],"lesson_path":"python/ds-60day/notebooks/day29_data_validation_schemas.ipynb","guide_path":"python/ds-60day/companion-guides/day29_data_validation_schemas.md","solution_paths":["python/ds-60day/solutions/day29_data_validation_schemas/day29_solutions.md","python/ds-60day/solutions/day29_data_validation_schemas/day29_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-30","track":"python","day":30,"title":"Project EDA Preprocessing","level":"intermediate","phase":"Data analysis and visualization","estimated_minutes":90,"prerequisites":["python-29"],"lesson_path":"python/ds-60day/notebooks/day30_project_eda_preprocessing.ipynb","guide_path":"python/ds-60day/companion-guides/day30_project_eda_preprocessing.md","solution_paths":["python/ds-60day/solutions/day30_project_eda_preprocessing/day30_solutions.md","python/ds-60day/solutions/day30_project_eda_preprocessing/day30_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-31","track":"python","day":31,"title":"Probability Basics","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-30"],"lesson_path":"python/ds-60day/notebooks/day31_probability_basics.ipynb","guide_path":"python/ds-60day/companion-guides/day31_probability_basics.md","solution_paths":["python/ds-60day/solutions/day31_probability_basics/day31_solutions.md","python/ds-60day/solutions/day31_probability_basics/day31_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-32","track":"python","day":32,"title":"Statistical Inference","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-31"],"lesson_path":"python/ds-60day/notebooks/day32_statistical_inference.ipynb","guide_path":"python/ds-60day/companion-guides/day32_statistical_inference.md","solution_paths":["python/ds-60day/solutions/day32_statistical_inference/day32_solutions.md","python/ds-60day/solutions/day32_statistical_inference/day32_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-33","track":"python","day":33,"title":"Linear Algebra Matrices","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-32"],"lesson_path":"python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb","guide_path":"python/ds-60day/companion-guides/day33_linear_algebra_matrices.md","solution_paths":["python/ds-60day/solutions/day33_linear_algebra_matrices/day33_solutions.md","python/ds-60day/solutions/day33_linear_algebra_matrices/day33_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-34","track":"python","day":34,"title":"scikit-learn Intro Pipelines","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-33"],"lesson_path":"python/ds-60day/notebooks/day34_sklearn_intro_pipelines.ipynb","guide_path":"python/ds-60day/companion-guides/day34_sklearn_intro_pipelines.md","solution_paths":["python/ds-60day/solutions/day34_sklearn_intro_pipelines/day34_solutions.md","python/ds-60day/solutions/day34_sklearn_intro_pipelines/day34_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-35","track":"python","day":35,"title":"Model Evaluation CV","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-34"],"lesson_path":"python/ds-60day/notebooks/day35_model_evaluation_cv.ipynb","guide_path":"python/ds-60day/companion-guides/day35_model_evaluation_cv.md","solution_paths":["python/ds-60day/solutions/day35_model_evaluation_cv/day35_solutions.md","python/ds-60day/solutions/day35_model_evaluation_cv/day35_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-36","track":"python","day":36,"title":"Dimensionality Reduction PCA","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-35"],"lesson_path":"python/ds-60day/notebooks/day36_dimensionality_reduction_pca.ipynb","guide_path":"python/ds-60day/companion-guides/day36_dimensionality_reduction_pca.md","solution_paths":["python/ds-60day/solutions/day36_dimensionality_reduction_pca/day36_solutions.md","python/ds-60day/solutions/day36_dimensionality_reduction_pca/day36_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-37","track":"python","day":37,"title":"Regularization Linear Models","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-36"],"lesson_path":"python/ds-60day/notebooks/day37_regularization_linear_models.ipynb","guide_path":"python/ds-60day/companion-guides/day37_regularization_linear_models.md","solution_paths":["python/ds-60day/solutions/day37_regularization_linear_models/day37_solutions.md","python/ds-60day/solutions/day37_regularization_linear_models/day37_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-38","track":"python","day":38,"title":"Tree Models Random Forest","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-37"],"lesson_path":"python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb","guide_path":"python/ds-60day/companion-guides/day38_tree_models_random_forest.md","solution_paths":["python/ds-60day/solutions/day38_tree_models_random_forest/day38_solutions.md","python/ds-60day/solutions/day38_tree_models_random_forest/day38_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-39","track":"python","day":39,"title":"Gradient Boosting XGBoost LightGBM","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-38"],"lesson_path":"python/ds-60day/notebooks/day39_gradient_boosting_xgboost_lightgbm.ipynb","guide_path":"python/ds-60day/companion-guides/day39_gradient_boosting_xgboost_lightgbm.md","solution_paths":["python/ds-60day/solutions/day39_gradient_boosting_xgboost_lightgbm/day39_solutions.md","python/ds-60day/solutions/day39_gradient_boosting_xgboost_lightgbm/day39_solutions.ipynb"],"dependency_group":"ml","network":"offline"},{"id":"python-40","track":"python","day":40,"title":"Model Tuning SearchCV","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-39"],"lesson_path":"python/ds-60day/notebooks/day40_model_tuning_searchcv.ipynb","guide_path":"python/ds-60day/companion-guides/day40_model_tuning_searchcv.md","solution_paths":["python/ds-60day/solutions/day40_model_tuning_searchcv/day40_solutions.md","python/ds-60day/solutions/day40_model_tuning_searchcv/day40_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-41","track":"python","day":41,"title":"Imbalance Handling","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-40"],"lesson_path":"python/ds-60day/notebooks/day41_imbalance_handling.ipynb","guide_path":"python/ds-60day/companion-guides/day41_imbalance_handling.md","solution_paths":["python/ds-60day/solutions/day41_imbalance_handling/day41_solutions.md","python/ds-60day/solutions/day41_imbalance_handling/day41_solutions.ipynb"],"dependency_group":"ml","network":"offline"},{"id":"python-42","track":"python","day":42,"title":"Unsupervised K-means Anomaly","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-41"],"lesson_path":"python/ds-60day/notebooks/day42_unsupervised_kmeans_anomaly.ipynb","guide_path":"python/ds-60day/companion-guides/day42_unsupervised_kmeans_anomaly.md","solution_paths":["python/ds-60day/solutions/day42_unsupervised_kmeans_anomaly/day42_solutions.md","python/ds-60day/solutions/day42_unsupervised_kmeans_anomaly/day42_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-43","track":"python","day":43,"title":"Model Interpretation SHAP PDP","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-42"],"lesson_path":"python/ds-60day/notebooks/day43_model_interpretation_shap_pdp.ipynb","guide_path":"python/ds-60day/companion-guides/day43_model_interpretation_shap_pdp.md","solution_paths":["python/ds-60day/solutions/day43_model_interpretation_shap_pdp/day43_solutions.md","python/ds-60day/solutions/day43_model_interpretation_shap_pdp/day43_solutions.ipynb"],"dependency_group":"ml","network":"offline"},{"id":"python-44","track":"python","day":44,"title":"Model Deployment FastAPI","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-43"],"lesson_path":"python/ds-60day/notebooks/day44_model_deployment_fastapi.ipynb","guide_path":"python/ds-60day/companion-guides/day44_model_deployment_fastapi.md","solution_paths":["python/ds-60day/solutions/day44_model_deployment_fastapi/day44_solutions.md","python/ds-60day/solutions/day44_model_deployment_fastapi/day44_solutions.ipynb"],"dependency_group":"production","network":"offline"},{"id":"python-45","track":"python","day":45,"title":"End to End Modeling Project","level":"intermediate","phase":"Statistics and machine learning","estimated_minutes":105,"prerequisites":["python-44"],"lesson_path":"python/ds-60day/notebooks/day45_end_to_end_modeling_project.ipynb","guide_path":"python/ds-60day/companion-guides/day45_end_to_end_modeling_project.md","solution_paths":["python/ds-60day/solutions/day45_end_to_end_modeling_project/day45_solutions.md","python/ds-60day/solutions/day45_end_to_end_modeling_project/day45_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-46","track":"python","day":46,"title":"Deep Learning Overview","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-45"],"lesson_path":"python/ds-60day/notebooks/day46_deep_learning_overview.ipynb","guide_path":"python/ds-60day/companion-guides/day46_deep_learning_overview.md","solution_paths":["python/ds-60day/solutions/day46_deep_learning_overview/day46_solutions.md","python/ds-60day/solutions/day46_deep_learning_overview/day46_solutions.ipynb"],"dependency_group":"deep-learning","network":"offline"},{"id":"python-47","track":"python","day":47,"title":"PyTorch Basics NN Training Loop","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-46"],"lesson_path":"python/ds-60day/notebooks/day47_pytorch_basics_nn_training_loop.ipynb","guide_path":"python/ds-60day/companion-guides/day47_pytorch_basics_nn_training_loop.md","solution_paths":["python/ds-60day/solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.md","python/ds-60day/solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.ipynb"],"dependency_group":"deep-learning","network":"offline"},{"id":"python-48","track":"python","day":48,"title":"Transfer Learning CNN","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-47"],"lesson_path":"python/ds-60day/notebooks/day48_transfer_learning_cnn.ipynb","guide_path":"python/ds-60day/companion-guides/day48_transfer_learning_cnn.md","solution_paths":["python/ds-60day/solutions/day48_transfer_learning_cnn/day48_solutions.md","python/ds-60day/solutions/day48_transfer_learning_cnn/day48_solutions.ipynb"],"dependency_group":"deep-learning","network":"optional-model-download"},{"id":"python-49","track":"python","day":49,"title":"NLP Basics Hugging Face Spacy","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-48"],"lesson_path":"python/ds-60day/notebooks/day49_nlp_basics_hf_spacy.ipynb","guide_path":"python/ds-60day/companion-guides/day49_nlp_basics_hf_spacy.md","solution_paths":["python/ds-60day/solutions/day49_nlp_basics_hf_spacy/day49_solutions.md","python/ds-60day/solutions/day49_nlp_basics_hf_spacy/day49_solutions.ipynb"],"dependency_group":"nlp","network":"optional-model-download"},{"id":"python-50","track":"python","day":50,"title":"Time Series Modeling","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-49"],"lesson_path":"python/ds-60day/notebooks/day50_time_series_modeling.ipynb","guide_path":"python/ds-60day/companion-guides/day50_time_series_modeling.md","solution_paths":["python/ds-60day/solutions/day50_time_series_modeling/day50_solutions.md","python/ds-60day/solutions/day50_time_series_modeling/day50_solutions.ipynb"],"dependency_group":"ml","network":"offline"},{"id":"python-51","track":"python","day":51,"title":"Advanced Feature Engineering Target Encoding","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-50"],"lesson_path":"python/ds-60day/notebooks/day51_advanced_feature_engineering_target_encoding.ipynb","guide_path":"python/ds-60day/companion-guides/day51_advanced_feature_engineering_target_encoding.md","solution_paths":["python/ds-60day/solutions/day51_advanced_feature_engineering_target_encoding/day51_solutions.md","python/ds-60day/solutions/day51_advanced_feature_engineering_target_encoding/day51_solutions.ipynb"],"dependency_group":"data","network":"first-run-seaborn-cache"},{"id":"python-52","track":"python","day":52,"title":"Scalability Dask","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-51"],"lesson_path":"python/ds-60day/notebooks/day52_scalability_dask.ipynb","guide_path":"python/ds-60day/companion-guides/day52_scalability_dask.md","solution_paths":["python/ds-60day/solutions/day52_scalability_dask/day52_solutions.md","python/ds-60day/solutions/day52_scalability_dask/day52_solutions.ipynb"],"dependency_group":"production","network":"offline"},{"id":"python-53","track":"python","day":53,"title":"MLOps MLflow Experiment Tracking","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-52"],"lesson_path":"python/ds-60day/notebooks/day53_mlops_mlflow_experiment_tracking.ipynb","guide_path":"python/ds-60day/companion-guides/day53_mlops_mlflow_experiment_tracking.md","solution_paths":["python/ds-60day/solutions/day53_mlops_mlflow_experiment_tracking/day53_solutions.md","python/ds-60day/solutions/day53_mlops_mlflow_experiment_tracking/day53_solutions.ipynb"],"dependency_group":"production","network":"offline"},{"id":"python-54","track":"python","day":54,"title":"Monitoring Model Governance","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-53"],"lesson_path":"python/ds-60day/notebooks/day54_monitoring_model_governance.ipynb","guide_path":"python/ds-60day/companion-guides/day54_monitoring_model_governance.md","solution_paths":["python/ds-60day/solutions/day54_monitoring_model_governance/day54_solutions.md","python/ds-60day/solutions/day54_monitoring_model_governance/day54_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-55","track":"python","day":55,"title":"APIs Containerization Docker","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-54"],"lesson_path":"python/ds-60day/notebooks/day55_apis_containerization_docker.ipynb","guide_path":"python/ds-60day/companion-guides/day55_apis_containerization_docker.md","solution_paths":["python/ds-60day/solutions/day55_apis_containerization_docker/day55_solutions.md","python/ds-60day/solutions/day55_apis_containerization_docker/day55_solutions.ipynb"],"dependency_group":"production","network":"offline"},{"id":"python-56","track":"python","day":56,"title":"Orchestration Prefect Intro","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-55"],"lesson_path":"python/ds-60day/notebooks/day56_orchestration_prefect_intro.ipynb","guide_path":"python/ds-60day/companion-guides/day56_orchestration_prefect_intro.md","solution_paths":["python/ds-60day/solutions/day56_orchestration_prefect_intro/day56_solutions.md","python/ds-60day/solutions/day56_orchestration_prefect_intro/day56_solutions.ipynb"],"dependency_group":"production","network":"first-run-seaborn-cache"},{"id":"python-57","track":"python","day":57,"title":"Security Privacy Ethics","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-56"],"lesson_path":"python/ds-60day/notebooks/day57_security_privacy_ethics.ipynb","guide_path":"python/ds-60day/companion-guides/day57_security_privacy_ethics.md","solution_paths":["python/ds-60day/solutions/day57_security_privacy_ethics/day57_solutions.md","python/ds-60day/solutions/day57_security_privacy_ethics/day57_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-58","track":"python","day":58,"title":"Code Review Refactor Tests","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-57"],"lesson_path":"python/ds-60day/notebooks/day58_code_review_refactor_tests.ipynb","guide_path":"python/ds-60day/companion-guides/day58_code_review_refactor_tests.md","solution_paths":["python/ds-60day/solutions/day58_code_review_refactor_tests/day58_solutions.md","python/ds-60day/solutions/day58_code_review_refactor_tests/day58_solutions.ipynb"],"dependency_group":"data","network":"offline"},{"id":"python-59","track":"python","day":59,"title":"Capstone Kickoff","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-58"],"lesson_path":"python/ds-60day/notebooks/day59_capstone_kickoff.ipynb","guide_path":"python/ds-60day/companion-guides/day59_capstone_kickoff.md","solution_paths":["python/ds-60day/solutions/day59_capstone_kickoff/day59_solutions.md","python/ds-60day/solutions/day59_capstone_kickoff/day59_solutions.ipynb"],"dependency_group":"advanced","network":"offline"},{"id":"python-60","track":"python","day":60,"title":"Capstone Completion Presentation","level":"advanced","phase":"Production, advanced topics, and capstone","estimated_minutes":120,"prerequisites":["python-59"],"lesson_path":"python/ds-60day/notebooks/day60_capstone_completion_presentation.ipynb","guide_path":"python/ds-60day/companion-guides/day60_capstone_completion_presentation.md","solution_paths":["python/ds-60day/solutions/day60_capstone_completion_presentation/day60_solutions.md","python/ds-60day/solutions/day60_capstone_completion_presentation/day60_solutions.ipynb"],"dependency_group":"advanced","network":"offline"},{"id":"python-pro-01","track":"python","day":61,"title":"Package Engineering and Local Release Workflow","level":"intermediate","phase":"Professional Python engineering","estimated_minutes":150,"prerequisites":["python-15"],"lesson_path":"python/professional/lessons/py_pro_01_package_engineering.py","guide_path":"python/professional/companion-guides/py_pro_01_package_engineering.md","solution_paths":["python/professional/solutions/py_pro_01_package_engineering_solutions.md","python/professional/solutions/py_pro_01_package_engineering_solution.py"],"dependency_group":"professional","network":"offline"},{"id":"python-svc-01","track":"python","day":62,"title":"Reliable HTTP Clients and External-Service Boundaries","level":"intermediate","phase":"Professional Python engineering","estimated_minutes":150,"prerequisites":["python-15"],"lesson_path":"python/professional/lessons/py_svc_01_reliable_http_clients.py","guide_path":"python/professional/companion-guides/py_svc_01_reliable_http_clients.md","solution_paths":["python/professional/solutions/py_svc_01_reliable_http_clients_solutions.md","python/professional/solutions/py_svc_01_reliable_http_clients_solution.py"],"dependency_group":"professional","network":"offline"},{"id":"python-pro-02","track":"python","day":63,"title":"Concurrency and Parallelism Decision Lab","level":"advanced","phase":"Professional Python engineering","estimated_minutes":180,"prerequisites":["python-15"],"lesson_path":"python/professional/lessons/py_pro_02_concurrency_parallelism.py","guide_path":"python/professional/companion-guides/py_pro_02_concurrency_parallelism.md","solution_paths":["python/professional/solutions/py_pro_02_concurrency_parallelism_solutions.md","python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py"],"dependency_group":"professional","network":"offline"},{"id":"python-data-01","track":"python","day":64,"title":"Columnar Data, Arrow, and Embedded Analytical SQL","level":"intermediate","phase":"Professional data engineering","estimated_minutes":180,"prerequisites":["python-23"],"lesson_path":"python/professional/lessons/py_data_01_arrow_duckdb.py","guide_path":"python/professional/companion-guides/py_data_01_arrow_duckdb.md","solution_paths":["python/professional/solutions/py_data_01_arrow_duckdb_solutions.md","python/professional/solutions/py_data_01_arrow_duckdb_solution.py"],"dependency_group":"professional","network":"offline"},{"id":"python-test-01","track":"python","day":65,"title":"Test Architecture, Doubles, and Generative Testing","level":"advanced","phase":"Professional Python engineering","estimated_minutes":180,"prerequisites":["python-10"],"lesson_path":"python/professional/lessons/py_test_01_architecture_generative.py","guide_path":"python/professional/companion-guides/py_test_01_architecture_generative.md","solution_paths":["python/professional/solutions/py_test_01_architecture_generative_solutions.md","python/professional/solutions/py_test_01_architecture_generative_solution.py"],"dependency_group":"professional","network":"offline"},{"id":"python-lang-01","track":"python","day":66,"title":"Advanced Typing and the Python Data Model","level":"advanced","phase":"Professional Python engineering","estimated_minutes":180,"prerequisites":["python-12"],"lesson_path":"python/professional/lessons/py_lang_01_typing_data_model.py","guide_path":"python/professional/companion-guides/py_lang_01_typing_data_model.md","solution_paths":["python/professional/solutions/py_lang_01_typing_data_model_solutions.md","python/professional/solutions/py_lang_01_typing_data_model_solution.py"],"dependency_group":"quality","network":"offline"},{"id":"python-stats-01","track":"python","day":67,"title":"Resampling, Experiments, and Causal Boundaries","level":"advanced","phase":"Advanced statistics and experimentation","estimated_minutes":210,"prerequisites":["python-32"],"lesson_path":"python/professional/lessons/py_stats_01_resampling_experiments.py","guide_path":"python/professional/companion-guides/py_stats_01_resampling_experiments.md","solution_paths":["python/professional/solutions/py_stats_01_resampling_experiments_solutions.md","python/professional/solutions/py_stats_01_resampling_experiments_solution.py"],"dependency_group":"data","network":"offline"},{"id":"python-ml-01","track":"python","day":68,"title":"Reproducible Data and Model Delivery","level":"advanced","phase":"Production machine learning","estimated_minutes":210,"prerequisites":["python-45"],"lesson_path":"python/professional/lessons/py_ml_01_reproducible_delivery.py","guide_path":"python/professional/companion-guides/py_ml_01_reproducible_delivery.md","solution_paths":["python/professional/solutions/py_ml_01_reproducible_delivery_solutions.md","python/professional/solutions/py_ml_01_reproducible_delivery_solution.py"],"dependency_group":"production","network":"offline"},{"id":"python-svc-02","track":"python","day":69,"title":"Service Hardening and Observability","level":"advanced","phase":"Professional Python engineering","estimated_minutes":210,"prerequisites":["python-55","bridge-08","python-svc-01","python-ml-01"],"lesson_path":"python/professional/lessons/py_svc_02_hardening_observability.py","guide_path":"python/professional/companion-guides/py_svc_02_hardening_observability.md","solution_paths":["python/professional/solutions/py_svc_02_hardening_observability_solutions.md","python/professional/solutions/py_svc_02_hardening_observability_solution.py"],"dependency_group":"production","network":"offline"},{"id":"python-perf-01","track":"python","day":70,"title":"Measurement-First Performance Engineering","level":"advanced","phase":"Python specialization","estimated_minutes":180,"prerequisites":["python-23","python-pro-02"],"lesson_path":"python/professional/lessons/py_perf_01_measurement_optimization.py","guide_path":"python/professional/companion-guides/py_perf_01_measurement_optimization.md","solution_paths":["python/professional/solutions/py_perf_01_measurement_optimization_solutions.md","python/professional/solutions/py_perf_01_measurement_optimization_solution.py"],"dependency_group":"data","network":"offline"},{"id":"sql-found-01","track":"sql","day":-1,"title":"Relational Design, DDL, and Integrity Constraints","level":"foundation","phase":"Relational foundations","estimated_minutes":150,"prerequisites":[],"lesson_path":"sql/professional/lessons/sql_found_01_relational_design.sql","guide_path":"sql/professional/companion-guides/sql_found_01_relational_design.md","solution_paths":["sql/professional/solutions/sql_found_01_relational_design_solutions.md","sql/professional/solutions/sql_found_01_relational_design_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-found-02","track":"sql","day":0,"title":"Versioned Schema Migrations and Safe Evolution","level":"intermediate","phase":"Relational foundations","estimated_minutes":180,"prerequisites":["sql-found-01"],"lesson_path":"sql/professional/lessons/sql_found_02_versioned_migrations.sql","guide_path":"sql/professional/companion-guides/sql_found_02_versioned_migrations.md","solution_paths":["sql/professional/solutions/sql_found_02_versioned_migrations_solutions.md","sql/professional/solutions/sql_found_02_versioned_migrations_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-01","track":"sql","day":1,"title":"Select Where Orderby","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-found-02"],"lesson_path":"sql/postgres-60day/day01_select_where_orderby.sql","guide_path":"sql/postgres-60day/companion-guides/day01_select_where_orderby.md","solution_paths":["sql/postgres-60day/solutions/day01_solutions.md","sql/postgres-60day/solutions/day01_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-02","track":"sql","day":2,"title":"Aggregates Groupby Having","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-01"],"lesson_path":"sql/postgres-60day/day02_aggregates_groupby_having.sql","guide_path":"sql/postgres-60day/companion-guides/day02_aggregates_groupby_having.md","solution_paths":["sql/postgres-60day/solutions/day02_solutions.md","sql/postgres-60day/solutions/day02_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-03","track":"sql","day":3,"title":"Inner Joins","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-02"],"lesson_path":"sql/postgres-60day/day03_inner_joins.sql","guide_path":"sql/postgres-60day/companion-guides/day03_inner_joins.md","solution_paths":["sql/postgres-60day/solutions/day03_solutions.md","sql/postgres-60day/solutions/day03_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-04","track":"sql","day":4,"title":"Outer Joins","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-03"],"lesson_path":"sql/postgres-60day/day04_outer_joins.sql","guide_path":"sql/postgres-60day/companion-guides/day04_outer_joins.md","solution_paths":["sql/postgres-60day/solutions/day04_solutions.md","sql/postgres-60day/solutions/day04_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-05","track":"sql","day":5,"title":"Cross Self Joins","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-04"],"lesson_path":"sql/postgres-60day/day05_cross_self_joins.sql","guide_path":"sql/postgres-60day/companion-guides/day05_cross_self_joins.md","solution_paths":["sql/postgres-60day/solutions/day05_solutions.md","sql/postgres-60day/solutions/day05_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-06","track":"sql","day":6,"title":"Set Operations","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-05"],"lesson_path":"sql/postgres-60day/day06_set_operations.sql","guide_path":"sql/postgres-60day/companion-guides/day06_set_operations.md","solution_paths":["sql/postgres-60day/solutions/day06_solutions.md","sql/postgres-60day/solutions/day06_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-07","track":"sql","day":7,"title":"Week1 Project","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-06"],"lesson_path":"sql/postgres-60day/day07_week1_project.sql","guide_path":"sql/postgres-60day/companion-guides/day07_week1_project.md","solution_paths":["sql/postgres-60day/solutions/day07_solutions.md","sql/postgres-60day/solutions/day07_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-08","track":"sql","day":8,"title":"Scalar Inline Subqueries","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-07"],"lesson_path":"sql/postgres-60day/day08_scalar_inline_subqueries.sql","guide_path":"sql/postgres-60day/companion-guides/day08_scalar_inline_subqueries.md","solution_paths":["sql/postgres-60day/solutions/day08_solutions.md","sql/postgres-60day/solutions/day08_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-09","track":"sql","day":9,"title":"Correlated Subqueries","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-08"],"lesson_path":"sql/postgres-60day/day09_correlated_subqueries.sql","guide_path":"sql/postgres-60day/companion-guides/day09_correlated_subqueries.md","solution_paths":["sql/postgres-60day/solutions/day09_solutions.md","sql/postgres-60day/solutions/day09_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-10","track":"sql","day":10,"title":"DML with Subqueries","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-09"],"lesson_path":"sql/postgres-60day/day10_dml_with_subqueries.sql","guide_path":"sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md","solution_paths":["sql/postgres-60day/solutions/day10_solutions.md","sql/postgres-60day/solutions/day10_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-11","track":"sql","day":11,"title":"Case Expressions","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-10"],"lesson_path":"sql/postgres-60day/day11_case_expressions.sql","guide_path":"sql/postgres-60day/companion-guides/day11_case_expressions.md","solution_paths":["sql/postgres-60day/solutions/day11_solutions.md","sql/postgres-60day/solutions/day11_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-12","track":"sql","day":12,"title":"String Functions","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-11"],"lesson_path":"sql/postgres-60day/day12_string_functions.sql","guide_path":"sql/postgres-60day/companion-guides/day12_string_functions.md","solution_paths":["sql/postgres-60day/solutions/day12_solutions.md","sql/postgres-60day/solutions/day12_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-13","track":"sql","day":13,"title":"Date Time Functions","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-12"],"lesson_path":"sql/postgres-60day/day13_date_time_functions.sql","guide_path":"sql/postgres-60day/companion-guides/day13_date_time_functions.md","solution_paths":["sql/postgres-60day/solutions/day13_solutions.md","sql/postgres-60day/solutions/day13_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-14","track":"sql","day":14,"title":"Numeric and Casting","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-13"],"lesson_path":"sql/postgres-60day/day14_numeric_and_casting.sql","guide_path":"sql/postgres-60day/companion-guides/day14_numeric_and_casting.md","solution_paths":["sql/postgres-60day/solutions/day14_solutions.md","sql/postgres-60day/solutions/day14_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-15","track":"sql","day":15,"title":"Phase1 Project","level":"foundation","phase":"SQL foundations and query building","estimated_minutes":75,"prerequisites":["sql-14"],"lesson_path":"sql/postgres-60day/day15_phase1_project.sql","guide_path":"sql/postgres-60day/companion-guides/day15_phase1_project.md","solution_paths":["sql/postgres-60day/solutions/day15_solutions.md","sql/postgres-60day/solutions/day15_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-16","track":"sql","day":16,"title":"Window Functions Fundamentals","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-15"],"lesson_path":"sql/postgres-60day/day16_window_functions_fundamentals.sql","guide_path":"sql/postgres-60day/companion-guides/day16_window_functions_fundamentals.md","solution_paths":["sql/postgres-60day/solutions/day16_solutions.md","sql/postgres-60day/solutions/day16_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-17","track":"sql","day":17,"title":"Rank Functions","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-16"],"lesson_path":"sql/postgres-60day/day17_rank_functions.sql","guide_path":"sql/postgres-60day/companion-guides/day17_rank_functions.md","solution_paths":["sql/postgres-60day/solutions/day17_solutions.md","sql/postgres-60day/solutions/day17_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-18","track":"sql","day":18,"title":"Lag Lead","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-17"],"lesson_path":"sql/postgres-60day/day18_lag_lead.sql","guide_path":"sql/postgres-60day/companion-guides/day18_lag_lead.md","solution_paths":["sql/postgres-60day/solutions/day18_solutions.md","sql/postgres-60day/solutions/day18_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-19","track":"sql","day":19,"title":"Running Aggregates","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-18"],"lesson_path":"sql/postgres-60day/day19_running_aggregates.sql","guide_path":"sql/postgres-60day/companion-guides/day19_running_aggregates.md","solution_paths":["sql/postgres-60day/solutions/day19_solutions.md","sql/postgres-60day/solutions/day19_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-20","track":"sql","day":20,"title":"First Last Value","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-19"],"lesson_path":"sql/postgres-60day/day20_first_last_value.sql","guide_path":"sql/postgres-60day/companion-guides/day20_first_last_value.md","solution_paths":["sql/postgres-60day/solutions/day20_solutions.md","sql/postgres-60day/solutions/day20_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-21","track":"sql","day":21,"title":"Distribution Functions","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-20"],"lesson_path":"sql/postgres-60day/day21_distribution_functions.sql","guide_path":"sql/postgres-60day/companion-guides/day21_distribution_functions.md","solution_paths":["sql/postgres-60day/solutions/day21_solutions.md","sql/postgres-60day/solutions/day21_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-22","track":"sql","day":22,"title":"Advanced Windows","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-21"],"lesson_path":"sql/postgres-60day/day22_advanced_windows.sql","guide_path":"sql/postgres-60day/companion-guides/day22_advanced_windows.md","solution_paths":["sql/postgres-60day/solutions/day22_solutions.md","sql/postgres-60day/solutions/day22_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-23","track":"sql","day":23,"title":"CTEs Intro","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-22"],"lesson_path":"sql/postgres-60day/day23_ctes_intro.sql","guide_path":"sql/postgres-60day/companion-guides/day23_ctes_intro.md","solution_paths":["sql/postgres-60day/solutions/day23_solutions.md","sql/postgres-60day/solutions/day23_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-24","track":"sql","day":24,"title":"Recursive CTEs","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-23"],"lesson_path":"sql/postgres-60day/day24_recursive_ctes.sql","guide_path":"sql/postgres-60day/companion-guides/day24_recursive_ctes.md","solution_paths":["sql/postgres-60day/solutions/day24_solutions.md","sql/postgres-60day/solutions/day24_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-25","track":"sql","day":25,"title":"Multiple CTEs Hierarchies","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-24"],"lesson_path":"sql/postgres-60day/day25_multiple_ctes_hierarchies.sql","guide_path":"sql/postgres-60day/companion-guides/day25_multiple_ctes_hierarchies.md","solution_paths":["sql/postgres-60day/solutions/day25_solutions.md","sql/postgres-60day/solutions/day25_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-26","track":"sql","day":26,"title":"CTEs with Windows","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-25"],"lesson_path":"sql/postgres-60day/day26_ctes_with_windows.sql","guide_path":"sql/postgres-60day/companion-guides/day26_ctes_with_windows.md","solution_paths":["sql/postgres-60day/solutions/day26_solutions.md","sql/postgres-60day/solutions/day26_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-27","track":"sql","day":27,"title":"Pivot Unpivot","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-26"],"lesson_path":"sql/postgres-60day/day27_pivot_unpivot.sql","guide_path":"sql/postgres-60day/companion-guides/day27_pivot_unpivot.md","solution_paths":["sql/postgres-60day/solutions/day27_solutions.md","sql/postgres-60day/solutions/day27_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-28","track":"sql","day":28,"title":"JSON XML","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-27"],"lesson_path":"sql/postgres-60day/day28_json_xml.sql","guide_path":"sql/postgres-60day/companion-guides/day28_json_xml.md","solution_paths":["sql/postgres-60day/solutions/day28_solutions.md","sql/postgres-60day/solutions/day28_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-29","track":"sql","day":29,"title":"Pattern Matching","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-28"],"lesson_path":"sql/postgres-60day/day29_pattern_matching.sql","guide_path":"sql/postgres-60day/companion-guides/day29_pattern_matching.md","solution_paths":["sql/postgres-60day/solutions/day29_solutions.md","sql/postgres-60day/solutions/day29_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-30","track":"sql","day":30,"title":"Phase2 Project","level":"intermediate","phase":"Windows, CTEs, and advanced querying","estimated_minutes":90,"prerequisites":["sql-29"],"lesson_path":"sql/postgres-60day/day30_phase2_project.sql","guide_path":"sql/postgres-60day/companion-guides/day30_phase2_project.md","solution_paths":["sql/postgres-60day/solutions/day30_solutions.md","sql/postgres-60day/solutions/day30_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-31","track":"sql","day":31,"title":"Explain Analyze","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-30"],"lesson_path":"sql/postgres-60day/day31_explain_analyze.sql","guide_path":"sql/postgres-60day/companion-guides/day31_explain_analyze.md","solution_paths":["sql/postgres-60day/solutions/day31_solutions.md","sql/postgres-60day/solutions/day31_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-32","track":"sql","day":32,"title":"Index Fundamentals","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-31"],"lesson_path":"sql/postgres-60day/day32_index_fundamentals.sql","guide_path":"sql/postgres-60day/companion-guides/day32_index_fundamentals.md","solution_paths":["sql/postgres-60day/solutions/day32_solutions.md","sql/postgres-60day/solutions/day32_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-33","track":"sql","day":33,"title":"Index Optimization Strategies","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-32"],"lesson_path":"sql/postgres-60day/day33_index_optimization_strategies.sql","guide_path":"sql/postgres-60day/companion-guides/day33_index_optimization_strategies.md","solution_paths":["sql/postgres-60day/solutions/day33_solutions.md","sql/postgres-60day/solutions/day33_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-34","track":"sql","day":34,"title":"Query Optimization","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-33"],"lesson_path":"sql/postgres-60day/day34_query_optimization.sql","guide_path":"sql/postgres-60day/companion-guides/day34_query_optimization.md","solution_paths":["sql/postgres-60day/solutions/day34_solutions.md","sql/postgres-60day/solutions/day34_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-35","track":"sql","day":35,"title":"Avoiding Pitfalls","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-34"],"lesson_path":"sql/postgres-60day/day35_avoiding_pitfalls.sql","guide_path":"sql/postgres-60day/companion-guides/day35_avoiding_pitfalls.md","solution_paths":["sql/postgres-60day/solutions/day35_solutions.md","sql/postgres-60day/solutions/day35_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-36","track":"sql","day":36,"title":"Materialized Views","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-35"],"lesson_path":"sql/postgres-60day/day36_materialized_views.sql","guide_path":"sql/postgres-60day/companion-guides/day36_materialized_views.md","solution_paths":["sql/postgres-60day/solutions/day36_solutions.md","sql/postgres-60day/solutions/day36_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-37","track":"sql","day":37,"title":"Partitioning Sharding","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-36"],"lesson_path":"sql/postgres-60day/day37_partitioning_sharding.sql","guide_path":"sql/postgres-60day/companion-guides/day37_partitioning_sharding.md","solution_paths":["sql/postgres-60day/solutions/day37_solutions.md","sql/postgres-60day/solutions/day37_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-38","track":"sql","day":38,"title":"Transactions Isolation","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-37"],"lesson_path":"sql/postgres-60day/day38_transactions_isolation.sql","guide_path":"sql/postgres-60day/companion-guides/day38_transactions_isolation.md","solution_paths":["sql/postgres-60day/solutions/day38_solutions.md","sql/postgres-60day/solutions/day38_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-39","track":"sql","day":39,"title":"Locks Deadlocks","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-38"],"lesson_path":"sql/postgres-60day/day39_locks_deadlocks.sql","guide_path":"sql/postgres-60day/companion-guides/day39_locks_deadlocks.md","solution_paths":["sql/postgres-60day/solutions/day39_solutions.md","sql/postgres-60day/solutions/day39_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-40","track":"sql","day":40,"title":"Analytic Functions Advanced","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-39"],"lesson_path":"sql/postgres-60day/day40_analytic_functions_advanced.sql","guide_path":"sql/postgres-60day/companion-guides/day40_analytic_functions_advanced.md","solution_paths":["sql/postgres-60day/solutions/day40_solutions.md","sql/postgres-60day/solutions/day40_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-41","track":"sql","day":41,"title":"Complex Aggregations","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-40"],"lesson_path":"sql/postgres-60day/day41_complex_aggregations.sql","guide_path":"sql/postgres-60day/companion-guides/day41_complex_aggregations.md","solution_paths":["sql/postgres-60day/solutions/day41_solutions.md","sql/postgres-60day/solutions/day41_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-42","track":"sql","day":42,"title":"Data Quality Validation","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-41"],"lesson_path":"sql/postgres-60day/day42_data_quality_validation.sql","guide_path":"sql/postgres-60day/companion-guides/day42_data_quality_validation.md","solution_paths":["sql/postgres-60day/solutions/day42_solutions.md","sql/postgres-60day/solutions/day42_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-43","track":"sql","day":43,"title":"Backup Recovery","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-42"],"lesson_path":"sql/postgres-60day/day43_backup_recovery.sql","guide_path":"sql/postgres-60day/companion-guides/day43_backup_recovery.md","solution_paths":["sql/postgres-60day/solutions/day43_solutions.md","sql/postgres-60day/solutions/day43_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-44","track":"sql","day":44,"title":"Monitoring Diagnostics","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-43"],"lesson_path":"sql/postgres-60day/day44_monitoring_diagnostics.sql","guide_path":"sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md","solution_paths":["sql/postgres-60day/solutions/day44_solutions.md","sql/postgres-60day/solutions/day44_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-45","track":"sql","day":45,"title":"Phase3 Optimization Project","level":"advanced","phase":"Performance, transactions, and operations","estimated_minutes":105,"prerequisites":["sql-44"],"lesson_path":"sql/postgres-60day/day45_phase3_optimization_project.sql","guide_path":"sql/postgres-60day/companion-guides/day45_phase3_optimization_project.md","solution_paths":["sql/postgres-60day/solutions/day45_solutions.md","sql/postgres-60day/solutions/day45_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-46","track":"sql","day":46,"title":"Project1 Ecommerce Part1","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-45"],"lesson_path":"sql/postgres-60day/day46_project1_ecommerce_part1.sql","guide_path":"sql/postgres-60day/companion-guides/day46_project1_ecommerce_part1.md","solution_paths":["sql/postgres-60day/solutions/day46_solutions.md","sql/postgres-60day/solutions/day46_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-47","track":"sql","day":47,"title":"Project1 Ecommerce Part2","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-46"],"lesson_path":"sql/postgres-60day/day47_project1_ecommerce_part2.sql","guide_path":"sql/postgres-60day/companion-guides/day47_project1_ecommerce_part2.md","solution_paths":["sql/postgres-60day/solutions/day47_solutions.md","sql/postgres-60day/solutions/day47_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-48","track":"sql","day":48,"title":"Project1 Ecommerce Part3","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-47"],"lesson_path":"sql/postgres-60day/day48_project1_ecommerce_part3.sql","guide_path":"sql/postgres-60day/companion-guides/day48_project1_ecommerce_part3.md","solution_paths":["sql/postgres-60day/solutions/day48_solutions.md","sql/postgres-60day/solutions/day48_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-49","track":"sql","day":49,"title":"Project2 Finance Part1","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-48"],"lesson_path":"sql/postgres-60day/day49_project2_finance_part1.sql","guide_path":"sql/postgres-60day/companion-guides/day49_project2_finance_part1.md","solution_paths":["sql/postgres-60day/solutions/day49_solutions.md","sql/postgres-60day/solutions/day49_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-50","track":"sql","day":50,"title":"Project2 Finance Part2","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-49"],"lesson_path":"sql/postgres-60day/day50_project2_finance_part2.sql","guide_path":"sql/postgres-60day/companion-guides/day50_project2_finance_part2.md","solution_paths":["sql/postgres-60day/solutions/day50_solutions.md","sql/postgres-60day/solutions/day50_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-51","track":"sql","day":51,"title":"Project2 Finance Part3","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-50"],"lesson_path":"sql/postgres-60day/day51_project2_finance_part3.sql","guide_path":"sql/postgres-60day/companion-guides/day51_project2_finance_part3.md","solution_paths":["sql/postgres-60day/solutions/day51_solutions.md","sql/postgres-60day/solutions/day51_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-52","track":"sql","day":52,"title":"Project3 DWH Part1","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-51"],"lesson_path":"sql/postgres-60day/day52_project3_dwh_part1.sql","guide_path":"sql/postgres-60day/companion-guides/day52_project3_dwh_part1.md","solution_paths":["sql/postgres-60day/solutions/day52_solutions.md","sql/postgres-60day/solutions/day52_solutions.sql"],"dependency_group":"postgres","network":"offline","stateful_group":"dwh-project"},{"id":"sql-53","track":"sql","day":53,"title":"Project3 DWH Part2 SCD","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-52"],"lesson_path":"sql/postgres-60day/day53_project3_dwh_part2_scd.sql","guide_path":"sql/postgres-60day/companion-guides/day53_project3_dwh_part2_scd.md","solution_paths":["sql/postgres-60day/solutions/day53_solutions.md","sql/postgres-60day/solutions/day53_solutions.sql"],"dependency_group":"postgres","network":"offline","stateful_group":"dwh-project"},{"id":"sql-54","track":"sql","day":54,"title":"Project3 DWH Part3 Aggregations","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-53"],"lesson_path":"sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql","guide_path":"sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md","solution_paths":["sql/postgres-60day/solutions/day54_solutions.md","sql/postgres-60day/solutions/day54_solutions.sql"],"dependency_group":"postgres","network":"offline","stateful_group":"dwh-project"},{"id":"sql-55","track":"sql","day":55,"title":"Project4 BI Part1","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-54"],"lesson_path":"sql/postgres-60day/day55_project4_bi_part1.sql","guide_path":"sql/postgres-60day/companion-guides/day55_project4_bi_part1.md","solution_paths":["sql/postgres-60day/solutions/day55_solutions.md","sql/postgres-60day/solutions/day55_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-56","track":"sql","day":56,"title":"Project4 BI Part2","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-55"],"lesson_path":"sql/postgres-60day/day56_project4_bi_part2.sql","guide_path":"sql/postgres-60day/companion-guides/day56_project4_bi_part2.md","solution_paths":["sql/postgres-60day/solutions/day56_solutions.md","sql/postgres-60day/solutions/day56_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-57","track":"sql","day":57,"title":"Project4 BI Part3","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-56"],"lesson_path":"sql/postgres-60day/day57_project4_bi_part3.sql","guide_path":"sql/postgres-60day/companion-guides/day57_project4_bi_part3.md","solution_paths":["sql/postgres-60day/solutions/day57_solutions.md","sql/postgres-60day/solutions/day57_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-58","track":"sql","day":58,"title":"Final Capstone Part1","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-57"],"lesson_path":"sql/postgres-60day/day58_final_capstone_part1.sql","guide_path":"sql/postgres-60day/companion-guides/day58_final_capstone_part1.md","solution_paths":["sql/postgres-60day/solutions/day58_solutions.md","sql/postgres-60day/solutions/day58_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-59","track":"sql","day":59,"title":"Final Capstone Part2","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-58"],"lesson_path":"sql/postgres-60day/day59_final_capstone_part2.sql","guide_path":"sql/postgres-60day/companion-guides/day59_final_capstone_part2.md","solution_paths":["sql/postgres-60day/solutions/day59_solutions.md","sql/postgres-60day/solutions/day59_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-60","track":"sql","day":60,"title":"Final Capstone Part3","level":"advanced","phase":"Applied analytics and capstones","estimated_minutes":120,"prerequisites":["sql-59"],"lesson_path":"sql/postgres-60day/day60_final_capstone_part3.sql","guide_path":"sql/postgres-60day/companion-guides/day60_final_capstone_part3.md","solution_paths":["sql/postgres-60day/solutions/day60_solutions.md","sql/postgres-60day/solutions/day60_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-sec-01","track":"sql","day":61,"title":"Schemas, Roles, Privileges, and Row-Level Security","level":"advanced","phase":"Database security and application safety","estimated_minutes":180,"prerequisites":["sql-found-02","sql-39"],"lesson_path":"sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql","guide_path":"sql/professional/companion-guides/sql_sec_01_roles_privileges_rls.md","solution_paths":["sql/professional/solutions/sql_sec_01_roles_privileges_rls_solutions.md","sql/professional/solutions/sql_sec_01_roles_privileges_rls_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-prog-01","track":"sql","day":62,"title":"Functions, Procedures, and Triggers","level":"advanced","phase":"Database programming","estimated_minutes":180,"prerequisites":["sql-found-02"],"lesson_path":"sql/professional/lessons/sql_prog_01_routines_triggers.sql","guide_path":"sql/professional/companion-guides/sql_prog_01_routines_triggers.md","solution_paths":["sql/professional/solutions/sql_prog_01_routines_triggers_solutions.md","sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-types-01","track":"sql","day":63,"title":"PostgreSQL-Native Types and Searchable Documents","level":"advanced","phase":"PostgreSQL data modelling","estimated_minutes":180,"prerequisites":["sql-29"],"lesson_path":"sql/professional/lessons/sql_types_01_native_types_search.sql","guide_path":"sql/professional/companion-guides/sql_types_01_native_types_search.md","solution_paths":["sql/professional/solutions/sql_types_01_native_types_search_solutions.md","sql/professional/solutions/sql_types_01_native_types_search_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-ops-01","track":"sql","day":64,"title":"Index Types, Statistics, and Maintenance Lifecycle","level":"advanced","phase":"PostgreSQL operations","estimated_minutes":210,"prerequisites":["sql-35","sql-types-01"],"lesson_path":"sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql","guide_path":"sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md","solution_paths":["sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.md","sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-test-01","track":"sql","day":65,"title":"SQL Tests, Migration Checks, and Data Contracts","level":"advanced","phase":"Database quality engineering","estimated_minutes":180,"prerequisites":["sql-found-02","sql-42"],"lesson_path":"sql/professional/lessons/sql_test_01_contracts_migrations.sql","guide_path":"sql/professional/companion-guides/sql_test_01_contracts_migrations.md","solution_paths":["sql/professional/solutions/sql_test_01_contracts_migrations_solutions.md","sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-analytics-01","track":"sql","day":66,"title":"Reusable Analytical Query Patterns","level":"advanced","phase":"Advanced analytical SQL","estimated_minutes":240,"prerequisites":["sql-30","sql-test-01"],"lesson_path":"sql/professional/lessons/sql_analytics_01_query_patterns.sql","guide_path":"sql/professional/companion-guides/sql_analytics_01_query_patterns.md","solution_paths":["sql/professional/solutions/sql_analytics_01_query_patterns_solutions.md","sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"sql-ops-02","track":"sql","day":67,"title":"Backup, Restore, and Recovery Rehearsals","level":"advanced","phase":"PostgreSQL operations","estimated_minutes":240,"prerequisites":["sql-43","sql-ops-01"],"lesson_path":"sql/professional/lessons/sql_ops_02_backup_restore_recovery.sql","guide_path":"sql/professional/companion-guides/sql_ops_02_backup_restore_recovery.md","solution_paths":["sql/professional/solutions/sql_ops_02_backup_restore_recovery_solutions.md","sql/professional/solutions/sql_ops_02_backup_restore_recovery_solutions.sql"],"dependency_group":"postgres","network":"optional-container-image"},{"id":"sql-ext-01","track":"sql","day":68,"title":"PostgreSQL Extensions, Spatial Data, and Vectors","level":"advanced","phase":"PostgreSQL specialization","estimated_minutes":240,"prerequisites":["sql-types-01","sql-ops-01"],"lesson_path":"sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql","guide_path":"sql/professional/companion-guides/sql_ext_01_extensions_spatial_vector.md","solution_paths":["sql/professional/solutions/sql_ext_01_extensions_spatial_vector_solutions.md","sql/professional/solutions/sql_ext_01_extensions_spatial_vector_solutions.sql"],"dependency_group":"postgres","network":"optional-container-image"},{"id":"sql-repl-01","track":"sql","day":69,"title":"Replication, Change Data Capture, and High Availability","level":"advanced","phase":"PostgreSQL specialization","estimated_minutes":240,"prerequisites":["sql-ops-02","sql-prog-01","sql-test-01"],"lesson_path":"sql/professional/lessons/sql_repl_01_cdc_high_availability.sql","guide_path":"sql/professional/companion-guides/sql_repl_01_cdc_high_availability.md","solution_paths":["sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.md","sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql"],"dependency_group":"postgres","network":"optional-container-image"},{"id":"sql-temporal-01","track":"sql","day":70,"title":"Temporal and Domain Modelling","level":"advanced","phase":"PostgreSQL specialization","estimated_minutes":210,"prerequisites":["sql-found-01","sql-types-01","sql-prog-01","sql-test-01","sql-39"],"lesson_path":"sql/professional/lessons/sql_temporal_01_domain_modelling.sql","guide_path":"sql/professional/companion-guides/sql_temporal_01_domain_modelling.md","solution_paths":["sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.md","sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql"],"dependency_group":"postgres","network":"offline"},{"id":"bridge-01","track":"bridge","day":1,"title":"Config Logging CLI","level":"intermediate","phase":"Python and PostgreSQL engineering","estimated_minutes":105,"prerequisites":["python-15","sql-15"],"lesson_path":"bridge/lessons/day01_config_logging_cli.py","guide_path":"bridge/companion-guides/day01_config_logging_cli.md","solution_paths":["bridge/solutions/day01_solutions.md","bridge/solutions/day01_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-02","track":"bridge","day":2,"title":"Protocols Context Decorators","level":"intermediate","phase":"Python and PostgreSQL engineering","estimated_minutes":105,"prerequisites":["bridge-01"],"lesson_path":"bridge/lessons/day02_protocols_context_decorators.py","guide_path":"bridge/companion-guides/day02_protocols_context_decorators.md","solution_paths":["bridge/solutions/day02_solutions.md","bridge/solutions/day02_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-03","track":"bridge","day":3,"title":"Safe Psycopg Queries","level":"intermediate","phase":"Python and PostgreSQL engineering","estimated_minutes":105,"prerequisites":["bridge-02"],"lesson_path":"bridge/lessons/day03_safe_psycopg_queries.py","guide_path":"bridge/companion-guides/day03_safe_psycopg_queries.md","solution_paths":["bridge/solutions/day03_solutions.md","bridge/solutions/day03_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-04","track":"bridge","day":4,"title":"Transactions Idempotency Retries","level":"intermediate","phase":"Python and PostgreSQL engineering","estimated_minutes":105,"prerequisites":["bridge-03"],"lesson_path":"bridge/lessons/day04_transactions_idempotency_retries.py","guide_path":"bridge/companion-guides/day04_transactions_idempotency_retries.md","solution_paths":["bridge/solutions/day04_solutions.md","bridge/solutions/day04_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-05","track":"bridge","day":5,"title":"DB Testing Fixtures Doubles","level":"intermediate","phase":"Python and PostgreSQL engineering","estimated_minutes":105,"prerequisites":["bridge-04"],"lesson_path":"bridge/lessons/day05_db_testing_fixtures_doubles.py","guide_path":"bridge/companion-guides/day05_db_testing_fixtures_doubles.md","solution_paths":["bridge/solutions/day05_solutions.md","bridge/solutions/day05_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-06","track":"bridge","day":6,"title":"Bulk ETL Validation","level":"advanced","phase":"Python and PostgreSQL engineering","estimated_minutes":120,"prerequisites":["bridge-05"],"lesson_path":"bridge/lessons/day06_bulk_etl_validation.py","guide_path":"bridge/companion-guides/day06_bulk_etl_validation.md","solution_paths":["bridge/solutions/day06_solutions.md","bridge/solutions/day06_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-07","track":"bridge","day":7,"title":"Async Bounded Concurrency","level":"advanced","phase":"Python and PostgreSQL engineering","estimated_minutes":120,"prerequisites":["bridge-06"],"lesson_path":"bridge/lessons/day07_async_bounded_concurrency.py","guide_path":"bridge/companion-guides/day07_async_bounded_concurrency.md","solution_paths":["bridge/solutions/day07_solutions.md","bridge/solutions/day07_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-08","track":"bridge","day":8,"title":"Production Capstone","level":"advanced","phase":"Python and PostgreSQL engineering","estimated_minutes":120,"prerequisites":["bridge-07"],"lesson_path":"bridge/lessons/day08_production_capstone.py","guide_path":"bridge/companion-guides/day08_production_capstone.md","solution_paths":["bridge/solutions/day08_solutions.md","bridge/solutions/day08_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-jupyter-01","track":"bridge","day":9,"title":"PostgreSQL in Jupyter with SQL Magics","level":"intermediate","phase":"Interactive Python and PostgreSQL","estimated_minutes":150,"prerequisites":["python-18","sql-15","bridge-03"],"lesson_path":"bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb","guide_path":"bridge/professional/companion-guides/bridge_jupyter_01_postgresql_magics.md","solution_paths":["bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solutions.md","bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb"],"dependency_group":"sql-notebooks","network":"offline"},{"id":"bridge-ops-01","track":"bridge","day":10,"title":"Migration Delivery and Application Observability","level":"advanced","phase":"Professional application and database operations","estimated_minutes":240,"prerequisites":["bridge-08","sql-found-02"],"lesson_path":"bridge/professional/lessons/bridge_ops_01_migration_observability.py","guide_path":"bridge/professional/companion-guides/bridge_ops_01_migration_observability.md","solution_paths":["bridge/professional/solutions/bridge_ops_01_migration_observability_solutions.md","bridge/professional/solutions/bridge_ops_01_migration_observability_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-ai-01","track":"bridge","day":11,"title":"AI Application Engineering with Deterministic Test Doubles","level":"advanced","phase":"Application specialization","estimated_minutes":240,"prerequisites":["bridge-08","python-test-01"],"lesson_path":"bridge/professional/lessons/bridge_ai_01_application_engineering.py","guide_path":"bridge/professional/companion-guides/bridge_ai_01_application_engineering.md","solution_paths":["bridge/professional/solutions/bridge_ai_01_application_engineering_solutions.md","bridge/professional/solutions/bridge_ai_01_application_engineering_solution.py"],"dependency_group":"bridge","network":"offline"},{"id":"bridge-analytics-01","track":"bridge","day":12,"title":"Analytics Engineering, Lineage, and Data Contracts","level":"advanced","phase":"Data engineering specialization","estimated_minutes":240,"prerequisites":["bridge-05","python-data-01","sql-analytics-01"],"lesson_path":"bridge/professional/lessons/bridge_analytics_01_local_project.py","guide_path":"bridge/professional/companion-guides/bridge_analytics_01_local_project.md","solution_paths":["bridge/professional/solutions/bridge_analytics_01_local_project_solutions.md","bridge/professional/solutions/bridge_analytics_01_local_project_solution.py"],"dependency_group":"professional","network":"offline"}]};
+    const lessons = course.lessons;
+    const lessonById = new Map(lessons.map((lesson) => [lesson.id, lesson]));
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const state = loadState();
+
+    function loadState() {
+      const fallback = { completed: [], setup: {}, os: "windows" };
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (!parsed || !Array.isArray(parsed.completed)) return fallback;
+        return {
+          completed: parsed.completed.filter((id) => lessonById.has(id)),
+          setup: parsed.setup && typeof parsed.setup === "object" ? parsed.setup : {},
+          os: ["windows", "macos", "linux"].includes(parsed.os) ? parsed.os : "windows"
+        };
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        // Some file:// privacy modes disable localStorage. The in-memory state
+        // still works for this page view.
+      }
+    }
+
+    const completedSet = () => new Set(state.completed);
+    const escapeHtml = (value) => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    function isReady(lesson, completed = completedSet()) {
+      return lesson.prerequisites.every((id) => completed.has(id));
+    }
+
+    function relativeLink(path) {
+      return String(path).split("/").map(encodeURIComponent).join("/");
+    }
+
+    function renderCard(lesson) {
+      const completed = completedSet().has(lesson.id);
+      const prerequisites = lesson.prerequisites.length
+        ? lesson.prerequisites.map((id) => `<code>${escapeHtml(id)}</code>`).join(", ")
+        : "none";
+      const solutions = lesson.solution_paths
+        .map((path, index) => `<a href="${relativeLink(path)}">Solution ${index + 1}</a>`)
+        .join("");
+      return `
+        <article class="lesson-card ${completed ? "complete" : ""}" data-lesson-id="${escapeHtml(lesson.id)}">
+          <div class="lesson-top">
+            <span class="lesson-id">${escapeHtml(lesson.id)}</span>
+            <label class="completion">
+              <input type="checkbox" data-complete="${escapeHtml(lesson.id)}" ${completed ? "checked" : ""}>
+              Complete
+            </label>
+          </div>
+          <h3>${escapeHtml(lesson.title)}</h3>
+          <div class="lesson-meta">
+            <span class="tag">${escapeHtml(lesson.track)}</span>
+            <span class="tag">${escapeHtml(lesson.level)}</span>
+            <span class="tag">${escapeHtml(lesson.estimated_minutes)} min</span>
+            <span class="tag">${isReady(lesson) ? "ready" : "prerequisites pending"}</span>
+            <span class="tag">${escapeHtml(lesson.network)}</span>
+          </div>
+          <p class="lesson-phase">${escapeHtml(lesson.phase)}</p>
+          <p class="prereqs"><strong>Prerequisites:</strong> ${prerequisites}</p>
+          <div class="lesson-links">
+            <a href="${relativeLink(lesson.guide_path)}">Guide</a>
+            <a href="${relativeLink(lesson.lesson_path)}">Learner artifact</a>
+            ${solutions}
+          </div>
+        </article>`;
+    }
+
+    const search = document.querySelector("#lesson-search");
+    const trackFilter = document.querySelector("#track-filter");
+    const levelFilter = document.querySelector("#level-filter");
+    const statusFilter = document.querySelector("#status-filter");
+    const lessonGrid = document.querySelector("#lesson-grid");
+    const resultCount = document.querySelector("#result-count");
+    const loadMore = document.querySelector("#load-more");
+    let activePath = "";
+    let visibleLimit = 30;
+
+    [...new Set(lessons.map((lesson) => lesson.level))].sort().forEach((level) => {
+      const option = document.createElement("option");
+      option.value = level;
+      option.textContent = level[0].toUpperCase() + level.slice(1);
+      levelFilter.append(option);
+    });
+
+    function filteredLessons() {
+      const query = search.value.trim().toLowerCase();
+      const completed = completedSet();
+      return lessons.filter((lesson) => {
+        const haystack = [
+          lesson.id,
+          lesson.title,
+          lesson.phase,
+          lesson.track,
+          lesson.level,
+          ...lesson.prerequisites
+        ].join(" ").toLowerCase();
+        if (query && !haystack.includes(query)) return false;
+        if (trackFilter.value && lesson.track !== trackFilter.value) return false;
+        if (levelFilter.value && lesson.level !== levelFilter.value) return false;
+        if (statusFilter.value === "complete" && !completed.has(lesson.id)) return false;
+        if (statusFilter.value === "incomplete" && completed.has(lesson.id)) return false;
+        if (statusFilter.value === "ready" && (completed.has(lesson.id) || !isReady(lesson, completed))) return false;
+        if (
+          activePath === "new" &&
+          !(
+            (lesson.track === "python" && lesson.day >= 1 && lesson.day <= 15) ||
+            ["sql-found-01", "sql-found-02"].includes(lesson.id) ||
+            (lesson.track === "sql" && lesson.day >= 1 && lesson.day <= 15)
+          )
+        ) return false;
+        if (activePath === "python" && lesson.track !== "python") return false;
+        if (
+          activePath === "sql-bridge" &&
+          !["sql", "bridge"].includes(lesson.track)
+        ) return false;
+        return true;
+      });
+    }
+
+    function renderCatalog() {
+      const filtered = filteredLessons();
+      const visible = filtered.slice(0, visibleLimit);
+      lessonGrid.innerHTML = visible.length
+        ? visible.map(renderCard).join("")
+        : '<p class="empty">No lessons match those filters. Clear one filter and try again.</p>';
+      const pathSuffix = activePath ? ` in the selected path` : "";
+      resultCount.textContent = filtered.length > visible.length
+        ? `Showing ${visible.length} of ${filtered.length} matches${pathSuffix}`
+        : `Showing ${filtered.length} of ${lessons.length} lessons${pathSuffix}`;
+      loadMore.hidden = visible.length >= filtered.length;
+      lessonGrid.querySelectorAll("[data-complete]").forEach((input) => {
+        input.addEventListener("change", (event) => {
+          const id = event.currentTarget.dataset.complete;
+          const completed = completedSet();
+          event.currentTarget.checked ? completed.add(id) : completed.delete(id);
+          state.completed = [...completed].sort();
+          saveState();
+          renderCatalog();
+          renderProgress();
+        });
+      });
+    }
+
+    function renderProgress() {
+      const completed = completedSet();
+      const percentage = Math.round((completed.size / lessons.length) * 100);
+      const ring = document.querySelector("#progress-ring");
+      ring.style.setProperty("--progress", `${percentage}%`);
+      ring.dataset.label = `${percentage}%`;
+      document.querySelector("#progress-count").textContent =
+        `${completed.size} of ${lessons.length} complete`;
+      const next = lessons.find((lesson) => !completed.has(lesson.id) && isReady(lesson, completed));
+      document.querySelector("#next-ready").textContent = next
+        ? `Next ready: ${next.id} — ${next.title}`
+        : completed.size === lessons.length
+          ? "Every cataloged lesson is complete."
+          : "Complete prerequisites to unlock the next cataloged lesson.";
+    }
+
+    [search, trackFilter, levelFilter, statusFilter].forEach((control) => {
+      control.addEventListener(control === search ? "input" : "change", () => {
+        activePath = "";
+        visibleLimit = 30;
+        renderCatalog();
+      });
+    });
+
+    document.querySelectorAll("[data-path-filter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const path = button.dataset.pathFilter;
+        activePath = path;
+        visibleLimit = 30;
+        search.value = "";
+        levelFilter.value = "";
+        statusFilter.value = "";
+        trackFilter.value = "";
+        renderCatalog();
+        document.querySelector("#catalog").scrollIntoView();
+      });
+    });
+
+    loadMore.addEventListener("click", () => {
+      visibleLimit += 30;
+      renderCatalog();
+    });
+
+    function selectOs(os) {
+      state.os = os;
+      saveState();
+      document.querySelectorAll("[data-os-tab]").forEach((button) => {
+        const selected = button.dataset.osTab === os;
+        button.setAttribute("aria-selected", String(selected));
+        button.tabIndex = selected ? 0 : -1;
+      });
+      document.querySelectorAll("[data-os-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.osPanel !== os;
+      });
+    }
+
+    document.querySelectorAll("[data-os-tab]").forEach((button) => {
+      button.addEventListener("click", () => selectOs(button.dataset.osTab));
+      button.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+        const systems = ["windows", "macos", "linux"];
+        const current = systems.indexOf(state.os);
+        const offset = event.key === "ArrowRight" ? 1 : -1;
+        const next = systems[(current + offset + systems.length) % systems.length];
+        selectOs(next);
+        document.querySelector(`[data-os-tab="${next}"]`).focus();
+      });
+    });
+
+    document.querySelectorAll("[data-setup-check]").forEach((input) => {
+      input.checked = Boolean(state.setup[input.dataset.setupCheck]);
+      input.addEventListener("change", () => {
+        state.setup[input.dataset.setupCheck] = input.checked;
+        saveState();
+      });
+    });
+
+    function downloadProgress() {
+      const payload = {
+        format: "ds60sqlpy-portable-guide-progress",
+        version: 1,
+        completed: state.completed,
+        setup: state.setup
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json" });
+      const anchor = document.createElement("a");
+      anchor.href = URL.createObjectURL(blob);
+      anchor.download = "ds60sqlpy-progress.json";
+      anchor.click();
+      URL.revokeObjectURL(anchor.href);
+    }
+
+    document.querySelector("#export-progress").addEventListener("click", downloadProgress);
+    document.querySelector("#import-progress").addEventListener("click", () => {
+      document.querySelector("#progress-file").click();
+    });
+    document.querySelector("#progress-file").addEventListener("change", async (event) => {
+      const file = event.currentTarget.files[0];
+      if (!file) return;
+      try {
+        const payload = JSON.parse(await file.text());
+        if (payload.format !== "ds60sqlpy-portable-guide-progress" || !Array.isArray(payload.completed)) {
+          throw new Error("not a DS60 portable-guide progress file");
+        }
+        state.completed = payload.completed.filter((id) => lessonById.has(id));
+        state.setup = payload.setup && typeof payload.setup === "object" ? payload.setup : {};
+        saveState();
+        document.querySelectorAll("[data-setup-check]").forEach((input) => {
+          input.checked = Boolean(state.setup[input.dataset.setupCheck]);
+        });
+        renderCatalog();
+        renderProgress();
+      } catch (error) {
+        window.alert(`Could not import progress: ${error.message}`);
+      } finally {
+        event.currentTarget.value = "";
+      }
+    });
+    document.querySelector("#clear-progress").addEventListener("click", () => {
+      if (!window.confirm("Clear lesson and setup progress stored by this browser?")) return;
+      state.completed = [];
+      state.setup = {};
+      saveState();
+      document.querySelectorAll("[data-setup-check]").forEach((input) => {
+        input.checked = false;
+      });
+      renderCatalog();
+      renderProgress();
+    });
+
+    const codexLesson = document.querySelector("#codex-lesson");
+    lessons.forEach((lesson) => {
+      const option = document.createElement("option");
+      option.value = lesson.id;
+      option.textContent = `${lesson.id} — ${lesson.title}`;
+      codexLesson.append(option);
+    });
+
+    function renderPrompt() {
+      const lesson = lessonById.get(codexLesson.value) || lessons[0];
+      const prerequisites = lesson.prerequisites.length
+        ? lesson.prerequisites.join(", ")
+        : "none";
+      document.querySelector("#codex-prompt").value =
+`Use $guide-ds60sqlpy-learning to coach me through ${lesson.id} — ${lesson.title}.
+
+Work from this repository root and inspect the catalog entry, companion guide, and learner artifact. My operating system is ${state.os}. The catalog prerequisites are ${prerequisites}.
+
+First verify that I am using the repository interpreter/kernel and ask 2–3 short prerequisite questions. Then teach one concept at a time. Ask me to predict behavior and attempt each exercise. Use progressive hints—concept, structure, partial answer—before any full answer. Do not open files under solutions/ until I ask or finish an honest attempt. Inspect my actual code/query and output, explain evidence precisely, and end with a short retrieval quiz plus the next concrete step.`;
+    }
+
+    codexLesson.addEventListener("change", renderPrompt);
+    document.querySelector("#copy-prompt").addEventListener("click", async () => {
+      const prompt = document.querySelector("#codex-prompt");
+      try {
+        await navigator.clipboard.writeText(prompt.value);
+        document.querySelector("#copy-status").textContent = "Prompt copied.";
+      } catch {
+        prompt.select();
+        document.execCommand("copy");
+        document.querySelector("#copy-status").textContent =
+          "Prompt selected; press Ctrl+C or Command+C if it was not copied.";
+      }
+    });
+
+    selectOs(state.os);
+    renderCatalog();
+    renderProgress();
+    renderPrompt();
+  </script>
+</body>
+</html>

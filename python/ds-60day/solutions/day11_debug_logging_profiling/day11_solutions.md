@@ -112,3 +112,114 @@ with cProfile.Profile() as pr:
 pstats.Stats(pr).strip_dirs().sort_stats("cumtime").print_stats(10)
 ```
 - cumtime shows where total time is spent; optimize those hot paths first.
+
+---
+
+## Exercise-by-exercise reference
+
+Every numbered learner exercise has a matching entry here. The original
+worked examples remain above; the expanded answers below add heavily
+commented code, explicit reasoning, and executable checks.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Add useful logging to the CSV/JSON utilities from Day 8. **Hint:** log path, operation, row count, and expected failures; never log secrets or entire sensitive records.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Profile a deliberately slow function, identify its hot spot, then improve it. **Hint:** first improve the algorithm or data structure. If the work is numeric array processing, compare the measured loop with NumPy vectorization from the course's installed data dependencies.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 3 — Prediction
+
+**Prompt:** With a logger set to `WARNING`, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted.
+
+**Reasoning checkpoint:** The threshold keeps records at that level or more severe. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 4 — Tracing
+
+**Prompt:** Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption.
+
+**Reasoning checkpoint:** Read a traceback from the final exception upward through your code. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 5 — Implementation
+
+**Prompt:** Implement a reusable `timed(label)` context manager using `time.perf_counter` and logging.
+
+**Reasoning checkpoint:** Put elapsed-time logging in `finally` so failures are still timed. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 6 — Debugging
+
+**Prompt:** Explain why repeated `logging.basicConfig(...)` calls in notebooks may appear ineffective and configure a named logger without duplicate handlers.
+
+**Reasoning checkpoint:** Configuration is process state; inspect handlers before adding one. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 7 — Edge case and explanation
+
+**Prompt:** Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification.
+
+**Reasoning checkpoint:** A faster wrong answer is not an optimization. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+## Expanded mastery lab solutions
+
+Observe before optimizing: reproduce a defect, add bounded context, profile representative work, and change the measured bottleneck.
+
+Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
+
+### Practices 1–2 — Logging and traceback reading
+
+At `WARNING`, warning and error records are emitted. Start traceback diagnosis
+at the deepest frame in code you control, then inspect the input and assumption
+there before editing callers.
+
+### Practices 3–5 — A timing tool and a fair benchmark
+
+```python
+from __future__ import annotations
+
+import logging
+from contextlib import contextmanager
+from time import perf_counter
+from collections.abc import Iterator
+
+logger = logging.getLogger("ds60.day11")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    # Add exactly one local handler in an interactive process.
+    logger.addHandler(logging.NullHandler())
+
+
+@contextmanager
+def timed(label: str) -> Iterator[None]:
+    """Log elapsed time for a block, including blocks that raise."""
+
+    started = perf_counter()
+    try:
+        yield
+    finally:
+        elapsed = perf_counter() - started
+        logger.info("%s completed in %.6f seconds", label, elapsed)
+
+
+def loop_sum(values: list[int]) -> int:
+    total = 0
+    for value in values:
+        total += value
+    return total
+
+
+values = list(range(1_000))
+with timed("loop_sum"):
+    loop_result = loop_sum(values)
+with timed("built_in_sum"):
+    built_in_result = sum(values)
+
+# Verify equivalent behavior before comparing repeated timings.
+assert loop_result == built_in_result
+```
+
+For a real benchmark, reuse equivalent input, warm both paths, run multiple
+trials, report a distribution, and keep logging/I/O outside the timed region.

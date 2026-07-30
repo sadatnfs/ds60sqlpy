@@ -62,6 +62,28 @@ makes missing matches visible during validation.
    the table expected to have one row per key on the left, then deliberately
    duplicate one of its keys to observe the error.
 
+### Additional mastery practice
+
+Declare each table's grain and key cardinality before merging. Use validation and reconciliation to make row loss or multiplication visible.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** One key appears twice on the left and three times on the right. Predict the number of joined rows for that key.
+   **Progressive hint:** A many-to-many match forms every pair: left count × right count.
+5. **Tracing:** Trace an outer merge with `indicator=True` and classify `left_only`, `right_only`, and `both` rows.
+   **Progressive hint:** The indicator is a compact reconciliation tool.
+6. **Implementation:** Implement an anti-join returning left rows whose key has no right match.
+   **Progressive hint:** Use a left merge with indicator, then filter `left_only`.
+7. **Debugging:** Repair a merge whose `validate='one_to_many'` is reversed relative to the actual product-to-order-item relationship.
+   **Progressive hint:** Say which side must have unique keys before choosing `1:m` or `m:1`.
+8. **Edge case and explanation:** Investigate how missing keys match in pandas and decide whether to reject, sentinel-fill, or separate them before a business-key join.
+   **Progressive hint:** Do not assume pandas null-key behavior matches SQL.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - How many output rows can an `m:m` match create for one key?

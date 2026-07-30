@@ -76,3 +76,59 @@ CROSS JOIN latest_six m
 LEFT JOIN monthly seasonal
   ON seasonal.month = (f.forecast_month - interval '12 months')::date
 ORDER BY f.forecast_month;
+
+-- Exercise 3: the leaky frame includes the target actual; the honest frame ends
+-- at 1 PRECEDING. Display both to make the bias observable.
+WITH monthly AS (
+  SELECT date_trunc('month', order_date)::date AS month,
+         SUM(total_amount) AS revenue
+  FROM orders GROUP BY date_trunc('month', order_date)
+)
+SELECT month, revenue,
+       AVG(revenue) OVER (
+         ORDER BY month ROWS BETWEEN 5 PRECEDING AND CURRENT ROW
+       ) AS leaky_ma6,
+       AVG(revenue) OVER (
+         ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING
+       ) AS honest_ma6
+FROM monthly
+ORDER BY month;
+
+-- Exercise 4: generate the calendar first so LAG(...,12) means 12 calendar
+-- months. The observed flag distinguishes missing from explicit zero revenue.
+WITH bounds AS (
+  SELECT date_trunc('month', MIN(order_date))::date AS first_month,
+         date_trunc('month', MAX(order_date))::date AS last_month FROM orders
+), spine AS (
+  SELECT generate_series(first_month, last_month, interval '1 month')::date AS month
+  FROM bounds
+), actual AS (
+  SELECT date_trunc('month', order_date)::date AS month,
+         SUM(total_amount) AS revenue
+  FROM orders GROUP BY date_trunc('month', order_date)
+), complete AS (
+  SELECT s.month, a.revenue, (a.month IS NOT NULL) AS had_source_rows
+  FROM spine s LEFT JOIN actual a USING (month)
+)
+SELECT month, revenue, had_source_rows,
+       LAG(revenue, 12) OVER (ORDER BY month) AS seasonal_forecast
+FROM complete
+ORDER BY month;
+
+-- Exercise 5: MAPE excludes zero actuals through NULLIF and reports the scoring
+-- denominator so the omission is visible.
+WITH toy(actual, forecast) AS (
+  VALUES (100::numeric, 90::numeric), (0, 10), (50, 60)
+)
+SELECT ROUND(AVG(ABS(actual - forecast) / NULLIF(actual, 0)), 4) AS mape,
+       COUNT(*) FILTER (WHERE actual <> 0) AS scored_rows,
+       COUNT(*) FILTER (WHERE actual = 0) AS excluded_zero_actuals
+FROM toy;
+
+-- Exercise 6: MAE is currency-scale error; MAPE magnifies the small-actual miss.
+WITH toy(actual, forecast) AS (
+  VALUES (1000::numeric, 900::numeric), (10, 20)
+)
+SELECT AVG(ABS(actual - forecast)) AS mae,
+       AVG(ABS(actual - forecast) / NULLIF(actual, 0)) AS mape
+FROM toy;

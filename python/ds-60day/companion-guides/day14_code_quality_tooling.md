@@ -65,13 +65,35 @@ macOS/Linux:
 .venv/bin/python -m pytest
 ```
 
-## Exercise and progressive hint
+## Exercises and progressive hints
 
-Run all four checks on utilities from earlier days. Predict what each tool will
+1. Run all four checks on utilities from earlier days. Predict what each tool will
 report, then make the smallest behavior-preserving fixes. **Hint:** process one
 diagnostic at a time from the first file; an early syntax/import issue can cause
 many downstream messages. Finish with pytest because clean static output does
 not prove correct behavior.
+
+### Additional mastery practice
+
+Use formatter, linter, type checker, and tests as complementary evidence. Read and fix one diagnostic at a time, then review behavior.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+2. **Prediction:** Given an unused import, inconsistent spacing, a possible `None` value, and a wrong result, predict which quality tool can detect each.
+   **Progressive hint:** No single tool proves all four properties.
+3. **Tracing:** Trace type narrowing for `str | None` through an explicit `is None` branch and state the type in each path.
+   **Progressive hint:** A type checker follows control-flow evidence.
+4. **Implementation:** Refactor an untyped file loader into a typed function using `Path`, a context manager, UTF-8, and a validated return shape.
+   **Progressive hint:** Boundary validation can replace an unhelpfully broad `Any`.
+5. **Debugging:** Replace an unexplained `# type: ignore` with a real narrowing or a narrow error-code ignore plus justification.
+   **Progressive hint:** Do not suppress diagnostics before understanding the contract.
+6. **Edge case and explanation:** Design a local/CI gate order and explain why formatter success should not prevent tests from running during diagnosis.
+   **Progressive hint:** Fast static checks give feedback, but each signal remains independent.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
 
 ## Self-check
 

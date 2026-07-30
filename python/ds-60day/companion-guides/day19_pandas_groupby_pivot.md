@@ -68,6 +68,28 @@ is the offline alternative when that cache has not been primed.
    **Hint:** preserve an identifier column and compare at the same grain, using
    a tolerance for floating-point results.
 
+### Additional mastery practice
+
+Write the input and output grain before grouping or reshaping. Reconcile row counts and totals at equivalent grains.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** Predict whether rows with a missing group key are included by default and compare `dropna=True` with `dropna=False`.
+   **Progressive hint:** Missing group keys are normally excluded unless requested.
+5. **Tracing:** Trace a wide table through `melt` and back through `pivot_table`; name the identifier, variable, and value columns.
+   **Progressive hint:** Reshaping changes layout, not the underlying measures.
+6. **Implementation:** Implement grouped weighted means without using a simple mean of group means.
+   **Progressive hint:** Aggregate weighted numerators and denominators at the same grain.
+7. **Debugging:** Repair a calculation that joins a customer-level total back to line items and then sums it, multiplying totals by line count.
+   **Progressive hint:** Do not re-aggregate a measure after broadcasting it to a finer grain.
+8. **Edge case and explanation:** Handle groups whose total weight is zero and categories with no observed rows; state whether they appear in output.
+   **Progressive hint:** Make zero-denominator and categorical `observed` behavior explicit.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - How does `.transform("sum")` differ in shape from `.agg("sum")`?

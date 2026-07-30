@@ -88,3 +88,25 @@ buffers as well as execution time.
   using a materialized view for reporting.
 - Materialized views duplicate data and add refresh cost; they are not a default
   replacement for indexing or query repair.
+
+## Exercise 3 — Observe stale then refreshed data
+
+The transaction changes one disposable source row after materialization.
+Source and view totals diverge until `REFRESH`, making the freshness contract
+visible instead of merely described.
+
+## Exercise 4 — Explain concurrent-refresh eligibility
+
+The unique `(week, country)` index supplies a stable row identity required by
+concurrent refresh. Initial population and this rollback lab still use ordinary
+refresh; concurrent refresh also has transaction restrictions.
+
+## Exercise 5 — Name the revenue definition
+
+The view stores order-header totals. The control query prints header and
+line-item revenue side by side so a consumer must choose a business definition.
+
+## Exercise 6 — Materialize missing combinations explicitly
+
+A cross-joined week/country spine defines requested combinations. The left join
+and `COALESCE` then implement a deliberate zero-display policy.

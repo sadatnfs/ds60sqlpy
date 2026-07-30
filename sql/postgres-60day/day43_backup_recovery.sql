@@ -21,8 +21,16 @@ SELECT 'customers_stg', COUNT(*) FROM customers_stg;
 -- - For ad-hoc recovery, restore into a separate DB and compare using EXCEPT/INTERSECT
 
 -- Exercises
--- 1) Export/import a subset. COPY table has no WHERE clause; use
+-- 1. Export/import a subset. COPY table has no WHERE clause; use
 --    COPY (SELECT ... WHERE ...) TO STDOUT or client-side \copy in psql.
--- 2) Restore customers from staged into base with conflict handling (ON CONFLICT DO UPDATE) in a transaction.
+-- 2. Restore customers from staged into base with conflict handling (ON CONFLICT DO UPDATE) in a transaction.
+-- 3. Prediction: decide whether COPY TO '/server/path' or psql \copy writes on
+--    the database server. Explain which is usually appropriate for a learner PC.
+-- 4. Construction: generate a deterministic manifest with table name, row
+--    count, minimum key, maximum key, and export timestamp.
+-- 5. Debugging: stage duplicate emails and make the restore deterministic
+--    before ON CONFLICT, rather than letting one arbitrary duplicate win.
+-- 6. Edge case: compare source and restored rows with IS DISTINCT FROM so NULL
+--    values are compared safely.
 
 ROLLBACK;

@@ -30,9 +30,16 @@ order totals would repeat across categories.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day56_project4_bi_part2.sql). Record
-cube row counts before and after payment method, and retain percentile
-observation counts.
+Complete these in the [learner SQL](../day56_project4_bi_part2.sql):
+
+1. Add payment method to the cube and compare row counts.
+2. Calculate category-month order-value P50/P90.
+3. Predict raw payment/item join fanout.
+4. Pre-aggregate payment methods and reconcile line revenue.
+5. Repair line-grain percentiles when the metric is order value.
+6. Compare continuous and discrete percentiles for an even population.
+
+Retain cube and percentile observation counts.
 
 ## Self-check
 

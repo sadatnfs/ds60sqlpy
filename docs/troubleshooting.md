@@ -262,6 +262,22 @@ the step as optional.
 5. Distinguish a fake-backed unit-test pass from server authentication,
    permissions, lock behavior, or network evidence.
 
+## `%sql` or `%%sql` is unavailable in a notebook
+
+The SQL magics come from JupySQL and run only in an IPython-based kernel.
+
+1. Select the repository `ds60sqlpy` kernel.
+2. Install the `sql-notebooks` profile while connected.
+3. Restart the kernel.
+4. Run `%load_ext sql` before `%sql`.
+5. Confirm no learner file named `sql.py` is shadowing the extension.
+
+If the extension loads but PostgreSQL does not connect, verify
+`DS60_DATABASE_URL` in the terminal that launched Jupyter. Do not print the
+value when it contains a password. Use `postgresql+psycopg://` through the
+lesson's SQLAlchemy engine rather than accidentally requesting the older
+`psycopg2` driver. See [PostgreSQL in Jupyter](setup/jupyter-postgresql.md).
+
 ## A SQL file shows errors but the command exits successfully
 
 Use:

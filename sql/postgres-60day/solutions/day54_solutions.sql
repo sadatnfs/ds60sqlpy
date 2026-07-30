@@ -131,4 +131,68 @@ SELECT a.year,
 FROM aggregate_total a
 JOIN fact_total f USING (year, month);
 
+-- Exercise 3: list loaded periods. A late fact for any listed closed period
+-- requires refreshing that period, not only the newest one.
+SELECT dd.year, dd.month,
+       COUNT(*) AS fact_rows,
+       MAX(dd.date_actual) AS latest_fact_date
+FROM fact_sales fs
+JOIN dim_date dd USING (date_key)
+GROUP BY dd.year, dd.month
+ORDER BY dd.year DESC, dd.month DESC;
+
+-- Exercise 4: the procedure's DELETE + INSERT statements share this surrounding
+-- transaction. The prior call already refreshed one month atomically.
+SELECT year, month, COUNT(*) AS category_rows, SUM(revenue) AS revenue
+FROM agg_sales_category_month
+GROUP BY year, month
+ORDER BY year DESC, month DESC;
+
+-- Exercise 5: FULL JOIN plus COALESCE in the delta exposes a row missing from
+-- either side instead of allowing NULL arithmetic to hide it.
+WITH aggregate_total AS (
+  SELECT year, month, SUM(revenue) AS revenue
+  FROM agg_sales_category_month GROUP BY year, month
+), fact_total AS (
+  SELECT dd.year, dd.month, ROUND(SUM(fs.amount), 2) AS revenue
+  FROM fact_sales fs JOIN dim_date dd USING (date_key)
+  GROUP BY dd.year, dd.month
+)
+SELECT COALESCE(a.year, f.year) AS year,
+       COALESCE(a.month, f.month) AS month,
+       a.revenue AS aggregate_revenue,
+       f.revenue AS fact_revenue,
+       COALESCE(a.revenue, 0) - COALESCE(f.revenue, 0) AS difference
+FROM aggregate_total a
+FULL JOIN fact_total f USING (year, month)
+WHERE a.revenue IS DISTINCT FROM f.revenue
+ORDER BY year, month;
+
+-- Exercise 6: snapshot, rerun the same latest-month refresh, then compare both
+-- directions. An empty difference proves row/value idempotency.
+CREATE TEMP TABLE aggregate_snapshot_before AS
+SELECT * FROM agg_sales_category_month;
+DO $refresh_latest_month_again$
+DECLARE
+  latest_year int;
+  latest_month int;
+BEGIN
+  SELECT dd.year, dd.month INTO latest_year, latest_month
+  FROM fact_sales fs JOIN dim_date dd USING (date_key)
+  ORDER BY dd.year DESC, dd.month DESC LIMIT 1;
+  CALL refresh_sales_aggregates_solution(latest_year, latest_month);
+END
+$refresh_latest_month_again$;
+SELECT 'before_minus_after' AS side, * FROM (
+  SELECT * FROM aggregate_snapshot_before
+  EXCEPT
+  SELECT * FROM agg_sales_category_month
+) a
+UNION ALL
+SELECT 'after_minus_before', * FROM (
+  SELECT * FROM agg_sales_category_month
+  EXCEPT
+  SELECT * FROM aggregate_snapshot_before
+) b;
+
 ROLLBACK;

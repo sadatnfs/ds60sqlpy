@@ -96,3 +96,24 @@ between observed values, so a percentile need not equal an actual order value.
   not written with `OVER` in this grouped query.
 - Define the analytical grain before calculating a percentile. Line-level and
   order-level percentiles answer different questions.
+
+## Exercise 3 — Compare discrete and continuous medians
+
+For four values, the discrete median chooses an observed central value while the
+continuous median interpolates. The runnable `VALUES` fixture makes the
+difference deterministic.
+
+## Exercise 4 — Share and rank within month
+
+Revenue is first aggregated to month/category grain. The denominator window
+partitions by month, and `ROW_NUMBER` adds category as a deterministic tie-break.
+
+## Exercise 5 — Remove forecast leakage
+
+The corrected frame is `7 PRECEDING` through `1 PRECEDING`. Ending at the current
+row would let the target actual influence its own forecast.
+
+## Exercise 6 — Preserve undefined dispersion
+
+The constant fixture has standard deviation zero. `NULLIF(sd, 0)` returns NULL
+for every z-score, accurately distinguishing undefined from normal.

@@ -44,4 +44,38 @@ WHERE customer_id = 42
   AND event_time >= timestamptz '2025-03-01 00:00:00+00'
   AND event_time < timestamptz '2025-04-01 00:00:00+00';
 
+-- Exercise 3: the unbounded query can visit every partition; the bounded query
+-- lets PostgreSQL prune to March.
+EXPLAIN SELECT COUNT(*) FROM solution_events;
+EXPLAIN
+SELECT COUNT(*) FROM solution_events
+WHERE event_time >= timestamptz '2025-03-01 00:00:00+00'
+  AND event_time < timestamptz '2025-04-01 00:00:00+00';
+
+-- Exercise 4: original exercises already created April, so June is the
+-- deliberately uncovered value routed to DEFAULT.
+CREATE TABLE solution_events_default PARTITION OF solution_events DEFAULT;
+INSERT INTO solution_events(event_time, customer_id, payload)
+VALUES ('2025-06-15 00:00:00+00', 1, '{"source":"default"}');
+SELECT tableoid::regclass AS physical_partition, event_time
+FROM solution_events
+WHERE event_time = timestamptz '2025-06-15 00:00:00+00';
+
+-- Exercise 5: this catalog query shows the covered named ranges. Without the
+-- DEFAULT partition, an insert outside them raises “no partition ... found”.
+SELECT relid::regclass AS partition_name,
+       pg_get_expr(c.relpartbound, c.oid) AS partition_bound
+FROM pg_partition_tree('solution_events') pt
+JOIN pg_class c ON c.oid = pt.relid
+WHERE pt.isleaf
+ORDER BY partition_name::text;
+
+-- Exercise 6: the exact February boundary belongs to February because lower
+-- FROM bounds are inclusive and upper TO bounds are exclusive.
+INSERT INTO solution_events(event_time, customer_id, payload)
+VALUES ('2025-02-01 00:00:00+00', 2, '{"source":"boundary"}');
+SELECT tableoid::regclass AS physical_partition, event_time
+FROM solution_events
+WHERE payload->>'source' = 'boundary';
+
 ROLLBACK;

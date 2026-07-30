@@ -32,8 +32,18 @@ and a limitation; repeat that evidence pattern for Finance and Marketing.
 
 ## Exercises
 
-Complete all four deliverables in the [learner SQL](../day59_final_capstone_part2.sql).
-Add a one-page metric dictionary and a before/after performance evidence table.
+Complete these in the [learner SQL](../day59_final_capstone_part2.sql):
+
+1. State every LTV CTE's grain and its grain transition.
+2. Add funnel conversion rates and retain buyers without events.
+3. Reconcile order totals, line revenue, and payments before KPI selection.
+4. Add direct attribution and reconcile purchases.
+5. Compare customer/date and date/customer index orders.
+6. Write a complete metric contract for one KPI.
+7. Publish product-pair support, confidence, and lift with a minimum count.
+8. Assemble named cross-domain control totals for stakeholder sign-off.
+
+Add a one-page metric dictionary and before/after evidence table.
 
 ## Self-check
 

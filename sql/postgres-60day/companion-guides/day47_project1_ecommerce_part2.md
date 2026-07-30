@@ -29,9 +29,16 @@ as explicit zeros.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day47_project1_ecommerce_part2.sql).
-Return a tidy six-cohort result with numerator and denominator retained beside
-the rate.
+Complete these in the [learner SQL](../day47_project1_ecommerce_part2.sql):
+
+1. Convert active-customer counts to retention rates.
+2. Return the latest six cohort curves in tidy form.
+3. Compare signup-month and first-order-month cohort anchors.
+4. Build a complete cohort/offset spine.
+5. Prevent negative offsets from inconsistent chronology.
+6. Distinguish observed zero retention from future, unobservable offsets.
+
+Retain numerator and denominator beside every rate.
 
 ## Self-check
 

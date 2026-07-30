@@ -63,6 +63,11 @@ If a package imports in the terminal but not the notebook, the notebook almost a
 
 Start JupyterLab from **Terminal → Run Task → Course: JupyterLab**, or work directly in VS Code’s notebook editor.
 
+The professional PostgreSQL notebook uses the same Python kernel plus the
+JupySQL extension. Prepare its process-scoped connection and packages with
+[PostgreSQL in Jupyter](setup/jupyter-postgresql.md); do not save a database
+password in notebook metadata or VS Code workspace settings.
+
 ## Repository tasks
 
 Use **Terminal → Run Task**:
@@ -72,7 +77,9 @@ Use **Terminal → Run Task**:
 - `Course: Catalog`
 - `Course: Validate`
 - `Course: JupyterLab`
+- `Course: PostgreSQL Notebook`
 - `Course: Bridge tests`
+- `Course: Professional tests`
 
 Tasks contain operating-system-specific interpreter paths so learners do not need to translate them.
 

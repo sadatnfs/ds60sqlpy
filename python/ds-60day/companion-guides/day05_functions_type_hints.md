@@ -60,6 +60,28 @@ between values that a basic type checker cannot express.
    and its values near the function boundary; do not catch errors the function
    cannot repair.
 
+### Additional mastery practice
+
+Design functions from their contracts: accepted inputs, return value, failure behavior, side effects, and boundary cases.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** Predict the result of calling a function with `items=[]` as a default three times when it appends on each call. Explain shared defaults.
+   **Progressive hint:** Default objects are created once when `def` executes.
+5. **Tracing:** Trace a local variable that shadows a global of the same name. Which binding changes, and when would `global` be required?
+   **Progressive hint:** Assignment makes a name local unless explicitly declared otherwise.
+6. **Implementation:** Implement typed `weighted_mean(values, weights)` with length, empty, and zero-total-weight validation.
+   **Progressive hint:** State every invalid condition before calculating.
+7. **Debugging:** Repair a function whose `*items` argument is accidentally passed as one list instead of unpacked individual items.
+   **Progressive hint:** Compare `f(values)` with `f(*values)`.
+8. **Edge case and explanation:** Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input.
+   **Progressive hint:** Document whether empty normalized output is valid or an error.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What is the difference between a default argument and a return default?

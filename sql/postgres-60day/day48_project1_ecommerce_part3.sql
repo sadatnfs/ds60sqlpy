@@ -37,7 +37,15 @@ ORDER BY COUNT(*) DESC
 LIMIT 50;
 
 -- Exercises
--- 1) Compute assisted conversions: campaigns that appear before purchase within 7 days.
--- 2) Build multi-touch attribution with fractional credit using window functions.
+-- 1. Compute assisted conversions: campaigns that appear before purchase within 7 days.
+-- 2. Build multi-touch attribution with fractional credit using window functions.
+-- 3. Prediction: explain how repeated touches from the same campaign affect
+--    touch-level versus campaign-level equal-credit attribution.
+-- 4. Construction: calculate product-pair support, confidence in both
+--    directions, and lift using distinct order baskets.
+-- 5. Debugging: prevent one event touch from being credited to several purchases
+--    when the intended model assigns it only to the next purchase.
+-- 6. Edge case: place unattributed purchases in an explicit '(direct)' bucket
+--    so total attributed credit reconciles to total eligible purchases.
 
 ROLLBACK;

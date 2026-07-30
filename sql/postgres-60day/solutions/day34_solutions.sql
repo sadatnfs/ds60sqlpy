@@ -56,4 +56,59 @@ JOIN order_items oi USING (order_id)
 GROUP BY ro.order_id, ro.customer_id, ro.order_date
 ORDER BY ro.order_date DESC, ro.order_id DESC;
 
+-- Exercise 3: MATERIALIZED creates an optimization boundary; NOT MATERIALIZED
+-- permits the CTE to be folded into its single parent query.
+EXPLAIN
+WITH recent AS MATERIALIZED (
+  SELECT order_id, customer_id FROM orders
+  WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
+)
+SELECT COUNT(*) FROM recent JOIN customers USING (customer_id);
+
+EXPLAIN
+WITH recent AS NOT MATERIALIZED (
+  SELECT order_id, customer_id FROM orders
+  WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
+)
+SELECT COUNT(*) FROM recent JOIN customers USING (customer_id);
+
+-- Exercise 4: reduce items to one row per order before crossing the next grain.
+WITH item_totals AS (
+  SELECT order_id, SUM(quantity) AS units
+  FROM order_items
+  GROUP BY order_id
+)
+SELECT c.country, SUM(it.units) AS units
+FROM item_totals it
+JOIN orders o USING (order_id)
+JOIN customers c USING (customer_id)
+GROUP BY c.country
+ORDER BY c.country;
+
+-- Exercise 5: aggregate each independent many-side to order grain. Joining raw
+-- payments and items would multiply both amounts.
+WITH paid AS (
+  SELECT order_id, SUM(amount) AS paid_amount FROM payments GROUP BY order_id
+), sold AS (
+  SELECT order_id,
+         SUM(quantity * unit_price * (1 - discount)) AS line_revenue
+  FROM order_items
+  GROUP BY order_id
+)
+SELECT o.order_id, p.paid_amount, s.line_revenue
+FROM orders o
+LEFT JOIN paid p USING (order_id)
+LEFT JOIN sold s USING (order_id)
+ORDER BY o.order_id
+LIMIT 20;
+
+-- Exercise 6: NOT EXISTS remains two-valued for each customer even if the
+-- subquery's projected expression could contain NULL.
+SELECT c.customer_id
+FROM customers c
+WHERE NOT EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+)
+ORDER BY c.customer_id;
+
 ROLLBACK;

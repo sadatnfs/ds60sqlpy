@@ -99,3 +99,23 @@ Expected grain: one row per represented `(month, category)`.
   before two-argument `ROUND`.
 - Percentiles need enough observations. Always accompany production percentiles
   with sample counts.
+
+## Exercise 3 — Measure raw fanout
+
+The raw payment/item join reports joined rows and distinct source keys. Orders
+with several rows on both sides demonstrate the multiplication risk.
+
+## Exercise 4 — Attribute at order grain
+
+Payment policy reduces methods to one order-level label; line revenue also
+reduces to one order row. The windowed grand total reconciles attribution.
+
+## Exercise 5 — Match percentile grain
+
+`category_order` emits one observation per category/order before calculating
+P50. A line-item percentile would answer a different question.
+
+## Exercise 6 — Compare percentile definitions
+
+Continuous P50 can interpolate; discrete P50 is an observed order value. The
+observation count is retained so even-sized groups can be interpreted.

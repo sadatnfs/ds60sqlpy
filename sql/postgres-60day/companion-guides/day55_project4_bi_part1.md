@@ -30,9 +30,16 @@ then reconcile the grand total with source line revenue.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day55_project4_bi_part1.sql). Add
-one real `NULL` dimension value and prove labels still distinguish it from a
-generated subtotal.
+Complete these in the [learner SQL](../day55_project4_bi_part1.sql):
+
+1. Replace `ROLLUP` with `CUBE` and compare row counts.
+2. Add status to an exact top-five drill-down.
+3. Predict `ROLLUP(country, category, month)` grouping sets.
+4. Label levels with PostgreSQL's `GROUPING(country, category)` bit mask.
+5. Use deterministic `ROW_NUMBER` for exactly five results.
+6. Separate real unknown members from generated subtotals.
+
+Test one real NULL/unknown dimension value.
 
 ## Self-check
 

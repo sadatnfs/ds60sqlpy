@@ -30,8 +30,16 @@ the parent `LIMIT` or aggregate node.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day31_explain_analyze.sql). Save one
-plan and a result-control query as the baseline for Day 32.
+Complete these in the [learner SQL](../day31_explain_analyze.sql):
+
+1. Add predicates and observe selectivity effects.
+2. Compare `EXPLAIN` with `EXPLAIN ANALYZE`, including estimated/actual rows.
+3. Predict and compare plans for `total_amount > 0` and `> 900`.
+4. Explain a country-filtered customer/orders join with `VERBOSE`.
+5. Safely inspect a no-op `UPDATE` with `ANALYZE` and a savepoint.
+6. Test a zero-row predicate and interpret its estimate.
+
+Save one plan and a result-control query as the baseline for Day 32.
 
 ## Self-check
 
@@ -89,3 +97,16 @@ indexes, so save one Day 31 plan as a before-index baseline.
 - Never use `EXPLAIN ANALYZE` on destructive production DML merely to see a
   plan; it executes the statement.
 - Prefer `EXPLAIN (ANALYZE, BUFFERS)` when you need I/O evidence.
+
+## Expanded practice lab
+
+Prompts 3–6 add prediction, construction, debugging, and an empty-result edge
+case. Read a plan from the most deeply indented node upward: scans produce rows,
+joins combine them, aggregates reduce their grain, and the root returns the
+final result. For each plan, record estimated versus actual rows before timing;
+a fast plan can still expose a serious cardinality error.
+
+Use a savepoint for the no-op `UPDATE` demonstration because `ANALYZE` executes
+the statement. A zero-row predicate is not itself evidence of stale statistics:
+compare the estimate, then distinguish a rare but modeled value from genuinely
+outdated table statistics.

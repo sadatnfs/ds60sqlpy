@@ -33,9 +33,20 @@ exception with owner and next action. Apply the same loop to each deliverable.
 
 ## Exercises
 
-Complete every acceptance item in the [learner SQL](../day60_final_capstone_part3.sql).
-Produce a final checklist that links each claim to its query and evidence rather
-than marking work complete from prose alone.
+Complete these in the [learner SQL](../day60_final_capstone_part3.sql):
+
+1. Classify snapshot-independent versus clock-dependent outputs.
+2. Build a named, severity-aware sign-off check result.
+3. Remove repeated `LAG` calls while preserving first-month NULL growth.
+4. Mark an incomplete current month separately.
+5. Capture and document before/after JSON plan evidence.
+6. Produce a release checklist covering operations and known limits.
+7. Map metric lineage from source tables through validation.
+8. Reconcile every dashboard subtotal to a simple control.
+9. Test empty, one-row, NULL-heavy, and duplicate-key fixtures.
+10. Return `PASS`/`FAIL`/`NOT_RUN` for every acceptance criterion.
+
+Link every sign-off claim to executable evidence.
 
 ## Self-check
 

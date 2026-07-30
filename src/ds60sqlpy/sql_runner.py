@@ -76,13 +76,21 @@ class SqlRunner:
         return self.run_file(self.catalog.repo_root / "sql" / "postgres-60day" / "00_verify.sql")
 
     def lesson(self, day: int) -> SqlRun:
-        """Run one lesson by day number."""
+        """Run one lesson by its track ordering number."""
 
         lesson = self.catalog.by_day("sql", day)
         return self.run_file(self.catalog.resolve(lesson.lesson_path))
 
+    def lesson_id(self, lesson_id: str) -> SqlRun:
+        """Run one SQL lesson by stable catalog ID."""
+
+        lesson = self.catalog.get(lesson_id)
+        if lesson.track != "sql":
+            raise SqlRunnerError(f"Lesson is not in the SQL track: {lesson_id}")
+        return self.run_file(self.catalog.resolve(lesson.lesson_path))
+
     def all_lessons(self) -> tuple[SqlRun, ...]:
-        """Run all 60 lessons sequentially, preserving explicit project state."""
+        """Run every SQL lesson sequentially, preserving explicit project state."""
 
         runs: list[SqlRun] = []
         for lesson in self.catalog.lessons("sql"):
@@ -93,14 +101,13 @@ class SqlRunner:
         return tuple(runs)
 
     def solution_files(self) -> tuple[Path, ...]:
-        """Return checked-in executable SQL solutions in day order."""
+        """Return cataloged executable SQL solutions in lesson order."""
 
         return tuple(
-            sorted(
-                (self.catalog.repo_root / "sql" / "postgres-60day" / "solutions").glob(
-                    "day*_solutions.sql"
-                )
-            )
+            self.catalog.resolve(path)
+            for lesson in self.catalog.lessons("sql")
+            for path in lesson.solution_paths
+            if Path(path).suffix == ".sql"
         )
 
     def all_solutions(self) -> tuple[SqlRun, ...]:

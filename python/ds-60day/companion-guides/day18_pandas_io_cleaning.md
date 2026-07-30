@@ -70,6 +70,28 @@ one unless the project declares and installs it.
 3. Write `clean(df)` returning a fully typed DataFrame. **Hint:** copy first,
    normalize names/values, convert types, then assert the output contract.
 
+### Additional mastery practice
+
+Profile before cleaning, preserve raw input, and make every conversion, imputation, and rejection rule observable and testable.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** Predict the results of `pd.to_datetime(..., errors='coerce', utc=True)` for valid text, invalid text, and a timestamp with an offset.
+   **Progressive hint:** Invalid text becomes `NaT`; valid values normalize to UTC.
+5. **Tracing:** Trace conversion from object strings to pandas nullable `Int64`, including an empty value.
+   **Progressive hint:** Nullable integer dtype can represent `<NA>` without becoming float.
+6. **Implementation:** Implement a cleaner that normalizes column names, parses an event time, converts quantity, and returns a copy plus a quality summary.
+   **Progressive hint:** Record invalid counts before dropping or imputing anything.
+7. **Debugging:** Repair an in-place operation performed on a chained selection.
+   **Progressive hint:** Use assignment on the owned copy and avoid `inplace=True` on a temporary object.
+8. **Edge case and explanation:** Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing—and justify.
+   **Progressive hint:** A statistical fallback cannot be computed from zero observations.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why should missingness be measured by column and important segment?

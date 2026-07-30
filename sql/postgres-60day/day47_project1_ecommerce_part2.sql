@@ -30,7 +30,15 @@ WHERE month_offset BETWEEN 0 AND 12
 ORDER BY cohort_month DESC, month_offset;
 
 -- Exercises
--- 1) Convert active_customers to retention_rate by dividing by cohort size.
--- 2) Chart retention curves for last 6 cohorts (outside SQL).
+-- 1. Convert active_customers to retention_rate by dividing by cohort size.
+-- 2. Chart retention curves for last 6 cohorts (outside SQL).
+-- 3. Prediction: decide whether signup month or first-order month is the better
+--    cohort anchor for a purchase-retention question; state the metric change.
+-- 4. Construction: build a complete cohort/month-offset spine so missing
+--    activity appears as zero rather than an absent row.
+-- 5. Debugging: prevent month_offset < 0 when synthetic orders precede a
+--    customer's recorded signup timestamp.
+-- 6. Edge case: separate not-yet-observable future offsets from observed zero
+--    retention instead of displaying both as zero.
 
 ROLLBACK;

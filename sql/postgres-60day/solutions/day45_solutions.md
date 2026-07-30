@@ -82,3 +82,33 @@ representative scale before changing production design.
 - The transaction rolls back course-owned indexes. Production index creation
   requires separate change planning and may need `CREATE INDEX CONCURRENTLY`.
 - Always reconcile the result values before accepting a faster plan.
+
+## Exercise 1 — Make the timestamp predicate sargable
+
+The direct half-open range leaves `order_date` unwrapped, making the B-tree
+eligible while preserving a clear time boundary.
+
+## Exercise 2 — Capture structured evidence
+
+`FORMAT JSON` keeps plan nodes, estimates, actual rows, buffers, and timing
+machine-readable. It still describes only this run and environment.
+
+## Exercise 3 — Prove semantic equivalence
+
+Direct and pre-aggregated country totals are compared with `EXCEPT` in both
+directions. Both difference sets must be empty before performance matters.
+
+## Exercise 4 — Test the empty-window boundary
+
+An impossible historical window should return no rows for every equivalent
+shape. An optimization must not manufacture a zero-valued group.
+
+## Exercise 5 — Document index tradeoffs
+
+The candidate serves date-bounded customer work but consumes storage and makes
+writes more expensive. Production creation needs a reviewed migration.
+
+## Exercise 6 — Write the decision record
+
+Report correctness, plan evidence, observed timing, operational cost, and limits
+as separate claims. The compact seed cannot support a universal speed promise.

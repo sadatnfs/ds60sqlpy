@@ -59,6 +59,28 @@ messages make both diagnosable.
    **Hint:** subclass `ValueError` because the type is acceptable but its value
    violates the function's contract.
 
+### Additional mastery practice
+
+Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** Predict which branch handles 0, 9, and 12 when checks are ordered as `x % 2 == 0`, `x % 3 == 0`, then both. Explain the bug.
+   **Progressive hint:** Only the first true branch runs; test the most specific rule first.
+5. **Tracing:** Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path?
+   **Progressive hint:** `else` follows success; `finally` runs in both cases.
+6. **Implementation:** Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`.
+   **Progressive hint:** Validate the domain before choosing a result branch.
+7. **Debugging:** Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface.
+   **Progressive hint:** Keep only the conversion inside the protected block.
+8. **Edge case and explanation:** Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it.
+   **Progressive hint:** A reusable library function usually should not invent a numeric result.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why does branch order matter in FizzBuzz?

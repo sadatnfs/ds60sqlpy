@@ -29,9 +29,18 @@ termination.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day44_monitoring_diagnostics.sql).
-If `pg_stat_statements` is unavailable, document that capability boundary
-instead of changing server configuration.
+Complete these in the
+[learner SQL](../day44_monitoring_diagnostics.sql):
+
+1. Identify longest-running active statements.
+2. Conditionally rank `pg_stat_statements` by mean and total time.
+3. Compare statement age with transaction age.
+4. Summarize connections by database, user, and state.
+5. Repair a report that ranks only mean duration.
+6. Identify and explain idle-in-transaction sessions.
+
+If the extension is unavailable, document that boundary without changing server
+configuration.
 
 ## Self-check
 
@@ -82,3 +91,14 @@ rather than column names from older PostgreSQL examples.
   cancel queries, or terminate backends merely to complete this lesson.
 - The executable solution can remain portable by checking for the extension
   view and using dynamic SQL only when it exists.
+
+## Expanded practice lab
+
+Prompts 3–6 build read-only operational judgment. `query_start` measures the
+current statement while `xact_start` measures the enclosing transaction; show
+both because long idle transactions can retain locks and old snapshots.
+
+Aggregate connection counts instead of exposing full SQL text in a shared
+report. For historical workload, examine both `mean_exec_time` and
+`total_exec_time`: one reveals expensive calls, the other cumulative load.
+Never cancel a session as part of this practice.

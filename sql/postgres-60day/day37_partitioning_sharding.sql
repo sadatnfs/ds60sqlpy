@@ -30,7 +30,15 @@ SELECT COUNT(*) FROM big_events
 WHERE event_time >= '2025-01-15' AND event_time < '2025-02-15';
 
 -- Exercises
--- 1) Add more partitions and test pruning.
--- 2) Create indexes on partitions and compare query plans.
+-- 1. Add more partitions and test pruning.
+-- 2. Create indexes on partitions and compare query plans.
+-- 3. Prediction: remove the event_time predicate and predict how many
+--    partitions appear in the plan. Restore the predicate and verify pruning.
+-- 4. Construction: add a DEFAULT partition, insert an April event, and use
+--    tableoid::regclass to prove which physical partition owns it.
+-- 5. Debugging: attempt to insert a March row before adding a matching/default
+--    partition. Read the error and explain the range-boundary gap.
+-- 6. Edge case: test exactly 2025-02-01 00:00:00+00 and explain why FROM is
+--    inclusive while TO is exclusive.
 
 ROLLBACK;

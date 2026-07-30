@@ -122,3 +122,24 @@ make a sequential scan rational.
 - An insert outside all bounds fails unless a default partition exists.
 - Put the partition key in filtering predicates so pruning is possible.
 - Too many tiny partitions increase planning and maintenance overhead.
+
+## Exercise 3 — Prove pruning
+
+The unbounded count can visit every leaf; the March range can prune unrelated
+partitions. Inspect named child scans rather than inferring pruning from timing.
+
+## Exercise 4 — Route an uncovered row
+
+Because the original tasks already add April, the solution inserts a June row
+into the DEFAULT partition and verifies ownership with `tableoid::regclass`.
+
+## Exercise 5 — Diagnose a range gap
+
+The catalog query prints every physical bound. Without DEFAULT, a date outside
+those bounds raises “no partition ... found”; that failure is preferable to
+silent misrouting.
+
+## Exercise 6 — Test the exact boundary
+
+February 1 lands in February because range partitions include `FROM` and
+exclude `TO`. The query proves placement rather than relying only on prose.

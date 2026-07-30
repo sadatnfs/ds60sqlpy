@@ -7,6 +7,7 @@ from ds60sqlpy.checks import (
     check_bridge,
     check_catalog,
     check_markdown_links,
+    check_professional_lessons,
     check_sql_guide_contract,
 )
 
@@ -32,6 +33,14 @@ def test_bridge_artifacts_are_complete_and_parse() -> None:
 def test_sql_companion_guides_follow_authoring_contract() -> None:
     catalog = Catalog.load()
     failures = [result for result in check_sql_guide_contract(catalog) if result.severity == "fail"]
+    assert failures == []
+
+
+def test_professional_lessons_follow_shared_contract() -> None:
+    catalog = Catalog.load()
+    failures = [
+        result for result in check_professional_lessons(catalog) if result.severity == "fail"
+    ]
     assert failures == []
 
 

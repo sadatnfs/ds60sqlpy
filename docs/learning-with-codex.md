@@ -40,6 +40,22 @@ transaction boundary.
 ```
 
 ```text
+Use $guide-ds60sqlpy-learning to start sql-found-01 before SQL Day 1. Make me
+state the grain and invariants before I write DDL.
+```
+
+```text
+Use $guide-ds60sqlpy-learning to guide bridge-jupyter-01. Verify the selected
+kernel and disposable database, keep my connection secret, and make me explain
+bound parameters versus Jinja SQL rendering.
+```
+
+```text
+Use $guide-ds60sqlpy-learning to choose my next professional module from the
+catalog based on demonstrated prerequisites rather than the lesson number.
+```
+
+```text
 Use $guide-ds60sqlpy-learning to review my current notebook. Give one hint at a time and do not open the official solution.
 ```
 

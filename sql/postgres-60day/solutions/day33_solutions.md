@@ -68,3 +68,26 @@ the index condition. The index excludes lower-value orders, reducing its size.
   not simply for every column mentioned by a query.
 - Small course tables may still receive sequential scans. Judge the design and
   inspect the plan; do not force a node type.
+
+## Exercise 3 — Test the leftmost-prefix limitation
+
+Filtering only `created_at` omits the composite index's first search column.
+PostgreSQL may still inspect the index in some conditions, but the query cannot
+seek through a known category prefix.
+
+## Exercise 4 — Cover customer order history
+
+`customer_id, order_date` are search/order keys. `status` and `total_amount` are
+included payload, which can support an index-only scan without widening the
+search key.
+
+## Exercise 5 — Prove partial-index eligibility
+
+`total_amount > 1200` implies the stored `> 1000` predicate; `> 500` does not.
+Eligibility and final selection are separate planner decisions.
+
+## Exercise 6 — Evaluate the NULL subset
+
+The answer first measures NULL prevalence, then builds a NULL-only index.
+Whether it is worthwhile depends on query frequency, subset size, and added
+write/storage cost—not on syntax alone.

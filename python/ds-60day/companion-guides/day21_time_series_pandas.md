@@ -59,6 +59,28 @@ boundary make the bin definition reviewable.
    **Hint:** parse first, use localization only on naive values, and include a
    date near a daylight-saving transition in your tests.
 
+### Additional mastery practice
+
+Keep timestamps timezone-aware at system boundaries, declare resampling windows, and reconcile totals whenever frequency changes.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict the difference between `tz_localize` and `tz_convert`, and which one applies to a naive timestamp.
+   **Progressive hint:** Localization assigns meaning; conversion changes representation of an instant.
+4. **Tracing:** Trace a three-day rolling mean with `min_periods=1` and identify which observations contribute at the beginning.
+   **Progressive hint:** Early windows contain fewer rows when the minimum allows it.
+5. **Implementation:** Resample deterministic daily sales to `W-FRI`, then assert the grand total is preserved.
+   **Progressive hint:** Document the weekly label/boundary and use sums for additive measures.
+6. **Debugging:** Repair a comparison between naive and timezone-aware timestamps.
+   **Progressive hint:** Normalize both sides to an aware UTC contract.
+7. **Edge case and explanation:** Handle an ambiguous or nonexistent daylight-saving local time and explain why silently guessing may corrupt event order.
+   **Progressive hint:** Use explicit `ambiguous`/`nonexistent` policy or reject the input.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why is `tz_localize` not interchangeable with `tz_convert`?

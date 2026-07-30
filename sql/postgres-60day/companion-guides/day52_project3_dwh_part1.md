@@ -30,9 +30,16 @@ customer, and product key in `fact_sales`. Compare fact row count with source
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day52_project3_dwh_part1.sql).
-Run the file from a known reset and save its fact-count and orphan-key checks
-for Days 53–54.
+Complete these in the [learner SQL](../day52_project3_dwh_part1.sql):
+
+1. Add `dim_country` and connect it to customers.
+2. Build `fact_payments` at payment grain.
+3. State/prove the `fact_sales` grain.
+4. Add and test unknown dimension members.
+5. Reconcile fact rows and amount to source.
+6. Define a late-arriving date policy.
+
+Run from a reset and save checks for Days 53–54.
 
 ## Self-check
 

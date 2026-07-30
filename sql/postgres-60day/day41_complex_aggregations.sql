@@ -35,7 +35,15 @@ ORDER BY p.category
 LIMIT 10;
 
 -- Exercises
--- 1) Build a 6-metric dashboard by category using FILTER for various time windows.
--- 2) Create a per-country string_agg of top 5 product names by revenue.
+-- 1. Build a 6-metric dashboard by category using FILTER for various time windows.
+-- 2. Create a per-country string_agg of top 5 product names by revenue.
+-- 3. Prediction: compare GROUPING SETS ((country), (category), ()) with CUBE
+--    (country, category). Predict which country/category detail level is absent.
+-- 4. Construction: report order count, paid revenue, returned revenue, and
+--    distinct customers per country using FILTER.
+-- 5. Debugging: distinguish a real NULL country from a subtotal NULL by adding
+--    GROUPING(country) and a safe display label.
+-- 6. Edge case: return an empty array rather than NULL when an aggregate input
+--    set is empty, and explain the COALESCE type cast.
 
 ROLLBACK;

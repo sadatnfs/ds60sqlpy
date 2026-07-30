@@ -94,3 +94,23 @@ ORDER BY month DESC;
   excluded and compare MAE when zeros are common.
 - Different models have different warm-up periods, so a rigorous comparison
   should score all models over the same common months.
+
+## Exercise 3 — Expose forecast leakage
+
+The leaky frame includes `CURRENT ROW`; the honest MA(6) frame uses six preceding
+rows and stops at `1 PRECEDING`. Side-by-side output makes the bias visible.
+
+## Exercise 4 — Build a monthly spine
+
+`generate_series` establishes one row per calendar month before the 12-row lag.
+The separate source-present flag distinguishes no row from a chosen zero policy.
+
+## Exercise 5 — Report the MAPE denominator
+
+`NULLIF(actual, 0)` excludes undefined percentage errors, and FILTER counts
+both scored and excluded observations. Never publish MAPE without that context.
+
+## Exercise 6 — Compare MAE and MAPE
+
+The deterministic fixture shows that MAE reflects currency-scale error while
+MAPE can be dominated by a modest miss on a very small actual.

@@ -56,7 +56,15 @@ ORDER BY month DESC, category
 LIMIT 100;
 
 -- Exercises
--- 1) Compute YoY variance and highlight categories with >15% overspend.
--- 2) Build a report pivoting categories as columns and months as rows with variance.
+-- 1. Compute YoY variance and highlight categories with >15% overspend.
+-- 2. Build a report pivoting categories as columns and months as rows with variance.
+-- 3. Prediction: decide whether an absent budget row means zero budget or
+--    unknown budget, and show how that policy changes COALESCE and variance.
+-- 4. Construction: add YTD actual, budget, absolute variance, and variance
+--    percentage per category using window frames.
+-- 5. Debugging: repair a FULL JOIN whose month/category keys are coalesced only
+--    in SELECT but not consistently reused in later windows.
+-- 6. Edge case: label new categories with actual spend but no budget separately
+--    from overspend so stakeholders do not confuse missing plans with zero plans.
 
 ROLLBACK;

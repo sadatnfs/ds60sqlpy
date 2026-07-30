@@ -27,7 +27,15 @@ GROUP BY p.category
 ORDER BY qty DESC;
 
 -- Exercises
--- 1) Identify the longest-running active queries on your system.
--- 2) If pg_stat_statements is available, list top 10 queries by mean_exec_time and total time.
+-- 1. Identify the longest-running active queries on your system.
+-- 2. If pg_stat_statements is available, list top 10 queries by mean_exec_time and total time.
+-- 3. Prediction: explain why query_start is not the same as transaction start,
+--    then display both ages for non-idle sessions.
+-- 4. Construction: summarize current connections by database, user, and state
+--    without exposing complete SQL text.
+-- 5. Debugging: repair a “slow query” report that sorts only by mean time even
+--    though one rarely executed outlier should not outrank total workload cost.
+-- 6. Edge case: identify sessions that are idle in transaction and explain why
+--    they can retain locks or old snapshots even while no statement is running.
 
 ROLLBACK;

@@ -33,8 +33,16 @@ ROLLBACK TO SAVEPOINT sp1;
 SELECT * FROM txn_demo WHERE id = 1; -- back to original in this tx
 
 -- Exercises
--- 1) In two sessions, reproduce non-repeatable reads under READ COMMITTED.
--- 2) Demonstrate phantom reads between two SELECT COUNT(*) with concurrent INSERTs.
--- 3) Use SERIALIZABLE and observe serialization failures under contention.
+-- 1. In two sessions, reproduce non-repeatable reads under READ COMMITTED.
+-- 2. Demonstrate phantom reads between two SELECT COUNT(*) with concurrent INSERTs.
+-- 3. Use SERIALIZABLE and observe serialization failures under contention.
+-- 4. Prediction: after ROLLBACK TO SAVEPOINT, decide whether the savepoint
+--    itself still exists; release it and verify PostgreSQL's behavior.
+-- 5. Construction: implement a transfer between two temp accounts that checks
+--    the debit balance and updates both rows atomically.
+-- 6. Debugging: provoke a unique-key error after a savepoint, recover with
+--    ROLLBACK TO SAVEPOINT, and prove the surrounding transaction remains usable.
+-- 7. Edge case: explain why a read-only transaction can still need a consistent
+--    isolation choice when several SELECT statements must describe one snapshot.
 
 ROLLBACK;

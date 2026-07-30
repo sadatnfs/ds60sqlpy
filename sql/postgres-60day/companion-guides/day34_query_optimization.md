@@ -29,9 +29,16 @@ optimization of the same requirement.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day34_query_optimization.sql).
-Change one thing per experiment and record plan, buffers, result reconciliation,
-and observed tradeoff.
+Complete these in the [learner SQL](../day34_query_optimization.sql):
+
+1. Replace a scalar/correlated subquery with a join and compare plans.
+2. Limit rows early without changing the result.
+3. Predict `MATERIALIZED` versus `NOT MATERIALIZED` planner freedom.
+4. Pre-aggregate items at order grain and verify totals.
+5. Repair payment/item fanout.
+6. Replace nullable `NOT IN` logic with `NOT EXISTS`.
+
+Change one thing per experiment and reconcile results before timing.
 
 ## Self-check
 
@@ -86,3 +93,14 @@ shape that the optimizer can transform.
   change results.
 - `DISTINCT` can hide join fanout. Fix grain instead of masking duplicates.
 - A faster query that changes counts or totals is incorrect.
+
+## Expanded practice lab
+
+Prompts 3–6 make semantic equivalence the first optimization gate. Compare
+`MATERIALIZED` and `NOT MATERIALIZED` as planner boundaries, then verify a
+one-row-per-order pre-aggregation against the direct join with `EXCEPT` in both
+directions.
+
+When payments and line items are both many-to-one with orders, aggregate each
+to order grain before combining them. Use `NOT EXISTS` for a NULL-safe anti-join;
+`NOT IN` becomes unknown for every candidate if its subquery can return NULL.

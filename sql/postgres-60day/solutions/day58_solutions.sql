@@ -128,4 +128,96 @@ SELECT *
 FROM cleaned_customer_ingest_solution
 ORDER BY email;
 
+-- Exercise 4: deterministic winner selection happens after normalization and
+-- before upsert. Newest valid timestamp wins; email/full_name break any ties.
+WITH candidates AS (
+  SELECT lower(trim(email)) AS normalized_email,
+         full_name,
+         created_at,
+         ROW_NUMBER() OVER (
+           PARTITION BY lower(trim(email))
+           ORDER BY created_at DESC NULLS LAST, trim(full_name), email
+         ) AS winner_rank
+  FROM stg_customer_ingest_solution
+)
+SELECT * FROM candidates WHERE winner_rank = 1 ORDER BY normalized_email;
+
+-- Exercise 5: every cleaned row receives one acceptance state and a diagnostic
+-- reason. Keeping detail permits remediation; grouped counts alone would not.
+WITH classified AS (
+  SELECT *,
+         CASE
+           WHEN full_name IS NULL OR full_name = '' THEN 'invalid_name'
+           WHEN NOT email_valid THEN 'invalid_email'
+           WHEN NOT country_valid THEN 'invalid_country'
+           WHEN created_at IS NULL THEN 'invalid_datetime'
+           WHEN NOT phone_valid THEN 'invalid_phone'
+           ELSE 'accepted'
+         END AS outcome
+  FROM cleaned_customer_ingest_solution
+)
+SELECT outcome, COUNT(*) AS rows
+FROM classified
+GROUP BY outcome
+ORDER BY outcome;
+
+-- Exercise 6: normalized email is the deduplication/conflict key, so case and
+-- surrounding whitespace cannot create competing logical customers.
+SELECT email AS normalized_email, COUNT(*) AS candidate_rows
+FROM cleaned_customer_ingest_solution
+GROUP BY email
+ORDER BY email;
+
+-- Exercise 7: missing and unknown are different quality states. Preserve the
+-- raw input beside its normalized candidate.
+SELECT country AS raw_country,
+       NULLIF(upper(trim(country)), '') AS normalized_candidate,
+       CASE WHEN country IS NULL OR trim(country) = '' THEN 'missing'
+            WHEN upper(trim(country)) IN ('US','USA','CA','GB','DE','FR','IN','AU','BR')
+              THEN 'recognized'
+            ELSE 'unrecognized' END AS country_status
+FROM stg_customer_ingest_solution
+ORDER BY raw_country NULLS FIRST;
+
+-- Exercise 8: source identity makes replay detection independent of row values.
+CREATE TEMP TABLE staged_batch_identity (
+  batch_id text NOT NULL,
+  source_row_number int NOT NULL,
+  email text,
+  PRIMARY KEY (batch_id, source_row_number)
+);
+INSERT INTO staged_batch_identity
+SELECT 'day58-demo', row_number() OVER (ORDER BY email), email
+FROM stg_customer_ingest_solution
+ON CONFLICT (batch_id, source_row_number) DO NOTHING;
+INSERT INTO staged_batch_identity
+SELECT 'day58-demo', row_number() OVER (ORDER BY email), email
+FROM stg_customer_ingest_solution
+ON CONFLICT (batch_id, source_row_number) DO NOTHING;
+SELECT COUNT(*) AS replay_safe_rows FROM staged_batch_identity;
+
+-- Exercise 9: PostgreSQL 16's IS JSON predicate validates text without raising.
+-- Invalid raw text remains available for quarantine and diagnosis.
+SELECT email, attributes AS raw_attributes,
+       CASE WHEN attributes IS JSON THEN 'valid_json'
+            ELSE 'invalid_json' END AS json_status
+FROM stg_customer_ingest_solution
+ORDER BY email;
+
+-- Exercise 10: each staged row is accepted or rejected exactly once. Upserted
+-- rows can be inserts or updates; production code would return those two counts
+-- separately using an explicit merge/audit strategy.
+WITH classified AS (
+  SELECT *,
+         email_valid AND country_valid AND phone_valid
+           AND created_at IS NOT NULL
+           AND full_name IS NOT NULL AND full_name <> '' AS accepted
+  FROM cleaned_customer_ingest_solution
+)
+SELECT (SELECT COUNT(*) FROM stg_customer_ingest_solution) AS staged_rows,
+       COUNT(*) FILTER (WHERE accepted) AS accepted_rows,
+       COUNT(*) FILTER (WHERE NOT accepted) AS rejected_rows,
+       COUNT(*) AS reconciled_rows
+FROM classified;
+
 ROLLBACK;

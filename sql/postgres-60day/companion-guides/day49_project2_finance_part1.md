@@ -30,8 +30,16 @@ retain the number of evaluated months.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day49_project2_finance_part1.sql).
-Add mean absolute error (MAE) and compare its interpretation with MAPE.
+Complete these in the [learner SQL](../day49_project2_finance_part1.sql):
+
+1. Backtest MA(6), MA(12), and seasonal naive with MAPE.
+2. Produce a 50/50 seasonal/MA(6) forecast.
+3. Explain and remove current-row leakage.
+4. Build a complete monthly spine before lagging 12 months.
+5. Handle zero actuals and report excluded MAPE rows.
+6. Compare MAE with MAPE on a low-revenue miss.
+
+Score every model on a common observation window.
 
 ## Self-check
 

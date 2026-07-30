@@ -85,3 +85,24 @@ data unchanged.
   entity and update policy.
 - Logical export is not point-in-time recovery. Production PITR requires base
   backups plus WAL archiving, which is outside this SQL-only exercise.
+
+## Exercise 3 — Choose COPY or backslash-copy
+
+Server-side `COPY` accesses the database server's filesystem. psql `\copy`
+streams through the client, which is usually the appropriate learner-machine
+workflow.
+
+## Exercise 4 — Build a manifest
+
+The manifest records table, count, key range, and observation time. Production
+automation should also hash the exported file outside SQL.
+
+## Exercise 5 — Deduplicate deterministically
+
+`ROW_NUMBER` partitions by normalized email and orders by an explicit newest/
+tie-break policy. Upsert never receives arbitrary duplicate winners.
+
+## Exercise 6 — Compare NULL safely
+
+`IS DISTINCT FROM` treats two NULLs as equal and one NULL as different. It
+therefore reports real source/restore differences without UNKNOWN results.

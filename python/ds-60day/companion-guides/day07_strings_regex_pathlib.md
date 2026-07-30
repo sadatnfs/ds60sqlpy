@@ -58,6 +58,28 @@ without hard-coding `/` or `\`.
    calculate and print every source/destination pair before calling `rename`;
    preserve each suffix and handle name collisions.
 
+### Additional mastery practice
+
+Use ordinary string operations for fixed syntax, regular expressions for patterns, and `pathlib` for portable path semantics.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Compare `"\n"` with `r"\n"` and predict their lengths and printed representations.
+   **Progressive hint:** A raw string preserves the backslash needed by many regex patterns.
+4. **Tracing:** Trace named regex groups while parsing `order-2048.csv`; distinguish `group(0)` from the named capture.
+   **Progressive hint:** The whole match and captured subparts are different values.
+5. **Implementation:** Implement `parse_report_name(Path)` returning a date and region for names like `sales_2025-07-01_west.csv`, rejecting mismatches.
+   **Progressive hint:** Use `fullmatch` so extra suffix text cannot pass silently.
+6. **Debugging:** Repair a greedy `<.*>` pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML.
+   **Progressive hint:** Use a constrained or non-greedy pattern only for a bounded format.
+7. **Edge case and explanation:** Build a rename plan to kebab-case that detects collisions before changing any files, including `A B.txt` and `a-b.txt`.
+   **Progressive hint:** Separate planning/validation from filesystem mutation.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - When is `str.replace` clearer than `re.sub`?

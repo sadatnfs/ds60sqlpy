@@ -39,6 +39,15 @@ bash scripts/setup.sh
 
 See [Validation](docs/validation.md) for focused and full checks.
 
+Optionally install the repository's local-only pre-commit hooks after setup:
+
+```text
+python -m pre_commit install
+```
+
+The hooks run the sensitive-content guard plus Ruff checks using the selected
+environment; they do not fetch a third-party hook repository.
+
 ## Lesson content contract
 
 Every learner-facing lesson should provide:
@@ -155,6 +164,7 @@ Run:
 ```text
 python scripts/course.py doctor
 python scripts/course.py validate
+python scripts/scan_secrets.py
 ```
 
 Then check:

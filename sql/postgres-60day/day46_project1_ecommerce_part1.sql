@@ -30,7 +30,15 @@ GROUP BY 1
 ORDER BY cohort_month DESC;
 
 -- Exercises
--- 1) Create LTV segments (gold/silver/bronze) based on thresholds and analyze by country.
--- 2) Compute revenue per cohort month at month offsets 0..12.
+-- 1. Create LTV segments (gold/silver/bronze) based on thresholds and analyze by country.
+-- 2. Compute revenue per cohort month at month offsets 0..12.
+-- 3. Prediction: compare NTILE(4) with fixed monetary thresholds. Explain why a
+--    customer's label can change under NTILE when unrelated customers arrive.
+-- 4. Construction: calculate customer LTV, order count, average order value, and
+--    days since last order in one customer-grain result.
+-- 5. Debugging: repair an LTV query that joins payments and order_items at raw
+--    grain and therefore multiplies revenue.
+-- 6. Edge case: retain customers with no orders, assign zero LTV, and explain
+--    where COALESCE belongs so the LEFT JOIN remains outer.
 
 ROLLBACK;

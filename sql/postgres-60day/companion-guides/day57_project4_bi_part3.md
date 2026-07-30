@@ -31,8 +31,16 @@ center, dispersion, and both scores beside the rank.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day57_project4_bi_part3.sql). Compare
-results with absent no-order days versus explicit zero-revenue days.
+Complete these in the [learner SQL](../day57_project4_bi_part3.sql):
+
+1. Compare MA(7) with calendar-week seasonal naive using MAPE.
+2. Rank positive/negative anomalies with SD and MAD scores.
+3. Predict how removing the date spine changes `LAG(..., 7)`.
+4. Compare MAE, RMSE, MAPE, and scored-row counts on one window.
+5. Detect and remove current-row forecast leakage.
+6. Preserve undefined scores for a constant series.
+
+Compare absent no-order days with explicit zero-revenue days.
 
 ## Self-check
 

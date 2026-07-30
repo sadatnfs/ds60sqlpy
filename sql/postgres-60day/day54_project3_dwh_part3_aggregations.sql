@@ -56,7 +56,7 @@ GROUP BY dd.year, dd.month, fs.customer_sk;
 -- GROUP BY dp.category, t.y, t.m;
 
 -- Data Quality checks: reconciling aggregates to facts
--- 1) Compare monthly category revenue between agg and base
+-- 1. Compare monthly category revenue between agg and base
 WITH base AS (
   SELECT dd.year, dd.month, dp.category, ROUND(SUM(fs.amount),2) AS rev
   FROM fact_sales fs
@@ -74,7 +74,7 @@ WITH base AS (
 )
 SELECT * FROM diff WHERE delta <> 0 ORDER BY year DESC, month DESC, category;
 
--- 2) Check for orphan SKs in agg_sales_customer_month
+-- 2. Check for orphan SKs in agg_sales_customer_month
 SELECT a.customer_sk
 FROM agg_sales_customer_month a
 LEFT JOIN dim_customer dc ON dc.customer_sk = a.customer_sk
@@ -82,7 +82,15 @@ WHERE dc.customer_sk IS NULL
 LIMIT 10;
 
 -- Exercises
--- 1) Add an agg table agg_sales_product_month and validate it.
--- 2) Create a stored procedure to refresh a given y, m across all aggs.
+-- 1. Add an agg table agg_sales_product_month and validate it.
+-- 2. Create a stored procedure to refresh a given y, m across all aggs.
+-- 3. Prediction: explain why refreshing only the current month misses a
+--    late-arriving fact for a previous month.
+-- 4. Construction: implement delete-and-insert refresh for one closed month in
+--    a transaction and return inserted row counts.
+-- 5. Debugging: repair the FULL JOIN reconciliation so a row missing from either
+--    the fact aggregate or stored aggregate is reported, not hidden by NULL math.
+-- 6. Edge case: rerun the same month refresh twice and prove both row count and
+--    revenue are identical (idempotency).
 
 ROLLBACK;

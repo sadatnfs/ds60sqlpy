@@ -17,7 +17,7 @@ The repository is designed for:
 | Track | Start here | What it covers |
 | --- | --- | --- |
 | Python and data science | [Python track](python/ds-60day/README.md) | Core Python, notebooks, data work, statistics, machine learning, APIs, and production topics |
-| PostgreSQL | [SQL track](sql/postgres-60day/README.md) | SQL fundamentals, joins, analytics, performance, transactions, data warehousing, and projects |
+| PostgreSQL | [SQL track](sql/postgres-60day/README.md) | Relational design, SQL fundamentals, analytics, performance, operations, and projects |
 | Python + PostgreSQL engineering | [Engineering bridge](bridge/README.md) | Typed configuration, safe database access, transactions, testing, ETL, concurrency, and production operations |
 | Both | Start with Python Days 1–15, then alternate tracks | A broader data-practitioner path |
 
@@ -26,6 +26,11 @@ The human-readable overview is [docs/curriculum-map.md](docs/curriculum-map.md).
 ```text
 python scripts/course.py catalog
 ```
+
+After the shared lessons, use
+[professional and specialization paths](docs/professional-paths.md) for the
+named modules. New SQL learners start with `sql-found-01` and `sql-found-02`
+before SQL Day 1.
 
 ## Quick start
 
@@ -79,10 +84,10 @@ bash scripts/setup.sh --advanced
 ```
 
 The advanced profile includes machine learning, production, Python/PostgreSQL
-bridge, deep-learning, natural-language-processing, and geospatial packages. It
-can take substantially longer and may use platform-specific wheels, so install
-it when the catalog shows that you need it. Catalog labels are not all literal
-package extras; use the
+bridge, professional data tooling, PostgreSQL notebook magics, deep-learning,
+natural-language-processing, and geospatial packages. It can take substantially
+longer and may use platform-specific wheels, so install it when the catalog
+shows that you need it. Catalog labels are not all literal package extras; use the
 [dependency-label mapping](docs/dependency-profiles.md) before choosing a
 targeted install.
 
@@ -106,14 +111,18 @@ Python:
 SQL:
 
 1. Complete [SQL setup](sql/postgres-60day/README.md).
-2. Read [SQL Day 1 companion guide](sql/postgres-60day/companion-guides/day01_select_where_orderby.md).
-3. Run the lesson with error-stop behavior:
+2. Complete the
+   [relational-design foundation](sql/professional/companion-guides/sql_found_01_relational_design.md)
+   and
+   [versioned-migrations foundation](sql/professional/companion-guides/sql_found_02_versioned_migrations.md).
+3. Read [SQL Day 1 companion guide](sql/postgres-60day/companion-guides/day01_select_where_orderby.md).
+4. Run the lesson with error-stop behavior:
 
    ```text
    psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
    ```
 
-4. Attempt the exercises before opening [the worked solution](sql/postgres-60day/solutions/day01_solutions.md).
+5. Attempt the exercises before opening [the worked solution](sql/postgres-60day/solutions/day01_solutions.md).
 
 `sql/postgres-60day/00_setup.sql` is a destructive reset of the disposable `training` schema. Never run it against a database that contains data you care about.
 
@@ -147,6 +156,7 @@ python/
     notebooks/
     companion-guides/
     solutions/
+  professional/
 sql/
   ADVANCED_SQL_60DAY_PLAN.md
   postgres-60day/
@@ -154,11 +164,13 @@ sql/
     day*.sql
     companion-guides/
     solutions/
+  professional/
 bridge/
   lessons/
   companion-guides/
   solutions/
   tests/
+  professional/
 curriculum/catalog.json
 scripts/
 docs/
@@ -166,15 +178,18 @@ docs/
 ```
 
 The maintained content has learner artifacts, companion guides, and runnable
-solutions for all 60 lessons in both main tracks, plus eight engineering bridge
-lessons. The generated catalog and validation command report the exact artifact
+solutions for all 60 lessons in both main tracks, eight engineering bridge
+lessons, and 26 named foundation/professional/specialization modules. The
+generated catalog indexes 154 learning modules and reports their exact artifact
 paths.
 
 ## Documentation
 
 - [Curriculum map](docs/curriculum-map.md)
+- [Professional and specialization paths](docs/professional-paths.md)
 - [VS Code workflow](docs/vscode.md)
 - [Offline use](docs/setup/offline.md)
+- [PostgreSQL in Jupyter](docs/setup/jupyter-postgresql.md)
 - [Local environments and caches](docs/local-files-and-caches.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Validation](docs/validation.md)

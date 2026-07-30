@@ -74,6 +74,28 @@ macOS/Linux:
 2. Add a negative test using `pytest.raises`. **Hint:** assert the narrow
    exception type and, when stable, a meaningful part of its message.
 
+### Additional mastery practice
+
+Test observable contracts across normal, boundary, and invalid inputs. A good failure explains which behavior changed.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict how pytest reports `assert actual == expected` compared with `assert check(actual)` when the values differ.
+   **Progressive hint:** Direct comparisons usually produce more useful assertion introspection.
+4. **Tracing:** Trace fixture setup, test execution, and teardown when the test passes and when it raises.
+   **Progressive hint:** A yielding fixture resumes after `yield` for cleanup in both paths.
+5. **Implementation:** Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text.
+   **Progressive hint:** Each parameter row should communicate one behavior.
+6. **Debugging:** Repair a test whose `pytest.raises(Exception)` would accept unrelated bugs and whose protected block contains several operations.
+   **Progressive hint:** Assert a narrow exception around one operation.
+7. **Edge case and explanation:** Test floating-point output and `NaN` correctly. Explain why direct equality is inappropriate for each.
+   **Progressive hint:** Use `pytest.approx` for tolerance and `math.isnan` for NaN.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why should test names describe behavior rather than implementation steps?

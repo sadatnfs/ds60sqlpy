@@ -39,5 +39,21 @@ GROUP BY c.country
 ORDER BY 2 DESC;
 
 -- Target: Reduce runtime by >70% vs baseline on your dataset
+-- The percentage is a measurement goal, never a guaranteed result on the small
+-- deterministic seed. Record plan shape, rows, buffers, and execution time.
+
+-- Exercises
+-- 1. Prediction: identify which baseline expression is non-sargable and predict
+--    how the half-open timestamp range changes index eligibility.
+-- 2. Construction: capture EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) for the
+--    baseline and rewrite, then compare root-node execution time and buffers.
+-- 3. Debugging: prove that the pre-aggregated rewrite returns the same country
+--    totals as the direct join by comparing them with EXCEPT in both directions.
+-- 4. Edge case: test a date window with zero matching orders and ensure every
+--    rewrite returns the same empty result rather than an invented zero row.
+-- 5. Design: propose one composite or covering index, state the exact query it
+--    serves, and explain its write/storage tradeoff.
+-- 6. Explanation: write a short optimization report separating semantic
+--    equivalence, planner evidence, and environment-dependent timing.
 
 ROLLBACK;

@@ -63,3 +63,94 @@ Why this pattern
 Pitfalls
 - Don’t .tz_localize when timestamps already have tz; use .tz_convert instead
 - Always sort by time before resample/rolling
+
+---
+
+## Exercise-by-exercise reference
+
+Every numbered learner exercise has a matching entry here. The original
+worked examples remain above; the expanded answers below add heavily
+commented code, explicit reasoning, and executable checks.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Create a business-day series and compute weekly sums. **Hint:** choose and document the weekly boundary (`W-FRI` or `W-SUN`), then reconcile the grand total before and after resampling.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Add a named local timezone to a timestamp column, then convert it to UTC. **Hint:** parse first, use localization only on naive values, and include a date near a daylight-saving transition in your tests.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 3 — Prediction
+
+**Prompt:** Predict the difference between `tz_localize` and `tz_convert`, and which one applies to a naive timestamp.
+
+**Reasoning checkpoint:** Localization assigns meaning; conversion changes representation of an instant. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 4 — Tracing
+
+**Prompt:** Trace a three-day rolling mean with `min_periods=1` and identify which observations contribute at the beginning.
+
+**Reasoning checkpoint:** Early windows contain fewer rows when the minimum allows it. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 5 — Implementation
+
+**Prompt:** Resample deterministic daily sales to `W-FRI`, then assert the grand total is preserved.
+
+**Reasoning checkpoint:** Document the weekly label/boundary and use sums for additive measures. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 6 — Debugging
+
+**Prompt:** Repair a comparison between naive and timezone-aware timestamps.
+
+**Reasoning checkpoint:** Normalize both sides to an aware UTC contract. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 7 — Edge case and explanation
+
+**Prompt:** Handle an ambiguous or nonexistent daylight-saving local time and explain why silently guessing may corrupt event order.
+
+**Reasoning checkpoint:** Use explicit `ambiguous`/`nonexistent` policy or reject the input. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+## Expanded mastery lab solutions
+
+Keep timestamps timezone-aware at system boundaries, declare resampling windows, and reconcile totals whenever frequency changes.
+
+Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
+
+### Practices 1–2 — Timezone and rolling-window semantics
+
+`tz_localize` assigns a timezone to naive wall-clock values. `tz_convert`
+represents already-aware instants in another timezone. With
+`min_periods=1`, the first rolling mean uses one row, the second uses two, and
+later values use up to three.
+
+### Practices 3–5 — Reconciled resampling and explicit DST policy
+
+```python
+import pandas as pd
+
+daily = pd.Series(
+    range(1, 11),
+    index=pd.date_range("2025-01-01", periods=10, freq="D", tz="UTC"),
+    name="sales",
+)
+weekly = daily.resample("W-FRI").sum()
+assert weekly.sum() == daily.sum()
+
+naive = pd.Timestamp("2025-01-01 12:00")
+aware = naive.tz_localize("America/New_York").tz_convert("UTC")
+boundary = pd.Timestamp("2025-01-01 17:00", tz="UTC")
+assert aware == boundary
+
+# 2025-03-09 02:30 never occurred in America/New_York.
+nonexistent = pd.DatetimeIndex(["2025-03-09 02:30"]).tz_localize(
+    "America/New_York", nonexistent="NaT"
+)
+assert nonexistent.isna().all()
+
+# Rejecting or marking the value missing is safer than silently inventing an
+# instant unless the product contract explicitly defines a shift policy.
+```

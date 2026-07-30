@@ -64,6 +64,28 @@ dimension, so it broadcasts across both rows.
 Use a seeded generator (`np.random.default_rng(42)`) if you generate data so
 results remain deterministic.
 
+### Additional mastery practice
+
+Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+4. **Prediction:** Predict the shape and values of a `(2, 3)` array plus a `(3,)` array, then explain broadcasting alignment.
+   **Progressive hint:** Broadcasting compares dimensions from the right.
+5. **Tracing:** Trace `array.sum(axis=0)` and `array.sum(axis=1)` by naming which dimension is removed and what each output element represents.
+   **Progressive hint:** The named axis is the dimension reduced.
+6. **Implementation:** Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero.
+   **Progressive hint:** Replace a zero standard deviation with a safe denominator.
+7. **Debugging:** Repair code that mutates an original array through a slice when an independent working array was intended.
+   **Progressive hint:** Use `.copy()` at the ownership boundary.
+8. **Edge case and explanation:** Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic.
+   **Progressive hint:** The array dtype, not Python's unbounded integer behavior, controls storage.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What shapes can broadcast with an array shaped `(1000, 4)`?

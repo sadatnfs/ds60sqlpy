@@ -74,6 +74,28 @@ macOS/Linux:
    `textutils` module with a relative import. **Hint:** run the package context
    with `python -m ...`; executing a nested file directly loses that context.
 
+### Additional mastery practice
+
+A module is executed once per interpreter process and then cached. Package layout and invocation style determine whether imports resolve.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict `__name__` when a file is executed directly versus imported. Which path should run CLI behavior?
+   **Progressive hint:** Direct execution uses `__main__`; imports use the module's name.
+4. **Tracing:** Trace two ordinary imports of the same module and explain the role of `sys.modules` in avoiding repeated top-level execution.
+   **Progressive hint:** The module object is cached after its first successful import.
+5. **Implementation:** Sketch a `textutils` package exposing `slugify` from `__init__.py` while keeping implementation in `slug.py`.
+   **Progressive hint:** The public import surface can be smaller than the package tree.
+6. **Debugging:** Explain why `python textutils/cli.py` can break a relative import and repair the invocation without modifying `sys.path`.
+   **Progressive hint:** Run the module from its package parent with `python -m textutils.cli`.
+7. **Edge case and explanation:** Break a two-module circular import by moving shared types/constants or by passing dependencies explicitly.
+   **Progressive hint:** Do not hide the cycle with an unexplained import inside every function.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What code runs the first time a module is imported?

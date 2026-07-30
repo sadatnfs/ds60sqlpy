@@ -91,6 +91,28 @@ The REPL gives fast feedback. The file records exactly what should run again.
 The separate solution notes use the two-environment and REPL exercises to test
 the same setup skills without simply copying the notebook cells.
 
+### Additional mastery practice
+
+Treat the interpreter, package installer, and notebook kernel as one connected system. Record evidence before changing an environment.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+6. **Prediction:** Predict what `sys.executable` should contain when the correct course kernel is active, then verify it in both the REPL and this notebook.
+   **Progressive hint:** The important fact is the interpreter path, not merely the word Python.
+7. **Tracing:** Trace the difference between `python -m pip --version` and a bare `pip --version`: which interpreter owns each command?
+   **Progressive hint:** Read the Python and site-packages paths printed by pip.
+8. **Implementation:** Write `environment_report()` returning the Python version, executable, platform, and current working directory without shell commands.
+   **Progressive hint:** Use `sys`, `platform`, and `pathlib.Path`.
+9. **Debugging:** A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ.
+   **Progressive hint:** Compare executable paths before reinstalling anything.
+10. **Edge case and explanation:** Explain how to recover when the `ds60sqlpy` kernel is absent even though `.venv` exists, and state what remains possible offline.
+   **Progressive hint:** Kernel registration and package download are separate operations.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - How can you prove which Python interpreter is executing a command?

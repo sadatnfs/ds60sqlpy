@@ -54,7 +54,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 Passing `argv` makes parser behavior testable without changing global process
 arguments.
 
-## Project exercises and progressive hints
+## Exercises and progressive hints
 
 1. Read a CSV with pandas, drop or handle required missing values, and convert
    documented column types. **Hint:** make `clean(frame)` return a copy so a
@@ -73,6 +73,28 @@ arguments.
 Store practice source in a tracked project directory. Put disposable generated
 files under ignored `artifacts/`; never commit `.venv`, caches, secrets, or a
 machine-specific `.env`.
+
+### Additional mastery practice
+
+Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+6. **Prediction:** Predict the Python types produced by `argparse` when `--input` uses `type=Path` and `--limit` uses `type=int`.
+   **Progressive hint:** The parser performs declared conversions before `main` receives values.
+7. **Tracing:** Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work.
+   **Progressive hint:** A pure transform accepts and returns data without reading global state.
+8. **Implementation:** Add `--overwrite` and refuse to replace an existing output unless the flag is present.
+   **Progressive hint:** Check the destination before performing the write.
+9. **Debugging:** Repair a module that parses arguments and writes files during import.
+   **Progressive hint:** Move behavior into `main(argv)` and use the `__main__` guard.
+10. **Edge case and explanation:** Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log.
+   **Progressive hint:** Translate expected boundary failures once, without hiding tracebacks in tests.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
 
 ## Run the project
 

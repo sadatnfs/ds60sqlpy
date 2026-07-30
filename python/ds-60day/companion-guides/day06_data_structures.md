@@ -55,6 +55,28 @@ coordinate pair, unique role membership, and keyed user lookup.
    numeric totals. **Hint:** decide what a missing key should start with before
    processing the pair.
 
+### Additional mastery practice
+
+Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** Predict the length and membership behavior of `{3, 1, 3, 2}`. Why must display order not be treated as a sorting guarantee?
+   **Progressive hint:** Sets enforce uniqueness and optimize membership, not presentation order.
+4. **Tracing:** Trace shallow copying for `original = [[1], [2]]; copied = original.copy(); copied[0].append(9)`.
+   **Progressive hint:** The outer lists differ but still refer to the same inner lists.
+5. **Implementation:** Implement `invert_multimap(mapping)` so values become keys and each new key maps to a list of original keys in encounter order.
+   **Progressive hint:** Use `setdefault` or `defaultdict(list)`.
+6. **Debugging:** Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity.
+   **Progressive hint:** Dictionary keys must have a stable hash while stored.
+7. **Edge case and explanation:** Extend stable de-duplication to records using a `key` function, then test repeated dictionaries whose IDs match but other fields differ.
+   **Progressive hint:** Store hashable derived keys while returning original records.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - Why is `item in a_set` usually preferable to `item in a_list` for repeated

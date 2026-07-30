@@ -73,3 +73,24 @@ valid observation, not a failed exercise.
   exercise-specific names.
 - Indexes created in the learner script are rolled back at the end of that
   script and are not available on later days.
+
+## Exercise 3 — Predict from selectivity
+
+Count each category before reading the plan. The optimizer may prefer a
+sequential scan on this compact seed even when the index is valid and usable.
+
+## Exercise 4 — Index a timestamp range
+
+The solution indexes `payment_date` and uses `[start, end)` bounds. Half-open
+windows compose cleanly without double-counting a boundary timestamp.
+
+## Exercise 5 — Match an expression index
+
+An index on `country` does not store `lower(country)`. The solution indexes that
+exact expression and repeats it exactly in the predicate.
+
+## Exercise 6 — Preserve the ordering contract
+
+The unordered query is intentionally nondeterministic. Only the query with
+`ORDER BY country, customer_id` promises reproducible presentation order; an
+index's incidental scan order is not a substitute.

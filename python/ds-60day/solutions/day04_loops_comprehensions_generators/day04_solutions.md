@@ -93,3 +93,120 @@ freq = Counter(items)           # Counter({'e': 3, 'a': 2, 's': 2, 'd': 1, 't': 
 Trade-offs
 - Comprehension teaches the mechanics but is O(n^2) in worst case
 - Counter is the idiomatic O(n) solution and should be preferred in practice
+
+---
+
+## Exercise-by-exercise reference
+
+Every numbered learner exercise has a matching entry here. The original
+worked examples remain above; the expanded answers below add heavily
+commented code, explicit reasoning, and executable checks.
+
+### Exercise 1 — Original lesson practice
+
+**Prompt:** Replace a loop that appends filtered values with a list comprehension. **Hint:** identify the output expression, the `for` clause, then the filter.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 2 — Original lesson practice
+
+**Prompt:** Write a generator that yields even numbers up to `N`. **Hint:** decide explicitly whether "up to" includes `N`, and test both an even and odd `N`.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 3 — Original lesson practice
+
+**Prompt:** Build a frequency dictionary. **Hint:** a comprehension can count each distinct item, but first consider the repeated-work cost; compare it with `collections.Counter`.
+
+The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
+
+### Exercise 4 — Prediction
+
+**Prompt:** Create a generator expression, consume one item with `next`, then convert the rest to a list. Predict what remains and why.
+
+**Reasoning checkpoint:** Iterators remember their current position and are usually one-shot. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 5 — Tracing
+
+**Prompt:** Trace `[n * 10 for n in range(6) if n % 2]` one input at a time.
+
+**Reasoning checkpoint:** Evaluate the filter before the output expression. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 6 — Implementation
+
+**Prompt:** Implement `batched(items, size)` yielding lists of at most `size`, including a final partial batch.
+
+**Reasoning checkpoint:** Accumulate, yield when full, then handle leftovers after the loop. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 7 — Debugging
+
+**Prompt:** Explain and repair a loop that removes negative values from the same list it is iterating over.
+
+**Reasoning checkpoint:** Build a new list or iterate over a copy. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+### Exercise 8 — Edge case and explanation
+
+**Prompt:** Define whether an even-number generator 'up to N' includes N and test N values -1, 0, 1, 2, and 3.
+
+**Reasoning checkpoint:** Boundary examples turn ambiguous English into a contract. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
+
+## Expanded mastery lab solutions
+
+Trace iteration boundaries and laziness. Prefer a clear loop when a comprehension would hide state changes or several decisions.
+
+Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
+
+### Practices 1–2 — Iteration traces
+
+```python
+stream = (n * n for n in range(4))
+first = next(stream)        # Consumes 0 ** 2.
+remaining = list(stream)    # Continues at 1; it does not restart.
+assert first == 0
+assert remaining == [1, 4, 9]
+
+# The filter runs first. Only odd n values reach n * 10.
+assert [n * 10 for n in range(6) if n % 2] == [10, 30, 50]
+```
+
+### Practices 3–5 — Batches, safe filtering, and explicit endpoints
+
+```python
+from collections.abc import Iterable, Iterator
+from typing import TypeVar
+
+T = TypeVar("T")
+
+
+def batched(items: Iterable[T], size: int) -> Iterator[list[T]]:
+    """Yield non-empty lists with at most ``size`` items."""
+
+    if size <= 0:
+        raise ValueError("size must be positive")
+    batch: list[T] = []
+    for item in items:
+        batch.append(item)
+        if len(batch) == size:
+            yield batch
+            batch = []      # New list: already-yielded batches stay unchanged.
+    if batch:
+        yield batch         # Preserve the final partial batch.
+
+
+values = [3, -1, -2, 4]
+non_negative = [value for value in values if value >= 0]
+assert values == [3, -1, -2, 4]   # The input was not mutated mid-iteration.
+assert non_negative == [3, 4]
+
+
+def evens_through(n: int) -> Iterator[int]:
+    """Yield even integers from 0 through n, inclusive."""
+
+    yield from range(0, n + 1, 2)
+
+
+assert list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]
+assert [list(evens_through(n)) for n in (-1, 0, 1, 2, 3)] == [
+    [], [0], [0], [0, 2], [0, 2]
+]
+```

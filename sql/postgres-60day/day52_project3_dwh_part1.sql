@@ -134,7 +134,15 @@ ORDER BY dd.year DESC, dd.month DESC, revenue DESC
 LIMIT 50;
 
 -- Exercises
--- 1) Add dim_country and link customers to it.
--- 2) Build a second fact table fact_payments linked to dim_date and dim_customer.
+-- 1. Add dim_country and link customers to it.
+-- 2. Build a second fact table fact_payments linked to dim_date and dim_customer.
+-- 3. Prediction: identify the grain of fact_sales and explain why order_id alone
+--    cannot be its primary key.
+-- 4. Construction: add unknown (-1) members to dimensions and route an
+--    intentionally unmatched source key to them during a test load.
+-- 5. Debugging: prove that fact_sales amount reconciles to source line-item
+--    revenue and investigate any row-count or amount difference.
+-- 6. Edge case: document how a late-arriving payment date outside dim_date's
+--    generated range should fail, extend, or map according to an explicit policy.
 
 COMMIT;

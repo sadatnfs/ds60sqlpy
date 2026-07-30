@@ -29,9 +29,17 @@ cannot form.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day39_locks_deadlocks.sql). Use a
-disposable queue table to prove two workers claim different rows with
-`FOR UPDATE SKIP LOCKED`.
+Complete these in the [learner SQL](../day39_locks_deadlocks.sql):
+
+1. Reproduce a deadlock and inspect it with `pg_locks`.
+2. Prevent it with consistent key ordering.
+3. Demonstrate a `SKIP LOCKED` worker.
+4. Predict `NOWAIT` behavior when another session owns the lock.
+5. Atomically claim/update at most five queue rows.
+6. Preserve deterministic key ordering through the locking SELECT.
+7. Test a transaction-level advisory lock.
+
+Use a disposable queue and prove two workers claim different rows.
 
 ## Self-check
 
@@ -85,3 +93,15 @@ reduce risk.
 Record the two-session statement sequence, the blocked/aborted session, SQLSTATE,
 and proof that the consistent-order version completes. Roll back or drop all
 disposable queue/deadlock objects.
+
+## Expanded practice lab
+
+Prompts 4–7 compare waiting, immediate failure, cooperative queues, and advisory
+coordination. `NOWAIT` raises an error instead of waiting; `SKIP LOCKED` omits
+currently claimed rows, which is useful for workers but wrong for complete
+reporting.
+
+Claim and update queue rows in one transaction, with a deterministic key order.
+Use `pg_try_advisory_xact_lock` for a non-blocking application lock that releases
+automatically at transaction end. Advisory locks work only when every actor
+follows the same key convention.

@@ -31,6 +31,9 @@ This file extends the root [AGENTS.md](../AGENTS.md) for `python/`.
 - Write learner artifacts to ignored locations such as `artifacts/` or `.learning/`.
 - Do not rely on cells having been run in a hidden order.
 - Avoid shell magics for cross-platform tasks when Python can do the work portably.
+- Named modules under `python/professional/` use stable catalog IDs rather than
+  pretending to be extra numbered days. Keep their learner modules
+  answer-free and their executable implementations under `solutions/`.
 
 ## Dependencies and data
 

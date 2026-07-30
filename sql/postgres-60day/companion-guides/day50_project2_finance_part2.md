@@ -28,9 +28,16 @@ known categories.
 
 ## Exercises
 
-Complete the prompts in the [learner SQL](../day50_project2_finance_part2.sql).
-Add actual-only, budget-only, and zero-budget toy rows and define their display
-policy.
+Complete these in the [learner SQL](../day50_project2_finance_part2.sql):
+
+1. Calculate YoY variance and flag >15% overspend.
+2. Pivot monthly category variance.
+3. Define absent-budget policy before using `COALESCE`.
+4. Add category YTD actual, budget, variance, and variance percentage.
+5. Normalize joined keys before applying windows.
+6. Label unbudgeted spend separately from ordinary overspend.
+
+Test actual-only, budget-only, and zero-budget toy rows.
 
 ## Self-check
 

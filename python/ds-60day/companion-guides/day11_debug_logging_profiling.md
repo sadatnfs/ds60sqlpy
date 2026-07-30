@@ -64,6 +64,28 @@ records through its module logger, not repeatedly call `basicConfig`.
    numeric array processing, compare the measured loop with NumPy vectorization
    from the course's installed data dependencies.
 
+### Additional mastery practice
+
+Observe before optimizing: reproduce a defect, add bounded context, profile representative work, and change the measured bottleneck.
+
+Continue with five new exercises. Record each prediction before running
+code; these extend rather than replace the original practice above.
+
+3. **Prediction:** With a logger set to `WARNING`, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted.
+   **Progressive hint:** The threshold keeps records at that level or more severe.
+4. **Tracing:** Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption.
+   **Progressive hint:** Read a traceback from the final exception upward through your code.
+5. **Implementation:** Implement a reusable `timed(label)` context manager using `time.perf_counter` and logging.
+   **Progressive hint:** Put elapsed-time logging in `finally` so failures are still timed.
+6. **Debugging:** Explain why repeated `logging.basicConfig(...)` calls in notebooks may appear ineffective and configure a named logger without duplicate handlers.
+   **Progressive hint:** Configuration is process state; inspect handlers before adding one.
+7. **Edge case and explanation:** Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification.
+   **Progressive hint:** A faster wrong answer is not an optimization.
+
+Before opening the reference solution, write one sentence explaining
+which contract or mental model each result confirms.
+
+
 ## Self-check
 
 - What is the first traceback line you should interpret?

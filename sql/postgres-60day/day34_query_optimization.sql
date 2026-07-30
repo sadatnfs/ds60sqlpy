@@ -28,7 +28,15 @@ WHERE o.status IN ('paid','shipped','delivered')
 GROUP BY p.category;
 
 -- Exercises
--- 1) Replace subqueries with joins and compare plans.
--- 2) Limit rows as early as possible and compare performance.
+-- 1. Replace subqueries with joins and compare plans.
+-- 2. Limit rows as early as possible and compare performance.
+-- 3. Prediction: compare a MATERIALIZED CTE with NOT MATERIALIZED for a recent
+--    orders query. Predict which version permits more planner reordering.
+-- 4. Construction: pre-aggregate order_items to one row per order before
+--    joining orders and customers; verify that totals match the direct join.
+-- 5. Debugging: repair a query that joins orders and payments before
+--    order_items and therefore multiplies both payment and line-item amounts.
+-- 6. Edge case: replace NOT IN with NOT EXISTS for an anti-join and explain how
+--    a NULL in the subquery changes NOT IN semantics.
 
 ROLLBACK;

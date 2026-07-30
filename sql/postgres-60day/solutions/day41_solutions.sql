@@ -69,3 +69,46 @@ FROM ranked
 WHERE product_rank <= 5
 GROUP BY country
 ORDER BY country;
+
+-- Exercise 3: explicit grouping sets omit country/category detail. CUBE emits
+-- detail, each one-column subtotal, and the grand total.
+WITH lines AS (
+  SELECT c.country, p.category,
+         oi.quantity * oi.unit_price * (1 - oi.discount) AS revenue
+  FROM orders o
+  JOIN customers c USING (customer_id)
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+)
+SELECT country, category, SUM(revenue) AS revenue,
+       GROUPING(country, category) AS grouping_mask
+FROM lines
+GROUP BY CUBE (country, category)
+ORDER BY grouping_mask, country, category;
+
+-- Exercise 4: FILTER states each metric population next to its measure.
+SELECT c.country,
+       COUNT(*) AS orders,
+       COUNT(*) FILTER (WHERE o.status = 'paid') AS paid_orders,
+       SUM(o.total_amount) FILTER (WHERE o.status = 'paid') AS paid_revenue,
+       SUM(o.total_amount) FILTER (WHERE o.status = 'returned') AS returned_revenue,
+       COUNT(DISTINCT o.customer_id) AS customers
+FROM orders o
+JOIN customers c USING (customer_id)
+GROUP BY c.country
+ORDER BY c.country;
+
+-- Exercise 5: GROUPING distinguishes generated subtotal NULL from a stored NULL.
+SELECT CASE WHEN GROUPING(country) = 1 THEN 'ALL COUNTRIES'
+            ELSE COALESCE(country, '(stored null)') END AS country_label,
+       GROUPING(country) AS is_subtotal,
+       COUNT(*) AS customers
+FROM customers
+GROUP BY GROUPING SETS ((country), ())
+ORDER BY is_subtotal, country_label;
+
+-- Exercise 6: array_agg over no rows is NULL; COALESCE needs the same text[]
+-- result type to implement the chosen empty-array display policy.
+SELECT COALESCE(array_agg(email) FILTER (WHERE false), '{}'::text[])
+         AS empty_email_array
+FROM customers;

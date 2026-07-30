@@ -79,3 +79,24 @@ complete implementation of every valid RFC email address.
   participating in those groups. Label it accordingly.
 - Keep validation queries read-only. Fix source data or use a reviewed
   remediation transaction after examining the exact failures.
+
+## Exercise 3 — Explain CHECK and NULL
+
+SQL CHECK rejects FALSE but accepts UNKNOWN. `NOT NULL` is therefore a separate
+schema rule when absence is invalid; the catalog query confirms both course
+amount columns declare it.
+
+## Exercise 4 — Reconcile order totals
+
+Line values aggregate to one row per order before comparison. The one-cent
+tolerance is an explicit currency rule and failing order IDs remain visible.
+
+## Exercise 5 — Retain duplicate evidence
+
+The normalized email is the grouping key, but `array_agg` preserves raw variants
+needed to diagnose case/whitespace differences.
+
+## Exercise 6 — Detect inclusive range overlap
+
+Promotion pairs share a product, are compared once, and overlap when each start
+is no later than the other end. Touching inclusive endpoints therefore count.
