@@ -103,6 +103,36 @@ Notes
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **characterization test:** locks down important current behavior before extracting or renaming it.
+2. **pure core + impure shell:** isolates transformations from I/O so normal, boundary, and failure cases are deterministic.
+3. **Ruff + mypy + pytest:** checks formatting/lint, static type contracts, and executable behavior as complementary evidence.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Characterization evidence preserves intent while pure seams and precise failures make the improved design testable.
+
+**Useful alternative:** Leave stable code unchanged when risk exceeds benefit; use an adapter/deprecation path when a public contract must evolve.
+
+**Trade-off:** More abstraction can improve reuse and testing but increases indirection; extract around real responsibilities, not hypothetical reuse.
+
+**Edge case to test:** Floating-point/rounding changes, exception type/message changes, ordering, mutation, file encoding, and public type narrowing can be breaking.
+
+**Evidence of correctness:** Run old/new behavior on normal and boundary fixtures, test failure/side effects, check public types and deprecation, and pass formatter/linter/type/tests from a clean process.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -110,7 +140,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Move at least two notebook functions into a `src/` package and add tests.
 
@@ -120,7 +150,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Move at least two notebook functions into a src/ package and add tests`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Add type hints and docstrings, then run mypy.
 
@@ -130,7 +169,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Add type hints and docstrings, then run mypy`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Write a short maintainer guide in the project root.
 
@@ -139,6 +187,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Write a short maintainer guide in the project root`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Characterization testing
 
@@ -158,6 +215,15 @@ whatever the refactor produced.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Before refactoring a legacy notebook function, capture current behavior for normal, boundary,...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Risk-based review
 
 **Prompt:** Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.
@@ -175,6 +241,15 @@ the author can act on the most important issues first.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Review a data-loading-to-prediction change using a checklist for security, data loss, leakage...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 
 ### Exercise 6 — Compatibility change
 
@@ -194,3 +269,5 @@ window.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Rename a public function parameter without breaking callers. Implement a deprecation path, te...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

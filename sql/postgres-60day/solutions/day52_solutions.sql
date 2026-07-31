@@ -1,4 +1,17 @@
 -- Day 52 solutions: warehouse dimensions and a payment fact
+-- SOLUTION READING MAP — sql-52: Project3 DWH Part1
+-- Explanation: sql/postgres-60day/solutions/day52_solutions.md
+-- Run from the repository root only against advanced_sql_training:
+--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day52_solutions.sql
+-- Read each answer from inputs to output: establish FROM/JOIN grain; apply
+-- row filters; group/aggregate; filter groups; compute windows; project named
+-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE
+-- as an intermediate relation whose keys, row count, and totals can be checked.
+-- A command tag is not enough for DDL/DML: inspect catalogs or before/after
+-- rows, test a boundary case, and reconcile with an independent control.
+-- NULL, zero, empty input, missing rows, and ties need explicit policies.
+-- This stateful answer intentionally commits the course-owned dwh base for Days 53-54.
+--
 -- This solution intentionally prepares persistent course-owned dwh state for
 -- Days 53 and 54. The included lesson resets only dwh and commits its base.
 SET search_path TO training, public;

@@ -1,5 +1,221 @@
 # Day 03 — Solutions: Control Flow, Truthiness, and Exceptions
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**branch selection, loop decisions, and narrow exception boundaries**.
+
+Control flow is the route execution takes through a program. An
+`if`/`elif`/`else` chain chooses exactly one branch: Python tests from
+top to bottom and stops at the first true condition. Put narrow or more
+specific rules before broader ones, and validate impossible inputs
+before classifying valid ones.
+
+Exceptions separate a normal return path from a failure path. A `try`
+block should contain only the operation expected to fail, while
+`except` names the failure the current layer can interpret. Catching
+every exception hides programming bugs. `else` runs after a successful
+`try`; `finally` runs whether success or failure occurred.
+
+### Vocabulary used in the worked answers
+
+- **condition:** an expression evaluated for truthiness.
+- **branch:** one possible block selected by a condition.
+- **guard clause:** an early check that rejects or handles an invalid case.
+- **exception:** an object representing a failure that interrupts normal flow.
+- **raise:** to deliberately signal an exception.
+- **handler:** an `except` block for a named exception type.
+
+### Reference pattern 1 — Order specific branches before general branches
+
+Classify a value after validating its domain.
+
+```python
+def classify_score(score: int) -> str:
+    if not 0 <= score <= 100:
+        raise ValueError("score must be between 0 and 100")
+    if score >= 90:
+        return "distinction"
+    if score >= 60:
+        return "pass"
+    return "fail"
+
+[classify_score(value) for value in (42, 75, 95)]
+```
+
+**Expected observation:** `['fail', 'pass', 'distinction']`. The guard rejects out-of-domain values before classification.
+
+### Reference pattern 2 — Protect only the fallible conversion
+
+Let unrelated programming errors remain visible.
+
+```python
+def parse_count(text: str) -> int | None:
+    try:
+        count = int(text.strip())
+    except ValueError:
+        return None
+    else:
+        return count
+
+[parse_count(text) for text in (" 12 ", "twelve")]
+```
+
+**Expected observation:** `[12, None]`. Only invalid integer text is converted into the chosen sentinel.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Print FizzBuzz for every integer from 1 through 30 inclusive. **Rules:** multiples of both 3 and 5 print `FizzBuzz`; only 3 prints `Fizz`; only 5 prints `Buzz`; all others print the number. **Constraints:** use one ordered `if`/`elif`/`else` chain. **Verify:** positions 3, 5, 15, 16, and 30 are correct and exactly 30 lines are produced.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies branch selection, loop decisions, and narrow exception boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+
+**Edge case:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
+
+**Solution evidence to inspect:** positions 3, 5, 15, 16, and 30 are correct and exactly 30 lines are produced.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Write `parse_age(text)` that returns an integer for valid integer text and returns `None` only when conversion raises `ValueError`. **Constraints:** put only `int(text)` inside `try`; do not use a bare `except`. **Verify:** test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies branch selection, loop decisions, and narrow exception boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+
+**Edge case:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
+
+**Solution evidence to inspect:** test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** Define `NegativeMeasurementError` as a subclass of `ValueError`, then write `validate_measurement(value)` that returns non-negative values unchanged and raises your exception for `-0.1`. **Verify:** show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies branch selection, loop decisions, and narrow exception boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+
+**Edge case:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
+
+**Solution evidence to inspect:** show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Predict which branch handles 0, 9, and 12 when checks are ordered as `x % 2 == 0`, `x % 3 == 0`, then both. Explain the bug. **Progressive hint:** Only the first true branch runs; test the most specific rule first. **Verify:** Record the branch selected for `0`, `9`, and `12` before/after reordering; confirm the repaired `12` reaches the combined rule.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying branch selection, loop decisions, and narrow exception boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+
+**Edge case:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
+
+**Solution evidence to inspect:** Record the branch selected for `0`, `9`, and `12` before/after reordering; confirm the repaired `12` reaches the combined rule.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path? **Progressive hint:** `else` follows success; `finally` runs in both cases. **Verify:** Use a four-column trace for `try`, `except`, `else`, and `finally` on valid/invalid text; each clause's executed flag must match the language rules.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the branch selection, loop decisions, and narrow exception boundaries model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+
+**Edge case:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
+
+**Solution evidence to inspect:** Use a four-column trace for `try`, `except`, `else`, and `finally` on valid/invalid text; each clause's executed flag must match the language rules.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`. **Progressive hint:** Validate the domain before choosing a result branch. **Verify:** Assert representative scores return `fail`, `pass`, and `distinction`, then assert `-1` and `101` each raise `ValueError`.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies branch selection, loop decisions, and narrow exception boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+
+**Edge case:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
+
+**Solution evidence to inspect:** Assert representative scores return `fail`, `pass`, and `distinction`, then assert `-1` and `101` each raise `ValueError`.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. **Progressive hint:** Keep only the conversion inside the protected block. **Verify:** Show invalid integer text is handled while a deliberate unrelated `TypeError` still reaches the test; keep only conversion inside `try`.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in branch selection, loop decisions, and narrow exception boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+
+**Edge case:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
+
+**Solution evidence to inspect:** Show invalid integer text is handled while a deliberate unrelated `TypeError` still reaches the test; keep only conversion inside `try`.
+
+### Exercise 8 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it. **Progressive hint:** A reusable library function usually should not invent a numeric result. **Verify:** Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from branch selection, loop decisions, and narrow exception boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+
+**Edge case:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
+
+**Solution evidence to inspect:** Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 This guide walks through each exercise with line‑by‑line explanations and beginner‑friendly reasoning. Where useful, we show multiple correct approaches and discuss trade‑offs.
 
 Prereqs
@@ -184,60 +400,6 @@ Check Your Understanding
 - What benefits do custom exceptions provide in larger programs?
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Print FizzBuzz for 1 through 30. **Hint:** test the most specific case (divisible by both numbers) before either individual case.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Parse user input while handling `ValueError`. **Hint:** keep only the conversion inside `try`; code outside should not be accidentally swallowed.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Original lesson practice
-
-**Prompt:** Define an exception for negative inputs and raise it when encountered. **Hint:** subclass `ValueError` because the type is acceptable but its value violates the function's contract.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 4 — Prediction
-
-**Prompt:** Predict which branch handles 0, 9, and 12 when checks are ordered as `x % 2 == 0`, `x % 3 == 0`, then both. Explain the bug.
-
-**Reasoning checkpoint:** Only the first true branch runs; test the most specific rule first. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 5 — Tracing
-
-**Prompt:** Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path?
-
-**Reasoning checkpoint:** `else` follows success; `finally` runs in both cases. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 6 — Implementation
-
-**Prompt:** Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`.
-
-**Reasoning checkpoint:** Validate the domain before choosing a result branch. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Debugging
-
-**Prompt:** Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface.
-
-**Reasoning checkpoint:** Keep only the conversion inside the protected block. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 8 — Edge case and explanation
-
-**Prompt:** Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it.
-
-**Reasoning checkpoint:** A reusable library function usually should not invent a numeric result. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

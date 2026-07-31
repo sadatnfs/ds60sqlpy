@@ -105,6 +105,36 @@ Notes
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`series.shift(lag)`:** aligns a past value as a current-row feature; positive lags must precede any rolling summary.
+2. **`train.iloc[:-horizon]` / `test.iloc[-horizon:]`:** creates a simple chronological boundary with a declared horizon.
+3. **rolling-origin loop:** repeats fit/predict at increasing origins while keeping every target strictly in the future.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Chronological baselines establish the task, while shifted features and rolling origins reproduce what information was available.
+
+**Useful alternative:** Exponential smoothing, regression with lags, or domain-specific state-space models may be preferable to automated ARIMA search.
+
+**Trade-off:** Longer training windows provide more data but may include stale regimes; shorter windows adapt faster with higher variance.
+
+**Edge case to test:** Duplicate/missing timestamps, time zones, daylight-saving changes, insufficient seasonal history, and exogenous data publication delays need policies.
+
+**Evidence of correctness:** Assert timestamp ordering/alignment and feature-source cutoffs, beat last/seasonal naive on identical origins, and report errors by origin plus uncertainty.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -112,7 +142,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the same test window.
 
@@ -122,7 +152,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Fit autoarima with m=7 and m=30; compare mean absolute error on the same test window`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.
 
@@ -132,7 +171,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Difference the training series and inspect autocorrelation without using test-period observations.
 
@@ -141,6 +189,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Difference the training series and inspect autocorrelation without using test-period observat...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Rolling-origin evaluation
 
@@ -160,6 +217,15 @@ backtest.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Implement at least four expanding-window forecast origins with a fixed horizon. Compare seaso...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Prediction intervals
 
 **Prompt:** Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.
@@ -177,6 +243,15 @@ forward-only calibration data and exchangeability assumptions.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Produce forecast intervals and evaluate empirical coverage and width across rolling origins....`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 
 ### Exercise 6 — Timestamp/data-quality debugging
 
@@ -196,3 +271,5 @@ evaluation.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Validate a series containing duplicate timestamps, missing periods, an irregular interval, an...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

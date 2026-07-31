@@ -65,6 +65,36 @@ Pitfalls
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`stats.ttest_1samp(sample, popmean)`:** compares a sample mean with a reference value using a t statistic and estimated standard error.
+2. **`stats.ttest_ind(a, b, equal_var=False)`:** runs Welch's two-sample test without assuming equal population variances.
+3. **`estimate ± critical_value * standard_error`:** forms an interval only after choosing a confidence level and an appropriate sampling model.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Inference starts with the estimand and sampling design, then reports estimate, uncertainty, test evidence, and practical interpretation together.
+
+**Useful alternative:** Bootstrap intervals can approximate uncertainty when their resampling scheme matches the data structure; they are not assumption-free.
+
+**Trade-off:** Higher confidence increases interval coverage but widens the interval; more tests increase the chance of false discoveries.
+
+**Edge case to test:** Constant data, tiny samples, missing values, or empty contingency cells can invalidate formulas or produce undefined statistics.
+
+**Evidence of correctness:** Report the estimate, sample size, standard error or interval, exact hypothesis, assumptions, and a practical effect measure; independently recompute at least one statistic.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -72,7 +102,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Draw groups from `Normal(0, 1)` and `Normal(0.3, 1)`, then test the difference in means with Welch's t-test.
 
@@ -82,7 +112,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Draw groups from Normal(0, 1) and Normal(0.3, 1), then test the difference in means with Welc...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Build a contingency table from categorical data and run a chi-square test. For a fully offline run, construct a small table directly; a cached Seaborn dataset is optional.
 
@@ -92,7 +131,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Build a contingency table from categorical data and run a chi-square test. For a fully offlin...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Compute 90% and 99% confidence intervals for the same mean and compare their widths.
 
@@ -101,6 +149,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Compute 90% and 99% confidence intervals for the same mean and compare their widths`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Prediction
 
@@ -121,6 +178,15 @@ inflate the apparent sample size.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Hold the true mean difference and variance fixed, then predict how increasing each group's sa...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 
 ### Exercise 5 — Implementation
 
@@ -166,6 +232,15 @@ resampling design or a BCa/analytic interval.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Build a seeded percentile-bootstrap confidence interval for a median difference. Validate emp...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Multiple-comparison reasoning
 
 **Prompt:** You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis.
@@ -185,3 +260,5 @@ than quietly folded into the confirmatory analysis.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one fals...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

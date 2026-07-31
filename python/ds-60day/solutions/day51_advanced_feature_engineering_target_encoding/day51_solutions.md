@@ -164,6 +164,36 @@ Explanation
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`groupby(category)[target].agg(['mean', 'count'])`:** builds category evidence only from the allowed training subset.
+2. **`(count * mean + strength * prior) / (count + strength)`:** smooths low-support categories toward the training-wide prior.
+3. **out-of-fold transform:** fits one map per training fold and writes values only to that fold's held-out rows.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Out-of-fold construction prevents self-label leakage, while smoothing and the prior make low-support and unknown categories explicit.
+
+**Useful alternative:** One-hot, hashing, count/frequency encoding, or learned embeddings avoid direct target statistics with different dimension and information trade-offs.
+
+**Trade-off:** Target encoding is compact for high cardinality but adds leakage, split, smoothing, and drift risks.
+
+**Edge case to test:** Singletons, all-missing categories, unseen values, multiclass targets, time-dependent meaning, and grouped duplicates need explicit policy.
+
+**Evidence of correctness:** Prove each training row is excluded from its map, compare against one-hot on identical folds, test unseen/missing categories, and report category support plus smoothing.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -171,7 +201,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or `FunctionTransformer`.
 
@@ -181,7 +211,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or Functio...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Add an appropriate prior and smoothing; experiment with `n_splits`.
 
@@ -191,7 +230,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Add an appropriate prior and smoothing; experiment with nsplits`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Compare ROC AUC with one-hot encoding across multiple seeded train/test splits.
 
@@ -200,6 +248,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Compare ROC AUC with one-hot encoding across multiple seeded train/test splits`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Out-of-fold invariant
 
@@ -220,6 +277,15 @@ training column with that full mapping.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Create a unique category for every training row and show that a leaky full-data target mean r...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Unknown and missing categories
 
 **Prompt:** Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three.
@@ -239,6 +305,15 @@ fitted transformer.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Define distinct policies for a missing category, an unseen category, and a known category wit...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Temporal leakage
 
 **Prompt:** Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation.
@@ -257,3 +332,5 @@ event time and label-arrival time may differ.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Design target encoding for timestamped events where later labels cannot inform earlier rows....`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

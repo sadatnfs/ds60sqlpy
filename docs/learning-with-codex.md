@@ -80,6 +80,19 @@ Use this sequence with Codex:
 4. Ask for one progressive hint at a time.
 5. Open a **Solution** tab only after the attempt, then explain the difference.
 
+Every Python and SQL companion guide ends with
+**Ask Codex about this lesson**. That block is not a generic “explain this”
+prompt: it carries the stable lesson ID, exact guide and learner paths,
+prerequisite boundary, topic-specific goals, safe run boundary, no-solutions
+rule, evidence loop, and mastery condition. The rendered reader presents the
+same contract in a dedicated copy panel. Prefer that lesson prompt over
+rewriting file paths and context by hand.
+
+The prompt is intentionally last. Read the definitions, examples, expected
+observations, exercises, and troubleshooting first. If the lesson itself does
+not make sense without Codex, report that as a curriculum defect; the coach is
+there to adapt questions and hints, not to supply missing course material.
+
 In private mode, the reader's buttons resolve only that stable lesson ID and
 its cataloged files. For a Python notebook, choose **Open this notebook in
 JupyterLab** or open it in VS Code and select `Python (ds60sqlpy)`. For a
@@ -148,15 +161,16 @@ Use $guide-ds60sqlpy-learning to check whether this lesson will run offline on m
 
 The expected flow is:
 
-1. Identify your operating system, track, experience, and current lesson.
-2. Run or interpret `python scripts/course.py doctor`.
-3. Read only the relevant catalog entry, guide, and learner artifact.
-4. Check prerequisites with a few short questions.
-5. Explain the lesson in plain language.
-6. Ask you to predict output or write an attempt.
-7. Use a progressive hint ladder.
-8. Run or inspect your actual code/query.
-9. Finish with a short retrieval quiz and a next step.
+1. Paste the lesson's own **Ask Codex about this lesson** prompt.
+2. Identify your operating system, track, experience, and current lesson.
+3. Run or interpret `python scripts/course.py doctor`.
+4. Read only the relevant catalog entry, guide, and learner artifact.
+5. Check prerequisites with a few short questions.
+6. Explain the lesson in plain language.
+7. Ask you to predict output or write an attempt.
+8. Use a progressive hint ladder.
+9. Run or inspect your actual code/query.
+10. Finish with a short retrieval quiz and a next step.
 
 The hint ladder should normally be:
 

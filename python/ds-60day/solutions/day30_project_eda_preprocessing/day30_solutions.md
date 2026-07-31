@@ -1,5 +1,263 @@
 # Day 30 — Solutions: Project — EDA and Preprocessing
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**a restartable EDA and preprocessing project with an auditable evidence chain**.
+
+A project notebook is a reproducible report, not a diary of accidental
+execution order. Start with the question, provenance, row grain, keys,
+scope, and acceptance criteria. Keep raw data immutable, put cleaning in
+functions, validate the final data, and write artifacts only after all
+gates pass.
+
+Build an evidence chain from raw to clean to validated to saved output.
+Reconcile row counts, unique entities, missingness, and additive totals
+at each boundary. Record each material decision with evidence, action,
+rationale, validation, and impact. Separate findings from limitations
+and stop output when data is empty, invalid, or contaminated by target
+or time leakage.
+
+### Vocabulary used in the worked answers
+
+- **acceptance criterion:** a measurable condition required before output is trusted.
+- **decision log:** structured evidence and rationale for each material treatment.
+- **reconciliation:** comparison of key counts/measures across processing boundaries.
+- **artifact:** a generated dataset, figure, report, or manifest.
+- **manifest:** metadata describing artifact source, version, shape, and validation.
+- **restartability:** the ability to run top to bottom from a fresh kernel with the same result.
+
+### Reference pattern 1 — Reconcile a cleaning boundary
+
+Make every row removal visible and explainable.
+
+```python
+import pandas as pd
+
+raw = pd.DataFrame({
+    "id": [1, 2, 2, 3],
+    "amount": [10.0, 20.0, 20.0, None],
+})
+cleaned = raw.drop_duplicates().dropna(subset=["amount"]).copy()
+reconciliation = {
+    "raw_rows": len(raw),
+    "clean_rows": len(cleaned),
+    "rows_removed": len(raw) - len(cleaned),
+    "raw_known_total": raw["amount"].sum(),
+    "clean_total": cleaned["amount"].sum(),
+}
+reconciliation
+```
+
+**Expected observation:** The reconciliation reports four raw rows, two clean rows, two removed rows, and totals before/after. Those changes still need documented rationale.
+
+### Reference pattern 2 — Represent a decision as data
+
+A structured entry is easier to audit than a scattered comment.
+
+```python
+decision = {
+    "issue": "duplicate id=2 row",
+    "evidence": "two identical rows",
+    "action": "keep first exact duplicate",
+    "rationale": "duplicate adds no new information",
+    "validation": "id/amount pair is unique afterward",
+    "impact": "one row and amount=20 removed from row-level totals",
+}
+sorted(decision)
+```
+
+**Expected observation:** All six required fields are listed. The impact makes clear that de-duplication changes additive totals.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** **Load and scope:** choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. **Expected behavior:** a fresh-kernel run can recreate the same raw profile without hidden state or network access. **Verify:** assert expected columns and key/time bounds before continuing.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** assert expected columns and key/time bounds before continuing.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** **Explore:** analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. **Constraints:** pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. **Verify:** every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** **Clean and transform:** implement `clean(raw)` that returns a new DataFrame and records each decision's evidence, action, rationale, validation, and impact. **Constraints:** preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. **Verify:** test idempotence where promised and reconcile row/entity counts plus key totals.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** test idempotence where promised and reconcile row/entity counts plus key totals.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** **Validate:** apply the Day 29 schema to the actual final cleaned DataFrame before output. **Expected behavior:** one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. **Constraint:** do not catch and discard the validation failure. **Verify:** save is impossible until validation succeeds.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** save is impossible until validation succeeds.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** **Save and report:** write cleaned data and figures under an ignored `artifacts/day30/` path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. **Constraints:** handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. **Verify:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. **Progressive hint:** A declared expectation turns a surprise into a testable discrepancy. **Verify:** Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. **Progressive hint:** Every material change needs a reason and reconciliation. **Verify:** Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the a restartable EDA and preprocessing project with an auditable evidence chain model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.
+
+### Exercise 8 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. **Progressive hint:** Make decisions data, not scattered comments. **Verify:** Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.
+
+### Exercise 9 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. **Progressive hint:** Put parameters/imports first and make `clean(raw)` return a copy. **Verify:** Restart and run top to bottom; assert `raw` remains unchanged, `clean(raw)` returns a copy, and no cell requires a later-created name.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** Restart and run top to bottom; assert `raw` remains unchanged, `clean(raw)` returns a copy, and no cell requires a later-created name.
+
+### Exercise 10 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. **Progressive hint:** Block artifact creation when acceptance criteria fail. **Verify:** Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from a restartable EDA and preprocessing project with an auditable evidence chain.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+
+**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+
+**Solution evidence to inspect:** Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 We combine EDA, cleaning, schema validation, and report generation into a reproducible workflow.
 
 Deliverables
@@ -78,72 +336,6 @@ Tips
 - Capture decisions and rationale in markdown cells
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** **Load and scope.** Use a local file, constructed dataset, or already-cached Seaborn sample; record provenance, row grain, shape, and analytical question. **Hint:** restart the notebook before continuing so hidden state cannot supply the data.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** **Explore.** Examine distributions, missingness, duplicates, relationships, correlations, and relevant segments. **Hint:** pair each table/plot with one sentence of evidence and one caveat; correlation alone is not causation.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Original lesson practice
-
-**Prompt:** **Clean and transform.** Reuse/refine the Day 18 cleaner and document each decision. **Hint:** keep raw data unchanged and assert idempotence where appropriate.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 4 — Original lesson practice
-
-**Prompt:** **Validate.** Apply a Pandera schema from Day 29 before writing. **Hint:** create at least one deliberately invalid fixture proving an important constraint can fail.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 5 — Original lesson practice
-
-**Prompt:** **Save and report.** Write cleaned output under `artifacts/day30/`, export readable figures, summarize findings/limitations, and add a final "What I learned" section. **Hint:** report row counts and key totals at raw, cleaned, and saved boundaries. If the dataset includes a prediction target, split before learning imputation, encoding, scaling, or target-aware decisions.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 6 — Prediction
-
-**Prompt:** Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure.
-
-**Reasoning checkpoint:** A declared expectation turns a surprise into a testable discrepancy. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Tracing
-
-**Prompt:** Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries.
-
-**Reasoning checkpoint:** Every material change needs a reason and reconciliation. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 8 — Implementation
-
-**Prompt:** Implement a structured decision log entry containing evidence, action, rationale, validation, and impact.
-
-**Reasoning checkpoint:** Make decisions data, not scattered comments. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 9 — Debugging
-
-**Prompt:** Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning.
-
-**Reasoning checkpoint:** Put parameters/imports first and make `clean(raw)` return a copy. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 10 — Edge case and explanation
-
-**Prompt:** Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version.
-
-**Reasoning checkpoint:** Block artifact creation when acceptance criteria fail. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

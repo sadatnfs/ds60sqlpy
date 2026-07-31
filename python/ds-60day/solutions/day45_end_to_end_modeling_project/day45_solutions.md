@@ -122,6 +122,36 @@ Checklist for README.md
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`DummyClassifier(strategy=...)`:** creates a minimal predictive reference under the exact same split and metric.
+2. **`ColumnTransformer` inside `Pipeline`:** binds column-specific preprocessing and prediction into one fitted artifact.
+3. **manifest + acceptance gates:** connect data hash, schema, code/environment, metrics, limitations, and artifact identity.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Separating contracts and gates makes each project stage testable and connects model performance to a reproducible decision claim.
+
+**Useful alternative:** A simpler rule-based or statistical model may meet the decision need with lower maintenance and explanation cost.
+
+**Trade-off:** A richer model can improve metrics while increasing data, compute, monitoring, privacy, and operational obligations.
+
+**Edge case to test:** Missing categories, changed schema, data drift, tiny slices, artifact incompatibility, and unavailable first-run Seaborn cache need explicit behavior.
+
+**Evidence of correctness:** Reproduce from a fresh environment, validate data and split hashes, beat a same-split baseline, reload the complete pipeline, test slices, and connect every claim to an artifact.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -129,7 +159,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Load the dataset and create train/validation/test boundaries.
 
@@ -139,7 +169,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Load the dataset and create train/validation/test boundaries`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Preprocess with `ColumnTransformer`.
 
@@ -149,7 +188,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Preprocess with ColumnTransformer`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Train a baseline model.
 
@@ -159,7 +207,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 4 — Original lesson practice
+**Verify:** For task `Train a baseline model`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 4
 
 **Prompt:** Evaluate with appropriate metrics and cross-validation.
 
@@ -169,7 +226,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 5 — Original lesson practice
+**Verify:** For task `Evaluate with appropriate metrics and cross-validation`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 5
 
 **Prompt:** Save the model and preprocessing together with `joblib`.
 
@@ -179,7 +245,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 6 — Original lesson practice
+**Verify:** For task `Save the model and preprocessing together with joblib`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 6
 
 **Prompt:** Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.
 
@@ -189,7 +264,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 7 — Original lesson practice
+**Verify:** For task `Write a short README-style section in the notebook covering rationale, metrics, limitations,...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 7
 
 **Prompt:** Optionally adapt the Day 44 FastAPI service.
 
@@ -198,6 +282,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Optionally adapt the Day 44 FastAPI service`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 
 ### Exercise 8 — Data-contract gate
 
@@ -217,6 +310,15 @@ training population and can make later metrics impossible to reproduce.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Write executable checks for row identity, required columns, target domain, missingness limits...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 9 — Leakage audit
 
 **Prompt:** Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field.
@@ -235,6 +337,15 @@ fit scope even when the raw field is available.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Create a feature-by-feature table with availability time, source, transformation fit scope, a...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 10 — Baseline ladder
 
 **Prompt:** Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results.
@@ -251,6 +362,15 @@ finding rather than optimizing the acceptance criterion after the fact.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identica...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 
 ### Exercise 11 — Operating-policy selection
 
@@ -270,6 +390,15 @@ Ranking metrics alone cannot define the operating point.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Build a threshold table with false-positive cost, false-negative cost, precision, recall, and...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 12 — Error-slice analysis
 
 **Prompt:** Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values.
@@ -286,6 +415,15 @@ development and require a new untouched evaluation set.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Define at least three pre-motivated slices, report support and error metrics, and inspect rep...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 
 ### Exercise 13 — Artifact manifest
 
@@ -304,6 +442,15 @@ untrusted sources. Provenance and access control remain required.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint,...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 14 — Fresh-process acceptance
 
 **Prompt:** Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance.
@@ -321,3 +468,5 @@ the ignored test artifact to prove the workflow—not a stale file—creates it.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixe...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

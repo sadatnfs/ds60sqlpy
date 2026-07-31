@@ -1,4 +1,21 @@
 -- Day 59: Final Capstone - Integrated Data Challenge (Part 2)
+-- BEGINNER WORKFLOW — sql-59: Final Capstone Part2
+-- Guide: sql/postgres-60day/companion-guides/day59_final_capstone_part2.md
+-- Recommended runner: open the private lesson reader and choose
+-- "Create/open guided SQL notebook". It verifies advanced_sql_training,
+-- creates an ignored .learning/sql/sql-59/ copy, and prints the full
+-- psql transcript below the run cell. Edit that private copy, not this official
+-- source, while studying.
+-- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
+-- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
+-- declare what one input row and one output row represent. A displayed result
+-- set is temporary; NULL, zero, an empty string, and an absent row differ.
+-- Primary objects in the worked examples: orders, order_items, customers, events, products.
+-- Success means the first error never appears, psql exits 0, result keys and
+-- control totals match the stated contract, and verification passes. The lesson's documented transaction/cleanup boundary restores disposable state.
+-- Keep all numbered exercises answer-free here: write predictions and attempts
+-- only in your ignored working copy.
+--
 -- Focus: Complex business logic, performance requirements, stakeholder queries
 BEGIN;
 SET search_path TO training, public;
@@ -136,20 +153,52 @@ LIMIT 20;
 -- Exercises
 -- 1. Prediction: state the grain of every CTE in the LTV query and identify the
 --    exact step where order-grain values become customer-grain values.
+--    Inputs: Use only the declared lesson objects (orders, order_items, customers, events, products) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
+--    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 2. Construction: turn the funnel counts into step-to-step and overall
 --    conversion rates while preserving customers who purchased without a
 --    recorded event.
+--    Inputs: Use only the declared lesson objects (orders, order_items, customers, events, products) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 3. Debugging: reconcile stored order totals, calculated line revenue, and
 --    payments before choosing which measure each stakeholder KPI should use.
+--    Inputs: Use only the declared lesson objects (orders, order_items, customers, events, products) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
+--    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
+--    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
 -- 4. Edge case: assign purchases with no qualifying campaign touch to a
 --    '(direct)' bucket and prove attribution counts reconcile to purchases.
+--    Inputs: Use only the declared lesson objects (orders, order_items, customers, events, products) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 5. Performance: compare the customer/date index with a date/customer index
 --    for the date-bounded aggregation; explain the leftmost-column tradeoff.
+--    Inputs: Use only the declared lesson objects (orders, order_items, customers, events, products) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 6. Explanation: write a metric contract for one KPI covering name, grain,
 --    numerator, denominator, time zone, NULL policy, exclusions, and owner.
+--    Inputs: Use only the declared lesson objects (orders, order_items, customers, events, products) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 7. Construction: produce a stakeholder-safe product-pair report with support,
 --    confidence, lift, minimum basket count, and deterministic ordering.
+--    Inputs: Use only the declared lesson objects (orders, order_items, customers, events, products) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 8. Sign-off: assemble one result set that reconciles the customer, finance,
 --    funnel, attribution, and market-basket outputs to named control totals.
+--    Inputs: Use only the declared lesson objects (orders, order_items, customers, events, products) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 
 ROLLBACK;

@@ -12,6 +12,11 @@ by the command-line tools.
 | Static/offline | Double-click `START_HERE.html` | This browser's local storage | No; use rendered reading pages |
 | Private launcher | Double-click `START_DS60.cmd` on Windows, or run `scripts/learning_portal.py` | Ignored `.learning/progress.json` plus a browser copy | Yes, unless `--no-launches` is supplied |
 
+The dashboard displays a prominent mode banner beneath its hero. Do not infer
+the mode from the URL or button styling: **You are in portable reading mode**
+means native apps cannot start, while **Private launcher mode is active**
+means the authenticated loopback bridge is ready.
+
 The static file contains its styles, scripts, and catalog data. It does not
 load a font, analytics script, image, or API from the internet.
 
@@ -72,6 +77,10 @@ Every native action is mapped in course code; the browser never supplies a
 shell command or unrestricted filesystem path.
 
 - **Open repository in VS Code** opens only the repository root.
+- **Open notebook** on a Python/bridge notebook card starts JupyterLab with
+  that exact cataloged learner notebook.
+- **Open SQL workspace** on a SQL card creates and opens that lesson's guided
+  notebook directly.
 - **Open in VS Code** on a lesson reader resolves that stable catalog ID plus
   its guide, learner, or indexed solution selector.
 - **Open exact notebook** starts JupyterLab with that cataloged `.ipynb`.
@@ -79,8 +88,9 @@ shell command or unrestricted filesystem path.
   and SQL copy for that stable SQL lesson, then starts JupyterLab with that
   exact notebook. It never accepts a browser-supplied path or command.
 - **Launch Python JupyterLab** opens `python/ds-60day/notebooks`.
-- **Launch PostgreSQL notebook lab** opens
-  `bridge/professional/notebooks`.
+- **Open PostgreSQL magics lab** opens `bridge/professional/notebooks`. This is
+  the JupySQL `%sql`/`%%sql` integration lab, not the normal way to run a full
+  lesson script.
 
 VS Code needs its `code` launcher. If it is unavailable, open the repository
 with **File → Open Folder**. Jupyter actions require the repository `.venv`;

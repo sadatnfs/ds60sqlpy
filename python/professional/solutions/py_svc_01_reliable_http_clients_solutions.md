@@ -80,6 +80,56 @@ logs. All behavior is local and deterministic.
 
 ---
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## Reasoning before implementation
+
+A small transport seam exposes every attempt, allowing policy tests to prove timing, replay, pagination, validation, and secrecy without a network.
+
+1. **transport Protocol:** isolates request/response mechanics so policy is deterministic under scripted failures.
+2. **retry classifier + budget:** allows only documented transient failures while respecting attempts, delay, and remaining deadline.
+3. **response/schema validation:** rejects malformed success bodies before trusted domain code consumes them.
+4. **Prove the failure boundary:** Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.
+
+**Alternative:** A mature generated SDK can supply serialization and auth, but application-specific retries, deadlines, observability, and privacy still need review.
+
+**Trade-off:** Retries improve resilience to transient failure while increasing latency/load and the risk of duplicate mutation.
+
+**Failure boundary:** Connection reset after send, Retry-After HTTP dates, redirect credential leakage, oversized bodies, cancellation, and malformed JSON need bounded behavior.
+
+**Verification:** Script success/transient/permanent/timeout/repeated-cursor cases, assert stable identities and deadline math, close responses, and scan all diagnostics for credentials.
+
+### Verification micro-example
+
+Run this small, deterministic case before adapting the reference to a
+larger system. It gives the reasoning above an executable anchor:
+
+```python
+def may_retry(method, status, *, idempotency_key=None):
+    transient = status in {429, 502, 503, 504}
+    replay_safe = method in {"GET", "HEAD"} or idempotency_key is not None
+    return transient and replay_safe
+
+cases = [
+    ("GET", 503, None),
+    ("POST", 503, None),
+    ("POST", 503, "logical-operation-17"),
+    ("GET", 400, None),
+]
+decisions = [may_retry(method, status, idempotency_key=key)
+             for method, status, key in cases]
+print(decisions)
+assert decisions == [True, False, True, False]
+```
+
+**Expected observation:** A transient status is insufficient for an unsafe mutation without a stable idempotency identity.
+
+The reference implementation is one defensible contract, not a license
+to copy internal steps into every system. Preserve the observable
+guarantees and repeat the failure tests when adapting it.
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reference
 
 Use this map after an honest attempt. The executable implementation remains
@@ -100,6 +150,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `classify status`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 2 — authorize replay
 
 **Prompt recap:** Implement `method_can_retry`: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics. - POST and PATCH require a non-empty idempotency key in this lesson. An idempotency header helps only if the server documents and enforces it. Never invent safety solely on the client side.
@@ -113,6 +171,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `authorize replay`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 3 — add bounded backoff
 
@@ -128,6 +194,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `add bounded backoff`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 4 — keep identities stable
 
 **Prompt recap:** Generate one correlation ID before the attempt loop. Generate or accept one idempotency key per logical mutation. Assert every scripted attempt sees the same values. Do not create a new idempotency key inside a retry loop; the server would see each replay as a new operation.
@@ -141,6 +215,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `keep identities stable`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 5 — paginate defensively
 
@@ -156,6 +238,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `paginate defensively`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 6 — configure and redact auth
 
 **Prompt recap:** Read `DS60_API_TOKEN`, `DS60_API_BASE_URL`, and a numeric timeout from an injected environment mapping. Make the token field `repr=False`. Implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers. Redact common query credential keys before logging URLs. Do not log bodies by default.
@@ -170,6 +260,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `configure and redact auth`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 7 — prove policy with scripts
 
 **Prompt recap:** Create deterministic scripts for: 1. 503 then 200 for GET, 2. 400 for GET, 3. 503 for POST without a key, 4. 503 then 200 for POST with a key, 5. 429 with `Retry-After`, 6. three transport timeouts, 7. two valid pages, and 8. a repeated cursor. Assert request count, delays, identities, timeout propagation, returned items, and redacted logs.
@@ -183,6 +281,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `prove policy with scripts`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 8 — allocate an end-to-end timeout budget
 
@@ -204,6 +310,14 @@ because clock adjustment can move it backward.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `allocate an end-to-end timeout budget`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 9 — support Retry-After dates safely
 
 **Prompt recap:** Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.
@@ -223,6 +337,14 @@ never wait in real time.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `support Retry-After dates safely`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 10 — model a circuit breaker
 
@@ -244,6 +366,14 @@ contract explicitly says so.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `model a circuit breaker`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 ### Exercise 11 — bound concurrent requests
 
 **Prompt recap:** Add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately. Prove permits release on success, exception, timeout, and cancellation.
@@ -263,6 +393,14 @@ into memory and latency.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `bound concurrent requests`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 
 ### Exercise 12 — close streaming responses
 
@@ -284,6 +422,14 @@ failed.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `close streaming responses`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 ### Exercise 13 — inject a credential provider
 
 **Prompt recap:** Replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge. Preserve redaction and prevent refresh loops.
@@ -302,6 +448,14 @@ Authentication failure is not a reason for unbounded general retries.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `inject a credential provider`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 14 — build an adversarial transport contract suite
 
@@ -322,3 +476,5 @@ real adapter still needs a small local integration test.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `build an adversarial transport contract suite`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.

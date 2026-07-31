@@ -83,6 +83,36 @@ Takeaways
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`step__parameter`:** addresses nested pipeline parameters; inspect `get_params()` instead of guessing names.
+2. **`ParameterGrid(space)`:** enumerates the exact Cartesian search and makes the fit budget calculable.
+3. **`GridSearchCV(..., scoring=..., refit=...)`:** scores candidates in inner folds and refits the selected configuration on all supplied rows.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Explicit candidate enumeration controls compute, while a declared refit metric and outer evaluation control selection bias.
+
+**Useful alternative:** Randomized or successive-halving search can spend a bounded budget across broader spaces; domain-guided manual comparison may be clearer for few candidates.
+
+**Trade-off:** A larger search may find a better inner-fold score while increasing compute, multiplicity, and overfitting to the validation procedure.
+
+**Edge case to test:** Invalid parameter combinations, stochastic candidates without seeds, NaN scores, and resource oversubscription can silently distort rankings.
+
+**Evidence of correctness:** Count candidates and expected fits, inspect every failed/NaN result, declare the refit metric, and evaluate the full search procedure on untouched data or outer folds.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -90,7 +120,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Use `RandomizedSearchCV` with a wider parameter space.
 
@@ -100,7 +130,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Use RandomizedSearchCV with a wider parameter space`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Implement nested cross-validation and compare its result with the non-nested search score.
 
@@ -109,6 +148,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Implement nested cross-validation and compare its result with the non-nested search score`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 
 ### Exercise 3 — Search-budget calculation
 
@@ -127,6 +175,15 @@ pilot before launching the full budget, especially on Windows laptops.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candida...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Multi-metric selection
 
@@ -167,6 +224,15 @@ looks best after the run.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refi...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Results-table diagnosis
 
 **Prompt:** Turn `cv_results_` into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates.
@@ -184,6 +250,15 @@ as evidence instead of retaining only `best_params_`.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Turn cvresults into a tidy table containing parameters, mean and standard deviation of train/...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 6 — Reproducibility debugging
 
@@ -203,3 +278,5 @@ partition.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `A randomized search produces different winners on repeated runs. List every random source and...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

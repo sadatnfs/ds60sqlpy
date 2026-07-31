@@ -73,6 +73,36 @@ Notes
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **release manifest:** pins code/data/environment/artifact identities and the commands used to verify them.
+2. **claim-to-evidence matrix:** maps each slide or conclusion to a metric, artifact, test, and limitation.
+3. **handoff/runbook:** defines normal operation, monitoring, failure response, rollback, ownership, and retention.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Cold-start and claim-evidence checks turn a collection of files into a reproducible, scoped, and handoff-ready result.
+
+**Useful alternative:** A smaller final claim with stronger evidence is better than a broad story; a recorded local demo can replace fragile live infrastructure.
+
+**Trade-off:** More deployment polish can strengthen delivery but should not displace data/evaluation correctness and transparent limitations.
+
+**Edge case to test:** Missing caches, OS path differences, environment drift, unavailable services, stale screenshots, artifact mismatch, and absent owners must have fallback behavior.
+
+**Evidence of correctness:** Rebuild from clean instructions, run tests/smoke and artifact reload, hash the release, audit every claim/limitation, rehearse demo fallback/rollback, and obtain handoff sign-off.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -80,7 +110,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Finalize the data and training/evaluation pipeline.
 
@@ -90,7 +120,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Finalize the data and training/evaluation pipeline`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Produce a results notebook and README with exact reproduction steps.
 
@@ -100,7 +139,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Produce a results notebook and README with exact reproduction steps`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Save artifacts under an ignored `artifacts/` path and retain dependency metadata/lock.
 
@@ -110,7 +158,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 4 — Original lesson practice
+**Verify:** For task `Save artifacts under an ignored artifacts/ path and retain dependency metadata/lock`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 4
 
 **Prompt:** Prepare presentation-ready visuals and the short story above.
 
@@ -120,7 +177,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 5 — Original lesson practice
+**Verify:** For task `Prepare presentation-ready visuals and the short story above`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 5
 
 **Prompt:** Write three takeaways and one open question.
 
@@ -129,6 +195,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Write three takeaways and one open question`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 
 ### Exercise 6 — Cold-start reproduction
 
@@ -148,6 +223,15 @@ undocumented intervention.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Clone/copy the project into a fresh temporary directory, follow only the README on Windows or...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
+
 ### Exercise 7 — Claim-to-evidence matrix
 
 **Prompt:** Create a table mapping every headline claim to metric/visual, dataset and split, sample size, uncertainty, reproduction command, limitation, and owner.
@@ -164,6 +248,15 @@ methodology into a confirmed finding.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Create a table mapping every headline claim to metric/visual, dataset and split, sample size,...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 
 ### Exercise 8 — Failure-tolerant demo
 
@@ -183,6 +276,15 @@ credentials or sensitive records while troubleshooting on screen.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Prepare and rehearse a five-minute demo with a preflight check, time budget, local fixtures,...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 9 — Operational handoff
 
 **Prompt:** Write an ownership and maintenance section covering artifact/data refresh, dependency updates, monitoring, incident contact, rollback, known limitations, and end-of-life criteria.
@@ -199,6 +301,15 @@ repository. Use placeholder roles and documented configuration boundaries.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Write an ownership and maintenance section covering artifact/data refresh, dependency updates...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 10 — Retrospective and next experiment
 
@@ -218,3 +329,5 @@ model search.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Write a retrospective with what changed your belief, strongest and weakest evidence, one disc...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

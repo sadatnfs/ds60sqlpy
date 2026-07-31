@@ -1,5 +1,58 @@
 # Day 60 Solution — End-to-End Capstone Sign-off
 
+
+<!-- beginner-solution-enrichment -->
+## How to study and run this solution
+
+Open this explanation only after making an honest attempt. The executable
+companion runs solely against the disposable `advanced_sql_training` database:
+
+```powershell
+# Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day60_solutions.sql"
+```
+
+```bash
+# macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day60_solutions.sql
+```
+
+`psql` prints each result/command tag in the terminal. Stop at the first
+unexpected `ERROR`; later output cannot repair an earlier failed invariant.
+Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
+ordering with the explanation before comparing syntax.
+
+## Clause-by-clause reading map
+
+The lesson's main concepts are Acceptance criterion, Evidence bundle, Handoff. Its worked-model focus is:
+Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with SUM(orders.totalamount), capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
+
+- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
+  before adding aggregates; a one-to-many join is allowed to multiply rows only
+  when the later contract accounts for it.
+- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
+  completed groups. Window functions run over the surviving relation and
+  normally preserve its row count.
+- Read the `SELECT` list as the public result contract: keys establish grain,
+  measures state calculations, and aliases explain meaning. `ORDER BY` is the
+  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
+- Trace every common table expression (CTE) as a temporary named relation.
+  Execute or inspect one stage at a time while debugging, but compare the final
+  result with an independent control rather than trusting stage names.
+- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
+  chooses another representation. Guard division with `NULLIF`; disclose
+  exclusions and distinguish zero from no row.
+- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
+  Catalog checks, negative cases, row-count reconciliation, and the declared
+  transaction boundary prove behavior and cleanup.
+
+The exact final queries are not the only valid syntax. A join, subquery, CTE,
+window, or conditional aggregate can be an alternative when it preserves the
+same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
+form whose intermediate relations a reviewer can verify; optimize only after
+correctness is established with evidence.
+
 Day 60 has acceptance criteria, not discrete exercises. The final submission
 must connect data quality, transformation, analytics, performance evidence, and
 documented tradeoffs. The executable reference is
@@ -177,10 +230,40 @@ decision.
 Snapshot summaries depend only on table state. Trailing/current-period reports
 also depend on the clock and need a bound `as_of_date` for reproducible review.
 
+### Reasoning and verification
+
+- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Exercise 2 — Return executable sign-off checks
 
 Each check contains observed/expected values, computed pass status, severity,
 and remediation. A typed label cannot substitute for the equality expression.
+
+### Reasoning and verification
+
+- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** An alternative physical/object design is valid only if catalog inspection and valid/invalid behavior prove the same invariant.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 3 — Calculate LAG once
 
@@ -188,10 +271,40 @@ and remediation. A typed label cannot substitute for the equality expression.
 query calculates growth. The first month remains NULL because it has no valid
 comparison.
 
+### Reasoning and verification
+
+- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A different window or subquery shape is valid only with the same partition, peer, frame, tie, and output-order semantics.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Exercise 4 — Flag an incomplete month
 
 The current calendar month is marked explicitly. Production evaluation should
 bind an as-of date and avoid comparing a partial period with a complete one.
+
+### Reasoning and verification
+
+- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A different window or subquery shape is valid only with the same partition, peer, frame, tie, and output-order semantics.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 5 — Retain structured plan evidence
 
@@ -199,20 +312,80 @@ bind an as-of date and avoid comparing a partial period with a complete one.
 rows, buffer activity, and timing. Evidence applies only to the tested server,
 data volume, parameters, and cache state.
 
+### Reasoning and verification
+
+- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Exercise 6 — Complete the operational release checklist
 
 Rollback, ownership, privileges, refresh, monitoring, contracts, and limits all
 have named owners/evidence. Query correctness alone is not production readiness.
+
+### Reasoning and verification
+
+- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 7 — Publish lineage
 
 Every published metric maps to sources, transformation grain, and a validation
 query. This gives Codex and human maintainers a compact impact-analysis trail.
 
+### Reasoning and verification
+
+- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Exercise 8 — Reconcile dashboard totals
 
 Monthly-view revenue is summed and compared with the simplest order total.
 Nonzero difference blocks sign-off before any optimization is accepted.
+
+### Reasoning and verification
+
+- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** Pre-aggregation or a differently ordered join pipeline is valid only if it prevents fanout and reconciles to the same scoped control total.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 9 — Test edge fixtures
 
@@ -220,7 +393,37 @@ The in-query fixture represents NULL, one-row-like, and duplicate-key cases
 without changing course data. Counts expose assumptions that production
 constraints or quarantine rules must enforce.
 
+### Reasoning and verification
+
+- **Expected result/shape:** Evidence of the incorrect behavior followed by a corrected result at the declared grain, with the violated invariant made visible.
+- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Exercise 10 — Distinguish FAIL from NOT_RUN
 
 Executed checks compare observed and expected values. An unexecuted Windows CI
 bootstrap remains `NOT_RUN`; prose or confidence must never upgrade it to PASS.
+
+### Reasoning and verification
+
+- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.

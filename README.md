@@ -20,6 +20,12 @@ The repository is designed for:
 - A one-time connected setup followed by offline study
 - Optional guidance from Codex without requiring Codex to run the lessons
 
+Each Python, SQL, and bridge guide is designed to stand on its own: it defines the
+mental model and vocabulary, breaks down syntax or query anatomy, provides
+runnable examples and visible checks, diagnoses common mistakes, and supplies
+a progression of practice. Its final **Ask Codex about this lesson** block is
+optional, copy-ready coaching context—not a replacement for the lesson.
+
 > [!IMPORTANT]
 > The repository runs locally after setup, but a brand-new machine still needs internet access to install Python packages, PostgreSQL or Docker, and VS Code extensions. A few lessons use Seaborn datasets that download on first use and are cached afterward. Pretrained Hugging Face, spaCy, and torchvision exercises can also require a deliberate first download; their lesson notes identify those cases. See [Offline use](docs/setup/offline.md).
 
@@ -246,6 +252,11 @@ baseline lives in `curriculum/practice_baseline.json`; the target for each
 learner artifact, guide, and every explanatory solution artifact is at least
 `max(6, 2 × audited baseline)`. Run `python scripts/audit_practice.py` or read
 the generated [practice coverage report](docs/practice-coverage.md).
+The companion [lesson depth report](docs/lesson-depth-report.md) checks the
+self-contained beginner-teaching contract, explanatory solution floor,
+historical Python notebook depth, and per-lesson Codex prompts. These automated
+checks are minimums; runnable examples and technical explanations still
+receive human and execution review.
 
 ## Documentation
 
@@ -258,6 +269,8 @@ the generated [practice coverage report](docs/practice-coverage.md).
 - [Offline use](docs/setup/offline.md)
 - [PostgreSQL in Jupyter](docs/setup/jupyter-postgresql.md)
 - [Practice coverage](docs/practice-coverage.md)
+- [Lesson depth report](docs/lesson-depth-report.md)
+- [Curriculum design references](docs/curriculum-design-references.md)
 - [Local environments and caches](docs/local-files-and-caches.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Validation](docs/validation.md)

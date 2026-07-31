@@ -130,6 +130,36 @@ Guidance
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`@flow`:** creates the orchestration boundary and run-level parameters/state.
+2. **`@task(retries=..., retry_delay_seconds=...)`:** declares task-level retry policy; exception classification still matters.
+3. **cache key + result persistence:** reuses a completed result only when identity and storage semantics are deliberate.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Explicit task contracts isolate retry and cache policy, while deterministic output identity makes repeated local execution auditable.
+
+**Useful alternative:** A plain Python CLI plus scheduler may be enough; use orchestration when state, retries, concurrency, or observability justify it.
+
+**Trade-off:** More task boundaries improve visibility and selective retry but add serialization, state, and coordination overhead.
+
+**Edge case to test:** Partial writes, stale caches, concurrent duplicate keys, nonserializable results, cancellation, and credentials in logs need tests.
+
+**Evidence of correctness:** Inject retryable/permanent failures, prove attempt counts and cleanup, repeat with identical inputs, change one key input, and inspect final task/flow states.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -137,7 +167,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Add `test_size` and `random_state` parameters to the training flow.
 
@@ -147,7 +177,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Add testsize and randomstate parameters to the training flow`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Split the training task into separate train and evaluate tasks with explicit outputs.
 
@@ -157,7 +196,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Split the training task into separate train and evaluate tasks with explicit outputs`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Explore the optional local Prefect UI and scheduling basics.
 
@@ -166,6 +214,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Explore the optional local Prefect UI and scheduling basics`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Retry and idempotence
 
@@ -183,6 +240,15 @@ errors. Classify the exception and preserve the original cause in task state.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Add retries to a task that writes an artifact. Make the write idempotent so a failure after w...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 5 — Cache-key design
 
@@ -203,6 +269,15 @@ contract or disable caching.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Design a task cache key that changes when data fingerprint, code/config, or relevant paramete...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Failure observability
 
 **Prompt:** Instrument a three-task flow so logs and a final summary identify run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category without logging sensitive rows.
@@ -220,3 +295,5 @@ diagnosis.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Instrument a three-task flow so logs and a final summary identify run ID, task, safe input ve...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

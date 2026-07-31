@@ -1,5 +1,196 @@
 # Day 13 — Solutions: Functional Tools (itertools, functools, map/filter)
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**functions as values and composable iterable tools**.
+
+Python functions are objects: they can be assigned to names, passed as
+arguments, and returned. A higher-order function accepts or returns
+another function. This enables small reusable operations, but an
+ordinary named function is usually clearer than a dense lambda once
+logic needs explanation.
+
+`map` transforms, `filter` selects, `itertools` composes lazy iteration,
+and `functools` supplies function adapters and caching. List
+comprehensions often read more naturally for one transformation/filter;
+lazy tools matter when the input is a stream or too large to materialize.
+Avoid `reduce` when a named loop or built-in such as `sum`, `min`, or
+`max` states the intent better.
+
+### Vocabulary used in the worked answers
+
+- **first-class function:** a function usable as an ordinary runtime value.
+- **higher-order function:** a function that accepts or returns functions.
+- **lambda:** a small anonymous single-expression function.
+- **lazy iterator:** an iterator that computes values only when requested.
+- **accumulator:** the progressively combined value in a fold/reduction.
+- **cache:** stored results reused for repeated equivalent calls.
+
+### Reference pattern 1 — Pass a named function into a lazy transformation
+
+Keep the operation testable on its own.
+
+```python
+def normalize_name(text: str) -> str:
+    return " ".join(text.strip().title().split())
+
+raw_names = ["  ada lovelace", "GRACE   HOPPER  "]
+normalized_iter = map(normalize_name, raw_names)
+list(normalized_iter)
+```
+
+**Expected observation:** `['Ada Lovelace', 'Grace Hopper']`. `map` is lazy; `list` consumes it.
+
+### Reference pattern 2 — Compose lazy filtering and slicing
+
+Generate only as many values as the consumer requests.
+
+```python
+from itertools import islice
+
+squares = (number**2 for number in range(100))
+even_squares = filter(lambda value: value % 2 == 0, squares)
+list(islice(even_squares, 5))
+```
+
+**Expected observation:** `[0, 4, 16, 36, 64]`. `islice` stops after five accepted values rather than consuming all 100 squares.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Use `itertools.groupby` to group records that are already sorted by a category key. **Inputs:** include the same category in separated positions before sorting. **Expected behavior:** after explicit sorting, each category appears once with all of its records. **Constraint:** explain why `groupby` groups adjacent runs rather than globally collecting unsorted data. **Verify:** Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies functions as values and composable iterable tools.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a comprehension for a clear transform/filter, `itertools` for lazy composition, and an explicit loop when stateful branching matters.
+
+**Edge case:** One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.
+
+**Solution evidence to inspect:** Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Use `functools.reduce` to compute a product for `[2, 3, 4]`, giving an explicit identity so empty input returns `1`. **Then:** implement the same result with a named loop and compare readability. **Verify:** both return `24` and both define empty behavior; state why `sum`/`math.prod` is preferable in ordinary production code.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies functions as values and composable iterable tools.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a comprehension for a clear transform/filter, `itertools` for lazy composition, and an explicit loop when stateful branching matters.
+
+**Edge case:** One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.
+
+**Solution evidence to inspect:** both return `24` and both define empty behavior; state why `sum`/`math.prod` is preferable in ordinary production code.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Predict what remains after calling `next` on a `map` object and then converting it to a list. **Progressive hint:** `map` is a lazy one-shot iterator in Python 3. **Verify:** Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying functions as values and composable iterable tools.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a comprehension for a clear transform/filter, `itertools` for lazy composition, and an explicit loop when stateful branching matters.
+
+**Edge case:** One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.
+
+**Solution evidence to inspect:** Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace `sorted(records, key=lambda row: (row['team'], -row['score']))` and explain the tuple key. **Progressive hint:** Tuple components are compared left to right. **Verify:** Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the functions as values and composable iterable tools model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a comprehension for a clear transform/filter, `itertools` for lazy composition, and an explicit loop when stateful branching matters.
+
+**Edge case:** One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.
+
+**Solution evidence to inspect:** Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Implement `compose(*functions)` so `compose(f, g)(x)` applies `g` then `f`, and handle no functions as identity. **Progressive hint:** Apply the reversed function sequence to the current value. **Verify:** Assert composition order with noncommutative functions and assert `compose()(value)` returns the original value unchanged.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies functions as values and composable iterable tools.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a comprehension for a clear transform/filter, `itertools` for lazy composition, and an explicit loop when stateful branching matters.
+
+**Edge case:** One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.
+
+**Solution evidence to inspect:** Assert composition order with noncommutative functions and assert `compose()(value)` returns the original value unchanged.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Repair lambdas created in a loop that all use the final loop value. **Progressive hint:** Bind the current value as a default argument or use a factory function. **Verify:** Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in functions as values and composable iterable tools.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a comprehension for a clear transform/filter, `itertools` for lazy composition, and an explicit loop when stateful branching matters.
+
+**Edge case:** One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.
+
+**Solution evidence to inspect:** Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Refactor a pipeline that prints inside `map` into pure transforms plus one explicit presentation step. **Progressive hint:** Pure stages are easier to test and reuse. **Verify:** Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from functions as values and composable iterable tools.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a comprehension for a clear transform/filter, `itertools` for lazy composition, and an explicit loop when stateful branching matters.
+
+**Edge case:** One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.
+
+**Solution evidence to inspect:** Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 We implement grouping with itertools.groupby and create specialized functions with functools.partial.
 
 Contents
@@ -60,54 +251,6 @@ Notes
 - Combine with map for pipelines, but prefer comprehensions for clarity when possible.
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Group `(key, value)` pairs by key with `itertools.groupby`. **Hint:** inspect what happens to keys that reappear later; arrange the input by the same key before grouping.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Use `partial` to create a specialized function from a more general one. **Hint:** identify the argument that stays constant across many calls and bind only that argument.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Prediction
-
-**Prompt:** Predict what remains after calling `next` on a `map` object and then converting it to a list.
-
-**Reasoning checkpoint:** `map` is a lazy one-shot iterator in Python 3. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 4 — Tracing
-
-**Prompt:** Trace `sorted(records, key=lambda row: (row['team'], -row['score']))` and explain the tuple key.
-
-**Reasoning checkpoint:** Tuple components are compared left to right. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 5 — Implementation
-
-**Prompt:** Implement `compose(*functions)` so `compose(f, g)(x)` applies `g` then `f`, and handle no functions as identity.
-
-**Reasoning checkpoint:** Apply the reversed function sequence to the current value. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 6 — Debugging
-
-**Prompt:** Repair lambdas created in a loop that all use the final loop value.
-
-**Reasoning checkpoint:** Bind the current value as a default argument or use a factory function. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Edge case and explanation
-
-**Prompt:** Refactor a pipeline that prints inside `map` into pure transforms plus one explicit presentation step.
-
-**Reasoning checkpoint:** Pure stages are easier to test and reuse. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

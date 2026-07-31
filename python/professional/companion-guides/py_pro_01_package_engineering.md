@@ -106,6 +106,102 @@ Both artifacts are valuable:
 - Do not assume that successfully importing from the checkout proves either
   artifact works.
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+Work from the repository root. First run the answer-free learner
+module named in this guide's original walkthrough. Read each TODO as a
+contract: record the input, returned value, raised exception, and side
+effect before implementing it. Then run the focused test command in
+**Self-check**. Keep exploratory changes in a copy or a new test; the
+checked-in solution remains a comparison artifact.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe python\professional\lessons\py_pro_01_package_engineering.py
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python python/professional/lessons/py_pro_01_package_engineering.py
+```
+
+The focused test command is shown in **Self-check** below. The learner
+module is intentionally answer-free, so `TODO` output is the expected
+starting state rather than a setup failure.
+
+## Mechanism lab — two small examples before the full system
+
+### Boundary and mental model
+
+A source tree is not the deliverable. The build backend reads
+`pyproject.toml` and creates a wheel containing import packages plus
+distribution metadata. The **distribution name** used by installers
+may differ from the Python **import name**. A src layout prevents an
+accidental import from the repository root from masquerading as a
+successful installation.
+
+A release check therefore builds a wheel, inspects its contents and
+metadata, installs it into a clean environment, imports it from outside
+the source tree, runs tests, and records hashes. Editable installs are
+useful for development but do not prove the wheel.
+
+- **`[build-system]`:** declares the backend and bootstrap requirements that turn source into a distribution artifact.
+- **`[project]` metadata:** defines distribution identity, version, Python range, dependencies, and entry points.
+- **`python -m build` then clean install:** proves the built wheel, not repository-path import behavior.
+
+### Micro-example A — distinguish distribution and import identities
+
+```python
+import importlib.util
+
+distribution_name = "beautiful-soup4"
+import_name = "bs4"
+print({"installer_name": distribution_name, "import_name": import_name})
+# The names are contracts for different tools and need not match.
+assert distribution_name.replace("-", "_") != import_name
+print("installed import available:", importlib.util.find_spec(import_name) is not None)
+```
+
+**Expected observation:** Installer and import identifiers can differ; availability must be checked through the intended interface.
+
+**Why it matters:** This mechanics example does not install anything and does not require `bs4` to be present.
+
+### Micro-example B — create a deterministic source manifest digest
+
+```python
+import hashlib
+
+files = {
+    "src/tiny/__init__.py": b'__version__ = "1.0.0"\n',
+    "src/tiny/core.py": b"def add(a, b): return a + b\n",
+}
+manifest = "\n".join(
+    f"{path}:{hashlib.sha256(content).hexdigest()}"
+    for path, content in sorted(files.items())
+)
+digest = hashlib.sha256(manifest.encode("utf-8")).hexdigest()
+print(manifest, digest, sep="\n")
+assert len(digest) == 64
+```
+
+**Expected observation:** Sorting paths and hashing exact bytes gives a repeatable content identity, not a claim about package quality.
+
+**Why it matters:** The manifest includes every release-relevant file and normalizes no bytes silently.
+
+### Debugging and transfer
+
+**Common mistake:** Running an import from the repo root and concluding that the wheel contains the right packages and data.
+
+**Diagnostic:** Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change the working directory, and print `module.__file__` plus distribution version.
+
+**Transfer question:** What extra checks would a package with a console script, typed marker, and package data need before publication?
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercises
 
 Work in
@@ -121,6 +217,14 @@ file.
 Hint: `Path.suffix` handles `.whl`; `Path.name.endswith(".tar.gz")` handles the
 two-part sdist suffix.
 
+**Verify:** For task `classify artifacts`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
+
+
+
+
+
+
+
 ### Exercise 2 — create an offline build command
 
 Implement `offline_build_command` as an argument list. Use the running
@@ -130,17 +234,54 @@ and choose an explicit output directory.
 Why an argument list? It avoids a second round of shell parsing and behaves the
 same way in PowerShell, Command Prompt, Bash, and zsh.
 
+**Verify:** For task `create an offline build command`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 ### Exercise 3 — inspect dependency intent
 
 For each fixture entry, decide whether it is:
 
 1. a runtime dependency,
+
+**Verify:** For task `a runtime dependency,`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
 2. an optional installed feature,
+
+**Verify:** For task `an optional installed feature,`, demonstrate the concrete requirement “2. an optional installed feature,” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
 3. a development-only dependency group, or
+
+**Verify:** For task `a development-only dependency group, or`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
 4. a build bootstrap requirement.
 
 Explain when `colorama`'s environment marker is true. Confirm that building
 metadata does not install the `test` or `quality` groups.
+
+**Verify:** For task `a build bootstrap requirement`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
 
 ### Exercise 4 — build in a disposable directory
 
@@ -170,6 +311,14 @@ If the frontend reports a missing build requirement, return to connected setup
 and install the build tools. Do not remove `--no-isolation` merely to make an
 offline test pass.
 
+**Verify:** For task `build in a disposable directory`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
+
+
+
+
+
+
+
 ### Exercise 5 — prove the installed origin
 
 Install the wheel into a fresh target using `pip install --no-index --no-deps
@@ -184,6 +333,14 @@ tree, put only that target on `PYTHONPATH`, and print:
 Implement `installed_origin_is_safe` so it accepts only a resolved path under
 the fresh target.
 
+**Verify:** For task `prove the installed origin`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
+
+
+
+
+
+
+
 ### Extended professional practice
 
 These exercises move from prediction and implementation through debugging,
@@ -196,11 +353,27 @@ Build the fixture sdist in disposable storage, unpack it, build a wheel from tha
 
 **Progressive hint:** A direct wheel and an sdist exercise different inclusion paths. Use temporary directories and inspect archive members before rebuilding.
 
+**Verify:** For task `build a wheel from the source distribution`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 ### Exercise 7 — inspect installed metadata without importing
 
 Use `importlib.metadata` against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package. Reject unexpected or missing metadata.
 
 **Progressive hint:** Distribution metadata and import packages are related but distinct. Place only the target on the child process search path.
+
+**Verify:** For task `inspect installed metadata without importing`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+
+
+
+
+
+
 
 ### Exercise 8 — separate reproducibility from equivalence
 
@@ -208,17 +381,41 @@ Build twice from the same clean staged source. Compare file hashes, archive memb
 
 **Progressive hint:** Start with semantic equivalence. Byte-for-byte reproducibility requires controlled timestamps, toolchains, environment variables, and ordering.
 
+**Verify:** For task `separate reproducibility from equivalence`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 9 — test dependency markers across targets
 
 Create a review matrix for the fixture's build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.
 
 **Progressive hint:** Parse marker intent with packaging metadata; do not infer it from the developer machine where the lesson happens to run.
 
+**Verify:** For task `test dependency markers across targets`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 ### Exercise 10 — design a local release gate
 
 Write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.
 
 **Progressive hint:** Every gate should produce bounded evidence and fail closed. Keep index credentials, signing services, and publication outside this local lab.
+
+**Verify:** For task `design a local release gate`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
 
 ## Self-check
 
@@ -277,3 +474,36 @@ build tools were not bootstrapped.
   one entry point.
 - Continue to `python-svc-01` to package a reliable service boundary or
   `python-pro-02` to choose a concurrency model deliberately.
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-pro-01` — Package engineering and a local release workflow.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize src-layout packaging, build artifacts, metadata, and clean installation. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_pro_01_package_engineering.md`
+- learner artifact: `python/professional/lessons/py_pro_01_package_engineering.py`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

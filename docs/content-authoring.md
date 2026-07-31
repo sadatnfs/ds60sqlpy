@@ -4,7 +4,9 @@ Course content must be correct, runnable, accessible to its intended learner,
 and explicit about prerequisites. This guide defines the shared contract;
 track-specific rules live in [python/AGENTS.md](../python/AGENTS.md),
 [sql/AGENTS.md](../sql/AGENTS.md), and
-[bridge/AGENTS.md](../bridge/AGENTS.md).
+[bridge/AGENTS.md](../bridge/AGENTS.md). The
+[curriculum design references](curriculum-design-references.md) record the
+external tutorial patterns that informed this contract.
 
 ## Before authoring
 
@@ -43,6 +45,123 @@ exact backticked stable ID inside `## Level and prerequisites`. Put transitive
 background and merely helpful material in separately labeled prose so Codex
 and learners do not mistake it for a hard gate.
 
+## Complete-amateur depth standard
+
+The section checklist above is necessary, but a heading with one sentence or a
+list of unexplained terms is not a complete lesson. Write for a learner who has
+never seen the topic and may not yet know what to type, where to type it, or
+how to tell whether it worked.
+
+Every companion guide in the Python, SQL, and bridge tracks must provide all
+of the following:
+
+1. **A plain-language purpose and mental model.** Explain what problem the
+   concept solves and connect it to something the learner already knows.
+2. **Definitions before use.** Define each new term in a complete sentence.
+   Say what the thing is, what role it plays, and one important distinction
+   from a nearby concept.
+3. **Syntax or query anatomy.** Break a representative expression or statement
+   into its meaningful parts. Do not assume punctuation, indentation, aliases,
+   clauses, or evaluation order are self-explanatory.
+4. **At least two focused worked examples.** One should demonstrate the normal
+   case. The other should change one meaningful condition, expose an edge case,
+   or contrast a common wrong approach. Annotate the important lines or clauses.
+5. **An expected observation.** Show the bounded output, result columns and row
+   grain, assertion, or precise behavior the learner should see. When output
+   can vary, explain the invariant instead of inventing an exact value.
+6. **A novice-safe run path.** Name the file or notebook, tool, kernel or
+   database, command or button, where output appears, and what success looks
+   like. SQL guides must lead with the guided SQL notebook route and retain
+   separately labeled PowerShell and POSIX `psql` alternatives.
+7. **A practice ramp.** Move from prediction and tracing to a guided change,
+   independent construction, debugging, an edge case, and transfer to a new
+   context. A long list of equally vague tasks is not progression.
+8. **Diagnosis, not just warnings.** For each important mistake, show the
+   symptom or likely error, explain its cause, and give the smallest useful
+   investigation step.
+9. **Retrieval and explanation.** End with questions that require the learner
+   to explain the idea without copying syntax and identify what evidence would
+   prove their work correct.
+
+Avoid repeating a generic paragraph across lessons. Shared setup belongs in a
+canonical setup document, but every lesson still needs a short, concrete
+handoff to that workflow. Topic explanations, examples, mistakes, and expected
+observations must be specific to the lesson.
+
+### Exercise contracts
+
+An exercise must be specific enough that a learner and a reviewer can agree on
+whether it is complete. Include:
+
+- the supplied input, table, or starting code;
+- the requested output or behavior;
+- meaningful constraints, such as “do not mutate the input” or “one row per
+  customer”;
+- at least one concrete normal case and one boundary or failure case; and
+- a verification method that does not require opening the official solution.
+
+For example, do not write:
+
+> Replace a loop that appends filtered values with a list comprehension.
+
+Write a bounded contract instead:
+
+> Given `temperatures = [18, -3, 25, 0, 14, -8]`, first run an ordinary loop
+> that appends only values greater than or equal to zero. Rewrite that behavior
+> as one list comprehension named `non_freezing`. Preserve input order, do not
+> modify `temperatures`, and verify that the result is
+> `[18, 25, 0, 14]`. Then test an empty list and a list containing only
+> negative values.
+
+The second version names the input, filter boundary, result name, ordering and
+mutation constraints, expected value, and edge cases without revealing the
+comprehension itself.
+
+### Notebook teaching flow
+
+Historical Python notebooks should no longer be four-cell summaries. A
+tutorial notebook should normally separate:
+
+1. goal, prerequisites, and how to run;
+2. mental model and vocabulary;
+3. first explained example;
+4. a prediction or trace before execution;
+5. second contrasting example;
+6. guided practice with a starter cell;
+7. independent and debugging practice with scratch cells;
+8. checks and expected observations; and
+9. retrieval questions and next steps.
+
+The exact number of cells may vary, but each cell should have one teaching job.
+Do not hide all examples in one large code cell or all instructions in one
+large Markdown cell. A learner must be able to run top to bottom from a fresh
+kernel without relying on state created out of order.
+
+### Ask Codex about this lesson
+
+Every companion guide must end with an optional `## Ask Codex about this
+lesson` section containing a copy-ready fenced `text` prompt. The course prose
+must remain sufficient without it.
+
+The prompt must be specific rather than “explain this topic.” Include:
+
+- the stable lesson ID and title;
+- the exact companion-guide and learner-artifact paths;
+- the checked-in `$guide-ds60sqlpy-learning` skill;
+- the declared prerequisite boundary and beginner-appropriate depth;
+- the key concepts or decisions this particular lesson emphasizes;
+- an instruction not to read `solutions/` until the learner asks or has made
+  an honest attempt;
+- the explain → predict → attempt → one-hint-at-a-time → evidence-review loop;
+- the exact environment safety boundary for live SQL; and
+- a done condition based on working evidence and retrieval in the learner's
+  own words.
+
+The generated lesson reader also presents this prompt in a dedicated,
+copyable coaching panel. Keep the Markdown source and generated reader aligned
+so the prompt remains usable in VS Code, plain text, static HTML, and private
+portal modes.
+
 ## Difficulty and pacing
 
 - A beginner lesson should not silently require an intermediate concept.
@@ -67,6 +186,10 @@ and learners do not mistake it for a hard gate.
 - Keep learner exercises answer-free.
 - Provide hints that do not collapse immediately into the answer.
 - Make solution reasoning more important than syntax.
+- Give each exercise one authoritative numbered solution section. Integrate
+  legacy explanations and later clause/line maps beneath it; do not leave two
+  sections with the same exercise number, different function names, or
+  conflicting edge-case policies.
 - Include at least one edge case or alternative.
 - Avoid brittle assertions tied to random or time-dependent output.
 - Do not use the official solution as the only test of correctness.

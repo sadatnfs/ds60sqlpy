@@ -75,6 +75,36 @@ Takeaways
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`Pipeline([('scale', ...), ('model', ...)])`:** names ordered steps so nested parameters and learned attributes remain inspectable.
+2. **`.fit(X_train, y_train)`:** fits every transformer on training rows, transforms those rows, then fits the final estimator.
+3. **`.predict(X_new)`:** uses already learned preprocessing and model state; it must not refit on new data.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** The unified estimator contract makes training boundaries repeatable and allows model selection tools to clone the full workflow.
+
+**Useful alternative:** Manual preprocessing can be valid when it uses an explicit fitted object and tests prove train-only state, but it is easier to misuse.
+
+**Trade-off:** Pipelines add naming and inspection overhead while sharply reducing inconsistent preprocessing and leakage risk.
+
+**Edge case to test:** Unknown categories, missing columns, changed column order, and sparse/dense output expectations must be part of the input contract.
+
+**Evidence of correctness:** Inspect fitted step attributes, prove test rows did not enter learned preprocessing, verify feature shape/order, and execute prediction on an unknown-category boundary.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -82,7 +112,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Swap `LinearRegression` for `Ridge` and compare test scores.
 
@@ -92,7 +122,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Swap LinearRegression for Ridge and compare test scores`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Inspect the coefficients and discuss how feature scaling changes their numeric values and interpretation.
 
@@ -101,6 +140,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Inspect the coefficients and discuss how feature scaling changes their numeric values and int...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 
 ### Exercise 3 — Leakage prediction
 
@@ -120,6 +168,15 @@ target encoding, and learned dimensionality reduction.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Predict how cross-validation scores can change when a scaler is fit on the complete dataset b...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Mixed-type implementation
 
@@ -170,6 +227,15 @@ learned state, not harmless cleanup constants.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Build a ColumnTransformer for numeric imputation/scaling and categorical imputation/one-hot e...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Unknown-category debugging
 
 **Prompt:** Fit on regions `north` and `south`, then predict a row with region `west`. Compare `OneHotEncoder` default behavior with `handle_unknown='ignore'` and explain the resulting representation.
@@ -187,6 +253,15 @@ that would change the feature schema and invalidate fitted coefficients.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Fit on regions north and south, then predict a row with region west. Compare OneHotEncoder de...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 
 ### Exercise 6 — Inspection and schema contract
 
@@ -218,3 +293,5 @@ serving code cannot silently invent another column order.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `After fitting the mixed-type pipeline, recover transformed feature names, pair them with coef...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

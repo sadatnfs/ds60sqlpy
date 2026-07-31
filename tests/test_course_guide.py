@@ -38,6 +38,13 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
     assert "DS60_DATABASE_URL" in rendered
     assert "START_DS60.cmd" in rendered
     assert "Double-click" in rendered
+    assert "You are in portable reading mode." in rendered
+    assert "Private launcher mode is active." in rendered
+    assert 'id="run-sql"' in rendered
+    assert "Open SQL workspace" in rendered
+    assert 'launchNative("jupyter-sql"' in rendered
+    assert 'launchNative("jupyter-lesson"' in rendered
+    assert "Open PostgreSQL magics lab" in rendered
     assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
     for source_path in COURSE_GUIDE_REFERENCE_PATHS:
         assert f'href="{reference_relative_path(source_path)}"' in rendered

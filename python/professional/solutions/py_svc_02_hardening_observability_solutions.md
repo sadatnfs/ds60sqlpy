@@ -33,6 +33,56 @@ that flaps.
 
 ---
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## Reasoning before implementation
+
+A fixed admission sequence and injected policy components make overload, auth, trust, telemetry, and incident behavior deterministic under tests.
+
+1. **startup validation + artifact verification:** fails before traffic when capacity, policy, or trusted model bytes are invalid.
+2. **admission chain:** checks readiness, identity/role, rate, and concurrency before expensive work.
+3. **structured log + metrics:** records bounded diagnostic context and aggregate outcomes without secrets or unbounded labels.
+4. **Prove the failure boundary:** Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.
+
+**Alternative:** A reverse proxy/service mesh can provide some limits, TLS, and telemetry, but application authorization, artifact trust, and semantic readiness remain.
+
+**Trade-off:** Fail-closed controls reduce unsafe service at the cost of availability; fail-open requires explicit bounded risk and ownership.
+
+**Failure boundary:** Multi-process limits, cancellation, credential rotation, trace injection, slow telemetry exporters, circuit half-open probes, and graceful drain need policy.
+
+**Verification:** Run the fault matrix, prove permits/tokens release, distinguish 401/403/429/503, tamper artifacts, audit log redaction/metric labels, and rehearse drain/recovery.
+
+### Verification micro-example
+
+Run this small, deterministic case before adapting the reference to a
+larger system. It gives the reasoning above an executable anchor:
+
+```python
+def status(*, running, dependencies, artifact_verified, draining):
+    return {
+        "healthy": running,
+        "ready": (
+            running and bool(dependencies) and all(dependencies)
+            and artifact_verified and not draining
+        ),
+    }
+
+outage = status(
+    running=True, dependencies=[True, False],
+    artifact_verified=True, draining=False
+)
+print(outage)
+assert outage == {"healthy": True, "ready": False}
+```
+
+**Expected observation:** A dependency outage removes traffic readiness while avoiding a harmful restart loop.
+
+The reference implementation is one defensible contract, not a license
+to copy internal steps into every system. Preserve the observable
+guarantees and repeat the failure tests when adapting it.
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reference
 
 Use this map after an honest attempt. The executable implementation remains
@@ -53,6 +103,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Validate startup configuration`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 2 — Complete health/readiness policy
 
 **Prompt recap:** Health remains true for a running process. Readiness requires at least one configured dependency, all probes ready, verified artifact, and no draining state. Return named reasons so an operator can diagnose 503 without exposing secrets. Do not make a liveness endpoint perform slow dependency calls; repeated restarts can amplify an external outage.
@@ -66,6 +124,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Complete health/readiness policy`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 3 — Design structured events
 
@@ -81,6 +147,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Design structured events`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 4 — Design metrics
 
 **Prompt recap:** Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes. Observe duration values. Do not put user, token, request ID, or arbitrary URL into metric labels.
@@ -94,6 +168,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Design metrics`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 5 — Bound concurrency
 
@@ -109,6 +191,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Bound concurrency`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 6 — Rate limit with injected time
 
 **Prompt recap:** Consume two tokens, reject the third request, advance a fake clock one second, and accept one refill. State that this in-process bucket is not sufficient across multiple service instances.
@@ -122,6 +212,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Rate limit with injected time`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 7 — Separate authentication and authorization
 
@@ -137,6 +235,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Separate authentication and authorization`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 8 — Trust an artifact narrowly
 
 **Prompt recap:** Compute expected SHA-256 before startup, verify exact bytes, then parse a flat JSON object. Tamper with the file and confirm verification fails. Do not use pickle for untrusted service artifacts.
@@ -150,6 +256,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Trust an artifact narrowly`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 9 — Run the incident drill
 
@@ -165,6 +279,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Run the incident drill`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 10 — Draw the Internet-facing boundary
 
 **Prompt recap:** List what this local example does not supply: TLS termination, real identity, secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy, artifact distribution, deployment rollback, and on-call response.
@@ -178,6 +300,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Draw the Internet-facing boundary`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 11 — drain and shut down gracefully
 
@@ -198,6 +328,14 @@ completion explicitly and assert telemetry contains request counts, not bodies.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `drain and shut down gracefully`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 12 — add a dependency circuit breaker
 
 **Prompt recap:** Wrap one dependency probe/call in a closed/open/half-open breaker with injected time. Define which failures count, one bounded probe, readiness interaction, and recovery metrics.
@@ -216,6 +354,14 @@ explicitly rather than coupling it to breaker implementation.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `add a dependency circuit breaker`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 13 — define distributed limiting semantics
 
@@ -236,6 +382,14 @@ concurrency limits still protect each process even with a shared rate policy.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `define distributed limiting semantics`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 ### Exercise 14 — bound telemetry backpressure
 
 **Prompt recap:** Make the log/metric exporter slow or unavailable. Define a bounded queue, drop/coalesce policy, priority for security events, and counters that reveal lost telemetry without blocking request handling indefinitely.
@@ -254,6 +408,14 @@ reports unsent counts rather than hanging forever.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `bound telemetry backpressure`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 
 ### Exercise 15 — propagate trace context safely
 
@@ -274,6 +436,14 @@ must escape values so an ID cannot inject fake lines or fields.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `propagate trace context safely`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 16 — rehearse credential rotation
 
 **Prompt recap:** Model a credential provider accepting active and previous key versions during a bounded overlap. Rotate, verify new requests use the active key, expire the old key, and ensure neither value reaches repr/log/metrics.
@@ -292,6 +462,14 @@ tokens and scan captured diagnostics for their absence.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `rehearse credential rotation`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
 
 ### Exercise 17 — compose dependency timeout budgets
 
@@ -312,6 +490,14 @@ without logging payloads. Fixed clocks make the policy deterministic in tests.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `compose dependency timeout budgets`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 18 — run a fault-injection matrix
 
 **Prompt recap:** Inject dependency false/exception/latency, artifact tampering, auth outage, limiter saturation, log-export failure, handler exception, and drain. For each, predict status, readiness/health, cleanup, log, and metric evidence.
@@ -330,6 +516,14 @@ claim production chaos readiness without deployed-system validation.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `run a fault-injection matrix`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
 
 ### Exercise 19 — define an SLO and error budget
 
@@ -350,6 +544,14 @@ low volume are reported, not silently treated as success.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `define an SLO and error budget`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 20 — audit privacy, retention, and cardinality
 
 **Prompt recap:** Inventory every log field, metric label, trace attribute, and local artifact. Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and owner; then test representative forbidden values.
@@ -368,3 +570,5 @@ Remove fields without a justified operational purpose.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `audit privacy, retention, and cardinality`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

@@ -107,6 +107,36 @@ Notes
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`FROM` / pinned base:** establishes operating-system and Python dependencies; pin and scan rather than trusting `latest`.
+2. **`COPY` and `.dockerignore`:** define which local files enter the build context and image layers.
+3. **`CMD` / `HEALTHCHECK`:** define the main process and probe command without replacing service-level readiness policy.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** A narrow context and reproducible image package only the intended runtime; distinct probes and tests then establish service behavior.
+
+**Useful alternative:** A host process or managed buildpack may be simpler; orchestration platforms add deployment controls but do not fix application contracts.
+
+**Trade-off:** Smaller images reduce attack surface and transfer time, while aggressive minimization can make debugging and native dependencies harder.
+
+**Edge case to test:** Architecture mismatch, missing system libraries, read-only filesystem, signal handling, corrupt model artifact, and absent Docker daemon require checks.
+
+**Evidence of correctness:** Inspect context and image history, scan dependencies, run as non-root, test valid/invalid requests and signals, distinguish health/readiness, and rebuild deterministically.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -114,7 +144,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Create a slim dependency file containing only direct API runtime needs.
 
@@ -124,7 +154,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Create a slim dependency file containing only direct API runtime needs`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Add `GET /health` returning `{"status": "ok"}`.
 
@@ -134,7 +173,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Add GET /health returning {"status": "ok"}`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Optionally push the image to a registry if you intentionally use a connected account.
 
@@ -143,6 +191,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Optionally push the image to a registry if you intentionally use a connected account`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Layer and secret audit
 
@@ -162,6 +219,15 @@ latest layer is not sufficient.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Create a .dockerignore, inspect image history, and prove that .env, Git metadata, notebooks,...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Least-privilege runtime
 
 **Prompt:** Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.
@@ -180,6 +246,15 @@ does not replace dependency updates, network policy, or input validation.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Run the service as a non-root user with a read-only filesystem and an explicit writable tempo...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Health semantics
 
 **Prompt:** Implement separate `/live` and `/ready` checks and a startup failure when the model manifest is incompatible. Test all three states.
@@ -197,3 +272,5 @@ or a network, then add one container smoke test for the packaged path.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Implement separate /live and /ready checks and a startup failure when the model manifest is i...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.

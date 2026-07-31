@@ -54,6 +54,36 @@ Exercise 3 — Baseline, risks, milestones
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **decision statement:** names stakeholder, action, prediction time, and consequence before selecting a model.
+2. **acceptance matrix:** connects each success/guardrail threshold to data, metric, owner, and verification command.
+3. **milestone checkpoint:** produces a reviewable artifact and explicit continue/pivot/stop decision.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** A falsifiable charter and staged evidence plan reduce wasted modeling and make risk/acceptance decisions reviewable.
+
+**Useful alternative:** A descriptive analysis, rule, data-quality fix, or no model may better serve the stakeholder than predictive ML.
+
+**Trade-off:** Broader scope may be more impressive but weakens depth, reproducibility, and completion probability.
+
+**Edge case to test:** License restrictions, unrepresentative samples, target leakage, tiny key slices, unavailable labels, and irreproducible external data can invalidate the plan.
+
+**Evidence of correctness:** Get stakeholder sign-off on charter/thresholds, validate a local data sample and license, reproduce the target, run the baseline, and record continue/pivot/stop at each milestone.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -61,7 +91,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Write the problem statement and success metric in the notebook.
 
@@ -71,7 +101,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Write the problem statement and success metric in the notebook`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Create the project skeleton.
 
@@ -81,7 +120,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Create the project skeleton`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Build a baseline and record metrics.
 
@@ -90,6 +138,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Build a baseline and record metrics`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Scope and stop rules
 
@@ -108,6 +165,15 @@ Record the decision and date in a log. A well-supported “do not deploy” or
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data,...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Capstone data contract
 
 **Prompt:** Create a versioned schema and quality report for your chosen local dataset, including source/license, row unit, target, types, ranges, missingness, duplicates, split keys, and fingerprint.
@@ -124,6 +190,15 @@ credential, restricted dataset, or developer-specific absolute path.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Create a versioned schema and quality report for your chosen local dataset, including source/...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 6 — Decision log
 
@@ -142,3 +217,5 @@ operational rather than permanent dogma.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Record at least five project decisions with date, question, alternatives, evidence, chosen ac...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

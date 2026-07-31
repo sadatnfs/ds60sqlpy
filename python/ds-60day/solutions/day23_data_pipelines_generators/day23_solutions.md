@@ -1,5 +1,210 @@
 # Day 23 — Solutions: Data Pipelines and Generators
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**lazy, composable data-pipeline stages with explicit resource and error policy**.
+
+A pipeline is a sequence of stages that turn input into output. Give each
+stage one responsibility—read, parse, validate, normalize, filter,
+batch, or write—and define the shape it accepts and yields. Small stages
+are easier to test and recombine than one function mixing files, rules,
+logging, and output.
+
+Generator stages keep memory bounded by yielding one item at a time.
+Calling a generator function does not run its body; iteration starts
+work and advances state. The stage that opens a resource should own its
+`with` block for the entire iteration. Decide whether malformed records
+stop the stream, are skipped with evidence, or go to quarantine.
+
+### Vocabulary used in the worked answers
+
+- **pipeline:** an ordered composition of input/output stages.
+- **stage:** one transformation with a stated input and output contract.
+- **streaming:** processing incrementally rather than loading everything.
+- **backpressure:** a consumer limiting how quickly upstream work advances.
+- **batch:** a bounded group processed or written together.
+- **quarantine:** separate retention of invalid records and failure reasons.
+
+### Reference pattern 1 — Compose lazy normalization and filtering
+
+Each stage consumes and yields one record at a time.
+
+```python
+from collections.abc import Iterable, Iterator
+
+def normalize(rows: Iterable[dict[str, str]]) -> Iterator[dict[str, str]]:
+    for row in rows:
+        yield {"name": row["name"].strip(), "status": row["status"].lower()}
+
+def active_only(rows: Iterable[dict[str, str]]) -> Iterator[dict[str, str]]:
+    for row in rows:
+        if row["status"] == "active":
+            yield row
+
+source = [{"name": " Ada ", "status": "ACTIVE"}, {"name": "Lin", "status": "inactive"}]
+list(active_only(normalize(source)))
+```
+
+**Expected observation:** `[{'name': 'Ada', 'status': 'active'}]`. No stage needed all records at once.
+
+### Reference pattern 2 — Preserve a final partial batch
+
+Batch boundaries are part of the contract.
+
+```python
+def batches(items: Iterable[int], size: int) -> Iterator[tuple[int, ...]]:
+    if size <= 0:
+        raise ValueError("size must be positive")
+    batch = []
+    for item in items:
+        batch.append(item)
+        if len(batch) == size:
+            yield tuple(batch)
+            batch = []
+    if batch:
+        yield tuple(batch)
+
+list(batches(range(5), 2))
+```
+
+**Expected observation:** `[(0, 1), (2, 3), (4,)]`. The last partial batch is not silently lost.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Build `stream_clean_csv(path)` that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. **Constraints:** use `csv.DictReader`, keep the file open during iteration, and do not return a list. **Verify:** partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies lazy, composable data-pipeline stages with explicit resource and error policy.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.
+
+**Edge case:** Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests.
+
+**Solution evidence to inspect:** partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Compose separate generator stages to filter, map, and batch clean rows. **Contract:** every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. **Verify:** on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies lazy, composable data-pipeline stages with explicit resource and error policy.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.
+
+**Edge case:** Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests.
+
+**Solution evidence to inspect:** on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. **Progressive hint:** Calling a generator function creates an iterator; its body starts on iteration. **Verify:** Append an event inside the generator body and assert no event at construction, one at first `next`, and all remaining events only after full consumption.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying lazy, composable data-pipeline stages with explicit resource and error policy.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.
+
+**Edge case:** Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests.
+
+**Solution evidence to inspect:** Append an event inside the generator body and assert no event at construction, one at first `next`, and all remaining events only after full consumption.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. **Progressive hint:** Consumption is stateful and does not rewind automatically. **Verify:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the lazy, composable data-pipeline stages with explicit resource and error policy model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.
+
+**Edge case:** Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests.
+
+**Solution evidence to inspect:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Implement `batch_rows(rows, size)` yielding tuples and preserving the final partial batch. **Progressive hint:** Validate positive size and reset the accumulator after each yield. **Verify:** Assert five rows at size two produce `[(0, 1), (2, 3), (4,)]`, empty input produces none, and nonpositive size raises.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies lazy, composable data-pipeline stages with explicit resource and error policy.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.
+
+**Edge case:** Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests.
+
+**Solution evidence to inspect:** Assert five rows at size two produce `[(0, 1), (2, 3), (4,)]`, empty input produces none, and nonpositive size raises.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Repair a function that returns a generator expression over a file after the surrounding `with` block has already closed the file. **Progressive hint:** Own the `with` block inside the generator that performs iteration. **Verify:** Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in lazy, composable data-pipeline stages with explicit resource and error policy.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.
+
+**Edge case:** Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests.
+
+**Solution evidence to inspect:** Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. **Progressive hint:** Pass a callback/list for bounded error records or yield tagged results. **Verify:** Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from lazy, composable data-pipeline stages with explicit resource and error policy.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.
+
+**Edge case:** Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests.
+
+**Solution evidence to inspect:** Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 We build a streaming CSV cleaner and compose generators to filter/map/batch rows.
 
 Contents
@@ -84,54 +289,6 @@ Notes
 - Use itertools and generator composition to stay memory-efficient
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Build a CSV streaming cleaner that yields normalized row dictionaries. **Hint:** let the generator open the file inside its own `with` block and use `csv.DictReader`; state whether malformed rows stop or are quarantined.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Compose generators to filter, map, and batch rows. **Hint:** give every stage one responsibility, preserve laziness, and make the final partial batch part of the contract.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Prediction
-
-**Prompt:** Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization.
-
-**Reasoning checkpoint:** Calling a generator function creates an iterator; its body starts on iteration. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 4 — Tracing
-
-**Prompt:** Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see.
-
-**Reasoning checkpoint:** Consumption is stateful and does not rewind automatically. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 5 — Implementation
-
-**Prompt:** Implement `batch_rows(rows, size)` yielding tuples and preserving the final partial batch.
-
-**Reasoning checkpoint:** Validate positive size and reset the accumulator after each yield. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 6 — Debugging
-
-**Prompt:** Repair a function that returns a generator expression over a file after the surrounding `with` block has already closed the file.
-
-**Reasoning checkpoint:** Own the `with` block inside the generator that performs iteration. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Edge case and explanation
-
-**Prompt:** Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file.
-
-**Reasoning checkpoint:** Pass a callback/list for bounded error records or yield tagged results. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

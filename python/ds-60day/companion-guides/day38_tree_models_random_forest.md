@@ -59,10 +59,161 @@ The gap between training and held-out accuracy is one diagnostic, not a complete
 model-selection procedure. Choose complexity with validation or CV and report a
 separate test estimate.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 38 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — tree splits, ensemble variance reduction, and held-out importance
+
+### The mental model
+
+A decision tree recursively partitions feature space. Each split asks a
+threshold question chosen to reduce impurity; each leaf stores a local
+prediction. Deep trees can represent fine interactions but also isolate
+noise. Depth, leaf size, and pruning control that capacity.
+
+A random forest trains many trees on bootstrapped rows while considering
+subsets of features. Averaging decorrelated trees reduces variance.
+Impurity importance describes split usage inside the fitted forest;
+held-out permutation importance measures score loss when one feature's
+association is broken. Neither establishes causality.
+
+### Worked examples and syntax anatomy
+
+- **`DecisionTreeClassifier(max_depth=..., min_samples_leaf=...)`:** sets capacity controls before fitting and exposes tree-specific train/validation gaps.
+- **`RandomForestClassifier(n_estimators=..., random_state=...)`:** averages bootstrapped, feature-subsampled trees; enough estimators stabilize rather than deepen the model.
+- **`permutation_importance(model, X_valid, y_valid, ...)`:** measures held-out score change under repeated feature shuffles.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — make the depth-versus-generalization gap visible
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_valid, y_train, y_valid = train_test_split(
+    X, y, stratify=y, random_state=3801
+)
+for depth in (1, 3, 8, None):
+    tree = DecisionTreeClassifier(max_depth=depth, random_state=3801)
+    tree.fit(X_train, y_train)
+    print(depth, {"train": tree.score(X_train, y_train),
+                  "valid": tree.score(X_valid, y_valid)})
+```
+
+**Expected observation:** Training accuracy rises with capacity; validation accuracy need not, revealing overfitting rather than a syntax error.
+
+**Assumption to name:** The validation split represents future cases and was not used to choose unlimited alternatives.
+
+### Focused example B — test a deliberately useless noise feature
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.inspection import permutation_importance
+from sklearn.model_selection import train_test_split
+
+X, y = load_breast_cancer(return_X_y=True)
+rng = np.random.default_rng(3802)
+X = np.column_stack([X, rng.normal(size=X.shape[0])])
+X_train, X_valid, y_train, y_valid = train_test_split(
+    X, y, stratify=y, random_state=3802
+)
+forest = RandomForestClassifier(n_estimators=80, random_state=3802, n_jobs=1)
+forest.fit(X_train, y_train)
+importance = permutation_importance(
+    forest, X_valid, y_valid, n_repeats=5, random_state=3802, n_jobs=1
+)
+print({"noise_importance": importance.importances_mean[-1],
+       "best_importance": importance.importances_mean.max()})
+```
+
+**Expected observation:** The random noise feature should have importance near zero, while at least one real feature matters more.
+
+**Assumption to name:** The model's held-out score is good enough that score perturbations are interpretable.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define tree splits, ensemble variance reduction, and held-out importance in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Treating `feature_importances_` as causal effect or as reliable when correlated features can substitute for one another.
+
+**Debug it deliberately:** Compare train/validation scores, tree depth/leaf counts, repeated permutation intervals, and a synthetic noise feature.
+
+**Stop condition:** Do not interpret importance from a poorly performing model or from the same rows used to fit it.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Plot tree depth versus accuracy.
+
+**Verify:** For task `Plot tree depth versus accuracy`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 2. Inspect feature importances and discuss their reliability.
+
+**Verify:** For task `Inspect feature importances and discuss their reliability`, demonstrate the concrete requirement “2. Inspect feature importances and discuss their reliability” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -81,15 +232,51 @@ attempt, and record the evidence that would prove your result correct.
 
 3. **Pruning implementation:** Use a decision tree's cost-complexity pruning path to evaluate candidate `ccp_alpha` values with cross-validation. Freeze the chosen value before final holdout evaluation.
    **Progressive hint:** The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.
+
+**Verify:** For task `Pruning implementation: Use a decision tree's cost-complexity pruning path to evaluate candid...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 4. **Out-of-bag reasoning:** Enable `oob_score=True` in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.
    **Progressive hint:** Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.
+
+**Verify:** For task `Out-of-bag reasoning: Enable oobscore=True in a RandomForestClassifier and compare the out-of...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 5. **Imbalance debugging:** Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test `class_weight='balanced'`.
    **Progressive hint:** A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.
+
+**Verify:** For task `Imbalance debugging: Train a tree on a 98:2 dataset, compare accuracy with minority recall an...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 6. **Correlated-importance edge case:** Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.
    **Progressive hint:** The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.
 
+**Verify:** For task `Correlated-importance edge case: Duplicate one informative feature, refit the forest, and obs...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -122,3 +309,36 @@ alone.
 - Then consult the
   [Day 38 solution](../solutions/day38_tree_models_random_forest/day38_solutions.md).
 - Continue to [Day 39 — Gradient Boosting](day39_gradient_boosting_xgboost_lightgbm.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize tree splits, ensemble variance reduction, and held-out importance. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day38_tree_models_random_forest.md`
+- learner artifact: `python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

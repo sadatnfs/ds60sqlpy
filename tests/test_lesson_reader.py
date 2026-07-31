@@ -65,6 +65,14 @@ def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
     assert "START_DS60.cmd" in sql_reader
     assert "Create/open guided SQL notebook" in sql_reader
     assert 'action: "jupyter-sql"' in sql_reader
+    assert "Ask Codex about this lesson" in python_reader
+    assert "Copy Codex prompt" in python_reader
+    assert "guide-ds60sqlpy-learning" in python_reader
+    assert "python-01" in python_reader
+    assert "python/ds-60day/notebooks/day01_setup_and_repl.ipynb" in python_reader
+    assert "solutions/" in python_reader
+    assert "advanced_sql_training" in sql_reader
+    assert "inspect my actual psql transcript" in sql_reader
 
 
 def test_markdown_links_to_catalog_artifacts_become_reader_links() -> None:

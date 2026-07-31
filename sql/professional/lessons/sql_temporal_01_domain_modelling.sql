@@ -1,4 +1,21 @@
 -- SQL-TEMPORAL-01: Temporal and domain modelling
+-- BEGINNER WORKFLOW — sql-temporal-01: Temporal and Domain Modelling
+-- Guide: sql/professional/companion-guides/sql_temporal_01_domain_modelling.md
+-- Recommended runner: open the private lesson reader and choose
+-- "Create/open guided SQL notebook". It verifies advanced_sql_training,
+-- creates an ignored .learning/sql/sql-temporal-01/ copy, and prints the full
+-- psql transcript below the run cell. Edit that private copy, not this official
+-- source, while studying.
+-- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
+-- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
+-- declare what one input row and one output row represent. A displayed result
+-- set is temporary; NULL, zero, an empty string, and an absent row differ.
+-- Primary objects in the worked examples: pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes.
+-- Success means the first error never appears, psql exits 0, result keys and
+-- control totals match the stated contract, and verification passes. The lesson's documented transaction/cleanup boundary restores disposable state.
+-- Keep all numbered exercises answer-free here: write predictions and attempts
+-- only in your ignored working copy.
+--
 -- Target: PostgreSQL 16+
 
 \set ON_ERROR_STOP on
@@ -335,33 +352,77 @@ ORDER BY rr.record_key;
 --
 -- 1. Add a retroactive valid-time correction recorded April 1. Query the value
 --    valid February 15 as known March 15 versus as known April 2.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 2. Test facts exactly at every valid/system upper boundary. Prove [lower,upper)
 --    gives at most one current match.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 3. If btree_gist is already approved in an isolated environment, write (do
 --    not run here) an exclusion constraint for customer_key equality and current
 --    valid-period overlap. Compare it with the advisory-lock trigger fallback.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
 -- 4. Add a correction ledger entry that reverses LEDGER-101 without updating
 --    history. Verify idempotency keys and reversal references.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 5. Add a retention exception/hold release workflow with approver, reason,
 --    decision time, and immutable audit. Do not auto-delete fixture rows.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
 -- 6. State domain assumptions: time zone, clock authority, late arrival,
 --    overlap/gap policy, deletion/anonymization, ledger meaning, and who may
 --    correct system history.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 7. Model a local-time business rule across a daylight-saving transition.
 --    Store the source zone and UTC instant, test ambiguous/nonexistent local
 --    times, and explain why a bare timestamp or fixed UTC offset is insufficient.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
+--    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 8. Distinguish event time, ingestion time, and processing time for late data.
 --    Define a watermark and allowed lateness, then show how a late event changes
 --    a previously published aggregate and how the correction is communicated.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 9. Implement a Type-2 dimension as-of join with surrogate key, business key,
 --    effective half-open range, current marker, and correction metadata. Prove
 --    every fact resolves to at most one dimension row.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 10. Design temporal referential integrity when a child period must be
 --     contained by a parent period. Compare trigger/exclusion approaches,
 --     concurrency locking, deferred validation, and repair of historical gaps.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 11. Produce a deterministic gap-and-overlap report per business key using
 --     lag/lead and multirange operations. Define whether adjacency is valid and
 --     fail on duplicate or empty periods.
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 12. Plan time-based partition archival without violating legal holds.
 --     Inventory cross-partition keys, indexes, detach/archive/verify steps,
 --     encryption and access, hold exceptions, restore tests, and deletion proof.
@@ -383,6 +444,10 @@ BEGIN
     END IF;
 END
 $self_check$;
+--    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 
 ROLLBACK;
 \echo 'SQL-TEMPORAL-01 complete: pro_temporal_lab was rolled back'

@@ -103,6 +103,114 @@ producer -> queue(maxsize=2) -> three long-lived consumers
 When the queue is full, `await queue.put(...)` pauses the producer. This is
 backpressure. The consumer count bounds active worker calls.
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+Work from the repository root. First run the answer-free learner
+module named in this guide's original walkthrough. Read each TODO as a
+contract: record the input, returned value, raised exception, and side
+effect before implementing it. Then run the focused test command in
+**Self-check**. Keep exploratory changes in a copy or a new test; the
+checked-in solution remains a comparison artifact.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe python\professional\lessons\py_pro_02_concurrency_parallelism.py
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python python/professional/lessons/py_pro_02_concurrency_parallelism.py
+```
+
+The focused test command is shown in **Self-check** below. The learner
+module is intentionally answer-free, so `TODO` output is the expected
+starting state rather than a setup failure.
+
+## Mechanism lab — two small examples before the full system
+
+### Boundary and mental model
+
+Concurrency overlaps work; parallelism executes work simultaneously.
+`asyncio` is effective when many operations spend time awaiting
+nonblocking I/O. Threads can overlap blocking I/O behind a synchronous
+API. Processes bypass the Global Interpreter Lock for CPU-bound Python
+work but require serialization, startup, and platform-safe entry
+points.
+
+Unlimited fan-out converts latency into memory, connection, and rate
+pressure. A production design needs admission bounds, result/error
+accounting, cancellation cleanup, timeouts, ordering semantics, and
+measurement against a sequential baseline.
+
+- **workload classification:** identifies CPU time, blocking/nonblocking I/O, data transfer, and external capacity before selecting a primitive.
+- **semaphore/worker queue:** bounds active and queued work rather than creating one task per input.
+- **structured result:** associates each input with success/failure/cancellation so no work disappears.
+
+### Micro-example A — state the execution choice from the blocking behavior
+
+```python
+def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
+    if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:
+        raise ValueError("classify one dominant workload")
+    if waits_nonblocking:
+        return "asyncio"
+    if waits_blocking:
+        return "threads"
+    return "processes-or-native-vectorization"
+
+assert choose_execution(waits_nonblocking=True) == "asyncio"
+assert choose_execution(cpu_python=True) == "processes-or-native-vectorization"
+```
+
+**Expected observation:** The decision follows where time is spent, not a belief that one primitive is universally faster.
+
+**Why it matters:** One dominant local bottleneck was measured; mixed pipelines may need multiple bounded stages.
+
+### Micro-example B — prove an async concurrency ceiling
+
+```python
+import asyncio
+
+async def demo():
+    gate = asyncio.Semaphore(2)
+    active = 0
+    peak = 0
+
+    async def work(value):
+        nonlocal active, peak
+        async with gate:
+            active += 1
+            peak = max(peak, active)
+            await asyncio.sleep(0)
+            active -= 1
+            return value * 2
+
+    results = await asyncio.gather(*(work(i) for i in range(6)))
+    return results, peak
+
+results, peak = asyncio.run(demo())
+print(results, peak)
+assert results == [0, 2, 4, 6, 8, 10] and peak == 2
+```
+
+**Expected observation:** All inputs are accounted for while no more than two operations enter the protected section.
+
+**Why it matters:** The task count is tiny; a large stream also needs bounded task creation or a worker queue.
+
+### Debugging and transfer
+
+**Common mistake:** Wrapping CPU-bound Python in threads or constructing millions of async tasks behind a semaphore.
+
+**Diagnostic:** Measure sequential and candidate paths, record active/queued counts, per-item results, timeout/cancellation cleanup, serialization size, and platform start method.
+
+**Transfer question:** Design a two-stage pipeline with blocking file reads followed by CPU parsing; where are the two separate bounds?
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercises
 
 ### Exercise 1 — choose a model
@@ -118,19 +226,70 @@ write one sentence explaining the choice:
 Reject labels that contradict each other. An async function that performs
 computation without `await` is still CPU work and blocks the event loop.
 
+**Verify:** For task `choose a model`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 2 — build a bounded async map
 
 Implement `bounded_map` with:
 
 1. `asyncio.Queue(maxsize=queue_capacity)`,
+
+**Verify:** For task `asyncio.Queue(maxsize=queuecapacity),`, measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+
+
+
+
+
 2. one producer,
+
+**Verify:** For task `one producer,`, demonstrate the concrete requirement “2. one producer,” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
 3. a fixed number of consumers,
+
+**Verify:** For task `a fixed number of consumers,`, demonstrate the concrete requirement “3. a fixed number of consumers,” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
 4. indexed items so results retain input order,
+
+**Verify:** For task `indexed items so results retain input order,`, demonstrate the concrete requirement “4. indexed items so results retain input order,” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
 5. a unique sentinel per consumer, and
+
+**Verify:** For task `a unique sentinel per consumer, and`, demonstrate the concrete requirement “5. a unique sentinel per consumer, and” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
 6. `asyncio.TaskGroup`.
 
 Place `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch
 `CancelledError` unless cleanup requires it; if caught, re-raise it.
+
+**Verify:** For task `asyncio.TaskGroup`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+
+
+
+
+
+
 
 ### Exercise 3 — add per-item timeouts
 
@@ -140,6 +299,14 @@ block returns the active count to zero.
 
 Prediction: what happens to sibling consumers when one item times out?
 
+**Verify:** For task `add per-item timeouts`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+
+
+
+
+
+
+
 ### Exercise 4 — adapt blocking I/O
 
 Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs.
@@ -148,6 +315,14 @@ ordered results rather than treating speed as the correctness assertion.
 
 Explain why a thread pool requires a deliberate `max_workers`, even if the
 remote service could theoretically accept more requests.
+
+**Verify:** For task `adapt blocking I/O`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
 
 ### Exercise 5 — isolate CPU work
 
@@ -180,6 +355,14 @@ macOS/Linux:
 The workload is intentionally small for safety; process startup may make it
 slower than sequential execution. That observation is part of the lesson.
 
+**Verify:** For task `isolate CPU work`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+
+
+
+
+
+
+
 ### Exercise 6 — reason about shared state
 
 Implement `deterministic_lost_update`. Force two workers to read the same
@@ -190,6 +373,14 @@ List three repairs:
 - one owner task/process receives update messages,
 - a lock protects the complete read/modify/write unit, or
 - an external system performs an atomic update.
+
+**Verify:** For task `reason about shared state`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Extended professional practice
 
@@ -203,11 +394,27 @@ Cancel `bounded_map` while workers are active. Instrument acquired resources and
 
 **Progressive hint:** Put cleanup in `finally`, do not suppress `CancelledError`, and use TaskGroup as the child ownership boundary.
 
+**Verify:** For task `prove cancellation cleanup`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
+
 ### Exercise 8 — inspect structured failures
 
 Run multiple workers that fail with different typed exceptions. Use `except*` to handle one expected category while preserving unexpected failures and their original tracebacks.
 
 **Progressive hint:** ExceptionGroup is a tree. Match by exception type and re-raise what the current layer cannot translate.
+
+**Verify:** For task `inspect structured failures`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
 
 ### Exercise 9 — stream a backpressured producer
 
@@ -215,11 +422,27 @@ Adapt `bounded_map` from a finite Sequence to an async iterator whose length is 
 
 **Progressive hint:** Assign increasing indexes at production, use a bounded queue, and emit completed results through a second bounded channel.
 
+**Verify:** For task `stream a backpressured producer`, measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure; then run the named missing/unknown/empty boundary and assert its explicit fallback or exception instead of accepting an accidental default.
+
+
+
+
+
+
+
 ### Exercise 10 — trace context across boundaries
 
 Set a request ID in `contextvars`, then observe propagation through an async task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any explicit propagation visible.
 
 **Progressive hint:** Async tasks and `to_thread` copy context by design; arbitrary executors and processes need deliberate value transfer.
+
+**Verify:** For task `trace context across boundaries`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+
+
+
+
+
+
 
 ### Exercise 11 — design graceful executor shutdown
 
@@ -227,11 +450,27 @@ Own a thread or process pool through a context manager. Stop accepting new work,
 
 **Progressive hint:** Lifecycle ownership belongs to the component that created the executor. Differentiate pending work from already-running calls.
 
+**Verify:** For task `design graceful executor shutdown`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 ### Exercise 12 — make an evidence-based model decision
 
 Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.
 
 **Progressive hint:** Use generous repeated measurements and interpret each model only for the workload it matches. A tiny workload can legitimately stay sequential.
+
+**Verify:** For task `make an evidence-based model decision`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 
 ## Self-check
 
@@ -286,3 +525,36 @@ PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests
   unbounded HTTP work.
 - Investigate producer/consumer shutdown, signal handling, and process worker
   recycling in a project after mastering this deterministic core.
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize choosing async, threads, or processes and bounding concurrent work. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_pro_02_concurrency_parallelism.md`
+- learner artifact: `python/professional/lessons/py_pro_02_concurrency_parallelism.py`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

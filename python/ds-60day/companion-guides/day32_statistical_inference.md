@@ -63,15 +63,168 @@ The estimate and interval communicate location and uncertainty. The p-value
 addresses compatibility with the specific null value `0.0`. Report all three
 with the sample size and assumptions; a p-value alone hides the effect magnitude.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 32 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — sampling uncertainty, confidence intervals, and hypothesis-test evidence
+
+### The mental model
+
+Statistical inference reasons from a finite sample toward an unknown
+population quantity. An estimator such as a sample mean varies across
+hypothetical repeated samples; its **standard error** describes that
+sampling variability. A confidence interval is a procedure with a
+long-run coverage property, not a probability statement about a fixed
+parameter after the data are observed.
+
+A hypothesis test asks how incompatible an observed statistic is with
+a precisely stated null model. The p-value is conditional on that null
+model and its assumptions. It is not the probability that the null is
+true, and it does not measure whether an effect is useful.
+
+### Worked examples and syntax anatomy
+
+- **`stats.ttest_1samp(sample, popmean)`:** compares a sample mean with a reference value using a t statistic and estimated standard error.
+- **`stats.ttest_ind(a, b, equal_var=False)`:** runs Welch's two-sample test without assuming equal population variances.
+- **`estimate ± critical_value * standard_error`:** forms an interval only after choosing a confidence level and an appropriate sampling model.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — see interval width respond to sample size
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+import numpy as np
+from scipy import stats
+
+rng = np.random.default_rng(3201)
+
+def mean_interval(sample, confidence=0.95):
+    sample = np.asarray(sample, dtype=float)
+    se = sample.std(ddof=1) / np.sqrt(sample.size)
+    critical = stats.t.ppf((1 + confidence) / 2, df=sample.size - 1)
+    return sample.mean() + np.array([-1, 1]) * critical * se
+
+small = rng.normal(loc=2.0, scale=1.0, size=25)
+large = rng.normal(loc=2.0, scale=1.0, size=400)
+small_ci, large_ci = mean_interval(small), mean_interval(large)
+print({"small": small_ci, "large": large_ci})
+assert np.ptp(large_ci) < np.ptp(small_ci)
+```
+
+**Expected observation:** The larger sample normally produces a much narrower interval because its standard error is smaller.
+
+**Assumption to name:** The observations are independent and the mean's t-based sampling model is reasonable.
+
+### Focused example B — separate statistical detection from practical size
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+import numpy as np
+from scipy import stats
+
+rng = np.random.default_rng(3202)
+sample = rng.normal(loc=0.02, scale=1.0, size=100_000)
+result = stats.ttest_1samp(sample, popmean=0.0)
+standardized_effect = sample.mean() / sample.std(ddof=1)
+print({"p_value": result.pvalue, "standardized_effect": standardized_effect})
+assert abs(standardized_effect) < 0.05
+```
+
+**Expected observation:** A very small effect can have a small p-value when the sample is large.
+
+**Assumption to name:** The operational decision depends on effect size and uncertainty, not a significance threshold alone.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define sampling uncertainty, confidence intervals, and hypothesis-test evidence in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Reporting `p < 0.05` without the estimate, interval, assumptions, sample size, or practical decision threshold.
+
+**Debug it deliberately:** Reconstruct the test statistic from estimate divided by standard error, inspect the data-generating grain, and calculate an effect size.
+
+**Stop condition:** Do not make a population claim when independence, selection, multiplicity, or the measurement process is unexplained.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Draw groups from `Normal(0, 1)` and `Normal(0.3, 1)`, then test the
    difference in means with Welch's t-test.
+
+**Verify:** For task `Draw groups from Normal(0, 1) and Normal(0.3, 1), then test the`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
 2. Build a contingency table from categorical data and run a chi-square test.
    For a fully offline run, construct a small table directly; a cached Seaborn
    dataset is optional.
+
+**Verify:** For task `Build a contingency table from categorical data and run a chi-square test`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
 3. Compute 90% and 99% confidence intervals for the same mean and compare their
    widths.
+
+**Verify:** For task `Compute 90% and 99% confidence intervals for the same mean and compare their`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -91,13 +244,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Prediction:** Hold the true mean difference and variance fixed, then predict how increasing each group's sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.
    **Progressive hint:** Standard error shrinks approximately with 1/sqrt(n); the underlying standardized effect does not grow merely because more rows were collected.
+
+**Verify:** For task `Prediction: Hold the true mean difference and variance fixed, then predict how increasing eac...`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
+
 5. **Implementation:** Build a seeded percentile-bootstrap confidence interval for a median difference. Validate empty groups and expose the number of resamples as a parameter.
    **Progressive hint:** Resample each group independently with replacement, compute one median difference per resample, then take symmetric quantiles.
+
+**Verify:** For task `Implementation: Build a seeded percentile-bootstrap confidence interval for a median differen...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 6. **Multiple-comparison reasoning:** You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis.
    **Progressive hint:** Under independent true nulls, use 1-(1-alpha)**20. Bonferroni controls family-wise error; Benjamini-Hochberg targets the expected false-discovery proportion among rejections.
 
+**Verify:** For task `Multiple-comparison reasoning: You test 20 unrelated null hypotheses at alpha=0.05. Estimate...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -128,3 +308,36 @@ the same shape and total count as the observed contingency table.
 - Then consult the
   [Day 32 solution](../solutions/day32_statistical_inference/day32_solutions.md).
 - Continue to [Day 33 — Linear Algebra](day33_linear_algebra_matrices.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-32` — Day 32 — Statistical Inference.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize sampling uncertainty, confidence intervals, and hypothesis-test evidence. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day32_statistical_inference.md`
+- learner artifact: `python/ds-60day/notebooks/day32_statistical_inference.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

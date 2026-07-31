@@ -28,6 +28,56 @@ order, and a backend that passes fake-only tests but violates the real contract.
 
 ---
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## Reasoning before implementation
+
+The architecture keeps policy pure and repeatable, while contract and generative tests broaden evidence without confusing fake behavior with external systems.
+
+1. **Protocol/injected dependency:** lets production policy receive a fake clock/store without patching global implementation details.
+2. **shared contract suite:** applies the same observable create/read/update/delete requirements to fake and real-local implementations.
+3. **Hypothesis strategy + property:** defines an input domain and invariant, with deterministic settings and no repository cache.
+4. **Prove the failure boundary:** Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.
+
+**Alternative:** Table-driven and metamorphic tests can cover broad cases when a generative library is unavailable or the domain needs highly curated examples.
+
+**Trade-off:** Fakes make tests fast and deterministic but can omit real failure modes; mocks verify interaction but couple easily to implementation.
+
+**Failure boundary:** Leaked mutable fixtures, flaky timing, unordered output, malformed persisted data, concurrency interleavings, and Hypothesis databases/caches need control.
+
+**Verification:** Run normal/boundary/failure examples, share contracts across fake/real-local, inspect a shrunk failure, prove environment restoration, and keep tests offline/deterministic.
+
+### Verification micro-example
+
+Run this small, deterministic case before adapting the reference to a
+larger system. It gives the reasoning above an executable anchor:
+
+```python
+class FixedClock:
+    def __init__(self, value):
+        self.value = value
+    def now(self):
+        return self.value
+
+def is_fresh(created_at, ttl, clock):
+    if ttl <= 0:
+        raise ValueError("ttl must be positive")
+    return clock.now() < created_at + ttl
+
+clock = FixedClock(12.0)
+assert is_fresh(10.0, 3.0, clock)
+clock.value = 13.0
+assert not is_fresh(10.0, 3.0, clock)
+```
+
+**Expected observation:** The exact expiration boundary is tested instantly and deterministically without sleeping.
+
+The reference implementation is one defensible contract, not a license
+to copy internal steps into every system. Preserve the observable
+guarantees and repeat the failure tests when adapting it.
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reference
 
 Use this map after an honest attempt. The executable implementation remains
@@ -48,6 +98,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Choose fixture lifetime`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 2 — Complete interval merging
 
 **Prompt recap:** Implement `merge_intervals`. Add examples for empty input, reversed endpoints, adjacent intervals, duplicates, and nesting. Then express properties: - output is sorted, - output intervals no longer touch, - every original integer point remains covered, and - no new point is created.
@@ -61,6 +119,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Complete interval merging`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 3 — Use Hypothesis meaningfully
 
@@ -76,6 +142,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Use Hypothesis meaningfully`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 4 — Compare test doubles
 
 **Prompt recap:** Complete `choose_double`. Use a fake for the stateful store, a mock only for one audit interaction, and a real temporary file for serialization behavior. Explain why mocking every store method couples tests to implementation steps.
@@ -89,6 +163,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Compare test doubles`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 5 — Patch and restore process state
 
@@ -104,6 +186,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Patch and restore process state`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 6 — Add a contract failure
 
 **Prompt recap:** Create a deliberately broken store that never overwrites values. Run the shared contract and locate the exact violated behavior. Contract tests complement, rather than replace, implementation-specific failure tests.
@@ -117,6 +207,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Add a contract failure`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 7 — model a state machine
 
@@ -139,6 +237,14 @@ named regression test.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `model a state machine`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 8 — add metamorphic tests
 
 **Prompt recap:** Write metamorphic relations for interval merging when the exact output is inconvenient: input permutation, duplicate insertion, endpoint translation, and applying merge twice.
@@ -158,6 +264,14 @@ infect both relation and implementation, so review the mathematical contract.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `add metamorphic tests`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 ### Exercise 9 — evaluate mutation-test survivors
 
 **Prompt recap:** Make three deliberate mutations: change expiry `<` to `<=`, stop merging adjacent intervals, and skip store overwrite. Predict which test should fail and add a focused test for any survivor.
@@ -176,6 +290,14 @@ need review. The useful output is a concrete missing behavioral assertion.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `evaluate mutation-test survivors`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 
 ### Exercise 10 — test concurrency without timing races
 
@@ -197,6 +319,14 @@ only to prevent a hung test, not as the correctness condition.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `test concurrency without timing races`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 11 — triage a flaky test
 
 **Prompt recap:** Take a test that depends on wall-clock sleep, random data, shared files, or unordered output. Classify the cause, collect repeat evidence, and replace the unstable boundary rather than adding retries.
@@ -216,6 +346,14 @@ owner and deadline if used.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `triage a flaky test`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 12 — design a layered verification portfolio
 
@@ -237,3 +375,5 @@ wiring evidence.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `design a layered verification portfolio`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.

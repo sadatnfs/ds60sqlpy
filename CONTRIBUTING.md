@@ -56,19 +56,25 @@ Every learner-facing lesson should provide:
 1. A clear title and level
 2. Prerequisites
 3. Learning objectives
-4. A concise explanation of why the topic matters
-5. Runnable examples using local or generated data by default
-6. Exercises that progress from recall to application
-7. Expected behavior or a way to self-check
-8. A short knowledge check
-9. Next steps
-10. A separately located solution
+4. A complete-amateur mental model and defined vocabulary
+5. Syntax or query anatomy
+6. At least two topic-specific runnable examples with expected observations
+7. Exercises that progress from prediction through transfer
+8. An explicit **Expected** or **Verify** contract for every numbered exercise
+9. Common-error symptoms, causes, and recovery
+10. Retrieval questions and next steps
+11. A separately located, clause- or line-explained solution
+12. A final, copy-ready **Ask Codex about this lesson** prompt that names the
+    stable ID and exact paths while keeping `solutions/` closed until an attempt
 
 Do not put the complete answer directly below an exercise in the learner artifact. Preserve the hint-first experience.
 Every cataloged learner, guide, and explanatory-solution artifact must also
 meet its immutable `curriculum/practice_baseline.json` target:
 `max(6, 2 × audited baseline)`. Run `python scripts/audit_practice.py`; do not
 lower the baseline or inflate counts with answer steps.
+Also run `python scripts/audit_lesson_depth.py`. The structural audit is a
+minimum floor; review technical accuracy, progression, and teaching quality by
+reading and executing the changed lesson.
 
 ## Cross-platform requirements
 
@@ -176,6 +182,7 @@ Run:
 python scripts/course.py doctor
 python scripts/course.py validate
 python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 python scripts/scan_secrets.py --history

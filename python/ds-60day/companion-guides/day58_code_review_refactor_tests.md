@@ -87,11 +87,165 @@ Windows PowerShell:
 Ruff is the repository's sole Python formatter and linter; keep its checked-in
 configuration as the source of truth.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 58 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — behavior-preserving refactoring, seams, tests, and compatibility review
+
+### The mental model
+
+Refactoring changes internal structure while preserving observable
+behavior. Before changing unfamiliar code, a **characterization test**
+records what it currently does for representative and boundary inputs.
+Then small pure functions and explicit dependencies create seams that
+can be tested without files, networks, clocks, or global state.
+
+Code review is risk analysis, not style preference. Trace inputs,
+outputs, exceptions, side effects, data/security boundaries, backward
+compatibility, and evidence. Static tools catch classes of problems but
+cannot prove runtime or domain behavior.
+
+### Worked examples and syntax anatomy
+
+- **characterization test:** locks down important current behavior before extracting or renaming it.
+- **pure core + impure shell:** isolates transformations from I/O so normal, boundary, and failure cases are deterministic.
+- **Ruff + mypy + pytest:** checks formatting/lint, static type contracts, and executable behavior as complementary evidence.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — capture legacy behavior before extraction
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+def legacy_total(rows):
+    return round(sum(float(row["price"]) * int(row["units"]) for row in rows), 2)
+
+sample = [
+    {"price": "1.25", "units": "2"},
+    {"price": "0.50", "units": "3"},
+]
+observed = legacy_total(sample)
+print(observed)
+assert observed == 4.0  # characterization: preserve while restructuring
+```
+
+**Expected observation:** The test records the current numeric contract before parsing and calculation are separated.
+
+**Assumption to name:** Rounding only the final total is intended behavior; malformed-row policy still needs a failure test.
+
+### Focused example B — extract a pure boundary with explicit failures
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+from decimal import Decimal, InvalidOperation
+
+def line_total(price_text, units_text):
+    try:
+        price = Decimal(price_text)
+        units = int(units_text)
+    except (InvalidOperation, ValueError) as exc:
+        raise ValueError("invalid sales row") from exc
+    if price < 0 or units < 0:
+        raise ValueError("price and units must be nonnegative")
+    return price * units
+
+assert line_total("1.25", "2") == Decimal("2.50")
+try:
+    line_total("bad", "2")
+except ValueError as exc:
+    print(type(exc.__cause__).__name__, str(exc))
+```
+
+**Expected observation:** The extracted function is deterministic, uses decimal arithmetic, and translates low-level parse errors into one boundary exception.
+
+**Assumption to name:** Rejecting negative values and translating errors matches the caller's contract.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define behavior-preserving refactoring, seams, tests, and compatibility review in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Changing behavior and structure simultaneously without a regression test or compatibility note.
+
+**Debug it deliberately:** Reduce the diff, identify one observable contract, reproduce the old result, add boundary/failure tests, and run tools after each small extraction.
+
+**Stop condition:** Do not merge a refactor when tests assert implementation steps rather than behavior or when API/data compatibility is unexplained.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Move at least two notebook functions into a `src/` package and add tests.
+
+**Verify:** For task `Move at least two notebook functions into a src/ package and add tests`, demonstrate the concrete requirement “1. Move at least two notebook functions into a src/ package and add tests” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 2. Add type hints and docstrings, then run mypy.
+
+**Verify:** For task `Add type hints and docstrings, then run mypy`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
 3. Write a short maintainer guide in the project root.
+
+**Verify:** For task `Write a short maintainer guide in the project root`, demonstrate the concrete requirement “3. Write a short maintainer guide in the project root” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -115,13 +269,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Characterization testing:** Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change.
    **Progressive hint:** Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.
+
+**Verify:** For task `Characterization testing: Before refactoring a legacy notebook function, capture current beha...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
+
+
+
+
+
+
+
 5. **Risk-based review:** Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.
    **Progressive hint:** Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.
+
+**Verify:** For task `Risk-based review: Review a data-loading-to-prediction change using a checklist for security,...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 6. **Compatibility change:** Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan.
    **Progressive hint:** Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.
 
+**Verify:** For task `Compatibility change: Rename a public function parameter without breaking callers. Implement...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -153,3 +334,36 @@ navigation cost. Extract around stable concepts and side-effect boundaries.
 - Then consult the
   [Day 58 solution](../solutions/day58_code_review_refactor_tests/day58_solutions.md).
 - Continue to [Day 59 — Capstone Kickoff](day59_capstone_kickoff.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-58` — Day 58 — Code Review, Refactoring, and Tests.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize behavior-preserving refactoring, seams, tests, and compatibility review. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day58_code_review_refactor_tests.md`
+- learner artifact: `python/ds-60day/notebooks/day58_code_review_refactor_tests.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

@@ -74,6 +74,50 @@ its plan exposes filter and projection information.
 
 ---
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## Reasoning before implementation
+
+Boundary parsing proves semantic types first; round-trip, plan, and cross-engine reconciliation then prove storage/query behavior.
+
+1. **explicit parse/schema:** turns untrusted text into typed dates, decimals, integers, and nullable fields at one controlled boundary.
+2. **Parquet row groups/partitions:** organize data for selective scans without creating unsafe values or millions of tiny files.
+3. **DuckDB projection/filter:** pushes required columns and supported predicates near the scan; inspect plan and profile.
+4. **Prove the failure boundary:** Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.
+
+**Alternative:** CSV remains excellent for small interchange; SQLite/pandas may be simpler when schema scale and selective scans do not justify Arrow tooling.
+
+**Trade-off:** Parquet adds schema/compression/pushdown while requiring engines, evolution policy, file-layout management, and less direct inspection.
+
+**Failure boundary:** Decimal overflow, timezone normalization, schema evolution, partition traversal, duplicate lookup keys, tiny files, and missing optional packages need policy.
+
+**Verification:** Reconcile typed values/nulls/totals across engines, assert schema round-trip, reject unsafe partitions, inspect plan plus scan metrics, and exercise the CSV fallback.
+
+### Verification micro-example
+
+Run this small, deterministic case before adapting the reference to a
+larger system. It gives the reasoning above an executable anchor:
+
+```python
+import csv
+from pathlib import Path
+
+path = Path("python/professional/fixtures/data/sales.csv")
+with path.open("r", encoding="utf-8", newline="") as handle:
+    row = next(csv.DictReader(handle))
+types = {name: type(value).__name__ for name, value in row.items()}
+print(row, types)
+assert set(types.values()) == {"str"}
+```
+
+**Expected observation:** Dates, units, prices, and blanks all arrive as strings and must be interpreted by an explicit contract.
+
+The reference implementation is one defensible contract, not a license
+to copy internal steps into every system. Preserve the observable
+guarantees and repeat the failure tests when adapting it.
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reference
 
 Use this map after an honest attempt. The executable implementation remains
@@ -94,6 +138,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `define the CSV contract`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 2 — compare storage contracts
 
 **Prompt recap:** Make a table in your notes: | Question | CSV | Parquet | | --- | --- | --- | | Can a text editor inspect it? | | | | Are types/nullability stored? | | | | Can a scan select columns efficiently? | | | | Does Python need an extra engine? | | | | Is append/stream exchange simple? | | | Choose a format for a five-row configuration export and for a repeated 50-million-row analytical scan. Explain each answer.
@@ -107,6 +159,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `compare storage contracts`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 3 — build an Arrow schema
 
@@ -122,6 +182,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `build an Arrow schema`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 4 — make partitions deliberate
 
 **Prompt recap:** Implement `partition_directory`. Reject `../north`, slashes, empty strings, and unexpected case. Write one stable file per region at `region=<validated-value>/part-000.csv`. Partitioning every high-cardinality value can create millions of tiny files, so choose commonly filtered dimensions and plan file sizes.
@@ -135,6 +203,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `make partitions deliberate`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 5 — query Parquet with DuckDB
 
@@ -150,6 +226,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `query Parquet with DuckDB`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 6 — explain pushdown honestly
 
 **Prompt recap:** Pushdown does not mean every query reads zero irrelevant bytes. Row-group statistics, file organization, filter selectivity, expression support, and engine version matter. Write: 1. what the plan proves, 2. what it suggests may be skipped, and 3. what would require profiling or scan metrics to prove.
@@ -164,6 +248,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `explain pushdown honestly`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 7 — exercise the fallback
 
 **Prompt recap:** Run `summarize_with_csv_fallback` in an environment without PyArrow/DuckDB. If pandas exists, it uses typed `read_csv`; otherwise it uses the standard library. Confirm the same row count, null count, region set, and revenue across engines.
@@ -177,6 +269,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `exercise the fallback`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 8 — plan schema evolution
 
@@ -197,6 +297,14 @@ coercion the installed engine happens to perform.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `plan schema evolution`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 9 — control file and row-group size
 
 **Prompt recap:** Generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups. Record metadata count, scan planning, file sizes, and filtered query behavior.
@@ -216,6 +324,14 @@ universal number. Clean the generated data under an ignored temporary path.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `control file and row-group size`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 ### Exercise 10 — validate a dataset before querying
 
 **Prompt recap:** Build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.
@@ -234,6 +350,14 @@ status. A successful Parquet read is not a data-quality proof.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `validate a dataset before querying`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
 
 ### Exercise 11 — reconcile a local analytical join
 
@@ -255,6 +379,14 @@ rows.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `reconcile a local analytical join`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 12 — find a non-pushdown filter
 
 **Prompt recap:** Compare `units >= ?` with a transformed predicate such as a function of units. Inspect plans and scan evidence, then rewrite only when semantics remain identical.
@@ -273,6 +405,14 @@ obtain a prettier plan.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `find a non-pushdown filter`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 
 ### Exercise 13 — publish a dataset atomically
 
@@ -293,6 +433,14 @@ change but do not prove source trust or data correctness.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `publish a dataset atomically`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 ### Exercise 14 — reconcile decimals and timestamps across engines
 
 **Prompt recap:** Add boundary decimal values and timezone-aware timestamps to a local round trip. Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.
@@ -311,3 +459,5 @@ letting local machine timezone decide.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `reconcile decimals and timestamps across engines`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

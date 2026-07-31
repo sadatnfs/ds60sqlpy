@@ -38,6 +38,56 @@ represent production data.
 
 ---
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## Reasoning before implementation
+
+The workflow preserves a correctness oracle and performance budget while using profiles and scaling evidence to justify each change.
+
+1. **benchmark contract:** fixes data size/distribution, environment, warm-up, repetitions, statistic, and correctness invariant.
+2. **profile → hypothesis → one change:** connects an observed hotspot to a scoped optimization rather than guessing.
+3. **scale curve + budget:** measures several input sizes and checks latency/memory against an explicit threshold.
+4. **Prove the failure boundary:** Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.
+
+**Alternative:** Caching, batching, vectorization, database pushdown, native libraries, concurrency, or a better algorithm solve different bottlenecks.
+
+**Trade-off:** Optimizations can increase memory, latency variance, startup cost, code complexity, and platform dependence even when median runtime improves.
+
+**Failure boundary:** Warm/cold cache, tiny inputs, skew, GC, first-run imports, thread oversubscription, nonhashable values, and Windows process startup need separate evidence.
+
+**Verification:** Assert output equivalence and failures, benchmark repeated realistic workloads/sizes, report distribution and resources, profile the hotspot, and enforce the stated budget.
+
+### Verification micro-example
+
+Run this small, deterministic case before adapting the reference to a
+larger system. It gives the reasoning above an executable anchor:
+
+```python
+import statistics
+import timeit
+
+samples = timeit.repeat(
+    "sum(range(10_000))",
+    repeat=7,
+    number=200,
+)
+report = {
+    "median_seconds": statistics.median(samples),
+    "min_seconds": min(samples),
+    "max_seconds": max(samples),
+}
+print(report)
+assert report["min_seconds"] <= report["median_seconds"] <= report["max_seconds"]
+```
+
+**Expected observation:** Repeated timings vary; median and range reveal noise that one measurement hides.
+
+The reference implementation is one defensible contract, not a license
+to copy internal steps into every system. Preserve the observable
+guarantees and repeat the failure tests when adapting it.
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reference
 
 Use this map after an honest attempt. The executable implementation remains
@@ -58,6 +108,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Define semantics before speed`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 2 — Build a representative timing plan
 
 **Prompt recap:** Choose a workload size large enough to rise above timer noise but small enough for quick study. Warm up separately, then collect at least five repeated batches with `timeit`. Record Python version, platform, input size, and plan. Do not assert “candidate < baseline” in the test suite. CI hosts, antivirus, power state, and schedulers make that flaky.
@@ -71,6 +129,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Build a representative timing plan`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 3 — Ask cProfile a different question
 
@@ -86,6 +152,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Ask cProfile a different question`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 4 — Measure allocation pressure
 
 **Prompt recap:** Compare materialized-list and generator sums with `tracemalloc`. Assert equal results and report bounds (`peak >= current >= 0`). Explain why `tracemalloc` may not see memory allocated inside every native library.
@@ -99,6 +173,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Measure allocation pressure`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 5 — Compare optional vectorization
 
@@ -114,6 +196,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Compare optional vectorization`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 6 — Model process transfer
 
 **Prompt recap:** Serialize a safe local JSON payload and measure its byte length. Complete `estimated_transfer_bytes`. Four workers each receiving two copies move eight payload equivalents before computation. Real process protocols may add framing, copies, or shared-memory complexity.
@@ -127,6 +217,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Model process transfer`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 7 — Evaluate caching
 
@@ -142,6 +240,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Evaluate caching`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 8 — Bound native/FFI work
 
 **Prompt recap:** Use the policy to prefer an available algorithm improvement. If a measured hotspot remains, batch native calls and cap transfer. Survey Cython, Rust/PyO3, C/C++ extensions, and `ctypes`/`cffi`; record build wheels, ABI, ownership, error, and safety obligations before choosing one.
@@ -156,6 +262,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Bound native/FFI work`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 9 — Apply the evidence decision
 
 **Prompt recap:** Complete `choose_next_step` in priority order: 1. fix unequal behavior, 2. reduce peak memory beyond budget, 3. reduce transfer consuming at least 30 percent, 4. optimize a hotspot consuming at least 50 percent, or 5. keep the current implementation. Thresholds are a transparent lesson policy, not universal laws.
@@ -169,6 +283,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Apply the evidence decision`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 10 — compare timing distributions
 
@@ -190,6 +312,14 @@ regression budget.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `compare timing distributions`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 11 — diagnose warmup, GC, and environment noise
 
 **Prompt recap:** Measure cold import/first call separately from steady state. Repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.
@@ -208,6 +338,14 @@ outliers automatically—identify scheduler, I/O, thermal, or allocation causes.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `diagnose warmup, GC, and environment noise`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 
 ### Exercise 12 — trade algorithm speed for memory
 
@@ -229,6 +367,14 @@ contract and cannot silently replace exact output.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `trade algorithm speed for memory`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 13 — test vectorized dtype boundaries
 
 **Prompt recap:** Compare Python integer sum-of-squares with NumPy int32, int64, float, and object arrays near overflow. Detect silent overflow and choose a validated dtype.
@@ -247,6 +393,14 @@ must route `choose_next_step` to fix correctness first.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `test vectorized dtype boundaries`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 14 — evaluate shared-memory process input
 
@@ -268,6 +422,14 @@ is material.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `evaluate shared-memory process input`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 15 — separate I/O concurrency from CPU optimization
 
 **Prompt recap:** Benchmark a local fake I/O wait and a pure-Python CPU loop under sequential, async/thread, and process designs. Explain why each model helps one workload and may hurt another.
@@ -285,6 +447,14 @@ cleanup. Do not generalize from one task label such as “data processing.”
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `separate I/O concurrency from CPU optimization`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 
 ### Exercise 16 — prevent a cache stampede
 
@@ -304,6 +474,14 @@ eviction, distributed coordination, or whether stale data is acceptable.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `prevent a cache stampede`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 17 — review an FFI ownership boundary
 
@@ -325,6 +503,14 @@ required for every supported target.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `review an FFI ownership boundary`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 18 — design a continuous performance gate
 
 **Prompt recap:** Define a stable local/CI benchmark artifact with workload version, correctness hash, environment, raw timings, peak memory, practical regression budget, comparison policy, and an investigation path instead of an immediate flaky fail.
@@ -344,3 +530,5 @@ production/representative profiles and update through reviewed evidence.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `design a continuous performance gate`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.

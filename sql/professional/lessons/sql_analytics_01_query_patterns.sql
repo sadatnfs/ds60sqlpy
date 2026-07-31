@@ -1,4 +1,21 @@
 -- SQL-ANALYTICS-01: Reusable analytical query patterns
+-- BEGINNER WORKFLOW — sql-analytics-01: Reusable Analytical Query Patterns
+-- Guide: sql/professional/companion-guides/sql_analytics_01_query_patterns.md
+-- Recommended runner: open the private lesson reader and choose
+-- "Create/open guided SQL notebook". It verifies advanced_sql_training,
+-- creates an ignored .learning/sql/sql-analytics-01/ copy, and prints the full
+-- psql transcript below the run cell. Edit that private copy, not this official
+-- source, while studying.
+-- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
+-- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
+-- declare what one input row and one output row represent. A displayed result
+-- set is temporary; NULL, zero, an empty string, and an absent row differ.
+-- Primary objects in the worked examples: pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history.
+-- Success means the first error never appears, psql exits 0, result keys and
+-- control totals match the stated contract, and verification passes. The lesson's documented transaction/cleanup boundary restores disposable state.
+-- Keep all numbered exercises answer-free here: write predictions and attempts
+-- only in your ignored working copy.
+--
 -- Target: PostgreSQL 16+
 
 \set ON_ERROR_STOP on
@@ -341,35 +358,87 @@ ORDER BY r.cohort_month, r.month_number;
 --
 -- 1. Prove the dedup view has one row per source_event_id and document why the
 --    latest ingested row wins.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 2. Recalculate sessions with a 60-minute threshold and add duration. Decide
 --    whether an event exactly 60 minutes later starts a new session.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 3. Return one row per user with every funnel timestamp, then test that each
 --    non-NULL step is no earlier than its predecessor.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 4. Return only islands lasting at least two active days.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 5. Add an unattributed purchase and two touches at the same timestamp. Define
 --    and test the deterministic tie-break and NULL attribution behavior.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 6. Add month 1 activity and verify numerator, cohort denominator, and rate
 --    independently before division.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 7. Add an event exactly at a tier valid_to boundary and prove it joins the
 --    successor [valid_from, valid_to) row, not both rows.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 8. Compute a trailing seven-day active-user metric over a dense date spine.
 --    Compare ROWS and RANGE frames and prove missing calendar dates do not
 --    silently change the business window.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
+--    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 9. Calculate median and 90th-percentile session duration with percentile_cont.
 --    State input/output grain, interpolation behavior, NULL handling, and why
 --    an average cannot answer the same distribution question.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 10. Return the top two event types per user with row_number, rank, and
 --     dense_rank side by side. Define a deterministic tie policy and explain
 --     when each ranking function changes the number of returned rows.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 11. Traverse a parent/child campaign hierarchy with a recursive CTE. Include
 --     depth, a path, and cycle detection; prove malformed cyclic input
 --     terminates rather than looping until a resource limit.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
+--    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
+--    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
 -- 12. Build a daily funnel report that retains zero-activity dates. Keep event
 --     filters in the appropriate JOIN condition, make each denominator
 --     explicit, and distinguish zero from missing data.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 13. Compare an exact distinct-user count with a documented approximate
 --     strategy suitable for very large data. Define acceptable error, memory,
 --     mergeability, refresh, and verification requirements before choosing.
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
 -- 14. Turn one analysis into a reusable parameterized query. Validate time-zone,
 --     interval, and cohort inputs; preserve half-open bounds and deterministic
 --     order; add grain, duplicate, NULL, and boundary contract checks.
@@ -394,6 +463,10 @@ BEGIN
     END IF;
 END
 $self_check$;
+--    Inputs: Use only the declared lesson objects (pro_analytics_lab.users, pro_analytics_lab.events, pro_analytics_lab.daily_activity, pro_analytics_lab.campaign_touches, pro_analytics_lab.tier_history) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 
 ROLLBACK;
 \echo 'SQL-ANALYTICS-01 complete: pro_analytics_lab was rolled back'

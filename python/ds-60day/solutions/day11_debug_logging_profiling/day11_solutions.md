@@ -1,5 +1,222 @@
 # Day 11 — Solutions: Debugging, Logging, and Profiling
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**evidence-driven debugging, useful logs, and measurement before optimization**.
+
+Debugging is the process of reducing uncertainty. Start from an
+observable symptom, make the smallest reproducible case, form one
+hypothesis, and collect evidence that could disprove it. Reading the
+traceback from the final exception line upward usually identifies the
+failure type before the stack frames identify how execution arrived
+there.
+
+Logging records meaningful runtime events for later inspection;
+debugging explores a live failure; profiling measures where time or
+memory is actually spent. A log entry should add context without
+exposing credentials or personal data. Optimization begins after a
+representative measurement, not after guessing which line “looks slow.”
+
+### Vocabulary used in the worked answers
+
+- **symptom:** the observable incorrect output, failure, or slowdown.
+- **traceback:** the exception report showing failure type and active call stack.
+- **hypothesis:** a testable explanation for the observed symptom.
+- **log level:** severity such as DEBUG, INFO, WARNING, or ERROR.
+- **profiler:** a tool that measures resource use by code location.
+- **benchmark:** a repeatable timing or resource comparison under stated conditions.
+
+### Reference pattern 1 — Add context at the boundary
+
+A small function logs an outcome without dumping the input records.
+
+```python
+import logging
+
+logger = logging.getLogger("day11")
+logger.setLevel(logging.INFO)
+
+def accepted_count(values: list[int]) -> int:
+    count = sum(value >= 0 for value in values)
+    logger.info("accepted=%d total=%d", count, len(values))
+    return count
+
+accepted_count([4, -1, 0])
+```
+
+**Expected observation:** The function returns `2`; when the notebook has a visible logging handler, one INFO event reports counts rather than raw sensitive values.
+
+### Reference pattern 2 — Measure two equivalent membership strategies
+
+Use repeated representative work instead of one noisy timestamp.
+
+```python
+from timeit import timeit
+
+values = list(range(1_000))
+value_set = set(values)
+list_seconds = timeit("999 in values", number=5_000, globals=globals())
+set_seconds = timeit("999 in value_set", number=5_000, globals=globals())
+{"same_answer": (999 in values) == (999 in value_set),
+ "set_faster_here": set_seconds < list_seconds}
+```
+
+**Expected observation:** Both lookups agree and the set is normally faster in this repeated lookup scenario. Exact durations vary by computer and are not asserted.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Start from a supplied failing function and use `breakpoint()` or the VS Code debugger to pause immediately before the wrong value is produced. **Evidence:** record the call arguments, two relevant local variables, and the branch taken. **Constraint:** do not change logic until you can state one falsifiable hypothesis. **Verify:** after the fix, rerun the original failing input and one nearby passing input.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies evidence-driven debugging, useful logs, and measurement before optimization.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.
+
+**Edge case:** Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.
+
+**Solution evidence to inspect:** after the fix, rerun the original failing input and one nearby passing input.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Add module-level logging with `logging.getLogger(__name__)` and emit useful DEBUG/INFO/WARNING events for a small processing function. **Constraints:** use lazy `%s`/`%d` formatting, do not call `basicConfig` inside reusable library logic, and log counts/identifiers rather than sensitive record contents. **Verify:** demonstrate that changing the configured level changes visibility without changing the returned value.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies evidence-driven debugging, useful logs, and measurement before optimization.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.
+
+**Edge case:** Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.
+
+**Solution evidence to inspect:** demonstrate that changing the configured level changes visibility without changing the returned value.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** Profile a deliberately slow membership or aggregation function with `cProfile` or `timeit`, implement one behavior-preserving improvement, and compare under identical inputs. **Expected behavior:** outputs match exactly and the measurement identifies where time changed. **Constraint:** report repeated timings rather than claiming from a single run. **Verify:** Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies evidence-driven debugging, useful logs, and measurement before optimization.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.
+
+**Edge case:** Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.
+
+**Solution evidence to inspect:** Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** With a logger set to `WARNING`, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. **Progressive hint:** The threshold keeps records at that level or more severe. **Verify:** Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying evidence-driven debugging, useful logs, and measurement before optimization.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.
+
+**Edge case:** Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.
+
+**Solution evidence to inspect:** Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. **Progressive hint:** Read a traceback from the final exception upward through your code. **Verify:** Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the evidence-driven debugging, useful logs, and measurement before optimization model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.
+
+**Edge case:** Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.
+
+**Solution evidence to inspect:** Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Implement a reusable `timed(label)` context manager using `time.perf_counter` and logging. **Progressive hint:** Put elapsed-time logging in `finally` so failures are still timed. **Verify:** Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies evidence-driven debugging, useful logs, and measurement before optimization.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.
+
+**Edge case:** Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.
+
+**Solution evidence to inspect:** Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Explain why repeated `logging.basicConfig(...)` calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. **Progressive hint:** Configuration is process state; inspect handlers before adding one. **Verify:** Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in evidence-driven debugging, useful logs, and measurement before optimization.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.
+
+**Edge case:** Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.
+
+**Solution evidence to inspect:** Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.
+
+### Exercise 8 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. **Progressive hint:** A faster wrong answer is not an optimization. **Verify:** Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from evidence-driven debugging, useful logs, and measurement before optimization.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.
+
+**Edge case:** Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.
+
+**Solution evidence to inspect:** Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 Line-by-line solutions that add logging to utilities and profile a slow function.
 
 Contents
@@ -114,54 +331,6 @@ pstats.Stats(pr).strip_dirs().sort_stats("cumtime").print_stats(10)
 - cumtime shows where total time is spent; optimize those hot paths first.
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Add useful logging to the CSV/JSON utilities from Day 8. **Hint:** log path, operation, row count, and expected failures; never log secrets or entire sensitive records.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Profile a deliberately slow function, identify its hot spot, then improve it. **Hint:** first improve the algorithm or data structure. If the work is numeric array processing, compare the measured loop with NumPy vectorization from the course's installed data dependencies.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Prediction
-
-**Prompt:** With a logger set to `WARNING`, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted.
-
-**Reasoning checkpoint:** The threshold keeps records at that level or more severe. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 4 — Tracing
-
-**Prompt:** Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption.
-
-**Reasoning checkpoint:** Read a traceback from the final exception upward through your code. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 5 — Implementation
-
-**Prompt:** Implement a reusable `timed(label)` context manager using `time.perf_counter` and logging.
-
-**Reasoning checkpoint:** Put elapsed-time logging in `finally` so failures are still timed. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 6 — Debugging
-
-**Prompt:** Explain why repeated `logging.basicConfig(...)` calls in notebooks may appear ineffective and configure a named logger without duplicate handlers.
-
-**Reasoning checkpoint:** Configuration is process state; inspect handlers before adding one. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Edge case and explanation
-
-**Prompt:** Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification.
-
-**Reasoning checkpoint:** A faster wrong answer is not an optimization. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

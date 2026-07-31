@@ -23,9 +23,15 @@ historical “60-day” shape.
 - `README.md`: learner entry point
 - `docs/setup/`: operating-system setup
 - `docs/content-authoring.md`: lesson contract
+- `docs/curriculum-design-references.md`: source-backed teaching patterns and
+  the rationale for the repository's lesson sequence
 - `docs/validation.md`: verification policy
 - `curriculum/practice_baseline.json` and `scripts/audit_practice.py`:
   immutable pre-enrichment counts and the per-surface exercise-doubling gate
+- `scripts/audit_lesson_depth.py` and `docs/lesson-depth-report.md`:
+  structural minimums for self-contained beginner explanations, runnable
+  examples, exercise contracts, explanatory solutions, historical Python
+  notebook depth, and per-lesson Codex prompts across all three tracks
 - `scripts/build_course_guide.py`: source for generated `START_HERE.html`; never
   hand-edit the HTML
 - `src/ds60sqlpy/lesson_reader.py` and `scripts/build_lesson_readers.py`:
@@ -65,6 +71,9 @@ Use `python -m pip`, repository-relative paths, and `pathlib`. Never add a devel
 
 - Assume no prior programming or database experience unless the learner says otherwise.
 - Explain new terms before relying on them.
+- Make the checked-in lesson sufficient on its own. Codex coaching is an
+  optional practice aid, never a substitute for definitions, syntax anatomy,
+  examples, expected observations, or troubleshooting in the lesson.
 - Ask the learner to predict behavior and attempt exercises.
 - Give progressive hints before opening or reproducing official solutions.
 - Use the sequence **guide → prediction → learner attempt → progressive hints
@@ -135,6 +144,15 @@ For each lesson change:
    distinct prompts rather than relabeled answer steps.
 8. Regenerate both navigation layers after artifact or catalog changes:
    `START_HERE.html` and every affected `lesson-pages/<lesson-id>.html`.
+9. Meet `docs/content-authoring.md` and `scripts/audit_lesson_depth.py`: define
+   the mental model, explain syntax or query anatomy, include at least two
+   topic-specific runnable examples, label the expected result or verification
+   for every numbered exercise, explain common mistakes, and end every guide
+   with `## Ask Codex about this lesson`.
+10. Make that Codex prompt copy-ready and lesson-specific. It must name the
+    stable lesson ID, exact guide and learner paths, the
+    `guide-ds60sqlpy-learning` skill, the `solutions/` boundary, and the
+    explain → predict → attempt → one hint → evidence → retrieval loop.
 
 Do not expand the curriculum merely to increase lesson count. Add content only when it closes a documented learning gap.
 
@@ -147,10 +165,11 @@ python scripts/course.py doctor
 python scripts/course.py catalog
 python scripts/course.py validate
 python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 python scripts/scan_secrets.py --history
-python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
+python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
 ```
 
 SQL commands must use:
@@ -173,6 +192,8 @@ Definition of done:
 - Offline behavior is preserved.
 - Windows and POSIX instructions remain valid.
 - Generated artifacts, caches, credentials, and unrelated diffs are absent.
+- `docs/practice-coverage.md` and `docs/lesson-depth-report.md` match their
+  generators, and all cataloged Python and SQL lessons pass both gates.
 
 Portal changes must retain both delivery modes. `START_HERE.html` remains
 self-contained and useful over `file://`; launcher mode binds only to

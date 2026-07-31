@@ -1,4 +1,21 @@
 -- SQL-EXT-01: Extensions, spatial data, and vectors
+-- BEGINNER WORKFLOW — sql-ext-01: PostgreSQL Extensions, Spatial Data, and Vectors
+-- Guide: sql/professional/companion-guides/sql_ext_01_extensions_spatial_vector.md
+-- Recommended runner: open the private lesson reader and choose
+-- "Create/open guided SQL notebook". It verifies advanced_sql_training,
+-- creates an ignored .learning/sql/sql-ext-01/ copy, and prints the full
+-- psql transcript below the run cell. Edit that private copy, not this official
+-- source, while studying.
+-- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
+-- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
+-- declare what one input row and one output row represent. A displayed result
+-- set is temporary; NULL, zero, an empty string, and an absent row differ.
+-- Primary objects in the worked examples: pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot.
+-- Success means the first error never appears, psql exits 0, result keys and
+-- control totals match the stated contract, and verification passes. The lesson's documented transaction/cleanup boundary restores disposable state.
+-- Keep all numbered exercises answer-free here: write predictions and attempts
+-- only in your ignored working copy.
+--
 -- Target: PostgreSQL 16+
 -- This default path never executes CREATE EXTENSION.
 
@@ -208,37 +225,89 @@ ORDER BY
 -- 1. Classify each requested extension as unavailable, available-but-not-
 --    installed, or installed. Record exact versions; do not infer CREATE
 --    privilege from availability.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
 -- 2. Explain where generated lower(display_name) differs from citext, including
 --    Unicode/collation, operators, joins, and every writer's contract.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
+--    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 3. Compare built-in point distance with PostGIS geometry/geography and SRIDs.
 --    State why latitude/longitude must not be treated as an abstract point grid.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
+--    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 4. Extend array_l2_distance with explicit dimension validation and compare an
 --    exact scan with pgvector HNSW/IVFFlat recall, build, memory, and write cost.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
+--    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 5. Compare built-in SHA-256, pgcrypto digest/crypt/PGP functions, and external
 --    key management. Never use a fast digest alone for password storage.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 6. Design an approved postgres_fdw boundary: server ownership, user mapping
 --    secrets, imported-column contract, pushdown, transaction consistency,
 --    failure isolation, and local snapshot fallback.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 7. Explain pg_trgm similarity versus prefix LIKE and full-text search. Name
 --    the exact operators an optional trigram index must serve.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 8. Build an extension lifecycle inventory: owner, installed/default/available
 --    versions, dependencies, trusted flag, update path, publisher, approval,
 --    backup/restore needs, and rollback test. Do not upgrade anything here.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 9. Detect collation provider/version drift and explain why affected indexes
 --    may require REINDEX after operating-system or ICU changes. Separate
 --    detection, impact analysis, remediation, and validation.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 10. If PostGIS is approved elsewhere, design a nearest-resource query using
 --     geography and a GiST index. Address SRID, units, antimeridian/poles,
 --     ST_DWithin prefiltering, exact distance, and deterministic ties.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 11. If pgvector is approved elsewhere, compare cosine, inner-product, and L2
 --     operators plus HNSW and IVFFlat. State normalization, recall benchmark,
 --     build/update cost, filtering, dimension, and exact fallback requirements.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
+--    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
 -- 12. Extend the FDW design for credential rotation, connection limits, remote
 --     schema drift, timeouts, pushdown inspection, partial failure, observability,
 --     and a last-known-good snapshot. Never put credentials in learner SQL.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 13. Write a supply-chain review for an extension unavailable from the trusted
 --     package source. Cover source/build provenance, native-code privilege,
 --     CVEs, reproducibility, licensing, patch ownership, and removal testing.
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 -- 14. Plan an extension upgrade rehearsal in a restored disposable database.
 --     Capture dependencies and plans before/after, application canaries,
 --     performance/correctness checks, backup compatibility, and rollback limits.
@@ -256,6 +325,10 @@ BEGIN
     END IF;
 END
 $self_check$;
+--    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
 
 ROLLBACK;
 \echo 'SQL-EXT-01 complete: no extension was created and schema was rolled back'

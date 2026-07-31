@@ -84,11 +84,171 @@ lock is the more complete project form taught by the current repository.
 | Reproduction | Fresh-environment setup and exact baseline command |
 | Plan | Remaining experiments ranked by expected learning value |
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 59 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — capstone scope, decision framing, data contracts, and early stop rules
+
+### The mental model
+
+A capstone begins with a decision and stakeholder, not an algorithm.
+The problem statement identifies who acts, what prediction or analysis
+is available at that moment, and what outcome changes. A baseline,
+primary metric, guardrails, and acceptance threshold make success
+falsifiable.
+
+A data contract records source/license, row grain, keys, schema,
+missingness, time boundary, target construction, and prohibited fields.
+A risk register covers leakage, privacy, fairness, security, operations,
+and uncertainty. Stop rules prevent endless tuning when data or evidence
+cannot support the proposed claim.
+
+### Worked examples and syntax anatomy
+
+- **decision statement:** names stakeholder, action, prediction time, and consequence before selecting a model.
+- **acceptance matrix:** connects each success/guardrail threshold to data, metric, owner, and verification command.
+- **milestone checkpoint:** produces a reviewable artifact and explicit continue/pivot/stop decision.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — validate a project charter as data
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+charter = {
+    "stakeholder": "course reviewer",
+    "decision": "prioritize which records receive manual review",
+    "prediction_time": "after validation, before review",
+    "baseline": "review in arrival order",
+    "primary_metric": "recall at fixed review capacity",
+    "guardrails": ["no prohibited identifiers", "latency under 100 ms"],
+    "stop_rule": "stop if target cannot be reproduced from source evidence",
+}
+required = {
+    "stakeholder", "decision", "prediction_time", "baseline",
+    "primary_metric", "guardrails", "stop_rule",
+}
+missing = required - charter.keys()
+print({"missing": sorted(missing), "charter": charter})
+assert not missing
+```
+
+**Expected observation:** The charter is reviewable because every required decision field has a concrete value.
+
+**Assumption to name:** The stakeholder confirms the metric and capacity actually reflect the intended action.
+
+### Focused example B — turn a claim into predeclared acceptance checks
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+acceptance = [
+    {"name": "quality", "observed": 1.0, "operator": ">=", "threshold": 1.0},
+    {"name": "recall_at_capacity", "observed": 0.82, "operator": ">=", "threshold": 0.80},
+    {"name": "latency_ms", "observed": 42, "operator": "<=", "threshold": 100},
+]
+
+def passes(item):
+    return (
+        item["observed"] >= item["threshold"]
+        if item["operator"] == ">="
+        else item["observed"] <= item["threshold"]
+    )
+
+results = {item["name"]: passes(item) for item in acceptance}
+print(results)
+assert all(results.values())
+```
+
+**Expected observation:** Each claim has direction, threshold, and observed evidence instead of a vague 'good enough' judgment.
+
+**Assumption to name:** Thresholds were approved before final evaluation and each observation comes from the declared evidence boundary.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define capstone scope, decision framing, data contracts, and early stop rules in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Choosing a large dataset or fashionable model before defining the decision, prediction time, baseline, and harm constraints.
+
+**Debug it deliberately:** Ask what row exists at prediction time, who acts on the output, what simple alternative exists, and which evidence would force a stop.
+
+**Stop condition:** Pause or pivot when target provenance, data license, leakage boundary, stakeholder decision, or feasible baseline cannot be established.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Write the problem statement and success metric in the notebook.
+
+**Verify:** For task `Write the problem statement and success metric in the notebook`, demonstrate the concrete requirement “1. Write the problem statement and success metric in the notebook” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 2. Create the project skeleton.
+
+**Verify:** For task `Create the project skeleton`, demonstrate the concrete requirement “2. Create the project skeleton” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 3. Build a baseline and record metrics.
+
+**Verify:** For task `Build a baseline and record metrics`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -111,13 +271,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Scope and stop rules:** Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum baseline value.
    **Progressive hint:** Time-box discovery and name the evidence that triggers pivot, pause, or stop. Do not make deployment the default capstone requirement.
+
+**Verify:** For task `Scope and stop rules: Write must-have, should-have, and out-of-scope lists plus kill criteria...`, demonstrate the concrete requirement “4. Scope and stop rules: Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum base” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
+
 5. **Capstone data contract:** Create a versioned schema and quality report for your chosen local dataset, including source/license, row unit, target, types, ranges, missingness, duplicates, split keys, and fingerprint.
    **Progressive hint:** Use a tiny valid fixture and deliberately invalid fixture to test the validator.
+
+**Verify:** For task `Capstone data contract: Create a versioned schema and quality report for your chosen local da...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 6. **Decision log:** Record at least five project decisions with date, question, alternatives, evidence, chosen action, consequences, and revisit trigger.
    **Progressive hint:** Include split/metric/baseline choices, not only model hyperparameters. Link each result to a reproducible command or notebook cell.
 
+**Verify:** For task `Decision log: Record at least five project decisions with date, question, alternatives, evide...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -145,3 +332,36 @@ failure mode, and validation check for every answer.
 - Then review the
   [Day 59 solution](../solutions/day59_capstone_kickoff/day59_solutions.md).
 - Continue to [Day 60 — Completion and Presentation](day60_capstone_completion_presentation.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-59` — Day 59 — Capstone Kickoff.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize capstone scope, decision framing, data contracts, and early stop rules. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day59_capstone_kickoff.md`
+- learner artifact: `python/ds-60day/notebooks/day59_capstone_kickoff.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

@@ -61,13 +61,167 @@ Nothing expensive happens until an execution trigger such as `compute`,
 `persist`, or a write. Inspect the task and expected output size before
 triggering it.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 52 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — lazy task graphs, partitions, bounded reducers, and scale evidence
+
+### The mental model
+
+Dask DataFrame represents a logical plan split into pandas partitions.
+Most operations are lazy: they build a task graph but do not read or
+compute data until `compute` or `persist`. `persist` returns a new
+collection backed by computed partitions; it is not an in-place flag.
+
+Parallelism has overhead and memory cost. If data fits comfortably in
+memory, pandas is often simpler and faster. Scalable reducers keep a
+small associative state per chunk and combine states without loading
+all rows. Partition size, skew, shuffles, and final-result size matter
+more than merely importing Dask.
+
+### Worked examples and syntax anatomy
+
+- **lazy expression:** describes tasks and dependencies; inspect partitions/graph before execution.
+- **`.compute()`:** executes the graph and materializes the result in local memory.
+- **chunk state + combine:** keeps sufficient statistics such as sum/count rather than averaging chunk averages incorrectly.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — combine chunk sums and counts correctly
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+chunks = [[1.0, 2.0, 3.0], [100.0]]
+states = [
+    {"sum": sum(chunk), "count": len(chunk)}
+    for chunk in chunks
+]
+total_sum = sum(state["sum"] for state in states)
+total_count = sum(state["count"] for state in states)
+correct_mean = total_sum / total_count
+wrong_mean_of_means = sum(
+    state["sum"] / state["count"] for state in states
+) / len(states)
+print({"correct": correct_mean, "wrong": wrong_mean_of_means})
+assert correct_mean == 26.5 and wrong_mean_of_means != correct_mean
+```
+
+**Expected observation:** Unequal chunk sizes make an unweighted mean of chunk means wrong; sum and count compose exactly.
+
+**Assumption to name:** Every valid value contributes once and missing-value rules are the same in every chunk.
+
+### Focused example B — see a lazy Dask computation remain unevaluated
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+from dask import delayed
+
+calls = []
+
+@delayed
+def record(value):
+    calls.append(value)
+    return value * 2
+
+planned = record(21)
+print({"before_compute_calls": list(calls), "planned_type": type(planned).__name__})
+result = planned.compute(scheduler="single-threaded")
+print({"after_compute_calls": list(calls), "result": result})
+assert result == 42 and calls == [21]
+```
+
+**Expected observation:** Constructing the delayed object performs no work; `compute` executes the task exactly once.
+
+**Assumption to name:** The single-threaded scheduler is chosen so this mechanics demonstration has deterministic local ordering.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define lazy task graphs, partitions, bounded reducers, and scale evidence in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Calling `compute()` after every transformation or persisting a collection larger than available memory.
+
+**Debug it deliberately:** Inspect partition count/sizes, graph task count, shuffle boundaries, memory, and final result size; benchmark against pandas on the same data.
+
+**Stop condition:** Do not claim scalability from elapsed time on one tiny demo or create partitions without a memory and overhead rationale.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Read a large local CSV with Dask and compute groupby aggregations.
+
+**Verify:** For task `Read a large local CSV with Dask and compute groupby aggregations`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
 2. Persist the DataFrame and compare repeated timings with and without
    persistence.
+
+**Verify:** For task `Persist the DataFrame and compare repeated timings with and without`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 3. Implement the same reduction with `pandas.read_csv(..., chunksize=...)` and
    compare memory and elapsed time.
+
+**Verify:** For task `Implement the same reduction with pandas.readcsv(..., chunksize=...) and`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -91,13 +245,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Task-graph tracing:** Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined `dask.compute` call.
    **Progressive hint:** Building an expression does not read all data. Combining terminal computations can share upstream work without persisting the entire frame.
+
+**Verify:** For task `Task-graph tracing: Build two aggregations from the same lazy Dask DataFrame, inspect their t...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+
+
+
+
+
+
+
 5. **Partition-skew diagnosis:** Create a group key where one value owns most rows. Measure partition sizes and groupby runtime, then propose repartitioning or algorithm changes.
    **Progressive hint:** A balanced row count before a shuffle does not guarantee balanced work after grouping; one hot key can become a straggler.
+
+**Verify:** For task `Partition-skew diagnosis: Create a group key where one value owns most rows. Measure partitio...`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
+
 6. **Reducer correctness:** Implement a mergeable mean/variance state for chunks and prove it matches NumPy across different chunk boundaries, including an empty chunk.
    **Progressive hint:** A mean alone is not mergeable without support. Carry count, mean, and M2 (sum of squared deviations) using a stable combine formula.
 
+**Verify:** For task `Reducer correctness: Implement a mergeable mean/variance state for chunks and prove it matche...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then run the named missing/unknown/empty boundary and assert its explicit fallback or exception instead of accepting an accidental default.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -130,3 +311,36 @@ data over the Internet. Close the client to release processes.
 - Then review the
   [Day 52 solution](../solutions/day52_scalability_dask/day52_solutions.md).
 - Continue to [Day 53 — MLflow](day53_mlops_mlflow_experiment_tracking.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-52` — Day 52 — Scalability with Dask and Chunked pandas.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize lazy task graphs, partitions, bounded reducers, and scale evidence. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day52_scalability_dask.md`
+- learner artifact: `python/ds-60day/notebooks/day52_scalability_dask.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

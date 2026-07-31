@@ -85,6 +85,36 @@ Result interpretation
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`rng = np.random.default_rng(seed)`:** creates an isolated reproducible random-number generator; the seed is an experiment input.
+2. **`rng.binomial(n, p, size)`:** returns `size` independent counts, each between zero and `n`, under constant success probability `p`.
+3. **`event.mean()`:** estimates a probability only when the Boolean or 0/1 array represents the event at the intended experimental grain.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Analytic probability establishes the target; seeded simulation then measures approximation error without replacing the derivation.
+
+**Useful alternative:** For rare-event approximations, a Poisson model can be useful when its assumptions are stated and checked.
+
+**Trade-off:** More simulation runs reduce Monte Carlo error but do not repair a wrong probability model.
+
+**Edge case to test:** A condition with zero observed support makes empirical conditional probability undefined, not zero.
+
+**Evidence of correctness:** Probabilities must remain in [0, 1], analytic and seeded simulation results should agree within a stated tolerance, and every conditional estimate must report its denominator.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -92,7 +122,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Simulate `Binomial(n=10, p=0.3)` 10,000 times and plot a histogram.
 
@@ -102,7 +132,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Simulate Binomial(n=10, p=0.3) 10,000 times and plot a histogram`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then show the labeled figure and reconcile it with a numeric summary so appearance is not the only check.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Generate `Normal(0, 1)` values, compute their mean and variance, and overlay the probability density function. The standard-library formula is enough; SciPy is optional.
 
@@ -112,7 +151,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Generate Normal(0, 1) values, compute their mean and variance, and overlay the probability de...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Given sensitivity `0.95`, specificity `0.90`, and prevalence `0.01`, compute \(P(\text{disease}\mid\text{positive})\).
 
@@ -121,6 +169,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Given sensitivity 0.95, specificity 0.90, and prevalence 0.01, compute \(P(\text{disease}\mid...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Prediction and uncertainty
 
@@ -156,6 +213,15 @@ an assumption; clustered events would require another model.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `For an event with probability 0.002 observed in 1,000 independent trials, predict the chance...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 
 ### Exercise 5 — Implementation
 
@@ -196,6 +262,15 @@ returning zero would incorrectly claim evidence of no association.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Debugging and boundaries
 
 **Prompt:** Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval.
@@ -230,3 +305,5 @@ and NaN. Clipping invalid probabilities would hide upstream data errors.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fracti...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

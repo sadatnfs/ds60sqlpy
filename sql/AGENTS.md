@@ -44,6 +44,21 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 
 - Keep the lesson script, companion guide, Markdown solution, executable solution when present, catalog-builder inputs, and generated catalog entry aligned.
 - Use Markdown solutions for explanation and `.sql` solutions for executable coverage.
+- Assume the learner has never used a database client. Every companion guide
+  must lead with `## How to run this lesson`, name the disposable
+  `advanced_sql_training` database, explain the private reader's
+  **Create/open guided SQL notebook** action, and include a repository-root
+  `psql -X -v ON_ERROR_STOP=1` fallback.
+- Explain every new clause and the query's logical row-shaping sequence. Worked
+  examples must state the starting row grain, expected columns/rows, NULL and
+  ordering assumptions, and what evidence proves the query behaved correctly.
+- Markdown solutions must explain each clause or statement, intermediate row
+  shape, tempting wrong approaches, verification queries, and rollback or
+  persistence behavior instead of only displaying a final query.
+- End every guide with the copy-ready, lesson-specific
+  `## Ask Codex about this lesson` block defined in
+  `docs/content-authoring.md`; coaching is optional and may not compensate for
+  missing course prose.
 - Do not claim an executable solution exists when only prose is present.
 - Use repository-root commands in documentation.
 - Provide PowerShell-safe alternatives for pipes, file redirection, and API examples.
@@ -67,6 +82,7 @@ Then run:
 ```text
 python scripts/course.py validate
 python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 ```
 
 Verify that:

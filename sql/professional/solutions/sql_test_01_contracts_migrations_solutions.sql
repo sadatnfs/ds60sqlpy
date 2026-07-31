@@ -1,4 +1,17 @@
 -- SQL-TEST-01 executable solutions
+-- SOLUTION READING MAP — sql-test-01: SQL Tests, Migration Checks, and Data Contracts
+-- Explanation: sql/professional/solutions/sql_test_01_contracts_migrations_solutions.md
+-- Run from the repository root only against advanced_sql_training:
+--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql
+-- Read each answer from inputs to output: establish FROM/JOIN grain; apply
+-- row filters; group/aggregate; filter groups; compute windows; project named
+-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE
+-- as an intermediate relation whose keys, row count, and totals can be checked.
+-- A command tag is not enough for DDL/DML: inspect catalogs or before/after
+-- rows, test a boundary case, and reconcile with an independent control.
+-- NULL, zero, empty input, missing rows, and ties need explicit policies.
+-- The documented transaction/cleanup boundary must leave no unintended persistent object.
+--
 \set ON_ERROR_STOP on
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;

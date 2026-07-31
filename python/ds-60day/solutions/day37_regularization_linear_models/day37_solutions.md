@@ -72,6 +72,36 @@ Takeaways
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`Pipeline([('scale', StandardScaler()), ('model', Ridge(...))])`:** learns scaling inside each training boundary before applying the penalty.
+2. **`alpha`:** controls penalty strength; compare it on a logarithmic scale with cross-validation.
+3. **`model.coef_`:** contains coefficients in transformed feature space; inspect magnitude and stability alongside validation error.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Scaling makes the penalty meaningful, while cross-validation and coefficient-path checks expose the bias-variance and stability trade-off.
+
+**Useful alternative:** Ridge is often more stable with correlated features; Elastic Net can retain groups better than pure Lasso.
+
+**Trade-off:** Sparsity improves compactness but can make selection unstable; Ridge keeps all features but controls their combined magnitude.
+
+**Edge case to test:** Perfect collinearity, constant features, an excessively large alpha, or too few optimizer iterations can hide useful signal or prevent convergence.
+
+**Evidence of correctness:** Keep scaling inside the pipeline, report fold metrics and convergence state, compare coefficient norms/nonzero counts, and repeat selection across resamples.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -79,7 +109,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Sweep `alpha` values and plot validation scores for Ridge and Lasso.
 
@@ -89,7 +119,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Sweep alpha values and plot validation scores for Ridge and Lasso`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Inspect fitted coefficients and compare their sparsity. The separate solution also demonstrates Elastic Net as a useful extension.
 
@@ -98,6 +137,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Inspect fitted coefficients and compare their sparsity. The separate solution also demonstrat...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 
 ### Exercise 3 — Prediction
 
@@ -117,6 +165,15 @@ rather than assuming every implementation uses the same objective.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Elastic Net implementation
 
@@ -155,6 +212,15 @@ than presenting zeros as automatic feature discovery.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Build a scaled ElasticNetCV pipeline, state what alpha and l1ratio control, and inspect both...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Scaling bug
 
 **Prompt:** Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison.
@@ -175,6 +241,15 @@ their standardized unit.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Exp...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Stability investigation
 
 **Prompt:** Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions.
@@ -193,3 +268,5 @@ importance.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Create two highly correlated predictors, refit Lasso across several bootstrap samples, and co...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.

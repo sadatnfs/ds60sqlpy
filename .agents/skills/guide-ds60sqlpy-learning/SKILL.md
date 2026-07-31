@@ -63,6 +63,11 @@ code or queries.
    Do not create or update it without permission.
 9. Choose one lesson. Load only its catalog entry, companion guide, and learner
    artifact initially. Do not open the official solution yet.
+10. Find that guide's final `## Ask Codex about this lesson` block. Treat its
+    stable ID, exact file paths, execution route, learning objective, and
+    solution boundary as the lesson-specific tutoring contract. If it is
+    missing or inconsistent with the catalog, report a course defect rather
+    than inventing paths or silently weakening the boundary.
 
 The catalog contains stable named modules such as `sql-found-01`,
 `python-pro-02`, and `bridge-jupyter-01` in addition to the historical day
@@ -74,6 +79,12 @@ bootstrap. They do not imply that a new machine can install tools and packages
 without a connection.
 
 ## Teach a lesson
+
+The checked-in guide must carry the explanation. Use Codex to question,
+demonstrate, diagnose, and adapt—not to replace a thin guide with an improvised
+lecture. If a definition, syntax explanation, runnable example, expected
+observation, or recovery path is absent, identify that gap and ground any
+temporary explanation in the actual artifact.
 
 Use this loop. Keep the five learner-visible phases explicit:
 
@@ -199,6 +210,10 @@ When the request is to improve course content rather than tutor:
 - Preserve `curriculum/practice_baseline.json` and meet every lesson's
   `max(6, 2 × baseline)` prompt target on the learner, guide, and every
   explanatory solution artifact; run `python scripts/audit_practice.py`.
+- Meet the complete-amateur depth contract in `docs/content-authoring.md` and
+  run `python scripts/audit_lesson_depth.py`. Every Python and SQL guide must
+  include its own copy-ready Codex tutoring prompt, but must be fully useful
+  without Codex.
 - Generate `START_HERE.html` only through
   `scripts/build_course_guide.py`, then use `--check` to prove no drift.
 - Generate `lesson-pages/*.html` only through

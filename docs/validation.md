@@ -30,10 +30,11 @@ Sensitive-content guard:
 python scripts/scan_secrets.py --history
 ```
 
-Practice-enrichment and generated portal drift:
+Practice enrichment, self-contained lesson depth, and generated portal drift:
 
 ```text
 python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 ```
@@ -48,6 +49,7 @@ On Windows, use:
 .\.venv\Scripts\python.exe scripts\course.py validate
 .\.venv\Scripts\python.exe scripts\scan_secrets.py --history
 .\.venv\Scripts\python.exe scripts\audit_practice.py
+.\.venv\Scripts\python.exe scripts\audit_lesson_depth.py
 .\.venv\Scripts\python.exe scripts\build_course_guide.py --check
 .\.venv\Scripts\python.exe scripts\build_lesson_readers.py --check
 ```
@@ -60,6 +62,7 @@ On macOS/Linux, use:
 .venv/bin/python scripts/course.py validate
 .venv/bin/python scripts/scan_secrets.py --history
 .venv/bin/python scripts/audit_practice.py
+.venv/bin/python scripts/audit_lesson_depth.py
 .venv/bin/python scripts/build_course_guide.py --check
 .venv/bin/python scripts/build_lesson_readers.py --check
 ```
@@ -90,7 +93,8 @@ python scripts/build_catalog.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 python scripts/audit_practice.py
-python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
+python scripts/audit_lesson_depth.py
+python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
 python -m ruff check src scripts tests bridge python/professional
 python -m mypy
 python -m pytest
@@ -112,6 +116,8 @@ without opening a browser.
 The focused learner-entry tests cover different boundaries:
 
 - `test_course_guide.py` checks dashboard catalog links and generated copy.
+- `test_lesson_depth_audit.py` checks the curriculum-wide beginner-depth
+  contract, duplicate/template guards, runnable guide fences, and report.
 - `test_lesson_reader.py` checks deterministic rendered pages, safe link
   rewriting, recursive Markdown/SQL reference pages, mode-specific completion
   controls, and stale-page removal.
@@ -203,6 +209,12 @@ Check:
 - Markdown internal links resolve.
 - Every lesson surface meets its immutable
   `curriculum/practice_baseline.json` doubling target.
+- Every cataloged lesson passes `scripts/audit_lesson_depth.py`: complete
+  beginner-facing sections, definitions, worked examples, exercise
+  verification contracts, explanatory solutions, historical Python notebook
+  depth, and a context-rich per-lesson Codex coaching prompt.
+- `docs/practice-coverage.md` and `docs/lesson-depth-report.md` match their
+  generators.
 - `START_HERE.html` matches a fresh deterministic portal render.
 - `lesson-pages/` contains exactly one current page per cataloged lesson and
   matches a fresh deterministic reader render.

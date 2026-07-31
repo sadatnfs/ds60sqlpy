@@ -60,16 +60,169 @@ For a Binomial variable, the theoretical mean is \(np\) and the variance is
 \(np(1-p)\). Compare those values with a large simulated sample as a diagnostic,
 not as a replacement for the formulas.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 31 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — probability models, conditional evidence, and simulation error
+
+### The mental model
+
+Probability separates a **model** from one observed dataset. A random
+variable specifies which numeric outcome is recorded; a distribution
+assigns probability to those outcomes; a sample is one finite set of
+draws. The expected value is a property of the model, while a sample
+mean is an estimate that changes across samples.
+
+Conditional probability changes the denominator. `P(A | B)` asks what
+fraction of the cases where `B` occurred also satisfy `A`. Bayes'
+theorem reverses a condition by accounting for every route into the
+observed evidence. Simulation is a useful numerical check, but its
+accuracy depends on the number and independence of simulated runs.
+
+### Worked examples and syntax anatomy
+
+- **`rng = np.random.default_rng(seed)`:** creates an isolated reproducible random-number generator; the seed is an experiment input.
+- **`rng.binomial(n, p, size)`:** returns `size` independent counts, each between zero and `n`, under constant success probability `p`.
+- **`event.mean()`:** estimates a probability only when the Boolean or 0/1 array represents the event at the intended experimental grain.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — solve an at-least-one event by its complement
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+import numpy as np
+
+event_probability = 0.002
+opportunities = 1_000
+analytic = 1 - (1 - event_probability) ** opportunities
+
+rng = np.random.default_rng(3101)
+counts = rng.binomial(opportunities, event_probability, size=20_000)
+simulated = np.mean(counts >= 1)
+print({"analytic": analytic, "simulated": simulated})
+assert abs(simulated - analytic) < 0.02
+```
+
+**Expected observation:** Both values are near 0.865; they are close rather than exactly equal.
+
+**Assumption to name:** The 1,000 opportunities are independent and all use the same event probability.
+
+### Focused example B — make the Bayes denominator visible with counts
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+population = 10_000
+prevalence = 0.01
+sensitivity = 0.95
+specificity = 0.90
+
+diseased = population * prevalence
+healthy = population - diseased
+true_positives = diseased * sensitivity
+false_positives = healthy * (1 - specificity)
+positive_predictive_value = true_positives / (true_positives + false_positives)
+print({"true_positive": true_positives,
+       "false_positive": false_positives,
+       "P(disease|positive)": positive_predictive_value})
+assert 0 < positive_predictive_value < sensitivity
+```
+
+**Expected observation:** False positives greatly outnumber true positives, so the posterior is about 8.8%, not 95%.
+
+**Assumption to name:** Sensitivity and specificity apply to this population and the stated prevalence is credible.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define probability models, conditional evidence, and simulation error in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Using sensitivity as `P(disease | positive)` reverses the condition and ignores the base rate.
+
+**Debug it deliberately:** Draw a two-by-two count table for a concrete population and verify that true and false positives both appear in the denominator.
+
+**Stop condition:** Do not interpret a probability until the event, denominator, independence assumption, and simulation grain are explicit.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 Complete these in the learner notebook:
 
 1. Simulate `Binomial(n=10, p=0.3)` 10,000 times and plot a histogram.
+
+**Verify:** For task `Simulate Binomial(n=10, p=0.3) 10,000 times and plot a histogram`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then show the labeled figure and reconcile it with a numeric summary so appearance is not the only check.
+
+
+
+
+
+
 2. Generate `Normal(0, 1)` values, compute their mean and variance, and overlay
    the probability density function. The standard-library formula is enough;
    SciPy is optional.
+
+**Verify:** For task `Generate Normal(0, 1) values, compute their mean and variance, and overlay`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+
+
+
+
+
+
 3. Given sensitivity `0.95`, specificity `0.90`, and prevalence `0.01`, compute
    \(P(\text{disease}\mid\text{positive})\).
+
+**Verify:** For task `Given sensitivity 0.95, specificity 0.90, and prevalence 0.01, compute`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -89,13 +242,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Prediction and uncertainty:** For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.
    **Progressive hint:** Compute 1-(1-p)**n first. Treat each simulated experiment as one Bernoulli outcome and use sqrt(p_hat*(1-p_hat)/runs) for its standard error.
+
+**Verify:** For task `Prediction and uncertainty: For an event with probability 0.002 observed in 1,000 independent...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+
+
+
+
+
+
+
 5. **Implementation:** Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support.
    **Progressive hint:** Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.
+
+**Verify:** For task `Implementation: Estimate P(A|B) from two Boolean arrays without using a probability library....`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+
+
+
+
+
+
+
 6. **Debugging and boundaries:** Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval.
    **Progressive hint:** n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.
 
+**Verify:** For task `Debugging and boundaries: Design and test a Binomial-parameter validator. Include n=0, p=0, p...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -126,3 +306,36 @@ ones. Do not require exact equality from random draws.
 - After attempting every exercise, compare reasoning with the
   [separate solution](../solutions/day31_probability_basics/day31_solutions.md).
 - Continue to [Day 32 — Statistical Inference](day32_statistical_inference.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-31` — Day 31 — Probability Basics.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize probability models, conditional evidence, and simulation error. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day31_probability_basics.md`
+- learner artifact: `python/ds-60day/notebooks/day31_probability_basics.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

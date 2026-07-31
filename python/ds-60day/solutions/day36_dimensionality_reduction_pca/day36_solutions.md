@@ -88,6 +88,36 @@ Notes
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`StandardScaler()`:** centers and scales features when equalized variance, rather than raw units, is the intended geometry.
+2. **`PCA(n_components=...).fit(X_train)`:** learns training-only means, axes, and explained variance.
+3. **`.transform()` / `.inverse_transform()`:** moves between feature and component spaces, enabling reconstruction-error checks.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** The solution treats PCA as a fitted transformation with a declared geometry and validates both variance retention and downstream consequences.
+
+**Useful alternative:** Supervised feature selection can preserve target-relevant original columns, while regularization may avoid a separate reduction step.
+
+**Trade-off:** Fewer components reduce dimension and noise but sacrifice information and make feature-level explanations less direct.
+
+**Edge case to test:** Constant columns, missing values, very sparse inputs, or requesting more components than rank require preprocessing or an explicit failure.
+
+**Evidence of correctness:** Fit scaling/PCA on training data only, assert transformed shapes, report cumulative explained variance and reconstruction error, and compare downstream validation against a no-PCA baseline.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -95,7 +125,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Plot cumulative explained variance and choose a component count.
 
@@ -105,7 +135,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Plot cumulative explained variance and choose a component count`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Compare PCA before and after feature standardization.
 
@@ -115,7 +154,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Compare PCA before and after feature standardization`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Try `SelectKBest` on a classification dataset and compare its validated performance with PCA.
 
@@ -124,6 +172,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Try SelectKBest on a classification dataset and compare its validated performance with PCA`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Reconstruction analysis
 
@@ -158,6 +215,15 @@ the reduced representation against the actual downstream objective.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Fit scaled PCA with several component counts, inverse-transform the representations, and plot...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Interpretation edge case
 
 **Prompt:** Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent.
@@ -176,6 +242,15 @@ matrices. Do not interpret a sign flip as learned behavioral drift.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Fit PCA twice to equivalent data and explain why a component and all of its loadings may appe...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 
 ### Exercise 6 — Leakage debugging
 
@@ -206,3 +281,5 @@ simulation across seeds; one dataset can understate or overstate the leakage.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Create a dataset with many noise features, run SelectKBest once before cross-validation, and...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

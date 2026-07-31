@@ -355,6 +355,61 @@ def build_html(payload: dict[str, Any]) -> str:
       background: var(--green-soft);
     }
     .callout.warning { border-color: #ead09c; background: var(--gold-soft); }
+    .mode-notice {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: 0.9rem;
+      margin: 0 auto 1rem;
+      border: 2px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      background: var(--gold-soft);
+    }
+    .mode-notice.private {
+      border-color: var(--green);
+      background: var(--green-soft);
+    }
+    .mode-notice strong { display: block; margin-bottom: 0.2rem; }
+    .mode-notice p { margin: 0; color: var(--muted); }
+    .mode-icon {
+      display: grid;
+      width: 2.35rem;
+      height: 2.35rem;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--gold);
+      font-weight: 900;
+    }
+    .mode-notice.private .mode-icon { background: var(--green); }
+    .sql-run-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0.7rem;
+      counter-reset: sql-run;
+    }
+    .sql-run-step {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      background: var(--surface);
+      counter-increment: sql-run;
+    }
+    .sql-run-step::before {
+      display: grid;
+      width: 2rem;
+      height: 2rem;
+      place-items: center;
+      margin-bottom: 0.7rem;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--navy);
+      content: counter(sql-run);
+      font-weight: 850;
+    }
+    .sql-run-step h3 { margin-bottom: 0.45rem; font-size: 1rem; }
+    .sql-run-step p { margin: 0; color: var(--muted); font-size: 0.88rem; }
     .controls {
       display: grid;
       grid-template-columns: minmax(15rem, 2fr) repeat(3, minmax(9rem, 1fr));
@@ -598,6 +653,7 @@ def build_html(payload: dict[str, Any]) -> str:
       .hero { grid-template-columns: 1fr; }
       .grid.three, .lesson-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .workflow { grid-template-columns: repeat(2, 1fr); }
+      .sql-run-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .controls { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 620px) {
@@ -606,9 +662,10 @@ def build_html(payload: dict[str, Any]) -> str:
       nav { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.25rem; }
       .hero { padding-top: 2.5rem; }
       h1 { font-size: clamp(2.8rem, 17vw, 4.4rem); }
-      .grid.three, .grid.two, .lesson-grid, .workflow, .controls { grid-template-columns: 1fr; }
+      .grid.three, .grid.two, .lesson-grid, .workflow, .sql-run-grid, .controls { grid-template-columns: 1fr; }
       .section-head { align-items: flex-start; flex-direction: column; }
       .progress-panel, .track-progress-grid, .readiness-results { grid-template-columns: 1fr; }
+      .mode-notice { grid-template-columns: 1fr; }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -634,6 +691,7 @@ def build_html(payload: dict[str, Any]) -> str:
       </a>
       <nav aria-label="Primary">
         <a href="#setup">Set up</a>
+        <a href="#run-sql">Run SQL</a>
         <a href="#paths">Choose a path</a>
         <a href="#workflow">Study loop</a>
         <a href="#catalog">Lessons</a>
@@ -654,6 +712,7 @@ def build_html(payload: dict[str, Any]) -> str:
       <div class="hero-actions">
         <a class="button" href="#windows-quick-start">Windows: start here</a>
         <a class="button secondary" href="#setup">macOS/Linux setup</a>
+        <a class="button secondary" href="#run-sql">How to run SQL</a>
         <a class="button secondary" href="#catalog">Browse all lessons</a>
       </div>
     </div>
@@ -672,6 +731,33 @@ def build_html(payload: dict[str, Any]) -> str:
         Lesson code is designed for offline study after setup.
       </p>
     </aside>
+  </div>
+
+  <div class="shell">
+    <div class="mode-notice" id="static-mode-banner">
+      <span class="mode-icon" aria-hidden="true">i</span>
+      <div>
+        <strong>You are in portable reading mode.</strong>
+        <p>
+          Guides and rendered notebooks are readable here, but a normal browser
+          page cannot safely start VS Code, Jupyter, Python, or PostgreSQL. On
+          Windows, double-click <code>START_DS60.cmd</code>. On macOS/Linux, run
+          <code>.venv/bin/python scripts/learning_portal.py</code>. The reopened
+          page will say <em>Private launcher mode</em> and show real launch buttons.
+        </p>
+      </div>
+    </div>
+    <div class="mode-notice private" id="private-mode-banner" hidden>
+      <span class="mode-icon" aria-hidden="true">✓</span>
+      <div>
+        <strong>Private launcher mode is active.</strong>
+        <p>
+          Buttons on this page can now open allowlisted lesson files in VS Code
+          or generate and open guided notebooks in JupyterLab. Keep the launcher
+          terminal open; it is the private bridge between this page and your apps.
+        </p>
+      </div>
+    </div>
   </div>
 
   <noscript>
@@ -836,7 +922,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <div class="launcher-actions">
             <button type="button" data-launch-action="open-repo">Open repository in VS Code</button>
             <button type="button" class="secondary" data-launch-action="jupyter-python">Launch Python JupyterLab</button>
-            <button type="button" class="secondary" data-launch-action="jupyter-sql">Launch PostgreSQL notebook lab</button>
+            <button type="button" class="secondary" data-launch-action="jupyter-sql">Open PostgreSQL magics lab</button>
           </div>
           <p class="microcopy launcher-status" id="launcher-status" aria-live="polite"></p>
           <div class="readiness-box">
@@ -875,6 +961,82 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <code>.learning/progress.json</code> file in private launcher mode.
             No machine details leave the computer.
           </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="run-sql">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">SQL beginner runway</p>
+            <h2>Run SQL in a real notebook, one statement at a time.</h2>
+          </div>
+          <p>
+            A SQL lesson uses three cooperating programs: Jupyter displays the
+            notebook, Python sends commands through the database driver, and
+            PostgreSQL executes them and returns rows. The generated notebook
+            explains and checks each boundary before you touch an exercise.
+          </p>
+        </div>
+        <div class="sql-run-grid">
+          <article class="sql-run-step">
+            <h3>Start guided mode</h3>
+            <p>
+              Windows: double-click <code>START_DS60.cmd</code>. Keep its
+              terminal open until you finish studying.
+            </p>
+          </article>
+          <article class="sql-run-step">
+            <h3>Pass readiness</h3>
+            <p>
+              Confirm the course kernel, PostgreSQL tools, server connection,
+              and disposable <code>advanced_sql_training</code> database.
+            </p>
+          </article>
+          <article class="sql-run-step">
+            <h3>Choose a SQL lesson</h3>
+            <p>
+              Open its reader, study the guide, then select
+              <strong>Create/open guided SQL notebook</strong>.
+            </p>
+          </article>
+          <article class="sql-run-step">
+            <h3>Edit, save, prepare</h3>
+            <p>
+              Work in the generated copy. Save it, run the preparation cells,
+              and read every readiness message before the SQL cell.
+            </p>
+          </article>
+          <article class="sql-run-step">
+            <h3>Run and inspect</h3>
+            <p>
+              Execute one cell, inspect the transcript and returned rows, then
+              explain the row grain, columns, and ordering before continuing.
+            </p>
+          </article>
+        </div>
+        <div class="grid two" style="margin-top: 1rem">
+          <div class="callout">
+            <h3>Your first SQL launch</h3>
+            <p>
+              Start with relational design, then continue to SQL Day 1. In
+              private mode, every SQL catalog card gains an
+              <strong>Open SQL workspace</strong> button that creates the
+              lesson-specific guided notebook for you.
+            </p>
+            <a class="button" href="lesson-pages/sql-found-01.html">Start SQL foundations</a>
+          </div>
+          <div class="callout warning">
+            <h3>If a cell fails</h3>
+            <p>
+              Stop at the first error. Check which layer named it:
+              <em>Jupyter/kernel</em>, <em>Python package or driver</em>,
+              <em>connection/database</em>, or <em>SQL statement</em>. Copy the
+              complete error into your learning notes before changing anything.
+            </p>
+            <a href="docs/guided-sql-notebooks.md">Open the guided SQL handbook</a>
+          </div>
         </div>
       </div>
     </section>
@@ -926,7 +1088,10 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         <p class="microcopy" style="margin-top: 1rem">
           See the narrative <a href="docs/curriculum-map.md">curriculum map</a>
           and <a href="docs/professional-paths.md">professional paths</a> for
-          milestone advice and specialization lanes.
+          milestone advice and specialization lanes. Curious how the teaching
+          sequence was designed? Read the
+          <a href="docs/curriculum-design-references.md">source-backed curriculum
+          design notes</a>.
         </p>
       </div>
     </section>
@@ -1094,7 +1259,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
   <footer>
     <div class="shell">
       <span>DS60 portable learning guide · generated from <code>curriculum/catalog.json</code></span>
-      <span><a href="README.md">README</a> · <a href="AGENTS.md">Agent guide</a> · <a href="docs/validation.md">Validation</a></span>
+      <span><a href="README.md">README</a> · <a href="AGENTS.md">Agent guide</a> · <a href="docs/content-authoring.md">Authoring standard</a> · <a href="docs/validation.md">Validation</a></span>
     </div>
   </footer>
 
@@ -1158,6 +1323,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 
     async function loadServerProgress() {
       if (!launcherMode) return;
+      document.querySelector("#static-mode-banner").hidden = true;
+      document.querySelector("#private-mode-banner").hidden = false;
       document.querySelector("#launcher-panel").hidden = false;
       try {
         const payload = await apiRequest("/api/status");
@@ -1254,6 +1421,11 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       const solutions = lesson.solution_paths
         .map((_path, index) => `<a href="${reader}#solution-${index + 1}">Solution ${index + 1}</a>`)
         .join("");
+      const learnerLauncher = lesson.track === "sql"
+        ? `<button type="button" class="ghost" data-open-sql="${escapeHtml(lesson.id)}">Open SQL workspace</button>`
+        : String(lesson.lesson_path).toLowerCase().endsWith(".ipynb")
+          ? `<button type="button" class="ghost" data-open-notebook="${escapeHtml(lesson.id)}">Open notebook</button>`
+          : `<button type="button" class="ghost" data-open-lesson="${escapeHtml(lesson.id)}">Open in VS Code</button>`;
       return `
         <article class="lesson-card ${completed ? "complete" : ""}" data-lesson-id="${escapeHtml(lesson.id)}">
           <div class="lesson-top">
@@ -1278,7 +1450,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <a href="${reader}#guide">Guide</a>
             <a href="${reader}#learner">Learner artifact</a>
             ${solutions}
-            ${launcherMode ? `<button type="button" class="ghost" data-open-lesson="${escapeHtml(lesson.id)}">Open in VS Code</button>` : ""}
+            ${launcherMode ? learnerLauncher : ""}
           </div>
         </article>`;
     }
@@ -1363,6 +1535,23 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           void launchNative("open-lesson", {
             lesson_id: button.dataset.openLesson,
             artifact: "lesson"
+          });
+        });
+      });
+      lessonGrid.querySelectorAll("[data-open-notebook]").forEach((button) => {
+        button.addEventListener("click", () => {
+          void launchNative("jupyter-lesson", {
+            lesson_id: button.dataset.openNotebook,
+            artifact: "lesson"
+          });
+        });
+      });
+      lessonGrid.querySelectorAll("[data-open-sql]").forEach((button) => {
+        button.addEventListener("click", () => {
+          void launchNative("jupyter-sql", {
+            lesson_id: button.dataset.openSql,
+            artifact: "lesson",
+            solution_index: 1
           });
         });
       });

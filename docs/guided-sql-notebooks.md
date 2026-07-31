@@ -40,9 +40,11 @@ installation to the current process path, and Jupyter launched from the portal
 inherits it. If the notebook says `psql` is missing, close Jupyter, return to
 this PowerShell window, rerun the doctor, and start the portal again.
 
-The normal portal action is the easiest route: choose a SQL lesson and select
-the guided notebook action. The action creates an editable SQL copy and a
-notebook, then opens the notebook in JupyterLab.
+The normal portal action is the easiest route. The reopened dashboard says
+**Private launcher mode is active**. Choose any SQL card and select
+**Open SQL workspace**, or open the lesson reader and select
+**Create/open guided SQL notebook**. Both actions create the same editable SQL
+copy and lesson-specific notebook, then open that exact notebook in JupyterLab.
 
 ## macOS and Linux path
 
@@ -101,14 +103,30 @@ For `sql-01`, the generated files are:
 
 The notebook follows this learning sequence:
 
-1. **Goal** — identifies the lesson, guide, official source, and editable copy.
-2. **Setup** — locates the repository and performs a secret-free readiness
-   check.
-3. **Steps** — renders the official SQL, links to the editable copy, prepares
-   the database, and runs the complete working file.
-4. **Checks** — reruns deterministic course database invariants.
-5. **Next Steps** — sends the learner back to progress tracking and the next
-   catalog prerequisite.
+1. **Goal and three-program mental model** — identifies the lesson, guide,
+   official source, editable copy, and the separate roles of Jupyter, Python,
+   `psql`, and the PostgreSQL server.
+2. **Before-you-run checklist** — confirms the selected course kernel, local
+   tools, disposable database name, and the difference between reading and
+   execution.
+3. **Secret-free readiness** — locates the repository, validates the database
+   target, and explains each pass, warning, or failure.
+4. **Study and edit** — renders the official SQL for comparison and points to
+   the preserved editable copy.
+5. **Explicit preparation** — requires the learner to confirm the destructive
+   reset switch before preparing the course schema.
+6. **Run and inspect** — executes the complete copy through fixed `psql -f`,
+   then teaches the learner to read the exit status, transcript, result
+   columns, row grain, counts, and ordering.
+7. **Checks and recovery** — reruns deterministic database invariants and maps
+   common failures to the responsible layer.
+8. **Reflection and next step** — asks for evidence in the learner's own words
+   before progress is recorded.
+
+The notebook is deliberately more than a wrapper around a command. It teaches
+how to tell whether a query ran, where output came from, why the database is
+safe to reset, and what evidence should be captured before a learner edits
+again.
 
 Generation never overwrites an existing notebook or SQL copy. Reopening a
 lesson therefore preserves experiments and notes. To start over, first save

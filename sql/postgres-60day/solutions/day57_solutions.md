@@ -1,5 +1,58 @@
 # Day 57 Solutions — Forecast Accuracy and Anomalies
 
+
+<!-- beginner-solution-enrichment -->
+## How to study and run this solution
+
+Open this explanation only after making an honest attempt. The executable
+companion runs solely against the disposable `advanced_sql_training` database:
+
+```powershell
+# Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day57_solutions.sql"
+```
+
+```bash
+# macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day57_solutions.sql
+```
+
+`psql` prints each result/command tag in the terminal. Stop at the first
+unexpected `ERROR`; later output cannot repair an earlier failed invariant.
+Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
+ordering with the explanation before comparing syntax.
+
+## Clause-by-clause reading map
+
+The lesson's main concepts are Seasonal naive, MAD, Anomaly candidate. Its worked-model focus is:
+Build a complete daily spine before LAG(revenue, 7) so the offset means seven calendar days. Calculate a trailing forecast that excludes the current actual, then score the same six-month rows. For anomaly output, retain raw revenue, center, dispersion, and both scores beside the rank.
+
+- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
+  before adding aggregates; a one-to-many join is allowed to multiply rows only
+  when the later contract accounts for it.
+- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
+  completed groups. Window functions run over the surviving relation and
+  normally preserve its row count.
+- Read the `SELECT` list as the public result contract: keys establish grain,
+  measures state calculations, and aliases explain meaning. `ORDER BY` is the
+  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
+- Trace every common table expression (CTE) as a temporary named relation.
+  Execute or inspect one stage at a time while debugging, but compare the final
+  result with an independent control rather than trusting stage names.
+- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
+  chooses another representation. Guard division with `NULLIF`; disclose
+  exclusions and distinguish zero from no row.
+- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
+  Catalog checks, negative cases, row-count reconciliation, and the declared
+  transaction boundary prove behavior and cleanup.
+
+The exact final queries are not the only valid syntax. A join, subquery, CTE,
+window, or conditional aggregate can be an alternative when it preserves the
+same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
+form whose intermediate relations a reviewer can verify; optimize only after
+correctness is established with evidence.
+
 The exercises compare a seven-day moving average with a weekly seasonal naive,
 then rank recent positive and negative anomalies using standard-deviation and
 MAD scores. See [`day57_solutions.sql`](day57_solutions.sql).
@@ -53,6 +106,21 @@ ORDER BY model;
 
 Expected shape: two model rows. Zero-revenue days are excluded from MAPE by
 `NULLIF`; disclose that choice.
+
+### Reasoning and verification
+
+- **Expected result/shape:** Exercise 1 requires a written prediction and the observed result for “Compare MA(7) with calendar-week seasonal naive using MAPE”. Show both compared result shapes at one row per requested calendar/cohort bucket and grouping key, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `day`, `revenue`, `ma7_forecast`, `seasonal_naive`, `model`, `mape`, `ma`.
+- **Independent verification:** For Exercise 1, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 1: compare prior-seven-day average with seven-day seasonal naive.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A different window or subquery shape is valid only with the same partition, peer, frame, tie, and output-order semantics.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 2 — Top ten positive and negative anomalies
 
@@ -116,6 +184,21 @@ ORDER BY direction DESC, anomaly_rank;
 Expected shape: up to ten positive and ten negative rows. The combined absolute
 score is a ranking heuristic; it is not a calibrated probability.
 
+### Reasoning and verification
+
+- **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Rank positive/negative anomalies with SD and MAD scores” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `absolute_deviation`, `mad`, `sd_z`, `modified_z`, `direction`, `anomaly_rank`, `sd`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
+- **Independent verification:** For Exercise 2, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 2: rank positive and negative anomalies using both standard and median-absolute-deviation scores.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A different window or subquery shape is valid only with the same partition, peer, frame, tie, and output-order semantics.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Reasoning, safety, and pitfalls
 
 - A moving average must exclude the current day to avoid leakage.
@@ -132,7 +215,7 @@ The exact runnable answers are in
 [`day57_solutions.sql`](day57_solutions.sql). The notes below explain why every
 stage exists, so the query can be rebuilt rather than memorized.
 
-## Exercise 1 — Compare two forecasts without leakage
+### Clause map for Exercise 1 — Compare two forecasts without leakage
 
 - `bounds` finds the observed date extent; it avoids assuming that course data
   ends today.
@@ -151,7 +234,7 @@ stage exists, so the query can be rebuilt rather than memorized.
 `UNION ALL` retains one row per model. `ORDER BY model` makes the small result
 stable but has no analytical effect.
 
-## Exercise 2 — Rank robust anomaly candidates
+### Clause map for Exercise 2 — Rank robust anomaly candidates
 
 - `daily` establishes one observation per represented order date.
 - `moments` calculates the mean and sample standard deviation used by the
@@ -174,6 +257,21 @@ The answer calculates `observed_row_lag7` before building a spine and
 `calendar_day_lag7` after it. Joining the outputs by date makes any gaps visible.
 Neither population is automatically correct; the metric contract decides.
 
+### Reasoning and verification
+
+- **Expected result/shape:** Exercise 3 requires a written prediction and the observed result for “Predict how removing the date spine changes LAG(..., 7)”. Show both compared result shapes at one row per requested calendar/cohort bucket and grouping key, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `max_day`, `day`, `revenue`, `observed_row_lag7`, `calendar`, `calendar_day_lag7`, `lag`.
+- **Independent verification:** For Exercise 3, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 3: show exactly why the calendar spine matters. observeddaily has one row only when orders exist, so LAG(..., 7) means “seven prior observations.” calendardaily has one row per calendar date, so the same offset means “seven calendar days.”
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Exercise 4 — Compare MAE, RMSE, and MAPE fairly
 
 `calendar_daily` and `forecasts` repeat the leakage-free foundation.
@@ -186,11 +284,41 @@ both models one evaluation population.
 - MAPE reports relative error but is undefined at zero actual.
 - `scored_rows` and `zero_actual_rows` disclose denominators and exclusions.
 
+### Reasoning and verification
+
+- **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Compare MAE, RMSE, MAPE, and scored-row counts on one window”. Show both compared result shapes at one summary row per grouping key explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `error`, `model`, `scored_rows`, `mae`, `rmse`, `mape`, `zero_actual_rows`.
+- **Independent verification:** For Exercise 4, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 4: score both forecast models on one identical evaluation set. 1. calendardaily establishes one row per date and a documented zero policy. 2. forecasts uses only prior rows: MA(7) ends at 1 PRECEDING, while the seasonal model reads exactly seven calendar rows back. 3. LATERAL VALUES reshapes the two model columns to a common tidy model grain. 4. The WHERE clause requires both forecasts, so model comparisons use the same dates. MAPE additionally excludes zero actuals through NULLIF.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Exercise 5 — Detect a leaky frame
 
 The leaky window ends at `CURRENT ROW`, so the day's actual helps predict itself.
 The corrected frame ends at `1 PRECEDING`. Displaying both columns is a direct
 proof of the semantic difference.
+
+### Reasoning and verification
+
+- **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Detect and remove current-row forecast leakage” at one row per requested calendar/cohort bucket and grouping key. Named evidence columns/objects: `day`, `revenue`, `leaky_window`, `forecast_window`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
+- **Independent verification:** For Exercise 5, prove uniqueness at one row per requested calendar/cohort bucket and grouping key; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 5: place the leaky and honest frames side by side. The leaky result includes the current actual, so it is not a forecast of that day. The honest frame ends at 1 PRECEDING and can be computed before the target is known.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 6 — Preserve undefined zero-dispersion scores
 
@@ -198,3 +326,18 @@ The constant three-day fixture has standard deviation and MAD equal to zero.
 Both score formulas divide by `NULLIF(dispersion, 0)`, yielding NULL. That means
 “this scoring method is undefined for this population,” not “the observation is
 normal.”
+
+### Reasoning and verification
+
+- **Expected result/shape:** Exercise 6 requires a written prediction and the observed result for “Preserve undefined scores for a constant series. Compare absent no-order days with explicit zero-revenue days”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `median_revenue`, `mean_revenue`, `sd_revenue`, `absolute_deviation`, `mad`, `sd_z`, `modified_mad_z`.
+- **Independent verification:** For Exercise 6, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 6: constant data has zero SD and zero MAD. Both denominators use NULLIF, preserving an undefined score as NULL instead of declaring the points “normal” with a fabricated zero score.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.

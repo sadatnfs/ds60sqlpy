@@ -1,4 +1,17 @@
 -- SQL-FOUND-01 executable solutions
+-- SOLUTION READING MAP — sql-found-01: Relational Design, DDL, and Integrity Constraints
+-- Explanation: sql/professional/solutions/sql_found_01_relational_design_solutions.md
+-- Run from the repository root only against advanced_sql_training:
+--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_found_01_relational_design_solutions.sql
+-- Read each answer from inputs to output: establish FROM/JOIN grain; apply
+-- row filters; group/aggregate; filter groups; compute windows; project named
+-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE
+-- as an intermediate relation whose keys, row count, and totals can be checked.
+-- A command tag is not enough for DDL/DML: inspect catalogs or before/after
+-- rows, test a boundary case, and reconcile with an independent control.
+-- NULL, zero, empty input, missing rows, and ties need explicit policies.
+-- The documented transaction/cleanup boundary must leave no unintended persistent object.
+--
 -- Creates and removes only pro_relational_lab.
 
 BEGIN;

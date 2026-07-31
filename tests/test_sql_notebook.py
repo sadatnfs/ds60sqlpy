@@ -135,11 +135,17 @@ def test_generate_notebook_is_valid_guided_and_credential_free(
     assert workspace.notebook_path.is_relative_to(catalog.repo_root / ".learning")
     assert workspace.sql_path.is_relative_to(catalog.repo_root / ".learning")
     assert "## Goal" in source
+    assert "## How this notebook works" in source
     assert "## Setup" in source
+    assert "Interpret the readiness result" in source
     assert "## Steps" in source
+    assert "Read the transcript as evidence" in source
     assert "## Checks" in source
+    assert "Recovery and reflection" in source
     assert "## Next Steps" in source
     assert "psql -X -v ON_ERROR_STOP=1 -f" in source
+    assert "Ready to execute: True" in source
+    assert "row grain" in source
     assert "\\echo 'sql-01'" in source
     assert "do-not-save-me" not in workspace.notebook_path.read_text(encoding="utf-8")
     assert notebook.metadata.course.lesson_id == "sql-01"

@@ -90,6 +90,52 @@ on a narrow elapsed-time threshold, random scheduling, or external I/O.
 
 ---
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## Reasoning before implementation
+
+The solution treats primitive choice, admission control, lifecycle, and result accounting as separate contracts validated under forced interleavings.
+
+1. **workload classification:** identifies CPU time, blocking/nonblocking I/O, data transfer, and external capacity before selecting a primitive.
+2. **semaphore/worker queue:** bounds active and queued work rather than creating one task per input.
+3. **structured result:** associates each input with success/failure/cancellation so no work disappears.
+4. **Prove the failure boundary:** Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.
+
+**Alternative:** Vectorized/native libraries often outperform Python processes; a simple sequential loop is best when overhead dominates.
+
+**Trade-off:** Higher concurrency may reduce latency until external or local saturation, then worsens queuing, memory, and failure amplification.
+
+**Failure boundary:** Cancellation during acquisition, task exception, process pickle failure, Windows spawn recursion, lost ordering, and executor shutdown need tests.
+
+**Verification:** Benchmark against sequential, prove peak active/queued bounds, account for every input, inject failures/cancellation, and run process examples behind a main guard.
+
+### Verification micro-example
+
+Run this small, deterministic case before adapting the reference to a
+larger system. It gives the reasoning above an executable anchor:
+
+```python
+def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
+    if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:
+        raise ValueError("classify one dominant workload")
+    if waits_nonblocking:
+        return "asyncio"
+    if waits_blocking:
+        return "threads"
+    return "processes-or-native-vectorization"
+
+assert choose_execution(waits_nonblocking=True) == "asyncio"
+assert choose_execution(cpu_python=True) == "processes-or-native-vectorization"
+```
+
+**Expected observation:** The decision follows where time is spent, not a belief that one primitive is universally faster.
+
+The reference implementation is one defensible contract, not a license
+to copy internal steps into every system. Preserve the observable
+guarantees and repeat the failure tests when adapting it.
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reference
 
 Use this map after an honest attempt. The executable implementation remains
@@ -110,6 +156,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `choose a model`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 2 — build a bounded async map
 
 **Prompt recap:** Implement `bounded_map` with: 1. `asyncio.Queue(maxsize=queue_capacity)`, 2. one producer, 3. a fixed number of consumers, 4. indexed items so results retain input order, 5. a unique sentinel per consumer, and 6. `asyncio.TaskGroup`. Place `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch `CancelledError` unless cleanup requires it; if caught, re-raise it.
@@ -123,6 +177,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `build a bounded async map`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 3 — add per-item timeouts
 
@@ -138,6 +200,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `add per-item timeouts`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 4 — adapt blocking I/O
 
 **Prompt recap:** Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs. Compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion. Explain why a thread pool requires a deliberate `max_workers`, even if the remote service could theoretically accept more requests.
@@ -151,6 +221,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `adapt blocking I/O`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 5 — isolate CPU work
 
@@ -166,6 +244,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `isolate CPU work`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 6 — reason about shared state
 
 **Prompt recap:** Implement `deterministic_lost_update`. Force two workers to read the same snapshot, then apply both writes. Compare with two serialized increments. List three repairs: - one owner task/process receives update messages, - a lock protects the complete read/modify/write unit, or - an external system performs an atomic update.
@@ -179,6 +265,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `reason about shared state`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 7 — prove cancellation cleanup
 
@@ -200,6 +294,14 @@ continuing with partial results is incorrect.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `prove cancellation cleanup`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 8 — inspect structured failures
 
 **Prompt recap:** Run multiple workers that fail with different typed exceptions. Use `except*` to handle one expected category while preserving unexpected failures and their original tracebacks.
@@ -218,6 +320,14 @@ from an independent worker defect.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `inspect structured failures`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
 
 ### Exercise 9 — stream a backpressured producer
 
@@ -239,6 +349,14 @@ input, so expose an async result iterator instead.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `stream a backpressured producer`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 10 — trace context across boundaries
 
 **Prompt recap:** Set a request ID in `contextvars`, then observe propagation through an async task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any explicit propagation visible.
@@ -257,6 +375,14 @@ tokens in a reviewed credential boundary, not a general diagnostic context.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `trace context across boundaries`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 
 ### Exercise 11 — design graceful executor shutdown
 
@@ -277,6 +403,14 @@ Avoid relying only on garbage collection or interpreter teardown.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `design graceful executor shutdown`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 ### Exercise 12 — make an evidence-based model decision
 
 **Prompt recap:** Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.
@@ -296,3 +430,5 @@ decision honestly.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `make an evidence-based model decision`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

@@ -164,6 +164,36 @@ Line‑by‑line
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`DataLoader(dataset, batch_size=..., shuffle=...)`:** yields bounded feature/target batches and controls training order.
+2. **`model(features)`:** returns logits shaped `(batch, classes)` for multiclass classification.
+3. **`CrossEntropyLoss(logits, labels)`:** expects floating logits and `long` class indices shaped `(batch,)`.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** The solution establishes tensor contracts first, then separates training updates from evaluation measurement and checkpoint policy.
+
+**Useful alternative:** Full-batch training is simpler for tiny data; high-level trainers reduce boilerplate but can hide the exact state transitions learners need to understand.
+
+**Trade-off:** Smaller batches add gradient noise and more updates; larger batches use more memory and may generalize differently.
+
+**Edge case to test:** Empty loaders, a final partial batch, wrong class count, device mismatch, non-finite loss, and checkpointing optimizer state require tests.
+
+**Evidence of correctness:** Overfit a tiny batch, assert logits/label contracts, show dropout mode behavior, use no-grad validation, aggregate loss by example, and reload a portable checkpoint.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -171,7 +201,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Add dropout to the MLP and compare results.
 
@@ -181,7 +211,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Add dropout to the MLP and compare results`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Implement a small minibatch training loop with `DataLoader`.
 
@@ -190,6 +229,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Implement a small minibatch training loop with DataLoader`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 
 ### Exercise 3 — Shape and dtype contract
 
@@ -212,6 +260,15 @@ without a dimension because a batch of size one can lose its batch axis.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Write assertions at the start of a classification training step for feature shape/dtype, targ...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 4 — Validation implementation
 
 **Prompt:** Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller's prior train/eval mode, and never retains an autograd graph.
@@ -229,6 +286,15 @@ history does not retain tensors or device memory.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Implement an evaluation function that returns sample-weighted loss and accuracy, restores the...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 5 — DataLoader reproducibility
 
@@ -249,6 +315,15 @@ hold across more than one seed.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Run two shuffled DataLoaders with the same seed and compare batch order. Then state what chan...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Portable checkpoint
 
 **Prompt:** Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain `state_dict` versus serializing the entire model object.
@@ -266,3 +341,5 @@ is a requirement.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resum...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

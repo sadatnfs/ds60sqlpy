@@ -84,6 +84,36 @@ Caveats
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`permutation_importance(..., X_valid, y_valid)`:** measures predictive reliance on held-out data with repeated shuffles and a declared scorer.
+2. **`PartialDependenceDisplay.from_estimator(...)`:** averages model predictions over a grid while holding the empirical distribution of other features.
+3. **`shap.TreeExplainer(model, data=background, ...)`:** allocates model output under an explicit dependence/background convention; output shape is model/version dependent.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Triangulating local sensitivity, held-out permutation, and global behavior makes method assumptions and disagreements visible.
+
+**Useful alternative:** Coefficients, ALE plots, counterfactual analysis, and model-specific diagnostics answer different questions and may handle correlation differently.
+
+**Trade-off:** Model-agnostic explanations are portable but computationally expensive and assumption-heavy; simpler models can be easier to audit.
+
+**Edge case to test:** Correlated/duplicate features, multiclass output shapes, out-of-range perturbations, and unstable background samples can radically change attributions.
+
+**Evidence of correctness:** Explain only a validated held-out model, report repeated uncertainty, record background/scorer/output class, test plausibility, and state explicitly that predictive explanation is not causality.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -91,7 +121,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Compare a SHAP summary for the top five important features.
 
@@ -101,7 +131,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Compare a SHAP summary for the top five important features`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Plot PDP for the most important feature and interpret it.
 
@@ -111,7 +150,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Plot PDP for the most important feature and interpret it`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Optionally use LIME on one prediction and compare it with SHAP. LIME is installed by the `ml` dependency group but remains an optional lesson extension. Complete the required work with SHAP and scikit-learn before adding a second explanation library.
 
@@ -120,6 +168,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Optionally use LIME on one prediction and compare it with SHAP. LIME is installed by the ml d...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Local-versus-global diagnosis
 
@@ -138,6 +195,15 @@ population. Sample representative correct cases, errors, and important slices.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Construct a case where a feature is globally important but contributes little to one predicti...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 
 ### Exercise 5 — Explanation leakage
 
@@ -158,6 +224,15 @@ made from a retrained model.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Explain why selecting the 'most important' features with the final test set and then retraini...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Correlated-feature and causality check
 
 **Prompt:** Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, and write a cautious stakeholder explanation.
@@ -175,3 +250,5 @@ assumptions not supplied by SHAP, PDP, LIME, or permutation importance.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, an...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.

@@ -68,11 +68,163 @@ print("average precision:", average_precision_score(y_test, scores))
 The 0.5 threshold is a starting convention, not a law. Select an operating point
 using validation data and an explicit cost, capacity, recall, or precision goal.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 41 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — rare-class metrics, training interventions, and threshold policy
+
+### The mental model
+
+Class imbalance means the outcome of interest is uncommon, not that the
+dataset is automatically unusable. Accuracy can look excellent when a
+classifier always predicts the majority class. Start by recording
+prevalence and the counts/costs of false negatives and false positives.
+
+Class weights and resampling change the **training objective or training
+distribution**. A decision threshold changes how fitted scores become
+actions. These are separate choices. Resampling must occur inside each
+training fold, and a threshold must be selected on validation evidence,
+never final-test labels.
+
+### Worked examples and syntax anatomy
+
+- **`np.bincount(y)` / prevalence:** establishes class support before modeling and must be reported for every evaluation split.
+- **`class_weight='balanced'`:** reweights training loss; it does not make the observed population balanced.
+- **`precision_recall_curve(y, score)`:** shows threshold trade-offs; selecting a threshold still requires a decision rule and validation boundary.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — expose the majority-class accuracy trap
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+import numpy as np
+from sklearn.metrics import accuracy_score, recall_score
+
+y_true = np.array([0] * 95 + [1] * 5)
+always_negative = np.zeros_like(y_true)
+print({
+    "prevalence": y_true.mean(),
+    "accuracy": accuracy_score(y_true, always_negative),
+    "positive_recall": recall_score(y_true, always_negative),
+})
+assert accuracy_score(y_true, always_negative) == 0.95
+assert recall_score(y_true, always_negative) == 0.0
+```
+
+**Expected observation:** The classifier is 95% accurate while finding none of the positive cases.
+
+**Assumption to name:** Positive cases are the operational focus; missing all of them is unacceptable.
+
+### Focused example B — choose a threshold from an explicit recall constraint
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+import numpy as np
+from sklearn.metrics import precision_recall_curve
+
+y_valid = np.array([0, 0, 0, 0, 1, 1, 1, 1])
+scores = np.array([0.05, 0.15, 0.35, 0.55, 0.30, 0.50, 0.70, 0.90])
+precision, recall, thresholds = precision_recall_curve(y_valid, scores)
+candidates = [
+    (threshold, p, r)
+    for threshold, p, r in zip(thresholds, precision[:-1], recall[:-1])
+    if r >= 0.75
+]
+chosen = max(candidates, key=lambda row: row[1])
+print({"threshold": chosen[0], "precision": chosen[1], "recall": chosen[2]})
+```
+
+**Expected observation:** The chosen threshold satisfies the stated recall floor and maximizes precision only among eligible validation candidates.
+
+**Assumption to name:** The tiny array is a mechanics demo; a real threshold needs sufficient representative validation support and uncertainty.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define rare-class metrics, training interventions, and threshold policy in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Applying SMOTE or another sampler before the train/test split, which creates related synthetic evidence across boundaries.
+
+**Debug it deliberately:** Trace row IDs through split, sampling, fitting, calibration, threshold selection, and final evaluation; print class counts at each stage.
+
+**Stop condition:** Do not choose a threshold or sampler from final test results or claim synthetic rows add real-world evidence.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Compare `class_weight="balanced"` with a SMOTE strategy.
+
+**Verify:** For task `Compare classweight="balanced" with a SMOTE strategy`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 2. Tune the threshold to maximize minority-class F1.
+
+**Verify:** For task `Tune the threshold to maximize minority-class F1`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then report class support and confusion counts at the chosen threshold and prove the declared operating constraint is satisfied.
+
+
+
+
+
+
 3. Plot precision–recall curves and discuss the tradeoff.
+
+**Verify:** For task `Plot precision–recall curves and discuss the tradeoff`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then report class support and confusion counts at the chosen threshold and prove the declared operating constraint is satisfied.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -92,13 +244,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Prevalence-shift reasoning:** Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predict how precision changes and verify it with Bayes' rule.
    **Progressive hint:** Precision depends on the base rate: TP/(TP+FP). Use a hypothetical population such as 10,000 to make the counts visible.
+
+**Verify:** For task `Prevalence-shift reasoning: Hold sensitivity and specificity fixed while changing event preva...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report class support and confusion counts at the chosen threshold and prove the declared operating constraint is satisfied.
+
+
+
+
+
+
+
 5. **Grouped imbalance split:** Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold.
    **Progressive hint:** Use StratifiedGroupKFold when feasible. Print group overlap, positive count, negative count, and prevalence per validation fold.
+
+**Verify:** For task `Grouped imbalance split: Create a cross-validation plan for rare outcomes with multiple rows...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 6. **Calibration after resampling:** Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data.
    **Progressive hint:** Oversampling changes the class distribution seen during fitting. Fit/calibrate inside development data and assess reliability on natural prevalence.
 
+**Verify:** For task `Calibration after resampling: Explain why probabilities from a model trained on oversampled d...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -132,3 +311,36 @@ simple and often a strong first comparison.
 - Then consult the
   [Day 41 solution](../solutions/day41_imbalance_handling/day41_solutions.md).
 - Continue to [Day 42 — Unsupervised Learning](day42_unsupervised_kmeans_anomaly.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-41` — Day 41 — Handling Class Imbalance.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize rare-class metrics, training interventions, and threshold policy. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day41_imbalance_handling.md`
+- learner artifact: `python/ds-60day/notebooks/day41_imbalance_handling.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

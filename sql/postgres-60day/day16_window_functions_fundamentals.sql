@@ -1,4 +1,21 @@
 -- Day 16: Window Functions Fundamentals
+-- BEGINNER WORKFLOW — sql-16: Window Functions Fundamentals
+-- Guide: sql/postgres-60day/companion-guides/day16_window_functions_fundamentals.md
+-- Recommended runner: open the private lesson reader and choose
+-- "Create/open guided SQL notebook". It verifies advanced_sql_training,
+-- creates an ignored .learning/sql/sql-16/ copy, and prints the full
+-- psql transcript below the run cell. Edit that private copy, not this official
+-- source, while studying.
+-- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
+-- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
+-- declare what one input row and one output row represent. A displayed result
+-- set is temporary; NULL, zero, an empty string, and an absent row differ.
+-- Primary objects in the worked examples: order_items, products, orders.
+-- Success means the first error never appears, psql exits 0, result keys and
+-- control totals match the stated contract, and verification passes. The lesson's documented transaction/cleanup boundary restores disposable state.
+-- Keep all numbered exercises answer-free here: write predictions and attempts
+-- only in your ignored working copy.
+--
 -- OVER(), PARTITION BY, ORDER BY, frames
 BEGIN;
 SET search_path TO training, public;
@@ -59,15 +76,33 @@ LIMIT 30;
 -- Keep answers in your own scratch file; this learner script remains answer-free.
 -- 1. [Query writing] Show each order with the customer's average order total.
 --    Hint: Partition by customer ID and keep one output row per order.
+--    Inputs: Use only the declared lesson objects (order_items, products, orders) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
 -- 2. [Query writing] Show each employee salary with department average, minimum, and maximum.
 --    Hint: Partition all three window aggregates by department.
+--    Inputs: Use only the declared lesson objects (order_items, products, orders) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
 -- 3. [Query writing] Calculate every order's share of its customer's stored revenue.
 --    Hint: Use a partition total denominator and guard it with `NULLIF`.
+--    Inputs: Use only the declared lesson objects (order_items, products, orders) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
 -- 4. [Prediction] Compare `GROUP BY customer_id` with `AVG(...) OVER (PARTITION BY customer_id)` and report their row counts.
 --    Hint: Grouping collapses to one row per customer; a window preserves every order row.
+--    Inputs: Use only the declared lesson objects (order_items, products, orders) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
+--    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
 -- 5. [Debugging] Return orders above their customer average without placing a window function in `WHERE`.
 --    Hint: Compute the window value in a CTE, then filter the named column outside.
+--    Inputs: Use only the declared lesson objects (order_items, products, orders) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
+--    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
 -- 6. [Extension] Show order count and revenue context at both customer and country levels in the same row.
 --    Hint: Use different partitions for independent analytical contexts.
+--    Inputs: Use only the declared lesson objects (order_items, products, orders) and any small disposable fixture the prompt explicitly asks you to create.
+--    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
+--    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
 
 ROLLBACK;

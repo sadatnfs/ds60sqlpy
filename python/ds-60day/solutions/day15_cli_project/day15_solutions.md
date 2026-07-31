@@ -1,5 +1,253 @@
 # Day 15 — Solutions: CLI Data Tool Project
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**a small command-line application with separated boundaries**.
+
+A command-line interface (CLI) has three layers: parse external strings,
+call ordinary Python logic with typed values, then present a result and
+choose an exit status. Keeping the core logic free from `sys.argv`,
+printing, and process exit makes it reusable from tests and notebooks.
+
+`argparse` defines flags, help, conversion, and validation close to the
+command boundary. A `main(argv: list[str] | None = None) -> int`
+function is testable because tests can pass an explicit list rather than
+changing the real process arguments. The guarded entry point should do
+little more than `raise SystemExit(main())`.
+
+### Vocabulary used in the worked answers
+
+- **CLI:** a text interface driven by command-line arguments and exit status.
+- **argument parser:** a component that converts command text into named values.
+- **option:** a named flag such as `--limit`.
+- **positional argument:** a value identified by its position.
+- **exit status:** an integer process result where zero normally means success.
+- **entry point:** the small boundary that starts application execution.
+
+### Reference pattern 1 — Parse an explicit argument list
+
+Exercise the CLI contract without touching the notebook process arguments.
+
+```python
+import argparse
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="rowtool")
+    parser.add_argument("--limit", type=int, default=10)
+    parser.add_argument("names", nargs="+")
+    return parser
+
+args = build_parser().parse_args(["--limit", "2", "Ada", "Lin", "Grace"])
+(args.limit, args.names)
+```
+
+**Expected observation:** `(2, ['Ada', 'Lin', 'Grace'])`. Argparse converted `2` to an integer and collected positional names.
+
+### Reference pattern 2 — Keep core work independent of printing
+
+A plain function can be tested and reused by the CLI.
+
+```python
+def select_names(names: list[str], *, limit: int) -> list[str]:
+    if limit < 0:
+        raise ValueError("limit must be non-negative")
+    return [name.strip().title() for name in names[:limit]]
+
+select_names(args.names, limit=args.limit)
+```
+
+**Expected observation:** `['Ada', 'Lin']`. Parsing and presentation remain outside the core transformation.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. **Architecture:** `build_parser()`, pure core function(s), and `main(argv=None) -> int`. **Constraints:** use `pathlib`, UTF-8, no notebook-only state, and no hard-coded absolute paths. **Verify:** run `--help`, one successful command, and one invalid invocation.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a small command-line application with separated boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** run `--help`, one successful command, and one invalid invocation.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Add options for input path, output path, and a typed transformation parameter such as `--limit`. **Expected behavior:** argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. **Constraint:** do not catch programming errors broadly. **Verify:** Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the a small command-line application with separated boundaries model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** Write pytest tests that call core logic directly and call `main([...])` with temporary files. **Coverage:** happy path, empty input, missing path, invalid parameter, and output overwrite policy. **Verify:** assert return status, captured output, and exact file content without spawning a shell.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a small command-line application with separated boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** assert return status, captured output, and exact file content without spawning a shell.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** Package the CLI invocation behind `if __name__ == '__main__': raise SystemExit(main())`. **Expected behavior:** importing the module produces no output or process exit; `python -m ... --help` works from the documented package parent. **Verify:** test both import and module execution.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a small command-line application with separated boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** test both import and module execution.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. **Constraint:** do not mix Bash syntax into PowerShell. **Verify:** copy and run the command appropriate to your operating system.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a small command-line application with separated boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** copy and run the command appropriate to your operating system.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Predict the Python types produced by `argparse` when `--input` uses `type=Path` and `--limit` uses `type=int`. **Progressive hint:** The parser performs declared conversions before `main` receives values. **Verify:** Call `parse_args` with explicit text and assert the parsed input is a `Path`, limit is an `int`, and defaults have the documented types.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying a small command-line application with separated boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** Call `parse_args` with explicit text and assert the parsed input is a `Path`, limit is an `int`, and defaults have the documented types.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. **Progressive hint:** A pure transform accepts and returns data without reading global state. **Verify:** For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the a small command-line application with separated boundaries model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.
+
+### Exercise 8 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Add `--overwrite` and refuse to replace an existing output unless the flag is present. **Progressive hint:** Check the destination before performing the write. **Verify:** Use a temporary existing destination: assert refusal leaves content unchanged without the flag and `--overwrite` deliberately replaces it with the flag.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a small command-line application with separated boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** Use a temporary existing destination: assert refusal leaves content unchanged without the flag and `--overwrite` deliberately replaces it with the flag.
+
+### Exercise 9 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Repair a module that parses arguments and writes files during import. **Progressive hint:** Move behavior into `main(argv)` and use the `__main__` guard. **Verify:** Import the module while capturing output/files and assert no parser or write occurs; then assert `main([...])` performs the intended operation.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in a small command-line application with separated boundaries.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** Import the module while capturing output/files and assert no parser or write occurs; then assert `main([...])` performs the intended operation.
+
+### Exercise 10 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. **Progressive hint:** Translate expected boundary failures once, without hiding tracebacks in tests. **Verify:** Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the a small command-line application with separated boundaries model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.
+
+**Edge case:** Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.
+
+**Solution evidence to inspect:** Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 We scaffold a small CLI that loads a CSV, cleans it, and writes a summary and cleaned output, with tests.
 
 Contents
@@ -112,72 +360,6 @@ Notes
 - Extend as needed (schemas, logging, error handling).
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Read a CSV with pandas, drop or handle required missing values, and convert documented column types. **Hint:** make `clean(frame)` return a copy so a caller's input is not silently mutated.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Compute summary statistics and save a cleaned CSV. **Hint:** keep read/write functions separate from transforms and create parent directories deliberately.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Original lesson practice
-
-**Prompt:** Provide `--input` and `--out` with `argparse`; the intended invocation is `python tool.py --input data.csv --out out.csv`. **Hint:** use `type=Path` and `required=True`; do not introduce Click.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 4 — Original lesson practice
-
-**Prompt:** Test core functions and one parser path. **Hint:** use tiny in-memory frames and pytest's `tmp_path`, not large external data.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 5 — Original lesson practice
-
-**Prompt:** Run Ruff lint/format checks, mypy, and pytest. **Hint:** use the same commands as Day 14 and inspect the first failure before continuing. Store practice source in a tracked project directory. Put disposable generated files under ignored `artifacts/`; never commit `.venv`, caches, secrets, or a machine-specific `.env`.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 6 — Prediction
-
-**Prompt:** Predict the Python types produced by `argparse` when `--input` uses `type=Path` and `--limit` uses `type=int`.
-
-**Reasoning checkpoint:** The parser performs declared conversions before `main` receives values. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Tracing
-
-**Prompt:** Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work.
-
-**Reasoning checkpoint:** A pure transform accepts and returns data without reading global state. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 8 — Implementation
-
-**Prompt:** Add `--overwrite` and refuse to replace an existing output unless the flag is present.
-
-**Reasoning checkpoint:** Check the destination before performing the write. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 9 — Debugging
-
-**Prompt:** Repair a module that parses arguments and writes files during import.
-
-**Reasoning checkpoint:** Move behavior into `main(argv)` and use the `__main__` guard. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 10 — Edge case and explanation
-
-**Prompt:** Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log.
-
-**Reasoning checkpoint:** Translate expected boundary failures once, without hiding tracebacks in tests. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

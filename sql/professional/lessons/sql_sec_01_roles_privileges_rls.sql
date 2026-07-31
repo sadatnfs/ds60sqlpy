@@ -1,4 +1,21 @@
 -- SQL-SEC-01: Roles, privileges, schemas, and row-level security
+-- BEGINNER WORKFLOW — sql-sec-01: Schemas, Roles, Privileges, and Row-Level Security
+-- Guide: sql/professional/companion-guides/sql_sec_01_roles_privileges_rls.md
+-- Recommended runner: open the private lesson reader and choose
+-- "Create/open guided SQL notebook". It verifies advanced_sql_training,
+-- creates an ignored .learning/sql/sql-sec-01/ copy, and prints the full
+-- psql transcript below the run cell. Edit that private copy, not this official
+-- source, while studying.
+-- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
+-- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
+-- declare what one input row and one output row represent. A displayed result
+-- set is temporary; NULL, zero, an empty string, and an absent row differ.
+-- Primary objects in the worked examples: pg_catalog.pg_roles, pro_security_lab.documents, pro_security_lab.announcements, pro_security_lab.owner_context_documents, pro_security_lab.visible_documents.
+-- Success means the first error never appears, psql exits 0, result keys and
+-- control totals match the stated contract, and verification passes. The lesson's documented transaction/cleanup boundary restores disposable state.
+-- Keep all numbered exercises answer-free here: write predictions and attempts
+-- only in your ignored working copy.
+--
 -- Target: PostgreSQL 16+
 --
 -- The role-admin path creates NOLOGIN course roles inside one transaction and

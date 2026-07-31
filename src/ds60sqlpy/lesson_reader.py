@@ -18,6 +18,7 @@ from collections.abc import Iterable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+from textwrap import dedent
 from typing import Any
 from urllib.parse import quote, unquote, urlsplit
 
@@ -28,7 +29,10 @@ REFERENCE_PAGES_DIR = "reference-pages"
 COURSE_GUIDE_REFERENCE_PATHS = (
     "README.md",
     "AGENTS.md",
+    "docs/content-authoring.md",
+    "docs/curriculum-design-references.md",
     "docs/curriculum-map.md",
+    "docs/guided-sql-notebooks.md",
     "docs/learning-portal.md",
     "docs/learning-with-codex.md",
     "docs/professional-paths.md",
@@ -697,12 +701,13 @@ def _run_copy(lesson: Lesson) -> tuple[str, str]:
         )
     if suffix == ".sql":
         return (
-            "Run this SQL against only the disposable course database",
+            "Open your guided SQL workspace",
             (
-                "Open the script in VS Code, predict each result, then run it with "
-                "<code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set "
-                "their own transaction boundary; never point reset or lesson commands "
-                "at a shared or valuable database."
+                "In private launcher mode, choose <strong>Create/open guided SQL "
+                "notebook</strong>. It opens an editable copy, a safe database-preparation "
+                "step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript "
+                "in one JupyterLab notebook. The target must be the disposable "
+                "<code>advanced_sql_training</code> database—never a shared or valuable one."
             ),
         )
     return (
@@ -720,12 +725,16 @@ def _static_run_help(lesson: Lesson) -> str:
 
     if lesson.track == "sql":
         return (
-            "<strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the "
-            "repository folder, let it finish its readiness checks, then reopen this "
-            "lesson and choose <strong>Create/open guided SQL notebook</strong>. "
-            "<strong>macOS/Linux:</strong> start the private portal with the repository "
-            "interpreter first. You can also open the real <code>.sql</code> file in "
-            "VS Code and run it with the documented <code>psql</code> command."
+            "<strong>If the green SQL-notebook button is not visible, this is reading "
+            "mode.</strong><br><strong>Windows:</strong> return to the repository folder "
+            "and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the "
+            "launcher opens a new private browser page. Find this lesson there and choose "
+            "<strong>Create/open guided SQL notebook</strong>.<br>"
+            "<strong>macOS/Linux:</strong> from the repository root run "
+            "<code>.venv/bin/python scripts/learning_portal.py</code>, then use the new "
+            "private browser page. The manual fallback is to open the real "
+            "<code>.sql</code> file in VS Code and use the guide's fixed "
+            "<code>psql -f</code> command."
         )
     return (
         "Static/USB mode can ask VS Code to open the real file. If your browser does "
@@ -733,6 +742,130 @@ def _static_run_help(lesson: Lesson) -> str:
         "catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and "
         "launcher route."
     )
+
+
+def _codex_coaching_prompt(lesson: Lesson) -> str:
+    """Build a context-rich, answer-safe coaching prompt for one lesson."""
+
+    prerequisites = ", ".join(lesson.prerequisites) if lesson.prerequisites else "none"
+    execution_boundary = (
+        "For runnable work, use only the disposable advanced_sql_training database. "
+        "Prefer the lesson reader's Create/open guided SQL notebook action, explain "
+        "the expected row grain before execution, and inspect my actual psql transcript."
+        if lesson.track == "sql"
+        else (
+            "For runnable work, use the repository environment and the Python "
+            "(ds60sqlpy) kernel. Have me run cells or the cataloged source in order, "
+            "then inspect my actual output, assertions, or error."
+        )
+    )
+    return dedent(
+        f"""\
+        Use $guide-ds60sqlpy-learning to coach me through `{lesson.id}` —
+        {lesson.title}.
+
+        Goal:
+        Help me understand and demonstrate this lesson's objective. Assume I am a
+        complete beginner except for the declared prerequisites: {prerequisites}.
+
+        Repository context:
+        - Stable lesson ID: `{lesson.id}`
+        - Catalog: `curriculum/catalog.json`
+        - Companion guide: `{lesson.guide_path}`
+        - Learner artifact: `{lesson.lesson_path}`
+        - Applicable instructions: root `AGENTS.md` and the closest track `AGENTS.md`
+
+        Boundaries:
+        - Read the catalog entry, guide, and learner artifact first.
+        - Do not open, quote, or reproduce anything under `solutions/` until I ask
+          for it or show you an honest attempt.
+        - Explain every new term in plain language and use a small analogous example
+          before asking me to edit the official exercise.
+        - {execution_boundary}
+        - Give one progressive hint at a time. Do not silently complete the exercise.
+
+        Learning loop:
+        1. State the lesson's purpose and mental model in plain language.
+        2. Walk through the syntax or query anatomy and ask me to predict an example.
+        3. Ask me to attempt one bounded exercise and paste or run my evidence.
+        4. Diagnose the first mismatch from that evidence, then give only the next hint.
+        5. After I succeed, ask three retrieval questions and one transfer question.
+
+        Done when:
+        I can produce a working result, explain why it works in my own words, identify
+        one common failure mode, and verify the result without relying on the official
+        solution.
+        """
+    )
+
+
+def _sql_run_walkthrough(lesson: Lesson) -> str:
+    """Render a concrete first-run path for a SQL lesson reader."""
+
+    if lesson.track != "sql":
+        return ""
+    workspace = f".learning/sql/{lesson.id}/lesson/"
+    return f"""
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>{html.escape(workspace)}</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+    """
 
 
 def _artifact_panel(
@@ -889,6 +1022,8 @@ def build_lesson_html(
     lesson_id_json = _safe_script_json(lesson.id)
     lesson_path_json = _safe_script_json(lesson.lesson_path)
     static_run_help = _static_run_help(lesson)
+    codex_prompt = html.escape(_codex_coaching_prompt(lesson))
+    sql_run_walkthrough = _sql_run_walkthrough(lesson)
     notebook_action = (
         '<button class="button launcher-only" type="button" id="launch-jupyter" hidden>'
         "Open this notebook in JupyterLab</button>"
@@ -1001,12 +1136,48 @@ def build_lesson_html(
     .button.secondary:hover {{ color: #fff; background: var(--navy); }}
     .launcher-status {{ margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }}
     .static-help {{ margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }}
+    .sql-run-guide {{
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }}
+    .sql-run-guide > p:not(.eyebrow) {{ max-width: 80ch; color: var(--muted); }}
+    .run-steps {{ display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }}
+    .run-steps li {{
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }}
+    .run-steps li::before {{
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }}
+    .run-steps span {{ color: var(--muted); }}
+    .sql-run-guide details {{ margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }}
+    .sql-run-guide summary {{ cursor: pointer; color: var(--navy); }}
+    .error-map {{ display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }}
+    .error-map dt {{ font-weight: 780; }}
+    .error-map dd {{ margin: 0; color: var(--muted); }}
     .sequence {{
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }}
     .sequence article {{ border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }}
     .sequence strong {{ display: block; margin-bottom: .25rem; }}
     .sequence span {{ color: var(--muted); font-size: .88rem; }}
+    .coach-card {{
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }}
+    .coach-grid {{ display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }}
+    .coach-card h2 {{ margin-bottom: .55rem; font-size: 1.65rem; }}
+    .coach-card p {{ max-width: 78ch; color: var(--muted); }}
+    .codex-prompt {{
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }}
+    .copy-status {{ min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }}
     .tabs {{
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -1069,14 +1240,15 @@ def build_lesson_html(
     footer {{ border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }}
     @media (max-width: 760px) {{
       .top-actions .completion {{ display: none; }}
-      .run-card, .sequence, .lesson-nav {{ grid-template-columns: 1fr; }}
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav {{ grid-template-columns: 1fr; }}
+      .run-steps li::before {{ margin-bottom: .15rem; }}
       .run-actions, .artifact-actions {{ justify-content: flex-start; }}
       .artifact-head {{ display: block; }}
       .artifact-actions {{ margin-top: 1rem; }}
       .nav-card.next {{ text-align: left; }}
     }}
     @media print {{
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer {{ display: none !important; }}
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer {{ display: none !important; }}
       body {{ background: #fff; }}
       .artifact-panel {{ display: block !important; border: 0; box-shadow: none; break-before: page; }}
       .solution-notice {{ break-after: avoid; }}
@@ -1122,9 +1294,9 @@ def build_lesson_html(
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">{html.escape(run_heading)}</h2>
           <p>{run_guidance}</p>
-          <p class="static-help">
+          <div class="static-help">
             {static_run_help}
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -1139,11 +1311,31 @@ def build_lesson_html(
         </div>
       </section>
 
+      {sql_run_walkthrough}
+
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
         <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
         <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
       </div>
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>{codex_prompt}</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="tabs" role="tablist" aria-label="Lesson materials">
         <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
@@ -1245,6 +1437,23 @@ def build_lesson_html(
       }} catch {{
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }}
+    }});
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {{
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {{
+        if (navigator.clipboard && window.isSecureContext) {{
+          await navigator.clipboard.writeText(codexPrompt.value);
+        }} else if (!document.execCommand("copy")) {{
+          throw new Error("copy command was unavailable");
+        }}
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      }} catch {{
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }}
     }});
 

@@ -14,7 +14,18 @@ This file extends the root [AGENTS.md](../AGENTS.md) for `python/`.
 
 - Keep notebooks valid `nbformat` documents with the repository kernelspec.
 - Prefer small, purposeful cells. Introduce one idea at a time.
-- A lesson should contain objectives, explanation, runnable examples, exercises, self-checks, and next steps.
+- Historical Day 1–60 learner notebooks must contain at least eight purposeful
+  cells, including at least three runnable code cells and enough explanatory
+  Markdown to teach the lesson without an agent. These are minimums, not a
+  reason to split prose or add filler.
+- A lesson must contain objectives, a mental model and vocabulary, syntax
+  anatomy, at least two runnable examples with predicted and observed
+  behavior, guided and independent exercises, explicit expected/verify lines,
+  common-error diagnosis, self-checks, and next steps.
+- End every companion guide with the copy-ready, lesson-specific
+  `## Ask Codex about this lesson` contract defined in
+  `docs/content-authoring.md`. The material before it must remain
+  self-sufficient.
 - Each cataloged lesson must meet its immutable
   `curriculum/practice_baseline.json` target on the learner notebook, guide,
   and explanatory solution. Count distinct numbered prompts, not hint or
@@ -56,6 +67,7 @@ Run:
 ```text
 python scripts/course.py validate
 python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 ```
 
 For a changed lesson, also verify:

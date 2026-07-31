@@ -1,4 +1,21 @@
 -- SQL-FOUND-01: Relational design, DDL, and integrity constraints
+-- BEGINNER WORKFLOW — sql-found-01: Relational Design, DDL, and Integrity Constraints
+-- Guide: sql/professional/companion-guides/sql_found_01_relational_design.md
+-- Recommended runner: open the private lesson reader and choose
+-- "Create/open guided SQL notebook". It verifies advanced_sql_training,
+-- creates an ignored .learning/sql/sql-found-01/ copy, and prints the full
+-- psql transcript below the run cell. Edit that private copy, not this official
+-- source, while studying.
+-- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
+-- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
+-- declare what one input row and one output row represent. A displayed result
+-- set is temporary; NULL, zero, an empty string, and an absent row differ.
+-- Primary objects in the worked examples: pro_relational_lab.members, pro_relational_lab.equipment_categories, pro_relational_lab.equipment_items, pro_relational_lab.loans.
+-- Success means the first error never appears, psql exits 0, result keys and
+-- control totals match the stated contract, and verification passes. The lesson's documented transaction/cleanup boundary restores disposable state.
+-- Keep all numbered exercises answer-free here: write predictions and attempts
+-- only in your ignored working copy.
+--
 -- Target: PostgreSQL 16+
 --
 -- This learner file is safe to run with:
@@ -239,32 +256,64 @@ $lesson$;
 --    * external_reference is unique when supplied, but may be NULL;
 --    * service_days is a stored generated value.
 --
+--    Inputs: Use `pro_relational_lab.maintenance_visits` plus only the small disposable fixture explicitly requested by Exercise 1; keep the same filters/time window for its control query.
+--    Expected result/shape: Exercise 1 must make “Maintenance DDL: translate every visit requirement into a column, constraint, key, default, or generated expression; annotate the table grain” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `IDENTITY`, `ddl`, `pro_relational_lab.maintenance_visits`.
+--    Verify: For Exercise 1, inspect the relevant `pg_catalog` or `information_schema` rows for `IDENTITY`, `ddl`, `pro_relational_lab.maintenance_visits`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+--    Hint ladder, rung 1: State the invariant and object grain first, implement the smallest DDL step, then design its catalog and negative-case proof.
 -- 2. Insert one valid visit, then safely prove that a negative cost is rejected.
 --
+--    Inputs: Use `pro_relational_lab.maintenance_visits`, `pro_relational_lab.equipment_items` plus only the small disposable fixture explicitly requested by Exercise 2; keep the same filters/time window for its control query.
+--    Expected result/shape: Exercise 2 needs a labeled transaction/session transcript that demonstrates “Negative cost: insert one valid visit, isolate the rejected insert in a nested block, and verify the expected SQLSTATE category”. Capture statement order, affected keys/counts, lock or snapshot state, and the expected SQLSTATE when an error is part of the exercise; finish with no open lesson transaction or leftover shared fixture. Named evidence columns/objects: `service`, `i`, `sqlstate`.
+--    Verify: For Exercise 2, replay the written Session A/Session B order against `advanced_sql_training`, compare the observed values/SQLSTATE with the prediction, then query/drop the disposable fixture and confirm neither session retains a transaction or lock.
+--    Hint ladder, rung 1: Write the exact Session A/Session B schedule before opening either transaction; change only one isolation/lock step at a time.
 -- 3. Insert two visits whose external_reference is NULL. Explain why an ordinary
 --    UNIQUE constraint permits them. What PostgreSQL 15+ syntax would you choose
 --    if NULL had to behave like a duplicate?
 --
+--    Inputs: Use `pro_relational_lab.maintenance_visits`, `pro_relational_lab.equipment_items` plus only the small disposable fixture explicitly requested by Exercise 3; keep the same filters/time window for its control query.
+--    Expected result/shape: Exercise 3 requires a written prediction and the observed result for “NULL uniqueness: insert two NULL references, explain the observed rule, and write—but do not blindly apply—the stricter PostgreSQL 15+ alternative”. Show both compared result shapes at one row per requested calendar/cohort bucket and grouping key, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `i`, `dates`, `mv`.
+--    Verify: For Exercise 3, run the two forms over the identical rows in `pro_relational_lab.maintenance_visits`, `pro_relational_lab.equipment_items`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+--    Hint ladder, rung 1: Build and inspect the input relation and keys first; add one filter, grouping/window, projection, and ordering stage at a time.
 -- 4. Classify daily_fee_at_checkout as normalized duplication, an accidental
 --    inconsistency, or deliberate denormalization. State the invariant and the
 --    historical question that justify your choice.
 --
+--    Inputs: Use `pro_relational_lab.members`, `pro_relational_lab.equipment_categories`, `pro_relational_lab.equipment_items`, `pro_relational_lab.loans` plus only the small disposable fixture explicitly requested by Exercise 4; keep the same filters/time window for its control query.
+--    Expected result/shape: Exercise 4 requires a written prediction and the observed result for “Historical fee: state the invariant, the historical question, and why the checkout snapshot is or is not deliberate denormalization”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys.
+--    Verify: For Exercise 4, run the two forms over the identical rows in `pro_relational_lab.members`, `pro_relational_lab.equipment_categories`, `pro_relational_lab.equipment_items`, `pro_relational_lab.loans`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+--    Hint ladder, rung 1: Build and inspect the input relation and keys first; add one filter, grouping/window, projection, and ordering stage at a time.
 -- 5. A provider can perform many visits and a visit can involve several
 --    technicians. Model providers, technicians, and visit assignments without
 --    storing comma-separated names. State the grain and keys of every table.
 --
+--    Inputs: Use `pro_relational_lab.providers`, `pro_relational_lab.technicians`, `pro_relational_lab.visit_technicians`, `pro_relational_lab.maintenance_visits` plus only the small disposable fixture explicitly requested by Exercise 5; keep the same filters/time window for its control query.
+--    Expected result/shape: Exercise 5 must make “Many-to-many work: model providers, technicians, and assignments with one declared grain and key per relation; do not use delimited text” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `IDENTITY`, `mv`, `t`, `pro_relational_lab.providers`, `pro_relational_lab.technicians`, `pro_relational_lab.visit_technicians`.
+--    Verify: For Exercise 5, inspect the relevant `pg_catalog` or `information_schema` rows for `IDENTITY`, `mv`, `t`, `pro_relational_lab.providers`, `pro_relational_lab.technicians`, `pro_relational_lab.visit_technicians`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+--    Hint ladder, rung 1: State the invariant and object grain first, implement the smallest DDL step, then design its catalog and negative-case proof.
 -- 6. Write a query that reports every equipment item, including items with no
 --    loans, plus its loan count and latest checkout date. Explain why filtering
 --    the loan table in WHERE can accidentally turn the LEFT JOIN into an inner
 --    join, and make ties deterministic.
 --
+--    Inputs: Use `pro_relational_lab.loans`, `pro_relational_lab.equipment_items` plus only the small disposable fixture explicitly requested by Exercise 6; keep the same filters/time window for its control query.
+--    Expected result/shape: Exercise 6 must make “Outer-join report: retain never-borrowed equipment, make date ties deterministic, and test the result with an item that has no loan” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `IDENTITY`, `i`, `loan_count`, `latest_checkout`, `l`, `pro_relational_lab.loans`.
+--    Verify: For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `IDENTITY`, `i`, `loan_count`, `latest_checkout`, `l`, `pro_relational_lab.loans`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+--    Hint ladder, rung 1: State the invariant and object grain first, implement the smallest DDL step, then design its catalog and negative-case proof.
 -- 7. Choose ON DELETE behavior for category -> equipment, equipment -> loans,
 --    and equipment -> maintenance_visits. Defend each RESTRICT, CASCADE, or
 --    SET NULL decision in terms of historical truth rather than convenience.
 --
+--    Inputs: Use `pro_relational_lab.members`, `pro_relational_lab.equipment_categories`, `pro_relational_lab.equipment_items`, `pro_relational_lab.loans` plus only the small disposable fixture explicitly requested by Exercise 7; keep the same filters/time window for its control query.
+--    Expected result/shape: Exercise 7 must make “Deletion policy: choose and defend one referential action for each named relationship, including what happens to historical records” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `historical`.
+--    Verify: For Exercise 7, inspect the relevant `pg_catalog` or `information_schema` rows for `historical`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+--    Hint ladder, rung 1: State the invariant and object grain first, implement the smallest DDL step, then design its catalog and negative-case proof.
 -- 8. Write catalog queries that prove the maintenance_visits primary key,
 --    foreign key, checks, generated column, and NULL-aware uniqueness contract.
 --    Do not depend on PostgreSQL-generated constraint names.
+--    Inputs: Use `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, `pg_catalog.pg_attrdef` plus only the small disposable fixture explicitly requested by Exercise 8; keep the same filters/time window for its control query.
+--    Expected result/shape: Exercise 8 returns a table-shaped answer to “Contract introspection: prove key, check, generated-value, and uniqueness properties from catalogs without depending on generated object names” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `constraint_definition`, `con`, `rel`, `n`, `column_name`, `generated_expression`, `def`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
+--    Verify: For Exercise 8, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, `pg_catalog.pg_attrdef`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+--    Hint ladder, rung 1: Build and inspect the input relation and keys first; add one filter, grouping/window, projection, and ordering stage at a time.
 
 \echo 'Self-check: the worked model has the expected deterministic row counts'
 DO $lesson$

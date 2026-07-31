@@ -33,6 +33,53 @@ because an ordinary p-value crossed 0.05.
 
 ---
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## Reasoning before implementation
+
+The reference makes the resampling unit and null/estimand explicit, then separates statistical uncertainty from causal identification.
+
+1. **resampling unit:** matches the independent assignment/observation grain rather than blindly sampling rows.
+2. **seeded bootstrap/permutation loop:** produces a reproducible distribution of a declared statistic with Monte Carlo error.
+3. **estimand + assignment mechanism:** defines which causal contrast is identified and which assumptions support it.
+4. **Prove the failure boundary:** Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.
+
+**Alternative:** Analytic standard errors can be faster and clearer when assumptions hold; Bayesian models express other uncertainty questions.
+
+**Trade-off:** More resamples reduce Monte Carlo noise but do not add participants or repair exchangeability, interference, attrition, or selection.
+
+**Failure boundary:** Tiny samples, repeated units, unequal assignment, missing outcomes, multiple looks, noncompliance, and spillovers need design-specific methods.
+
+**Verification:** Compare seeded resampling with a hand/analytic check, report Monte Carlo error and units, reproduce assignment constraints, and state which causal claims remain unsupported.
+
+### Verification micro-example
+
+Run this small, deterministic case before adapting the reference to a
+larger system. It gives the reasoning above an executable anchor:
+
+```python
+import numpy as np
+
+control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])
+treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
+rng = np.random.default_rng(6101)
+draws = np.empty(5_000)
+for index in range(draws.size):
+    c = rng.choice(control, size=control.size, replace=True)
+    t = rng.choice(treatment, size=treatment.size, replace=True)
+    draws[index] = t.mean() - c.mean()
+interval = np.quantile(draws, [0.025, 0.975])
+print({"estimate": treatment.mean() - control.mean(), "interval": interval})
+```
+
+**Expected observation:** The resampled interval describes uncertainty under independent within-group resampling; the small sample makes it wide/discrete.
+
+The reference implementation is one defensible contract, not a license
+to copy internal steps into every system. Preserve the observable
+guarantees and repeat the failure tests when adapting it.
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reference
 
 Use this map after an honest attempt. The executable implementation remains
@@ -53,6 +100,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Define the experiment before analysis`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 2 — Complete standardized effect
 
 **Prompt recap:** Use the pooled sample standard deviation. Reject groups smaller than two and zero pooled variance. Explain raw units and standardized units side by side.
@@ -66,6 +121,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Complete standardized effect`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 3 — Bootstrap the difference
 
@@ -81,6 +144,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Bootstrap the difference`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 ### Exercise 4 — Permute assignments
 
 **Prompt recap:** Pool outcomes and enumerate treatment-index combinations when feasible. Use a two-sided comparison to the observed absolute difference. For large data, use seeded Monte Carlo assignments and the plus-one p-value correction. State why permuting individual rows is invalid if assignment occurred by account or site.
@@ -94,6 +165,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Permute assignments`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 5 — Plan sample size
 
@@ -109,6 +188,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Plan sample size`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 6 — Control a comparison family
 
 **Prompt recap:** Complete `holm_adjust` for three p-values. Preserve original order and enforce monotonic adjusted values after sorting. Identify the family before viewing results; splitting an inconvenient family after analysis defeats control.
@@ -122,6 +209,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Control a comparison family`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 7 — Check assignment and attrition
 
@@ -137,6 +232,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Check assignment and attrition`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 8 — Simulate peeking policy
 
 **Prompt recap:** Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson's simple Bonferroni per-look split illustrates the budget. Compare it with a single final look and research group-sequential designs before production use.
@@ -151,6 +254,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `Simulate peeking policy`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 ### Exercise 9 — Bound the claim
 
 **Prompt recap:** Complete `claim_scope`. Randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions. Observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
@@ -164,6 +275,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `Bound the claim`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 10 — bootstrap clustered assignments
 
@@ -185,6 +304,14 @@ clusters needs specialized methods and candid limitations.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `bootstrap clustered assignments`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 11 — bootstrap a ratio metric
 
 **Prompt recap:** Estimate treatment lift for revenue per active user, preserving each user's numerator and denominator. Handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
@@ -203,6 +330,14 @@ a different question. Report the exact formula and support with the interval.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `bootstrap a ratio metric`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Exercise 12 — apply covariate adjustment without leakage
 
@@ -224,6 +359,14 @@ freedom.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `apply covariate adjustment without leakage`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 13 — separate intention-to-treat from treatment-on-treated
 
 **Prompt recap:** Simulate assigned treatment with imperfect compliance. Compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
@@ -243,6 +386,14 @@ extension.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `separate intention-to-treat from treatment-on-treated`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 14 — perform missing-outcome sensitivity
 
@@ -264,6 +415,14 @@ p-values remain small.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `perform missing-outcome sensitivity`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 15 — simulate sequential false positives
 
 **Prompt recap:** Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability. Compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
@@ -284,6 +443,14 @@ requires a reviewed sequential design and operational stopping rules.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `simulate sequential false positives`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 16 — pre-specify heterogeneous effects
 
 **Prompt recap:** Choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family. Contrast this with mining many cuts for the largest lift.
@@ -302,6 +469,14 @@ observed lift was largest.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `pre-specify heterogeneous effects`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 
 ### Exercise 17 — run clustered randomization inference
 
@@ -322,6 +497,14 @@ independent information. Few sites limit resolution and power.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `run clustered randomization inference`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 ### Exercise 18 — produce an auditable analysis packet
 
 **Prompt recap:** Write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.
@@ -340,3 +523,5 @@ review ownership and any deviations from the pre-analysis plan.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `produce an auditable analysis packet`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.

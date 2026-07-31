@@ -96,6 +96,36 @@ Notes
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`np.bincount(y)` / prevalence:** establishes class support before modeling and must be reported for every evaluation split.
+2. **`class_weight='balanced'`:** reweights training loss; it does not make the observed population balanced.
+3. **`precision_recall_curve(y, score)`:** shows threshold trade-offs; selecting a threshold still requires a decision rule and validation boundary.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Prevalence and error costs choose evaluation, training interventions stay inside folds, and threshold policy is validated separately.
+
+**Useful alternative:** Class weighting avoids synthetic rows; undersampling reduces compute but discards majority information; anomaly framing may suit truly open-set cases.
+
+**Trade-off:** Higher recall usually lowers precision and increases review load, while aggressive resampling can damage probability calibration.
+
+**Edge case to test:** A split with zero positives, group leakage, changing prevalence, or an undefined precision denominator requires a redesigned evaluation.
+
+**Evidence of correctness:** Report class counts, confusion outcomes, PR metrics and threshold, prove resampling is training-only, and recheck calibration under the deployment prevalence.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -103,7 +133,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Compare `class_weight="balanced"` with a SMOTE strategy.
 
@@ -113,7 +143,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Compare classweight="balanced" with a SMOTE strategy`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Tune the threshold to maximize minority-class F1.
 
@@ -123,7 +162,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Tune the threshold to maximize minority-class F1`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Plot precision–recall curves and discuss the tradeoff.
 
@@ -132,6 +180,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Plot precision–recall curves and discuss the tradeoff`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Prevalence-shift reasoning
 
@@ -153,6 +210,15 @@ deployment base rate and monitor it over time.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predic...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Grouped imbalance split
 
 **Prompt:** Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold.
@@ -171,6 +237,15 @@ grouped holdouts or a time-aware group design that matches deployment.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Calibration after resampling
 
 **Prompt:** Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data.
@@ -188,3 +263,5 @@ without changing rank-based AUC very much.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Explain why probabilities from a model trained on oversampled data may not match real prevale...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

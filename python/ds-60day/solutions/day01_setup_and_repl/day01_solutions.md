@@ -1,5 +1,254 @@
 # Day 01 — Solutions: Setup, REPL, Virtual Envs, Package Management
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**execution contexts and a trustworthy course environment**.
+
+Python code always runs inside a particular **interpreter process**. That
+process has a version, a filesystem location, an installed package set,
+and a current working directory. A terminal REPL, a script, and a
+notebook may look like three different tools, but each eventually asks
+an interpreter to execute Python.
+
+A virtual environment gives this repository its own interpreter and
+package directory. A Jupyter kernel is the notebook's connection to an
+interpreter. If the terminal and notebook point at different
+interpreters, a package can import in one place and fail in the other.
+Diagnose identity first; reinstalling packages blindly often makes the
+mismatch harder to see.
+
+### Vocabulary used in the worked answers
+
+- **interpreter:** the program that reads Python code and executes it.
+- **REPL:** Read-Evaluate-Print Loop, an interactive prompt for small experiments.
+- **script:** a saved `.py` file executed from top to bottom.
+- **virtual environment:** an isolated interpreter/package location owned by one project.
+- **kernel:** the long-running interpreter process connected to a notebook.
+- **working directory:** the base directory used to resolve relative paths.
+
+### Reference pattern 1 — Ask the running interpreter to identify itself
+
+Inspect evidence rather than guessing which Python is active.
+
+```python
+import platform
+import sys
+from pathlib import Path
+
+identity = {
+    "python": platform.python_version(),
+    "executable_name": Path(sys.executable).name,
+    "working_folder": Path.cwd().name,
+}
+identity
+```
+
+**Expected observation:** A dictionary is displayed. The exact paths vary by computer; the course kernel should report Python 3.11 or 3.12 and an executable inside this repository's `.venv`.
+
+### Reference pattern 2 — Separate a calculation from presentation
+
+The same Python expressions work in the REPL, a script, and a notebook.
+
+```python
+subtotal = 12.50 + 7.25
+tax_rate = 0.08
+total = subtotal * (1 + tax_rate)
+message = f"Total: ${total:.2f}"
+message
+```
+
+**Expected observation:** `'Total: $21.33'`. Names keep intermediate facts visible, and the f-string controls only presentation.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Run the repository setup, then run `scripts/course.py doctor` with the repository interpreter. **Required evidence:** copy the Python version and interpreter path from the report. **Success:** the version is 3.11 or 3.12, the path belongs to this repository's `.venv`, and the doctor does not report a blocking core failure. **Constraint:** do not install or delete anything while diagnosing. **Verify:** Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository's `.venv`; record that no blocking core check failed.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository's `.venv`; record that no blocking core check failed.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Open the course Python REPL and evaluate `7 * 6`, `' Python '.strip().lower()`, and `type(3.5)`. **Before running:** predict each value and type. **Success:** record the three results and exit cleanly with `exit()`; explain why the string method does not modify the original literal. **Verify:** Record `42`, `'python'`, and `<class 'float'>` beside your predictions, then confirm the REPL exits without terminating the terminal.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** Record `42`, `'python'`, and `<class 'float'>` beside your predictions, then confirm the REPL exits without terminating the terminal.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** Open this notebook with the `Python (ds60sqlpy)` kernel. Run `import sys; print(sys.executable)` and compare it with the doctor report. **Success:** both point to the same `.venv` layout. **If they differ:** stop and diagnose the kernel rather than reinstalling packages. **Verify:** Resolve both paths and confirm the doctor interpreter and notebook `sys.executable` identify the same `.venv` environment.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** Resolve both paths and confirm the doctor interpreter and notebook `sys.executable` identify the same `.venv` environment.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** Create `calc.py` so `python calc.py 12.5 7.25` prints exactly `19.75`. **Inputs:** exactly two numeric command-line arguments. **Constraints:** convert the strings from `sys.argv`, print a friendly usage message for the wrong count, and keep the arithmetic in a small function. **Verify:** test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with `argparse`.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with `argparse`.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** Create two temporary virtual environments outside the repository and install NumPy in only one. **Evidence:** use each environment's `python -m pip show numpy` and interpreter path to prove isolation. **Constraint:** do not alter or delete the course `.venv`; remove only the two temporary environments you created after recording the result. **Verify:** Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Predict what `sys.executable` should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. **Progressive hint:** The important fact is the interpreter path, not merely the word Python. **Verify:** Resolve the REPL and notebook `sys.executable` values and assert both identify the same course `.venv`; record the exact shared path component.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** Resolve the REPL and notebook `sys.executable` values and assert both identify the same course `.venv`; record the exact shared path component.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace the difference between `python -m pip --version` and a bare `pip --version`: which interpreter owns each command? **Progressive hint:** Read the Python and site-packages paths printed by pip. **Verify:** Save both pip-version lines, underline the Python/site-packages owner in each, and explain any mismatch instead of assuming the commands are equivalent.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the execution contexts and a trustworthy course environment model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** Save both pip-version lines, underline the Python/site-packages owner in each, and explain any mismatch instead of assuming the commands are equivalent.
+
+### Exercise 8 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Write `environment_report()` returning the Python version, executable, platform, and current working directory without shell commands. **Progressive hint:** Use `sys`, `platform`, and `pathlib.Path`. **Verify:** Assert `environment_report()` has exactly the four required fields with string values and that its executable/cwd agree with direct `sys`/`Path` inspection.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** Assert `environment_report()` has exactly the four required fields with string values and that its executable/cwd agree with direct `sys`/`Path` inspection.
+
+### Exercise 9 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. **Progressive hint:** Compare executable paths before reinstalling anything. **Verify:** Record `sys.executable`, `python -m pip --version`, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** Record `sys.executable`, `python -m pip --version`, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.
+
+### Exercise 10 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Explain how to recover when the `ds60sqlpy` kernel is absent even though `.venv` exists, and state what remains possible offline. **Progressive hint:** Kernel registration and package download are separate operations. **Verify:** After local kernel registration, confirm `jupyter kernelspec list` includes `ds60sqlpy` and run one already-installed offline import without downloading a package.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from execution contexts and a trustworthy course environment.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.
+
+**Edge case:** Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.
+
+**Solution evidence to inspect:** After local kernel registration, confirm `jupyter kernelspec list` includes `ds60sqlpy` and run one already-installed offline import without downloading a package.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 This solution expands each exercise with exact commands and the reasoning behind them.
 
 Exercise 1: Create two virtual environments under the ignored
@@ -110,72 +359,6 @@ Notes
 - The course setup already installs JupyterLab in the repository `.venv`.
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Run the setup and confirm that `course.py doctor` reports Python 3.11 or 3.12. **Hint:** read the interpreter path in the report; it should contain `.venv`.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Start the REPL and evaluate arithmetic, a string method, and `type(...)`. **Hint:** exit with `exit()`.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Original lesson practice
-
-**Prompt:** In JupyterLab, select `Python (ds60sqlpy)` and print the interpreter path. **Hint:** the `sys` module can describe the running interpreter.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 4 — Original lesson practice
-
-**Prompt:** Create `calc.py` so two numeric command-line arguments produce their sum. **Hint:** command-line values in `sys.argv` are strings, so convert them deliberately. Day 15 replaces this bounded approach with `argparse`.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 5 — Original lesson practice
-
-**Prompt:** As deeper environment practice, create two temporary environments and install NumPy in only one. **Hint:** always use `python -m pip` from the interpreter you intend to modify. The separate solution notes use the two-environment and REPL exercises to test the same setup skills without simply copying the notebook cells.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 6 — Prediction
-
-**Prompt:** Predict what `sys.executable` should contain when the correct course kernel is active, then verify it in both the REPL and this notebook.
-
-**Reasoning checkpoint:** The important fact is the interpreter path, not merely the word Python. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Tracing
-
-**Prompt:** Trace the difference between `python -m pip --version` and a bare `pip --version`: which interpreter owns each command?
-
-**Reasoning checkpoint:** Read the Python and site-packages paths printed by pip. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 8 — Implementation
-
-**Prompt:** Write `environment_report()` returning the Python version, executable, platform, and current working directory without shell commands.
-
-**Reasoning checkpoint:** Use `sys`, `platform`, and `pathlib.Path`. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 9 — Debugging
-
-**Prompt:** A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ.
-
-**Reasoning checkpoint:** Compare executable paths before reinstalling anything. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 10 — Edge case and explanation
-
-**Prompt:** Explain how to recover when the `ds60sqlpy` kernel is absent even though `.venv` exists, and state what remains possible offline.
-
-**Reasoning checkpoint:** Kernel registration and package download are separate operations. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

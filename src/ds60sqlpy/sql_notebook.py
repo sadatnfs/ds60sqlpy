@@ -465,6 +465,47 @@ def _notebook_document(
         verification_run.require_success()
         """
     )
+    recovery_reflection = "\n".join(
+        [
+            "### Recovery and reflection",
+            "",
+            "| Symptom | First useful action |",
+            "| --- | --- |",
+            (
+                f'| `database "{COURSE_DATABASE_NAME}" does not exist` | '
+                "Return to course setup and create only the disposable database. |"
+            ),
+            (
+                '| `relation "training.…" does not exist` | '
+                "Re-read the reset warning and run the confirmed preparation cell. |"
+            ),
+            (
+                "| `syntax error at or near …` | Inspect that token and the clause "
+                "immediately before it; PostgreSQL often notices a missing comma or "
+                "parenthesis at the next token. |"
+            ),
+            (
+                "| Query succeeds but rows look duplicated | State the intended row "
+                "grain, then inspect join keys and one-to-many relationships. |"
+            ),
+            (
+                "| Result order changes | Add an explicit `ORDER BY` with a unique "
+                "final tie-breaker when stable order is part of the contract. |"
+            ),
+            (
+                "| Missing values behave unexpectedly | Review `IS NULL`, "
+                "three-valued logic, and whether an outer join introduced NULLs. |"
+            ),
+            "",
+            "Before comparing a solution, write down:",
+            "",
+            "- one sentence describing what each important clause contributes;",
+            "- the result's row grain and expected number or bound of rows;",
+            "- one input or boundary case that could disprove your query; and",
+            "- the exact transcript evidence that supports your conclusion.",
+            "",
+        ]
+    )
 
     cells = [
         _markdown_cell(
@@ -493,6 +534,40 @@ def _notebook_document(
         _markdown_cell(
             lesson.id,
             artifact_name,
+            "mental-model",
+            dedent(
+                f"""\
+                ## How this notebook works
+
+                Three programs cooperate, and each has a different job:
+
+                1. **JupyterLab** displays these instructions and runs the Python
+                   helper cells.
+                2. **`psql`** is the PostgreSQL command-line client. The helper calls
+                   it with the fixed editable file `{sql_filename}`.
+                3. **PostgreSQL** is the database server that parses the SQL, reads or
+                   changes the disposable course data, and returns rows or errors.
+
+                The Markdown source snapshot is for reading; typing into that snapshot
+                does not change the query. Use the linked `{sql_filename}` file in
+                JupyterLab's text editor, save it, and then run the notebook's lesson
+                cell. The output appears directly below that cell as a bounded `psql`
+                transcript.
+
+                **Before running anything**
+
+                - Confirm the kernel name in the top-right area is **Python
+                  (ds60sqlpy)**.
+                - Confirm this is lesson `{lesson.id}`, not a similarly named file.
+                - Keep the portal terminal open so Jupyter inherits the discovered
+                  PostgreSQL tools and local connection settings.
+                - Use only the disposable `{COURSE_DATABASE_NAME}` database.
+                """
+            ),
+        ),
+        _markdown_cell(
+            lesson.id,
+            artifact_name,
             "setup",
             dedent(
                 f"""\
@@ -514,6 +589,32 @@ def _notebook_document(
         ),
         _code_cell(lesson.id, artifact_name, "imports", setup_code),
         _code_cell(lesson.id, artifact_name, "readiness", readiness_code),
+        _markdown_cell(
+            lesson.id,
+            artifact_name,
+            "readiness-help",
+            dedent(
+                f"""\
+                ### Interpret the readiness result
+
+                Continue only when the last line says `Ready to execute: True`.
+
+                - **Workspace missing or changed:** reopen this exact lesson from the
+                  portal. Existing work is preserved, so do not delete it as a first
+                  troubleshooting step.
+                - **`psql` missing:** close JupyterLab, rerun the Windows course
+                  launcher or the macOS/Linux doctor, and launch the portal again from
+                  that environment.
+                - **Unsafe database target:** remove the unrelated connection override
+                  and configure only local `{COURSE_DATABASE_NAME}`. The helper will
+                  not echo a password-bearing URL.
+                - **Connection failure:** start local PostgreSQL, then rerun this cell.
+
+                Fix the first failed condition before continuing. Running later cells
+                cannot repair an unavailable client or server.
+                """
+            ),
+        ),
         _markdown_cell(
             lesson.id,
             artifact_name,
@@ -563,6 +664,34 @@ def _notebook_document(
         _markdown_cell(
             lesson.id,
             artifact_name,
+            "transcript-help",
+            dedent(
+                f"""\
+                ### 4. Read the transcript as evidence
+
+                A successful transcript ends without `ERROR` and the code cell does
+                not raise an exception. Query results appear as a table followed by a
+                row count such as `(5 rows)`. Data-definition or data-change
+                statements report a command tag such as `CREATE TABLE`, `INSERT 0 3`,
+                or `UPDATE 2`.
+
+                If the transcript reports an error:
+
+                1. Read the first `ERROR` and its line number.
+                2. Open and edit `{sql_filename}`, not the read-only snapshot.
+                3. Save the file.
+                4. Rerun the lesson cell. Rerun preparation first only when the error
+                   or lesson instructions show that database state is no longer clean.
+
+                Do not judge success from “some rows appeared.” Compare the actual
+                columns, row grain, ordering, NULL behavior, and counts with the
+                exercise's explicit verification contract.
+                """
+            ),
+        ),
+        _markdown_cell(
+            lesson.id,
+            artifact_name,
             "checks",
             dedent(
                 """\
@@ -576,6 +705,12 @@ def _notebook_document(
             ),
         ),
         _code_cell(lesson.id, artifact_name, "verify", verify_code),
+        _markdown_cell(
+            lesson.id,
+            artifact_name,
+            "recovery-reflection",
+            recovery_reflection,
+        ),
         _markdown_cell(
             lesson.id,
             artifact_name,

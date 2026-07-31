@@ -88,12 +88,174 @@ Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:8000/predict' `
   -ContentType 'application/json' -Body $body
 ```
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 55 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — container build boundaries, minimal images, and health semantics
+
+### The mental model
+
+A container image is a versioned filesystem plus process configuration;
+a container is one running process created from that image. Docker
+builds layers from a **build context**, so `.dockerignore` controls what
+can be sent to the builder. Multi-stage or ordered builds copy only the
+runtime artifacts needed after dependency installation.
+
+Liveness asks whether the process is functioning; readiness asks whether
+it should receive traffic. Packaging does not add application security,
+trusted artifacts, secret management, network policy, or safe defaults
+automatically.
+
+### Worked examples and syntax anatomy
+
+- **`FROM` / pinned base:** establishes operating-system and Python dependencies; pin and scan rather than trusting `latest`.
+- **`COPY` and `.dockerignore`:** define which local files enter the build context and image layers.
+- **`CMD` / `HEALTHCHECK`:** define the main process and probe command without replacing service-level readiness policy.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — audit build-context inclusion before Docker runs
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+from fnmatch import fnmatch
+
+files = [
+    "app.py",
+    "requirements.txt",
+    ".env",
+    ".venv/lib/package.py",
+    "artifacts/model.joblib",
+]
+ignore_patterns = [".env", ".venv/*"]
+included = [
+    path for path in files
+    if not any(fnmatch(path, pattern) for pattern in ignore_patterns)
+]
+print(included)
+assert ".env" not in included and not any(p.startswith(".venv/") for p in included)
+```
+
+**Expected observation:** The environment file and local virtual environment are excluded while explicit runtime assets remain.
+
+**Assumption to name:** This simplified matcher demonstrates review logic; Docker's complete ignore semantics and the real context still need inspection.
+
+### Focused example B — distinguish process health from traffic readiness
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+def probe(*, process_running, model_loaded, dependency_ready, draining):
+    return {
+        "healthy": process_running,
+        "ready": (
+            process_running
+            and model_loaded
+            and dependency_ready
+            and not draining
+        ),
+    }
+
+during_dependency_outage = probe(
+    process_running=True,
+    model_loaded=True,
+    dependency_ready=False,
+    draining=False,
+)
+print(during_dependency_outage)
+assert during_dependency_outage == {"healthy": True, "ready": False}
+```
+
+**Expected observation:** A running process can remain live while correctly refusing new traffic during a dependency outage.
+
+**Assumption to name:** Restarting the healthy process would not repair the external dependency and could amplify the incident.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define container build boundaries, minimal images, and health semantics in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Copying the whole repository into an image, baking credentials into layers, or binding a development server publicly.
+
+**Debug it deliberately:** Inspect build context, image history/SBOM, user, exposed ports, process signals, environment, artifact hash, and health/readiness responses.
+
+**Stop condition:** Do not publish an image until secrets, base/dependency provenance, non-root runtime, probes, resource limits, and rollback are reviewed.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Create a slim dependency file containing only direct API runtime needs.
+
+**Verify:** For task `Create a slim dependency file containing only direct API runtime needs`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
 2. Add `GET /health` returning `{"status": "ok"}`.
+
+**Verify:** For task `Add GET /health returning {"status": "ok"}`, demonstrate the concrete requirement “2. Add GET /health returning {"status": "ok"}” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 3. Optionally push the image to a registry if you intentionally use a connected
    account.
+
+**Verify:** For task `Optionally push the image to a registry if you intentionally use a connected`, demonstrate the concrete requirement “3. Optionally push the image to a registry if you intentionally use a connected account” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -114,13 +276,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Layer and secret audit:** Create a `.dockerignore`, inspect image history, and prove that `.env`, Git metadata, notebooks, caches, and local artifacts are absent.
    **Progressive hint:** The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.
+
+**Verify:** For task `Layer and secret audit: Create a .dockerignore, inspect image history, and prove that .env, G...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 5. **Least-privilege runtime:** Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.
    **Progressive hint:** Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.
+
+**Verify:** For task `Least-privilege runtime: Run the service as a non-root user with a read-only filesystem and a...`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 6. **Health semantics:** Implement separate `/live` and `/ready` checks and a startup failure when the model manifest is incompatible. Test all three states.
    **Progressive hint:** Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.
 
+**Verify:** For task `Health semantics: Implement separate /live and /ready checks and a startup failure when the m...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -152,3 +341,36 @@ adding complexity.
 - Then consult the
   [Day 55 solution](../solutions/day55_apis_containerization_docker/day55_solutions.md).
 - Continue to [Day 56 — Prefect](day56_orchestration_prefect_intro.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize container build boundaries, minimal images, and health semantics. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day55_apis_containerization_docker.md`
+- learner artifact: `python/ds-60day/notebooks/day55_apis_containerization_docker.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

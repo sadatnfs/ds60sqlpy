@@ -78,10 +78,142 @@ Record the exact model identifier and package version. A confidence-like score
 is not automatically calibrated probability, and sentiment labels may fail on
 sarcasm, dialect, negation, or domain-specific language.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 49 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — tokenization contracts, cached NLP models, and sensitive-text evaluation
+
+### The mental model
+
+Natural-language processing begins with a tokenizer contract. A token is
+a model-specific unit, not necessarily a word; subword models split rare
+words into reusable pieces and map them to integer IDs. A pipeline then
+combines preprocessing, model logits, and postprocessing labels.
+
+Different tokenizers produce different boundaries and offsets. Model
+output depends on truncation, maximum length, label mapping, model card,
+language/domain, and version. Raw text may contain personal or secret
+information, so examples, logs, caches, and evaluation artifacts need a
+privacy boundary.
+
+### Worked examples and syntax anatomy
+
+- **`spacy.blank('en')`:** creates an offline tokenizer without a downloaded statistical pipeline.
+- **`pipeline(task, model=..., local_files_only=...)`:** bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.
+- **token offsets and truncation:** connect tokens back to original text and define what content the model actually saw.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — inspect an offline spaCy token boundary
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+import spacy
+
+nlp = spacy.blank("en")
+doc = nlp("Tokenization isn't identical to splitting on spaces.")
+tokens = [(token.text, token.idx) for token in doc]
+print(tokens)
+assert "".join(token.text_with_ws for token in doc) == doc.text
+```
+
+**Expected observation:** Punctuation and the contraction receive tokenizer-specific boundaries while offsets reconstruct the original text.
+
+**Assumption to name:** The blank English tokenizer supplies lexical boundaries only; it has no trained part-of-speech or entity component.
+
+### Focused example B — make vocabulary and unknown-token behavior visible
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+vocabulary = {"[UNK]": 0, "data": 1, "science": 2, "helps": 3}
+text = "data science helps teams"
+pieces = text.lower().split()
+token_ids = [vocabulary.get(piece, vocabulary["[UNK]"]) for piece in pieces]
+print({"pieces": pieces, "token_ids": token_ids})
+assert token_ids[-1] == vocabulary["[UNK]"]
+```
+
+**Expected observation:** The unseen word maps to an explicit unknown ID; a real subword tokenizer may split it instead.
+
+**Assumption to name:** This tiny whitespace vocabulary demonstrates the contract and is not a substitute for a trained tokenizer.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define tokenization contracts, cached NLP models, and sensitive-text evaluation in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Calling an unpinned default pipeline that downloads a model, then interpreting its label and score without reading the model contract.
+
+**Debug it deliberately:** Record model/tokenizer IDs and revisions, cache status, token IDs/offsets, truncation length, label mapping, and evaluation slices.
+
+**Stop condition:** Do not send sensitive learner text to a remote model or persist raw text/logits without explicit purpose, access, and retention rules.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Try a zero-shot-classification pipeline with your own candidate labels.
+
+**Verify:** For task `Try a zero-shot-classification pipeline with your own candidate labels`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
 2. Compare tokenization from spaCy with a Hugging Face tokenizer.
+
+**Verify:** For task `Compare tokenization from spaCy with a Hugging Face tokenizer`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -103,15 +235,51 @@ attempt, and record the evidence that would prove your result correct.
 
 3. **Truncation debugging:** Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost.
    **Progressive hint:** Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.
+
+**Verify:** For task `Truncation debugging: Create a text longer than the model limit and inspect token count, spec...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 4. **Model-provenance contract:** Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state.
    **Progressive hint:** Record repository ID, immutable revision/commit when available, library versions, tokenizer settings, and local-files-only mode.
+
+**Verify:** For task `Model-provenance contract: Design metadata that proves which Hugging Face model/tokenizer and...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 5. **Evaluation leakage:** Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation.
    **Progressive hint:** Group by source/document/entity and use normalized hashes or similarity checks before splitting.
+
+**Verify:** For task `Evaluation leakage: Find and repair leakage when near-duplicate documents or excerpts from on...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 6. **Sensitive-text boundary:** Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis.
    **Progressive hint:** Use synthetic fixtures, stable opaque IDs, redacted excerpts, bounded retention, and counts rather than raw matched values.
 
+**Verify:** For task `Sensitive-text boundary: Design a local text-classification workflow that minimizes PII in lo...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -144,3 +312,36 @@ often easier to audit.
 - Then consult the
   [Day 49 solution](../solutions/day49_nlp_basics_hf_spacy/day49_solutions.md).
 - Continue to [Day 50 — Time-Series Modeling](day50_time_series_modeling.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-49` — Day 49 — NLP Basics with Hugging Face and spaCy.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize tokenization contracts, cached NLP models, and sensitive-text evaluation. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day49_nlp_basics_hf_spacy.md`
+- learner artifact: `python/ds-60day/notebooks/day49_nlp_basics_hf_spacy.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

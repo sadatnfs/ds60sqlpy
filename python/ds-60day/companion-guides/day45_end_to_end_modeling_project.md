@@ -81,18 +81,219 @@ pipeline = make_pipeline(
 Fit and serialize this complete pipeline, not separately transformed arrays. A
 future input must pass through the exact fitted preprocessing.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 45 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — an end-to-end evidence chain from decision to reproducible artifact
+
+### The mental model
+
+An end-to-end project is a sequence of contracts, not one long notebook:
+problem framing defines the decision and prediction time; data
+validation defines row grain and allowed values; splitting protects the
+evaluation boundary; a pipeline binds preprocessing to the model;
+metrics and error analysis support a scoped claim; artifact packaging
+preserves the exact fitted workflow.
+
+A baseline is a decision checkpoint. Added complexity is justified only
+if it improves a declared metric or operational property under the same
+data and evaluation design. Reproducibility also requires data identity,
+environment, seed, commands, and limitations.
+
+### Worked examples and syntax anatomy
+
+- **`DummyClassifier(strategy=...)`:** creates a minimal predictive reference under the exact same split and metric.
+- **`ColumnTransformer` inside `Pipeline`:** binds column-specific preprocessing and prediction into one fitted artifact.
+- **manifest + acceptance gates:** connect data hash, schema, code/environment, metrics, limitations, and artifact identity.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — require the candidate to beat a same-split baseline
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.dummy import DummyClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, stratify=y, random_state=4501
+)
+baseline = DummyClassifier(strategy="prior").fit(X_train, y_train)
+candidate = make_pipeline(
+    StandardScaler(), LogisticRegression(max_iter=2_000)
+).fit(X_train, y_train)
+scores = {
+    "baseline": roc_auc_score(y_test, baseline.predict_proba(X_test)[:, 1]),
+    "candidate": roc_auc_score(y_test, candidate.predict_proba(X_test)[:, 1]),
+}
+print(scores)
+assert scores["candidate"] > scores["baseline"]
+```
+
+**Expected observation:** The model must improve the declared held-out metric over the simple prior baseline on identical rows.
+
+**Assumption to name:** ROC AUC and this split reflect the decision; the test result was not repeatedly consulted during development.
+
+### Focused example B — turn completion into explicit acceptance gates
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+evidence = {
+    "data_contract_passed": True,
+    "tests_passed": True,
+    "baseline_auc": 0.50,
+    "candidate_auc": 0.97,
+    "minimum_improvement": 0.05,
+    "artifact_reloaded": True,
+    "limitations_documented": True,
+}
+gates = {
+    "quality": evidence["data_contract_passed"] and evidence["tests_passed"],
+    "performance": (
+        evidence["candidate_auc"] - evidence["baseline_auc"]
+        >= evidence["minimum_improvement"]
+    ),
+    "delivery": evidence["artifact_reloaded"] and evidence["limitations_documented"],
+}
+print(gates)
+assert all(gates.values())
+```
+
+**Expected observation:** A project is ready only when every named quality, performance, and delivery gate passes.
+
+**Assumption to name:** Thresholds and evidence requirements were set before viewing the final candidate result.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define an end-to-end evidence chain from decision to reproducible artifact in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Treating a high notebook score as the project outcome while omitting baseline, leakage audit, artifact reload, and limitations.
+
+**Debug it deliberately:** Trace every claim backward to metric rows, split, feature pipeline, data version, environment, and command; rerun in a fresh kernel/process.
+
+**Stop condition:** Do not promote a project when a gate is unknown, final evaluation influenced iteration, or the intended decision and harm boundaries are vague.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 The notebook's project checklist is the exercise:
 
 1. Load the dataset and create train/validation/test boundaries.
+
+**Verify:** For task `Load the dataset and create train/validation/test boundaries`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 2. Preprocess with `ColumnTransformer`.
+
+**Verify:** For task `Preprocess with ColumnTransformer`, measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+
+
+
+
+
+
 3. Train a baseline model.
+
+**Verify:** For task `Train a baseline model`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 4. Evaluate with appropriate metrics and cross-validation.
+
+**Verify:** For task `Evaluate with appropriate metrics and cross-validation`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 5. Save the model and preprocessing together with `joblib`.
+
+**Verify:** For task `Save the model and preprocessing together with joblib`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+
+
+
+
+
+
 6. Write a short README-style section in the notebook covering rationale,
    metrics, limitations, and next steps.
+
+**Verify:** For task `Write a short README-style section in the notebook covering rationale,`, demonstrate the concrete requirement “6. Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 7. Optionally adapt the Day 44 FastAPI service.
+
+**Verify:** For task `Optionally adapt the Day 44 FastAPI service`, demonstrate the concrete requirement “7. Optionally adapt the Day 44 FastAPI service” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -111,21 +312,84 @@ attempt, and record the evidence that would prove your result correct.
 
 8. **Data-contract gate:** Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint.
    **Progressive hint:** Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.
+
+**Verify:** For task `Data-contract gate: Write executable checks for row identity, required columns, target domain...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
+
+
+
+
+
+
+
 9. **Leakage audit:** Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field.
    **Progressive hint:** Ask whether the value exists at prediction time and whether it was computed using future rows or target information.
+
+**Verify:** For task `Leakage audit: Create a feature-by-feature table with availability time, source, transformati...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 10. **Baseline ladder:** Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results.
    **Progressive hint:** Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.
+
+**Verify:** For task `Baseline ladder: Evaluate a dummy strategy, a simple linear/tree model, and one selected cand...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 11. **Operating-policy selection:** Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it.
    **Progressive hint:** Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.
+
+**Verify:** For task `Operating-policy selection: Build a threshold table with false-positive cost, false-negative...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 12. **Error-slice analysis:** Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values.
    **Progressive hint:** Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.
+
+**Verify:** For task `Error-slice analysis: Define at least three pre-motivated slices, report support and error me...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
+
 13. **Artifact manifest:** Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes.
    **Progressive hint:** JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.
+
+**Verify:** For task `Artifact manifest: Save the fitted pipeline with a JSON manifest containing model ID, trainin...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
+
+
+
+
+
+
+
 14. **Fresh-process acceptance:** Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance.
    **Progressive hint:** Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.
 
+**Verify:** For task `Fresh-process acceptance: Create a smoke test that starts from a clean process, loads the sav...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -155,3 +419,36 @@ production readiness, causal validity, fairness, or stability under future data.
   [Day 45 reference solution](../solutions/day45_end_to_end_modeling_project/day45_solutions.md)
   only after producing your own evidence.
 - Continue to [Day 46 — Deep Learning Overview](day46_deep_learning_overview.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-45` — Day 45 — End-to-End Modeling Mini-Project.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize an end-to-end evidence chain from decision to reproducible artifact. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day45_end_to_end_modeling_project.md`
+- learner artifact: `python/ds-60day/notebooks/day45_end_to_end_modeling_project.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

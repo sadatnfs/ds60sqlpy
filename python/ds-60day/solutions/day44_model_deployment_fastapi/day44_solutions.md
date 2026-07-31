@@ -91,6 +91,36 @@ Deployment pointers
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`class Request(BaseModel)`:** declares typed input fields and validation constraints that become JSON Schema.
+2. **`@app.post('/predict', response_model=...)`:** binds an HTTP method/path to a validated function contract.
+3. **`TestClient(app).post(..., json=payload)`:** exercises serialization, routing, validation, and response behavior without starting a network server.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Validation narrows untrusted input first, artifact/schema checks establish compatibility second, and a thin endpoint delegates deterministic prediction.
+
+**Useful alternative:** ONNX or a safe JSON-based custom format can improve portability; application code may call a plain function when HTTP adds no value.
+
+**Trade-off:** Strict schemas protect clients and models but require explicit versioning when the feature contract evolves.
+
+**Edge case to test:** NaN/Infinity, huge batches, missing artifacts, version drift, concurrent load, and model exceptions require bounded error behavior.
+
+**Evidence of correctness:** Use TestClient for valid/invalid payloads, assert response schema/status, verify artifact identity and feature metadata before readiness, and test no credential or input body enters logs.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -98,7 +128,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Add input validation and friendly error behavior.
 
@@ -108,7 +138,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Add input validation and friendly error behavior`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Return the class name as well as the numeric class identifier.
 
@@ -118,7 +157,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Return the class name as well as the numeric class identifier`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Create a minimal runtime dependency file for this API.
 
@@ -127,6 +175,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Create a minimal runtime dependency file for this API`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Boundary-case testing
 
@@ -146,6 +203,15 @@ probability range, class mapping, and model version.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong featur...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Batch contract
 
 **Prompt:** Design a `/predict-batch` request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata.
@@ -164,6 +230,15 @@ but requires a more complex, versioned response contract.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Design a /predict-batch request and response with stable row IDs, a maximum batch size, order...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Artifact-compatibility check
 
 **Prompt:** At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe.
@@ -181,3 +256,5 @@ and controlled storage are security boundaries.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `At startup, validate model version, expected feature schema, and class metadata before accept...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

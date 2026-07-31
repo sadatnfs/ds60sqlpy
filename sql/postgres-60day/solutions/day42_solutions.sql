@@ -1,4 +1,17 @@
 -- Day 42 solutions: data-quality validation
+-- SOLUTION READING MAP — sql-42: Data Quality Validation
+-- Explanation: sql/postgres-60day/solutions/day42_solutions.md
+-- Run from the repository root only against advanced_sql_training:
+--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day42_solutions.sql
+-- Read each answer from inputs to output: establish FROM/JOIN grain; apply
+-- row filters; group/aggregate; filter groups; compute windows; project named
+-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE
+-- as an intermediate relation whose keys, row count, and totals can be checked.
+-- A command tag is not enough for DDL/DML: inspect catalogs or before/after
+-- rows, test a boundary case, and reconcile with an independent control.
+-- NULL, zero, empty input, missing rows, and ties need explicit policies.
+-- The documented transaction/cleanup boundary must leave no unintended persistent object.
+--
 SET search_path TO training, public;
 
 -- Exercise 1: one compact validation report. Constraints make most counts zero;

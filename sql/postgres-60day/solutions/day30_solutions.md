@@ -1,5 +1,58 @@
 # Day 30 solutions — Phase 2 Project: Cohort Retention and CLV
 
+
+<!-- beginner-solution-enrichment -->
+## How to study and run this solution
+
+Open this explanation only after making an honest attempt. The executable
+companion runs solely against the disposable `advanced_sql_training` database:
+
+```powershell
+# Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day30_solutions.sql"
+```
+
+```bash
+# macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day30_solutions.sql
+```
+
+`psql` prints each result/command tag in the terminal. Stop at the first
+unexpected `ERROR`; later output cannot repair an earlier failed invariant.
+Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
+ordering with the explanation before comparing syntax.
+
+## Clause-by-clause reading map
+
+The lesson's main concepts are Cohort, Retention denominator, Calendar spine. Its worked-model focus is:
+Calculate cohort size directly from customers at one row per signup cohort. Separately deduplicate activity to one row per customer/order month, derive month offset, and count active customers. Join numerator to denominator only after both relations are stable, then guard and range-check the retention rate.
+
+- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
+  before adding aggregates; a one-to-many join is allowed to multiply rows only
+  when the later contract accounts for it.
+- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
+  completed groups. Window functions run over the surviving relation and
+  normally preserve its row count.
+- Read the `SELECT` list as the public result contract: keys establish grain,
+  measures state calculations, and aliases explain meaning. `ORDER BY` is the
+  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
+- Trace every common table expression (CTE) as a temporary named relation.
+  Execute or inspect one stage at a time while debugging, but compare the final
+  result with an independent control rather than trusting stage names.
+- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
+  chooses another representation. Guard division with `NULLIF`; disclose
+  exclusions and distinguish zero from no row.
+- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
+  Catalog checks, negative cases, row-count reconciliation, and the declared
+  transaction boundary prove behavior and cleanup.
+
+The exact final queries are not the only valid syntax. A join, subquery, CTE,
+window, or conditional aggregate can be an alternative when it preserves the
+same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
+form whose intermediate relations a reviewer can verify; optimize only after
+correctness is established with evidence.
+
 These answers align one-for-one with [day30_phase2_project.sql](../day30_phase2_project.sql).
 Run only against the disposable `advanced_sql_training` database.
 The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
@@ -49,6 +102,21 @@ Check the result at the stated grain. An alternative formulation is
 valid only if it preserves the same NULL, ordering, time, money, and
 cardinality contract.
 
+### Reasoning and verification
+
+- **Expected result/shape:** One row per cohort month.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
+
 ## Exercise 2 — Query writing
 
 **Prompt:** Calculate active customers and net line revenue for each cohort/order month.
@@ -95,6 +163,21 @@ ORDER BY c.cohort_month, ov.order_month;
 Check the result at the stated grain. An alternative formulation is
 valid only if it preserves the same NULL, ordering, time, money, and
 cardinality contract.
+
+### Reasoning and verification
+
+- **Expected result/shape:** One row per observed cohort/order month.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 3 — Query writing
 
@@ -149,6 +232,21 @@ ORDER BY a.cohort_month, month_offset;
 Check the result at the stated grain. An alternative formulation is
 valid only if it preserves the same NULL, ordering, time, money, and
 cardinality contract.
+
+### Reasoning and verification
+
+- **Expected result/shape:** Observed cohort/offset rows with retention from 0 to 1.
+- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 4 — Prediction
 
@@ -216,6 +314,21 @@ ORDER BY s.cohort_month, s.month_offset;
 Check the result at the stated grain. An alternative formulation is
 valid only if it preserves the same NULL, ordering, time, money, and
 cardinality contract.
+
+### Reasoning and verification
+
+- **Expected result/shape:** Thirteen rows per cohort.
+- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 5 — Debugging
 
@@ -293,6 +406,21 @@ ORDER BY cohort_month, month_offset;
 Check the result at the stated grain. An alternative formulation is
 valid only if it preserves the same NULL, ordering, time, money, and
 cardinality contract.
+
+### Reasoning and verification
+
+- **Expected result/shape:** One row per observed cohort/month with nullable guarded measures.
+- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Exercise 6 — Extension
 
@@ -380,6 +508,21 @@ FROM scoped;
 Check the result at the stated grain. An alternative formulation is
 valid only if it preserves the same NULL, ordering, time, money, and
 cardinality contract.
+
+### Reasoning and verification
+
+- **Expected result/shape:** One row with zero retention violations and zero revenue difference.
+- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
+- **Intermediate relation check:** Run or inspect each CTE/subquery from the
+  inside out. Record its keys and row count; the first stage that violates the
+  declared grain is where debugging begins.
+- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
+  projection, and final sort belongs where it is. Moving a predicate can change
+  preserved rows; removing a tie-breaker can make output nondeterministic.
+- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
+- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
+  value/key, duplicate join keys, and tied ordering values. State which cases
+  are impossible because of a database constraint and which the query handles.
 
 ## Final self-check
 

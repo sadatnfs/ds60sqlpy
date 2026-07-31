@@ -46,11 +46,13 @@ useful fully local comparison even without the Titanic cache.
 There are two mappings:
 
 1. training rows need out-of-fold encodings; and
+
 2. validation/test/inference rows need a map learned from all available training
    rows.
 
 Using the first procedure for both, or the second procedure on training rows,
 creates subtle errors.
+
 
 ## Worked example: inspect support before trusting a mean
 
@@ -71,13 +73,164 @@ The rare category has an extreme mean based on one row. Smoothing combines its
 estimate with the global training mean, with the count determining how strongly
 to trust the category-specific value.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 51 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — out-of-fold target encoding, smoothing, and transform-time unknowns
+
+### The mental model
+
+Target encoding replaces a category with a statistic of the target.
+Computing that statistic from the row's own target leaks the answer.
+Training rows therefore need **out-of-fold** encodings: each row is
+transformed by a map learned from other folds only.
+
+Validation/test rows use a map learned from the corresponding training
+data. Rare categories are noisy, so smoothing shrinks their mean toward
+the training prior. Missing and unseen categories need an explicit
+fallback. Temporal or grouped data requires a compatible split rather
+than ordinary shuffled folds.
+
+### Worked examples and syntax anatomy
+
+- **`groupby(category)[target].agg(['mean', 'count'])`:** builds category evidence only from the allowed training subset.
+- **`(count * mean + strength * prior) / (count + strength)`:** smooths low-support categories toward the training-wide prior.
+- **out-of-fold transform:** fits one map per training fold and writes values only to that fold's held-out rows.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — show why a one-row category leaks perfectly
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+import pandas as pd
+
+category = pd.Series(["common", "common", "only_zero", "only_one"])
+target = pd.Series([0, 1, 0, 1], dtype=float)
+full_map = target.groupby(category).mean()
+leaked = category.map(full_map)
+print(pd.DataFrame({"category": category, "target": target, "leaked": leaked}))
+assert leaked.iloc[2] == target.iloc[2]
+assert leaked.iloc[3] == target.iloc[3]
+```
+
+**Expected observation:** Singleton categories receive their own targets exactly, creating a feature that memorizes training labels.
+
+**Assumption to name:** Category identity is available at prediction time, but the current row's target is not.
+
+### Focused example B — smooth known categories and fall back for unknowns
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+import pandas as pd
+
+train_category = pd.Series(["a", "a", "a", "b"])
+train_target = pd.Series([1, 1, 0, 1], dtype=float)
+prior = train_target.mean()
+stats = train_target.groupby(train_category).agg(["mean", "count"])
+strength = 3.0
+smoothed = (
+    stats["mean"] * stats["count"] + prior * strength
+) / (stats["count"] + strength)
+new_category = pd.Series(["a", "b", "unseen", None])
+encoded = new_category.map(smoothed).fillna(prior)
+print({"prior": prior, "map": smoothed.to_dict(),
+       "encoded": encoded.tolist()})
+assert encoded.iloc[2] == prior and encoded.iloc[3] == prior
+```
+
+**Expected observation:** The low-support `b` estimate is pulled toward the prior; unseen and missing values use the declared prior.
+
+**Assumption to name:** Using one shared prior for missing/unseen categories matches the model contract.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define out-of-fold target encoding, smoothing, and transform-time unknowns in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Building one full-training target map and applying it back to those same training rows.
+
+**Debug it deliberately:** Attach source fold and map-training row IDs to a tiny example; assert every encoded training row is absent from its map's target aggregation.
+
+**Stop condition:** Do not use target encoding until the split unit, unseen fallback, smoothing strength, and fit/transform boundaries are testable.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Add K-fold target encoding to a scikit-learn pipeline through a custom
    transformer or `FunctionTransformer`.
+
+**Verify:** For task `Add K-fold target encoding to a scikit-learn pipeline through a custom`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
 2. Add an appropriate prior and smoothing; experiment with `n_splits`.
+
+**Verify:** For task `Add an appropriate prior and smoothing; experiment with nsplits`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
+
+
+
+
+
+
 3. Compare ROC AUC with one-hot encoding across multiple seeded train/test
    splits.
+
+**Verify:** For task `Compare ROC AUC with one-hot encoding across multiple seeded train/test`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -102,13 +255,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Out-of-fold invariant:** Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead.
    **Progressive hint:** For a category absent from the fold's training partition, there is no valid category statistic; use the fold training prior.
+
+**Verify:** For task `Out-of-fold invariant: Create a unique category for every training row and show that a leaky...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 5. **Unknown and missing categories:** Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three.
    **Progressive hint:** Normalize missing values to an explicit sentinel if missingness is a category; unseen categories generally receive the training global prior.
+
+**Verify:** For task `Unknown and missing categories: Define distinct policies for a missing category, an unseen ca...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 6. **Temporal leakage:** Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation.
    **Progressive hint:** Sort by event time and compute each row's category statistics from strictly earlier labeled rows; handle ties deliberately.
 
+**Verify:** For task `Temporal leakage: Design target encoding for timestamped events where later labels cannot inf...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -140,3 +320,36 @@ based on cardinality, leakage risk, runtime, and validated evidence.
 - Then consult the
   [Day 51 solution](../solutions/day51_advanced_feature_engineering_target_encoding/day51_solutions.md).
 - Continue to [Day 52 — Dask](day52_scalability_dask.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-51` — Day 51 — Target Encoding and Leakage-Safe Features.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize out-of-fold target encoding, smoothing, and transform-time unknowns. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day51_advanced_feature_engineering_target_encoding.md`
+- learner artifact: `python/ds-60day/notebooks/day51_advanced_feature_engineering_target_encoding.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

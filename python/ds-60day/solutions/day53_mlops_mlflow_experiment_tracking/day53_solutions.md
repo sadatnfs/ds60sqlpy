@@ -75,6 +75,36 @@ Exercise 3 — Model Registry (concepts)
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`with mlflow.start_run():`:** creates a bounded lifecycle so successful and failed runs receive terminal status.
+2. **`log_param` versus `log_metric`:** stores fixed configuration separately from numeric measurements that may evolve by step.
+3. **`log_artifact` / model logging:** copies output into the run's artifact store; verify reload and input contract rather than trusting existence.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** The run lifecycle and evidence taxonomy make records inspectable, while reload and provenance checks connect tracking metadata to a usable artifact.
+
+**Useful alternative:** A versioned JSON manifest plus artifact directory can be sufficient locally; a shared tracking server adds collaboration with operational obligations.
+
+**Trade-off:** Automatic logging is convenient but may record too much, too little, or sensitive metadata; explicit logging is verbose but deliberate.
+
+**Edge case to test:** Nested/failed runs, duplicate parameter writes, missing artifacts, deleted tracking directories, incompatible signatures, and sensitive tags require policy.
+
+**Evidence of correctness:** Query exact run ID/status, record data/split/code/environment, distinguish params and metrics, hash artifacts, and reload with a representative input signature.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -82,7 +112,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Log additional parameters such as Logistic Regression `C` and compare runs.
 
@@ -92,7 +122,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Log additional parameters such as Logistic Regression C and compare runs`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Save a confusion-matrix PNG and log it as an artifact.
 
@@ -102,7 +141,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Save a confusion-matrix PNG and log it as an artifact`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Try a different classifier, such as Random Forest, and compare ROC AUC.
 
@@ -111,6 +159,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Try a different classifier, such as Random Forest, and compare ROC AUC`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Failure-state handling
 
@@ -130,6 +187,15 @@ evidence is restricted.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Run an experiment that intentionally raises after logging parameters. Verify MLflow records a...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Provenance manifest
 
 **Prompt:** Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.
@@ -148,6 +214,15 @@ Keep the source snapshot governed and reproducible.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock ha...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Reload and signature check
 
 **Prompt:** Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.
@@ -165,3 +240,5 @@ as an extension rather than required for the portable course.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Log a fitted pipeline with an input example/signature, reload it by run URI, and assert predi...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.

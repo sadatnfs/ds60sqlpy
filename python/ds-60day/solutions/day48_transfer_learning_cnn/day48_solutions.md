@@ -165,6 +165,36 @@ Takeaways
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`models.resnet18(weights=...)`:** constructs the architecture and optionally loads a specific versioned weight bundle.
+2. **`parameter.requires_grad = False`:** excludes a parameter from autograd updates but does not change module mode.
+3. **`model.fc = nn.Linear(model.fc.in_features, classes)`:** replaces the classifier head while preserving the backbone feature width.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** An architecture-only example proves mechanics offline, while explicit weight and transform metadata governs the connected transfer path.
+
+**Useful alternative:** A small custom CNN avoids external weights; feature extraction to cached embeddings can simplify repeated head experiments.
+
+**Trade-off:** Freezing reduces compute and overfitting risk but limits adaptation; unfreezing improves flexibility while requiring lower rates and more evidence.
+
+**Edge case to test:** Missing/corrupt cache, class-folder mismatch, grayscale inputs, tiny datasets, batch-normalization state, and device memory need explicit handling.
+
+**Evidence of correctness:** Prove whether a download can occur, list trainable parameters and optimizer membership, assert transforms/class mapping, compare frozen and fine-tuned validation, and save provenance.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -172,7 +202,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Load a small image folder with `ImageFolder` and `DataLoader`.
 
@@ -182,7 +212,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Load a small image folder with ImageFolder and DataLoader`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Train only the classifier head for a few epochs.
 
@@ -192,7 +231,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Train only the classifier head for a few epochs`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Unfreeze the final ResNet block and fine-tune it with a lower learning rate.
 
@@ -201,6 +249,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Unfreeze the final ResNet block and fine-tune it with a lower learning rate`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Transform mismatch diagnosis
 
@@ -220,6 +277,15 @@ deterministic inference transform exactly.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Compare predictions when validation images use the training transform with random crop/flip v...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Frozen-state edge case
 
 **Prompt:** Freeze a pretrained backbone containing BatchNorm. Explain the difference between `requires_grad=False` and putting frozen modules in evaluation mode.
@@ -237,6 +303,15 @@ global `model.train()` and assuming freeze semantics are complete.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Freeze a pretrained backbone containing BatchNorm. Explain the difference between requiresgra...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 6 — Offline fallback design
 
@@ -256,3 +331,5 @@ labeled smoke fallback—never silently change the experiment.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Make the lesson runnable when pretrained weights are not cached. Detect cache availability, o...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

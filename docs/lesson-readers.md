@@ -52,6 +52,13 @@ can then request only these fixed, catalog-resolved actions:
 - create an ignored, editable guided notebook for a cataloged SQL lesson and
   open that notebook in JupyterLab.
 
+Every Python and SQL reader also has an **Ask Codex about this lesson** panel.
+It contains a read-only, copy-ready prompt built from that exact catalog entry:
+stable ID, title, guide and learner paths, prerequisites, execution safety,
+solution boundary, progressive coaching loop, and evidence-based done
+condition. This is optional coaching context; the rendered guide before it
+must still define and demonstrate the concept completely.
+
 On Windows, double-click `START_DS60.cmd` rather than trying to make a static
 browser page start local software. It performs readiness checks and reopens
 the same course guide in authenticated loopback mode. SQL lesson run cards can

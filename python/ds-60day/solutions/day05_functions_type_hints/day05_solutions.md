@@ -1,5 +1,215 @@
 # Day 05 — Solutions: Functions, Docstrings, and Type Hints
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**function contracts, parameters, return values, scope, and type hints**.
+
+A function gives a name to a reusable behavior. Its contract says which
+inputs are accepted, what it returns, which failures it raises, and
+whether it changes anything outside itself. Parameters are names in the
+definition; arguments are actual values supplied by a caller.
+
+A call creates a local scope. Names assigned there normally disappear
+when the call returns. A `return` sends one value to the caller and
+stops that call. Type hints document intended types and support static
+tools, but Python does not enforce them automatically at runtime.
+Defaults are evaluated once when `def` runs, so mutable defaults should
+normally be replaced by `None` plus a fresh object inside the function.
+
+### Vocabulary used in the worked answers
+
+- **function:** a named reusable block that can accept inputs and return a value.
+- **parameter:** a name declared in a function signature.
+- **argument:** a value supplied for a parameter during a call.
+- **return value:** the object sent back to the caller.
+- **scope:** the region in which a name can be resolved.
+- **type hint:** machine-readable documentation of an intended type.
+
+### Reference pattern 1 — Make validation part of the contract
+
+Reject an invalid domain before doing the calculation.
+
+```python
+def mean(values: list[float]) -> float:
+    """Return the arithmetic mean of a non-empty list."""
+    if not values:
+        raise ValueError("values must not be empty")
+    return sum(values) / len(values)
+
+mean([2.0, 4.0, 9.0])
+```
+
+**Expected observation:** `5.0`. Empty input follows a deliberate exception path instead of dividing by zero accidentally.
+
+### Reference pattern 2 — Use keyword-only parameters to make calls readable
+
+A signature can prevent ambiguous positional calls.
+
+```python
+def discounted(price: float, *, rate: float = 0.0) -> float:
+    if not 0 <= rate <= 1:
+        raise ValueError("rate must be between 0 and 1")
+    return price * (1 - rate)
+
+discounted(80.0, rate=0.25)
+```
+
+**Expected observation:** `60.0`. The call labels `rate`, making `0.25` hard to confuse with another quantity.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Implement `describe(values: list[float]) -> tuple[float, float]` returning the arithmetic mean and **population** standard deviation. **Input:** `[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]`. **Expected result:** `(5.0, 2.0)`. **Constraints:** compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. **Verify:** Use `math.isclose` to confirm mean `5.0` and population standard deviation `2.0`, then show empty input follows the documented failure path.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies function contracts, parameters, return values, scope, and type hints.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.
+
+**Edge case:** Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.
+
+**Solution evidence to inspect:** Use `math.isclose` to confirm mean `5.0` and population standard deviation `2.0`, then show empty input follows the documented failure path.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. **Constraint:** choose and document one explicit behavior—this lesson's reference raises `ValueError`. **Verify:** `help(describe)` communicates the contract without reading the body.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies function contracts, parameters, return values, scope, and type hints.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.
+
+**Edge case:** Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.
+
+**Solution evidence to inspect:** `help(describe)` communicates the contract without reading the body.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** Validate `describe` near its boundary: reject an empty list and any non-finite value such as `float('nan')` with a useful `ValueError`. **Verify:** show the normal result and use two separate `try`/`except ValueError` checks for the invalid cases; do not catch errors inside the function that it cannot repair.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in function contracts, parameters, return values, scope, and type hints.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.
+
+**Edge case:** Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.
+
+**Solution evidence to inspect:** show the normal result and use two separate `try`/`except ValueError` checks for the invalid cases; do not catch errors inside the function that it cannot repair.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Predict the result of calling a function with `items=[]` as a default three times when it appends on each call. Explain shared defaults. **Progressive hint:** Default objects are created once when `def` executes. **Verify:** Call the faulty function three times and record cumulative state, then assert the `None`-sentinel repair returns independent one-item lists on every call.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying function contracts, parameters, return values, scope, and type hints.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.
+
+**Edge case:** Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.
+
+**Solution evidence to inspect:** Call the faulty function three times and record cumulative state, then assert the `None`-sentinel repair returns independent one-item lists on every call.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace a local variable that shadows a global of the same name. Which binding changes, and when would `global` be required? **Progressive hint:** Assignment makes a name local unless explicitly declared otherwise. **Verify:** Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the function contracts, parameters, return values, scope, and type hints model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.
+
+**Edge case:** Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.
+
+**Solution evidence to inspect:** Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Implement typed `weighted_mean(values, weights)` with length, empty, and zero-total-weight validation. **Progressive hint:** State every invalid condition before calculating. **Verify:** Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies function contracts, parameters, return values, scope, and type hints.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.
+
+**Edge case:** Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.
+
+**Solution evidence to inspect:** Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Repair a function whose `*items` argument is accidentally passed as one list instead of unpacked individual items. **Progressive hint:** Compare `f(values)` with `f(*values)`. **Verify:** Capture arguments received by `f(values)` and `f(*values)`; assert the repaired call presents individual items rather than one nested list.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in function contracts, parameters, return values, scope, and type hints.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.
+
+**Edge case:** Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.
+
+**Solution evidence to inspect:** Capture arguments received by `f(values)` and `f(*values)`; assert the repaired call presents individual items rather than one nested list.
+
+### Exercise 8 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. **Progressive hint:** Document whether empty normalized output is valid or an error. **Verify:** Test ordinary, empty, whitespace-only, and Unicode names against the docstring's stated contract; every behavior must match the documentation.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from function contracts, parameters, return values, scope, and type hints.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.
+
+**Edge case:** Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.
+
+**Solution evidence to inspect:** Test ordinary, empty, whitespace-only, and Unicode names against the docstring's stated contract; every behavior must match the documentation.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 We implement a robust function that computes mean and standard deviation with clear types, docstring, and validation.
 
 Contents
@@ -86,60 +296,6 @@ Notes
 - For large data, consider `statistics` module or NumPy for performance.
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Write an annotated function that computes the mean and population standard deviation of a list of numbers. **Hint:** calculate the mean once, then use each value's squared distance from that mean.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Add a docstring that states the return shape and empty-input behavior. **Hint:** decide on the contract before coding: return a sentinel or raise a specific exception.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Original lesson practice
-
-**Prompt:** Reject invalid inputs with `ValueError`. **Hint:** validate the collection and its values near the function boundary; do not catch errors the function cannot repair.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 4 — Prediction
-
-**Prompt:** Predict the result of calling a function with `items=[]` as a default three times when it appends on each call. Explain shared defaults.
-
-**Reasoning checkpoint:** Default objects are created once when `def` executes. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 5 — Tracing
-
-**Prompt:** Trace a local variable that shadows a global of the same name. Which binding changes, and when would `global` be required?
-
-**Reasoning checkpoint:** Assignment makes a name local unless explicitly declared otherwise. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 6 — Implementation
-
-**Prompt:** Implement typed `weighted_mean(values, weights)` with length, empty, and zero-total-weight validation.
-
-**Reasoning checkpoint:** State every invalid condition before calculating. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Debugging
-
-**Prompt:** Repair a function whose `*items` argument is accidentally passed as one list instead of unpacked individual items.
-
-**Reasoning checkpoint:** Compare `f(values)` with `f(*values)`. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 8 — Edge case and explanation
-
-**Prompt:** Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input.
-
-**Reasoning checkpoint:** Document whether empty normalized output is valid or an error. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

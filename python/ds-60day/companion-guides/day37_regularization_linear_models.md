@@ -64,12 +64,157 @@ A stronger penalty usually increases bias and decreases variance, but the
 validation curve is empirical. Select `alpha` using training folds rather than
 the final test set.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 37 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — regularization strength, coefficient shrinkage, sparsity, and stability
+
+### The mental model
+
+Linear models minimize a data-fitting loss. Regularization adds a cost
+for coefficient size: Ridge uses squared coefficients (L2), Lasso uses
+absolute coefficients (L1), and Elastic Net combines them. Increasing
+`alpha` gives the penalty more influence, usually increasing bias while
+reducing variance.
+
+The penalty acts on coefficient magnitudes, so feature units matter.
+Standardization makes one unit of coefficient more comparable across
+numeric features. Lasso's zero coefficients are a property of the
+fitted sample and penalty, not proof that excluded features are
+irrelevant or causally unimportant.
+
+### Worked examples and syntax anatomy
+
+- **`Pipeline([('scale', StandardScaler()), ('model', Ridge(...))])`:** learns scaling inside each training boundary before applying the penalty.
+- **`alpha`:** controls penalty strength; compare it on a logarithmic scale with cross-validation.
+- **`model.coef_`:** contains coefficients in transformed feature space; inspect magnitude and stability alongside validation error.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — trace Ridge shrinkage as alpha grows
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+import numpy as np
+from sklearn.datasets import make_regression
+from sklearn.linear_model import Ridge
+from sklearn.preprocessing import StandardScaler
+
+X, y = make_regression(n_samples=250, n_features=8, noise=20, random_state=3701)
+Xs = StandardScaler().fit_transform(X)
+norms = {}
+for alpha in (0.01, 1.0, 100.0):
+    coef = Ridge(alpha=alpha).fit(Xs, y).coef_
+    norms[alpha] = np.linalg.norm(coef)
+print(norms)
+assert norms[0.01] > norms[1.0] > norms[100.0]
+```
+
+**Expected observation:** The L2 norm of the coefficient vector decreases as penalty strength increases.
+
+**Assumption to name:** The same scaled design and response are used for every alpha so only regularization changes.
+
+### Focused example B — distinguish Lasso sparsity from stable selection
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+import numpy as np
+from sklearn.datasets import make_regression
+from sklearn.linear_model import Lasso
+from sklearn.preprocessing import StandardScaler
+
+X, y = make_regression(n_samples=120, n_features=20, n_informative=5,
+                       noise=25, random_state=3702)
+Xs = StandardScaler().fit_transform(X)
+for alpha in (0.1, 1.0, 10.0):
+    coef = Lasso(alpha=alpha, max_iter=20_000).fit(Xs, y).coef_
+    print(alpha, {"nonzero": np.count_nonzero(coef),
+                  "largest_abs": np.max(np.abs(coef))})
+```
+
+**Expected observation:** Stronger L1 regularization generally produces more exact zeros, but selected columns can change with data and alpha.
+
+**Assumption to name:** The optimization converged; warnings and `n_iter_` were inspected rather than ignored.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define regularization strength, coefficient shrinkage, sparsity, and stability in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Comparing penalized coefficients from unscaled features and interpreting the largest numeric coefficient as most important.
+
+**Debug it deliberately:** Inspect feature scales, convergence warnings, coefficient paths, fold scores, and selection frequency across resamples.
+
+**Stop condition:** Do not claim feature selection stability from one split or choose alpha from final test performance.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Sweep `alpha` values and plot validation scores for Ridge and Lasso.
+
+**Verify:** For task `Sweep alpha values and plot validation scores for Ridge and Lasso`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check.
+
+
+
+
+
+
 2. Inspect fitted coefficients and compare their sparsity.
 
 The separate solution also demonstrates Elastic Net as a useful extension.
+
+**Verify:** For task `Inspect fitted coefficients and compare their sparsity`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -87,15 +232,51 @@ attempt, and record the evidence that would prove your result correct.
 
 3. **Prediction:** Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept.
    **Progressive hint:** Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.
+
+**Verify:** For task `Prediction: Predict the coefficient and training-error behavior of Ridge as alpha moves from...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 4. **Elastic Net implementation:** Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity.
    **Progressive hint:** Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.
+
+**Verify:** For task `Elastic Net implementation: Build a scaled ElasticNetCV pipeline, state what alpha and l1rati...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 5. **Scaling bug:** Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison.
    **Progressive hint:** The L1 penalty operates on coefficient magnitude; rescaling a feature changes the coefficient needed for the same prediction.
+
+**Verify:** For task `Scaling bug: Fit Lasso to one feature measured in dollars and another measured in millions of...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
+
 6. **Stability investigation:** Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions.
    **Progressive hint:** Lasso may alternate which correlated feature receives weight; Ridge often distributes weight while predictions remain similar.
 
+**Verify:** For task `Stability investigation: Create two highly correlated predictors, refit Lasso across several...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -127,3 +308,36 @@ not proof that a feature is irrelevant or causally unimportant.
 - Then compare with the
   [Day 37 solution](../solutions/day37_regularization_linear_models/day37_solutions.md).
 - Continue to [Day 38 — Trees and Random Forests](day38_tree_models_random_forest.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-37` — Day 37 — Regularization and Linear Models.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize regularization strength, coefficient shrinkage, sparsity, and stability. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day37_regularization_linear_models.md`
+- learner artifact: `python/ds-60day/notebooks/day37_regularization_linear_models.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

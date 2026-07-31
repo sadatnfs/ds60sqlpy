@@ -1,5 +1,203 @@
 # Day 26 — Solutions: Interactive Visualization (Plotly / Altair)
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**interactive visual encodings, bounded interaction, and portable HTML export**.
+
+Interaction is useful when it helps a reader answer a question—inspect a
+point, filter a segment, zoom a dense range, or compare parameter
+choices. It is not a substitute for a clear initial view. The chart
+still needs an honest title, visible axes/legend, sensible defaults,
+units, and a bounded amount of data.
+
+Plotly builds figure objects directly; Altair declares how fields map
+to visual encodings and transformations. Both can produce HTML, but
+portability depends on whether JavaScript and data are embedded or
+loaded from a Content Delivery Network (CDN). For offline course use,
+export self-contained content and test it while disconnected.
+
+### Vocabulary used in the worked answers
+
+- **interaction:** a reader action that changes or reveals a chart view.
+- **tooltip:** details shown for a hovered/focused mark.
+- **selection:** a user-controlled set of marks or values.
+- **parameter:** a bounded value controlling an interactive expression.
+- **CDN:** a remote network service supplying shared assets such as JavaScript.
+- **self-contained HTML:** a file embedding the assets needed to work offline.
+
+### Reference pattern 1 — Build an inspectable Plotly figure
+
+Return the figure so construction remains separate from export.
+
+```python
+import pandas as pd
+import plotly.express as px
+
+points = pd.DataFrame({
+    "team": ["A", "A", "B", "B"],
+    "hours": [2, 4, 3, 5],
+    "tasks": [3, 7, 4, 9],
+})
+fig = px.scatter(
+    points, x="hours", y="tasks", color="team",
+    hover_data=["team"], title="Tasks completed versus hours"
+)
+(len(fig.data), fig.layout.xaxis.title.text, fig.layout.yaxis.title.text)
+```
+
+**Expected observation:** Two traces (one per team) and the `hours`/`tasks` axis titles are reported. The notebook also renders the interactive figure.
+
+### Reference pattern 2 — Inspect a self-contained HTML representation
+
+Embedding removes a runtime dependency on a remote CDN.
+
+```python
+html = fig.to_html(full_html=True, include_plotlyjs=True)
+{
+    "starts_as_html": html.lstrip().lower().startswith("<html>"),
+    "contains_figure_data": "Tasks completed versus hours" in html,
+    "characters": len(html),
+}
+```
+
+**Expected observation:** Both Boolean checks are `True`; the file-sized string is large because Plotly JavaScript is embedded.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Create an interactive histogram whose bin count can be changed only within sensible bounds. **Plotly route:** isolate a builder accepting `bins`; **Altair route:** bind a range input to a parameter. **Expected behavior:** changing bins alters aggregation without changing the underlying observations. **Verify:** test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies interactive visual encodings, bounded interaction, and portable HTML export.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.
+
+**Edge case:** Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.
+
+**Solution evidence to inspect:** test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Export the chart to a self-contained HTML file under an ignored learner artifact directory. **Constraints:** embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. **Verify:** disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies interactive visual encodings, bounded interaction, and portable HTML export.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.
+
+**Edge case:** Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.
+
+**Solution evidence to inspect:** disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. **Progressive hint:** A CDN reference needs network access when opened. **Verify:** Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying interactive visual encodings, bounded interaction, and portable HTML export.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.
+
+**Edge case:** Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.
+
+**Solution evidence to inspect:** Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. **Progressive hint:** A field retained only in source data is not visibly encoded. **Verify:** For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the interactive visual encodings, bounded interaction, and portable HTML export model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.
+
+**Edge case:** Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.
+
+**Solution evidence to inspect:** For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. **Progressive hint:** Separate figure construction from export. **Verify:** Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the interactive visual encodings, bounded interaction, and portable HTML export model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.
+
+**Edge case:** Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.
+
+**Solution evidence to inspect:** Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. **Progressive hint:** Validate the schema before calling the plotting library. **Verify:** Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in interactive visual encodings, bounded interaction, and portable HTML export.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.
+
+**Edge case:** Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.
+
+**Solution evidence to inspect:** Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. **Progressive hint:** Browser rendering and HTML size are part of the data contract. **Verify:** Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from interactive visual encodings, bounded interaction, and portable HTML export.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.
+
+**Edge case:** Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.
+
+**Solution evidence to inspect:** Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 We create an interactive histogram with dynamic bins and save to HTML.
 
 Contents
@@ -48,54 +246,6 @@ Notes
 - Altair interactive binning shown via a bound parameter
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Create an interactive histogram whose bin choice can be changed within sensible bounds. **Hint:** in Altair, bind a range input to a parameter; in Plotly, isolate figure construction in a function accepting a bin count.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Save the chart as HTML and open it in a browser. **Hint:** disconnect from the network before the final check and inspect whether all required JavaScript/data were embedded.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Prediction
-
-**Prompt:** Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy.
-
-**Reasoning checkpoint:** A CDN reference needs network access when opened. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 4 — Tracing
-
-**Prompt:** Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding.
-
-**Reasoning checkpoint:** A field retained only in source data is not visibly encoded. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 5 — Implementation
-
-**Prompt:** Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files.
-
-**Reasoning checkpoint:** Separate figure construction from export. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 6 — Debugging
-
-**Prompt:** Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names.
-
-**Reasoning checkpoint:** Validate the schema before calling the plotting library. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Edge case and explanation
-
-**Prompt:** Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups.
-
-**Reasoning checkpoint:** Browser rendering and HTML size are part of the data contract. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

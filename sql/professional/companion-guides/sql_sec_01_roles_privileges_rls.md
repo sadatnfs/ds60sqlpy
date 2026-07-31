@@ -26,6 +26,132 @@ make the optional path run. The lab creates only NOLOGIN roles inside one
 transaction and ends with `ROLLBACK`; it never sets passwords, changes server
 configuration, or grants broad access.
 
+## How to run this lesson
+
+The rendered lesson page is for reading. PostgreSQL runs the real learner SQL.
+For a first attempt, use the private course portal so the database check,
+ignored working copy, and complete `psql` transcript remain together.
+
+1. Open a terminal in the repository root. On Windows, double-click
+   `START_DS60.cmd` or run:
+
+   ```powershell
+   .\START_DS60.cmd
+   ```
+
+   On macOS or Linux, run:
+
+   ```bash
+   .venv/bin/python scripts/learning_portal.py
+   ```
+
+2. Open **SQL-SEC-01 — Schemas, Roles, Privileges, and Row-Level Security** and choose
+   **Create/open guided SQL notebook**. Run its readiness cells from top to
+   bottom. The runner accepts only the local disposable
+   `advanced_sql_training` database.
+3. Read the preparation warning. When you are ready to replace only the
+   course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
+   cell. It loads deterministic seed rows, verifies them, and prepares any
+   cataloged stateful predecessor.
+4. Open and edit the ignored learner copy at
+   `.learning/sql/sql-sec-01/sql_sec_01_roles_privileges_rls.sql`. Save it, then run the notebook's
+   full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
+   transaction and `psql` meta-command behavior.
+5. Read output directly below the run cell. A `SELECT` prints column headings,
+   table-shaped rows, and a row count; DDL/DML prints a command tag; `NOTICE`
+   lines explain intentional checks. Success means no unexpected `ERROR`, exit
+   code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.
+
+Some demonstrations require privileges or server features a normal course role may not have. Run the capability check first. The supported default path still teaches inspection and design without creating cluster-wide roles, extensions, or replication objects.
+
+Manual `psql` fallback:
+
+```powershell
+# Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\professional\lessons\sql_sec_01_roles_privileges_rls.sql"
+```
+
+```bash
+# macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql
+```
+
+The terminal is then the output surface. If PowerShell says `psql` is not
+recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
+process. If the database or a relation is missing, return to the notebook
+preparation cell and explicitly prepare the disposable database. For
+authentication failures, rerun setup/doctor—never put a password in SQL, a
+notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
+whole file instead of trusting partial output.
+
+## A beginner's mental model for this lesson
+
+A **table** stores facts in named columns. A **row** is one occurrence at the
+table's declared grain. A query creates a temporary **result set**: rows printed
+on screen are not automatically stored. This lesson introduces or reinforces
+Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. Its worked SQL reads or creates `pg_catalog.pg_roles`, `pro_security_lab.documents`, `pro_security_lab.announcements`, `pro_security_lab.owner_context_documents`, `pro_security_lab.visible_documents`.
+
+Before writing a query, complete this sentence: “One output row represents
+___.” Joins can multiply rows, filters can remove them, grouping can collapse
+many rows into one, and window functions can add calculations while preserving
+row count. For a normal analytical `SELECT`, use this logical reading order:
+`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
+window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
+different physical plan while preserving those semantics.
+
+The lesson-specific reasoning path is: The script first queries pgroles and stores a Boolean for a psql \if. Restricted installations print a safe skip and current capability summary. No attempted CREATE ROLE is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
+The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
+and ordering before running. Afterwards, compare keys/counts/totals with an
+independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
+are different facts; use `COALESCE` only after choosing which meaning the
+business question requires.
+
+## Two worked SQL examples
+
+These are answer-free worked excerpts from `sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+
+### Example 1
+
+```sql
+SELECT COALESCE(
+    (
+        SELECT r.rolsuper OR r.rolcreaterole
+        FROM pg_catalog.pg_roles AS r
+        WHERE r.rolname = CURRENT_USER
+    ),
+    false
+) AS ds60_can_manage_roles
+;
+```
+
+**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+
+**Expected result/shape:** The output or command tag must match the statement's
+declared columns/object and the lesson's stated grain; unexpected duplicates,
+missing keys, or an unreported `NULL` require investigation.
+
+### Example 2
+
+```sql
+SELECT NOT EXISTS (
+        SELECT 1
+        FROM pg_catalog.pg_roles AS r
+        WHERE r.rolname IN (
+            'ds60_sec_owner',
+            'ds60_sec_north',
+            'ds60_sec_south'
+        )
+    ) AS ds60_role_names_available
+;
+```
+
+**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+
+**Expected result/shape:** The output or command tag must match the statement's
+declared columns/object and the lesson's stated grain; unexpected duplicates,
+missing keys, or an unreported `NULL` require investigation.
+
 ## Learning objectives
 
 - Separate ownership from privileges, explain schema `USAGE` and a safe
@@ -133,24 +259,44 @@ print a reassuring message.
 Security work is complete only when both allowed and denied paths are proven:
 
 1. **Two-layer reads:** show schema `USAGE` and table `SELECT` independently.
+   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
 2. **Auditor:** create a NOLOGIN read-only role, explicit policy, positive read
    test, and negative write tests.
+   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
 3. **Default privileges:** prove which object owner’s future table receives the
    grant and which different owner does not.
+   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
 4. **Definer boundary:** inventory owner, search path, qualification, parameter,
    PUBLIC, grant, and RLS risks around the routine.
+   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
 5. **RLS bypass:** compare ordinary caller, owner, forced owner, BYPASSRLS, and
    superuser semantics without granting bypass attributes.
+   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
+   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
 6. **Effective access:** reconcile schema, relation, column, sequence, routine,
    membership, inheritance, and PUBLIC access.
+   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
 7. **Identity context:** observe `SESSION_USER` and `CURRENT_USER` across
    `SET ROLE` and a definer call; choose audit identities deliberately.
+   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
 8. **Fail-closed tenancy:** test NULL, case variants, unknown tenants, and
    unvalidated/reset session context.
+   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
 9. **Narrow writer:** prove only required insert columns/sequence/return values
    work and all unrelated writes or reads fail.
+   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
 10. **Revocation runbook:** document sessions, membership, ownership, default
     grants, dependent ACLs, verification, recovery, and durable audit evidence.
+   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
+   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
 
 ## Self-check
 
@@ -193,3 +339,36 @@ read-only operational roles in mind. Then continue to the future professional
 modules on routines/triggers, SQL contract tests, index operations, and recovery
 rehearsals; use the [curriculum gap backlog](../../../docs/curriculum-gap-backlog.md)
 to see their planned order.
+
+## Ask Codex about this lesson
+
+Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+enough to complete the lesson offline. If you want a patient tutor, copy this
+prompt after opening the repository in Codex:
+
+```text
+Tutor me through sql-sec-01 — Schemas, Roles, Privileges, and Row-Level Security.
+
+I am a complete beginner. Use these checked-in sources:
+- Guide: sql/professional/companion-guides/sql_sec_01_roles_privileges_rls.md
+- Answer-free learner SQL: sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql
+
+The lesson concepts include Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide's lesson-specific worked-model focus is: The script first queries pgroles and stores a Boolean for a psql \if. Restricted installations print a safe skip and current capability summary. No attempted CREATE ROLE is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader's Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-sec-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back.
+```

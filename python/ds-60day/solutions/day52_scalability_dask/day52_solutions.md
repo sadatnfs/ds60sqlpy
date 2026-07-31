@@ -73,6 +73,36 @@ Guidance
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **lazy expression:** describes tasks and dependencies; inspect partitions/graph before execution.
+2. **`.compute()`:** executes the graph and materializes the result in local memory.
+3. **chunk state + combine:** keeps sufficient statistics such as sum/count rather than averaging chunk averages incorrectly.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Associative reducers establish correctness independent of execution engine; lazy-graph inspection then explains when Dask performs work.
+
+**Useful alternative:** Chunked pandas or PyArrow scanners may be simpler; DuckDB can push filters/aggregations into an embedded analytical engine.
+
+**Trade-off:** More partitions improve available parallelism but increase scheduler overhead; large partitions reduce overhead while increasing peak memory.
+
+**Edge case to test:** Skewed keys, global sorts/shuffles, dtype inference drift, empty chunks, and a final result too large for memory defeat naive scaling.
+
+**Evidence of correctness:** Reconcile results with pandas/standard library, inspect graph and partition sizes, measure repeated runs, bound memory/final output, and prove reducers are associative.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -80,7 +110,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Read a large local CSV with Dask and compute groupby aggregations.
 
@@ -90,7 +120,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Read a large local CSV with Dask and compute groupby aggregations`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Persist the DataFrame and compare repeated timings with and without persistence.
 
@@ -100,7 +139,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Persist the DataFrame and compare repeated timings with and without persistence`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Implement the same reduction with `pandas.read_csv(..., chunksize=...)` and compare memory and elapsed time.
 
@@ -109,6 +157,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Implement the same reduction with pandas.readcsv(..., chunksize=...) and compare memory and e...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Task-graph tracing
 
@@ -128,6 +185,15 @@ Keep output bounded; computing a small aggregation is different from calling
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and comp...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
 ### Exercise 5 — Partition-skew diagnosis
 
 **Prompt:** Create a group key where one value owns most rows. Measure partition sizes and groupby runtime, then propose repartitioning or algorithm changes.
@@ -146,6 +212,15 @@ shuffle. Preserve exactness and test the salted/two-stage result against pandas.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Create a group key where one value owns most rows. Measure partition sizes and groupby runtim...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Reducer correctness
 
 **Prompt:** Implement a mergeable mean/variance state for chunks and prove it matches NumPy across different chunk boundaries, including an empty chunk.
@@ -163,3 +238,5 @@ aggregations; averaging partition means is wrong when partition sizes differ.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Implement a mergeable mean/variance state for chunks and prove it matches NumPy across differ...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

@@ -64,6 +64,36 @@ Takeaways
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`A.shape` and `B.shape`:** state the dimensional contract before multiplication; never infer it from a successful broadcast.
+2. **`A @ B`:** performs matrix multiplication, which is different from elementwise `A * B`.
+3. **`np.linalg.lstsq(X, y, rcond=None)`:** solves least squares directly and reports rank without explicitly forming an unstable inverse.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Shape reasoning proves the operation is defined, while `lstsq` and rank diagnostics address numerical and identifiability risk.
+
+**Useful alternative:** A pseudoinverse produces a minimum-norm solution, while regularization intentionally trades bias for stability.
+
+**Trade-off:** Centering and scaling improve numerical behavior but change coefficient units and do not create missing information.
+
+**Edge case to test:** An empty matrix, mismatched row counts, NaN/inf values, or a rank-deficient design needs an explicit failure or policy.
+
+**Evidence of correctness:** Assert every intended shape, compare predictions and residuals, report rank/condition, and avoid coefficient interpretation when the design is not identifiable.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -71,7 +101,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Add an intercept column of ones and recompute the coefficients.
 
@@ -81,7 +111,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Add an intercept column of ones and recompute the coefficients`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Compare the closed-form result with scikit-learn's `LinearRegression` on the same data.
 
@@ -91,7 +130,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 3 — Original lesson practice
+**Verify:** For task `Compare the closed-form result with scikit-learn's LinearRegression on the same data`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 3
 
 **Prompt:** Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.
 
@@ -100,6 +148,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Explain when the normal equation becomes numerically unstable and why iterative methods are o...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
+
 
 ### Exercise 4 — Shape tracing
 
@@ -119,6 +176,15 @@ contract.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 5 — Rank-deficiency debugging
 
@@ -152,6 +218,15 @@ rather than inventing meaning for unstable individual coefficients.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Construct a design matrix whose third column equals the sum of the first two. Compare np.lina...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Robust vector operation
 
 **Prompt:** Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector.
@@ -184,3 +259,5 @@ zero denominator.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

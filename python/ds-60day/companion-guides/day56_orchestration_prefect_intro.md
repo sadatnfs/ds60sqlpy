@@ -97,12 +97,161 @@ Follow the CLI output for the local API URL and open the displayed local UI
 For scheduling practice in Prefect 3, prefer a local `flow.serve(...)` example
 after the direct flow is correct, and keep its serving process running.
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## How to run this lesson
+
+1. Open the Day 56 learner notebook from this guide's **Next
+   step** section in VS Code or JupyterLab.
+2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
+   **Run All** only after making the written predictions; every added
+   worked example is bounded and offline after bootstrap.
+3. Keep experiments in new scratch cells. Do not edit the official
+   solution while attempting the numbered practice.
+4. Restart the kernel and run from the first cell before calling the
+   lesson complete. A clean run catches hidden state and stale
+   variables.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m jupyter lab
+```
+
+macOS/Linux:
+
+```bash
+.venv/bin/python -m jupyter lab
+```
+
+If the Windows environment uses the documented conda-prefix fallback,
+use `.\.venv\python.exe` in place of
+`.\.venv\Scripts\python.exe`.
+
+## Concept deep dive — observable task boundaries, retries, caching, and idempotent orchestration
+
+### The mental model
+
+An orchestrator records workflow state and coordinates retries,
+dependencies, schedules, and concurrency. A flow describes the larger
+run; tasks are observable units with their own state and policy. The
+boundary should be large enough to be meaningful and small enough to
+retry without repeating unrelated side effects.
+
+Retries are safe only for transient failures and idempotent operations.
+Caching requires a key representing all inputs and code/data meaning,
+plus persisted results. Neither retry nor cache makes an unsafe side
+effect idempotent automatically.
+
+### Worked examples and syntax anatomy
+
+- **`@flow`:** creates the orchestration boundary and run-level parameters/state.
+- **`@task(retries=..., retry_delay_seconds=...)`:** declares task-level retry policy; exception classification still matters.
+- **cache key + result persistence:** reuses a completed result only when identity and storage semantics are deliberate.
+
+Read an API call from the inside out: identify the data entering the
+operation, the state learned (if any), the value returned, and the
+evidence that would make the result trustworthy. A method returning
+without an exception proves only that the syntax and immediate runtime
+path worked.
+
+### Focused example A — derive an idempotent local output identity
+
+Before running the example, predict the shape, type, or direction of the
+result. Write the prediction down so that a surprise becomes evidence
+rather than something to overlook.
+
+```python
+import hashlib
+import json
+
+inputs = {"data_snapshot": "sales-v3", "model": "ridge", "alpha": 1.0}
+canonical = json.dumps(inputs, sort_keys=True, separators=(",", ":"))
+key = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:12]
+output_path = f"artifacts/day56/{key}/metrics.json"
+print({"cache_key": key, "output_path": output_path})
+assert key in output_path
+```
+
+**Expected observation:** Identical canonical inputs produce the same bounded output identity instead of a new timestamped duplicate.
+
+**Assumption to name:** The key includes every input that changes result meaning, including data and code/version identity where needed.
+
+### Focused example B — separate retryable from permanent failures
+
+This second example changes one important condition. Compare it with
+Example A instead of reading it as unrelated syntax.
+
+```python
+class TemporaryUnavailable(RuntimeError):
+    pass
+
+class InvalidInput(ValueError):
+    pass
+
+def should_retry(error):
+    return isinstance(error, (TemporaryUnavailable, TimeoutError))
+
+cases = [TemporaryUnavailable("later"), TimeoutError(), InvalidInput("bad row")]
+decisions = [should_retry(error) for error in cases]
+print(decisions)
+assert decisions == [True, True, False]
+```
+
+**Expected observation:** Only failures that may succeed without changing the input are eligible for retry.
+
+**Assumption to name:** The task's side effects are idempotent or protected by a durable idempotency key.
+
+### From first attempt to independent use
+
+| Stage | What to do | Evidence to keep |
+|---|---|---|
+| Recall | Define observable task boundaries, retries, caching, and idempotent orchestration in your own words and identify its input and output. | A definition that does not rely on the library name. |
+| Predict | Predict the examples before execution, including shape and direction. | A written prediction and an explanation of any mismatch. |
+| Implement | Recreate one example with a changed but valid input. | Code plus an assertion for the central invariant. |
+| Debug | Trigger the named mistake or edge case intentionally. | The observed symptom and the smallest diagnostic that isolates it. |
+| Transfer | Apply the idea to a different local dataset or decision. | A stated assumption, metric, and reason the method is suitable. |
+
+### Common mistake and debugging path
+
+**Mistake:** Adding retries to every exception or caching a task with undeclared external inputs and side effects.
+
+**Debug it deliberately:** Inspect task state history, attempt count, exception type, cache key inputs, persisted result, output identity, and cleanup after injected failure.
+
+**Stop condition:** Do not schedule/deploy a flow until local runs are deterministic, reruns are safe, and ownership/alerts are defined.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Learner exercises and progressive hints
 
 1. Add `test_size` and `random_state` parameters to the training flow.
+
+**Verify:** For task `Add testsize and randomstate parameters to the training flow`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 2. Split the training task into separate train and evaluate tasks with explicit
    outputs.
+
+**Verify:** For task `Split the training task into separate train and evaluate tasks with explicit`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+
+
+
+
+
+
 3. Explore the optional local Prefect UI and scheduling basics.
+
+**Verify:** For task `Explore the optional local Prefect UI and scheduling basics`, demonstrate the concrete requirement “3. Explore the optional local Prefect UI and scheduling basics” with explicit inputs, observable output, and one counterexample.
+
+
+
+
+
+
 
 ### Progressive hints
 
@@ -127,13 +276,40 @@ attempt, and record the evidence that would prove your result correct.
 
 4. **Retry and idempotence:** Add retries to a task that writes an artifact. Make the write idempotent so a failure after writing cannot create duplicate or partially valid outputs.
    **Progressive hint:** Write to a temporary path, validate, then atomically replace a versioned destination. A retry should produce the same logical result.
+
+**Verify:** For task `Retry and idempotence: Add retries to a task that writes an artifact. Make the write idempote...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
+
+
+
+
+
+
+
 5. **Cache-key design:** Design a task cache key that changes when data fingerprint, code/config, or relevant parameters change, but not when an unrelated log message changes.
    **Progressive hint:** Hash canonical semantic inputs and include a task/schema version. Do not cache a task whose hidden external state is untracked.
+
+**Verify:** For task `Cache-key design: Design a task cache key that changes when data fingerprint, code/config, or...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
+
+
+
+
+
+
+
 6. **Failure observability:** Instrument a three-task flow so logs and a final summary identify run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category without logging sensitive rows.
    **Progressive hint:** Use structured fields and task/run context. Emit counts and opaque IDs rather than raw feature values.
 
+**Verify:** For task `Failure observability: Instrument a three-task flow so logs and a final summary identify run...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+
+
+
+
+
+
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
+
+
 
 ## Self-check
 
@@ -165,3 +341,36 @@ late-run handling, alerts, backfills, retention, and recovery tests.
 - Then consult the
   [Day 56 solution](../solutions/day56_orchestration_prefect_intro/day56_solutions.md).
 - Continue to [Day 57 — Security, Privacy, and Ethics](day57_security_privacy_ethics.md).
+
+## Ask Codex about this lesson
+
+The lesson is complete without an AI assistant. If you want optional
+coaching, copy this prompt into Codex while the repository root is open:
+
+```text
+Tutor me through `python-56` — Day 56 — Orchestration with Prefect 3.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize observable task boundaries, retries, caching, and idempotent orchestration. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day56_orchestration_prefect_intro.md`
+- learner artifact: `python/ds-60day/notebooks/day56_orchestration_prefect_intro.ipynb`
+
+Assume only the prerequisites declared in the guide. Do not open or
+quote anything under `solutions/` unless I explicitly ask after an
+honest attempt. First explain one concept in plain language and show a
+tiny example. Then ask me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide's stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.
+```

@@ -170,6 +170,36 @@ Notes
 
 ---
 
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`spacy.blank('en')`:** creates an offline tokenizer without a downloaded statistical pipeline.
+2. **`pipeline(task, model=..., local_files_only=...)`:** bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.
+3. **token offsets and truncation:** connect tokens back to original text and define what content the model actually saw.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** Offline tokenization exposes the boundary first; optional cached inference is then governed by model provenance and evaluation.
+
+**Useful alternative:** Rule-based or classical bag-of-words models can be transparent, local, and strong baselines for bounded tasks.
+
+**Trade-off:** Large pretrained models add capability and transfer at the cost of downloads, compute, opaque failure modes, licensing, and privacy review.
+
+**Edge case to test:** Empty/long text, unusual Unicode, unsupported language, label-map mismatch, missing cache, and domain shift require tests.
+
+**Evidence of correctness:** Reconstruct text from offsets, test unknown/truncation behavior, pin and record model artifacts, evaluate task-specific slices, and prove raw sensitive text is not leaked.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reasoning map
 
 This map connects every learner prompt to a reasoning path. Read the
@@ -177,7 +207,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Reasoning notes for original Exercise 1
 
 **Prompt:** Try a zero-shot-classification pipeline with your own candidate labels.
 
@@ -187,7 +217,16 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-### Exercise 2 — Original lesson practice
+**Verify:** For task `Try a zero-shot-classification pipeline with your own candidate labels`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
+
+### Reasoning notes for original Exercise 2
 
 **Prompt:** Compare tokenization from spaCy with a Hugging Face tokenizer.
 
@@ -196,6 +235,15 @@ unless you can explain why that output follows from the inputs.
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
+
+**Verify:** For task `Compare tokenization from spaCy with a Hugging Face tokenizer`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 
 ### Exercise 3 — Truncation debugging
 
@@ -215,6 +263,15 @@ and attention memory cost grows rapidly.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Create a text longer than the model limit and inspect token count, special tokens, truncation...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+
+
+
+
+
+
+
+
 ### Exercise 4 — Model-provenance contract
 
 **Prompt:** Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state.
@@ -232,6 +289,15 @@ network disabled.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 
 ### Exercise 5 — Evaluation leakage
 
@@ -251,6 +317,15 @@ reconstructed.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
+**Verify:** For task `Find and repair leakage when near-duplicate documents or excerpts from one source appear in b...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
+
 ### Exercise 6 — Sensitive-text boundary
 
 **Prompt:** Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis.
@@ -268,3 +343,5 @@ incidents through the project's security process.
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
+
+**Verify:** For task `Design a local text-classification workflow that minimizes PII in logs, cached datasets, exam...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.

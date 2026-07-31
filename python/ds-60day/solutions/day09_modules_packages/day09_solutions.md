@@ -1,5 +1,195 @@
 # Day 09 — Solutions: Modules, Packages, Imports, __main__
 
+<!-- BEGIN BEGINNER SOLUTION REVIEW -->
+## Concept review before comparing answers
+
+The solution is not a typing template. Read the learner contract, predict
+the result, then compare decisions and evidence. The central mental model is
+**modules, package namespaces, imports, and safe entry points**.
+
+A module is a Python file loaded into a module object and namespace. An
+import locates that code, executes its top level once per interpreter
+process, caches the module in `sys.modules`, and binds a name in the
+importer. Import-time work should therefore be small and predictable.
+
+A package groups modules under one import namespace. Absolute imports
+start at a package available on the import path; relative imports name a
+sibling or parent within an already established package context.
+`python -m package.module` preserves that context, while directly
+executing a nested file often does not. The `if __name__ ==
+"__main__":` guard keeps CLI behavior out of ordinary imports.
+
+### Vocabulary used in the worked answers
+
+- **module:** a loaded Python file and its namespace.
+- **package:** an import namespace containing modules or subpackages.
+- **namespace:** a mapping from names to objects.
+- **absolute import:** an import written from a top-level package name.
+- **relative import:** an import written relative to the current package.
+- **entry point:** the deliberate location where execution behavior begins.
+
+### Reference pattern 1 — Compare module and attribute imports
+
+Both styles work; the module-qualified call preserves origin.
+
+```python
+import statistics as stats
+from statistics import median
+
+values = [2, 3, 100]
+(stats.mean(values), median(values), stats.__name__)
+```
+
+**Expected observation:** `(35, 3, 'statistics')` (the mean may display as `35`). The alias still refers to the module object.
+
+### Reference pattern 2 — Observe the import cache
+
+Repeated imports normally return the same module object.
+
+```python
+import json
+import sys
+
+first = json
+import json as second
+(first is second, sys.modules["json"] is first)
+```
+
+**Expected observation:** `(True, True)`. Python reuses the successfully loaded module from `sys.modules`.
+
+## Exercise-by-exercise reasoning map
+
+The numbering and learner contracts below match the guide and notebook.
+Each entry explains what to reason about, how to inspect the worked code,
+an alternative, an edge case, and the evidence required for completion.
+
+### Exercise 1 — reasoning, alternatives, and proof
+
+**Learner contract:** Create a `textutils` package containing `slug.py` with `slugify(text: str) -> str`, and expose `slugify` from `textutils/__init__.py`. **Expected behavior:** `textutils.slugify(' Data Science ') == 'data-science'`. **Constraints:** keep implementation out of `__init__.py`, use no `sys.path` modification, and test the import from the package's parent directory. **Verify:** From the package parent, import `textutils`, assert the slug result, and print `textutils.slugify.__module__` to prove the public name reaches `slug.py`.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies modules, package namespaces, imports, and safe entry points.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Import a module when origin clarity matters; re-export a small stable public surface from `__init__.py` when users should not depend on internal layout.
+
+**Edge case:** Name shadowing, circular imports, import-time side effects, and direct execution of nested files expose package-context mistakes.
+
+**Solution evidence to inspect:** From the package parent, import `textutils`, assert the slug result, and print `textutils.slugify.__module__` to prove the public name reaches `slug.py`.
+
+### Exercise 2 — reasoning, alternatives, and proof
+
+**Learner contract:** Add `textutils/cli.py` that uses an absolute import when called from outside and a package-relative import for an internal sibling example. **Run:** `python -m textutils.cli 'Hello World'`. **Expected output:** `hello-world`. **Constraints:** protect CLI execution with `if __name__ == '__main__':` and demonstrate that `import textutils.cli` produces no CLI output. **Verify:** Capture `hello-world` from module execution and capture no output from ordinary import in a fresh interpreter.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies modules, package namespaces, imports, and safe entry points.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Import a module when origin clarity matters; re-export a small stable public surface from `__init__.py` when users should not depend on internal layout.
+
+**Edge case:** Name shadowing, circular imports, import-time side effects, and direct execution of nested files expose package-context mistakes.
+
+**Solution evidence to inspect:** Capture `hello-world` from module execution and capture no output from ordinary import in a fresh interpreter.
+
+### Exercise 3 — reasoning, alternatives, and proof
+
+**Learner contract:** **Prediction:** Predict `__name__` when a file is executed directly versus imported. Which path should run CLI behavior? **Progressive hint:** Direct execution uses `__main__`; imports use the module's name. **Verify:** Capture `__name__` from direct module execution and import; assert CLI output occurs only in the `__main__` case.
+
+**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying modules, package namespaces, imports, and safe entry points.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Import a module when origin clarity matters; re-export a small stable public surface from `__init__.py` when users should not depend on internal layout.
+
+**Edge case:** Name shadowing, circular imports, import-time side effects, and direct execution of nested files expose package-context mistakes.
+
+**Solution evidence to inspect:** Capture `__name__` from direct module execution and import; assert CLI output occurs only in the `__main__` case.
+
+### Exercise 4 — reasoning, alternatives, and proof
+
+**Learner contract:** **Tracing:** Trace two ordinary imports of the same module and explain the role of `sys.modules` in avoiding repeated top-level execution. **Progressive hint:** The module object is cached after its first successful import. **Verify:** Use a top-level counter or identity check to prove two imports return the same module object and top-level initialization runs once.
+
+**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the modules, package namespaces, imports, and safe entry points model is visible.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Import a module when origin clarity matters; re-export a small stable public surface from `__init__.py` when users should not depend on internal layout.
+
+**Edge case:** Name shadowing, circular imports, import-time side effects, and direct execution of nested files expose package-context mistakes.
+
+**Solution evidence to inspect:** Use a top-level counter or identity check to prove two imports return the same module object and top-level initialization runs once.
+
+### Exercise 5 — reasoning, alternatives, and proof
+
+**Learner contract:** **Implementation:** Sketch a `textutils` package exposing `slugify` from `__init__.py` while keeping implementation in `slug.py`. **Progressive hint:** The public import surface can be smaller than the package tree. **Verify:** From a clean interpreter, assert both `from textutils import slugify` and the internal module call resolve to the same implementation.
+
+**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies modules, package namespaces, imports, and safe entry points.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Import a module when origin clarity matters; re-export a small stable public surface from `__init__.py` when users should not depend on internal layout.
+
+**Edge case:** Name shadowing, circular imports, import-time side effects, and direct execution of nested files expose package-context mistakes.
+
+**Solution evidence to inspect:** From a clean interpreter, assert both `from textutils import slugify` and the internal module call resolve to the same implementation.
+
+### Exercise 6 — reasoning, alternatives, and proof
+
+**Learner contract:** **Debugging:** Explain why `python textutils/cli.py` can break a relative import and repair the invocation without modifying `sys.path`. **Progressive hint:** Run the module from its package parent with `python -m textutils.cli`. **Verify:** Show direct nested-file execution fails for the expected package-context reason, then assert `python -m textutils.cli` succeeds without modifying `sys.path`.
+
+**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in modules, package namespaces, imports, and safe entry points.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Import a module when origin clarity matters; re-export a small stable public surface from `__init__.py` when users should not depend on internal layout.
+
+**Edge case:** Name shadowing, circular imports, import-time side effects, and direct execution of nested files expose package-context mistakes.
+
+**Solution evidence to inspect:** Show direct nested-file execution fails for the expected package-context reason, then assert `python -m textutils.cli` succeeds without modifying `sys.path`.
+
+### Exercise 7 — reasoning, alternatives, and proof
+
+**Learner contract:** **Edge case and explanation:** Break a two-module circular import by moving shared types/constants or by passing dependencies explicitly. **Progressive hint:** Do not hide the cycle with an unexplained import inside every function. **Verify:** Import both modules from a clean process after refactoring; assert neither exposes a partially initialized attribute and describe the removed dependency cycle.
+
+**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from modules, package namespaces, imports, and safe entry points.
+
+**How to read the code:** identify (1) the fixture or input,
+(2) the operation that implements the contract, (3) the returned
+value or side effect, and (4) the assertion/inspection that proves
+the behavior. Comments should explain *why* a boundary exists, not
+merely repeat the syntax.
+
+**Alternative:** Import a module when origin clarity matters; re-export a small stable public surface from `__init__.py` when users should not depend on internal layout.
+
+**Edge case:** Name shadowing, circular imports, import-time side effects, and direct execution of nested files expose package-context mistakes.
+
+**Solution evidence to inspect:** Import both modules from a clean process after refactoring; assert neither exposes a partially initialized attribute and describe the removed dependency cycle.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
 We create a minimal package `textutils` with a `slugify` helper, install it in editable mode, and demonstrate absolute vs relative imports.
 
 Contents
@@ -104,54 +294,6 @@ Notes
 - Avoid manipulating sys.path manually; use editable installs instead.
 
 ---
-
-## Exercise-by-exercise reference
-
-Every numbered learner exercise has a matching entry here. The original
-worked examples remain above; the expanded answers below add heavily
-commented code, explicit reasoning, and executable checks.
-
-### Exercise 1 — Original lesson practice
-
-**Prompt:** Create a `textutils` package with a `slugify` function. **Hint:** begin with the smallest package tree and prove `import textutils` works from its parent.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 2 — Original lesson practice
-
-**Prompt:** Import it from an external script with an absolute import and from another `textutils` module with a relative import. **Hint:** run the package context with `python -m ...`; executing a nested file directly loses that context.
-
-The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.
-
-### Exercise 3 — Prediction
-
-**Prompt:** Predict `__name__` when a file is executed directly versus imported. Which path should run CLI behavior?
-
-**Reasoning checkpoint:** Direct execution uses `__main__`; imports use the module's name. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 4 — Tracing
-
-**Prompt:** Trace two ordinary imports of the same module and explain the role of `sys.modules` in avoiding repeated top-level execution.
-
-**Reasoning checkpoint:** The module object is cached after its first successful import. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 5 — Implementation
-
-**Prompt:** Sketch a `textutils` package exposing `slugify` from `__init__.py` while keeping implementation in `slug.py`.
-
-**Reasoning checkpoint:** The public import surface can be smaller than the package tree. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 6 — Debugging
-
-**Prompt:** Explain why `python textutils/cli.py` can break a relative import and repair the invocation without modifying `sys.path`.
-
-**Reasoning checkpoint:** Run the module from its package parent with `python -m textutils.cli`. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
-
-### Exercise 7 — Edge case and explanation
-
-**Prompt:** Break a two-module circular import by moving shared types/constants or by passing dependencies explicitly.
-
-**Reasoning checkpoint:** Do not hide the cycle with an unexplained import inside every function. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.
 
 ## Expanded mastery lab solutions
 

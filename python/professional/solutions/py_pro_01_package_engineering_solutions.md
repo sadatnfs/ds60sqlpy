@@ -87,6 +87,49 @@ the missing bootstrap dependency without attempting a download.
 
 ---
 
+<!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
+## Reasoning before implementation
+
+The reference workflow separates source, build, artifact inspection, installation, and runtime proof so each failure has a clear owner.
+
+1. **`[build-system]`:** declares the backend and bootstrap requirements that turn source into a distribution artifact.
+2. **`[project]` metadata:** defines distribution identity, version, Python range, dependencies, and entry points.
+3. **`python -m build` then clean install:** proves the built wheel, not repository-path import behavior.
+4. **Prove the failure boundary:** Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.
+
+**Alternative:** A single-module project or application bundle may not need a published library, but it still benefits from explicit dependency and artifact identity.
+
+**Trade-off:** Dynamic versioning and broad build automation reduce repetition while making source-of-truth and reproducibility harder to inspect.
+
+**Failure boundary:** Missing package data, stale editable installs, namespace packages, platform wheels, incorrect Python ranges, and undeclared imports can pass source tests but fail consumers.
+
+**Verification:** Build twice, inspect wheel metadata/content, install in a clean environment from outside the repo, run entry points/tests, and compare artifact hashes.
+
+### Verification micro-example
+
+Run this small, deterministic case before adapting the reference to a
+larger system. It gives the reasoning above an executable anchor:
+
+```python
+import importlib.util
+
+distribution_name = "beautiful-soup4"
+import_name = "bs4"
+print({"installer_name": distribution_name, "import_name": import_name})
+# The names are contracts for different tools and need not match.
+assert distribution_name.replace("-", "_") != import_name
+print("installed import available:", importlib.util.find_spec(import_name) is not None)
+```
+
+**Expected observation:** Installer and import identifiers can differ; availability must be checked through the intended interface.
+
+The reference implementation is one defensible contract, not a license
+to copy internal steps into every system. Preserve the observable
+guarantees and repeat the failure tests when adapting it.
+
+<!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
+
 ## Exercise-by-exercise reference
 
 Use this map after an honest attempt. The executable implementation remains
@@ -107,6 +150,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `classify artifacts`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 2 — create an offline build command
 
 **Prompt recap:** Implement `offline_build_command` as an argument list. Use the running interpreter, invoke the `build` module, request both formats, disable isolation, and choose an explicit output directory. Why an argument list? It avoids a second round of shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.
@@ -120,6 +171,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `create an offline build command`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 3 — inspect dependency intent
 
@@ -135,6 +194,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `inspect dependency intent`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+
+
+
+
+
+
+
 ### Exercise 4 — build in a disposable directory
 
 **Prompt recap:** Use disposable staging and output directories because a backend may write metadata beside its source. Invoke the running interpreter with `-m build --no-isolation --sdist --wheel --outdir <temporary-dir> <fixture>`. If a backend requirement is missing, return to connected setup instead of weakening the offline policy.
@@ -149,6 +216,14 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `build in a disposable directory`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 5 — prove the installed origin
 
 **Prompt recap:** Install the wheel into a fresh target using `pip install --no-index --no-deps --target <directory> <wheel>`. Start Python outside the fixture source tree, expose only the target, and inspect the module origin, distribution version, console entry points, and greeting behavior. `installed_origin_is_safe` must accept only a resolved path beneath that fresh target.
@@ -162,6 +237,14 @@ normal case, a boundary case, and the documented failure behavior.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `prove the installed origin`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
 
 ### Exercise 6 — build a wheel from the source distribution
 
@@ -185,6 +268,14 @@ wheel succeeded.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `build a wheel from the source distribution`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
+
 ### Exercise 7 — inspect installed metadata without importing
 
 **Prompt recap:** Use `importlib.metadata` against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package. Reject unexpected or missing metadata.
@@ -204,6 +295,14 @@ the project intentionally derives version from distribution metadata.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `inspect installed metadata without importing`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+
+
+
+
+
+
 
 ### Exercise 8 — separate reproducibility from equivalence
 
@@ -226,6 +325,14 @@ but a narrower claim.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `separate reproducibility from equivalence`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+
+
+
+
+
+
+
 ### Exercise 9 — test dependency markers across targets
 
 **Prompt recap:** Create a review matrix for the fixture's build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.
@@ -246,6 +353,14 @@ combinations. Avoid unconditional imports of platform-selected packages.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
+**Verify:** For task `test dependency markers across targets`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+
+
+
+
+
+
+
 ### Exercise 10 — design a local release gate
 
 **Prompt recap:** Write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.
@@ -265,3 +380,5 @@ unsigned local fixture has supply-chain provenance.
 
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
+
+**Verify:** For task `design a local release gate`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
