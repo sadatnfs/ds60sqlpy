@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-jupyter-01 · PostgreSQL in Jupyter with SQL Magics · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-jupyter-01</p>
+        <h1>PostgreSQL in Jupyter with SQL Magics</h1>
+        <p class="hero-copy">Interactive Python and PostgreSQL</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">sql-notebooks setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-18.html">python-18</a> <a class="tag" href="sql-15.html">sql-15</a> <a class="tag" href="bridge-03.html">bridge-03</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/professional/companion-guides/bridge_jupyter_01_postgresql_magics.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/companion-guides/bridge_jupyter_01_postgresql_magics.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-jupyter-01-postgresql-magics-in-jupyter">BRIDGE-JUPYTER-01 — PostgreSQL magics in Jupyter<a class="heading-anchor" href="#guide--bridge-jupyter-01-postgresql-magics-in-jupyter" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<p><strong>Level:</strong> Intermediate/advanced <strong>Stable lesson ID:</strong> <code>bridge-jupyter-01</code> <strong>Catalog prerequisites:</strong> <code>python-18</code>, <code>sql-15</code>, and <code>bridge-03</code> <strong>Prerequisites:</strong> Python Day 18, SQL Day 15, <a href="bridge-03.html#guide">Bridge Day 3</a>, the repository notebook and bridge dependencies, and a reset disposable course database.</p>
+<p>This module is for interactive analysis. Its learner artifact is the <a href="bridge-jupyter-01.html#learner">answer-free notebook</a>; the completed notebook remains separate under <code>solutions/</code>.</p>
+<h5 id="guide--one-time-connected-setup">One-time connected setup<a class="heading-anchor" href="#guide--one-time-connected-setup" aria-label="Link to this section">#</a></h5>
+<p>Install the course profiles before going offline:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+bash scripts/setup.sh --advanced</code></pre>
+<p>Do not install packages with <code>%pip</code> inside the lesson. Central setup keeps the kernel reproducible and prevents a notebook from silently selecting a different interpreter.</p>
+<p>Reset and verify only the disposable <code>advanced_sql_training</code> database using the canonical PostgreSQL setup guide. The reset drops and recreates the course-owned <code>training</code> schema; never point it at valuable data.</p>
+<h5 id="guide--start-vs-code-with-the-environment-value">Start VS Code with the environment value<a class="heading-anchor" href="#guide--start-vs-code-with-the-environment-value" aria-label="Link to this section">#</a></h5>
+<p>Close existing course kernels. From the repository root, set the connection string only for the current shell and launch VS Code from that same process:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+$env:DS60_DATABASE_URL = Read-Host &quot;Paste the disposable course PostgreSQL URL&quot;
+code .</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+read -r -s -p &quot;Disposable course PostgreSQL URL: &quot; DS60_DATABASE_URL
+export DS60_DATABASE_URL
+printf &#x27;\n&#x27;
+code .</code></pre>
+<p>Open the learner notebook, choose the <code>ds60sqlpy</code> kernel, and run cells in order. Starting VS Code from the shell matters: a kernel cannot inherit an environment variable added later to an unrelated terminal.</p>
+<p>JupyterLab is also supported:</p>
+<pre><code class="language-powershell"># Windows PowerShell, after setting DS60_DATABASE_URL
+.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre><code class="language-bash"># macOS/Linux, after setting DS60_DATABASE_URL
+.venv/bin/python -m jupyter lab</code></pre>
+<p>Do not print the environment value, paste it into a cell, save it in notebook output, or commit a credential file.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>distinguish IPython line and cell magics;</li>
+<li>load JupySQL and manage a named connection;</li>
+<li>convert <code>DS60_DATABASE_URL</code> into a SQLAlchemy Psycopg 3 URL without rendering credentials;</li>
+<li>bind a SQLAlchemy engine with <code>%sql</code>;</li>
+<li>configure connection display and result limits safely;</li>
+<li>query the <code>training</code> schema with <code>%sql</code> and <code>%%sql</code>;</li>
+<li>convert a JupySQL result to pandas and use <code>autopandas</code> deliberately;</li>
+<li>bind data with named <code>:value</code> parameters;</li>
+<li>explain why Jinja <code>{{...}}</code> is code generation rather than safe binding;</li>
+<li>explain why values and identifiers need different composition mechanisms;</li>
+<li>recognize JupySQL autocommit and notebook-order hazards;</li>
+<li>choose Psycopg application code when interactive magics are the wrong layer.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>IPython magic</td>
+<td>Command supplied by the IPython kernel rather than ordinary Python syntax</td>
+</tr>
+<tr>
+<td>line magic</td>
+<td>One-line command beginning with <code>%</code>, such as <code>%sql SELECT 1</code></td>
+</tr>
+<tr>
+<td>cell magic</td>
+<td>Command beginning with <code>%%</code> whose body is the rest of the cell</td>
+</tr>
+<tr>
+<td>JupySQL</td>
+<td>IPython extension providing <code>%sql</code>, <code>%%sql</code>, and related database magics</td>
+</tr>
+<tr>
+<td>SQLAlchemy engine</td>
+<td>Lazy connection and dialect boundary that JupySQL can use</td>
+</tr>
+<tr>
+<td>dialect URL</td>
+<td>URL selecting both a database and driver, here <code>postgresql+psycopg</code></td>
+</tr>
+<tr>
+<td>parameter binding</td>
+<td>Sending SQL structure and data values separately</td>
+</tr>
+<tr>
+<td>code generation</td>
+<td>Rendering text that becomes SQL structure before execution</td>
+</tr>
+<tr>
+<td>identifier</td>
+<td>Database object name such as a schema, table, or column</td>
+</tr>
+<tr>
+<td><code>autolimit</code></td>
+<td>JupySQL bound on rows returned by a query</td>
+</tr>
+<tr>
+<td><code>displaylimit</code></td>
+<td>Display-only truncation; all rows may still be fetched</td>
+</tr>
+<tr>
+<td><code>autopandas</code></td>
+<td>Configuration that returns pandas DataFrames directly</td>
+</tr>
+<tr>
+<td>autocommit</td>
+<td>Mode in which each issued statement commits without an explicit surrounding unit</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--1-load-the-extension">1. Load the extension<a class="heading-anchor" href="#guide--1-load-the-extension" aria-label="Link to this section">#</a></h5>
+<p><code>%load_ext sql</code> registers JupySQL&#x27;s magics in the current IPython kernel. <code>%sql?</code> shows the locally installed command help. The extension is named <code>sql</code>, even though the package installed during setup is JupySQL.</p>
+<p>IPython defines one-percent line magics and two-percent cell magics. A line magic can appear on the right side of an assignment; a cell magic owns the whole remaining cell. See the <a href="https://ipython.readthedocs.io/en/stable/interactive/tutorial.html#magic-functions">official IPython magic introduction</a>.</p>
+<h5 id="guide--2-build-the-engine-without-displaying-its-url">2. Build the engine without displaying its URL<a class="heading-anchor" href="#guide--2-build-the-engine-without-displaying-its-url" aria-label="Link to this section">#</a></h5>
+<p>Read the URL from <code>os.environ</code>, parse it with <code>sqlalchemy.engine.make_url()</code>, validate the PostgreSQL backend and exact disposable database name, then select the Psycopg 3 driver:</p>
+<pre><code class="language-python">raw_database_url = os.environ[&quot;DS60_DATABASE_URL&quot;]
+course_url = make_url(raw_database_url)
+psycopg_url = course_url.set(drivername=&quot;postgresql+psycopg&quot;)
+engine = create_engine(psycopg_url, pool_pre_ping=True)</code></pre>
+<p>Do not evaluate <code>raw_database_url</code>, <code>course_url</code>, <code>psycopg_url</code>, or <code>engine</code> as the last expression in a notebook cell. Notebook display can reveal more than intended. The lesson ends the cell with a safe assertion.</p>
+<p>SQLAlchemy documents <code>postgresql+psycopg</code> as the synchronous Psycopg 3 dialect. The unqualified PostgreSQL URL may otherwise select a different default driver.</p>
+<h5 id="guide--3-configure-safe-interactive-defaults">3. Configure safe interactive defaults<a class="heading-anchor" href="#guide--3-configure-safe-interactive-defaults" aria-label="Link to this section">#</a></h5>
+<p>Set configuration before connecting:</p>
+<pre><code class="language-ipython">%config SqlMagic.displaycon = False
+%config SqlMagic.autolimit = 200
+%config SqlMagic.displaylimit = 25
+%config SqlMagic.autopandas = False
+%config SqlMagic.named_parameters = &quot;enabled&quot;</code></pre>
+<p><code>displaycon=False</code> suppresses connection-string feedback after queries. <code>autolimit</code> is the memory/performance guard. <code>displaylimit</code> only limits visible rows; it can still fetch the full result. <code>autopandas=True</code> bypasses JupySQL&#x27;s display limit, so SQL should still use an intentional <code>LIMIT</code>. <a href="https://jupysql.readthedocs.io/en/latest/api/configuration.html">JupySQL&#x27;s configuration reference</a> documents these distinctions.</p>
+<p>These settings are notebook ergonomics, not a substitute for statement timeouts, server permissions, reviewed queries, or production resource limits.</p>
+<h5 id="guide--4-bind-inspect-and-close-an-engine">4. Bind, inspect, and close an engine<a class="heading-anchor" href="#guide--4-bind-inspect-and-close-an-engine" aria-label="Link to this section">#</a></h5>
+<p>Pass the Python engine object and an alias:</p>
+<pre><code class="language-ipython">%sql engine --alias ds60-course
+%sql --connections</code></pre>
+<p>Switching among several databases by alias is possible, but this course module uses one disposable target. At the end:</p>
+<pre><code class="language-ipython">%sql --close ds60-course</code></pre>
+<p>Then call <code>engine.dispose()</code> in ordinary Python. The <a href="https://jupysql.readthedocs.io/en/latest/api/magic-sql.html">JupySQL <code>%sql</code> reference</a> documents <code>--connections</code>, <code>--close</code>, aliases, line queries, cell queries, and DataFrame conversion.</p>
+<h5 id="guide--5-query-with-line-and-cell-magics">5. Query with line and cell magics<a class="heading-anchor" href="#guide--5-query-with-line-and-cell-magics" aria-label="Link to this section">#</a></h5>
+<p>A small diagnostic fits on one line:</p>
+<pre><code class="language-ipython">%sql SELECT current_database() AS database_name</code></pre>
+<p>A reviewed multi-line query is easier to read as a cell:</p>
+<pre><code class="language-sql">%%sql
+SELECT customer_id, full_name, country
+FROM training.customers
+ORDER BY customer_id
+LIMIT 5;</code></pre>
+<p>The notebook deliberately performs no DDL, INSERT, UPDATE, DELETE, COPY, or stored routine call.</p>
+<h5 id="guide--6-bind-values-do-not-render-them">6. Bind values, do not render them<a class="heading-anchor" href="#guide--6-bind-values-do-not-render-them" aria-label="Link to this section">#</a></h5>
+<p>JupySQL named parameters refer to Python variables:</p>
+<pre><code class="language-python">order_status = &quot;paid&quot;
+minimum_total = 250</code></pre>
+<pre><code class="language-ipython">orders_result = %sql SELECT order_id, total_amount FROM training.orders WHERE status = :order_status AND total_amount &gt;= :minimum_total ORDER BY order_id LIMIT 20</code></pre>
+<p>The SQL keeps <code>:order_status</code> and <code>:minimum_total</code> as named value parameters. The driver binds their values separately.</p>
+<p>By contrast, <code>{{value}}</code> is Jinja expansion. It renders text that becomes SQL source, so malicious or merely malformed input can change the statement. JupySQL&#x27;s own magic reference warns that templated values require sanitization. Use templating only for reviewed code-generation cases, never ordinary data.</p>
+<h5 id="guide--7-keep-identifiers-static">7. Keep identifiers static<a class="heading-anchor" href="#guide--7-keep-identifiers-static" aria-label="Link to this section">#</a></h5>
+<p>Parameters bind values, not grammar. A table name cannot replace a value marker:</p>
+<pre><code class="language-sql">-- Not identifier binding:
+SELECT count(*) FROM :table_name;</code></pre>
+<p>For a notebook, prefer a static course table. In reusable Psycopg code, enforce an application allowlist and use <code>psycopg.sql.Identifier</code>. Quoting with a parameter, f-string, <code>.format()</code>, Jinja, or a homemade escape function is not a safe identifier boundary.</p>
+<h5 id="guide--8-convert-results-to-pandas">8. Convert results to pandas<a class="heading-anchor" href="#guide--8-convert-results-to-pandas" aria-label="Link to this section">#</a></h5>
+<p>With <code>autopandas=False</code>:</p>
+<pre><code class="language-python">orders_frame = orders_result.DataFrame()</code></pre>
+<p>With <code>autopandas=True</code>, an assigned line magic directly returns a DataFrame:</p>
+<pre><code class="language-ipython">%config SqlMagic.autopandas = True
+frame = %sql SELECT customer_id, full_name FROM training.customers ORDER BY customer_id LIMIT 10
+%config SqlMagic.autopandas = False</code></pre>
+<p>Keep the data small enough for notebook memory. For a large query, aggregate in PostgreSQL, page or stream through application code, or write a bounded extract—do not rely on a browser display limit.</p>
+<h5 id="guide--9-understand-transaction-ownership">9. Understand transaction ownership<a class="heading-anchor" href="#guide--9-understand-transaction-ownership" aria-label="Link to this section">#</a></h5>
+<p>JupySQL documents <code>SqlMagic.autocommit=True</code> as its default. Notebook cells are easy to re-run or execute out of order. The professional lesson therefore uses read-only statements.</p>
+<p>For reviewed multi-step writes, use an explicit SQLAlchemy <code>engine.begin()</code> or Psycopg transaction context and define who commits, rolls back, and retries. Turning <code>SqlMagic.autocommit</code> off is not by itself a complete application transaction policy, especially after a failed PostgreSQL statement leaves a transaction aborted.</p>
+<h5 id="guide--10-know-when-psycopg-is-the-better-boundary">10. Know when Psycopg is the better boundary<a class="heading-anchor" href="#guide--10-know-when-psycopg-is-the-better-boundary" aria-label="Link to this section">#</a></h5>
+<p>Keep JupySQL for interactive, bounded exploration. Use tested Psycopg application code for:</p>
+<ul>
+<li>typed row/domain mapping;</li>
+<li>reusable query functions;</li>
+<li>multiple statements with one transaction owner;</li>
+<li>retry and SQLSTATE classification;</li>
+<li>idempotency keys;</li>
+<li>COPY, server-side cursors, and streaming;</li>
+<li>pooling, async work, cancellation, and timeouts;</li>
+<li>structured logging and metrics;</li>
+<li>Protocol-based fakes plus small live integration tests.</li>
+</ul>
+<p>A notebook can import those functions. It should not become the only location where critical production behavior exists.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Use JupySQL for bounded, reviewable PostgreSQL exploration while keeping credentials out of cells and values separate from SQL structure.</li>
+<li><strong>Assumptions:</strong> The notebook reads <code>DS60_DATABASE_URL</code>, binds an explicit SQLAlchemy <code>postgresql+psycopg</code> engine, disables connection display, and keeps live cells tagged.</li>
+<li><strong>Primary failure mode:</strong> Notebook output, connection displays, Jinja rendering, or unbounded result materialization can leak secrets or turn exploration into unsafe application behavior.</li>
+<li><strong>Evidence loop:</strong> state the boundary and prediction, implement against deterministic local doubles, test success/failure/cleanup, and label any optional live-adapter evidence separately from offline proof.</li>
+</ul>
+<ol>
+<li><strong>Magic selection:</strong> Run the line diagnostic and multi-line training query; explain why one <code>%sql</code> form is easier to review for each statement.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Choose from statement shape and reviewability, not from different security semantics.</li>
+</ul>
+<ol>
+<li><strong>Security testing:</strong> Bind an injection-shaped string to a harmless read-only comparison, verify it behaves as data, then remove the value.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Use <code>:name</code>; never paste the sentinel into SQL or notebook output.</li>
+</ul>
+<ol>
+<li><strong>SQL practice:</strong> Query US customers whose lifetime order total meets a Python threshold; bind country and threshold, order deterministically, and limit to 10.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Aggregate after a left join, apply the threshold after grouping, and add customer ID as tie-breaker.</li>
+</ul>
+<ol>
+<li><strong>DataFrame boundary:</strong> Convert the assigned result with <code>.DataFrame()</code> and assert the expected columns in order.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Treat conversion as an explicit boundary and validate shape before analysis.</li>
+</ul>
+<ol>
+<li><strong>Configuration:</strong> Repeat one small query with <code>autopandas=True</code>, identify the changed return type, then restore it to false.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Notebook-global magic configuration is hidden state unless restored visibly.</li>
+</ul>
+<ol>
+<li><strong>Memory reasoning:</strong> Explain why <code>displaylimit=25</code> does not bound memory and identify the setting/query clause that does.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Rendering fewer rows is different from fetching fewer rows.</li>
+</ul>
+<ol>
+<li><strong>Identifier boundary:</strong> Explain why <code>FROM :table_name</code> is not identifier binding and how a Psycopg application handles a validated dynamic identifier.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Bound parameters represent data values, never SQL grammar.</li>
+</ul>
+<ol>
+<li><strong>Architecture decision:</strong> Write a decision note choosing interactive exploration or Psycopg application code using at least three criteria.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Consider reuse, transaction ownership, tests, dynamic structure, scale, and operational observability.</li>
+</ul>
+<ol>
+<li><strong>Cleanup:</strong> List active aliases, close <code>ds60-course</code>, dispose the engine, and verify no connection literal or output remains saved.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Both JupySQL alias state and SQLAlchemy pool state need explicit cleanup.</li>
+</ul>
+<ol>
+<li><strong>Setup review:</strong> Trace how the environment URL becomes a SQLAlchemy engine without ever being displayed and identify every validation step.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Validate scheme, driver, host/database target, and display settings before connecting.</li>
+</ul>
+<ol>
+<li><strong>Prediction:</strong> Predict the difference between a <code>%sql</code> line assignment and a <code>%%sql</code> cell when both return the same rows.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Compare Python assignment syntax, multi-line readability, and result access.</li>
+</ul>
+<ol>
+<li><strong>Capacity:</strong> Design a query/result-size check for a table with millions of rows and explain what remains unbounded after <code>LIMIT 25</code>.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Bound output, scan scope, and server work separately.</li>
+</ul>
+<ol>
+<li><strong>Type binding:</strong> Bind a <code>Decimal</code>, date, boolean, and list value in small read-only queries and record their PostgreSQL result types.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Let SQLAlchemy/JupySQL adapt Python values; do not pre-render literals.</li>
+</ul>
+<ol>
+<li><strong>Transaction reasoning:</strong> Use <code>engine.begin()</code> for a rollback-safe teaching write in a disposable temporary scope, then explain why magics are not the transaction owner.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> The checked-in notebook remains read-only; describe or run writes only in an explicitly authorized disposable lab.</li>
+</ul>
+<ol>
+<li><strong>Jinja boundary:</strong> Demonstrate conceptually why <code>{{value}}</code> is code generation rather than safe value binding, including a harmless fixed example.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Rendered text becomes SQL before the driver sees parameters.</li>
+</ul>
+<ol>
+<li><strong>Notebook hygiene:</strong> Validate nbformat, stable IDs, kernel metadata, live/static tags, empty outputs, and the absence of package-install magics, shell installs, URLs, and destructive SQL.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Inspect the serialized artifact, not only the visible notebook UI.</li>
+</ul>
+<ol>
+<li><strong>Offline review:</strong> Explain how a learner without a running PostgreSQL server can still review this module and which claims remain unexecuted.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Separate structural/offline evidence from live query evidence.</li>
+</ul>
+<ol>
+<li><strong>Handoff:</strong> Extract the capstone query into a Psycopg function design with typed inputs, a small cursor Protocol, and a fake-backed test.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Carry over SQL and value semantics while changing the ownership/testing surface.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>Record what the offline doubles prove and what they cannot prove.</li>
+<li>Inspect exact call order, parameters, schema, and failure behavior.</li>
+<li>Keep credentials, payloads, and high-cardinality identifiers out of output.</li>
+<li>Require deterministic reruns before considering an exercise complete.</li>
+</ul>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Did the kernel inherit <code>DS60_DATABASE_URL</code> without a notebook literal?</li>
+<li>Does the URL select PostgreSQL, Psycopg 3, and exactly the disposable database?</li>
+<li>Is connection display disabled before the first query?</li>
+<li>Is fetched data bounded with <code>autolimit</code> or explicit SQL <code>LIMIT</code>, not merely hidden with <code>displaylimit</code>?</li>
+<li>Can you explain one-percent versus two-percent magic syntax?</li>
+<li>Are data values represented with <code>:name</code>, never Jinja or string formatting?</li>
+<li>Are table and column names static?</li>
+<li>Can you convert a result explicitly and with <code>autopandas</code>?</li>
+<li>Did every cell remain read-only?</li>
+<li>Can you state who owns transactions and retries outside exploratory magics?</li>
+<li>Did you close the alias and dispose the engine?</li>
+<li>Is the notebook free of saved outputs, credentials, local paths, and setup commands?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Starting the kernel before setting the environment:</strong> restart VS Code or the kernel from the configured shell.</li>
+<li><strong>Using a different Python interpreter:</strong> select the repository <code>ds60sqlpy</code> kernel.</li>
+<li><strong>Letting the engine display itself:</strong> even redacted representations invite accidental credential handling. End setup cells with a safe assertion.</li>
+<li><strong>Relying on <code>displaylimit</code>:</strong> it truncates presentation, not necessarily the fetched result.</li>
+<li><strong>Leaving <code>autopandas</code> enabled unknowingly:</strong> pandas display settings apply, and downstream cells receive a different result type.</li>
+<li><strong>Using Jinja for values:</strong> it is code generation. Use named binding.</li>
+<li><strong>Trying to bind identifiers:</strong> value parameters cannot represent SQL grammar.</li>
+<li><strong>Writing through an exploratory notebook:</strong> out-of-order re-execution and autocommit make side effects hard to review and recover.</li>
+<li><strong>Assuming <code>%sql --close</code> disposes every resource:</strong> explicitly dispose the SQLAlchemy engine as well.</li>
+<li><strong>Installing from a notebook:</strong> <code>%pip</code> mutates the environment and may require a kernel restart. Use repository setup while connected.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Attempt the <a href="bridge-jupyter-01.html#learner">learner notebook</a> before reviewing the <a href="bridge-jupyter-01.html#solution-2">completed notebook</a> and <a href="bridge-jupyter-01.html#solution-1">solution reasoning</a>. Then use Bridge Days 3–5 to move a reusable query behind a typed, tested Psycopg boundary, or continue to BRIDGE-OPS-01 for migration delivery and operational evidence.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--bridge-jupyter-01-postgresql-magics-in-jupyter">BRIDGE-JUPYTER-01 — PostgreSQL magics in Jupyter<a class="heading-anchor" href="#learner--cell-1--bridge-jupyter-01-postgresql-magics-in-jupyter" aria-label="Link to this section">#</a></h3>
+<h4 id="learner--cell-1--goal">Goal<a class="heading-anchor" href="#learner--cell-1--goal" aria-label="Link to this section">#</a></h4>
+<p>Use JupySQL to explore the disposable course PostgreSQL database from a notebook without embedding or displaying credentials. Keep SQL structure separate from data values, bound result size, and know when an application should use Psycopg directly instead.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p><strong>Level:</strong> Intermediate/advanced <strong>Stable lesson ID:</strong> <code>bridge-jupyter-01</code> <strong>Prerequisites:</strong> Python Day 18, SQL Day 15, Bridge Day 3, and a reset disposable course database.</p>
+<p>An IPython <strong>line magic</strong> begins with one <code>%</code> and consumes the rest of that line. A <strong>cell magic</strong> begins with <code>%%</code> and consumes the cell body. Here <code>%sql</code> is convenient for a short statement or a result assignment; <code>%%sql</code> keeps a multi-line query readable.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--setup">Setup<a class="heading-anchor" href="#learner--cell-3--setup" aria-label="Link to this section">#</a></h4>
+<p>Complete the repository setup outside this notebook. Start VS Code or Jupyter from a shell where <code>DS60_DATABASE_URL</code> is set to the disposable <code>advanced_sql_training</code> database. Do not paste that value into a cell, print it, or save it in notebook output. The companion guide has separate Windows PowerShell and macOS/Linux commands.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># ruff: noqa: E501 -- JupySQL line magics stay on one physical line.</span>
+<span>%load_ext sql</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>JupySQL accepts a SQLAlchemy engine. The next cell parses the environment value, confirms the safe course target, selects SQLAlchemy&#x27;s Psycopg 3 dialect, and creates a lazy engine. <code>create_engine()</code> does not print the URL and normally does not connect until first use.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import os</span>
+<span> </span>
+<span>from sqlalchemy import create_engine</span>
+<span>from sqlalchemy.engine import make_url</span>
+<span> </span>
+<span>raw_database_url = os.environ.get(&quot;DS60_DATABASE_URL&quot;, &quot;&quot;).strip()</span>
+<span>if not raw_database_url:</span>
+<span>    raise RuntimeError(</span>
+<span>        &quot;Set DS60_DATABASE_URL in the shell that starts this notebook, then restart the kernel.&quot;</span>
+<span>    )</span>
+<span> </span>
+<span>course_url = make_url(raw_database_url)</span>
+<span>if course_url.get_backend_name() not in {&quot;postgres&quot;, &quot;postgresql&quot;}:</span>
+<span>    raise RuntimeError(&quot;DS60_DATABASE_URL must select PostgreSQL.&quot;)</span>
+<span>if course_url.database != &quot;advanced_sql_training&quot;:</span>
+<span>    raise RuntimeError(&quot;This lesson is restricted to the disposable course database.&quot;)</span>
+<span> </span>
+<span>psycopg_url = course_url.set(drivername=&quot;postgresql+psycopg&quot;)</span>
+<span>engine = create_engine(psycopg_url, pool_pre_ping=True)</span>
+<span>assert engine.url.drivername == &quot;postgresql+psycopg&quot;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p>Hide connection feedback before binding the engine. <code>autolimit</code> bounds rows fetched; <code>displaylimit</code> only shortens what is displayed and does not by itself protect memory. Keep <code>autopandas=False</code> initially so you can practise explicit conversion. Named <code>:value</code> parameters are enabled for safe value binding.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>%config SqlMagic.displaycon = False</span>
+<span>%config SqlMagic.autolimit = 200</span>
+<span>%config SqlMagic.displaylimit = 25</span>
+<span>%config SqlMagic.autopandas = False</span>
+<span>%config SqlMagic.named_parameters = &quot;enabled&quot;</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>%sql engine --alias ds60-course</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>%sql --connections</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h4 id="learner--cell-11--steps">Steps<a class="heading-anchor" href="#learner--cell-11--steps" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-11--1-compare-line-and-cell-magics">1. Compare line and cell magics<a class="heading-anchor" href="#learner--cell-11--1-compare-line-and-cell-magics" aria-label="Link to this section">#</a></h5>
+<p>Use a line magic for a small diagnostic. Use a cell magic when SQL should span multiple lines. These cells are read-only.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span>%sql SELECT current_database() AS database_name, current_user AS database_user</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span>%%sql</span>
+<span>SELECT customer_id, full_name, country, segment</span>
+<span>FROM training.customers</span>
+<span>ORDER BY customer_id</span>
+<span>LIMIT 5;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-14--2-bind-data-values-and-convert-a-result">2. Bind data values and convert a result<a class="heading-anchor" href="#learner--cell-14--2-bind-data-values-and-convert-a-result" aria-label="Link to this section">#</a></h5>
+<p>Python variables referenced as <code>:value</code> are sent through the database parameter boundary. They are data, not executable SQL. The query text keeps static table and column names.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span>order_status = &quot;paid&quot;</span>
+<span>minimum_total = 250</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span>orders_result = %sql SELECT order_id, customer_id, total_amount FROM training.orders WHERE status = :order_status AND total_amount &gt;= :minimum_total ORDER BY total_amount DESC, order_id LIMIT 20</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span>orders_frame = orders_result.DataFrame()</span>
+<span>assert list(orders_frame.columns) == [&quot;order_id&quot;, &quot;customer_id&quot;, &quot;total_amount&quot;]</span>
+<span>orders_frame.head()</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-18--3-use-autopandas-deliberately">3. Use <code>autopandas</code> deliberately<a class="heading-anchor" href="#learner--cell-18--3-use-autopandas-deliberately" aria-label="Link to this section">#</a></h5>
+<p>With <code>autopandas=True</code>, an assigned <code>%sql</code> result is already a pandas DataFrame. Pandas controls display in this mode, so keep an explicit SQL <code>LIMIT</code> as well as <code>autolimit</code>.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span>%config SqlMagic.autopandas = True</span>
+<span>customer_frame = %sql SELECT customer_id, full_name, country FROM training.customers ORDER BY customer_id LIMIT 10</span>
+<span>%config SqlMagic.autopandas = False</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span>assert customer_frame.shape[0] &lt;= 10</span>
+<span>assert {&quot;customer_id&quot;, &quot;full_name&quot;, &quot;country&quot;}.issubset(customer_frame.columns)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-21--4-separate-binding-from-code-generation">4. Separate binding from code generation<a class="heading-anchor" href="#learner--cell-21--4-separate-binding-from-code-generation" aria-label="Link to this section">#</a></h5>
+<p>JupySQL also supports Jinja text such as <code>{{value}}</code>. That renders SQL source <em>before</em> the driver executes it, so an untrusted value can change SQL structure. Treat Jinja as reviewed code generation, not value binding. Prefer <code>:value</code> for data.</p>
+<p>A parameter cannot represent an identifier: <code>FROM :table_name</code> is not valid identifier binding. Keep identifiers static in exploratory notebooks. In application code, validate a genuinely dynamic choice with an allowlist and compose it with <code>psycopg.sql.Identifier</code>.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 13</div><pre class="source-code language-python"><code><span>chosen_customer_id = 3</span>
+<span>customer_orders = %sql SELECT order_id, order_date, status, total_amount FROM training.orders WHERE customer_id = :chosen_customer_id ORDER BY order_date, order_id LIMIT 25</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-23--5-treat-transactions-as-an-explicit-boundary">5. Treat transactions as an explicit boundary<a class="heading-anchor" href="#learner--cell-23--5-treat-transactions-as-an-explicit-boundary" aria-label="Link to this section">#</a></h5>
+<p>JupySQL&#x27;s <code>SqlMagic.autocommit</code> defaults to true. A notebook is easy to run out of order, so this lesson stays read-only. For a multi-statement write, use a reviewed <code>engine.begin()</code> block or Psycopg transaction context and make commit/rollback ownership visible. Do not assume toggling a magic setting gives an application a complete retry-safe unit of work.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 14</div><pre class="source-code language-python"><code><span>from sqlalchemy import text</span>
+<span> </span>
+<span>with engine.begin() as connection:</span>
+<span>    observed_database = connection.scalar(text(&quot;SELECT current_database()&quot;))</span>
+<span> </span>
+<span>assert observed_database == &quot;advanced_sql_training&quot;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-25--6-know-when-to-leave-magics">6. Know when to leave magics<a class="heading-anchor" href="#learner--cell-25--6-know-when-to-leave-magics" aria-label="Link to this section">#</a></h5>
+<p>Use magics for interactive, bounded exploration. Prefer Psycopg application code for reusable functions, typed row mapping, COPY/streaming, explicit transactions, retry classification, pooling, async work, cancellation, structured logs, and fake-backed tests. A notebook can call those tested functions instead of becoming the only copy of production logic.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h4 id="learner--cell-26--exercises">Exercises<a class="heading-anchor" href="#learner--cell-26--exercises" aria-label="Link to this section">#</a></h4>
+<p><strong>Focus:</strong> Use JupySQL for bounded, reviewable PostgreSQL exploration while keeping credentials out of cells and values separate from SQL structure.</p>
+<p><strong>Assumptions:</strong> The notebook reads <code>DS60_DATABASE_URL</code>, binds an explicit SQLAlchemy <code>postgresql+psycopg</code> engine, disables connection display, and keeps live cells tagged.</p>
+<p><strong>Failure to watch for:</strong> Notebook output, connection displays, Jinja rendering, or unbounded result materialization can leak secrets or turn exploration into unsafe application behavior.</p>
+<p>Complete these in order. Keep this notebook answer-free, use bounded read-only SQL, and record which checks are structural versus live.</p>
+<ol>
+<li><strong>Magic selection:</strong> Run the line diagnostic and multi-line training query; explain why one <code>%sql</code> form is easier to review for each statement.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Choose from statement shape and reviewability, not from different security semantics.</li>
+</ul>
+<ol>
+<li><strong>Security testing:</strong> Bind an injection-shaped string to a harmless read-only comparison, verify it behaves as data, then remove the value.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Use <code>:name</code>; never paste the sentinel into SQL or notebook output.</li>
+</ul>
+<ol>
+<li><strong>SQL practice:</strong> Query US customers whose lifetime order total meets a Python threshold; bind country and threshold, order deterministically, and limit to 10.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Aggregate after a left join, apply the threshold after grouping, and add customer ID as tie-breaker.</li>
+</ul>
+<ol>
+<li><strong>DataFrame boundary:</strong> Convert the assigned result with <code>.DataFrame()</code> and assert the expected columns in order.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Treat conversion as an explicit boundary and validate shape before analysis.</li>
+</ul>
+<ol>
+<li><strong>Configuration:</strong> Repeat one small query with <code>autopandas=True</code>, identify the changed return type, then restore it to false.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Notebook-global magic configuration is hidden state unless restored visibly.</li>
+</ul>
+<ol>
+<li><strong>Memory reasoning:</strong> Explain why <code>displaylimit=25</code> does not bound memory and identify the setting/query clause that does.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Rendering fewer rows is different from fetching fewer rows.</li>
+</ul>
+<ol>
+<li><strong>Identifier boundary:</strong> Explain why <code>FROM :table_name</code> is not identifier binding and how a Psycopg application handles a validated dynamic identifier.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Bound parameters represent data values, never SQL grammar.</li>
+</ul>
+<ol>
+<li><strong>Architecture decision:</strong> Write a decision note choosing interactive exploration or Psycopg application code using at least three criteria.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Consider reuse, transaction ownership, tests, dynamic structure, scale, and operational observability.</li>
+</ul>
+<ol>
+<li><strong>Cleanup:</strong> List active aliases, close <code>ds60-course</code>, dispose the engine, and verify no connection literal or output remains saved.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Both JupySQL alias state and SQLAlchemy pool state need explicit cleanup.</li>
+</ul>
+<ol>
+<li><strong>Setup review:</strong> Trace how the environment URL becomes a SQLAlchemy engine without ever being displayed and identify every validation step.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Validate scheme, driver, host/database target, and display settings before connecting.</li>
+</ul>
+<ol>
+<li><strong>Prediction:</strong> Predict the difference between a <code>%sql</code> line assignment and a <code>%%sql</code> cell when both return the same rows.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Compare Python assignment syntax, multi-line readability, and result access.</li>
+</ul>
+<ol>
+<li><strong>Capacity:</strong> Design a query/result-size check for a table with millions of rows and explain what remains unbounded after <code>LIMIT 25</code>.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Bound output, scan scope, and server work separately.</li>
+</ul>
+<ol>
+<li><strong>Type binding:</strong> Bind a <code>Decimal</code>, date, boolean, and list value in small read-only queries and record their PostgreSQL result types.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Let SQLAlchemy/JupySQL adapt Python values; do not pre-render literals.</li>
+</ul>
+<ol>
+<li><strong>Transaction reasoning:</strong> Use <code>engine.begin()</code> for a rollback-safe teaching write in a disposable temporary scope, then explain why magics are not the transaction owner.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> The checked-in notebook remains read-only; describe or run writes only in an explicitly authorized disposable lab.</li>
+</ul>
+<ol>
+<li><strong>Jinja boundary:</strong> Demonstrate conceptually why <code>{{value}}</code> is code generation rather than safe value binding, including a harmless fixed example.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Rendered text becomes SQL before the driver sees parameters.</li>
+</ul>
+<ol>
+<li><strong>Notebook hygiene:</strong> Validate nbformat, stable IDs, kernel metadata, live/static tags, empty outputs, and the absence of package-install magics, shell installs, URLs, and destructive SQL.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Inspect the serialized artifact, not only the visible notebook UI.</li>
+</ul>
+<ol>
+<li><strong>Offline review:</strong> Explain how a learner without a running PostgreSQL server can still review this module and which claims remain unexecuted.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Separate structural/offline evidence from live query evidence.</li>
+</ul>
+<ol>
+<li><strong>Handoff:</strong> Extract the capstone query into a Psycopg function design with typed inputs, a small cursor Protocol, and a fake-backed test.</li>
+</ol>
+<ul>
+<li><strong>Hint:</strong> Carry over SQL and value semantics while changing the ownership/testing surface.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h4 id="learner--cell-27--checks">Checks<a class="heading-anchor" href="#learner--cell-27--checks" aria-label="Link to this section">#</a></h4>
+<p>Use the prepared variables and diagnostic cell below for the capstone query after attempting the numbered exercises above.</p>
+<ul>
+<li>Confirm every result is bounded and deterministically ordered.</li>
+<li>Confirm every data value uses <code>:name</code> binding and identifiers remain static.</li>
+<li>Distinguish structural checks from live PostgreSQL observations.</li>
+<li>Clear outputs and close/dispose both connection layers before saving.</li>
+</ul></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 15</div><pre class="source-code language-python"><code><span>exercise_country = &quot;US&quot;</span>
+<span>exercise_minimum_total = 500</span>
+<span> </span>
+<span># Add your result assignment and bound aggregate query in the next cell.</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 16</div><pre class="source-code language-python"><code><span>%%sql</span>
+<span>-- Replace this diagnostic row with the aggregate query described above.</span>
+<span>SELECT :exercise_country AS country_to_bind,</span>
+<span>       :exercise_minimum_total AS minimum_to_bind;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><p>Before continuing, verify that the notebook contains no URL literal or saved output; every exploratory query is bounded; values use <code>:name</code>; identifiers are static; and no write was issued. Run <code>%sql --connections</code> to inspect the active alias, then close it explicitly.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 17</div><pre class="source-code language-python"><code><span>%sql --close ds60-course</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 18</div><pre class="source-code language-python"><code><span>engine.dispose()</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h4 id="learner--cell-33--next-steps">Next Steps<a class="heading-anchor" href="#learner--cell-33--next-steps" aria-label="Link to this section">#</a></h4>
+<p>Compare behavior with the separate solution notebook only after attempting the check. Then return to Bridge Days 3–5 for production-safe Psycopg adapters and tests, or continue to BRIDGE-OPS-01 for migration delivery, readiness, and redacted observability.</p></article></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-jupyter-01-solution-reasoning">BRIDGE-JUPYTER-01 — Solution reasoning<a class="heading-anchor" href="#solution-1--bridge-jupyter-01-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Try the <a href="bridge-jupyter-01.html#learner">learner notebook</a> before opening the <a href="bridge-jupyter-01.html#solution-2">completed notebook</a>.</p>
+<h4 id="solution-1--connection-construction">Connection construction<a class="heading-anchor" href="#solution-1--connection-construction" aria-label="Link to this section">#</a></h4>
+<p>The solution reads <code>DS60_DATABASE_URL</code> from the process environment, rejects a non-PostgreSQL backend and any database name other than <code>advanced_sql_training</code>, and replaces the dialect driver with <code>postgresql+psycopg</code>. SQLAlchemy&#x27;s URL object preserves encoded connection fields better than string replacement.</p>
+<p>The URL variables and engine are never the final expression in a cell, so Jupyter does not render them. <code>SqlMagic.displaycon=False</code> is configured before the engine is bound. This is defense in depth; the primary rule is never to log, print, or save the URL.</p>
+<h4 id="solution-1--magic-and-result-choices">Magic and result choices<a class="heading-anchor" href="#solution-1--magic-and-result-choices" aria-label="Link to this section">#</a></h4>
+<p>The diagnostic uses <code>%sql</code> because it is one short statement. The first training query uses <code>%%sql</code> because line breaks expose selected columns, source, ordering, and limit. An assigned <code>%sql</code> call returns a JupySQL <code>ResultSet</code> while <code>autopandas</code> is false; <code>.DataFrame()</code> makes the conversion explicit.</p>
+<p>The second path temporarily enables <code>autopandas</code>, proves that the returned object has the expected shape, and immediately restores the default. Explicit SQL limits remain useful in both modes.</p>
+<h4 id="solution-1--parameter-safety">Parameter safety<a class="heading-anchor" href="#solution-1--parameter-safety" aria-label="Link to this section">#</a></h4>
+<p>All changing values use named <code>:value</code> markers. The completed aggregate binds country in <code>WHERE</code> and the minimum lifetime total in <code>HAVING</code>. Static schema, table, and column names remain SQL structure.</p>
+<p>Jinja <code>{{...}}</code> is intentionally shown only in explanatory Markdown. It renders SQL text before execution and is therefore code generation. The solution does not execute templated input. It also does not pretend parameters can bind identifiers; a reusable dynamic identifier belongs behind an allowlist and <code>psycopg.sql.Identifier</code> in application code.</p>
+<h4 id="solution-1--aggregate-reasoning">Aggregate reasoning<a class="heading-anchor" href="#solution-1--aggregate-reasoning" aria-label="Link to this section">#</a></h4>
+<p>The check solution:</p>
+<ol>
+<li>starts from <code>training.customers</code>;</li>
+<li>left-joins orders so customers with no orders remain representable;</li>
+<li>groups at customer grain;</li>
+<li>converts a missing sum to zero with <code>COALESCE</code>;</li>
+<li>filters the aggregate with <code>HAVING</code>;</li>
+<li>orders by lifetime total descending and customer ID ascending;</li>
+<li>limits the result to 10.</li>
+</ol>
+<p>The deterministic tie-breaker matters in notebooks and tests. Without it, rows with equal totals may appear in any order.</p>
+<h4 id="solution-1--transaction-and-cleanup-reasoning">Transaction and cleanup reasoning<a class="heading-anchor" href="#solution-1--transaction-and-cleanup-reasoning" aria-label="Link to this section">#</a></h4>
+<p>The notebook stays read-only because JupySQL autocommit and out-of-order cell execution make write ownership easy to misunderstand. A small <code>engine.begin()</code> block shows an explicit transaction context without changing state. Production writes, retries, COPY, streaming, and observability belong behind tested Psycopg or SQLAlchemy application functions.</p>
+<p>Cleanup has two layers: <code>%sql --close ds60-course</code> removes JupySQL&#x27;s named connection, and <code>engine.dispose()</code> releases the SQLAlchemy pool.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Passing an engine object avoids placing a URL in magic source, but the Python process still holds credentials in memory. Process access and notebook trust still matter.</li>
+<li><code>autolimit</code> protects exploration from accidental unbounded results, but it may alter query semantics or conceal that a result was truncated. Deliberate SQL limits and aggregate checks remain clearer.</li>
+<li><code>autopandas</code> is convenient but changes result type globally for the notebook session. A local explicit conversion is easier to reason about in shared notebooks.</li>
+<li>Magics make exploration concise but are harder to type-check, unit test, and reuse than an ordinary Python function.</li>
+<li>A read-only notebook is safer than an ad hoc write notebook, but database permissions should enforce least privilege rather than relying on prose.</li>
+<li>A static identifier is intentionally less flexible. The reduced attack and review surface is usually desirable during exploration.</li>
+</ul>
+<p>The structural tests verify metadata, clean execution state, tag coverage, required concepts, named parameters, and prohibited credential/setup patterns. Only an opt-in live run can prove the local PostgreSQL and JupySQL integration.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb</code>.</p>
+<p><strong>Shared failure rule:</strong> Notebook output, connection displays, Jinja rendering, or unbounded result materialization can leak secrets or turn exploration into unsafe application behavior.</p>
+<h5 id="solution-1--exercise-1-magic-selection">Exercise 1 — Magic selection<a class="heading-anchor" href="#solution-1--exercise-1-magic-selection" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Run the line diagnostic and multi-line training query; explain why one <code>%sql</code> form is easier to review for each statement.</p>
+<p><strong>Approach:</strong> Use line magic for one compact diagnostic or assignment and cell magic for formatted multi-line SQL. Both use the same bound engine and require the same value-binding discipline.</p>
+<p><strong>Why:</strong> Choose from statement shape and reviewability, not from different security semantics.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-2-security-testing">Exercise 2 — Security testing<a class="heading-anchor" href="#solution-1--exercise-2-security-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Bind an injection-shaped string to a harmless read-only comparison, verify it behaves as data, then remove the value.</p>
+<p><strong>Approach:</strong> Assign the sentinel in Python, reference it through a named parameter, and query a bounded comparison. The result should reflect literal data semantics rather than altering the SQL structure.</p>
+<p><strong>Why:</strong> Use <code>:name</code>; never paste the sentinel into SQL or notebook output.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-3-sql-practice">Exercise 3 — SQL practice<a class="heading-anchor" href="#solution-1--exercise-3-sql-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Query US customers whose lifetime order total meets a Python threshold; bind country and threshold, order deterministically, and limit to 10.</p>
+<p><strong>Approach:</strong> Use static schema/table names, <code>:exercise_country</code> and <code>:exercise_minimum_total</code>, <code>COALESCE(sum(...), 0)</code>, <code>HAVING</code>, and final <code>ORDER BY total DESC, customer_id LIMIT 10</code>.</p>
+<p><strong>Why:</strong> Aggregate after a left join, apply the threshold after grouping, and add customer ID as tie-breaker.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-4-dataframe-boundary">Exercise 4 — DataFrame boundary<a class="heading-anchor" href="#solution-1--exercise-4-dataframe-boundary" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Convert the assigned result with <code>.DataFrame()</code> and assert the expected columns in order.</p>
+<p><strong>Approach:</strong> Call <code>.DataFrame()</code> once, compare the exact column list with the query projection, and assert the row count is bounded by 10 before using the frame.</p>
+<p><strong>Why:</strong> Treat conversion as an explicit boundary and validate shape before analysis.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-5-configuration">Exercise 5 — Configuration<a class="heading-anchor" href="#solution-1--exercise-5-configuration" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Repeat one small query with <code>autopandas=True</code>, identify the changed return type, then restore it to false.</p>
+<p><strong>Approach:</strong> Enable the option in a live-tagged cell, verify a DataFrame is returned directly, and reset it in the same teaching section so later cells retain explicit result conversion.</p>
+<p><strong>Why:</strong> Notebook-global magic configuration is hidden state unless restored visibly.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-6-memory-reasoning">Exercise 6 — Memory reasoning<a class="heading-anchor" href="#solution-1--exercise-6-memory-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain why <code>displaylimit=25</code> does not bound memory and identify the setting/query clause that does.</p>
+<p><strong>Approach:</strong> <code>displaylimit</code> truncates presentation only. Use SQL <code>LIMIT</code> and JupySQL <code>autolimit</code> as fetch guards, while recognizing that an aggregate or expensive query can still do substantial server work.</p>
+<p><strong>Why:</strong> Rendering fewer rows is different from fetching fewer rows.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-7-identifier-boundary">Exercise 7 — Identifier boundary<a class="heading-anchor" href="#solution-1--exercise-7-identifier-boundary" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain why <code>FROM :table_name</code> is not identifier binding and how a Psycopg application handles a validated dynamic identifier.</p>
+<p><strong>Approach:</strong> Keep notebook identifiers static. Application code first allowlists the requested object, then composes it with <code>psycopg.sql.Identifier</code>; it does not pass a table name as <code>%s</code> or <code>:name</code>.</p>
+<p><strong>Why:</strong> Bound parameters represent data values, never SQL grammar.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-8-architecture-decision">Exercise 8 — Architecture decision<a class="heading-anchor" href="#solution-1--exercise-8-architecture-decision" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write a decision note choosing interactive exploration or Psycopg application code using at least three criteria.</p>
+<p><strong>Approach:</strong> Keep bounded one-off read exploration in the notebook; move reusable, write-capable, dynamically composed, scheduled, or heavily tested behavior into typed application code.</p>
+<p><strong>Why:</strong> Consider reuse, transaction ownership, tests, dynamic structure, scale, and operational observability.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-9-cleanup">Exercise 9 — Cleanup<a class="heading-anchor" href="#solution-1--exercise-9-cleanup" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> List active aliases, close <code>ds60-course</code>, dispose the engine, and verify no connection literal or output remains saved.</p>
+<p><strong>Approach:</strong> Inspect <code>%sql --connections</code>, close the named alias, call <code>engine.dispose()</code>, clear all outputs/execution counts, and scan notebook JSON for URL-shaped credential text.</p>
+<p><strong>Why:</strong> Both JupySQL alias state and SQLAlchemy pool state need explicit cleanup.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-10-setup-review">Exercise 10 — Setup review<a class="heading-anchor" href="#solution-1--exercise-10-setup-review" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trace how the environment URL becomes a SQLAlchemy engine without ever being displayed and identify every validation step.</p>
+<p><strong>Approach:</strong> Read the variable with <code>os.environ</code>, parse with <code>make_url</code>, require PostgreSQL plus the <code>psycopg</code> driver and disposable database, set <code>displaycon=False</code>, create the engine, then bind the object rather than a literal URL.</p>
+<p><strong>Why:</strong> Validate scheme, driver, host/database target, and display settings before connecting.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-11-prediction">Exercise 11 — Prediction<a class="heading-anchor" href="#solution-1--exercise-11-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict the difference between a <code>%sql</code> line assignment and a <code>%%sql</code> cell when both return the same rows.</p>
+<p><strong>Approach:</strong> A line magic can assign its result directly in Python on one line; a cell magic owns the whole cell and emphasizes formatted SQL. Result semantics and parameter safety are otherwise equivalent.</p>
+<p><strong>Why:</strong> Compare Python assignment syntax, multi-line readability, and result access.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-12-capacity">Exercise 12 — Capacity<a class="heading-anchor" href="#solution-1--exercise-12-capacity" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design a query/result-size check for a table with millions of rows and explain what remains unbounded after <code>LIMIT 25</code>.</p>
+<p><strong>Approach:</strong> Add selective predicates and partition/date bounds, project only needed columns, use deterministic <code>LIMIT</code>, and inspect a plan if authorized. <code>LIMIT</code> alone may still require a large scan/sort and does not cap aggregate work.</p>
+<p><strong>Why:</strong> Bound output, scan scope, and server work separately.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-13-type-binding">Exercise 13 — Type binding<a class="heading-anchor" href="#solution-1--exercise-13-type-binding" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Bind a <code>Decimal</code>, date, boolean, and list value in small read-only queries and record their PostgreSQL result types.</p>
+<p><strong>Approach:</strong> Assign typed Python values, reference each with <code>:name</code>, and use bounded <code>SELECT pg_typeof(...)</code> diagnostics. The adapter preserves value boundaries and exposes type mismatches explicitly.</p>
+<p><strong>Why:</strong> Let SQLAlchemy/JupySQL adapt Python values; do not pre-render literals.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-14-transaction-reasoning">Exercise 14 — Transaction reasoning<a class="heading-anchor" href="#solution-1--exercise-14-transaction-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Use <code>engine.begin()</code> for a rollback-safe teaching write in a disposable temporary scope, then explain why magics are not the transaction owner.</p>
+<p><strong>Approach:</strong> Application-level SQLAlchemy context owns commit/rollback and connection return. JupySQL exploratory cells should remain read-only; any write lab needs a separate tagged, opt-in, rollback-protected artifact.</p>
+<p><strong>Why:</strong> The checked-in notebook remains read-only; describe or run writes only in an explicitly authorized disposable lab.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-15-jinja-boundary">Exercise 15 — Jinja boundary<a class="heading-anchor" href="#solution-1--exercise-15-jinja-boundary" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Demonstrate conceptually why <code>{{value}}</code> is code generation rather than safe value binding, including a harmless fixed example.</p>
+<p><strong>Approach:</strong> Use <code>:value</code> for data. Reserve Jinja for trusted, reviewed structure when unavoidable; never pass user text through it and never describe rendering as equivalent to driver binding.</p>
+<p><strong>Why:</strong> Rendered text becomes SQL before the driver sees parameters.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-16-notebook-hygiene">Exercise 16 — Notebook hygiene<a class="heading-anchor" href="#solution-1--exercise-16-notebook-hygiene" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Validate nbformat, stable IDs, kernel metadata, live/static tags, empty outputs, and the absence of package-install magics, shell installs, URLs, and destructive SQL.</p>
+<p><strong>Approach:</strong> Run <code>nbformat.validate</code> plus repository validators/tests, require the <code>ds60sqlpy</code> kernel and unique IDs, clear every code output/count, and scan sources for forbidden installation/credential/write patterns.</p>
+<p><strong>Why:</strong> Inspect the serialized artifact, not only the visible notebook UI.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-17-offline-review">Exercise 17 — Offline review<a class="heading-anchor" href="#solution-1--exercise-17-offline-review" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain how a learner without a running PostgreSQL server can still review this module and which claims remain unexecuted.</p>
+<p><strong>Approach:</strong> They can read all prose/SQL, validate notebook JSON/tags/security, and run non-live Python cells where dependencies exist. Query results, adapter behavior, and cleanup against PostgreSQL remain explicitly unverified until the opt-in live path runs.</p>
+<p><strong>Why:</strong> Separate structural/offline evidence from live query evidence.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-18-handoff">Exercise 18 — Handoff<a class="heading-anchor" href="#solution-1--exercise-18-handoff" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Extract the capstone query into a Psycopg function design with typed inputs, a small cursor Protocol, and a fake-backed test.</p>
+<p><strong>Approach:</strong> Keep static SQL with <code>%s</code> placeholders, type country/threshold inputs, inject a cursor Protocol, map bounded rows explicitly, and test query/parameter separation before an optional live integration test.</p>
+<p><strong>Why:</strong> Carry over SQL and value semantics while changing the ownership/testing surface.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--bridge-jupyter-01-postgresql-magics-solution">BRIDGE-JUPYTER-01 — PostgreSQL magics solution<a class="heading-anchor" href="#solution-2--cell-1--bridge-jupyter-01-postgresql-magics-solution" aria-label="Link to this section">#</a></h3>
+<h4 id="solution-2--cell-1--goal">Goal<a class="heading-anchor" href="#solution-2--cell-1--goal" aria-label="Link to this section">#</a></h4>
+<p>Demonstrate one credential-safe, read-only JupySQL workflow against the disposable course PostgreSQL database, including bounded results, named value parameters, pandas conversion, connection cleanup, and an explicit transaction example.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p><strong>Level:</strong> Intermediate/advanced <strong>Stable lesson ID:</strong> <code>bridge-jupyter-01</code> <strong>Prerequisites:</strong> Python Day 18, SQL Day 15, Bridge Day 3, and a reset disposable course database.</p>
+<p><code>%sql</code> is a line magic for a short statement or result assignment. <code>%%sql</code> is a cell magic whose body is multi-line SQL.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-3--setup">Setup<a class="heading-anchor" href="#solution-2--cell-3--setup" aria-label="Link to this section">#</a></h4>
+<p>Set <code>DS60_DATABASE_URL</code> in the shell that launches VS Code or Jupyter. The notebook reads it once, never displays it, and rejects any database other than the disposable <code>advanced_sql_training</code> target.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># ruff: noqa: E501 -- JupySQL line magics stay on one physical line.</span>
+<span>%load_ext sql</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import os</span>
+<span> </span>
+<span>from sqlalchemy import create_engine, text</span>
+<span>from sqlalchemy.engine import make_url</span>
+<span> </span>
+<span>raw_database_url = os.environ.get(&quot;DS60_DATABASE_URL&quot;, &quot;&quot;).strip()</span>
+<span>if not raw_database_url:</span>
+<span>    raise RuntimeError(</span>
+<span>        &quot;Set DS60_DATABASE_URL in the shell that starts this notebook, then restart the kernel.&quot;</span>
+<span>    )</span>
+<span> </span>
+<span>course_url = make_url(raw_database_url)</span>
+<span>if course_url.get_backend_name() not in {&quot;postgres&quot;, &quot;postgresql&quot;}:</span>
+<span>    raise RuntimeError(&quot;DS60_DATABASE_URL must select PostgreSQL.&quot;)</span>
+<span>if course_url.database != &quot;advanced_sql_training&quot;:</span>
+<span>    raise RuntimeError(&quot;This lesson is restricted to the disposable course database.&quot;)</span>
+<span> </span>
+<span>psycopg_url = course_url.set(drivername=&quot;postgresql+psycopg&quot;)</span>
+<span>engine = create_engine(psycopg_url, pool_pre_ping=True)</span>
+<span>assert engine.url.drivername == &quot;postgresql+psycopg&quot;</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>%config SqlMagic.displaycon = False</span>
+<span>%config SqlMagic.autolimit = 200</span>
+<span>%config SqlMagic.displaylimit = 25</span>
+<span>%config SqlMagic.autopandas = False</span>
+<span>%config SqlMagic.named_parameters = &quot;enabled&quot;</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>%sql engine --alias ds60-course</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>%sql --connections</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-9--steps">Steps<a class="heading-anchor" href="#solution-2--cell-9--steps" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-2--cell-9--1-run-bounded-read-only-sql">1. Run bounded read-only SQL<a class="heading-anchor" href="#solution-2--cell-9--1-run-bounded-read-only-sql" aria-label="Link to this section">#</a></h5>
+<p>The line diagnostic is short. The customer query is easier to review as a cell magic.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span>%sql SELECT current_database() AS database_name, current_user AS database_user</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span>%%sql</span>
+<span>SELECT customer_id, full_name, country, segment</span>
+<span>FROM training.customers</span>
+<span>ORDER BY customer_id</span>
+<span>LIMIT 5;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="solution-2--cell-12--2-bind-values-with-name">2. Bind values with <code>:name</code><a class="heading-anchor" href="#solution-2--cell-12--2-bind-values-with-name" aria-label="Link to this section">#</a></h5>
+<p>The status and amount remain Python data. Neither value is rendered into SQL source.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span>order_status = &quot;paid&quot;</span>
+<span>minimum_total = 250</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span>orders_result = %sql SELECT order_id, customer_id, total_amount FROM training.orders WHERE status = :order_status AND total_amount &gt;= :minimum_total ORDER BY total_amount DESC, order_id LIMIT 20</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span>orders_frame = orders_result.DataFrame()</span>
+<span>assert list(orders_frame.columns) == [&quot;order_id&quot;, &quot;customer_id&quot;, &quot;total_amount&quot;]</span>
+<span>assert len(orders_frame) &lt;= 20</span>
+<span>orders_frame.head()</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h5 id="solution-2--cell-16--3-compare-explicit-conversion-with-autopandas">3. Compare explicit conversion with <code>autopandas</code><a class="heading-anchor" href="#solution-2--cell-16--3-compare-explicit-conversion-with-autopandas" aria-label="Link to this section">#</a></h5>
+<p><code>autopandas=True</code> returns a DataFrame directly. The SQL still has its own <code>LIMIT</code> because <code>displaylimit</code> affects presentation, not fetched row count, and pandas display rules apply in this mode.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span>%config SqlMagic.autopandas = True</span>
+<span>customer_frame = %sql SELECT customer_id, full_name, country FROM training.customers ORDER BY customer_id LIMIT 10</span>
+<span>%config SqlMagic.autopandas = False</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span>assert customer_frame.shape[0] &lt;= 10</span>
+<span>assert {&quot;customer_id&quot;, &quot;full_name&quot;, &quot;country&quot;}.issubset(customer_frame.columns)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="solution-2--cell-19--4-keep-code-generation-out-of-the-value-path">4. Keep code generation out of the value path<a class="heading-anchor" href="#solution-2--cell-19--4-keep-code-generation-out-of-the-value-path" aria-label="Link to this section">#</a></h5>
+<p>Jinja <code>{{value}}</code> renders SQL code before execution and therefore requires trusted, reviewed input. Named <code>:value</code> syntax uses the parameter boundary and is the correct choice for data values. Neither form safely binds a table or column name. Keep notebook identifiers static; application code can combine an allowlist with <code>psycopg.sql.Identifier</code> when dynamism is truly required.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="solution-2--cell-20--5-make-transaction-ownership-visible">5. Make transaction ownership visible<a class="heading-anchor" href="#solution-2--cell-20--5-make-transaction-ownership-visible" aria-label="Link to this section">#</a></h5>
+<p>JupySQL autocommit defaults to true. This lesson performs only reads. The SQLAlchemy block below demonstrates an explicit transaction context without changing data.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 13</div><pre class="source-code language-python"><code><span>with engine.begin() as connection:</span>
+<span>    observed_database = connection.scalar(text(&quot;SELECT current_database()&quot;))</span>
+<span> </span>
+<span>assert observed_database == &quot;advanced_sql_training&quot;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="solution-2--cell-22--6-move-reusable-effects-into-psycopg-code">6. Move reusable effects into Psycopg code<a class="heading-anchor" href="#solution-2--cell-22--6-move-reusable-effects-into-psycopg-code" aria-label="Link to this section">#</a></h5>
+<p>Magics are excellent for bounded exploration. Reusable typed queries, multiple writes, COPY, streaming, retry classification, pooling, async work, cancellation, structured logging, and unit-test seams belong in application modules using Psycopg or a deliberately chosen SQLAlchemy layer.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h4 id="solution-2--cell-23--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-2--cell-23--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb</code>.</p>
+<p><strong>Shared failure rule:</strong> Notebook output, connection displays, Jinja rendering, or unbounded result materialization can leak secrets or turn exploration into unsafe application behavior.</p>
+<h5 id="solution-2--cell-23--exercise-1-magic-selection">Exercise 1 — Magic selection<a class="heading-anchor" href="#solution-2--cell-23--exercise-1-magic-selection" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Run the line diagnostic and multi-line training query; explain why one <code>%sql</code> form is easier to review for each statement.</p>
+<p><strong>Approach:</strong> Use line magic for one compact diagnostic or assignment and cell magic for formatted multi-line SQL. Both use the same bound engine and require the same value-binding discipline.</p>
+<p><strong>Why:</strong> Choose from statement shape and reviewability, not from different security semantics.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-2-security-testing">Exercise 2 — Security testing<a class="heading-anchor" href="#solution-2--cell-23--exercise-2-security-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Bind an injection-shaped string to a harmless read-only comparison, verify it behaves as data, then remove the value.</p>
+<p><strong>Approach:</strong> Assign the sentinel in Python, reference it through a named parameter, and query a bounded comparison. The result should reflect literal data semantics rather than altering the SQL structure.</p>
+<p><strong>Why:</strong> Use <code>:name</code>; never paste the sentinel into SQL or notebook output.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-3-sql-practice">Exercise 3 — SQL practice<a class="heading-anchor" href="#solution-2--cell-23--exercise-3-sql-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Query US customers whose lifetime order total meets a Python threshold; bind country and threshold, order deterministically, and limit to 10.</p>
+<p><strong>Approach:</strong> Use static schema/table names, <code>:exercise_country</code> and <code>:exercise_minimum_total</code>, <code>COALESCE(sum(...), 0)</code>, <code>HAVING</code>, and final <code>ORDER BY total DESC, customer_id LIMIT 10</code>.</p>
+<p><strong>Why:</strong> Aggregate after a left join, apply the threshold after grouping, and add customer ID as tie-breaker.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-4-dataframe-boundary">Exercise 4 — DataFrame boundary<a class="heading-anchor" href="#solution-2--cell-23--exercise-4-dataframe-boundary" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Convert the assigned result with <code>.DataFrame()</code> and assert the expected columns in order.</p>
+<p><strong>Approach:</strong> Call <code>.DataFrame()</code> once, compare the exact column list with the query projection, and assert the row count is bounded by 10 before using the frame.</p>
+<p><strong>Why:</strong> Treat conversion as an explicit boundary and validate shape before analysis.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-5-configuration">Exercise 5 — Configuration<a class="heading-anchor" href="#solution-2--cell-23--exercise-5-configuration" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Repeat one small query with <code>autopandas=True</code>, identify the changed return type, then restore it to false.</p>
+<p><strong>Approach:</strong> Enable the option in a live-tagged cell, verify a DataFrame is returned directly, and reset it in the same teaching section so later cells retain explicit result conversion.</p>
+<p><strong>Why:</strong> Notebook-global magic configuration is hidden state unless restored visibly.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-6-memory-reasoning">Exercise 6 — Memory reasoning<a class="heading-anchor" href="#solution-2--cell-23--exercise-6-memory-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain why <code>displaylimit=25</code> does not bound memory and identify the setting/query clause that does.</p>
+<p><strong>Approach:</strong> <code>displaylimit</code> truncates presentation only. Use SQL <code>LIMIT</code> and JupySQL <code>autolimit</code> as fetch guards, while recognizing that an aggregate or expensive query can still do substantial server work.</p>
+<p><strong>Why:</strong> Rendering fewer rows is different from fetching fewer rows.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-7-identifier-boundary">Exercise 7 — Identifier boundary<a class="heading-anchor" href="#solution-2--cell-23--exercise-7-identifier-boundary" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain why <code>FROM :table_name</code> is not identifier binding and how a Psycopg application handles a validated dynamic identifier.</p>
+<p><strong>Approach:</strong> Keep notebook identifiers static. Application code first allowlists the requested object, then composes it with <code>psycopg.sql.Identifier</code>; it does not pass a table name as <code>%s</code> or <code>:name</code>.</p>
+<p><strong>Why:</strong> Bound parameters represent data values, never SQL grammar.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-8-architecture-decision">Exercise 8 — Architecture decision<a class="heading-anchor" href="#solution-2--cell-23--exercise-8-architecture-decision" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write a decision note choosing interactive exploration or Psycopg application code using at least three criteria.</p>
+<p><strong>Approach:</strong> Keep bounded one-off read exploration in the notebook; move reusable, write-capable, dynamically composed, scheduled, or heavily tested behavior into typed application code.</p>
+<p><strong>Why:</strong> Consider reuse, transaction ownership, tests, dynamic structure, scale, and operational observability.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-9-cleanup">Exercise 9 — Cleanup<a class="heading-anchor" href="#solution-2--cell-23--exercise-9-cleanup" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> List active aliases, close <code>ds60-course</code>, dispose the engine, and verify no connection literal or output remains saved.</p>
+<p><strong>Approach:</strong> Inspect <code>%sql --connections</code>, close the named alias, call <code>engine.dispose()</code>, clear all outputs/execution counts, and scan notebook JSON for URL-shaped credential text.</p>
+<p><strong>Why:</strong> Both JupySQL alias state and SQLAlchemy pool state need explicit cleanup.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-10-setup-review">Exercise 10 — Setup review<a class="heading-anchor" href="#solution-2--cell-23--exercise-10-setup-review" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trace how the environment URL becomes a SQLAlchemy engine without ever being displayed and identify every validation step.</p>
+<p><strong>Approach:</strong> Read the variable with <code>os.environ</code>, parse with <code>make_url</code>, require PostgreSQL plus the <code>psycopg</code> driver and disposable database, set <code>displaycon=False</code>, create the engine, then bind the object rather than a literal URL.</p>
+<p><strong>Why:</strong> Validate scheme, driver, host/database target, and display settings before connecting.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-11-prediction">Exercise 11 — Prediction<a class="heading-anchor" href="#solution-2--cell-23--exercise-11-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict the difference between a <code>%sql</code> line assignment and a <code>%%sql</code> cell when both return the same rows.</p>
+<p><strong>Approach:</strong> A line magic can assign its result directly in Python on one line; a cell magic owns the whole cell and emphasizes formatted SQL. Result semantics and parameter safety are otherwise equivalent.</p>
+<p><strong>Why:</strong> Compare Python assignment syntax, multi-line readability, and result access.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-12-capacity">Exercise 12 — Capacity<a class="heading-anchor" href="#solution-2--cell-23--exercise-12-capacity" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design a query/result-size check for a table with millions of rows and explain what remains unbounded after <code>LIMIT 25</code>.</p>
+<p><strong>Approach:</strong> Add selective predicates and partition/date bounds, project only needed columns, use deterministic <code>LIMIT</code>, and inspect a plan if authorized. <code>LIMIT</code> alone may still require a large scan/sort and does not cap aggregate work.</p>
+<p><strong>Why:</strong> Bound output, scan scope, and server work separately.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-13-type-binding">Exercise 13 — Type binding<a class="heading-anchor" href="#solution-2--cell-23--exercise-13-type-binding" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Bind a <code>Decimal</code>, date, boolean, and list value in small read-only queries and record their PostgreSQL result types.</p>
+<p><strong>Approach:</strong> Assign typed Python values, reference each with <code>:name</code>, and use bounded <code>SELECT pg_typeof(...)</code> diagnostics. The adapter preserves value boundaries and exposes type mismatches explicitly.</p>
+<p><strong>Why:</strong> Let SQLAlchemy/JupySQL adapt Python values; do not pre-render literals.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-14-transaction-reasoning">Exercise 14 — Transaction reasoning<a class="heading-anchor" href="#solution-2--cell-23--exercise-14-transaction-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Use <code>engine.begin()</code> for a rollback-safe teaching write in a disposable temporary scope, then explain why magics are not the transaction owner.</p>
+<p><strong>Approach:</strong> Application-level SQLAlchemy context owns commit/rollback and connection return. JupySQL exploratory cells should remain read-only; any write lab needs a separate tagged, opt-in, rollback-protected artifact.</p>
+<p><strong>Why:</strong> The checked-in notebook remains read-only; describe or run writes only in an explicitly authorized disposable lab.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-15-jinja-boundary">Exercise 15 — Jinja boundary<a class="heading-anchor" href="#solution-2--cell-23--exercise-15-jinja-boundary" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Demonstrate conceptually why <code>{{value}}</code> is code generation rather than safe value binding, including a harmless fixed example.</p>
+<p><strong>Approach:</strong> Use <code>:value</code> for data. Reserve Jinja for trusted, reviewed structure when unavoidable; never pass user text through it and never describe rendering as equivalent to driver binding.</p>
+<p><strong>Why:</strong> Rendered text becomes SQL before the driver sees parameters.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-16-notebook-hygiene">Exercise 16 — Notebook hygiene<a class="heading-anchor" href="#solution-2--cell-23--exercise-16-notebook-hygiene" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Validate nbformat, stable IDs, kernel metadata, live/static tags, empty outputs, and the absence of package-install magics, shell installs, URLs, and destructive SQL.</p>
+<p><strong>Approach:</strong> Run <code>nbformat.validate</code> plus repository validators/tests, require the <code>ds60sqlpy</code> kernel and unique IDs, clear every code output/count, and scan sources for forbidden installation/credential/write patterns.</p>
+<p><strong>Why:</strong> Inspect the serialized artifact, not only the visible notebook UI.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-17-offline-review">Exercise 17 — Offline review<a class="heading-anchor" href="#solution-2--cell-23--exercise-17-offline-review" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain how a learner without a running PostgreSQL server can still review this module and which claims remain unexecuted.</p>
+<p><strong>Approach:</strong> They can read all prose/SQL, validate notebook JSON/tags/security, and run non-live Python cells where dependencies exist. Query results, adapter behavior, and cleanup against PostgreSQL remain explicitly unverified until the opt-in live path runs.</p>
+<p><strong>Why:</strong> Separate structural/offline evidence from live query evidence.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-2--cell-23--exercise-18-handoff">Exercise 18 — Handoff<a class="heading-anchor" href="#solution-2--cell-23--exercise-18-handoff" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Extract the capstone query into a Psycopg function design with typed inputs, a small cursor Protocol, and a fake-backed test.</p>
+<p><strong>Approach:</strong> Keep static SQL with <code>%s</code> placeholders, type country/threshold inputs, inject a cursor Protocol, map bounded rows explicitly, and test query/parameter separation before an optional live integration test.</p>
+<p><strong>Why:</strong> Carry over SQL and value semantics while changing the ownership/testing surface.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h4 id="solution-2--cell-24--checks">Checks<a class="heading-anchor" href="#solution-2--cell-24--checks" aria-label="Link to this section">#</a></h4>
+<p>The completed aggregate binds country and threshold as data, preserves static identifiers, orders deterministically, and caps output.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 14</div><pre class="source-code language-python"><code><span>exercise_country = &quot;US&quot;</span>
+<span>exercise_minimum_total = 500</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 15</div><pre class="source-code language-python"><code><span>customer_totals = %sql SELECT c.customer_id, c.full_name, COALESCE(sum(o.total_amount), 0) AS lifetime_total FROM training.customers AS c LEFT JOIN training.orders AS o USING (customer_id) WHERE c.country = :exercise_country GROUP BY c.customer_id, c.full_name HAVING COALESCE(sum(o.total_amount), 0) &gt;= :exercise_minimum_total ORDER BY lifetime_total DESC, c.customer_id LIMIT 10</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 16</div><pre class="source-code language-python"><code><span>exercise_frame = customer_totals.DataFrame()</span>
+<span>assert list(exercise_frame.columns) == [&quot;customer_id&quot;, &quot;full_name&quot;, &quot;lifetime_total&quot;]</span>
+<span>assert len(exercise_frame) &lt;= 10</span>
+<span>exercise_frame</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><p>The safety check is behavioral: no connection literal or saved output exists; the result is bounded; the two inputs are named parameters; identifiers are fixed course objects; the query is read-only; and the connection is closed explicitly.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 17</div><pre class="source-code language-python"><code><span>%sql --close ds60-course</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 18</div><pre class="source-code language-python"><code><span>engine.dispose()</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h4 id="solution-2--cell-31--next-steps">Next Steps<a class="heading-anchor" href="#solution-2--cell-31--next-steps" aria-label="Link to this section">#</a></h4>
+<p>Return to Bridge Days 3–5 to package exploratory SQL behind typed Psycopg functions and fake-backed tests. Continue to BRIDGE-OPS-01 to connect migration checks, request IDs, retry policy, health/readiness, metrics, and forward-fix versus rollback evidence.</p></article></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="bridge-08.html"><small>Previous lesson</small><strong>bridge-08</strong><span>Production Capstone</span></a>
+        <a class="nav-card next" href="bridge-ops-01.html"><small>Next lesson</small><strong>bridge-ops-01</strong><span>Migration Delivery and Application Observability</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-jupyter-01";
+    const LEARNER_PATH = "bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

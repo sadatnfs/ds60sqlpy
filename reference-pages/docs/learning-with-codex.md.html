@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Learning with Codex · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Learning with Codex</h1>
+      <p class="source-path">Generated from <code>docs/learning-with-codex.md</code></p>
+    </header>
+    <article class="document"><h2 id="learning-with-codex">Learning with Codex<a class="heading-anchor" href="#learning-with-codex" aria-label="Link to this section">#</a></h2>
+<p>Codex can act as a tutor, reviewer, debugger, and study planner for this repository. It is optional: all course content and local execution should remain usable without Codex.</p>
+<p>Codex itself may require a network connection even when a lesson does not. “Offline course” and “online tutor” are separate capabilities.</p>
+<h3 id="choose-the-right-front-door">Choose the right front door<a class="heading-anchor" href="#choose-the-right-front-door" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Situation</th>
+<th>Start here</th>
+<th>What it provides</th>
+</tr></thead><tbody>
+<tr>
+<td>New or returning Windows learner</td>
+<td>Double-click <code>START_DS60.cmd</code></td>
+<td>Discovers or prepares the repository environment, runs readiness checks, and opens the authenticated private portal</td>
+</tr>
+<tr>
+<td>macOS/Linux learner after setup</td>
+<td>Run <code>scripts/learning_portal.py</code> with the repository interpreter</td>
+<td>Opens the same private portal with exact VS Code and JupyterLab actions</td>
+</tr>
+<tr>
+<td>Source-only USB or no local server</td>
+<td>Double-click <a href="../../START_HERE.html"><code>START_HERE.html</code></a></td>
+<td>Fully static dashboard and rendered lesson readers; progress stays in that browser</td>
+</tr>
+</tbody></table></div>
+<p>The Windows launcher asks before a connected first setup. It never requests or stores a database credential and never resets PostgreSQL. Keep its terminal open while learning; <code>Ctrl+C</code> stops the private portal.</p>
+<p>Manual private-portal commands are:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\learning_portal.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python scripts/learning_portal.py</code></pre>
+<p>The private launcher binds only to <code>127.0.0.1</code>. It can open the repository, exact cataloged artifacts, exact notebook lessons, and catalog-restricted guided SQL notebooks; it cannot accept arbitrary commands or paths. Pass <code>--no-launches</code> if you want file-backed progress with every native process action disabled.</p>
+<p>Static mode remains useful without Python or a server, but a browser cannot safely execute Python, notebooks, or SQL. Its optional <code>vscode://</code> link is a best-effort handoff to a registered VS Code installation. If it does not work, open the repository in VS Code and use the catalog path printed on the lesson page.</p>
+<h3 id="start-codex-in-the-repository-root">Start Codex in the repository root<a class="heading-anchor" href="#start-codex-in-the-repository-root" aria-label="Link to this section">#</a></h3>
+<p>Open the directory containing <code>README.md</code>. From there, Codex can discover:</p>
+<ul>
+<li>Root and track-specific <code>AGENTS.md</code> guidance</li>
+<li>The generated <code>curriculum/catalog.json</code> lesson index</li>
+<li>The <code>$guide-ds60sqlpy-learning</code> repo-local skill</li>
+<li>The environment doctor and validation commands</li>
+</ul>
+<p>If Codex starts inside a nested lesson directory, tell it to work from the repository root.</p>
+<h3 id="use-one-rendered-lesson-page">Use one rendered lesson page<a class="heading-anchor" href="#use-one-rendered-lesson-page" aria-label="Link to this section">#</a></h3>
+<p>Every <strong>Start lesson</strong> link opens <code>lesson-pages/&lt;lesson-id&gt;.html</code>, a deterministic page generated from the checked-in companion guide, learner artifact, and solutions. Markdown is rendered as HTML, notebook cells receive a read-only notebook view, and Python or SQL receives a readable source listing. The browser is for reading; edit and run the actual artifact in VS Code or JupyterLab.</p>
+<p>Setup, documentation, and other local Markdown/SQL links open generated <code>reference-pages/</code> HTML, so they remain readable instead of becoming raw text tabs. In static mode, return to <code>START_HERE.html</code> to mark completion; the lesson-page checkbox is reserved for private launcher mode, where progress can be synchronized safely.</p>
+<p>Use this sequence with Codex:</p>
+<ol>
+<li>Read the <strong>Guide</strong> tab and state the objective in your own words.</li>
+<li>Predict what the first example will do.</li>
+<li>Open the real <strong>Learner artifact</strong> and make an honest attempt.</li>
+<li>Ask for one progressive hint at a time.</li>
+<li>Open a <strong>Solution</strong> tab only after the attempt, then explain the difference.</li>
+</ol>
+<p>In private mode, the reader&#x27;s buttons resolve only that stable lesson ID and its cataloged files. For a Python notebook, choose <strong>Open this notebook in JupyterLab</strong> or open it in VS Code and select <code>Python (ds60sqlpy)</code>. For a Python source lesson, open the exact <code>.py</code> file in VS Code and run it with the repository interpreter.</p>
+<p>For a normal SQL lesson, choose <strong>Create/open guided SQL notebook</strong>. The launcher creates an ignored notebook plus editable SQL copy under <code>.learning/sql/&lt;lesson-id&gt;/</code> and opens that exact notebook in JupyterLab. It preserves existing learner edits. The notebook runs the complete course script through a fixed, non-shell <code>psql -f</code> path so <code>psql</code> meta-commands continue to work; database preparation remains a separate, explicitly confirmed reset of only <code>advanced_sql_training</code>. Use <code>bridge-jupyter-01</code> instead when the learning objective is short JupySQL <code>%sql</code>/<code>%%sql</code> exploration. See <a href="guided-sql-notebooks.md.html">Guided SQL lesson notebooks</a>.</p>
+<h3 id="use-the-tutor-skill">Use the tutor skill<a class="heading-anchor" href="#use-the-tutor-skill" aria-label="Link to this section">#</a></h3>
+<p>Explicit invocation is the most predictable starting point:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to assess my current level and guide me through the next lesson.</code></pre>
+<p>You can also ask:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning. I am on a new Windows machine and have never programmed. Help me verify setup, then start Python Day 1.</code></pre>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to resume SQL. Quiz me on prerequisites before recommending the next lesson.</code></pre>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to start the Python/PostgreSQL bridge. Verify
+that I am ready, use fakes before a live database, and make me explain each
+transaction boundary.</code></pre>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to start sql-found-01 before SQL Day 1. Make me
+state the grain and invariants before I write DDL.</code></pre>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to guide bridge-jupyter-01. Verify the selected
+kernel and disposable database, keep my connection secret, and make me explain
+bound parameters versus Jinja SQL rendering.</code></pre>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to choose my next professional module from the
+catalog based on demonstrated prerequisites rather than the lesson number.</code></pre>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to review my current notebook. Give one hint at a time and do not open the official solution.</code></pre>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to check whether this lesson will run offline on my machine.</code></pre>
+<h3 id="a-good-tutoring-session">A good tutoring session<a class="heading-anchor" href="#a-good-tutoring-session" aria-label="Link to this section">#</a></h3>
+<p>The expected flow is:</p>
+<ol>
+<li>Identify your operating system, track, experience, and current lesson.</li>
+<li>Run or interpret <code>python scripts/course.py doctor</code>.</li>
+<li>Read only the relevant catalog entry, guide, and learner artifact.</li>
+<li>Check prerequisites with a few short questions.</li>
+<li>Explain the lesson in plain language.</li>
+<li>Ask you to predict output or write an attempt.</li>
+<li>Use a progressive hint ladder.</li>
+<li>Run or inspect your actual code/query.</li>
+<li>Finish with a short retrieval quiz and a next step.</li>
+</ol>
+<p>The hint ladder should normally be:</p>
+<ol>
+<li>Restate the goal and identify the misconception.</li>
+<li>Give a conceptual hint.</li>
+<li>Suggest pseudocode or a query shape.</li>
+<li>Show a partial implementation.</li>
+<li>Reveal a full worked solution only when requested or when you decide the attempt is complete.</li>
+</ol>
+<h3 id="ask-codex-to-inspect-evidence">Ask Codex to inspect evidence<a class="heading-anchor" href="#ask-codex-to-inspect-evidence" aria-label="Link to this section">#</a></h3>
+<p>Useful debugging prompt:</p>
+<pre><code class="language-text">Inspect my selected interpreter, the exact error, and the lesson&#x27;s declared dependencies before suggesting a fix. Do not assume package installation succeeded.</code></pre>
+<p>Useful SQL prompt:</p>
+<pre><code class="language-text">Run this only against the disposable advanced_sql_training database with psql -X -v ON_ERROR_STOP=1. Explain the first failing statement and keep the lesson transaction safe.</code></pre>
+<p>Useful bridge prompt:</p>
+<pre><code class="language-text">Test my solution offline with the provided fake first. If a live PostgreSQL
+check would add evidence, resolve DS60_DATABASE_URL and explain the exact
+rollback-safe operation before running it.</code></pre>
+<p>Useful review prompt:</p>
+<pre><code class="language-text">Compare my answer with the exercise requirements, not just the official solution. Tell me what is correct, what fails on an edge case, and the smallest next improvement.</code></pre>
+<h3 id="progress-and-privacy">Progress and privacy<a class="heading-anchor" href="#progress-and-privacy" aria-label="Link to this section">#</a></h3>
+<p>You decide whether progress is stored.</p>
+<ul>
+<li>Keep private local notes under <code>.learning/</code>; the directory is ignored.</li>
+<li>Ask before writing or changing a progress file.</li>
+<li>Treat <code>.learning/sql/</code> as learner work. A generated SQL notebook and editable SQL copy are preserved when reopened; do not delete them without first saving anything worth keeping.</li>
+<li>Do not put passwords, personal data, API keys, or proprietary datasets in prompts or notebooks.</li>
+<li>Do not ask Codex to connect a course reset command to a workplace database.</li>
+</ul>
+<p>A useful local progress note records:</p>
+<ul>
+<li>Lesson ID</li>
+<li>Date attempted</li>
+<li>What you can explain without notes</li>
+<li>Exercise status</li>
+<li>One misconception or blocker</li>
+<li>Next review date</li>
+</ul>
+<p>The course CLI and private portal share the same minimal ignored progress record:</p>
+<pre><code class="language-text">python scripts/course.py progress show
+python scripts/course.py progress complete python-01 --notes &quot;Can explain values, variables, and the selected kernel.&quot;</code></pre>
+<p>Use the stable lesson ID printed by <code>catalog</code>. Codex should ask before marking a lesson complete and should base completion on your explanation or working attempt—not on merely opening the file. On Windows, substitute <code>&amp; $CoursePython</code> from the launcher block for <code>python</code> when the repository environment is not activated.</p>
+<p>The portal&#x27;s <strong>Export progress</strong> button creates a portable JSON backup. In static-file mode, import/export is also the deliberate bridge between browsers. Never commit either the <code>.learning/</code> directory or a personal progress export. Before making a source-only USB copy, export progress and separately preserve any <code>.learning/sql/</code> exercises you want to resume.</p>
+<h3 id="avoid-answer-leakage">Avoid answer leakage<a class="heading-anchor" href="#avoid-answer-leakage" aria-label="Link to this section">#</a></h3>
+<p>Say this explicitly when you want active learning:</p>
+<pre><code class="language-text">Do not read files under solutions/ until I ask. Use the learner notebook and companion guide first.</code></pre>
+<p>If you want a worked example, ask for a new analogous example before requesting the official answer.</p>
+<h3 id="use-codex-for-setup-carefully">Use Codex for setup carefully<a class="heading-anchor" href="#use-codex-for-setup-carefully" aria-label="Link to this section">#</a></h3>
+<p>Codex should:</p>
+<ul>
+<li>Adapt commands to PowerShell or POSIX</li>
+<li>Use the repository virtual environment</li>
+<li>Explain what a command changes</li>
+<li>Preserve unrelated work</li>
+<li>Verify results with the course doctor</li>
+</ul>
+<p>Codex should not:</p>
+<ul>
+<li>Change machine-wide security settings without explaining why</li>
+<li>Install into the system Python</li>
+<li>invent an unverified package version</li>
+<li>silently access the network during an offline lesson</li>
+<li>reset a database without resolving the exact disposable target</li>
+</ul>
+<h3 id="without-codex">Without Codex<a class="heading-anchor" href="#without-codex" aria-label="Link to this section">#</a></h3>
+<p>Use the same learning loop manually:</p>
+<ol>
+<li>Read the guide.</li>
+<li>Predict and run examples.</li>
+<li>Attempt exercises.</li>
+<li>Use hints and documentation.</li>
+<li>Compare with the separate solution.</li>
+<li>Record what you can reproduce without looking.</li>
+</ol>
+<p>The <a href="curriculum-map.md.html">curriculum map</a>, <a href="troubleshooting.md.html">troubleshooting guide</a>, and <code>python scripts/course.py catalog</code> provide the same navigation foundation.</p></article>
+  </main>
+</body>
+</html>

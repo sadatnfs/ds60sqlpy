@@ -1,0 +1,1977 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-ops-01 · Migration Delivery and Application Observability · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-ops-01</p>
+        <h1>Migration Delivery and Application Observability</h1>
+        <p class="hero-copy">Professional application and database operations</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">240 minutes</span>
+          <span class="tag">bridge setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="bridge-08.html">bridge-08</a> <a class="tag" href="sql-found-02.html">sql-found-02</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/professional/lessons/bridge_ops_01_migration_observability.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/professional/lessons/bridge_ops_01_migration_observability.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/professional/companion-guides/bridge_ops_01_migration_observability.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/companion-guides/bridge_ops_01_migration_observability.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-ops-01-migration-delivery-and-application-observability">BRIDGE-OPS-01 — Migration delivery and application observability<a class="heading-anchor" href="#guide--bridge-ops-01-migration-delivery-and-application-observability" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<p><strong>Level:</strong> Advanced <strong>Stable lesson ID:</strong> <code>bridge-ops-01</code> <strong>Catalog prerequisites:</strong> <code>sql-found-02</code> and <code>bridge-08</code> <strong>Prerequisites:</strong> SQL-FOUND-02, <a href="bridge-04.html#guide">Bridge Day 4</a>, <a href="bridge-05.html#guide">Bridge Day 5</a>, and <a href="bridge-08.html#guide">Bridge Day 8</a>. Days 4 and 5 are earlier steps within the sequential bridge path.</p>
+<p>This cumulative lab connects database change delivery to application behavior. A migration is not finished merely because one <code>ALTER TABLE</code> succeeded. It also needs immutable history, a transaction boundary, verification, retry and idempotency rules, useful telemetry, readiness evidence, and a rehearsed recovery choice.</p>
+<p>The default path uses Protocol-based fakes and does not need PostgreSQL. The optional live path is restricted to <code>DS60_DATABASE_URL</code> and the disposable <code>advanced_sql_training</code> database. It creates two course-owned lab objects in the resettable <code>training</code> schema:</p>
+<ul>
+<li><code>training.ds60_schema_migrations</code></li>
+<li><code>training.bridge_release_lab</code></li>
+</ul>
+<p>Never run the live lab against a production, shared, or valuable database.</p>
+<p>Run the answer-free starter from the repository root:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe bridge\professional\lessons\bridge_ops_01_migration_observability.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python bridge/professional/lessons/bridge_ops_01_migration_observability.py</code></pre>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>model immutable, ordered migrations and detect checksum drift;</li>
+<li>keep trusted SQL structure separate from bound data values;</li>
+<li>apply one migration in one explicit transaction and verify it before commit;</li>
+<li>retry only classified transient failures using a fresh session;</li>
+<li>make an uncertain commit safe to retry with migration metadata;</li>
+<li>emit redacted structured logs and low-cardinality metrics carrying request and migration IDs;</li>
+<li>distinguish liveness from database-backed readiness;</li>
+<li>choose forward-fix, rollback, or pause based on recorded evidence.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>migration ID</td>
+<td>Stable ordered identity such as <code>20260730_002_release_source</code></td>
+</tr>
+<tr>
+<td>checksum</td>
+<td>Hash of immutable migration content used to detect edited history</td>
+</tr>
+<tr>
+<td>migration metadata</td>
+<td>Table recording which version and checksum committed</td>
+</tr>
+<tr>
+<td>advisory lock</td>
+<td>PostgreSQL transaction-scoped coordination lock used here to serialize runners</td>
+</tr>
+<tr>
+<td>expand–migrate–contract</td>
+<td>Add compatible shape, move data/traffic, then remove old shape later</td>
+</tr>
+<tr>
+<td>idempotent delivery</td>
+<td>Repeating a migration attempt produces no second logical change</td>
+</tr>
+<tr>
+<td>SQLSTATE</td>
+<td>PostgreSQL&#x27;s machine-readable error classification</td>
+</tr>
+<tr>
+<td>structured log</td>
+<td>Event plus named fields rather than an interpolated prose message</td>
+</tr>
+<tr>
+<td>metric cardinality</td>
+<td>Number of distinct label combinations a metric can produce</td>
+</tr>
+<tr>
+<td>liveness</td>
+<td>Evidence that the process itself can respond</td>
+</tr>
+<tr>
+<td>readiness</td>
+<td>Evidence that the process can safely serve its intended traffic</td>
+</tr>
+<tr>
+<td>forward-fix</td>
+<td>Apply a new corrective change without reversing committed data shape</td>
+</tr>
+<tr>
+<td>rollback</td>
+<td>Return application or schema state to a previously rehearsed compatible version</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--1-plan-immutable-migrations">1. Plan immutable migrations<a class="heading-anchor" href="#guide--1-plan-immutable-migrations" aria-label="Link to this section">#</a></h5>
+<p>The reference model stores an ID, description, trusted SQL commands, and a read-only verification query. IDs must be unique and lexically ordered. Once a checksum is recorded, editing that migration is drift and must stop delivery. Create a new migration instead.</p>
+<pre><code class="language-python">Migration(
+    migration_id=&quot;20260730_002_release_source&quot;,
+    description=&quot;Expand the lab with an additive source label&quot;,
+    commands=(
+        SqlCommand(&quot;ALTER TABLE training.bridge_release_lab ADD COLUMN source_label text&quot;),
+        SqlCommand(
+            &quot;UPDATE training.bridge_release_lab SET source_label = %s WHERE source_label IS NULL&quot;,
+            (&quot;legacy&quot;,),
+        ),
+    ),
+    verification=SqlCommand(
+        &quot;SELECT count(*) = 1 FROM information_schema.columns &quot;
+        &quot;WHERE table_schema = %s AND table_name = %s AND column_name = %s&quot;,
+        (&quot;training&quot;, &quot;bridge_release_lab&quot;, &quot;source_label&quot;),
+    ),
+)</code></pre>
+<p>Object names are trusted migration source code. <code>%s</code> placeholders bind values such as <code>&quot;legacy&quot;</code> and the three catalog filters. Psycopg parameters cannot stand for a table or column name. If application input genuinely selects an identifier, first enforce an allowlist and then use <code>psycopg.sql.Identifier</code>; do not use an f-string.</p>
+<h5 id="guide--2-deliver-one-complete-transaction-per-attempt">2. Deliver one complete transaction per attempt<a class="heading-anchor" href="#guide--2-deliver-one-complete-transaction-per-attempt" aria-label="Link to this section">#</a></h5>
+<p>The reference performs this sequence for each version:</p>
+<ol>
+<li>open a fresh session;</li>
+<li>acquire a transaction-scoped advisory lock;</li>
+<li>re-read that migration&#x27;s metadata row;</li>
+<li>skip only when the recorded checksum matches;</li>
+<li>execute trusted commands with separate parameter tuples;</li>
+<li>execute a read-only verification query;</li>
+<li>insert the migration ID, checksum, and request ID with parameters;</li>
+<li>commit;</li>
+<li>close the session.</li>
+</ol>
+<p>Any failure rolls back before classification. A retry opens a new session and repeats the <em>complete</em> transaction. It never retries a statement inside an already-aborted transaction.</p>
+<p>The metadata insert and schema change commit atomically. If the server commits but the client loses the response, the next attempt finds the matching metadata row and skips safely. This is the idempotency boundary.</p>
+<h5 id="guide--3-classify-retries-narrowly">3. Classify retries narrowly<a class="heading-anchor" href="#guide--3-classify-retries-narrowly" aria-label="Link to this section">#</a></h5>
+<p>The fake-friendly <code>RetryableDatabaseError</code> keeps default tests deterministic. The reference also recognizes PostgreSQL serialization failure (<code>40001</code>), deadlock detected (<code>40P01</code>), lock not available (<code>55P03</code>), and connection-class SQLSTATE values. Validation errors, checksum drift, syntax errors, and constraint violations are not automatically retryable.</p>
+<p>Bound attempts and exponential delay limit outage amplification. A production policy commonly adds jitter, a total deadline, and a deployment-level circuit breaker. Those policies should remain injected so tests never sleep.</p>
+<h5 id="guide--4-emit-safe-operational-evidence">4. Emit safe operational evidence<a class="heading-anchor" href="#guide--4-emit-safe-operational-evidence" aria-label="Link to this section">#</a></h5>
+<p>Each event includes stable fields:</p>
+<pre><code class="language-text">event=migration.attempt_started
+request_id=change-482
+migration_id=20260730_002_release_source
+attempt=1</code></pre>
+<p>Failure events include <code>error_type</code> and <code>retrying</code>, not the exception message. The redactor removes credential-like field names and URL-shaped values. Never send a connection URL, statement parameters, record payload, or raw exception to logs or metric tags.</p>
+<p>Useful low-cardinality metrics include:</p>
+<pre><code class="language-text">migration_attempts_total{migration_id=&quot;20260730_002_release_source&quot;}
+migration_outcomes_total{migration_id=&quot;...&quot;,outcome=&quot;applied&quot;}
+migration_duration_seconds{migration_id=&quot;...&quot;}</code></pre>
+<p>Do not label metrics with request IDs. They are useful in logs, but every request ID is distinct and would create unbounded metric cardinality.</p>
+<h5 id="guide--5-separate-health-from-readiness">5. Separate health from readiness<a class="heading-anchor" href="#guide--5-separate-health-from-readiness" aria-label="Link to this section">#</a></h5>
+<p><code>liveness()</code> has no database dependency. It proves only that the process can answer. <code>check_readiness()</code> performs read-only checks:</p>
+<ul>
+<li><code>SELECT 1</code> succeeds;</li>
+<li>the migration metadata table exists;</li>
+<li>all expected IDs exist;</li>
+<li>stored checksums match current source.</li>
+</ul>
+<p>A live process with a missing migration is <em>not ready</em>. A probe must not create tables, apply migrations, or repair state.</p>
+<h5 id="guide--6-make-recovery-evidence-explicit">6. Make recovery evidence explicit<a class="heading-anchor" href="#guide--6-make-recovery-evidence-explicit" aria-label="Link to this section">#</a></h5>
+<p><code>decide_recovery()</code> is a decision aid, not automation. It pauses when diagnosis is unconfirmed. Once new schema shape has received writes, an unrehearsed reverse migration may lose data, so only a rehearsed forward fix is selected. A release rollback is selected only when the previous application is compatible and the reverse path was rehearsed. Otherwise the correct result is to gather more evidence.</p>
+<p>Capture the evidence before release:</p>
+<ul>
+<li>compatibility test results for old and new application versions;</li>
+<li>migration and verification output;</li>
+<li>request/change ID and exact checksum;</li>
+<li>whether writes reached the new shape;</li>
+<li>forward-fix and reverse rehearsal results;</li>
+<li>owner and stop/go decision.</li>
+</ul>
+<h5 id="guide--7-optional-live-lab">7. Optional live lab<a class="heading-anchor" href="#guide--7-optional-live-lab" aria-label="Link to this section">#</a></h5>
+<p>First reset and verify only the disposable course database using the canonical PostgreSQL setup instructions. Then provide the connection string only to the current process environment.</p>
+<pre><code class="language-powershell"># Windows PowerShell
+$env:DS60_DATABASE_URL = Read-Host &quot;Paste the disposable course PostgreSQL URL&quot;
+.\.venv\Scripts\python.exe `
+  bridge\professional\solutions\bridge_ops_01_migration_observability_solution.py `
+  --live --request-id learning-bridge-ops-01</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+read -r -s -p &quot;Disposable course PostgreSQL URL: &quot; DS60_DATABASE_URL
+export DS60_DATABASE_URL
+printf &#x27;\n&#x27;
+.venv/bin/python \
+  bridge/professional/solutions/bridge_ops_01_migration_observability_solution.py \
+  --live --request-id learning-bridge-ops-01</code></pre>
+<p>The command rejects any database name other than <code>advanced_sql_training</code>. It prints counts and readiness only, never the URL. Running it again should report both migrations as skipped with matching checksums. Resetting <code>training</code> through the course setup removes the lab state.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Deliver immutable ordered PostgreSQL migrations with fake-tested retry/commit uncertainty, redacted observability, readiness probes, and evidence-driven recovery.</li>
+<li><strong>Assumptions:</strong> Each migration has stable identity/content/checksum; every attempt owns a fresh transaction; optional live work targets only the disposable course database.</li>
+<li><strong>Primary failure mode:</strong> Mutable history, retry after uncertain commit without re-checking metadata, or recovery without complete evidence can corrupt schema state.</li>
+<li><strong>Evidence loop:</strong> state the boundary and prediction, implement against deterministic local doubles, test success/failure/cleanup, and label any optional live-adapter evidence separately from offline proof.</li>
+</ul>
+<ol>
+<li><strong>Validation:</strong> Implement <code>Migration</code> validation and a stable checksum over identity, description, command text/parameters, and verification.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Canonical serialization must distinguish structure and parameter types without depending on object repr.</li>
+</ul>
+<ol>
+<li><strong>Redaction:</strong> Implement <code>redact_fields()</code> for sensitive key names, URL-shaped values, non-serializable objects, and ordinary scalars.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Use key classification and safe type conversion; never echo rejected values.</li>
+</ul>
+<ol>
+<li><strong>Planning:</strong> Implement <code>plan_pending()</code> with duplicate/order validation, unknown applied-version rejection, and checksum-drift detection.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Applied history is immutable and must be a prefix of known ordered migrations.</li>
+</ul>
+<ol>
+<li><strong>Test double:</strong> Build a recording session fake that stores SQL separately from parameter tuples and never parses PostgreSQL through SQLite.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Model transactional state and prepared query results explicitly.</li>
+</ul>
+<ol>
+<li><strong>Delivery:</strong> Implement the documented nine-step delivery order and prove rollback/close happen before injected retry delay.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then report.</li>
+</ul>
+<ol>
+<li><strong>Commit uncertainty:</strong> Simulate an uncertain commit whose retry sees a matching metadata row and prove commands are not applied twice.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Re-check immutable metadata under lock before every attempt.</li>
+</ul>
+<ol>
+<li><strong>Observability:</strong> Add event and metric fakes; require request/migration IDs in logs, exclude request IDs from metric tags, and prove secrets are absent.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Logs support correlation; metrics require bounded dimensions.</li>
+</ul>
+<ol>
+<li><strong>Readiness:</strong> Implement read-only readiness for current, pending, drifted, and unreachable states while keeping liveness database-independent.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Readiness describes safe traffic acceptance, not process existence.</li>
+</ul>
+<ol>
+<li><strong>Recovery:</strong> Build a scenario table for recovery decisions, including incomplete evidence that must pause.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Destructive or forward actions require rehearsed, compatible evidence.</li>
+</ul>
+<ol>
+<li><strong>Optional integration:</strong> After fake tests, run the disposable live lab twice and inspect migration metadata with a read-only query.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> The second run demonstrates idempotency; cleanup evidence is part of completion.</li>
+</ul>
+<ol>
+<li><strong>Immutability:</strong> Change only SQL whitespace after a migration is applied and decide whether checksum drift should be accepted.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A stored checksum is an immutable history contract, not a semantic SQL parser.</li>
+</ul>
+<ol>
+<li><strong>Concurrency:</strong> Model two deployers contending for the same advisory lock and specify timeout/ownership behavior.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Only one delivery transaction may make planning decisions at a time.</li>
+</ul>
+<ol>
+<li><strong>PostgreSQL semantics:</strong> Identify which DDL is transactional in PostgreSQL and how non-transactional commands alter the migration policy.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Do not assume every administrative statement can share ordinary transaction rollback.</li>
+</ul>
+<ol>
+<li><strong>Timeouts:</strong> Set statement and lock timeouts per attempt without leaking settings to later pooled work.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Transaction-local settings should expire with commit/rollback.</li>
+</ul>
+<ol>
+<li><strong>Telemetry design:</strong> Define a bounded migration metric schema and a redaction test for exception objects and URL-like fields.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Migration IDs may still become unbounded over years; choose dimensions deliberately.</li>
+</ul>
+<ol>
+<li><strong>Probe semantics:</strong> Distinguish current-but-stale application readiness from database reachability and migration currency.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Each probe should answer one operational question.</li>
+</ul>
+<ol>
+<li><strong>Decision analysis:</strong> Compare forward fix and release rollback when the new schema has already received writes.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Data written under the new contract can make old code incompatible even if DDL reversal is possible.</li>
+</ul>
+<ol>
+<li><strong>Expand-contract:</strong> Design a three-release expand/migrate/contract sequence for renaming a populated column.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Maintain compatibility while old and new application versions overlap.</li>
+</ul>
+<ol>
+<li><strong>Cleanup:</strong> Prove the optional live lab leaves no table, metadata row, lock, connection, or credential-bearing output behind.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A passing mutation test is incomplete without postconditions.</li>
+</ul>
+<ol>
+<li><strong>Failure simulation:</strong> Inject a network-like error immediately after fake commit and require the retry to gather evidence rather than blindly replay.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Client exceptions after commit do not prove server rollback.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>Record what the offline doubles prove and what they cannot prove.</li>
+<li>Inspect exact call order, parameters, schema, and failure behavior.</li>
+<li>Keep credentials, payloads, and high-cardinality identifiers out of output.</li>
+<li>Require deterministic reruns before considering an exercise complete.</li>
+</ul>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can an applied migration&#x27;s source change without a checksum failure?</li>
+<li>Does every retry receive a fresh session and a complete transaction?</li>
+<li>Can two concurrent runners both execute after the advisory lock and metadata re-check?</li>
+<li>Are data values always outside SQL text?</li>
+<li>Does a lost commit response remain safe to retry?</li>
+<li>Do logs contain request and migration IDs without URLs, parameters, payloads, or raw exception messages?</li>
+<li>Are metric tags bounded?</li>
+<li>Can the service be live but not ready?</li>
+<li>Does incomplete recovery evidence pause instead of guessing?</li>
+<li>Is the live path impossible to point at a differently named database?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Editing an applied migration:</strong> history no longer explains database state. Add a new forward migration.</li>
+<li><strong>Checking metadata before acquiring the lock:</strong> two runners can both see “pending.” Re-check inside the serialized transaction.</li>
+<li><strong>Retrying one failed statement:</strong> PostgreSQL leaves the transaction aborted. Roll back, close, and retry the complete idempotent unit.</li>
+<li><strong>Retrying every exception:</strong> permanent defects become slower and noisier.</li>
+<li><strong>Interpolating backfill values:</strong> migration files are trusted code, but runtime values still belong in Psycopg parameters.</li>
+<li><strong>Using request IDs as metric labels:</strong> cardinality grows forever. Keep them in structured logs.</li>
+<li><strong>Logging exception text:</strong> driver messages may include SQL, data, or connection details. Record a safe type and retain protected diagnostics under an explicit policy.</li>
+<li><strong>Applying migrations in readiness:</strong> probes must observe state, not mutate it.</li>
+<li><strong>Assuming rollback is safer:</strong> reverse DDL or a previous application can be destructive after new-shape writes.</li>
+<li><strong>Testing with SQLite:</strong> it does not reproduce PostgreSQL DDL transactions, SQLSTATEs, locks, or Psycopg binding.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Complete the <a href="bridge-ops-01.html#learner">learner file</a> and fake-backed tests before reviewing the <a href="bridge-ops-01.html#solution-2">reference implementation</a> and <a href="bridge-ops-01.html#solution-1">solution reasoning</a>. Then pair this delivery lab with the PostgreSQL migration foundation and a small application compatibility test.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/professional/lessons/bridge_ops_01_migration_observability.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/lessons/bridge_ops_01_migration_observability.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;BRIDGE-OPS-01: migration delivery and application observability.</span>
+<span> </span>
+<span>Prerequisites: SQL-FOUND-02, Bridge Day 4, Bridge Day 5, and Bridge Day 8.</span>
+<span>Read the companion guide before completing these exercises. This learner file</span>
+<span>does not contact PostgreSQL or call unfinished functions from ``main()``.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Callable, Mapping, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from enum import Enum</span>
+<span>from typing import Protocol</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-ops-01&quot;</span>
+<span>PREREQUISITES = (&quot;sql-found-02&quot;, &quot;bridge-04&quot;, &quot;bridge-05&quot;, &quot;bridge-08&quot;)</span>
+<span>LEVEL = &quot;advanced&quot;</span>
+<span> </span>
+<span> </span>
+<span>class QueryResult(Protocol):</span>
+<span>    &quot;&quot;&quot;Small result boundary shared by a Psycopg adapter and test fakes.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def fetchone(self) -&gt; Sequence[object] | None: ...</span>
+<span> </span>
+<span>    def fetchall(self) -&gt; Sequence[Sequence[object]]: ...</span>
+<span> </span>
+<span> </span>
+<span>class DatabaseSession(Protocol):</span>
+<span>    &quot;&quot;&quot;One transaction-owning database session.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def execute(</span>
+<span>        self,</span>
+<span>        query: str,</span>
+<span>        params: Sequence[object] | None = None,</span>
+<span>    ) -&gt; QueryResult: ...</span>
+<span> </span>
+<span>    def commit(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def rollback(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def close(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class Metrics(Protocol):</span>
+<span>    &quot;&quot;&quot;Low-cardinality counter and timing boundary.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def increment(</span>
+<span>        self,</span>
+<span>        name: str,</span>
+<span>        value: int = 1,</span>
+<span>        *,</span>
+<span>        tags: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; None: ...</span>
+<span> </span>
+<span>    def observe(</span>
+<span>        self,</span>
+<span>        name: str,</span>
+<span>        value: float,</span>
+<span>        *,</span>
+<span>        tags: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class EventLogger(Protocol):</span>
+<span>    &quot;&quot;&quot;Structured-event boundary; fields must already be safe to emit.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def emit(self, event: str, fields: Mapping[str, object]) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class SqlCommand:</span>
+<span>    &quot;&quot;&quot;Trusted SQL structure plus separately bound data values.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    text: str</span>
+<span>    params: tuple[object, ...] = ()</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Migration:</span>
+<span>    &quot;&quot;&quot;One immutable, ordered schema change.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    migration_id: str</span>
+<span>    description: str</span>
+<span>    commands: tuple[SqlCommand, ...]</span>
+<span>    verification: SqlCommand</span>
+<span> </span>
+<span>    @property</span>
+<span>    def checksum(self) -&gt; str:</span>
+<span>        &quot;&quot;&quot;Core implementation: compute a stable checksum over migration identity and content.&quot;&quot;&quot;</span>
+<span> </span>
+<span>        raise NotImplementedError(&quot;serialize immutable migration content and hash it&quot;)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RetryPolicy:</span>
+<span>    max_attempts: int = 3</span>
+<span>    base_delay_seconds: float = 0.05</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class DeliveryResult:</span>
+<span>    applied: tuple[str, ...]</span>
+<span>    skipped: tuple[str, ...]</span>
+<span>    attempts: int</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ReadinessResult:</span>
+<span>    ready: bool</span>
+<span>    current_version: str | None</span>
+<span>    target_version: str | None</span>
+<span>    reasons: tuple[str, ...]</span>
+<span> </span>
+<span> </span>
+<span>class RecoveryDecision(Enum):</span>
+<span>    PAUSE_AND_GATHER_EVIDENCE = &quot;pause-and-gather-evidence&quot;</span>
+<span>    FORWARD_FIX = &quot;forward-fix&quot;</span>
+<span>    ROLLBACK_RELEASE = &quot;rollback-release&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RecoveryEvidence:</span>
+<span>    diagnosis_confirmed: bool</span>
+<span>    migration_committed: bool</span>
+<span>    new_schema_received_writes: bool</span>
+<span>    previous_app_compatible: bool</span>
+<span>    reverse_change_rehearsed: bool</span>
+<span>    forward_fix_rehearsed: bool</span>
+<span> </span>
+<span> </span>
+<span>class RetryableDatabaseError(RuntimeError):</span>
+<span>    &quot;&quot;&quot;Fake-friendly stand-in for a narrowly classified transient failure.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>def redact_fields(fields: Mapping[str, object]) -&gt; dict[str, object]:</span>
+<span>    &quot;&quot;&quot;Core implementation: redact credential-bearing names and URL-shaped values.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;return JSON-safe fields without credentials or payloads&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def plan_pending(</span>
+<span>    migrations: Sequence[Migration],</span>
+<span>    applied_checksums: Mapping[str, str],</span>
+<span>) -&gt; tuple[Migration, ...]:</span>
+<span>    &quot;&quot;&quot;Core implementation: validate order and checksum history, then return pending work.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;reject drift and preserve immutable migration order&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def deliver_migrations(</span>
+<span>    session_factory: Callable[[], DatabaseSession],</span>
+<span>    migrations: Sequence[Migration],</span>
+<span>    *,</span>
+<span>    request_id: str,</span>
+<span>    retry_policy: RetryPolicy,</span>
+<span>    logger: EventLogger,</span>
+<span>    metrics: Metrics,</span>
+<span>    sleep: Callable[[float], None],</span>
+<span>    clock: Callable[[], float],</span>
+<span>) -&gt; DeliveryResult:</span>
+<span>    &quot;&quot;&quot;Core implementation: deliver each migration in a fresh, retryable transaction.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;lock, re-check, execute, verify, record, and commit&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def check_readiness(</span>
+<span>    session_factory: Callable[[], DatabaseSession],</span>
+<span>    migrations: Sequence[Migration],</span>
+<span>) -&gt; ReadinessResult:</span>
+<span>    &quot;&quot;&quot;Core implementation: distinguish process liveness from schema readiness.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;use read-only probes and report missing or drifted versions&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def decide_recovery(evidence: RecoveryEvidence) -&gt; RecoveryDecision:</span>
+<span>    &quot;&quot;&quot;Core implementation: choose only when the required recovery evidence exists.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;prefer a pause over an unevidenced destructive action&quot;)</span>
+<span> </span>
+<span> </span>
+<span># Exercises (answer-free)</span>
+<span># Focus: Deliver immutable ordered PostgreSQL migrations with fake-tested retry/commit</span>
+<span>#    uncertainty, redacted observability, readiness probes, and evidence-driven recovery.</span>
+<span># Assumptions: Each migration has stable identity/content/checksum; every attempt owns a fresh</span>
+<span>#    transaction; optional live work targets only the disposable course database.</span>
+<span># Failure to watch for: Mutable history, retry after uncertain commit without re-checking</span>
+<span>#    metadata, or recovery without complete evidence can corrupt schema state.</span>
+<span># Work in order: predict -&gt; implement -&gt; test -&gt; debug -&gt; extend. Keep official</span>
+<span># answers out of this starter and collect deterministic fake-backed evidence.</span>
+<span># 1. [Validation] Implement `Migration` validation and a stable checksum over identity,</span>
+<span>#    description, command text/parameters, and verification.</span>
+<span>#    Hint: Canonical serialization must distinguish structure and parameter types without</span>
+<span>#    depending on object repr.</span>
+<span># 2. [Redaction] Implement `redact_fields()` for sensitive key names, URL-shaped values,</span>
+<span>#    non-serializable objects, and ordinary scalars.</span>
+<span>#    Hint: Use key classification and safe type conversion; never echo rejected values.</span>
+<span># 3. [Planning] Implement `plan_pending()` with duplicate/order validation, unknown</span>
+<span>#    applied-version rejection, and checksum-drift detection.</span>
+<span>#    Hint: Applied history is immutable and must be a prefix of known ordered migrations.</span>
+<span># 4. [Test double] Build a recording session fake that stores SQL separately from parameter</span>
+<span>#    tuples and never parses PostgreSQL through SQLite.</span>
+<span>#    Hint: Model transactional state and prepared query results explicitly.</span>
+<span># 5. [Delivery] Implement the documented nine-step delivery order and prove rollback/close</span>
+<span>#    happen before injected retry delay.</span>
+<span>#    Hint: One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then</span>
+<span>#    report.</span>
+<span># 6. [Commit uncertainty] Simulate an uncertain commit whose retry sees a matching metadata row</span>
+<span>#    and prove commands are not applied twice.</span>
+<span>#    Hint: Re-check immutable metadata under lock before every attempt.</span>
+<span># 7. [Observability] Add event and metric fakes; require request/migration IDs in logs, exclude</span>
+<span>#    request IDs from metric tags, and prove secrets are absent.</span>
+<span>#    Hint: Logs support correlation; metrics require bounded dimensions.</span>
+<span># 8. [Readiness] Implement read-only readiness for current, pending, drifted, and unreachable</span>
+<span>#    states while keeping liveness database-independent.</span>
+<span>#    Hint: Readiness describes safe traffic acceptance, not process existence.</span>
+<span># 9. [Recovery] Build a scenario table for recovery decisions, including incomplete evidence</span>
+<span>#    that must pause.</span>
+<span>#    Hint: Destructive or forward actions require rehearsed, compatible evidence.</span>
+<span># 10. [Optional integration] After fake tests, run the disposable live lab twice and inspect</span>
+<span>#    migration metadata with a read-only query.</span>
+<span>#    Hint: The second run demonstrates idempotency; cleanup evidence is part of completion.</span>
+<span># 11. [Immutability] Change only SQL whitespace after a migration is applied and decide whether</span>
+<span>#    checksum drift should be accepted.</span>
+<span>#    Hint: A stored checksum is an immutable history contract, not a semantic SQL parser.</span>
+<span># 12. [Concurrency] Model two deployers contending for the same advisory lock and specify</span>
+<span>#    timeout/ownership behavior.</span>
+<span>#    Hint: Only one delivery transaction may make planning decisions at a time.</span>
+<span># 13. [PostgreSQL semantics] Identify which DDL is transactional in PostgreSQL and how</span>
+<span>#    non-transactional commands alter the migration policy.</span>
+<span>#    Hint: Do not assume every administrative statement can share ordinary transaction rollback.</span>
+<span># 14. [Timeouts] Set statement and lock timeouts per attempt without leaking settings to later</span>
+<span>#    pooled work.</span>
+<span>#    Hint: Transaction-local settings should expire with commit/rollback.</span>
+<span># 15. [Telemetry design] Define a bounded migration metric schema and a redaction test for</span>
+<span>#    exception objects and URL-like fields.</span>
+<span>#    Hint: Migration IDs may still become unbounded over years; choose dimensions deliberately.</span>
+<span># 16. [Probe semantics] Distinguish current-but-stale application readiness from database</span>
+<span>#    reachability and migration currency.</span>
+<span>#    Hint: Each probe should answer one operational question.</span>
+<span># 17. [Decision analysis] Compare forward fix and release rollback when the new schema has</span>
+<span>#    already received writes.</span>
+<span>#    Hint: Data written under the new contract can make old code incompatible even if DDL</span>
+<span>#    reversal is possible.</span>
+<span># 18. [Expand-contract] Design a three-release expand/migrate/contract sequence for renaming a</span>
+<span>#    populated column.</span>
+<span>#    Hint: Maintain compatibility while old and new application versions overlap.</span>
+<span># 19. [Cleanup] Prove the optional live lab leaves no table, metadata row, lock, connection, or</span>
+<span>#    credential-bearing output behind.</span>
+<span>#    Hint: A passing mutation test is incomplete without postconditions.</span>
+<span># 20. [Failure simulation] Inject a network-like error immediately after fake commit and require</span>
+<span>#    the retry to gather evidence rather than blindly replay.</span>
+<span>#    Hint: Client exceptions after commit do not prove server rollback.</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    print(&quot;BRIDGE-OPS-01 starter loaded; no database was contacted.&quot;)</span>
+<span>    print(&quot;Implement the orchestration against Protocol-based fakes first.&quot;)</span>
+<span>    print(&quot;Use only DS60_DATABASE_URL and the disposable course database for the live lab.&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/professional/solutions/bridge_ops_01_migration_observability_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/solutions/bridge_ops_01_migration_observability_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-ops-01-solution-reasoning">BRIDGE-OPS-01 — Solution reasoning<a class="heading-anchor" href="#solution-1--bridge-ops-01-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Start with the <a href="bridge-ops-01.html#learner">learner file</a>. The executable reference is <a href="bridge-ops-01.html#solution-2">bridge_ops_01_migration_observability_solution.py</a>.</p>
+<h4 id="solution-1--immutable-history-and-planning">Immutable history and planning<a class="heading-anchor" href="#solution-1--immutable-history-and-planning" aria-label="Link to this section">#</a></h4>
+<p><code>Migration</code> validates an ordered ID, non-empty description, at least one command, and a separate verification query. Its checksum is deterministic JSON over identity, description, command text, bound scalar values, and verification. <code>plan_pending()</code> rejects duplicate or reordered source, database-only IDs, and changed checksums before returning pending versions.</p>
+<p>The checksum is drift detection, not a signature or authorization mechanism. Repository review and release controls decide which migration source is trusted.</p>
+<h4 id="solution-1--parameter-and-identifier-boundaries">Parameter and identifier boundaries<a class="heading-anchor" href="#solution-1--parameter-and-identifier-boundaries" aria-label="Link to this section">#</a></h4>
+<p><code>SqlCommand</code> stores SQL text and a parameter tuple separately. The reference checks that every <code>%s</code> has one value, then the database adapter calls <code>execute(text, params)</code>. The metadata lookup, metadata insert, backfill value, and verification filters all use this boundary.</p>
+<p>Schema, table, and column names are immutable trusted migration source. Psycopg cannot bind identifiers as values. A product that permits dynamic identifiers needs an allowlist plus <code>psycopg.sql.Identifier</code>; Jinja, f-strings, and manual quoting are not parameter binding.</p>
+<h4 id="solution-1--transaction-retry-and-concurrency-boundaries">Transaction, retry, and concurrency boundaries<a class="heading-anchor" href="#solution-1--transaction-retry-and-concurrency-boundaries" aria-label="Link to this section">#</a></h4>
+<p>Each attempt opens a new session, obtains a transaction-scoped advisory lock, re-reads the metadata row, applies commands, verifies, records metadata, and commits. Failures roll back and close before the injected sleeper runs. Only the fake transient exception, selected transaction/lock SQLSTATEs, and connection-class SQLSTATEs retry.</p>
+<p>The advisory lock prevents two well-behaved course runners from applying the same version concurrently. The metadata primary key remains a final invariant. Production migration tools normally supply their own lock and history table; do not stack independent lock schemes without understanding their order.</p>
+<p>An uncertain commit is safe because schema change and metadata row commit in the same transaction. A new attempt sees the matching checksum after acquiring the lock and skips. This is stronger than making every DDL statement use <code>IF NOT EXISTS</code>, which can hide an unexpected object shape.</p>
+<h4 id="solution-1--observability-and-probes">Observability and probes<a class="heading-anchor" href="#solution-1--observability-and-probes" aria-label="Link to this section">#</a></h4>
+<p><code>JsonEventLogger</code> emits deterministic JSON. Callers provide request ID, migration ID, attempt, duration, outcome, retry flag, and exception type. <code>redact_fields()</code> replaces sensitive key names and credential-bearing URL shapes. Orchestration never passes statement parameters or exception messages in the first place; redaction is a second boundary, not permission to log everything.</p>
+<p>Metrics use migration ID and a bounded outcome label. Request IDs remain in logs because they would create high-cardinality metrics.</p>
+<p><code>liveness()</code> is process-local. <code>check_readiness()</code> uses only reads, checks the metadata table, and reuses <code>plan_pending()</code> for missing or drifted versions. It reports the exception type on probe failure without leaking its message.</p>
+<h4 id="solution-1--recovery-reasoning">Recovery reasoning<a class="heading-anchor" href="#solution-1--recovery-reasoning" aria-label="Link to this section">#</a></h4>
+<p><code>decide_recovery()</code> refuses to choose before diagnosis is confirmed. If committed schema has received writes, it selects a forward fix only when that path was rehearsed. It selects release rollback only when the previous application is compatible and reversal was rehearsed. All unsupported combinations pause.</p>
+<p>The result is evidence organization, never an automatic migration command. Operators still assess data loss, locks, traffic, backups, ownership, and the incident&#x27;s actual failure mode.</p>
+<h4 id="solution-1--optional-live-adapter">Optional live adapter<a class="heading-anchor" href="#solution-1--optional-live-adapter" aria-label="Link to this section">#</a></h4>
+<p>The default module imports no Psycopg code. <code>run_live()</code> imports Psycopg 3 at the optional boundary and creates one connection per attempted transaction. <code>require_course_database_url()</code> reads only <code>DS60_DATABASE_URL</code>, validates the PostgreSQL scheme and exact disposable database name, and never returns the URL to logs or output.</p>
+<p>The two example migrations create a lab table and then make an additive change. Their source SQL is intentionally not made superficially idempotent; the metadata transaction supplies idempotency and exposes partial or drifted state instead of concealing it.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A SHA-256 content checksum is portable and easy to audit, but it treats semantically harmless formatting edits as drift. That is intentional for immutable migration history.</li>
+<li>A single advisory-lock key serializes this course&#x27;s migration runner. Organizations need a collision-safe lock convention and one recognized migration owner.</li>
+<li>Connection-class errors retry because metadata makes an uncertain commit idempotent. A general application transaction may not have that property.</li>
+<li>Exception types are safe and low-cardinality but less diagnostic than a protected trace store. Rich diagnostics need explicit access, retention, and redaction policy.</li>
+<li><code>check_readiness()</code> opens a database connection per call. Real services often cache bounded state or separate startup readiness from high-frequency probes.</li>
+<li>Requiring an exact database name is a course safety rail, not a general production authorization control.</li>
+<li>The recovery decision model is intentionally conservative. It cannot replace tested backups, change review, ownership, or incident command.</li>
+</ul>
+<p>Add tests for checksum drift, concurrent re-check behavior, final-attempt failure, commit uncertainty, rollback/close failures, sensitive telemetry, readiness drift, and every recovery branch before adapting this pattern.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_ops_01_migration_observability_solution.py</code>.</p>
+<p><strong>Shared failure rule:</strong> Mutable history, retry after uncertain commit without re-checking metadata, or recovery without complete evidence can corrupt schema state.</p>
+<h5 id="solution-1--exercise-1-validation">Exercise 1 — Validation<a class="heading-anchor" href="#solution-1--exercise-1-validation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>Migration</code> validation and a stable checksum over identity, description, command text/parameters, and verification.</p>
+<p><strong>Approach:</strong> Validate non-blank ordered ID, description, at least one command, and verification; serialize fields into a deterministic JSON-compatible form and hash with SHA-256.</p>
+<p><strong>Why:</strong> Canonical serialization must distinguish structure and parameter types without depending on object repr.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-2-redaction">Exercise 2 — Redaction<a class="heading-anchor" href="#solution-1--exercise-2-redaction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>redact_fields()</code> for sensitive key names, URL-shaped values, non-serializable objects, and ordinary scalars.</p>
+<p><strong>Approach:</strong> Replace credential-bearing keys/URL values with a marker, retain bounded JSON scalars, convert unsupported objects to safe type labels, and recursively avoid payload dumps.</p>
+<p><strong>Why:</strong> Use key classification and safe type conversion; never echo rejected values.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-3-planning">Exercise 3 — Planning<a class="heading-anchor" href="#solution-1--exercise-3-planning" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>plan_pending()</code> with duplicate/order validation, unknown applied-version rejection, and checksum-drift detection.</p>
+<p><strong>Approach:</strong> Validate unique increasing IDs, ensure every applied ID exists and matches checksum, reject gaps/unknown versions, then return unapplied migrations in canonical order.</p>
+<p><strong>Why:</strong> Applied history is immutable and must be a prefix of known ordered migrations.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-4-test-double">Exercise 4 — Test double<a class="heading-anchor" href="#solution-1--exercise-4-test-double" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Build a recording session fake that stores SQL separately from parameter tuples and never parses PostgreSQL through SQLite.</p>
+<p><strong>Approach:</strong> Record execute calls, queue deterministic result objects, and track commit/rollback/close events. Test SQL dialect behavior only in optional PostgreSQL integration.</p>
+<p><strong>Why:</strong> Model transactional state and prepared query results explicitly.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-5-delivery">Exercise 5 — Delivery<a class="heading-anchor" href="#solution-1--exercise-5-delivery" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement the documented nine-step delivery order and prove rollback/close happen before injected retry delay.</p>
+<p><strong>Approach:</strong> Encode the order directly, classify only retryable failures, roll back and close in the attempt&#x27;s exception path, and let the outer retry call its fake sleeper afterward.</p>
+<p><strong>Why:</strong> One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then report.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-6-commit-uncertainty">Exercise 6 — Commit uncertainty<a class="heading-anchor" href="#solution-1--exercise-6-commit-uncertainty" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Simulate an uncertain commit whose retry sees a matching metadata row and prove commands are not applied twice.</p>
+<p><strong>Approach:</strong> On retry, read the recorded checksum; a match means the first attempt committed, so mark it skipped/applied evidence without re-running commands. Drift must fail closed.</p>
+<p><strong>Why:</strong> Re-check immutable metadata under lock before every attempt.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-7-observability">Exercise 7 — Observability<a class="heading-anchor" href="#solution-1--exercise-7-observability" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add event and metric fakes; require request/migration IDs in logs, exclude request IDs from metric tags, and prove secrets are absent.</p>
+<p><strong>Approach:</strong> Emit redacted structured events with correlation IDs, count/observe with fixed tags such as outcome/migration class, and test sentinel secrets across every field/message.</p>
+<p><strong>Why:</strong> Logs support correlation; metrics require bounded dimensions.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-8-readiness">Exercise 8 — Readiness<a class="heading-anchor" href="#solution-1--exercise-8-readiness" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement read-only readiness for current, pending, drifted, and unreachable states while keeping liveness database-independent.</p>
+<p><strong>Approach:</strong> Probe metadata without writes, compare current/target/checksums, return bounded reasons, and map connection failure to not-ready. Liveness remains a local process response.</p>
+<p><strong>Why:</strong> Readiness describes safe traffic acceptance, not process existence.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-9-recovery">Exercise 9 — Recovery<a class="heading-anchor" href="#solution-1--exercise-9-recovery" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Build a scenario table for recovery decisions, including incomplete evidence that must pause.</p>
+<p><strong>Approach:</strong> Return pause when diagnosis/state is incomplete; choose forward fix only with confirmed/rehearsed safe progress; choose rollback release only when prior compatibility and rollback evidence are established.</p>
+<p><strong>Why:</strong> Destructive or forward actions require rehearsed, compatible evidence.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-10-optional-integration">Exercise 10 — Optional integration<a class="heading-anchor" href="#solution-1--exercise-10-optional-integration" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> After fake tests, run the disposable live lab twice and inspect migration metadata with a read-only query.</p>
+<p><strong>Approach:</strong> Gate on environment/opt-in, parameterize values, run against the course schema, assert first applied/second skipped plus matching checksum, then remove lab objects through the documented rollback-safe cleanup.</p>
+<p><strong>Why:</strong> The second run demonstrates idempotency; cleanup evidence is part of completion.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-11-immutability">Exercise 11 — Immutability<a class="heading-anchor" href="#solution-1--exercise-11-immutability" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Change only SQL whitespace after a migration is applied and decide whether checksum drift should be accepted.</p>
+<p><strong>Approach:</strong> The reference treats any serialized content change as drift. Create a new migration for intentional changes; do not normalize arbitrary SQL in a way that can hide meaningful edits.</p>
+<p><strong>Why:</strong> A stored checksum is an immutable history contract, not a semantic SQL parser.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-12-concurrency">Exercise 12 — Concurrency<a class="heading-anchor" href="#solution-1--exercise-12-concurrency" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Model two deployers contending for the same advisory lock and specify timeout/ownership behavior.</p>
+<p><strong>Approach:</strong> Acquire a stable namespaced advisory transaction lock, let the second wait or fail under a configured lock timeout, and re-plan after acquisition rather than using stale pre-lock state.</p>
+<p><strong>Why:</strong> Only one delivery transaction may make planning decisions at a time.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-13-postgresql-semantics">Exercise 13 — PostgreSQL semantics<a class="heading-anchor" href="#solution-1--exercise-13-postgresql-semantics" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Identify which DDL is transactional in PostgreSQL and how non-transactional commands alter the migration policy.</p>
+<p><strong>Approach:</strong> Most PostgreSQL DDL is transactional, but commands such as <code>CREATE INDEX CONCURRENTLY</code> have restrictions. Classify or forbid such commands in the standard runner and use a separately designed/rehearsed workflow.</p>
+<p><strong>Why:</strong> Do not assume every administrative statement can share ordinary transaction rollback.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-14-timeouts">Exercise 14 — Timeouts<a class="heading-anchor" href="#solution-1--exercise-14-timeouts" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Set statement and lock timeouts per attempt without leaking settings to later pooled work.</p>
+<p><strong>Approach:</strong> Issue parameter-safe <code>SET LOCAL</code> or trusted constant settings after beginning the transaction, test their order before commands, and rely on transaction end to restore defaults.</p>
+<p><strong>Why:</strong> Transaction-local settings should expire with commit/rollback.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-15-telemetry-design">Exercise 15 — Telemetry design<a class="heading-anchor" href="#solution-1--exercise-15-telemetry-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define a bounded migration metric schema and a redaction test for exception objects and URL-like fields.</p>
+<p><strong>Approach:</strong> Prefer outcome/stage/error-class tags and numeric duration/attempts; keep request/migration IDs in logs unless the migration set is explicitly bounded; sanitize exception details before emission.</p>
+<p><strong>Why:</strong> Migration IDs may still become unbounded over years; choose dimensions deliberately.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-16-probe-semantics">Exercise 16 — Probe semantics<a class="heading-anchor" href="#solution-1--exercise-16-probe-semantics" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Distinguish current-but-stale application readiness from database reachability and migration currency.</p>
+<p><strong>Approach:</strong> Reachability proves a read connection; schema readiness proves expected migration/checksum state; application freshness/version compatibility is separate evidence. Report reasons independently.</p>
+<p><strong>Why:</strong> Each probe should answer one operational question.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-17-decision-analysis">Exercise 17 — Decision analysis<a class="heading-anchor" href="#solution-1--exercise-17-decision-analysis" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compare forward fix and release rollback when the new schema has already received writes.</p>
+<p><strong>Approach:</strong> Default to pause unless compatibility and data transformation evidence exists. Forward fix is often safer after new writes; rollback release requires proof the old app can read/write the evolved data.</p>
+<p><strong>Why:</strong> Data written under the new contract can make old code incompatible even if DDL reversal is possible.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-18-expand-contract">Exercise 18 — Expand-contract<a class="heading-anchor" href="#solution-1--exercise-18-expand-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design a three-release expand/migrate/contract sequence for renaming a populated column.</p>
+<p><strong>Approach:</strong> Add the new nullable column, dual-write/backfill/verify, switch readers and enforce constraints, then remove the old column only after compatibility and rollback windows close.</p>
+<p><strong>Why:</strong> Maintain compatibility while old and new application versions overlap.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-19-cleanup">Exercise 19 — Cleanup<a class="heading-anchor" href="#solution-1--exercise-19-cleanup" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Prove the optional live lab leaves no table, metadata row, lock, connection, or credential-bearing output behind.</p>
+<p><strong>Approach:</strong> Run read-only catalog checks after cleanup, close every session, verify lock absence, clear captured output, and scan logs/notebook/test artifacts for URL or secret sentinels.</p>
+<p><strong>Why:</strong> A passing mutation test is incomplete without postconditions.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-20-failure-simulation">Exercise 20 — Failure simulation<a class="heading-anchor" href="#solution-1--exercise-20-failure-simulation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Inject a network-like error immediately after fake commit and require the retry to gather evidence rather than blindly replay.</p>
+<p><strong>Approach:</strong> Mark the fake metadata committed, raise to the client, then on retry re-lock/re-read and accept only the matching checksum. A missing or mismatched row must not be guessed into success.</p>
+<p><strong>Why:</strong> Client exceptions after commit do not prove server rollback.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/professional/solutions/bridge_ops_01_migration_observability_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/solutions/bridge_ops_01_migration_observability_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;BRIDGE-OPS-01 reference: safe, observable, retryable migration delivery.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import argparse</span>
+<span>import hashlib</span>
+<span>import json</span>
+<span>import logging</span>
+<span>import os</span>
+<span>import re</span>
+<span>import time</span>
+<span>from collections.abc import Callable, Mapping, Sequence</span>
+<span>from contextlib import suppress</span>
+<span>from dataclasses import dataclass</span>
+<span>from enum import Enum</span>
+<span>from importlib import import_module</span>
+<span>from typing import Protocol, cast</span>
+<span>from urllib.parse import unquote, urlsplit</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-ops-01&quot;</span>
+<span>PREREQUISITES = (&quot;sql-found-02&quot;, &quot;bridge-04&quot;, &quot;bridge-05&quot;, &quot;bridge-08&quot;)</span>
+<span>LEVEL = &quot;advanced&quot;</span>
+<span> </span>
+<span>MIGRATION_ID = re.compile(r&quot;^\d{8}_\d{3}_[a-z][a-z0-9_]*$&quot;)</span>
+<span>RETRYABLE_SQLSTATES = frozenset({&quot;40001&quot;, &quot;40P01&quot;, &quot;55P03&quot;})</span>
+<span>SENSITIVE_KEY_PARTS = (</span>
+<span>    &quot;credential&quot;,</span>
+<span>    &quot;database_url&quot;,</span>
+<span>    &quot;dsn&quot;,</span>
+<span>    &quot;password&quot;,</span>
+<span>    &quot;payload&quot;,</span>
+<span>    &quot;secret&quot;,</span>
+<span>    &quot;token&quot;,</span>
+<span>)</span>
+<span> </span>
+<span>CREATE_METADATA_SQL = &quot;&quot;&quot;</span>
+<span>CREATE TABLE IF NOT EXISTS training.ds60_schema_migrations (</span>
+<span>    migration_id text PRIMARY KEY,</span>
+<span>    checksum text NOT NULL,</span>
+<span>    request_id text NOT NULL,</span>
+<span>    applied_at timestamptz NOT NULL DEFAULT clock_timestamp()</span>
+<span>)</span>
+<span>&quot;&quot;&quot;.strip()</span>
+<span> </span>
+<span>LOCK_SQL = &quot;SELECT pg_advisory_xact_lock(%s)&quot;</span>
+<span>MIGRATION_LOCK_KEY = 6_060_170_001</span>
+<span>READ_ONE_SQL = &quot;&quot;&quot;</span>
+<span>SELECT checksum</span>
+<span>FROM training.ds60_schema_migrations</span>
+<span>WHERE migration_id = %s</span>
+<span>&quot;&quot;&quot;.strip()</span>
+<span>READ_ALL_SQL = &quot;&quot;&quot;</span>
+<span>SELECT migration_id, checksum</span>
+<span>FROM training.ds60_schema_migrations</span>
+<span>ORDER BY migration_id</span>
+<span>&quot;&quot;&quot;.strip()</span>
+<span>RECORD_MIGRATION_SQL = &quot;&quot;&quot;</span>
+<span>INSERT INTO training.ds60_schema_migrations (migration_id, checksum, request_id)</span>
+<span>VALUES (%s, %s, %s)</span>
+<span>&quot;&quot;&quot;.strip()</span>
+<span> </span>
+<span> </span>
+<span>class QueryResult(Protocol):</span>
+<span>    def fetchone(self) -&gt; Sequence[object] | None: ...</span>
+<span> </span>
+<span>    def fetchall(self) -&gt; Sequence[Sequence[object]]: ...</span>
+<span> </span>
+<span> </span>
+<span>class DatabaseSession(Protocol):</span>
+<span>    def execute(</span>
+<span>        self,</span>
+<span>        query: str,</span>
+<span>        params: Sequence[object] | None = None,</span>
+<span>    ) -&gt; QueryResult: ...</span>
+<span> </span>
+<span>    def commit(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def rollback(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def close(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class Metrics(Protocol):</span>
+<span>    def increment(</span>
+<span>        self,</span>
+<span>        name: str,</span>
+<span>        value: int = 1,</span>
+<span>        *,</span>
+<span>        tags: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; None: ...</span>
+<span> </span>
+<span>    def observe(</span>
+<span>        self,</span>
+<span>        name: str,</span>
+<span>        value: float,</span>
+<span>        *,</span>
+<span>        tags: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class EventLogger(Protocol):</span>
+<span>    def emit(self, event: str, fields: Mapping[str, object]) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class SqlCommand:</span>
+<span>    &quot;&quot;&quot;Trusted SQL structure plus separately bound data values.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    text: str</span>
+<span>    params: tuple[object, ...] = ()</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if not self.text.strip():</span>
+<span>            raise ValueError(&quot;SQL command text cannot be blank&quot;)</span>
+<span>        if self.text.count(&quot;%s&quot;) != len(self.params):</span>
+<span>            raise ValueError(&quot;each SQL value placeholder must have one separate parameter&quot;)</span>
+<span>        supported = (str, int, float, bool, type(None))</span>
+<span>        if any(not isinstance(value, supported) for value in self.params):</span>
+<span>            raise TypeError(&quot;migration parameters must use stable JSON scalar values&quot;)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Migration:</span>
+<span>    &quot;&quot;&quot;One immutable, ordered schema change and its verification query.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    migration_id: str</span>
+<span>    description: str</span>
+<span>    commands: tuple[SqlCommand, ...]</span>
+<span>    verification: SqlCommand</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if not MIGRATION_ID.fullmatch(self.migration_id):</span>
+<span>            raise ValueError(&quot;migration_id must look like YYYYMMDD_NNN_lowercase_description&quot;)</span>
+<span>        if not self.description.strip():</span>
+<span>            raise ValueError(&quot;migration description cannot be blank&quot;)</span>
+<span>        if not self.commands:</span>
+<span>            raise ValueError(&quot;a migration needs at least one command&quot;)</span>
+<span> </span>
+<span>    @property</span>
+<span>    def checksum(self) -&gt; str:</span>
+<span>        &quot;&quot;&quot;Hash immutable content so an applied migration cannot change silently.&quot;&quot;&quot;</span>
+<span> </span>
+<span>        content = {</span>
+<span>            &quot;commands&quot;: [</span>
+<span>                {&quot;params&quot;: list(command.params), &quot;text&quot;: command.text} for command in self.commands</span>
+<span>            ],</span>
+<span>            &quot;description&quot;: self.description,</span>
+<span>            &quot;migration_id&quot;: self.migration_id,</span>
+<span>            &quot;verification&quot;: {</span>
+<span>                &quot;params&quot;: list(self.verification.params),</span>
+<span>                &quot;text&quot;: self.verification.text,</span>
+<span>            },</span>
+<span>        }</span>
+<span>        encoded = json.dumps(</span>
+<span>            content,</span>
+<span>            ensure_ascii=True,</span>
+<span>            separators=(&quot;,&quot;, &quot;:&quot;),</span>
+<span>            sort_keys=True,</span>
+<span>        ).encode(&quot;utf-8&quot;)</span>
+<span>        return hashlib.sha256(encoded).hexdigest()</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RetryPolicy:</span>
+<span>    max_attempts: int = 3</span>
+<span>    base_delay_seconds: float = 0.05</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if self.max_attempts &lt; 1:</span>
+<span>            raise ValueError(&quot;max_attempts must be at least 1&quot;)</span>
+<span>        if self.base_delay_seconds &lt; 0:</span>
+<span>            raise ValueError(&quot;base_delay_seconds cannot be negative&quot;)</span>
+<span> </span>
+<span>    def delay_after(self, failed_attempt: int) -&gt; float:</span>
+<span>        return self.base_delay_seconds * (2.0 ** (failed_attempt - 1))</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class DeliveryResult:</span>
+<span>    applied: tuple[str, ...]</span>
+<span>    skipped: tuple[str, ...]</span>
+<span>    attempts: int</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ReadinessResult:</span>
+<span>    ready: bool</span>
+<span>    current_version: str | None</span>
+<span>    target_version: str | None</span>
+<span>    reasons: tuple[str, ...]</span>
+<span> </span>
+<span> </span>
+<span>class RecoveryDecision(Enum):</span>
+<span>    PAUSE_AND_GATHER_EVIDENCE = &quot;pause-and-gather-evidence&quot;</span>
+<span>    FORWARD_FIX = &quot;forward-fix&quot;</span>
+<span>    ROLLBACK_RELEASE = &quot;rollback-release&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RecoveryEvidence:</span>
+<span>    diagnosis_confirmed: bool</span>
+<span>    migration_committed: bool</span>
+<span>    new_schema_received_writes: bool</span>
+<span>    previous_app_compatible: bool</span>
+<span>    reverse_change_rehearsed: bool</span>
+<span>    forward_fix_rehearsed: bool</span>
+<span> </span>
+<span> </span>
+<span>class RetryableDatabaseError(RuntimeError):</span>
+<span>    &quot;&quot;&quot;Fake-friendly stand-in for a narrowly classified transient failure.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>class JsonEventLogger:</span>
+<span>    &quot;&quot;&quot;Write one redacted, deterministic JSON object per event.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def __init__(self, logger: logging.Logger | None = None) -&gt; None:</span>
+<span>        self._logger = logger or logging.getLogger(__name__)</span>
+<span> </span>
+<span>    def emit(self, event: str, fields: Mapping[str, object]) -&gt; None:</span>
+<span>        payload = {&quot;event&quot;: event, **redact_fields(fields)}</span>
+<span>        self._logger.info(</span>
+<span>            json.dumps(payload, ensure_ascii=True, separators=(&quot;,&quot;, &quot;:&quot;), sort_keys=True)</span>
+<span>        )</span>
+<span> </span>
+<span> </span>
+<span>class NullMetrics:</span>
+<span>    &quot;&quot;&quot;No-op adapter for the optional command-line demonstration.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def increment(</span>
+<span>        self,</span>
+<span>        name: str,</span>
+<span>        value: int = 1,</span>
+<span>        *,</span>
+<span>        tags: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; None:</span>
+<span>        del name, value, tags</span>
+<span> </span>
+<span>    def observe(</span>
+<span>        self,</span>
+<span>        name: str,</span>
+<span>        value: float,</span>
+<span>        *,</span>
+<span>        tags: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; None:</span>
+<span>        del name, value, tags</span>
+<span> </span>
+<span> </span>
+<span>def redact_fields(fields: Mapping[str, object]) -&gt; dict[str, object]:</span>
+<span>    &quot;&quot;&quot;Return JSON-safe telemetry fields without credential-bearing content.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    safe: dict[str, object] = {}</span>
+<span>    for key, value in fields.items():</span>
+<span>        normalized_key = key.casefold()</span>
+<span>        key_is_sensitive = any(part in normalized_key for part in SENSITIVE_KEY_PARTS)</span>
+<span>        value_looks_like_url = isinstance(value, str) and &quot;://&quot; in value and &quot;@&quot; in value</span>
+<span>        if key_is_sensitive or value_looks_like_url:</span>
+<span>            safe[key] = &quot;[REDACTED]&quot;</span>
+<span>        elif value is None or isinstance(value, (str, int, float, bool)):</span>
+<span>            safe[key] = value</span>
+<span>        else:</span>
+<span>            safe[key] = f&quot;&lt;{type(value).__name__}&gt;&quot;</span>
+<span>    return safe</span>
+<span> </span>
+<span> </span>
+<span>def _validate_migration_order(migrations: Sequence[Migration]) -&gt; None:</span>
+<span>    identifiers = [migration.migration_id for migration in migrations]</span>
+<span>    if len(identifiers) != len(set(identifiers)):</span>
+<span>        raise ValueError(&quot;migration IDs must be unique&quot;)</span>
+<span>    if identifiers != sorted(identifiers):</span>
+<span>        raise ValueError(&quot;migrations must be supplied in immutable ID order&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def plan_pending(</span>
+<span>    migrations: Sequence[Migration],</span>
+<span>    applied_checksums: Mapping[str, str],</span>
+<span>) -&gt; tuple[Migration, ...]:</span>
+<span>    &quot;&quot;&quot;Reject checksum drift and return unapplied migrations in ID order.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    _validate_migration_order(migrations)</span>
+<span>    known = {migration.migration_id: migration for migration in migrations}</span>
+<span>    unknown_applied = sorted(set(applied_checksums) - set(known))</span>
+<span>    if unknown_applied:</span>
+<span>        raise ValueError(f&quot;database contains unknown migration IDs: {unknown_applied}&quot;)</span>
+<span> </span>
+<span>    pending: list[Migration] = []</span>
+<span>    for migration in migrations:</span>
+<span>        applied_checksum = applied_checksums.get(migration.migration_id)</span>
+<span>        if applied_checksum is None:</span>
+<span>            pending.append(migration)</span>
+<span>        elif applied_checksum != migration.checksum:</span>
+<span>            raise ValueError(f&quot;checksum drift detected for {migration.migration_id}&quot;)</span>
+<span>    return tuple(pending)</span>
+<span> </span>
+<span> </span>
+<span>def is_retryable_database_error(error: Exception) -&gt; bool:</span>
+<span>    &quot;&quot;&quot;Classify only explicit transient failures and selected PostgreSQL states.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if isinstance(error, RetryableDatabaseError):</span>
+<span>        return True</span>
+<span>    sqlstate = getattr(error, &quot;sqlstate&quot;, None)</span>
+<span>    if not isinstance(sqlstate, str):</span>
+<span>        return False</span>
+<span>    return sqlstate in RETRYABLE_SQLSTATES or sqlstate.startswith(&quot;08&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def _safe_rollback(</span>
+<span>    session: DatabaseSession, logger: EventLogger, fields: Mapping[str, object]</span>
+<span>) -&gt; None:</span>
+<span>    try:</span>
+<span>        session.rollback()</span>
+<span>    except Exception as error:</span>
+<span>        logger.emit(</span>
+<span>            &quot;migration.rollback_failed&quot;,</span>
+<span>            {**fields, &quot;error_type&quot;: type(error).__name__},</span>
+<span>        )</span>
+<span> </span>
+<span> </span>
+<span>def _safe_close(</span>
+<span>    session: DatabaseSession, logger: EventLogger, fields: Mapping[str, object]</span>
+<span>) -&gt; None:</span>
+<span>    try:</span>
+<span>        session.close()</span>
+<span>    except Exception as error:</span>
+<span>        logger.emit(</span>
+<span>            &quot;migration.close_failed&quot;,</span>
+<span>            {**fields, &quot;error_type&quot;: type(error).__name__},</span>
+<span>        )</span>
+<span> </span>
+<span> </span>
+<span>def _deliver_one(</span>
+<span>    session_factory: Callable[[], DatabaseSession],</span>
+<span>    migration: Migration,</span>
+<span>    *,</span>
+<span>    request_id: str,</span>
+<span>    retry_policy: RetryPolicy,</span>
+<span>    logger: EventLogger,</span>
+<span>    metrics: Metrics,</span>
+<span>    sleep: Callable[[float], None],</span>
+<span>    clock: Callable[[], float],</span>
+<span>) -&gt; tuple[bool, int]:</span>
+<span>    started = clock()</span>
+<span>    base_fields = {&quot;migration_id&quot;: migration.migration_id, &quot;request_id&quot;: request_id}</span>
+<span>    tags = {&quot;migration_id&quot;: migration.migration_id}</span>
+<span> </span>
+<span>    for attempt in range(1, retry_policy.max_attempts + 1):</span>
+<span>        session = session_factory()</span>
+<span>        delay: float | None = None</span>
+<span>        attempt_fields = {**base_fields, &quot;attempt&quot;: attempt}</span>
+<span>        metrics.increment(&quot;migration_attempts_total&quot;, tags=tags)</span>
+<span>        logger.emit(&quot;migration.attempt_started&quot;, attempt_fields)</span>
+<span> </span>
+<span>        try:</span>
+<span>            session.execute(LOCK_SQL, (MIGRATION_LOCK_KEY,))</span>
+<span>            existing = session.execute(READ_ONE_SQL, (migration.migration_id,)).fetchone()</span>
+<span>            if existing is not None:</span>
+<span>                existing_checksum = str(existing[0])</span>
+<span>                if existing_checksum != migration.checksum:</span>
+<span>                    raise ValueError(f&quot;checksum drift detected for {migration.migration_id}&quot;)</span>
+<span>                session.commit()</span>
+<span>                metrics.increment(</span>
+<span>                    &quot;migration_outcomes_total&quot;,</span>
+<span>                    tags={**tags, &quot;outcome&quot;: &quot;skipped&quot;},</span>
+<span>                )</span>
+<span>                logger.emit(&quot;migration.already_applied&quot;, attempt_fields)</span>
+<span>                return False, attempt</span>
+<span> </span>
+<span>            for command in migration.commands:</span>
+<span>                session.execute(command.text, command.params)</span>
+<span> </span>
+<span>            verification = session.execute(</span>
+<span>                migration.verification.text,</span>
+<span>                migration.verification.params,</span>
+<span>            ).fetchone()</span>
+<span>            if verification is None or not bool(verification[0]):</span>
+<span>                raise ValueError(&quot;migration verification did not return true&quot;)</span>
+<span> </span>
+<span>            session.execute(</span>
+<span>                RECORD_MIGRATION_SQL,</span>
+<span>                (migration.migration_id, migration.checksum, request_id),</span>
+<span>            )</span>
+<span>            session.commit()</span>
+<span>            duration = max(0.0, clock() - started)</span>
+<span>            metrics.increment(</span>
+<span>                &quot;migration_outcomes_total&quot;,</span>
+<span>                tags={**tags, &quot;outcome&quot;: &quot;applied&quot;},</span>
+<span>            )</span>
+<span>            metrics.observe(&quot;migration_duration_seconds&quot;, duration, tags=tags)</span>
+<span>            logger.emit(</span>
+<span>                &quot;migration.applied&quot;,</span>
+<span>                {**attempt_fields, &quot;duration_seconds&quot;: duration},</span>
+<span>            )</span>
+<span>            return True, attempt</span>
+<span>        except Exception as error:</span>
+<span>            _safe_rollback(session, logger, attempt_fields)</span>
+<span>            retry = is_retryable_database_error(error) and attempt &lt; retry_policy.max_attempts</span>
+<span>            outcome = &quot;retrying&quot; if retry else &quot;failed&quot;</span>
+<span>            metrics.increment(</span>
+<span>                &quot;migration_outcomes_total&quot;,</span>
+<span>                tags={**tags, &quot;outcome&quot;: outcome},</span>
+<span>            )</span>
+<span>            logger.emit(</span>
+<span>                &quot;migration.attempt_failed&quot;,</span>
+<span>                {</span>
+<span>                    **attempt_fields,</span>
+<span>                    &quot;error_type&quot;: type(error).__name__,</span>
+<span>                    &quot;retrying&quot;: retry,</span>
+<span>                },</span>
+<span>            )</span>
+<span>            if not retry:</span>
+<span>                raise</span>
+<span>            delay = retry_policy.delay_after(attempt)</span>
+<span>        finally:</span>
+<span>            _safe_close(session, logger, attempt_fields)</span>
+<span> </span>
+<span>        if delay is not None:</span>
+<span>            sleep(delay)</span>
+<span> </span>
+<span>    raise AssertionError(&quot;migration retry loop exhausted without returning or raising&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def _bootstrap_metadata(</span>
+<span>    session_factory: Callable[[], DatabaseSession],</span>
+<span>    *,</span>
+<span>    request_id: str,</span>
+<span>    logger: EventLogger,</span>
+<span>) -&gt; None:</span>
+<span>    session = session_factory()</span>
+<span>    fields = {&quot;request_id&quot;: request_id}</span>
+<span>    try:</span>
+<span>        session.execute(CREATE_METADATA_SQL)</span>
+<span>        session.commit()</span>
+<span>    except Exception:</span>
+<span>        _safe_rollback(session, logger, fields)</span>
+<span>        raise</span>
+<span>    finally:</span>
+<span>        _safe_close(session, logger, fields)</span>
+<span> </span>
+<span> </span>
+<span>def deliver_migrations(</span>
+<span>    session_factory: Callable[[], DatabaseSession],</span>
+<span>    migrations: Sequence[Migration],</span>
+<span>    *,</span>
+<span>    request_id: str,</span>
+<span>    retry_policy: RetryPolicy | None = None,</span>
+<span>    logger: EventLogger,</span>
+<span>    metrics: Metrics,</span>
+<span>    sleep: Callable[[float], None] = time.sleep,</span>
+<span>    clock: Callable[[], float] = time.monotonic,</span>
+<span>) -&gt; DeliveryResult:</span>
+<span>    &quot;&quot;&quot;Apply ordered migrations with fresh transactions and bounded retries.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if not request_id.strip():</span>
+<span>        raise ValueError(&quot;request_id cannot be blank&quot;)</span>
+<span>    if retry_policy is None:</span>
+<span>        retry_policy = RetryPolicy()</span>
+<span>    _validate_migration_order(migrations)</span>
+<span>    _bootstrap_metadata(session_factory, request_id=request_id, logger=logger)</span>
+<span> </span>
+<span>    applied: list[str] = []</span>
+<span>    skipped: list[str] = []</span>
+<span>    attempts = 0</span>
+<span>    for migration in migrations:</span>
+<span>        was_applied, used_attempts = _deliver_one(</span>
+<span>            session_factory,</span>
+<span>            migration,</span>
+<span>            request_id=request_id,</span>
+<span>            retry_policy=retry_policy,</span>
+<span>            logger=logger,</span>
+<span>            metrics=metrics,</span>
+<span>            sleep=sleep,</span>
+<span>            clock=clock,</span>
+<span>        )</span>
+<span>        attempts += used_attempts</span>
+<span>        target = applied if was_applied else skipped</span>
+<span>        target.append(migration.migration_id)</span>
+<span>    return DeliveryResult(tuple(applied), tuple(skipped), attempts)</span>
+<span> </span>
+<span> </span>
+<span>def liveness() -&gt; Mapping[str, str]:</span>
+<span>    &quot;&quot;&quot;Report that the process can serve a probe without touching PostgreSQL.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    return {&quot;status&quot;: &quot;healthy&quot;}</span>
+<span> </span>
+<span> </span>
+<span>def check_readiness(</span>
+<span>    session_factory: Callable[[], DatabaseSession],</span>
+<span>    migrations: Sequence[Migration],</span>
+<span>) -&gt; ReadinessResult:</span>
+<span>    &quot;&quot;&quot;Read PostgreSQL migration state without mutating it.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    _validate_migration_order(migrations)</span>
+<span>    target = migrations[-1].migration_id if migrations else None</span>
+<span>    session = session_factory()</span>
+<span>    try:</span>
+<span>        ping = session.execute(&quot;SELECT 1&quot;).fetchone()</span>
+<span>        if ping is None or int(cast(int, ping[0])) != 1:</span>
+<span>            return ReadinessResult(False, None, target, (&quot;database ping failed&quot;,))</span>
+<span> </span>
+<span>        metadata_table = session.execute(</span>
+<span>            &quot;SELECT to_regclass(%s)&quot;,</span>
+<span>            (&quot;training.ds60_schema_migrations&quot;,),</span>
+<span>        ).fetchone()</span>
+<span>        if metadata_table is None or metadata_table[0] is None:</span>
+<span>            return ReadinessResult(False, None, target, (&quot;migration metadata is absent&quot;,))</span>
+<span> </span>
+<span>        rows = session.execute(READ_ALL_SQL).fetchall()</span>
+<span>        applied = {str(row[0]): str(row[1]) for row in rows}</span>
+<span>        current = max(applied, default=None)</span>
+<span>        try:</span>
+<span>            pending = plan_pending(migrations, applied)</span>
+<span>        except ValueError as error:</span>
+<span>            return ReadinessResult(False, current, target, (str(error),))</span>
+<span>        if pending:</span>
+<span>            missing = &quot;, &quot;.join(migration.migration_id for migration in pending)</span>
+<span>            return ReadinessResult(False, current, target, (f&quot;pending migrations: {missing}&quot;,))</span>
+<span>        return ReadinessResult(True, current, target, ())</span>
+<span>    except Exception as error:</span>
+<span>        return ReadinessResult(</span>
+<span>            False,</span>
+<span>            None,</span>
+<span>            target,</span>
+<span>            (f&quot;database probe failed: {type(error).__name__}&quot;,),</span>
+<span>        )</span>
+<span>    finally:</span>
+<span>        with suppress(Exception):</span>
+<span>            session.rollback()</span>
+<span>        with suppress(Exception):</span>
+<span>            session.close()</span>
+<span> </span>
+<span> </span>
+<span>def decide_recovery(evidence: RecoveryEvidence) -&gt; RecoveryDecision:</span>
+<span>    &quot;&quot;&quot;Return a decision aid; never automate a schema reversal from this result.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if not evidence.diagnosis_confirmed:</span>
+<span>        return RecoveryDecision.PAUSE_AND_GATHER_EVIDENCE</span>
+<span>    if evidence.migration_committed and evidence.new_schema_received_writes:</span>
+<span>        if evidence.forward_fix_rehearsed:</span>
+<span>            return RecoveryDecision.FORWARD_FIX</span>
+<span>        return RecoveryDecision.PAUSE_AND_GATHER_EVIDENCE</span>
+<span>    if evidence.previous_app_compatible and evidence.reverse_change_rehearsed:</span>
+<span>        return RecoveryDecision.ROLLBACK_RELEASE</span>
+<span>    if evidence.forward_fix_rehearsed:</span>
+<span>        return RecoveryDecision.FORWARD_FIX</span>
+<span>    return RecoveryDecision.PAUSE_AND_GATHER_EVIDENCE</span>
+<span> </span>
+<span> </span>
+<span>def require_course_database_url(environment: Mapping[str, str]) -&gt; str:</span>
+<span>    &quot;&quot;&quot;Read and validate the disposable course URL without echoing it.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    database_url = environment.get(&quot;DS60_DATABASE_URL&quot;, &quot;&quot;).strip()</span>
+<span>    if not database_url:</span>
+<span>        raise ValueError(&quot;DS60_DATABASE_URL is required for --live&quot;)</span>
+<span>    parsed = urlsplit(database_url)</span>
+<span>    if parsed.scheme not in {&quot;postgres&quot;, &quot;postgresql&quot;} or not parsed.hostname:</span>
+<span>        raise ValueError(&quot;DS60_DATABASE_URL must be a PostgreSQL URL&quot;)</span>
+<span>    database_name = unquote(parsed.path.lstrip(&quot;/&quot;))</span>
+<span>    if database_name != &quot;advanced_sql_training&quot;:</span>
+<span>        raise ValueError(&quot;--live is restricted to the disposable advanced_sql_training database&quot;)</span>
+<span>    return database_url</span>
+<span> </span>
+<span> </span>
+<span>LIVE_MIGRATIONS = (</span>
+<span>    Migration(</span>
+<span>        migration_id=&quot;20260730_001_release_events&quot;,</span>
+<span>        description=&quot;Create a disposable release-event lab table&quot;,</span>
+<span>        commands=(</span>
+<span>            SqlCommand(</span>
+<span>                &quot;&quot;&quot;</span>
+<span>CREATE TABLE training.bridge_release_lab (</span>
+<span>    event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    request_id text NOT NULL,</span>
+<span>    event_name text NOT NULL,</span>
+<span>    created_at timestamptz NOT NULL DEFAULT clock_timestamp()</span>
+<span>)</span>
+<span>&quot;&quot;&quot;.strip()</span>
+<span>            ),</span>
+<span>        ),</span>
+<span>        verification=SqlCommand(</span>
+<span>            &quot;SELECT to_regclass(%s) IS NOT NULL&quot;,</span>
+<span>            (&quot;training.bridge_release_lab&quot;,),</span>
+<span>        ),</span>
+<span>    ),</span>
+<span>    Migration(</span>
+<span>        migration_id=&quot;20260730_002_release_source&quot;,</span>
+<span>        description=&quot;Expand the lab with an additive source label&quot;,</span>
+<span>        commands=(</span>
+<span>            SqlCommand(&quot;ALTER TABLE training.bridge_release_lab ADD COLUMN source_label text&quot;),</span>
+<span>            SqlCommand(</span>
+<span>                &quot;&quot;&quot;</span>
+<span>UPDATE training.bridge_release_lab</span>
+<span>SET source_label = %s</span>
+<span>WHERE source_label IS NULL</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>                (&quot;legacy&quot;,),</span>
+<span>            ),</span>
+<span>        ),</span>
+<span>        verification=SqlCommand(</span>
+<span>            &quot;&quot;&quot;</span>
+<span>SELECT count(*) = 1</span>
+<span>FROM information_schema.columns</span>
+<span>WHERE table_schema = %s</span>
+<span>  AND table_name = %s</span>
+<span>  AND column_name = %s</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>            (&quot;training&quot;, &quot;bridge_release_lab&quot;, &quot;source_label&quot;),</span>
+<span>        ),</span>
+<span>    ),</span>
+<span>)</span>
+<span> </span>
+<span> </span>
+<span>def run_live(database_url: str, *, request_id: str) -&gt; tuple[DeliveryResult, ReadinessResult]:</span>
+<span>    &quot;&quot;&quot;Run the opt-in lab against DS60_DATABASE_URL using Psycopg 3.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    psycopg = import_module(&quot;psycopg&quot;)</span>
+<span> </span>
+<span>    def session_factory() -&gt; DatabaseSession:</span>
+<span>        session = psycopg.connect(database_url, connect_timeout=5)</span>
+<span>        return cast(DatabaseSession, session)</span>
+<span> </span>
+<span>    logger = JsonEventLogger()</span>
+<span>    result = deliver_migrations(</span>
+<span>        session_factory,</span>
+<span>        LIVE_MIGRATIONS,</span>
+<span>        request_id=request_id,</span>
+<span>        logger=logger,</span>
+<span>        metrics=NullMetrics(),</span>
+<span>    )</span>
+<span>    return result, check_readiness(session_factory, LIVE_MIGRATIONS)</span>
+<span> </span>
+<span> </span>
+<span>def main(argv: Sequence[str] | None = None) -&gt; int:</span>
+<span>    parser = argparse.ArgumentParser(description=__doc__)</span>
+<span>    parser.add_argument(</span>
+<span>        &quot;--live&quot;,</span>
+<span>        action=&quot;store_true&quot;,</span>
+<span>        help=&quot;apply the lab migrations to the disposable course database&quot;,</span>
+<span>    )</span>
+<span>    parser.add_argument(</span>
+<span>        &quot;--request-id&quot;,</span>
+<span>        help=&quot;operator-supplied change/request ID required by --live&quot;,</span>
+<span>    )</span>
+<span>    args = parser.parse_args(None if argv is None else list(argv))</span>
+<span> </span>
+<span>    if not args.live:</span>
+<span>        print(&quot;BRIDGE-OPS-01 reference loaded; no database was contacted.&quot;)</span>
+<span>        print(&quot;Run the fake-backed tests before choosing the optional --live lab.&quot;)</span>
+<span>        return 0</span>
+<span>    if not args.request_id or not args.request_id.strip():</span>
+<span>        parser.error(&quot;--request-id is required with --live&quot;)</span>
+<span> </span>
+<span>    logging.basicConfig(level=logging.INFO, format=&quot;%(message)s&quot;)</span>
+<span>    database_url = require_course_database_url(os.environ)</span>
+<span>    delivery, readiness = run_live(database_url, request_id=args.request_id)</span>
+<span>    print(</span>
+<span>        &quot;Migration lab complete: &quot;</span>
+<span>        f&quot;applied={len(delivery.applied)} skipped={len(delivery.skipped)} &quot;</span>
+<span>        f&quot;ready={readiness.ready}&quot;</span>
+<span>    )</span>
+<span>    return 0 if readiness.ready else 1</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="bridge-jupyter-01.html"><small>Previous lesson</small><strong>bridge-jupyter-01</strong><span>PostgreSQL in Jupyter with SQL Magics</span></a>
+        <a class="nav-card next" href="bridge-ai-01.html"><small>Next lesson</small><strong>bridge-ai-01</strong><span>AI Application Engineering with Deterministic Test Doubles</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-ops-01";
+    const LEARNER_PATH = "bridge/professional/lessons/bridge_ops_01_migration_observability.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

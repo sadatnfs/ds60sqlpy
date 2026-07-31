@@ -7,7 +7,10 @@
   descriptive IDs such as `python-data-01`, `sql-found-01`, and
   `bridge-jupyter-01`; never renumber Days 1-60 to insert them.
 - Define vocabulary before use. Pair motivation and small runnable examples with explicit level/prerequisites, learning objectives, graduated exercises, self-checks, next steps, and separate solutions.
-- Keep the learner solving: do not place full answers in learner artifacts or reveal official solutions before an honest attempt.
+- Keep the learner solving with the visible sequence guide → prediction →
+  attempt → progressive hints → solution comparison. Do not place full answers
+  in learner artifacts, reveal official solutions before an honest attempt, or
+  mark completion merely because a page opened.
 - Use deterministic, laptop-safe examples unless randomness, scale, network, GPU, or external services are the explicit topic.
 - Use UTF-8, LF line endings, repository-relative paths, and separately labeled PowerShell/POSIX blocks when syntax differs.
 - Route learner-generated files to ignored `artifacts/dayXX/` locations. Treat `.learning/`, `artifacts/`, and `mlruns/` as potentially valuable local state even though Git ignores them.
@@ -35,6 +38,24 @@
 - Ruff line length is 100. Strict mypy and pytest cover shared tooling, the
   core bridge, and the Python and bridge professional solutions/tests as
   configured in `pyproject.toml`.
-- Do not hand-edit `curriculum/catalog.json`, `START_HERE.html`, `docs/practice-coverage.md`, or generated Day 46-60 solution notebooks; update their inputs and regenerate. Keep `curriculum/practice_baseline.json` immutable after the initial audit.
-- The optional portal stays loopback-only with token-protected same-origin writes, sensitive-path blocking, and fixed VS Code/Jupyter actions. Static HTML must remain self-contained and usable without a server.
-- Preserve unrelated work and do not commit environments, caches, secrets, checkpoints, progress, MLflow runs, or generated outputs.
+- Do not hand-edit `curriculum/catalog.json`, `START_HERE.html`,
+  `lesson-pages/*.html`, `reference-pages/**/*.html`,
+  `docs/practice-coverage.md`, or generated Day 46-60 solution notebooks;
+  update their inputs and regenerate. Keep `curriculum/practice_baseline.json`
+  immutable after the initial audit.
+- Rendered lesson pages stay self-contained/read-only, use no remote assets,
+  and remain useful over `file://`. The optional portal stays loopback-only
+  with token-protected same-origin writes, sensitive-path blocking, and fixed
+  catalog-resolved VS Code/Jupyter actions. A browser never supplies a shell
+  command or unrestricted path.
+- Route all learner-visible local Markdown/SQL links through deterministic
+  rendered references. Static completion belongs on `START_HERE.html`; expose
+  a lesson-level completion checkbox only in authenticated loopback mode.
+- Guided SQL notebooks write only below ignored `.learning/sql/`, preserve
+  existing learner copies, use the fixed course database and non-shell
+  `psql -f`, and require explicit reset confirmation. Do not check them in or
+  substitute `%%sql` for course files that contain `psql` meta-commands.
+- Preserve unrelated work and do not commit environments, caches, secrets,
+  checkpoints, learner progress/SQL workspaces, MLflow runs, or unexpected
+  generated outputs. Keep tracked `START_HERE.html`, `lesson-pages/`, and
+  `reference-pages/`; they are maintained outputs, not caches.

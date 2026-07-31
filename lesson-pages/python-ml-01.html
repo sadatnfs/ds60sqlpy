@@ -1,0 +1,1339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-ml-01 · Reproducible Data and Model Delivery · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-ml-01</p>
+        <h1>Reproducible Data and Model Delivery</h1>
+        <p class="hero-copy">Production machine learning</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">210 minutes</span>
+          <span class="tag">production setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-45.html">python-45</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_ml_01_reproducible_delivery.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_ml_01_reproducible_delivery.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_ml_01_reproducible_delivery.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_ml_01_reproducible_delivery.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--reproducible-data-and-model-delivery">Reproducible data and model delivery<a class="heading-anchor" href="#guide--reproducible-data-and-model-delivery" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-ml-01</code></p>
+<p><strong>Level:</strong> advanced</p>
+<p><strong>Estimated time:</strong> 210–270 minutes</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Catalog prerequisite:</strong> <code>python-45</code></li>
+<li>Python Days 34–45; Days 53–55 are useful follow-ons</li>
+<li>Basic model fitting, evaluation, files, JSON, and hashing</li>
+<li><code>python-pro-01</code> package metadata concepts are helpful, not required</li>
+</ul>
+<p>The lab uses a deterministic linear model and temporary JSON files. It needs no cloud registry, MLflow server, container registry, or network access.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>You will be able to:</p>
+<ol>
+<li>Create an order-stable data snapshot identity.</li>
+<li>Hash model, feature schema, and manifest independently.</li>
+<li>Record a bounded runtime compatibility contract.</li>
+<li>Verify artifact bytes before loading model data.</li>
+<li>Reject incompatible feature order, type, Python, or package versions.</li>
+<li>Distinguish candidate, staging, production, and archived registry stages.</li>
+<li>Require tests, compatibility, metrics, and manifest identity for promotion.</li>
+<li>Perform a recorded rollback during a local incident drill.</li>
+</ol>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lineage:</strong> evidence connecting source data, code/runtime, evaluation, and artifact.</li>
+<li><strong>Snapshot identifier:</strong> stable identity for exact dataset content.</li>
+<li><strong>Canonical serialization:</strong> one deterministic byte representation.</li>
+<li><strong>Content hash:</strong> digest that changes when bytes change.</li>
+<li><strong>Feature schema:</strong> ordered feature names, types, requirements, and version.</li>
+<li><strong>Manifest:</strong> artifact metadata and referenced hashes.</li>
+<li><strong>Compatibility:</strong> whether a consumer satisfies declared schema/runtime assumptions.</li>
+<li><strong>Registry stage:</strong> reviewed lifecycle state, not merely a folder name.</li>
+<li><strong>Promotion evidence:</strong> checks required before a version changes stage.</li>
+<li><strong>Rollback:</strong> deliberate restoration of a previously accepted version with a recorded reason.</li>
+<li><strong>Trusted loading:</strong> verifying identity and parsing a constrained format rather than executing arbitrary serialized code.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Run the learner hash example.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_ml_01_reproducible_delivery.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_ml_01_reproducible_delivery.py</code></pre>
+<p>Ordinary JSON object key order changes raw bytes. Canonical JSON sorts keys and uses stable separators. Dataset rows are sorted by unique <code>record_id</code> so an incidental read order does not create a new snapshot identity.</p>
+<p>The reference delivery flow is:</p>
+<pre><code class="language-text">rows -&gt; snapshot hash
+model -&gt; model.json -&gt; artifact hash
+schema -&gt; schema.json -&gt; schema hash
+all hashes + runtime -&gt; manifest.json
+                         |
+                         +-&gt; verify -&gt; compatibility -&gt; promotion evidence
+                                                   -&gt; registry stage</code></pre>
+<p>Every generated file stays in a temporary directory.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--1-complete-snapshot-hashing">1. Complete snapshot hashing<a class="heading-anchor" href="#guide--1-complete-snapshot-hashing" aria-label="Link to this section">#</a></h5>
+<p>Require a nonempty unique <code>record_id</code>, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed value does not.</p>
+<p>Explain what the hash does <em>not</em> prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.</p>
+<h5 id="guide--2-fit-and-serialize-the-local-model">2. Fit and serialize the local model<a class="heading-anchor" href="#guide--2-fit-and-serialize-the-local-model" aria-label="Link to this section">#</a></h5>
+<p>Fit <code>y = intercept + coefficient*x</code> on three deterministic points. Store only format identifier, feature name, and numeric parameters in JSON. Do not use pickle: loading an untrusted pickle can execute code.</p>
+<h5 id="guide--3-version-the-feature-schema">3. Version the feature schema<a class="heading-anchor" href="#guide--3-version-the-feature-schema" aria-label="Link to this section">#</a></h5>
+<p>Declare feature name, ordered position, dtype, required status, and schema version. Test exact compatibility, reordered input, a renamed feature, and a version change. Decide which future changes could be safely additive for a different consumer contract.</p>
+<h5 id="guide--4-define-runtime-compatibility">4. Define runtime compatibility<a class="heading-anchor" href="#guide--4-define-runtime-compatibility" aria-label="Link to this section">#</a></h5>
+<p>Declare Python 3.11 through below 3.13 and required package major versions. Inject the observed versions into the check rather than dumping a machine-specific environment. Report every incompatibility, not only the first.</p>
+<h5 id="guide--5-build-and-tamper-with-a-bundle">5. Build and tamper with a bundle<a class="heading-anchor" href="#guide--5-build-and-tamper-with-a-bundle" aria-label="Link to this section">#</a></h5>
+<p>Write model, schema, and manifest into a temporary directory. Verify all hashes. Replace <code>model.json</code> with <code>{}</code> and confirm loading fails before parsing or prediction.</p>
+<h5 id="guide--6-promote-with-evidence">6. Promote with evidence<a class="heading-anchor" href="#guide--6-promote-with-evidence" aria-label="Link to this section">#</a></h5>
+<p>Register a candidate with:</p>
+<ul>
+<li>tests passed,</li>
+<li>compatibility passed,</li>
+<li>named metric and threshold,</li>
+<li>metric value, and</li>
+<li>64-character manifest hash.</li>
+</ul>
+<p>Move it to staging and production. Reject a version with missing tests even if its metric is high.</p>
+<h5 id="guide--7-rehearse-rollback">7. Rehearse rollback<a class="heading-anchor" href="#guide--7-rehearse-rollback" aria-label="Link to this section">#</a></h5>
+<p>Promote version 1, then version 2. Record a simulated latency regression and roll back to archived version 1. Confirm one production version remains and the event trail preserves action, target, and reason.</p>
+<h5 id="guide--8-relate-the-lab-to-mlflow">8. Relate the lab to MLflow<a class="heading-anchor" href="#guide--8-relate-the-lab-to-mlflow" aria-label="Link to this section">#</a></h5>
+<p>Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day</p>
+<ol>
+<li>MLflow can store evidence; it does not define your compatibility or approval policy automatically.</li>
+</ol>
+<h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
+<p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
+<h5 id="guide--exercise-9-rebuild-a-bundle-deterministically">Exercise 9 — rebuild a bundle deterministically<a class="heading-anchor" href="#guide--exercise-9-rebuild-a-bundle-deterministically" aria-label="Link to this section">#</a></h5>
+<p>Build the JSON model bundle twice from canonical records and the same configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.</p>
+<p><strong>Progressive hint:</strong> Keep build time and machine paths outside content-addressed payloads. Canonical JSON requires sorted keys, stable ordering, and finite values.</p>
+<h5 id="guide--exercise-10-write-a-claim-bounded-model-card">Exercise 10 — write a claim-bounded model card<a class="heading-anchor" href="#guide--exercise-10-write-a-claim-bounded-model-card" aria-label="Link to this section">#</a></h5>
+<p>Create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.</p>
+<p><strong>Progressive hint:</strong> Generate measured fields from the same result object and keep policy prose versioned. Do not claim causality or production readiness from offline metrics.</p>
+<h5 id="guide--exercise-11-design-shadow-and-canary-evidence">Exercise 11 — design shadow and canary evidence<a class="heading-anchor" href="#guide--exercise-11-design-shadow-and-canary-evidence" aria-label="Link to this section">#</a></h5>
+<p>Specify a no-side-effect shadow comparison followed by a bounded canary. Define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.</p>
+<p><strong>Progressive hint:</strong> Shadow predictions do not affect decisions; canary output does. Both need versioned request/prediction identity and privacy-safe telemetry.</p>
+<h5 id="guide--exercise-12-separate-drift-from-compatibility">Exercise 12 — separate drift from compatibility<a class="heading-anchor" href="#guide--exercise-12-separate-drift-from-compatibility" aria-label="Link to this section">#</a></h5>
+<p>Create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation. Route each to reject, monitor/investigate, or rollback/retrain policy.</p>
+<p><strong>Progressive hint:</strong> Compatibility is a hard interface check; drift and quality are statistical evidence with support, reference, and action thresholds.</p>
+<h5 id="guide--exercise-13-test-forward-and-backward-compatibility">Exercise 13 — test forward and backward compatibility<a class="heading-anchor" href="#guide--exercise-13-test-forward-and-backward-compatibility" aria-label="Link to this section">#</a></h5>
+<p>Build a matrix of producer/consumer schema and model versions. Test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.</p>
+<p><strong>Progressive hint:</strong> Define compatibility from each consumer&#x27;s contract; semantic changes may be breaking even when JSON types match.</p>
+<h5 id="guide--exercise-14-capture-dependency-and-supply-chain-evidence">Exercise 14 — capture dependency and supply-chain evidence<a class="heading-anchor" href="#guide--exercise-14-capture-dependency-and-supply-chain-evidence" aria-label="Link to this section">#</a></h5>
+<p>Create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.</p>
+<p><strong>Progressive hint:</strong> Keep portable names/versions/hashes; omit credentials and developer paths. An inventory is evidence, not a vulnerability verdict.</p>
+<h5 id="guide--exercise-15-verify-artifact-trust-before-parsing">Exercise 15 — verify artifact trust before parsing<a class="heading-anchor" href="#guide--exercise-15-verify-artifact-trust-before-parsing" aria-label="Link to this section">#</a></h5>
+<p>Model a trusted local manifest root and verify every bundle file&#x27;s relative path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape, extra required files, and pickle.</p>
+<p><strong>Progressive hint:</strong> Resolve paths under the bundle root without following an escape. Hash bytes first and accept only an allowlisted safe format.</p>
+<h5 id="guide--exercise-16-rehearse-rollback-dependency-failure">Exercise 16 — rehearse rollback dependency failure<a class="heading-anchor" href="#guide--exercise-16-rehearse-rollback-dependency-failure" aria-label="Link to this section">#</a></h5>
+<p>Archive version 1, promote version 2, then discover that version 1&#x27;s runtime dependency is unavailable. Define rollback-target readiness, fallback decision, event trail, and prevention.</p>
+<p><strong>Progressive hint:</strong> A registry stage is not enough; periodically load and smoke-test retained rollback bundles in their compatible runtime.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Snapshot hashes ignore row order but detect content changes.</li>
+<li>Duplicate record IDs fail.</li>
+<li>Canonical JSON rejects NaN.</li>
+<li>Model prediction for x=3 is 7.</li>
+<li>Artifact tampering fails hash verification.</li>
+<li>Schema, Python, and package incompatibilities are all reported.</li>
+<li>A failed test blocks promotion despite a passing metric.</li>
+<li>Promotion archives the prior production entry.</li>
+<li>Rollback records a nonempty incident reason.</li>
+<li>No pickle, hosted account, or network access is used.</li>
+</ul>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
+.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_ml_01_reproducible_delivery -v</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_ml_01_reproducible_delivery -v</code></pre>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>A filename is called lineage:</strong> names are mutable and do not identify content.</li>
+<li><strong>Row order changes every snapshot:</strong> canonical identity did not define row ordering.</li>
+<li><strong>A hash is called trustworthy:</strong> identity is not provenance or review.</li>
+<li><strong>The feature set matches but order differs:</strong> the model contract was not checked exactly.</li>
+<li><strong>The whole developer environment is required:</strong> compatibility was not bounded to direct runtime assumptions.</li>
+<li><strong>Pickle is loaded before verification:</strong> arbitrary code may execute.</li>
+<li><strong>A metric alone promotes:</strong> tests, schema/runtime compatibility, and review evidence are missing.</li>
+<li><strong>Rollback is an unrecorded file copy:</strong> operators cannot reconstruct what changed or why.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Use this verified bundle in <code>python-svc-02</code>. Day 53 can record the same evidence in local MLflow, while Day 54 supplies monitoring and governance decisions.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_ml_01_reproducible_delivery.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_ml_01_reproducible_delivery.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-ml-01 learner lab: reproducible local model delivery.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import hashlib</span>
+<span>import json</span>
+<span>from collections.abc import Callable, Mapping, Sequence</span>
+<span> </span>
+<span>Scalar = str | int | float | bool | None</span>
+<span> </span>
+<span> </span>
+<span>def canonical_record_hash(records: Sequence[Mapping[str, Scalar]]) -&gt; str:</span>
+<span>    &quot;&quot;&quot;Return an order-independent SHA-256 snapshot identifier.</span>
+<span> </span>
+<span>    TODO: require a unique ``record_id``, sort records by that ID, serialize</span>
+<span>    canonical JSON, and hash UTF-8 bytes.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete canonical_record_hash&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def hash_text(text: str) -&gt; str:</span>
+<span>    &quot;&quot;&quot;Worked example: hashes identify bytes, not semantic equivalence.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    return hashlib.sha256(text.encode(&quot;utf-8&quot;)).hexdigest()</span>
+<span> </span>
+<span> </span>
+<span>def schema_compatible(</span>
+<span>    expected: Sequence[tuple[str, str]],</span>
+<span>    actual: Sequence[tuple[str, str]],</span>
+<span>) -&gt; bool:</span>
+<span>    &quot;&quot;&quot;TODO: require exact ordered names and types for this strict model.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete schema_compatible&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def self_check() -&gt; None:</span>
+<span>    left = json.dumps({&quot;x&quot;: 1, &quot;y&quot;: 2})</span>
+<span>    right = json.dumps({&quot;y&quot;: 2, &quot;x&quot;: 1})</span>
+<span>    print(&quot;Worked raw hashes differ:&quot;, hash_text(left) != hash_text(right))</span>
+<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
+<span>        (</span>
+<span>            &quot;canonical data snapshot&quot;,</span>
+<span>            lambda: canonical_record_hash([{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 2}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]),</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            &quot;feature compatibility&quot;,</span>
+<span>            lambda: schema_compatible([(&quot;x&quot;, &quot;float&quot;)], [(&quot;x&quot;, &quot;float&quot;)]),</span>
+<span>        ),</span>
+<span>    )</span>
+<span>    for label, call in checks:</span>
+<span>        try:</span>
+<span>            print(label, &quot;-&gt;&quot;, call())</span>
+<span>        except NotImplementedError:</span>
+<span>            print(&quot;TODO:&quot;, label)</span>
+<span> </span>
+<span> </span>
+<span># === Numbered professional practice ===</span>
+<span>#</span>
+<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
+<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
+<span># Full acceptance checks and progressive hints:</span>
+<span># companion-guides/py_ml_01_reproducible_delivery.md</span>
+<span>#</span>
+<span># Exercise 1 — Complete snapshot hashing</span>
+<span># Prompt: Require a nonempty unique `record_id`, sort by it, serialize with sorted keys,</span>
+<span># reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed</span>
+<span># value does not. Explain what the hash does *not* prove: source ownership, legality,</span>
+<span># labeling quality, representativeness, or absence of leakage.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 2 — Fit and serialize the local model</span>
+<span># Prompt: Fit `y = intercept + coefficient*x` on three deterministic points. Store only</span>
+<span># format identifier, feature name, and numeric parameters in JSON. Do not use pickle:</span>
+<span># loading an untrusted pickle can execute code.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 3 — Version the feature schema</span>
+<span># Prompt: Declare feature name, ordered position, dtype, required status, and schema</span>
+<span># version. Test exact compatibility, reordered input, a renamed feature, and a version</span>
+<span># change. Decide which future changes could be safely additive for a different consumer</span>
+<span># contract.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 4 — Define runtime compatibility</span>
+<span># Prompt: Declare Python 3.11 through below 3.13 and required package major versions.</span>
+<span># Inject the observed versions into the check rather than dumping a machine-specific</span>
+<span># environment. Report every incompatibility, not only the first.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 5 — Build and tamper with a bundle</span>
+<span># Prompt: Write model, schema, and manifest into a temporary directory. Verify all hashes.</span>
+<span># Replace `model.json` with `{}` and confirm loading fails before parsing or prediction.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 6 — Promote with evidence</span>
+<span># Prompt: Register a candidate with: - tests passed, - compatibility passed, - named</span>
+<span># metric and threshold, - metric value, and - 64-character manifest hash. Move it to</span>
+<span># staging and production. Reject a version with missing tests even if its metric is high.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 7 — Rehearse rollback</span>
+<span># Prompt: Promote version 1, then version 2. Record a simulated latency regression and</span>
+<span># roll back to archived version 1. Confirm one production version remains and the event</span>
+<span># trail preserves action, target, and reason.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 8 — Relate the lab to MLflow</span>
+<span># Prompt: Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day</span>
+<span># 53. MLflow can store evidence; it does not define your compatibility or approval policy</span>
+<span># automatically.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 9 — rebuild a bundle deterministically</span>
+<span># Prompt: Build the JSON model bundle twice from canonical records and the same</span>
+<span># configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field</span>
+<span># such as timestamps, path order, or float serialization.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 10 — write a claim-bounded model card</span>
+<span># Prompt: Create a model card from the manifest and evaluation evidence: intended and</span>
+<span># excluded use, population, metric/threshold, slices/support, data provenance,</span>
+<span># limitations, monitoring, owners, and stop conditions.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 11 — design shadow and canary evidence</span>
+<span># Prompt: Specify a no-side-effect shadow comparison followed by a bounded canary. Define</span>
+<span># routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how</span>
+<span># delayed labels are handled.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 12 — separate drift from compatibility</span>
+<span># Prompt: Create examples of schema incompatibility, valid schema with shifted</span>
+<span># distribution, and stable inputs with performance degradation. Route each to reject,</span>
+<span># monitor/investigate, or rollback/retrain policy.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 13 — test forward and backward compatibility</span>
+<span># Prompt: Build a matrix of producer/consumer schema and model versions. Test an additive</span>
+<span># optional field, required rename, reordered feature, and changed numeric meaning across</span>
+<span># old/new readers.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 14 — capture dependency and supply-chain evidence</span>
+<span># Prompt: Create a local release manifest containing reviewed lock hash, direct runtime</span>
+<span># requirements, Python range, package major versions, artifact hashes, source</span>
+<span># revision/dirty flag, and a generated component inventory.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 15 — verify artifact trust before parsing</span>
+<span># Prompt: Model a trusted local manifest root and verify every bundle file&#x27;s relative</span>
+<span># path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape,</span>
+<span># extra required files, and pickle.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 16 — rehearse rollback dependency failure</span>
+<span># Prompt: Archive version 1, promote version 2, then discover that version 1&#x27;s runtime</span>
+<span># dependency is unavailable. Define rollback-target readiness, fallback decision, event</span>
+<span># trail, and prevention.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># === End numbered professional practice ===</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    self_check()</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_ml_01_reproducible_delivery_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_ml_01_reproducible_delivery_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--reproducible-model-delivery-solution-reasoning">Reproducible model-delivery solution reasoning<a class="heading-anchor" href="#solution-1--reproducible-model-delivery-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Attempt <code>python-ml-01</code> before opening <a href="python-ml-01.html#solution-2"><code>py_ml_01_reproducible_delivery_solution.py</code></a>.</p>
+<p>Canonical JSON and SHA-256 make the exact data snapshot, feature schema, model artifact, and manifest independently identifiable. Sorting by a unique record ID makes the snapshot insensitive to incidental row order while duplicate IDs fail fast. A content hash proves byte identity, not data quality or provenance; those need source and review evidence alongside the digest.</p>
+<p>The local linear model is stored as validated JSON rather than pickle. Pickle can execute code while loading and is not a trustworthy exchange format. <code>verify_bundle</code> checks model, schema, and manifest before use. Compatibility then checks exact feature order/types, supported Python versions, and declared package major versions.</p>
+<p>Registry stages are decisions, not directories. A candidate needs tests, compatibility, a thresholded metric, and a manifest identity before staging or production. Promotion archives the previous production version. Rollback requires an explicit target and reason and leaves an event trail.</p>
+<p>In a larger system MLflow may record runs and artifacts, but the same lineage and compatibility evidence is still necessary. Hosted accounts are not required for this local contract.</p>
+<p>Edge cases include duplicated record identities, floating NaN (rejected by canonical JSON), schema reorder, a package major-version change, artifact tampering, promotion without tests, and rollback to a version whose external dependencies no longer exist.</p>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Use this map after an honest attempt. The executable implementation remains <a href="python-ml-01.html#solution-2"><code>py_ml_01_reproducible_delivery_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
+<h5 id="solution-1--exercise-1-complete-snapshot-hashing">Exercise 1 — Complete snapshot hashing<a class="heading-anchor" href="#solution-1--exercise-1-complete-snapshot-hashing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Require a nonempty unique <code>record_id</code>, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed value does not. Explain what the hash does <em>not</em> prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.</p>
+<p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-2-fit-and-serialize-the-local-model">Exercise 2 — Fit and serialize the local model<a class="heading-anchor" href="#solution-1--exercise-2-fit-and-serialize-the-local-model" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Fit <code>y = intercept + coefficient*x</code> on three deterministic points. Store only format identifier, feature name, and numeric parameters in JSON. Do not use pickle: loading an untrusted pickle can execute code.</p>
+<p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-3-version-the-feature-schema">Exercise 3 — Version the feature schema<a class="heading-anchor" href="#solution-1--exercise-3-version-the-feature-schema" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Declare feature name, ordered position, dtype, required status, and schema version. Test exact compatibility, reordered input, a renamed feature, and a version change. Decide which future changes could be safely additive for a different consumer contract.</p>
+<p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-4-define-runtime-compatibility">Exercise 4 — Define runtime compatibility<a class="heading-anchor" href="#solution-1--exercise-4-define-runtime-compatibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Declare Python 3.11 through below 3.13 and required package major versions. Inject the observed versions into the check rather than dumping a machine-specific environment. Report every incompatibility, not only the first.</p>
+<p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-5-build-and-tamper-with-a-bundle">Exercise 5 — Build and tamper with a bundle<a class="heading-anchor" href="#solution-1--exercise-5-build-and-tamper-with-a-bundle" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Write model, schema, and manifest into a temporary directory. Verify all hashes. Replace <code>model.json</code> with <code>{}</code> and confirm loading fails before parsing or prediction.</p>
+<p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-6-promote-with-evidence">Exercise 6 — Promote with evidence<a class="heading-anchor" href="#solution-1--exercise-6-promote-with-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Register a candidate with: - tests passed, - compatibility passed, - named metric and threshold, - metric value, and - 64-character manifest hash. Move it to staging and production. Reject a version with missing tests even if its metric is high.</p>
+<p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-7-rehearse-rollback">Exercise 7 — Rehearse rollback<a class="heading-anchor" href="#solution-1--exercise-7-rehearse-rollback" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Promote version 1, then version 2. Record a simulated latency regression and roll back to archived version 1. Confirm one production version remains and the event trail preserves action, target, and reason.</p>
+<p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-8-relate-the-lab-to-mlflow">Exercise 8 — Relate the lab to MLflow<a class="heading-anchor" href="#solution-1--exercise-8-relate-the-lab-to-mlflow" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day 53. MLflow can store evidence; it does not define your compatibility or approval policy automatically.</p>
+<p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-9-rebuild-a-bundle-deterministically">Exercise 9 — rebuild a bundle deterministically<a class="heading-anchor" href="#solution-1--exercise-9-rebuild-a-bundle-deterministically" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Build the JSON model bundle twice from canonical records and the same configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.</p>
+<p><strong>Reasoning path:</strong> Keep build time and machine paths outside content-addressed payloads. Canonical JSON requires sorted keys, stable ordering, and finite values.</p>
+<p>Generate immutable payloads from canonical data/schema/model/config and write them in deterministic order. The content manifest should match across builds; operational metadata such as build time can live in a separate non-hashed attestation if needed.</p>
+<p>On mismatch, compare canonical payloads field by field rather than accepting new hashes. Reproducibility does not prove model quality, but it makes lineage and review significantly stronger.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-10-write-a-claim-bounded-model-card">Exercise 10 — write a claim-bounded model card<a class="heading-anchor" href="#solution-1--exercise-10-write-a-claim-bounded-model-card" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.</p>
+<p><strong>Reasoning path:</strong> Generate measured fields from the same result object and keep policy prose versioned. Do not claim causality or production readiness from offline metrics.</p>
+<p>Every headline value includes dataset/split identity, unit, denominator, and uncertainty where appropriate. The card names populations not represented, known failure modes, human oversight, and what evidence would require rollback or retraining.</p>
+<p>Treat the card as release evidence reviewed with the artifact, not static marketing text. A missing or stale card blocks promotion under the local policy.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-11-design-shadow-and-canary-evidence">Exercise 11 — design shadow and canary evidence<a class="heading-anchor" href="#solution-1--exercise-11-design-shadow-and-canary-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Specify a no-side-effect shadow comparison followed by a bounded canary. Define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.</p>
+<p><strong>Reasoning path:</strong> Shadow predictions do not affect decisions; canary output does. Both need versioned request/prediction identity and privacy-safe telemetry.</p>
+<p>Shadow mode compares compatibility, latency, score distribution, and matured outcomes without exposing users to candidate decisions. A canary receives a small controlled share only after shadow gates pass. Predeclared safety, quality, capacity, and error thresholds trigger automatic pause/rollback.</p>
+<p>Do not repeatedly inspect and expand based on ordinary noisy metrics. Preserve assignment and label-maturity windows for valid comparisons.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-12-separate-drift-from-compatibility">Exercise 12 — separate drift from compatibility<a class="heading-anchor" href="#solution-1--exercise-12-separate-drift-from-compatibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation. Route each to reject, monitor/investigate, or rollback/retrain policy.</p>
+<p><strong>Reasoning path:</strong> Compatibility is a hard interface check; drift and quality are statistical evidence with support, reference, and action thresholds.</p>
+<p>Missing/reordered/wrong-type required features fail before prediction. Distribution shift with a valid schema can continue only under the reviewed monitoring policy; report support and reference period. Performance degradation requires matured labels and may trigger rollback even when input drift metrics look stable.</p>
+<p>Do not coerce an incompatible input merely to keep serving, and do not treat a PSI threshold as proof of model failure.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-13-test-forward-and-backward-compatibility">Exercise 13 — test forward and backward compatibility<a class="heading-anchor" href="#solution-1--exercise-13-test-forward-and-backward-compatibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Build a matrix of producer/consumer schema and model versions. Test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.</p>
+<p><strong>Reasoning path:</strong> Define compatibility from each consumer&#x27;s contract; semantic changes may be breaking even when JSON types match.</p>
+<p>Old readers may ignore an additive optional field only when they select known fields. New readers can supply a documented default for old payloads. Required renames, position changes in ordered models, and unit/meaning changes require a new version or explicit migration.</p>
+<p>Store migrations as tested code and preserve the original payload identity. Never relabel a semantic change as additive because parsing still succeeds.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-14-capture-dependency-and-supply-chain-evidence">Exercise 14 — capture dependency and supply-chain evidence<a class="heading-anchor" href="#solution-1--exercise-14-capture-dependency-and-supply-chain-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.</p>
+<p><strong>Reasoning path:</strong> Keep portable names/versions/hashes; omit credentials and developer paths. An inventory is evidence, not a vulnerability verdict.</p>
+<p>Compatibility checks consume only declared runtime requirements, while the lock/inventory supports reconstruction and security review. Record the exact tool/version that produced each file and fail promotion when required evidence is absent or inconsistent.</p>
+<p>Scanning/signing systems are optional authorized extensions. Do not invent an SBOM standard claim unless output validates against that standard.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-15-verify-artifact-trust-before-parsing">Exercise 15 — verify artifact trust before parsing<a class="heading-anchor" href="#solution-1--exercise-15-verify-artifact-trust-before-parsing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Model a trusted local manifest root and verify every bundle file&#x27;s relative path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape, extra required files, and pickle.</p>
+<p><strong>Reasoning path:</strong> Resolve paths under the bundle root without following an escape. Hash bytes first and accept only an allowlisted safe format.</p>
+<p>Validate the manifest structure, normalize relative paths, and ensure resolved files remain beneath the expected root. Reject symlinks or special files under the strict lesson policy. Compare size and digest, then parse flat/canonical JSON and validate schema.</p>
+<p>A hash from an untrusted manifest does not establish trust; the manifest root must arrive through an approved distribution boundary. Pickle/joblib remains unsafe for untrusted content.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-16-rehearse-rollback-dependency-failure">Exercise 16 — rehearse rollback dependency failure<a class="heading-anchor" href="#solution-1--exercise-16-rehearse-rollback-dependency-failure" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Archive version 1, promote version 2, then discover that version 1&#x27;s runtime dependency is unavailable. Define rollback-target readiness, fallback decision, event trail, and prevention.</p>
+<p><strong>Reasoning path:</strong> A registry stage is not enough; periodically load and smoke-test retained rollback bundles in their compatible runtime.</p>
+<p>Before promotion, verify at least one rollback candidate has artifact, manifest, runtime, schema, and representative fixture evidence. If v1 cannot load during incident response, do not mark rollback successful; pause/route to the last verified candidate or safe degraded behavior and record the failure.</p>
+<p>Add scheduled restoration drills and retain required runtime artifacts/locks. The event trail preserves original incident, attempted target, rejection reason, final action, and owner.</p>
+<p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_ml_01_reproducible_delivery_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_ml_01_reproducible_delivery_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-ml-01.</span>
+<span> </span>
+<span>Artifacts are canonical JSON plus SHA-256 manifests. No pickle, hosted registry,</span>
+<span>network account, or machine-specific environment capture is required.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import hashlib</span>
+<span>import json</span>
+<span>import sys</span>
+<span>import tempfile</span>
+<span>from collections.abc import Mapping, Sequence</span>
+<span>from dataclasses import dataclass, replace</span>
+<span>from pathlib import Path</span>
+<span>from statistics import mean</span>
+<span>from typing import Literal, TypeAlias</span>
+<span> </span>
+<span>Scalar: TypeAlias = str | int | float | bool | None</span>
+<span>Record: TypeAlias = Mapping[str, Scalar]</span>
+<span>Stage = Literal[&quot;candidate&quot;, &quot;staging&quot;, &quot;production&quot;, &quot;archived&quot;]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class FeatureSpec:</span>
+<span>    name: str</span>
+<span>    dtype: Literal[&quot;float&quot;]</span>
+<span>    required: bool = True</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class FeatureSchema:</span>
+<span>    version: int</span>
+<span>    features: tuple[FeatureSpec, ...]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class LinearModel:</span>
+<span>    feature_name: str</span>
+<span>    coefficient: float</span>
+<span>    intercept: float</span>
+<span> </span>
+<span>    def predict(self, features: Mapping[str, float]) -&gt; float:</span>
+<span>        try:</span>
+<span>            value = features[self.feature_name]</span>
+<span>        except KeyError as exc:</span>
+<span>            raise ValueError(f&quot;missing feature: {self.feature_name}&quot;) from exc</span>
+<span>        return self.intercept + self.coefficient * value</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RuntimeRequirement:</span>
+<span>    python_min: tuple[int, int]</span>
+<span>    python_max_exclusive: tuple[int, int]</span>
+<span>    packages: tuple[tuple[str, str], ...]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Manifest:</span>
+<span>    artifact_sha256: str</span>
+<span>    schema_sha256: str</span>
+<span>    data_snapshot_sha256: str</span>
+<span>    runtime: RuntimeRequirement</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class CompatibilityReport:</span>
+<span>    compatible: bool</span>
+<span>    reasons: tuple[str, ...]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class PromotionEvidence:</span>
+<span>    tests_passed: bool</span>
+<span>    compatibility_passed: bool</span>
+<span>    metric_name: str</span>
+<span>    metric_value: float</span>
+<span>    minimum_metric: float</span>
+<span>    manifest_sha256: str</span>
+<span> </span>
+<span>    @property</span>
+<span>    def approved(self) -&gt; bool:</span>
+<span>        return (</span>
+<span>            self.tests_passed</span>
+<span>            and self.compatibility_passed</span>
+<span>            and self.metric_value &gt;= self.minimum_metric</span>
+<span>            and len(self.manifest_sha256) == 64</span>
+<span>        )</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RegistryEntry:</span>
+<span>    version: str</span>
+<span>    stage: Stage</span>
+<span>    evidence: PromotionEvidence</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RegistryEvent:</span>
+<span>    action: Literal[&quot;registered&quot;, &quot;promoted&quot;, &quot;rollback&quot;]</span>
+<span>    version: str</span>
+<span>    reason: str</span>
+<span> </span>
+<span> </span>
+<span>class LocalRegistry:</span>
+<span>    def __init__(self) -&gt; None:</span>
+<span>        self._entries: dict[str, RegistryEntry] = {}</span>
+<span>        self._events: list[RegistryEvent] = []</span>
+<span> </span>
+<span>    @property</span>
+<span>    def entries(self) -&gt; tuple[RegistryEntry, ...]:</span>
+<span>        return tuple(self._entries[key] for key in sorted(self._entries))</span>
+<span> </span>
+<span>    @property</span>
+<span>    def events(self) -&gt; tuple[RegistryEvent, ...]:</span>
+<span>        return tuple(self._events)</span>
+<span> </span>
+<span>    def register(self, version: str, evidence: PromotionEvidence) -&gt; None:</span>
+<span>        if not version or version in self._entries:</span>
+<span>            raise ValueError(&quot;version must be new and non-empty&quot;)</span>
+<span>        self._entries[version] = RegistryEntry(version, &quot;candidate&quot;, evidence)</span>
+<span>        self._events.append(RegistryEvent(&quot;registered&quot;, version, &quot;candidate created&quot;))</span>
+<span> </span>
+<span>    def stage(self, version: str) -&gt; None:</span>
+<span>        entry = self._entry(version)</span>
+<span>        if entry.stage != &quot;candidate&quot;:</span>
+<span>            raise ValueError(&quot;only a candidate can enter staging&quot;)</span>
+<span>        if not entry.evidence.approved:</span>
+<span>            raise ValueError(&quot;promotion evidence is incomplete&quot;)</span>
+<span>        self._entries[version] = replace(entry, stage=&quot;staging&quot;)</span>
+<span> </span>
+<span>    def promote(self, version: str, *, reason: str) -&gt; None:</span>
+<span>        entry = self._entry(version)</span>
+<span>        if entry.stage != &quot;staging&quot; or not entry.evidence.approved:</span>
+<span>            raise ValueError(&quot;only an approved staging version can reach production&quot;)</span>
+<span>        if not reason.strip():</span>
+<span>            raise ValueError(&quot;promotion reason is required&quot;)</span>
+<span>        for key, current in tuple(self._entries.items()):</span>
+<span>            if current.stage == &quot;production&quot;:</span>
+<span>                self._entries[key] = replace(current, stage=&quot;archived&quot;)</span>
+<span>        self._entries[version] = replace(entry, stage=&quot;production&quot;)</span>
+<span>        self._events.append(RegistryEvent(&quot;promoted&quot;, version, reason))</span>
+<span> </span>
+<span>    def rollback(self, version: str, *, reason: str) -&gt; None:</span>
+<span>        target = self._entry(version)</span>
+<span>        if target.stage != &quot;archived&quot;:</span>
+<span>            raise ValueError(&quot;rollback target must be a previously archived version&quot;)</span>
+<span>        if not reason.strip():</span>
+<span>            raise ValueError(&quot;rollback reason is required&quot;)</span>
+<span>        for key, current in tuple(self._entries.items()):</span>
+<span>            if current.stage == &quot;production&quot;:</span>
+<span>                self._entries[key] = replace(current, stage=&quot;archived&quot;)</span>
+<span>        self._entries[version] = replace(target, stage=&quot;production&quot;)</span>
+<span>        self._events.append(RegistryEvent(&quot;rollback&quot;, version, reason))</span>
+<span> </span>
+<span>    def production(self) -&gt; RegistryEntry | None:</span>
+<span>        return next(</span>
+<span>            (entry for entry in self._entries.values() if entry.stage == &quot;production&quot;),</span>
+<span>            None,</span>
+<span>        )</span>
+<span> </span>
+<span>    def _entry(self, version: str) -&gt; RegistryEntry:</span>
+<span>        try:</span>
+<span>            return self._entries[version]</span>
+<span>        except KeyError as exc:</span>
+<span>            raise ValueError(f&quot;unknown version: {version}&quot;) from exc</span>
+<span> </span>
+<span> </span>
+<span>def canonical_json(value: object) -&gt; str:</span>
+<span>    return json.dumps(</span>
+<span>        value,</span>
+<span>        ensure_ascii=True,</span>
+<span>        allow_nan=False,</span>
+<span>        sort_keys=True,</span>
+<span>        separators=(&quot;,&quot;, &quot;:&quot;),</span>
+<span>    )</span>
+<span> </span>
+<span> </span>
+<span>def sha256_text(text: str) -&gt; str:</span>
+<span>    return hashlib.sha256(text.encode(&quot;utf-8&quot;)).hexdigest()</span>
+<span> </span>
+<span> </span>
+<span>def canonical_record_hash(records: Sequence[Record]) -&gt; str:</span>
+<span>    seen: set[str] = set()</span>
+<span>    normalized: list[dict[str, Scalar]] = []</span>
+<span>    for record in records:</span>
+<span>        record_id = record.get(&quot;record_id&quot;)</span>
+<span>        if not isinstance(record_id, str) or not record_id:</span>
+<span>            raise ValueError(&quot;every record needs a non-empty string record_id&quot;)</span>
+<span>        if record_id in seen:</span>
+<span>            raise ValueError(f&quot;duplicate record_id: {record_id}&quot;)</span>
+<span>        seen.add(record_id)</span>
+<span>        normalized.append(dict(record))</span>
+<span>    normalized.sort(key=lambda record: str(record[&quot;record_id&quot;]))</span>
+<span>    return sha256_text(canonical_json(normalized))</span>
+<span> </span>
+<span> </span>
+<span>def fit_linear_model(</span>
+<span>    rows: Sequence[tuple[float, float]],</span>
+<span>    *,</span>
+<span>    feature_name: str = &quot;x&quot;,</span>
+<span>) -&gt; LinearModel:</span>
+<span>    if len(rows) &lt; 2:</span>
+<span>        raise ValueError(&quot;training needs at least two rows&quot;)</span>
+<span>    x_values = [row[0] for row in rows]</span>
+<span>    y_values = [row[1] for row in rows]</span>
+<span>    x_mean = mean(x_values)</span>
+<span>    y_mean = mean(y_values)</span>
+<span>    denominator = sum((value - x_mean) ** 2 for value in x_values)</span>
+<span>    if denominator == 0:</span>
+<span>        raise ValueError(&quot;feature must vary&quot;)</span>
+<span>    coefficient = (</span>
+<span>        sum((x_value - x_mean) * (y_value - y_mean) for x_value, y_value in rows) / denominator</span>
+<span>    )</span>
+<span>    intercept = y_mean - coefficient * x_mean</span>
+<span>    return LinearModel(feature_name, coefficient, intercept)</span>
+<span> </span>
+<span> </span>
+<span>def schema_payload(schema: FeatureSchema) -&gt; dict[str, object]:</span>
+<span>    return {</span>
+<span>        &quot;version&quot;: schema.version,</span>
+<span>        &quot;features&quot;: [</span>
+<span>            {</span>
+<span>                &quot;name&quot;: feature.name,</span>
+<span>                &quot;dtype&quot;: feature.dtype,</span>
+<span>                &quot;required&quot;: feature.required,</span>
+<span>            }</span>
+<span>            for feature in schema.features</span>
+<span>        ],</span>
+<span>    }</span>
+<span> </span>
+<span> </span>
+<span>def model_payload(model: LinearModel) -&gt; dict[str, object]:</span>
+<span>    return {</span>
+<span>        &quot;format&quot;: &quot;ds60-linear-json-v1&quot;,</span>
+<span>        &quot;feature_name&quot;: model.feature_name,</span>
+<span>        &quot;coefficient&quot;: model.coefficient,</span>
+<span>        &quot;intercept&quot;: model.intercept,</span>
+<span>    }</span>
+<span> </span>
+<span> </span>
+<span>def manifest_payload(manifest: Manifest) -&gt; dict[str, object]:</span>
+<span>    return {</span>
+<span>        &quot;artifact_sha256&quot;: manifest.artifact_sha256,</span>
+<span>        &quot;schema_sha256&quot;: manifest.schema_sha256,</span>
+<span>        &quot;data_snapshot_sha256&quot;: manifest.data_snapshot_sha256,</span>
+<span>        &quot;runtime&quot;: {</span>
+<span>            &quot;python_min&quot;: list(manifest.runtime.python_min),</span>
+<span>            &quot;python_max_exclusive&quot;: list(manifest.runtime.python_max_exclusive),</span>
+<span>            &quot;packages&quot;: [list(item) for item in manifest.runtime.packages],</span>
+<span>        },</span>
+<span>    }</span>
+<span> </span>
+<span> </span>
+<span>def write_bundle(</span>
+<span>    directory: Path,</span>
+<span>    *,</span>
+<span>    model: LinearModel,</span>
+<span>    schema: FeatureSchema,</span>
+<span>    data_snapshot_sha256: str,</span>
+<span>    runtime: RuntimeRequirement,</span>
+<span>) -&gt; Manifest:</span>
+<span>    directory.mkdir(parents=True, exist_ok=False)</span>
+<span>    artifact_text = canonical_json(model_payload(model))</span>
+<span>    schema_text = canonical_json(schema_payload(schema))</span>
+<span>    artifact_hash = sha256_text(artifact_text)</span>
+<span>    schema_hash = sha256_text(schema_text)</span>
+<span>    manifest = Manifest(artifact_hash, schema_hash, data_snapshot_sha256, runtime)</span>
+<span>    (directory / &quot;model.json&quot;).write_text(artifact_text, encoding=&quot;utf-8&quot;)</span>
+<span>    (directory / &quot;schema.json&quot;).write_text(schema_text, encoding=&quot;utf-8&quot;)</span>
+<span>    (directory / &quot;manifest.json&quot;).write_text(</span>
+<span>        canonical_json(manifest_payload(manifest)),</span>
+<span>        encoding=&quot;utf-8&quot;,</span>
+<span>    )</span>
+<span>    return manifest</span>
+<span> </span>
+<span> </span>
+<span>def verify_bundle(directory: Path, expected: Manifest) -&gt; None:</span>
+<span>    artifact_text = (directory / &quot;model.json&quot;).read_text(encoding=&quot;utf-8&quot;)</span>
+<span>    schema_text = (directory / &quot;schema.json&quot;).read_text(encoding=&quot;utf-8&quot;)</span>
+<span>    manifest_text = (directory / &quot;manifest.json&quot;).read_text(encoding=&quot;utf-8&quot;)</span>
+<span>    if sha256_text(artifact_text) != expected.artifact_sha256:</span>
+<span>        raise ValueError(&quot;model artifact hash mismatch&quot;)</span>
+<span>    if sha256_text(schema_text) != expected.schema_sha256:</span>
+<span>        raise ValueError(&quot;feature schema hash mismatch&quot;)</span>
+<span>    if manifest_text != canonical_json(manifest_payload(expected)):</span>
+<span>        raise ValueError(&quot;manifest content mismatch&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def compatibility_report(</span>
+<span>    *,</span>
+<span>    expected_schema: FeatureSchema,</span>
+<span>    actual_schema: FeatureSchema,</span>
+<span>    runtime: RuntimeRequirement,</span>
+<span>    python_version: tuple[int, int],</span>
+<span>    package_versions: Mapping[str, str],</span>
+<span>) -&gt; CompatibilityReport:</span>
+<span>    reasons: list[str] = []</span>
+<span>    if expected_schema != actual_schema:</span>
+<span>        reasons.append(&quot;feature schema differs&quot;)</span>
+<span>    if not runtime.python_min &lt;= python_version &lt; runtime.python_max_exclusive:</span>
+<span>        reasons.append(f&quot;Python {python_version} is outside the declared range&quot;)</span>
+<span>    for package, required_major in runtime.packages:</span>
+<span>        actual = package_versions.get(package)</span>
+<span>        if actual is None:</span>
+<span>            reasons.append(f&quot;missing package {package}&quot;)</span>
+<span>        elif actual.split(&quot;.&quot;, 1)[0] != required_major:</span>
+<span>            reasons.append(f&quot;{package} major {actual.split(&#x27;.&#x27;, 1)[0]} != {required_major}&quot;)</span>
+<span>    return CompatibilityReport(not reasons, tuple(reasons))</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    rows = [(0.0, 1.0), (1.0, 3.0), (2.0, 5.0)]</span>
+<span>    records: list[Record] = [</span>
+<span>        {&quot;record_id&quot;: &quot;r1&quot;, &quot;x&quot;: 0.0, &quot;y&quot;: 1.0},</span>
+<span>        {&quot;record_id&quot;: &quot;r2&quot;, &quot;x&quot;: 1.0, &quot;y&quot;: 3.0},</span>
+<span>        {&quot;record_id&quot;: &quot;r3&quot;, &quot;x&quot;: 2.0, &quot;y&quot;: 5.0},</span>
+<span>    ]</span>
+<span>    model = fit_linear_model(rows)</span>
+<span>    schema = FeatureSchema(1, (FeatureSpec(&quot;x&quot;, &quot;float&quot;),))</span>
+<span>    runtime = RuntimeRequirement((3, 11), (3, 13), ((&quot;ds60-runtime&quot;, &quot;1&quot;),))</span>
+<span>    with tempfile.TemporaryDirectory(prefix=&quot;ds60-model-bundle-&quot;) as directory:</span>
+<span>        bundle = Path(directory) / &quot;bundle&quot;</span>
+<span>        manifest = write_bundle(</span>
+<span>            bundle,</span>
+<span>            model=model,</span>
+<span>            schema=schema,</span>
+<span>            data_snapshot_sha256=canonical_record_hash(records),</span>
+<span>            runtime=runtime,</span>
+<span>        )</span>
+<span>        verify_bundle(bundle, manifest)</span>
+<span>        report = compatibility_report(</span>
+<span>            expected_schema=schema,</span>
+<span>            actual_schema=schema,</span>
+<span>            runtime=runtime,</span>
+<span>            python_version=sys.version_info[:2],</span>
+<span>            package_versions={&quot;ds60-runtime&quot;: &quot;1.0&quot;},</span>
+<span>        )</span>
+<span>        print(&quot;prediction:&quot;, model.predict({&quot;x&quot;: 3.0}))</span>
+<span>        print(&quot;manifest:&quot;, sha256_text(canonical_json(manifest_payload(manifest))))</span>
+<span>        print(&quot;compatible:&quot;, report.compatible)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-stats-01.html"><small>Previous lesson</small><strong>python-stats-01</strong><span>Resampling, Experiments, and Causal Boundaries</span></a>
+        <a class="nav-card next" href="python-svc-02.html"><small>Next lesson</small><strong>python-svc-02</strong><span>Service Hardening and Observability</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-ml-01";
+    const LEARNER_PATH = "python/professional/lessons/py_ml_01_reproducible_delivery.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

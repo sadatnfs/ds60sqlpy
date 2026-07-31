@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-repl-01 · Replication, Change Data Capture, and High Availability · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-repl-01</p>
+        <h1>Replication, Change Data Capture, and High Availability</h1>
+        <p class="hero-copy">PostgreSQL specialization</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">240 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">optional-container-image</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-ops-02.html">sql-ops-02</a> <a class="tag" href="sql-prog-01.html">sql-prog-01</a> <a class="tag" href="sql-test-01.html">sql-test-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_repl_01_cdc_high_availability.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_repl_01_cdc_high_availability.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_repl_01_cdc_high_availability.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--sql-repl-01-replication-cdc-and-high-availability">SQL-REPL-01 — Replication, CDC, and High Availability<a class="heading-anchor" href="#guide--sql-repl-01-replication-cdc-and-high-availability" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-ops-02</code>, <code>sql-prog-01</code>, and <code>sql-test-01</code></li>
+<li><strong>Prerequisites:</strong> <a href="sql-ops-02.html#guide">SQL-OPS-02 — recovery</a>, <a href="sql-prog-01.html#guide">SQL-PROG-01</a>, <a href="sql-test-01.html#guide">SQL-TEST-01</a>, transactions, locking, idempotency, RPO, and RTO.</li>
+<li><strong>Artifacts:</strong> <a href="sql-repl-01.html#learner">learner SQL</a> · <a href="sql-repl-01.html#solution-1">solution reasoning</a> · <a href="sql-repl-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run the single-database offline simulation:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_repl_01_cdc_high_availability.sql</code></pre>
+<p>It reads capability/count catalogs and rolls back local tables. It never changes <code>wal_level</code>, creates publications/subscriptions/slots, promotes a server, or contacts another node.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Implement a transactional outbox and an idempotent consumer with immutable event fingerprints.</li>
+<li>Reason about at-least-once delivery, aggregate ordering, and replication posture through safe inspection.</li>
+<li>Compare physical and logical replication, explain slot/WAL retention, and design failover/RPO/RTO evidence without mistaking replication for backup.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>WAL:</strong> ordered write-ahead log used by crash and replication recovery.</li>
+<li><strong>Physical replication:</strong> byte/block-level WAL streaming for a compatible PostgreSQL cluster.</li>
+<li><strong>Logical replication:</strong> table-change stream decoded into publications and subscriptions.</li>
+<li><strong>CDC:</strong> change data capture delivered to downstream consumers.</li>
+<li><strong>Transactional outbox:</strong> business change and event intent committed in one database transaction.</li>
+<li><strong>Inbox/idempotency key:</strong> durable consumer record preventing repeated effect.</li>
+<li><strong>Replication slot:</strong> server-side retention position that can keep WAL/catalog state for a consumer.</li>
+<li><strong>Failover:</strong> promote/switch service to a healthy replica.</li>
+<li><strong>Fencing:</strong> prevent the former primary from accepting conflicting writes.</li>
+<li><strong>Split brain:</strong> multiple writable primaries diverging.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>The capability query reports WAL level and counts only; it does not print slot, publication, subscription, host, or query identities. Counts can still require monitoring privileges on managed services. Capability settings are evidence, not authorization to mutate them.</p>
+<p>The outbox transaction writes order state and a unique <code>(aggregate_type,key,version)</code> event together. If the process dies after commit but before delivery, the event remains. This closes the dual-write gap between business data and a separately published message.</p>
+<p><code>consume_outbox_batch</code> claims ordered unpublished rows with <code>FOR UPDATE SKIP LOCKED</code>, inserts <code>(consumer,event_id)</code> with <code>ON CONFLICT DO NOTHING</code>, applies a projection only when the inbox insert is new, and records delivery attempts. Resetting <code>published_at</code> simulates redelivery: attempts increase, but inbox cardinality and projection side effect do not.</p>
+<p>An idempotency key is also an immutability contract. The inbox stores a canonical JSONB payload fingerprint and rejects the same event ID with a different fingerprint; silently treating those two requests as equivalent would hide producer corruption. The local procedure intentionally collapses one relay and one consumer into a teaching transaction. Real fan-out publishes once to a broker/log and tracks delivery or offsets per consumer group rather than using one global <code>published_at</code> value as every consumer&#x27;s position.</p>
+<p>This same-database simulation can atomically combine inbox and projection. An external API effect cannot share the transaction. Send the stable event or operation ID to an API that durably enforces idempotency, reconcile uncertain timeouts, and accept that “exactly once” is an end-to-end property—not a broker checkbox.</p>
+<p>Aggregate version protects the projection from late older delivery. A consumer should detect version gaps rather than silently accept missing history, then retry, replay, or fetch a canonical snapshot according to its contract.</p>
+<p>Physical streaming reproduces the cluster and supports standby/failover but requires compatible binaries/storage semantics. Logical replication selects tables and can cross versions/use different indexes, but schema DDL and sequence state need separate coordination. Neither retained replica alone protects against a replicated accidental delete.</p>
+<p>Slots protect a consumer&#x27;s restart position by retaining WAL. An abandoned slot can fill disk and threaten the primary. Monitor retained bytes/LSN lag, activity, consumer ownership, alert/runbook thresholds, and only retire a slot after proving the consumer no longer needs it.</p>
+<p>Failover requires health/quorum, fencing, loss/replay evidence, client routing, timeline/slot/subscriber repair, verification, and a new backup. Promotion is irreversible history branching, not a health-check button.</p>
+<h5 id="guide--optional-multi-node-boundary">Optional multi-node boundary<a class="heading-anchor" href="#guide--optional-multi-node-boundary" aria-label="Link to this section">#</a></h5>
+<p>A physical/logical lab requires an approved pinned multi-container environment, separate ports/volumes, replication credentials, initialized publications or standbys, controlled network faults, disk monitoring, and exact cleanup. It may need a one-time image pull. It is intentionally not implemented by this SQL module; never create slots/subscriptions or alter WAL settings on the host course cluster merely to make an exercise appear complete.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete all twelve prompts. Begin with publisher crash, consumer uncertainty, out-of-order versions, physical/logical semantics, slot retention operations, and a fenced failover runbook; then cover publications, bootstrap, replica consistency, conflict handling, DDL sequencing, and failback. For every failure, identify durable state before retry and the evidence needed to distinguish “not applied” from “applied but acknowledgement lost.”</p>
+<p>Keep the local SQL as a single-node model; multi-node actions remain reviewed runbook work:</p>
+<ol>
+<li><strong>Publisher crash:</strong> prove a committed, unacknowledged outbox row is durable.</li>
+<li><strong>Consumer uncertainty:</strong> distinguish database-local idempotency from an external side effect and design its key.</li>
+<li><strong>Ordering:</strong> deliver versions out of order, prevent regression, and detect gaps.</li>
+<li><strong>Mechanisms:</strong> compare physical streaming with logical publication, including DDL and sequence behavior.</li>
+<li><strong>Slots:</strong> define WAL-byte, active-state, lag, disk, alert, ownership, and retirement evidence.</li>
+<li><strong>Failover:</strong> cover quorum, fencing, loss, routing, timeline, CDC state, objectives, fallback, verification, and new backup.</li>
+<li><strong>Publication contract:</strong> design row/column scope, replica identity, initial copy, updates/deletes, and tenant-leak tests.</li>
+<li><strong>Bootstrap:</strong> align consistent snapshot and start LSN with slot retention, deduplication, restart, handoff, and abandoned-run cleanup.</li>
+<li><strong>Read consistency:</strong> define user-visible staleness and compare primary pinning, LSN waits, bounded lag, timeout, and fallback.</li>
+<li><strong>Conflicts:</strong> compare single-writer ownership, versions, merge, quarantine, and repair; reject naive wall-clock wins.</li>
+<li><strong>DDL sequencing:</strong> build publisher/subscriber/application compatibility across additive, validating, contract, and removal phases.</li>
+<li><strong>Failback/reseed:</strong> choose rewind/rebuild safely and verify timelines, slots, subscriptions, routing, data, backup, and audit.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Are business row and outbox event atomic?</li>
+<li>Does redelivery leave one inbox row/effect per consumer-event?</li>
+<li>Can an older aggregate version never overwrite a newer projection?</li>
+<li>Are version gaps detectable?</li>
+<li>Can you state what schema/sequences the replication mode does not cover?</li>
+<li>Does slot monitoring include retained WAL disk risk?</li>
+<li>Does failover fence the old primary and prove data-loss/RPO?</li>
+<li>Does rollback leave no local schema, publication, subscription, slot, or role?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Writing business data then publishing separately loses events on a crash.</li>
+<li>Marking published before durable broker acceptance loses delivery.</li>
+<li>Retrying a timed-out external side effect without an idempotency contract can duplicate it.</li>
+<li>SKIP LOCKED is a work-distribution tool, not a guarantee of fair ordering.</li>
+<li>Logical replication is not automatic schema migration.</li>
+<li>Unbounded inactive slots can exhaust primary disk.</li>
+<li>Replicas replay deletes/corruption and are not independent backup.</li>
+<li>Failover without fencing creates split brain.</li>
+<li>Async replication can lose acknowledged commits; RPO must reflect reality.</li>
+<li>Monitoring only “replica connected” misses replay/apply lag.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-temporal-01.html#guide">SQL-TEMPORAL-01 — temporal and domain modelling</a>. Combine the outbox with SQL-TEST-01 contracts and SQL-OPS-02 recovery rehearsals before treating CDC or failover as production-ready.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_repl_01_cdc_high_availability.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_repl_01_cdc_high_availability.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-REPL-01: Replication, CDC, and high availability</span>
+<span>-- Target: PostgreSQL 16+</span>
+<span>-- Default path is one-database outbox/idempotency simulation plus read-only</span>
+<span>-- capability inspection. It creates no publication, subscription, or slot.</span>
+<span> </span>
+<span>\set ON_ERROR_STOP on</span>
+<span>\echo &#x27;SQL-REPL-01: read-only replication capability summary&#x27;</span>
+<span>SELECT</span>
+<span>    current_database() AS database_name,</span>
+<span>    current_setting(&#x27;wal_level&#x27;) AS wal_level,</span>
+<span>    current_setting(&#x27;max_wal_senders&#x27;) AS max_wal_senders,</span>
+<span>    current_setting(&#x27;max_replication_slots&#x27;) AS max_replication_slots,</span>
+<span>    current_setting(&#x27;hot_standby&#x27;) AS hot_standby,</span>
+<span>    pg_catalog.pg_is_in_recovery() AS is_in_recovery;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    (SELECT COUNT(*) FROM pg_catalog.pg_replication_slots) AS slot_count,</span>
+<span>    (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pg_catalog.pg_replication_slots AS s</span>
+<span>        WHERE s.active</span>
+<span>    ) AS active_slot_count,</span>
+<span>    (SELECT COUNT(*) FROM pg_catalog.pg_publication) AS publication_count,</span>
+<span>    (SELECT COUNT(*) FROM pg_catalog.pg_subscription) AS subscription_count,</span>
+<span>    (SELECT COUNT(*) FROM pg_catalog.pg_stat_replication) AS sender_count,</span>
+<span>    (SELECT COUNT(*) FROM pg_catalog.pg_stat_wal_receiver) AS receiver_count;</span>
+<span> </span>
+<span>\echo &#x27;SQL-REPL-01: disposable transactional outbox lab&#x27;</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_replication_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_replication_lab.orders (</span>
+<span>    order_key text PRIMARY KEY,</span>
+<span>    status text NOT NULL CHECK (status IN (&#x27;open&#x27;, &#x27;paid&#x27;, &#x27;cancelled&#x27;)),</span>
+<span>    aggregate_version integer NOT NULL CHECK (aggregate_version &gt; 0),</span>
+<span>    updated_at timestamptz NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_replication_lab.outbox_events (</span>
+<span>    event_id text PRIMARY KEY,</span>
+<span>    aggregate_type text NOT NULL,</span>
+<span>    aggregate_key text NOT NULL,</span>
+<span>    aggregate_version integer NOT NULL CHECK (aggregate_version &gt; 0),</span>
+<span>    event_type text NOT NULL,</span>
+<span>    payload jsonb NOT NULL CHECK (jsonb_typeof(payload) = &#x27;object&#x27;),</span>
+<span>    occurred_at timestamptz NOT NULL,</span>
+<span>    published_at timestamptz,</span>
+<span>    delivery_attempts integer NOT NULL DEFAULT 0 CHECK (delivery_attempts &gt;= 0),</span>
+<span>    UNIQUE (aggregate_type, aggregate_key, aggregate_version)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_replication_lab.consumer_inbox (</span>
+<span>    consumer_name text NOT NULL,</span>
+<span>    event_id text NOT NULL,</span>
+<span>    accepted_at timestamptz NOT NULL DEFAULT clock_timestamp(),</span>
+<span>    payload_sha256 text NOT NULL CHECK (</span>
+<span>        payload_sha256 ~ &#x27;^[0-9a-f]{64}$&#x27;</span>
+<span>    ),</span>
+<span>    PRIMARY KEY (consumer_name, event_id)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_replication_lab.projected_orders (</span>
+<span>    consumer_name text NOT NULL,</span>
+<span>    order_key text NOT NULL,</span>
+<span>    status text NOT NULL,</span>
+<span>    aggregate_version integer NOT NULL,</span>
+<span>    last_event_id text NOT NULL,</span>
+<span>    PRIMARY KEY (consumer_name, order_key)</span>
+<span>);</span>
+<span> </span>
+<span>-- Business state and event are committed by the same database transaction.</span>
+<span>INSERT INTO pro_replication_lab.orders (</span>
+<span>    order_key, status, aggregate_version, updated_at</span>
+<span>)</span>
+<span>VALUES (</span>
+<span>    &#x27;ORD-100&#x27;,</span>
+<span>    &#x27;open&#x27;,</span>
+<span>    1,</span>
+<span>    TIMESTAMPTZ &#x27;2026-06-01 10:00:00+00&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_replication_lab.outbox_events (</span>
+<span>    event_id,</span>
+<span>    aggregate_type,</span>
+<span>    aggregate_key,</span>
+<span>    aggregate_version,</span>
+<span>    event_type,</span>
+<span>    payload,</span>
+<span>    occurred_at</span>
+<span>)</span>
+<span>VALUES (</span>
+<span>    &#x27;EVT-100-v1&#x27;,</span>
+<span>    &#x27;order&#x27;,</span>
+<span>    &#x27;ORD-100&#x27;,</span>
+<span>    1,</span>
+<span>    &#x27;order.opened&#x27;,</span>
+<span>    &#x27;{&quot;order_key&quot;:&quot;ORD-100&quot;,&quot;status&quot;:&quot;open&quot;}&#x27;,</span>
+<span>    TIMESTAMPTZ &#x27;2026-06-01 10:00:00+00&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>UPDATE pro_replication_lab.orders AS o</span>
+<span>SET status = &#x27;paid&#x27;,</span>
+<span>    aggregate_version = 2,</span>
+<span>    updated_at = TIMESTAMPTZ &#x27;2026-06-01 10:05:00+00&#x27;</span>
+<span>WHERE o.order_key = &#x27;ORD-100&#x27;;</span>
+<span> </span>
+<span>INSERT INTO pro_replication_lab.outbox_events (</span>
+<span>    event_id,</span>
+<span>    aggregate_type,</span>
+<span>    aggregate_key,</span>
+<span>    aggregate_version,</span>
+<span>    event_type,</span>
+<span>    payload,</span>
+<span>    occurred_at</span>
+<span>)</span>
+<span>VALUES (</span>
+<span>    &#x27;EVT-100-v2&#x27;,</span>
+<span>    &#x27;order&#x27;,</span>
+<span>    &#x27;ORD-100&#x27;,</span>
+<span>    2,</span>
+<span>    &#x27;order.paid&#x27;,</span>
+<span>    &#x27;{&quot;order_key&quot;:&quot;ORD-100&quot;,&quot;status&quot;:&quot;paid&quot;}&#x27;,</span>
+<span>    TIMESTAMPTZ &#x27;2026-06-01 10:05:00+00&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>CREATE PROCEDURE pro_replication_lab.consume_outbox_batch(</span>
+<span>    p_consumer_name text,</span>
+<span>    p_batch_size integer</span>
+<span>)</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>AS $procedure$</span>
+<span>DECLARE</span>
+<span>    event_row pro_replication_lab.outbox_events%ROWTYPE;</span>
+<span>    event_payload_sha256 text;</span>
+<span>BEGIN</span>
+<span>    IF p_consumer_name IS NULL OR btrim(p_consumer_name) = &#x27;&#x27; THEN</span>
+<span>        RAISE EXCEPTION &#x27;consumer name must not be blank&#x27;</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span>    IF p_batch_size &lt; 1 OR p_batch_size &gt; 1000 THEN</span>
+<span>        RAISE EXCEPTION &#x27;batch size must be between 1 and 1000&#x27;</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    FOR event_row IN</span>
+<span>        SELECT oe.*</span>
+<span>        FROM pro_replication_lab.outbox_events AS oe</span>
+<span>        WHERE oe.published_at IS NULL</span>
+<span>        ORDER BY</span>
+<span>            oe.occurred_at,</span>
+<span>            oe.aggregate_key,</span>
+<span>            oe.aggregate_version,</span>
+<span>            oe.event_id</span>
+<span>        FOR UPDATE SKIP LOCKED</span>
+<span>        LIMIT p_batch_size</span>
+<span>    LOOP</span>
+<span>        event_payload_sha256 := encode(</span>
+<span>            sha256(event_row.payload::text::bytea),</span>
+<span>            &#x27;hex&#x27;</span>
+<span>        );</span>
+<span> </span>
+<span>        INSERT INTO pro_replication_lab.consumer_inbox (</span>
+<span>            consumer_name,</span>
+<span>            event_id,</span>
+<span>            payload_sha256</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            p_consumer_name,</span>
+<span>            event_row.event_id,</span>
+<span>            event_payload_sha256</span>
+<span>        )</span>
+<span>        ON CONFLICT (consumer_name, event_id) DO NOTHING;</span>
+<span> </span>
+<span>        -- FOUND is true only when this consumer accepted the event for the first</span>
+<span>        -- time. Redelivery therefore does not repeat the projection side effect.</span>
+<span>        IF FOUND THEN</span>
+<span>            INSERT INTO pro_replication_lab.projected_orders (</span>
+<span>                consumer_name,</span>
+<span>                order_key,</span>
+<span>                status,</span>
+<span>                aggregate_version,</span>
+<span>                last_event_id</span>
+<span>            )</span>
+<span>            VALUES (</span>
+<span>                p_consumer_name,</span>
+<span>                event_row.aggregate_key,</span>
+<span>                event_row.payload -&gt;&gt; &#x27;status&#x27;,</span>
+<span>                event_row.aggregate_version,</span>
+<span>                event_row.event_id</span>
+<span>            )</span>
+<span>            ON CONFLICT (consumer_name, order_key) DO UPDATE</span>
+<span>            SET status = EXCLUDED.status,</span>
+<span>                aggregate_version = EXCLUDED.aggregate_version,</span>
+<span>                last_event_id = EXCLUDED.last_event_id</span>
+<span>            WHERE EXCLUDED.aggregate_version</span>
+<span>                  &gt; pro_replication_lab.projected_orders.aggregate_version;</span>
+<span>        ELSIF NOT EXISTS (</span>
+<span>            SELECT 1</span>
+<span>            FROM pro_replication_lab.consumer_inbox AS ci</span>
+<span>            WHERE ci.consumer_name = p_consumer_name</span>
+<span>              AND ci.event_id = event_row.event_id</span>
+<span>              AND ci.payload_sha256 = event_payload_sha256</span>
+<span>        ) THEN</span>
+<span>            RAISE EXCEPTION</span>
+<span>                &#x27;event id % was reused with a different payload&#x27;,</span>
+<span>                event_row.event_id</span>
+<span>                USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>        END IF;</span>
+<span> </span>
+<span>        UPDATE pro_replication_lab.outbox_events AS oe</span>
+<span>        SET published_at = clock_timestamp(),</span>
+<span>            delivery_attempts = oe.delivery_attempts + 1</span>
+<span>        WHERE oe.event_id = event_row.event_id;</span>
+<span>    END LOOP;</span>
+<span>END</span>
+<span>$procedure$;</span>
+<span> </span>
+<span>\echo &#x27;First at-least-once delivery: consumer accepts two unique events&#x27;</span>
+<span>CALL pro_replication_lab.consume_outbox_batch(&#x27;order_projection&#x27;, 10);</span>
+<span> </span>
+<span>SELECT</span>
+<span>    po.consumer_name,</span>
+<span>    po.order_key,</span>
+<span>    po.status,</span>
+<span>    po.aggregate_version,</span>
+<span>    po.last_event_id</span>
+<span>FROM pro_replication_lab.projected_orders AS po</span>
+<span>ORDER BY po.consumer_name, po.order_key;</span>
+<span> </span>
+<span>DO $expected_payload_conflict$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        UPDATE pro_replication_lab.outbox_events</span>
+<span>        SET payload = &#x27;{&quot;order_key&quot;:&quot;ORD-100&quot;,&quot;status&quot;:&quot;cancelled&quot;}&#x27;,</span>
+<span>            published_at = NULL</span>
+<span>        WHERE event_id = &#x27;EVT-100-v1&#x27;;</span>
+<span> </span>
+<span>        CALL pro_replication_lab.consume_outbox_batch(</span>
+<span>            &#x27;order_projection&#x27;,</span>
+<span>            10</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;event-id payload conflict unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected idempotency-payload rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$expected_payload_conflict$;</span>
+<span> </span>
+<span>\echo &#x27;Simulated redelivery: inbox key prevents repeated side effects&#x27;</span>
+<span>UPDATE pro_replication_lab.outbox_events</span>
+<span>SET published_at = NULL;</span>
+<span> </span>
+<span>CALL pro_replication_lab.consume_outbox_batch(&#x27;order_projection&#x27;, 10);</span>
+<span> </span>
+<span>SELECT</span>
+<span>    oe.event_id,</span>
+<span>    oe.aggregate_version,</span>
+<span>    oe.delivery_attempts,</span>
+<span>    (oe.published_at IS NOT NULL) AS acknowledged</span>
+<span>FROM pro_replication_lab.outbox_events AS oe</span>
+<span>ORDER BY oe.aggregate_key, oe.aggregate_version, oe.event_id;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    ci.consumer_name,</span>
+<span>    COUNT(*) AS accepted_unique_events</span>
+<span>FROM pro_replication_lab.consumer_inbox AS ci</span>
+<span>GROUP BY ci.consumer_name</span>
+<span>ORDER BY ci.consumer_name;</span>
+<span> </span>
+<span>-- Exercises:</span>
+<span>--</span>
+<span>-- 1. Simulate a process crash after the business transaction commits but before</span>
+<span>--    publication. Prove the unpublished outbox event remains discoverable.</span>
+<span>-- 2. Simulate consumer redelivery after an external side effect but before</span>
+<span>--    acknowledgement. Explain why an inbox transaction works only when the</span>
+<span>--    effect shares its database; design an idempotency key for an external API.</span>
+<span>-- 3. Deliver aggregate version 3 before version 2 to a fresh consumer and prove</span>
+<span>--    the projection never regresses. Define how gaps are detected/repaired.</span>
+<span>-- 4. Explain physical streaming versus logical replication/publications, and</span>
+<span>--    whether schema DDL and sequences are replicated by the chosen mechanism.</span>
+<span>-- 5. Design slot monitoring around retained WAL bytes, active state, consumer</span>
+<span>--    lag, disk budget, alert threshold, and safe slot retirement. Never drop a</span>
+<span>--    slot merely because its consumer is temporarily disconnected.</span>
+<span>-- 6. Write a failover runbook covering health/quorum, fencing the old primary,</span>
+<span>--    data-loss evidence, DNS/client reconnect, timeline, slot/subscriber state,</span>
+<span>--    RPO/RTO, rollback, and post-failover backups.</span>
+<span>-- 7. Design a logical publication for one table with a row filter and column</span>
+<span>--    list. Explain replica identity for UPDATE/DELETE, unsupported schema</span>
+<span>--    changes, sequence state, initial copy, and how to prove no tenant leaks.</span>
+<span>-- 8. Document a consistent snapshot-to-stream bootstrap. Relate exported</span>
+<span>--    snapshot, start LSN, replication slot, initial copy, handoff, deduplication,</span>
+<span>--    restart, WAL retention, and cleanup after an abandoned bootstrap.</span>
+<span>-- 9. Specify a read-after-write contract for traffic sent to replicas. Compare</span>
+<span>--    primary pinning, LSN tokens/waits, bounded staleness, session guarantees,</span>
+<span>--    timeout fallback, and what lag metric users actually experience.</span>
+<span>-- 10. Design conflict handling for accidental multi-writer topology. Explain</span>
+<span>--     why wall-clock last-write-wins is unsafe, and compare single-writer</span>
+<span>--     ownership, version checks, deterministic merge, quarantine, and repair.</span>
+<span>-- 11. Create a DDL compatibility matrix for publisher/subscriber versions.</span>
+<span>--     Sequence additive columns, defaults, constraints, type changes, indexes,</span>
+<span>--     application deployments, validation, and removal without stopping CDC.</span>
+<span>-- 12. Write failback/reseed steps after promotion. Cover new-primary backup,</span>
+<span>--     old-primary fencing, timeline divergence, rewind or rebuild choice,</span>
+<span>--     replication slots, subscriptions, client routing, data checks, and audit.</span>
+<span> </span>
+<span>DO $self_check$</span>
+<span>BEGIN</span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_replication_lab.consumer_inbox AS ci</span>
+<span>        WHERE ci.consumer_name = &#x27;order_projection&#x27;</span>
+<span>    ) &lt;&gt; 2 THEN</span>
+<span>        RAISE EXCEPTION &#x27;idempotent inbox accepted a duplicate event&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_replication_lab.projected_orders AS po</span>
+<span>        WHERE po.consumer_name = &#x27;order_projection&#x27;</span>
+<span>          AND po.order_key = &#x27;ORD-100&#x27;</span>
+<span>          AND po.status = &#x27;paid&#x27;</span>
+<span>          AND po.aggregate_version = 2</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;order projection is not at latest aggregate version&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$self_check$;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span>\echo &#x27;SQL-REPL-01 complete: no replication object was created&#x27;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-repl-01-solutions-replication-cdc-and-ha">SQL-REPL-01 Solutions — Replication, CDC, and HA<a class="heading-anchor" href="#solution-1--sql-repl-01-solutions-replication-cdc-and-ha" aria-label="Link to this section">#</a></h3>
+<p>Run:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql</code></pre>
+<p>The solution creates no replication objects and rolls back.</p>
+<h4 id="solution-1--exercise-1-publisher-crash">Exercise 1 — Publisher crash<a class="heading-anchor" href="#solution-1--exercise-1-publisher-crash" aria-label="Link to this section">#</a></h4>
+<p>Commit business state and outbox intent together. A crash before publisher acknowledgement leaves <code>published=false</code>; a later worker discovers it. Mark published only after durable downstream acknowledgement. Monitor old unpublished rows and retry with backoff/ownership.</p>
+<h4 id="solution-1--exercise-2-consumer-uncertainty">Exercise 2 — Consumer uncertainty<a class="heading-anchor" href="#solution-1--exercise-2-consumer-uncertainty" aria-label="Link to this section">#</a></h4>
+<p>Inbox plus projection is atomic when both live in one database transaction. For an external API, send <code>event_id</code> as an idempotency key to a service that durably stores it and returns the original result on retry. After a timeout, query/reconcile by key; do not assume failure means no effect. Bind the key to a canonical request fingerprint and reject key reuse with different content.</p>
+<h4 id="solution-1--exercise-3-ordering-and-gaps">Exercise 3 — Ordering and gaps<a class="heading-anchor" href="#solution-1--exercise-3-ordering-and-gaps" aria-label="Link to this section">#</a></h4>
+<p>The executable delivers v3 before v2. The projection update condition accepts only a greater aggregate version, so v2 cannot regress v3. Inbox contains versions 2 and 3; comparing with generated contiguous versions reveals the missing v1 gap. Policy may pause/replay, fetch a canonical snapshot, or accept a documented compaction—not silently ignore it.</p>
+<h4 id="solution-1--exercise-4-physical-versus-logical">Exercise 4 — Physical versus logical<a class="heading-anchor" href="#solution-1--exercise-4-physical-versus-logical" aria-label="Link to this section">#</a></h4>
+<p>Physical replication streams WAL/storage changes for the cluster and supports standby recovery; it needs compatible PostgreSQL/storage/extensions. Logical replication decodes selected table DML through publication/subscription and can support version/platform differences, but schema DDL, sequences, large objects, and conflict policy need separate handling.</p>
+<h4 id="solution-1--exercise-5-slot-operations">Exercise 5 — Slot operations<a class="heading-anchor" href="#solution-1--exercise-5-slot-operations" aria-label="Link to this section">#</a></h4>
+<p>Track slot owner/consumer, active state, restart/confirmed LSN, retained WAL bytes versus disk budget, consumer lag/rate, last success, and alert/runbook threshold. Confirm consumer decommission or new restart position before dropping a slot. A disconnected but recoverable consumer may still need retained WAL.</p>
+<h4 id="solution-1--exercise-6-failover">Exercise 6 — Failover<a class="heading-anchor" href="#solution-1--exercise-6-failover" aria-label="Link to this section">#</a></h4>
+<p>Detect with quorum-aware health, fence the old writer, determine replay/loss against RPO, promote one target, update routing, reconnect clients with retry, verify data/application/slots/subscribers, establish a new replica and backup, and record the new timeline. Define abort/rollback boundaries before promotion; after divergent writes, “fail back” is reconciliation, not a simple switch.</p>
+<h4 id="solution-1--exercise-7-publication-and-replica-identity-contract">Exercise 7 — Publication and replica identity contract<a class="heading-anchor" href="#solution-1--exercise-7-publication-and-replica-identity-contract" aria-label="Link to this section">#</a></h4>
+<p>Publish only reviewed rows/columns and test inserts, updates crossing the row filter, deletes, NULL boundaries, and every tenant. UPDATE/DELETE need a replica identity that identifies the old row—usually a suitable primary key; FULL increases WAL and has limitations.</p>
+<p>Logical replication does not automatically maintain sequence state or replicate general DDL. Filtering defines movement scope, not subscriber authorization, so test for leaks end to end.</p>
+<h4 id="solution-1--exercise-8-snapshot-to-stream-bootstrap">Exercise 8 — Snapshot-to-stream bootstrap<a class="heading-anchor" href="#solution-1--exercise-8-snapshot-to-stream-bootstrap" aria-label="Link to this section">#</a></h4>
+<p>Create/own the slot and exported snapshot, record its start LSN, read initial data under that snapshot, then consume from the matching position before handoff. Deduplicate by stable source identity and checkpoint only durable work.</p>
+<p>Monitor retained WAL versus disk. On abandonment, prove no consumer needs the slot before cleanup; an orphan slot is a disk-growth hazard.</p>
+<h4 id="solution-1--exercise-9-read-after-write-on-replicas">Exercise 9 — Read-after-write on replicas<a class="heading-anchor" href="#solution-1--exercise-9-read-after-write-on-replicas" aria-label="Link to this section">#</a></h4>
+<p>Define user-visible consistency: immediate own-write visibility, maximum staleness, or best effort. Compare primary pinning, a commit-LSN token and replay wait, bounded-lag routing, and timeout fallback.</p>
+<p>Byte/time lag does not prove one transaction is visible. Observe replay LSN and application caches, cap waits, and specify paused-replay/failover behavior.</p>
+<h4 id="solution-1--exercise-10-multi-writer-conflicts">Exercise 10 — Multi-writer conflicts<a class="heading-anchor" href="#solution-1--exercise-10-multi-writer-conflicts" aria-label="Link to this section">#</a></h4>
+<p>Wall clocks skew, so last timestamp wins can discard a causally later change. Prefer single-writer ownership; otherwise use expected versions, deterministic domain merge, and quarantine irreconcilable conflicts with source evidence.</p>
+<p>Do not advance checkpoints silently past unresolved data. Provide canonical snapshot/replay repair, idempotency, authorization, and an audit of the choice.</p>
+<h4 id="solution-1--exercise-11-ddl-compatibility-sequencing">Exercise 11 — DDL compatibility sequencing<a class="heading-anchor" href="#solution-1--exercise-11-ddl-compatibility-sequencing" aria-label="Link to this section">#</a></h4>
+<p>Matrix publisher, subscriber, decoder/apply, and old/new application schemas. Add nullable columns first, deploy tolerant readers/writers, backfill/reconcile, validate constraints, and remove only after every consumer stops using old shape.</p>
+<p>Defaults, generated values, replica identity, types, row filters, and column lists need explicit tests. DDL requires its own ordered deployment channel.</p>
+<h4 id="solution-1--exercise-12-failback-and-reseed">Exercise 12 — Failback and reseed<a class="heading-anchor" href="#solution-1--exercise-12-failback-and-reseed" aria-label="Link to this section">#</a></h4>
+<p>Protect a verified new-primary backup and keep the old primary fenced. Compare timelines/LSNs and use rewind only when prerequisites/WAL exist; otherwise rebuild. Recreate and verify replicas, slots, subscriptions, and checkpoints.</p>
+<p>Before routing writes, reconcile data and critical queries, establish backup/HA, monitor retry/lag/conflicts, and record authority/evidence. A diverged former primary cannot be restored by reversing DNS.</p>
+<h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Poison events need quarantine without blocking every later aggregate forever.</li>
+<li>Publisher concurrency needs leases/locks and retry visibility.</li>
+<li>Synchronous replication trades latency/availability for lower acknowledged data-loss risk.</li>
+<li>Logical subscriber conflicts require explicit ownership.</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-REPL-01 executable solutions: local simulation only.</span>
+<span>\set ON_ERROR_STOP on</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_replication_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_replication_lab.outbox (</span>
+<span>    event_id text PRIMARY KEY,</span>
+<span>    aggregate_key text NOT NULL,</span>
+<span>    aggregate_version integer NOT NULL,</span>
+<span>    payload jsonb NOT NULL,</span>
+<span>    published boolean NOT NULL DEFAULT false,</span>
+<span>    UNIQUE (aggregate_key, aggregate_version)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_replication_lab.inbox (</span>
+<span>    consumer_name text NOT NULL,</span>
+<span>    event_id text NOT NULL,</span>
+<span>    payload_sha256 text NOT NULL,</span>
+<span>    PRIMARY KEY (consumer_name, event_id)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_replication_lab.projection (</span>
+<span>    consumer_name text NOT NULL,</span>
+<span>    aggregate_key text NOT NULL,</span>
+<span>    aggregate_version integer NOT NULL,</span>
+<span>    status text NOT NULL,</span>
+<span>    PRIMARY KEY (consumer_name, aggregate_key)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_replication_lab.outbox</span>
+<span>VALUES</span>
+<span>    (&#x27;E-v1&#x27;, &#x27;ORDER-1&#x27;, 1, &#x27;{&quot;status&quot;:&quot;open&quot;}&#x27;, false),</span>
+<span>    (&#x27;E-v2&#x27;, &#x27;ORDER-1&#x27;, 2, &#x27;{&quot;status&quot;:&quot;paid&quot;}&#x27;, false),</span>
+<span>    (&#x27;E-v3&#x27;, &#x27;ORDER-1&#x27;, 3, &#x27;{&quot;status&quot;:&quot;cancelled&quot;}&#x27;, false);</span>
+<span> </span>
+<span>CREATE PROCEDURE pro_replication_lab.deliver_event(</span>
+<span>    p_consumer text,</span>
+<span>    p_event_id text</span>
+<span>)</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>AS $procedure$</span>
+<span>DECLARE</span>
+<span>    e pro_replication_lab.outbox%ROWTYPE;</span>
+<span>    event_payload_sha256 text;</span>
+<span>BEGIN</span>
+<span>    SELECT o.*</span>
+<span>    INTO STRICT e</span>
+<span>    FROM pro_replication_lab.outbox AS o</span>
+<span>    WHERE o.event_id = p_event_id</span>
+<span>    FOR UPDATE;</span>
+<span> </span>
+<span>    event_payload_sha256 := encode(</span>
+<span>        sha256(e.payload::text::bytea),</span>
+<span>        &#x27;hex&#x27;</span>
+<span>    );</span>
+<span> </span>
+<span>    INSERT INTO pro_replication_lab.inbox (</span>
+<span>        consumer_name,</span>
+<span>        event_id,</span>
+<span>        payload_sha256</span>
+<span>    )</span>
+<span>    VALUES (p_consumer, e.event_id, event_payload_sha256)</span>
+<span>    ON CONFLICT DO NOTHING;</span>
+<span> </span>
+<span>    IF FOUND THEN</span>
+<span>        INSERT INTO pro_replication_lab.projection (</span>
+<span>            consumer_name, aggregate_key, aggregate_version, status</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            p_consumer,</span>
+<span>            e.aggregate_key,</span>
+<span>            e.aggregate_version,</span>
+<span>            e.payload -&gt;&gt; &#x27;status&#x27;</span>
+<span>        )</span>
+<span>        ON CONFLICT (consumer_name, aggregate_key) DO UPDATE</span>
+<span>        SET aggregate_version = EXCLUDED.aggregate_version,</span>
+<span>            status = EXCLUDED.status</span>
+<span>        WHERE EXCLUDED.aggregate_version</span>
+<span>              &gt; pro_replication_lab.projection.aggregate_version;</span>
+<span>    ELSIF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_replication_lab.inbox AS i</span>
+<span>        WHERE i.consumer_name = p_consumer</span>
+<span>          AND i.event_id = e.event_id</span>
+<span>          AND i.payload_sha256 = event_payload_sha256</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION</span>
+<span>            &#x27;event id % was reused with a different payload&#x27;,</span>
+<span>            e.event_id</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    UPDATE pro_replication_lab.outbox AS o</span>
+<span>    SET published = true</span>
+<span>    WHERE o.event_id = e.event_id;</span>
+<span>END</span>
+<span>$procedure$;</span>
+<span> </span>
+<span>-- Exercise 3: out-of-order v3, then v2 must not regress.</span>
+<span>CALL pro_replication_lab.deliver_event(&#x27;projection&#x27;, &#x27;E-v3&#x27;);</span>
+<span>CALL pro_replication_lab.deliver_event(&#x27;projection&#x27;, &#x27;E-v2&#x27;);</span>
+<span>CALL pro_replication_lab.deliver_event(&#x27;projection&#x27;, &#x27;E-v3&#x27;);</span>
+<span> </span>
+<span>SELECT</span>
+<span>    p.consumer_name,</span>
+<span>    p.aggregate_key,</span>
+<span>    p.aggregate_version,</span>
+<span>    p.status</span>
+<span>FROM pro_replication_lab.projection AS p</span>
+<span>ORDER BY p.consumer_name, p.aggregate_key;</span>
+<span> </span>
+<span>WITH accepted_versions AS (</span>
+<span>    SELECT</span>
+<span>        o.aggregate_key,</span>
+<span>        array_agg(o.aggregate_version ORDER BY o.aggregate_version) AS versions</span>
+<span>    FROM pro_replication_lab.inbox AS i</span>
+<span>    JOIN pro_replication_lab.outbox AS o</span>
+<span>      ON o.event_id = i.event_id</span>
+<span>    WHERE i.consumer_name = &#x27;projection&#x27;</span>
+<span>    GROUP BY o.aggregate_key</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    av.aggregate_key,</span>
+<span>    av.versions,</span>
+<span>    (</span>
+<span>        SELECT array_agg(v ORDER BY v)</span>
+<span>        FROM generate_series(</span>
+<span>            av.versions[1],</span>
+<span>            av.versions[cardinality(av.versions)]</span>
+<span>        ) AS v</span>
+<span>    ) AS expected_contiguous_versions</span>
+<span>FROM accepted_versions AS av</span>
+<span>ORDER BY av.aggregate_key;</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_replication_lab.projection AS p</span>
+<span>        WHERE p.aggregate_key = &#x27;ORDER-1&#x27;</span>
+<span>          AND p.aggregate_version = 3</span>
+<span>          AND p.status = &#x27;cancelled&#x27;</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;out-of-order delivery regressed projection&#x27;;</span>
+<span>    END IF;</span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_replication_lab.inbox AS i</span>
+<span>        WHERE i.consumer_name = &#x27;projection&#x27;</span>
+<span>    ) &lt;&gt; 2 THEN</span>
+<span>        RAISE EXCEPTION &#x27;redelivery bypassed inbox idempotency&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- Exercise 1: E-v1 models a committed business/outbox event whose publisher</span>
+<span>-- acknowledgement was lost. It remains discoverable for retry.</span>
+<span>SELECT</span>
+<span>    o.event_id,</span>
+<span>    o.aggregate_key,</span>
+<span>    o.aggregate_version</span>
+<span>FROM pro_replication_lab.outbox AS o</span>
+<span>WHERE NOT o.published</span>
+<span>ORDER BY o.aggregate_key, o.aggregate_version;</span>
+<span> </span>
+<span>-- Exercise 2: the duplicate E-v3 call produced only one inbox row. An external</span>
+<span>-- side effect also needs event_id plus a canonical request fingerprint as a</span>
+<span>-- durable idempotency contract at the external service.</span>
+<span>SELECT</span>
+<span>    i.consumer_name,</span>
+<span>    i.event_id,</span>
+<span>    COUNT(*) AS accepted_rows</span>
+<span>FROM pro_replication_lab.inbox AS i</span>
+<span>GROUP BY i.consumer_name, i.event_id</span>
+<span>ORDER BY i.consumer_name, i.event_id;</span>
+<span> </span>
+<span>-- Exercise 4: this single-node fixture creates no replication object. Physical</span>
+<span>-- streaming covers cluster storage/WAL; logical publications select table DML</span>
+<span>-- and require separate DDL/sequence handling.</span>
+<span>SELECT</span>
+<span>    pg_catalog.pg_is_in_recovery() AS connected_to_recovery_node,</span>
+<span>    current_setting(&#x27;server_version&#x27;) AS server_version;</span>
+<span> </span>
+<span>-- Exercise 5: read-only slot inventory. Empty results are a valid capability</span>
+<span>-- state; never drop a disconnected slot without consumer ownership evidence.</span>
+<span>SELECT</span>
+<span>    s.slot_name,</span>
+<span>    s.slot_type,</span>
+<span>    s.active,</span>
+<span>    s.restart_lsn,</span>
+<span>    s.confirmed_flush_lsn</span>
+<span>FROM pg_catalog.pg_replication_slots AS s</span>
+<span>ORDER BY s.slot_name;</span>
+<span> </span>
+<span>-- Exercise 6: promotion requires quorum-aware diagnosis, old-primary fencing,</span>
+<span>-- data-loss evidence, controlled routing, timeline/CDC verification, a new</span>
+<span>-- replica and backup, and recorded RPO/RTO plus stop/fallback boundaries.</span>
+<span> </span>
+<span>-- Exercise 7: publication scope needs row/column leak tests and an UPDATE/DELETE</span>
+<span>-- replica identity. The local table&#x27;s primary key is the intended identity.</span>
+<span>SELECT</span>
+<span>    n.nspname AS schema_name,</span>
+<span>    rel.relname AS table_name,</span>
+<span>    CASE rel.relreplident</span>
+<span>        WHEN &#x27;d&#x27; THEN &#x27;default&#x27;</span>
+<span>        WHEN &#x27;n&#x27; THEN &#x27;nothing&#x27;</span>
+<span>        WHEN &#x27;f&#x27; THEN &#x27;full&#x27;</span>
+<span>        WHEN &#x27;i&#x27; THEN &#x27;index&#x27;</span>
+<span>    END AS replica_identity</span>
+<span>FROM pg_catalog.pg_class AS rel</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = rel.relnamespace</span>
+<span>WHERE n.nspname = &#x27;pro_replication_lab&#x27;</span>
+<span>  AND rel.relname = &#x27;outbox&#x27;;</span>
+<span> </span>
+<span>-- Exercise 8: a consistent bootstrap owns one exported snapshot/start LSN,</span>
+<span>-- initial copy, stream handoff, durable checkpoint, WAL budget, retry, and</span>
+<span>-- abandoned-slot cleanup record.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;create slot and export snapshot&#x27;::text),</span>
+<span>        (2, &#x27;copy under snapshot and record progress&#x27;),</span>
+<span>        (3, &#x27;consume from matching LSN with idempotency&#x27;),</span>
+<span>        (4, &#x27;verify handoff, then release bootstrap resources&#x27;)</span>
+<span>) AS bootstrap(step_number, required_evidence)</span>
+<span>ORDER BY step_number;</span>
+<span> </span>
+<span>-- Exercise 9: read-your-write should use transaction visibility evidence such</span>
+<span>-- as a commit/replay LSN token, not byte lag alone.</span>
+<span>SELECT</span>
+<span>    CASE</span>
+<span>        WHEN pg_catalog.pg_is_in_recovery()</span>
+<span>        THEN pg_catalog.pg_last_wal_replay_lsn()</span>
+<span>        ELSE pg_catalog.pg_current_wal_lsn()</span>
+<span>    END AS local_visibility_lsn;</span>
+<span> </span>
+<span>-- Exercise 10: wall-clock last-write-wins is unsafe under skew. Prefer one</span>
+<span>-- writer per key; otherwise use expected versions, deterministic merge, or</span>
+<span>-- quarantine with canonical snapshot/replay repair and an audit.</span>
+<span>SELECT</span>
+<span>    p.aggregate_key,</span>
+<span>    p.aggregate_version,</span>
+<span>    p.status</span>
+<span>FROM pro_replication_lab.projection AS p</span>
+<span>ORDER BY p.aggregate_key;</span>
+<span> </span>
+<span>-- Exercise 11: DDL uses an explicit compatibility sequence outside logical</span>
+<span>-- replication, with publisher/subscriber/application checks at every phase.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;expand&#x27;::text, &#x27;nullable/additive on compatible endpoints&#x27;::text),</span>
+<span>        (&#x27;deploy&#x27;, &#x27;tolerant readers and dual-compatible writers&#x27;),</span>
+<span>        (&#x27;backfill&#x27;, &#x27;reconcile before validating constraints&#x27;),</span>
+<span>        (&#x27;contract&#x27;, &#x27;remove only after all consumers stop old shape&#x27;)</span>
+<span>) AS ddl_matrix(phase, compatibility_gate)</span>
+<span>ORDER BY phase;</span>
+<span> </span>
+<span>-- Exercise 12: failback/reseed begins with a protected new-primary backup and a</span>
+<span>-- fenced former primary, then chooses rewind or rebuild from timeline/WAL</span>
+<span>-- evidence and revalidates data, slots, subscriptions, routing, backup, and HA.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-ext-01.html"><small>Previous lesson</small><strong>sql-ext-01</strong><span>PostgreSQL Extensions, Spatial Data, and Vectors</span></a>
+        <a class="nav-card next" href="sql-temporal-01.html"><small>Next lesson</small><strong>sql-temporal-01</strong><span>Temporal and Domain Modelling</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-repl-01";
+    const LEARNER_PATH = "sql/professional/lessons/sql_repl_01_cdc_high_availability.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

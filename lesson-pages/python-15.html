@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-15 · CLI Project · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-15</p>
+        <h1>CLI Project</h1>
+        <p class="hero-copy">Python foundations</p>
+        <div class="meta">
+          <span class="tag">foundation</span>
+          <span class="tag">75 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-14.html">python-14</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day15_cli_project.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/ds-60day/companion-guides/day15_cli_project.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day15_cli_project.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-15-project-a-testable-cli-data-tool">Day 15 — Project: A Testable CLI Data Tool<a class="heading-anchor" href="#guide--day-15-project-a-testable-cli-data-tool" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Beginner checkpoint</p>
+<p>This checkpoint combines the first 14 days into a small command-line program that reads CSV, cleans data, writes output, and remains testable.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end of this project, you can:</p>
+<ul>
+<li>separate parsing, I/O, transformation, and presentation concerns;</li>
+<li>build a standard-library <code>argparse</code> interface;</li>
+<li>pass paths into pure, testable core functions;</li>
+<li>return a meaningful process exit code;</li>
+<li>run Ruff, mypy, and pytest before treating the project as complete.</li>
+</ul>
+<h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
+<p>Complete Days 1–14, especially packages (<code>python-09</code>), pytest (<code>python-10</code>), logging (<code>python-11</code>), and quality tooling (<code>python-14</code>).</p>
+<h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>CLI:</strong> command-line interface.</li>
+<li><strong>Argument parser:</strong> converts command text into validated program options.</li>
+<li><strong>Pure transform:</strong> computes output from input without performing file I/O.</li>
+<li><strong>Boundary:</strong> point where untrusted input, files, or operating-system behavior enters the program.</li>
+<li><strong>Exit code:</strong> <code>0</code> for success and nonzero for a reported failure.</li>
+</ul>
+<p>Keep a thin shell around a testable core:</p>
+<pre><code class="language-text">arguments -&gt; read -&gt; clean -&gt; summarize -&gt; write
+               boundaries | pure work | boundary</code></pre>
+<h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
+<p>This tiny parser demonstrates the interface without solving the data project:</p>
+<pre><code class="language-python">import argparse
+from pathlib import Path
+
+
+def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
+    parser = argparse.ArgumentParser(description=&quot;Inspect an input path&quot;)
+    parser.add_argument(&quot;--input&quot;, required=True, type=Path)
+    return parser.parse_args(argv)</code></pre>
+<p>Passing <code>argv</code> makes parser behavior testable without changing global process arguments.</p>
+<h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Read a CSV with pandas, drop or handle required missing values, and convert documented column types. <strong>Hint:</strong> make <code>clean(frame)</code> return a copy so a caller&#x27;s input is not silently mutated.</li>
+<li>Compute summary statistics and save a cleaned CSV. <strong>Hint:</strong> keep read/write functions separate from transforms and create parent directories deliberately.</li>
+<li>Provide <code>--input</code> and <code>--out</code> with <code>argparse</code>; the intended invocation is <code>python tool.py --input data.csv --out out.csv</code>. <strong>Hint:</strong> use <code>type=Path</code> and <code>required=True</code>; do not introduce Click.</li>
+<li>Test core functions and one parser path. <strong>Hint:</strong> use tiny in-memory frames and pytest&#x27;s <code>tmp_path</code>, not large external data.</li>
+<li>Run Ruff lint/format checks, mypy, and pytest. <strong>Hint:</strong> use the same commands as Day 14 and inspect the first failure before continuing.</li>
+</ol>
+<p>Store practice source in a tracked project directory. Put disposable generated files under ignored <code>artifacts/</code>; never commit <code>.venv</code>, caches, secrets, or a machine-specific <code>.env</code>.</p>
+<h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.</p>
+<p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
+<ol>
+<li><strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values.</li>
+<li><strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state.</li>
+<li><strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write.</li>
+<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard.</li>
+<li><strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests.</li>
+</ol>
+<p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
+<h4 id="guide--run-the-project">Run the project<a class="heading-anchor" href="#guide--run-the-project" aria-label="Link to this section">#</a></h4>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe tool.py --input data.csv --out artifacts\out.csv
+.\.venv\Scripts\python.exe -m pytest</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python tool.py --input data.csv --out artifacts/out.csv
+.venv/bin/python -m pytest</code></pre>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can transformation tests run without reading a real file?</li>
+<li>Does <code>--help</code> explain required arguments and their purpose?</li>
+<li>What happens for a missing path, malformed number, or empty input?</li>
+<li>Can another module import the code without running the CLI?</li>
+</ul>
+<p>Expected behavior: valid input produces deterministic cleaned/summary output, invalid input fails clearly, and all quality gates pass.</p>
+<h4 id="guide--common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#guide--common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>The CLI runs during import:</strong> put execution in <code>main()</code> and guard it with <code>if <strong>name</strong> == &quot;<strong>main</strong>&quot;</code>.</li>
+<li><strong>Tests need subprocesses for every case:</strong> move logic behind pure functions and test the parser with an explicit <code>argv</code>.</li>
+<li><strong>Pandas mutates caller data:</strong> call <code>.copy()</code> at the transform boundary.</li>
+<li><strong>A traceback is shown for an ordinary user error:</strong> catch the narrow boundary exception in <code>main</code>, log a concise message, and return nonzero.</li>
+<li><strong>Windows output paths use manual string concatenation:</strong> use <code>Path</code> and <code>/</code> composition.</li>
+</ul>
+<h4 id="guide--continue">Continue<a class="heading-anchor" href="#guide--continue" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><a href="python-15.html#learner">Open the learner notebook</a></li>
+<li><a href="python-15.html#solution-1">Check the separate project solution</a></li>
+<li><a href="python-16.html#guide">Next: Day 16 — NumPy fundamentals</a></li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/notebooks/day15_cli_project.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day15_cli_project.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-15-project-cli-data-tool">Day 15 — Project: CLI data tool<a class="heading-anchor" href="#learner--cell-1--day-15-project-cli-data-tool" aria-label="Link to this section">#</a></h3>
+<p>Build a small command-line script that ingests a CSV, cleans it, and outputs a summary with tests and linting.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--requirements">Requirements<a class="heading-anchor" href="#learner--cell-2--requirements" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Read CSV (pandas), drop NA, convert types.</li>
+<li>Output summary stats and save a cleaned CSV.</li>
+<li>Provide a CLI (<code>python tool.py --input data.csv --out out.csv</code>).</li>
+<li>Include pytest tests for core functions.</li>
+<li>Pass Ruff lint and format checks, mypy, and pytest.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--hints">Hints<a class="heading-anchor" href="#learner--cell-3--hints" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Put core logic in functions so tests can import them.</li>
+<li>Use the standard-library <code>argparse</code> module for the CLI.</li>
+<li>Keep I/O separate from transforms.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-4--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Read a CSV with pandas, drop or handle required missing values, and convert documented column types. <strong>Hint:</strong> make <code>clean(frame)</code> return a copy so a caller&#x27;s input is not silently mutated.</li>
+<li>Compute summary statistics and save a cleaned CSV. <strong>Hint:</strong> keep read/write functions separate from transforms and create parent directories deliberately.</li>
+<li>Provide <code>--input</code> and <code>--out</code> with <code>argparse</code>; the intended invocation is <code>python tool.py --input data.csv --out out.csv</code>. <strong>Hint:</strong> use <code>type=Path</code> and <code>required=True</code>; do not introduce Click.</li>
+<li>Test core functions and one parser path. <strong>Hint:</strong> use tiny in-memory frames and pytest&#x27;s <code>tmp_path</code>, not large external data.</li>
+<li>Run Ruff lint/format checks, mypy, and pytest. <strong>Hint:</strong> use the same commands as Day 14 and inspect the first failure before continuing.</li>
+</ol>
+<p>Store practice source in a tracked project directory. Put disposable generated files under ignored <code>artifacts/</code>; never commit <code>.venv</code>, caches, secrets, or a machine-specific <code>.env</code>.</p>
+<h5 id="learner--cell-4--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-4--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.</p>
+<p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
+<ol>
+<li><strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values.</li>
+<li><strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state.</li>
+<li><strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write.</li>
+<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard.</li>
+<li><strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests.</li>
+</ol>
+<p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<span>#</span>
+<span># Predict first. Then write small code and assertions below each label.</span>
+<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<span> </span>
+<span># Practice 6 — Prediction</span>
+<span> </span>
+<span> </span>
+<span># Practice 7 — Tracing</span>
+<span> </span>
+<span> </span>
+<span># Practice 8 — Implementation</span>
+<span> </span>
+<span> </span>
+<span># Practice 9 — Debugging</span>
+<span> </span>
+<span> </span>
+<span># Practice 10 — Edge case and explanation</span>
+<span> </span></code></pre>
+</article></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day15_cli_project/day15_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day15_cli_project/day15_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-15-solutions-cli-data-tool-project">Day 15 — Solutions: CLI Data Tool Project<a class="heading-anchor" href="#solution-1--day-15-solutions-cli-data-tool-project" aria-label="Link to this section">#</a></h3>
+<p>We scaffold a small CLI that loads a CSV, cleans it, and writes a summary and cleaned output, with tests.</p>
+<p>Contents</p>
+<ul>
+<li>Project layout</li>
+<li>Core transforms with tests</li>
+<li>CLI wired with argparse</li>
+</ul>
+<hr>
+<p>Project layout</p>
+<pre><code>project/
+  pyproject.toml
+  src/
+    cli.py
+    io_utils.py
+    transforms.py
+  tests/
+    test_transforms.py</code></pre>
+<p>src/transforms.py</p>
+<pre><code class="language-python">from __future__ import annotations
+from typing import Sequence
+import pandas as pd
+
+
+def clean(df: pd.DataFrame) -&gt; pd.DataFrame:
+    d = df.copy()
+    # Example cleaning: drop NA rows in key cols and convert types
+    d = d.rename(columns=str.lower)
+    if &quot;date&quot; in d.columns:
+        d[&quot;date&quot;] = pd.to_datetime(d[&quot;date&quot;], errors=&quot;coerce&quot;, utc=True)
+    for c in (&quot;price&quot;, &quot;qty&quot;):
+        if c in d.columns:
+            d[c] = pd.to_numeric(d[c], errors=&quot;coerce&quot;)
+    d = d.dropna(subset=[c for c in (&quot;price&quot;,&quot;qty&quot;) if c in d.columns])
+    return d
+
+
+def summarize(d: pd.DataFrame) -&gt; pd.DataFrame:
+    # Example summary: total revenue by day (if present)
+    if {&quot;price&quot;,&quot;qty&quot;}.issubset(d.columns):
+        d = d.assign(revenue=d[&quot;price&quot;] * d[&quot;qty&quot;])
+    if &quot;date&quot; in d.columns:
+        return d.groupby(d[&quot;date&quot;].dt.date).agg(revenue=(&quot;revenue&quot;,&quot;sum&quot;))
+    return d.agg(revenue=(&quot;revenue&quot;,&quot;sum&quot;)).to_frame().T</code></pre>
+<p>src/io_utils.py</p>
+<pre><code class="language-python">from pathlib import Path
+import pandas as pd
+
+def read_csv(path: Path) -&gt; pd.DataFrame:
+    return pd.read_csv(path)
+
+def write_csv(df: pd.DataFrame, path: Path) -&gt; None:
+    df.to_csv(path, index=False)</code></pre>
+<p>src/cli.py</p>
+<pre><code class="language-python">import argparse
+from pathlib import Path
+from .io_utils import read_csv, write_csv
+from .transforms import clean, summarize
+
+def main(argv: list[str] | None = None) -&gt; int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--input&quot;, type=Path, required=True)
+    ap.add_argument(&quot;--out&quot;, type=Path, required=True)
+    ap.add_argument(&quot;--summary&quot;, type=Path, required=False)
+    args = ap.parse_args(argv)
+
+    df = read_csv(args.input)
+    tidy = clean(df)
+    write_csv(tidy, args.out)
+    if args.summary:
+        summ = summarize(tidy)
+        write_csv(summ, args.summary)
+    return 0
+
+if __name__ == &quot;__main__&quot;:
+    raise SystemExit(main())</code></pre>
+<p>tests/test_transforms.py</p>
+<pre><code class="language-python">import pandas as pd
+from src.transforms import clean, summarize
+
+def test_clean_and_summary():
+    df = pd.DataFrame({&quot;date&quot;:[&quot;2025-01-01&quot;,&quot;bad&quot;],&quot;price&quot;:[&quot;10&quot;,&quot;x&quot;],&quot;qty&quot;:[2,3]})
+    tidy = clean(df)
+    assert list(tidy.columns) &gt;= [&quot;date&quot;,&quot;price&quot;,&quot;qty&quot;]
+    assert tidy[&quot;price&quot;].dtype.kind in &quot;fi&quot;   # numeric
+    summ = summarize(tidy)
+    assert &quot;revenue&quot; in summ.columns</code></pre>
+<p>Run</p>
+<pre><code class="language-bash">pytest -q
+python -m src.cli --input data.csv --out out.csv --summary summary.csv</code></pre>
+<p>Notes</p>
+<ul>
+<li>Keep transforms pure and I/O thin for testability.</li>
+<li>Extend as needed (schemas, logging, error handling).</li>
+</ul>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Read a CSV with pandas, drop or handle required missing values, and convert documented column types. <strong>Hint:</strong> make <code>clean(frame)</code> return a copy so a caller&#x27;s input is not silently mutated.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compute summary statistics and save a cleaned CSV. <strong>Hint:</strong> keep read/write functions separate from transforms and create parent directories deliberately.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Provide <code>--input</code> and <code>--out</code> with <code>argparse</code>; the intended invocation is <code>python tool.py --input data.csv --out out.csv</code>. <strong>Hint:</strong> use <code>type=Path</code> and <code>required=True</code>; do not introduce Click.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Test core functions and one parser path. <strong>Hint:</strong> use tiny in-memory frames and pytest&#x27;s <code>tmp_path</code>, not large external data.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-1--exercise-5-original-lesson-practice">Exercise 5 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Run Ruff lint/format checks, mypy, and pytest. <strong>Hint:</strong> use the same commands as Day 14 and inspect the first failure before continuing. Store practice source in a tracked project directory. Put disposable generated files under ignored <code>artifacts/</code>; never commit <code>.venv</code>, caches, secrets, or a machine-specific <code>.env</code>.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-1--exercise-6-prediction">Exercise 6 — Prediction<a class="heading-anchor" href="#solution-1--exercise-6-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>.</p>
+<p><strong>Reasoning checkpoint:</strong> The parser performs declared conversions before <code>main</code> receives values. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--exercise-7-tracing">Exercise 7 — Tracing<a class="heading-anchor" href="#solution-1--exercise-7-tracing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work.</p>
+<p><strong>Reasoning checkpoint:</strong> A pure transform accepts and returns data without reading global state. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--exercise-8-implementation">Exercise 8 — Implementation<a class="heading-anchor" href="#solution-1--exercise-8-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present.</p>
+<p><strong>Reasoning checkpoint:</strong> Check the destination before performing the write. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--exercise-9-debugging">Exercise 9 — Debugging<a class="heading-anchor" href="#solution-1--exercise-9-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Repair a module that parses arguments and writes files during import.</p>
+<p><strong>Reasoning checkpoint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--exercise-10-edge-case-and-explanation">Exercise 10 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-10-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log.</p>
+<p><strong>Reasoning checkpoint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
+<p>Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.</p>
+<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
+<h5 id="solution-1--practices-1-2-parsed-types-and-boundaries">Practices 1–2 — Parsed types and boundaries<a class="heading-anchor" href="#solution-1--practices-1-2-parsed-types-and-boundaries" aria-label="Link to this section">#</a></h5>
+<p><code>type=Path</code> produces a <code>Path</code>; <code>type=int</code> produces an integer or lets argparse report invalid text. Reading and writing are boundaries; deterministic cleaning and summarization should be pure enough to test in memory.</p>
+<h5 id="solution-1--practices-3-5-safe-overwrite-and-importable-entry-point">Practices 3–5 — Safe overwrite and importable entry point<a class="heading-anchor" href="#solution-1--practices-3-5-safe-overwrite-and-importable-entry-point" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
+    parser = argparse.ArgumentParser(description=&quot;Clean a course CSV&quot;)
+    parser.add_argument(&quot;--input&quot;, type=Path, required=True)
+    parser.add_argument(&quot;--out&quot;, type=Path, required=True)
+    parser.add_argument(&quot;--limit&quot;, type=int)
+    parser.add_argument(&quot;--overwrite&quot;, action=&quot;store_true&quot;)
+    return parser.parse_args(argv)
+
+
+def ensure_writable_output(path: Path, *, overwrite: bool) -&gt; None:
+    &quot;&quot;&quot;Reject accidental replacement before any output is opened.&quot;&quot;&quot;
+
+    if path.exists() and not overwrite:
+        raise FileExistsError(f&quot;output already exists: {path}&quot;)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def main(argv: list[str] | None = None) -&gt; int:
+    args = parse_args(argv)
+    try:
+        if not args.input.is_file():
+            raise FileNotFoundError(f&quot;input not found: {args.input}&quot;)
+        ensure_writable_output(args.out, overwrite=args.overwrite)
+        # read -&gt; clean -&gt; summarize -&gt; write belongs here.
+    except (FileNotFoundError, FileExistsError, ValueError) as error:
+        print(f&quot;error: {error}&quot;)   # One user-facing boundary translation.
+        return 2
+    return 0
+
+
+parsed = parse_args([&quot;--input&quot;, &quot;in.csv&quot;, &quot;--out&quot;, &quot;out.csv&quot;, &quot;--limit&quot;, &quot;10&quot;])
+assert isinstance(parsed.input, Path) and parsed.limit == 10
+
+# Production module only:
+# if __name__ == &quot;__main__&quot;:
+#     raise SystemExit(main())</code></pre>
+<p>Expected user/data errors can return <code>2</code>; unexpected programming failures should propagate during tests and normally produce a controlled top-level log with a distinct nonzero code in a production application.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day15_cli_project/day15_solutions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day15_cli_project/day15_solutions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-15-solutions-cli-data-tool-project">Day 15 — Solutions: CLI Data Tool Project<a class="heading-anchor" href="#solution-2--cell-1--day-15-solutions-cli-data-tool-project" aria-label="Link to this section">#</a></h3>
+<p>Core transform functions and simple test in-notebook.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
+<span> </span>
+<span>def clean(df: pd.DataFrame) -&gt; pd.DataFrame:</span>
+<span>    d = df.rename(columns=str.lower).copy()</span>
+<span>    if &#x27;date&#x27; in d: d[&#x27;date&#x27;] = pd.to_datetime(d[&#x27;date&#x27;], errors=&#x27;coerce&#x27;, utc=True)</span>
+<span>    for c in (&#x27;price&#x27;,&#x27;qty&#x27;):</span>
+<span>        if c in d: d[c] = pd.to_numeric(d[c], errors=&#x27;coerce&#x27;)</span>
+<span>    d = d.dropna(subset=[c for c in (&#x27;price&#x27;,&#x27;qty&#x27;) if c in d.columns])</span>
+<span>    return d</span>
+<span> </span>
+<span>def summarize(d: pd.DataFrame) -&gt; pd.DataFrame:</span>
+<span>    if {&#x27;price&#x27;,&#x27;qty&#x27;}.issubset(d.columns):</span>
+<span>        d = d.assign(revenue=d[&#x27;price&#x27;]*d[&#x27;qty&#x27;])</span>
+<span>    if &#x27;date&#x27; in d:</span>
+<span>        return d.groupby(d[&#x27;date&#x27;].dt.date).agg(revenue=(&#x27;revenue&#x27;,&#x27;sum&#x27;))</span>
+<span>    return d.agg(revenue=(&#x27;revenue&#x27;,&#x27;sum&#x27;)).to_frame().T</span>
+<span> </span>
+<span>df = pd.DataFrame({&#x27;date&#x27;:[&#x27;2025-01-01&#x27;,&#x27;bad&#x27;], &#x27;price&#x27;:[&#x27;10&#x27;,&#x27;x&#x27;], &#x27;qty&#x27;:[2,3]})</span>
+<span>tidy = clean(df); summ = summarize(tidy)</span>
+<span>tidy.dtypes, summ</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
+<h4 id="solution-2--cell-3--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-3--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
+<h5 id="solution-2--cell-3--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Read a CSV with pandas, drop or handle required missing values, and convert documented column types. <strong>Hint:</strong> make <code>clean(frame)</code> return a copy so a caller&#x27;s input is not silently mutated.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-3--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compute summary statistics and save a cleaned CSV. <strong>Hint:</strong> keep read/write functions separate from transforms and create parent directories deliberately.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-3--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Provide <code>--input</code> and <code>--out</code> with <code>argparse</code>; the intended invocation is <code>python tool.py --input data.csv --out out.csv</code>. <strong>Hint:</strong> use <code>type=Path</code> and <code>required=True</code>; do not introduce Click.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-3--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Test core functions and one parser path. <strong>Hint:</strong> use tiny in-memory frames and pytest&#x27;s <code>tmp_path</code>, not large external data.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-3--exercise-5-original-lesson-practice">Exercise 5 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Run Ruff lint/format checks, mypy, and pytest. <strong>Hint:</strong> use the same commands as Day 14 and inspect the first failure before continuing. Store practice source in a tracked project directory. Put disposable generated files under ignored <code>artifacts/</code>; never commit <code>.venv</code>, caches, secrets, or a machine-specific <code>.env</code>.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-3--exercise-6-prediction">Exercise 6 — Prediction<a class="heading-anchor" href="#solution-2--cell-3--exercise-6-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>.</p>
+<p><strong>Reasoning checkpoint:</strong> The parser performs declared conversions before <code>main</code> receives values. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-3--exercise-7-tracing">Exercise 7 — Tracing<a class="heading-anchor" href="#solution-2--cell-3--exercise-7-tracing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work.</p>
+<p><strong>Reasoning checkpoint:</strong> A pure transform accepts and returns data without reading global state. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-3--exercise-8-implementation">Exercise 8 — Implementation<a class="heading-anchor" href="#solution-2--cell-3--exercise-8-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present.</p>
+<p><strong>Reasoning checkpoint:</strong> Check the destination before performing the write. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-3--exercise-9-debugging">Exercise 9 — Debugging<a class="heading-anchor" href="#solution-2--cell-3--exercise-9-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Repair a module that parses arguments and writes files during import.</p>
+<p><strong>Reasoning checkpoint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-3--exercise-10-edge-case-and-explanation">Exercise 10 — Edge case and explanation<a class="heading-anchor" href="#solution-2--cell-3--exercise-10-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log.</p>
+<p><strong>Reasoning checkpoint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h4 id="solution-2--cell-3--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-2--cell-3--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
+<p>Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.</p>
+<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
+<h5 id="solution-2--cell-3--practices-1-2-parsed-types-and-boundaries">Practices 1–2 — Parsed types and boundaries<a class="heading-anchor" href="#solution-2--cell-3--practices-1-2-parsed-types-and-boundaries" aria-label="Link to this section">#</a></h5>
+<p><code>type=Path</code> produces a <code>Path</code>; <code>type=int</code> produces an integer or lets argparse report invalid text. Reading and writing are boundaries; deterministic cleaning and summarization should be pure enough to test in memory.</p>
+<h5 id="solution-2--cell-3--practices-3-5-safe-overwrite-and-importable-entry-point">Practices 3–5 — Safe overwrite and importable entry point<a class="heading-anchor" href="#solution-2--cell-3--practices-3-5-safe-overwrite-and-importable-entry-point" aria-label="Link to this section">#</a></h5></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from __future__ import annotations</span>
+<span> </span>
+<span>import argparse</span>
+<span>from pathlib import Path</span>
+<span> </span>
+<span> </span>
+<span>def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:</span>
+<span>    parser = argparse.ArgumentParser(description=&quot;Clean a course CSV&quot;)</span>
+<span>    parser.add_argument(&quot;--input&quot;, type=Path, required=True)</span>
+<span>    parser.add_argument(&quot;--out&quot;, type=Path, required=True)</span>
+<span>    parser.add_argument(&quot;--limit&quot;, type=int)</span>
+<span>    parser.add_argument(&quot;--overwrite&quot;, action=&quot;store_true&quot;)</span>
+<span>    return parser.parse_args(argv)</span>
+<span> </span>
+<span> </span>
+<span>def ensure_writable_output(path: Path, *, overwrite: bool) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Reject accidental replacement before any output is opened.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if path.exists() and not overwrite:</span>
+<span>        raise FileExistsError(f&quot;output already exists: {path}&quot;)</span>
+<span>    path.parent.mkdir(parents=True, exist_ok=True)</span>
+<span> </span>
+<span> </span>
+<span>def main(argv: list[str] | None = None) -&gt; int:</span>
+<span>    args = parse_args(argv)</span>
+<span>    try:</span>
+<span>        if not args.input.is_file():</span>
+<span>            raise FileNotFoundError(f&quot;input not found: {args.input}&quot;)</span>
+<span>        ensure_writable_output(args.out, overwrite=args.overwrite)</span>
+<span>        # read -&gt; clean -&gt; summarize -&gt; write belongs here.</span>
+<span>    except (FileNotFoundError, FileExistsError, ValueError) as error:</span>
+<span>        print(f&quot;error: {error}&quot;)   # One user-facing boundary translation.</span>
+<span>        return 2</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>parsed = parse_args([&quot;--input&quot;, &quot;in.csv&quot;, &quot;--out&quot;, &quot;out.csv&quot;, &quot;--limit&quot;, &quot;10&quot;])</span>
+<span>assert isinstance(parsed.input, Path) and parsed.limit == 10</span>
+<span> </span>
+<span># Production module only:</span>
+<span># if __name__ == &quot;__main__&quot;:</span>
+<span>#     raise SystemExit(main())</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Expected user/data errors can return <code>2</code>; unexpected programming failures should propagate during tests and normally produce a controlled top-level log with a distinct nonzero code in a production application.</p></article></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-14.html"><small>Previous lesson</small><strong>python-14</strong><span>Code Quality Tooling</span></a>
+        <a class="nav-card next" href="python-16.html"><small>Next lesson</small><strong>python-16</strong><span>NumPy Fundamentals</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-15";
+    const LEARNER_PATH = "python/ds-60day/notebooks/day15_cli_project.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

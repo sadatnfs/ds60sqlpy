@@ -149,6 +149,8 @@ Do not hand-edit the lock.
 - Replace stale progress prose with catalog-derived status where possible.
 - Edit `scripts/build_course_guide.py`, not generated `START_HERE.html`, and
   run its `--check` mode.
+- Edit `src/ds60sqlpy/lesson_reader.py`, not generated `lesson-pages/*.html`,
+  and run `scripts/build_lesson_readers.py --check`.
 - Preserve both portal modes and the loopback/token/origin/path/launch
   allowlist boundary documented in `docs/learning-portal.md`.
 
@@ -175,6 +177,7 @@ python scripts/course.py doctor
 python scripts/course.py validate
 python scripts/audit_practice.py
 python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
 python scripts/scan_secrets.py --history
 ```
 

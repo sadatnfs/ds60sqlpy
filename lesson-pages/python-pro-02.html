@@ -1,0 +1,1359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-pro-02 · Concurrency and Parallelism Decision Lab · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-pro-02</p>
+        <h1>Concurrency and Parallelism Decision Lab</h1>
+        <p class="hero-copy">Professional Python engineering</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">180 minutes</span>
+          <span class="tag">professional setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-15.html">python-15</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_pro_02_concurrency_parallelism.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_pro_02_concurrency_parallelism.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_pro_02_concurrency_parallelism.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_pro_02_concurrency_parallelism.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--concurrency-and-parallelism-decision-lab">Concurrency and parallelism decision lab<a class="heading-anchor" href="#guide--concurrency-and-parallelism-decision-lab" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-pro-02</code></p>
+<p><strong>Level:</strong> advanced</p>
+<p><strong>Estimated time:</strong> 180–240 minutes</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Catalog prerequisite:</strong> <code>python-15</code></li>
+<li>Python Days 1–15</li>
+<li>Functions, exceptions, context managers, and basic testing</li>
+<li><code>async</code>/<code>await</code> vocabulary from Bridge Day 7 is helpful but not required</li>
+</ul>
+<p>This lesson uses only the Python standard library and deterministic local work.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ol>
+<li>Distinguish concurrency from parallel execution.</li>
+<li>Classify work as cooperative I/O, blocking I/O, or pure-Python CPU work.</li>
+<li>Choose among asyncio, threads, and processes with explicit trade-offs.</li>
+<li>Bound both active work and queued work.</li>
+<li>Propagate failures, cancellation, and timeouts without orphaned tasks.</li>
+<li>Explain a lost update and choose an ownership or synchronization strategy.</li>
+<li>Write process-pool code that is safe under Windows <code>spawn</code>.</li>
+</ol>
+<h5 id="guide--motivation">Motivation<a class="heading-anchor" href="#guide--motivation" aria-label="Link to this section">#</a></h5>
+<p>“Make it concurrent” is not a complete design. Unbounded tasks can move a bottleneck into memory, threads do not make every CPU workload parallel, and a cancelled caller must not leave work running in the background. The first professional skill is choosing the model from the behavior of the work.</p>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Concurrency:</strong> multiple operations make progress during overlapping time.</li>
+<li><strong>Parallelism:</strong> multiple operations execute at the same instant.</li>
+<li><strong>I/O-bound:</strong> most elapsed time is spent waiting for files, sockets, or another service.</li>
+<li><strong>CPU-bound:</strong> most elapsed time is spent executing computation.</li>
+<li><strong>Cooperative scheduling:</strong> a task yields explicitly, normally at <code>await</code>.</li>
+<li><strong>Preemptive scheduling:</strong> the runtime or operating system switches workers.</li>
+<li><strong>Event loop:</strong> the scheduler that resumes ready asyncio tasks.</li>
+<li><strong>Thread:</strong> a worker sharing process memory; useful around blocking I/O.</li>
+<li><strong>Process:</strong> an isolated interpreter with serialization and startup cost.</li>
+<li><strong>Backpressure:</strong> slowing producers when consumers cannot keep up.</li>
+<li><strong>Structured concurrency:</strong> child tasks live inside a scope that waits for them and propagates their failures.</li>
+<li><strong>Cancellation:</strong> a request to stop work at a safe suspension point.</li>
+<li><strong>Race condition:</strong> correctness depends on an uncontrolled interleaving.</li>
+<li><strong>Lost update:</strong> two workers read the same old value and one write overwrites the other&#x27;s change.</li>
+<li><strong>Spawn:</strong> a process start method that imports the main module in a new interpreter; it is the Windows default.</li>
+</ul>
+<h5 id="guide--decision-table">Decision table<a class="heading-anchor" href="#guide--decision-table" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Work behavior</th>
+<th>First model to evaluate</th>
+<th>Why</th>
+<th>Main caution</th>
+</tr></thead><tbody>
+<tr>
+<td>Many awaitable local/network waits</td>
+<td>asyncio</td>
+<td>Low per-task overhead</td>
+<td>Blocking the event loop</td>
+</tr>
+<tr>
+<td>Blocking I/O library</td>
+<td>bounded threads</td>
+<td>Existing synchronous API can wait concurrently</td>
+<td>Shared mutable state</td>
+</tr>
+<tr>
+<td>Substantial pure-Python computation</td>
+<td>bounded processes</td>
+<td>Separate interpreters can execute in parallel</td>
+<td>Startup and serialization</td>
+</tr>
+<tr>
+<td>Tiny or sequential work</td>
+<td>no concurrency</td>
+<td>Simpler and often faster</td>
+<td>Optimizing before measuring</td>
+</tr>
+</tbody></table></div>
+<p>This is a starting hypothesis, not a guarantee. Measure representative work.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--predict-before-running">Predict before running<a class="heading-anchor" href="#guide--predict-before-running" aria-label="Link to this section">#</a></h5>
+<p>Open <a href="python-pro-02.html#learner"><code>lessons/py_pro_02_concurrency_parallelism.py</code></a>. The baseline awaits three 10 ms waits sequentially. Predict the lower bound on elapsed time, then run it.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_pro_02_concurrency_parallelism.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_02_concurrency_parallelism.py</code></pre>
+<p>The exact measured time varies, so the check uses a broad behavioral boundary rather than asserting a fragile benchmark.</p>
+<h5 id="guide--two-different-bounds">Two different bounds<a class="heading-anchor" href="#guide--two-different-bounds" aria-label="Link to this section">#</a></h5>
+<p>A semaphore limits active operations, but a producer can still create a million waiting task objects. A bounded queue controls pending work as well:</p>
+<pre><code class="language-text">producer -&gt; queue(maxsize=2) -&gt; three long-lived consumers</code></pre>
+<p>When the queue is full, <code>await queue.put(...)</code> pauses the producer. This is backpressure. The consumer count bounds active worker calls.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--exercise-1-choose-a-model">Exercise 1 — choose a model<a class="heading-anchor" href="#guide--exercise-1-choose-a-model" aria-label="Link to this section">#</a></h5>
+<p>Implement <code>choose_execution_model</code> in the learner artifact. For each case, write one sentence explaining the choice:</p>
+<ul>
+<li>an async database driver,</li>
+<li>a synchronous file metadata API,</li>
+<li>image transforms written in pure Python,</li>
+<li>three tiny computations.</li>
+</ul>
+<p>Reject labels that contradict each other. An async function that performs computation without <code>await</code> is still CPU work and blocks the event loop.</p>
+<h5 id="guide--exercise-2-build-a-bounded-async-map">Exercise 2 — build a bounded async map<a class="heading-anchor" href="#guide--exercise-2-build-a-bounded-async-map" aria-label="Link to this section">#</a></h5>
+<p>Implement <code>bounded_map</code> with:</p>
+<ol>
+<li><code>asyncio.Queue(maxsize=queue_capacity)</code>,</li>
+<li>one producer,</li>
+<li>a fixed number of consumers,</li>
+<li>indexed items so results retain input order,</li>
+<li>a unique sentinel per consumer, and</li>
+<li><code>asyncio.TaskGroup</code>.</li>
+</ol>
+<p>Place <code>queue.task_done()</code> in <code>finally</code>. Let exceptions propagate. Do not catch <code>CancelledError</code> unless cleanup requires it; if caught, re-raise it.</p>
+<h5 id="guide--exercise-3-add-per-item-timeouts">Exercise 3 — add per-item timeouts<a class="heading-anchor" href="#guide--exercise-3-add-per-item-timeouts" aria-label="Link to this section">#</a></h5>
+<p>Wrap each worker call with <code>asyncio.timeout</code>. Test one worker slower than the limit. Inspect the <code>ExceptionGroup</code> from <code>TaskGroup</code>, and verify a <code>finally</code> block returns the active count to zero.</p>
+<p>Prediction: what happens to sibling consumers when one item times out?</p>
+<h5 id="guide--exercise-4-adapt-blocking-i-o">Exercise 4 — adapt blocking I/O<a class="heading-anchor" href="#guide--exercise-4-adapt-blocking-i-o" aria-label="Link to this section">#</a></h5>
+<p>Use <code>ThreadPoolExecutor(max_workers=N)</code> for deterministic <code>time.sleep</code> jobs. Compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion.</p>
+<p>Explain why a thread pool requires a deliberate <code>max_workers</code>, even if the remote service could theoretically accept more requests.</p>
+<h5 id="guide--exercise-5-isolate-cpu-work">Exercise 5 — isolate CPU work<a class="heading-anchor" href="#guide--exercise-5-isolate-cpu-work" aria-label="Link to this section">#</a></h5>
+<p>Make the CPU function a top-level function with serializable arguments and results. Use:</p>
+<pre><code class="language-python">multiprocessing.get_context(&quot;spawn&quot;)</code></pre>
+<p>and <code>ProcessPoolExecutor</code>. Run process creation only beneath:</p>
+<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
+    ...</code></pre>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\solutions\py_pro_02_concurrency_parallelism_solution.py --with-processes</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py --with-processes</code></pre>
+<p>The workload is intentionally small for safety; process startup may make it slower than sequential execution. That observation is part of the lesson.</p>
+<h5 id="guide--exercise-6-reason-about-shared-state">Exercise 6 — reason about shared state<a class="heading-anchor" href="#guide--exercise-6-reason-about-shared-state" aria-label="Link to this section">#</a></h5>
+<p>Implement <code>deterministic_lost_update</code>. Force two workers to read the same snapshot, then apply both writes. Compare with two serialized increments.</p>
+<p>List three repairs:</p>
+<ul>
+<li>one owner task/process receives update messages,</li>
+<li>a lock protects the complete read/modify/write unit, or</li>
+<li>an external system performs an atomic update.</li>
+</ul>
+<h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
+<p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
+<h5 id="guide--exercise-7-prove-cancellation-cleanup">Exercise 7 — prove cancellation cleanup<a class="heading-anchor" href="#guide--exercise-7-prove-cancellation-cleanup" aria-label="Link to this section">#</a></h5>
+<p>Cancel <code>bounded_map</code> while workers are active. Instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.</p>
+<p><strong>Progressive hint:</strong> Put cleanup in <code>finally</code>, do not suppress <code>CancelledError</code>, and use TaskGroup as the child ownership boundary.</p>
+<h5 id="guide--exercise-8-inspect-structured-failures">Exercise 8 — inspect structured failures<a class="heading-anchor" href="#guide--exercise-8-inspect-structured-failures" aria-label="Link to this section">#</a></h5>
+<p>Run multiple workers that fail with different typed exceptions. Use <code>except*</code> to handle one expected category while preserving unexpected failures and their original tracebacks.</p>
+<p><strong>Progressive hint:</strong> ExceptionGroup is a tree. Match by exception type and re-raise what the current layer cannot translate.</p>
+<h5 id="guide--exercise-9-stream-a-backpressured-producer">Exercise 9 — stream a backpressured producer<a class="heading-anchor" href="#guide--exercise-9-stream-a-backpressured-producer" aria-label="Link to this section">#</a></h5>
+<p>Adapt <code>bounded_map</code> from a finite Sequence to an async iterator whose length is unknown. Preserve output order without retaining every input or creating one task per item.</p>
+<p><strong>Progressive hint:</strong> Assign increasing indexes at production, use a bounded queue, and emit completed results through a second bounded channel.</p>
+<h5 id="guide--exercise-10-trace-context-across-boundaries">Exercise 10 — trace context across boundaries<a class="heading-anchor" href="#guide--exercise-10-trace-context-across-boundaries" aria-label="Link to this section">#</a></h5>
+<p>Set a request ID in <code>contextvars</code>, then observe propagation through an async task, <code>asyncio.to_thread</code>, a raw thread-pool submission, and a spawned process. Make any explicit propagation visible.</p>
+<p><strong>Progressive hint:</strong> Async tasks and <code>to_thread</code> copy context by design; arbitrary executors and processes need deliberate value transfer.</p>
+<h5 id="guide--exercise-11-design-graceful-executor-shutdown">Exercise 11 — design graceful executor shutdown<a class="heading-anchor" href="#guide--exercise-11-design-graceful-executor-shutdown" aria-label="Link to this section">#</a></h5>
+<p>Own a thread or process pool through a context manager. Stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.</p>
+<p><strong>Progressive hint:</strong> Lifecycle ownership belongs to the component that created the executor. Differentiate pending work from already-running calls.</p>
+<h5 id="guide--exercise-12-make-an-evidence-based-model-decision">Exercise 12 — make an evidence-based model decision<a class="heading-anchor" href="#guide--exercise-12-make-an-evidence-based-model-decision" aria-label="Link to this section">#</a></h5>
+<p>Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.</p>
+<p><strong>Progressive hint:</strong> Use generous repeated measurements and interpret each model only for the workload it matches. A tiny workload can legitimately stay sequential.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Async results preserve input order even when completion order differs.</li>
+<li>Peak active calls never exceed <code>worker_count</code>.</li>
+<li>The bounded queue capacity is finite and positive.</li>
+<li>A worker exception reaches the caller as an exception-group leaf.</li>
+<li>A timeout cancels sibling work and cleanup returns active work to zero.</li>
+<li>Cancelling the parent does not hang.</li>
+<li>The process worker is top-level and pool creation is main-guarded.</li>
+<li>You can explain why a shorter benchmark is not proof of correctness.</li>
+</ul>
+<p>Run the focused suite.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
+.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_pro_02_concurrency_parallelism -v</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_pro_02_concurrency_parallelism -v</code></pre>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Async work runs sequentially:</strong> each coroutine was awaited while it was created. Schedule child tasks within a structured scope.</li>
+<li><strong>The notebook freezes:</strong> a blocking function ran on the event-loop thread, or <code>asyncio.run</code> was called inside an already-running notebook loop. In a notebook, await the coroutine directly.</li>
+<li><strong>Memory grows before work starts:</strong> millions of tasks were created behind a semaphore. Feed fixed workers through a bounded queue.</li>
+<li><strong>A timeout appears ignored:</strong> blocking code never reached an await point. Move compatible blocking I/O to a thread; use a process for cancellable isolation when appropriate.</li>
+<li><strong>Windows recursively launches children:</strong> pool creation is at import time. Move it into a function and call that function only under the main guard.</li>
+<li><strong>A process cannot pickle a function:</strong> lambdas, nested functions, open file handles, and many live objects cannot cross the boundary. Use top-level functions and plain data.</li>
+<li><strong>A counter occasionally loses changes:</strong> a compound update was assumed atomic. Synchronize the whole invariant or use one owner.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Use Bridge Day 7 for database-specific bounded asyncio patterns.</li>
+<li>Continue to <code>python-svc-01</code> and apply retry/rate-limit policy without creating unbounded HTTP work.</li>
+<li>Investigate producer/consumer shutdown, signal handling, and process worker recycling in a project after mastering this deterministic core.</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_pro_02_concurrency_parallelism.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_pro_02_concurrency_parallelism.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-pro-02 learner lab: concurrency and parallelism.</span>
+<span> </span>
+<span>The worked example measures a sequential local wait. Complete the TODO</span>
+<span>functions before comparing your design with the reference implementation.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import asyncio</span>
+<span>import time</span>
+<span>from collections.abc import Awaitable, Callable, Sequence</span>
+<span>from typing import Literal, TypeVar</span>
+<span> </span>
+<span>T = TypeVar(&quot;T&quot;)</span>
+<span>R = TypeVar(&quot;R&quot;)</span>
+<span>Workload = Literal[&quot;async-io&quot;, &quot;blocking-io&quot;, &quot;cpu&quot;]</span>
+<span>Model = Literal[&quot;asyncio&quot;, &quot;threads&quot;, &quot;processes&quot;]</span>
+<span> </span>
+<span> </span>
+<span>def choose_execution_model(</span>
+<span>    workload: Workload,</span>
+<span>    *,</span>
+<span>    async_api_available: bool,</span>
+<span>) -&gt; Model:</span>
+<span>    &quot;&quot;&quot;Choose the first concurrency model to evaluate.</span>
+<span> </span>
+<span>    TODO:</span>
+<span>    - cooperative async I/O with an async API -&gt; asyncio</span>
+<span>    - blocking I/O without an async API -&gt; threads</span>
+<span>    - substantial pure-Python CPU work -&gt; processes</span>
+<span> </span>
+<span>    Reject contradictory input such as claiming an async API for CPU work.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete choose_execution_model&quot;)</span>
+<span> </span>
+<span> </span>
+<span>async def bounded_map(</span>
+<span>    items: Sequence[T],</span>
+<span>    worker: Callable[[T], Awaitable[R]],</span>
+<span>    *,</span>
+<span>    worker_count: int,</span>
+<span>    queue_capacity: int,</span>
+<span>) -&gt; list[R]:</span>
+<span>    &quot;&quot;&quot;Map an async worker while bounding active work and queued work.</span>
+<span> </span>
+<span>    TODO: use an ``asyncio.Queue(maxsize=queue_capacity)``, a fixed number of</span>
+<span>    consumers, and ``asyncio.TaskGroup``. Preserve input order. A worker</span>
+<span>    exception must cancel sibling work rather than being hidden.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete bounded_map&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def deterministic_lost_update(initial: int = 0) -&gt; tuple[int, int]:</span>
+<span>    &quot;&quot;&quot;Model two unsynchronized read/modify/write operations.</span>
+<span> </span>
+<span>    TODO: return ``(unsafe_result, serialized_result)``. Force both unsafe</span>
+<span>    workers to read the same initial snapshot before either writes. This</span>
+<span>    demonstrates the race without relying on a timing-sensitive thread test.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete deterministic_lost_update&quot;)</span>
+<span> </span>
+<span> </span>
+<span>async def _worked_wait(delay: float) -&gt; str:</span>
+<span>    await asyncio.sleep(delay)</span>
+<span>    return f&quot;waited {delay:.3f}s&quot;</span>
+<span> </span>
+<span> </span>
+<span>async def worked_example() -&gt; None:</span>
+<span>    &quot;&quot;&quot;Run a deterministic sequential baseline and show unfinished exercises.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    started = time.perf_counter()</span>
+<span>    messages = [await _worked_wait(delay) for delay in (0.01, 0.01, 0.01)]</span>
+<span>    elapsed = time.perf_counter() - started</span>
+<span>    print(f&quot;Sequential async baseline: {messages}; elapsed &gt;= 0.03? {elapsed &gt;= 0.03}&quot;)</span>
+<span> </span>
+<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
+<span>        (</span>
+<span>            &quot;execution-model choice&quot;,</span>
+<span>            lambda: choose_execution_model(&quot;blocking-io&quot;, async_api_available=False),</span>
+<span>        ),</span>
+<span>        (&quot;lost-update model&quot;, deterministic_lost_update),</span>
+<span>    )</span>
+<span>    for label, call in checks:</span>
+<span>        try:</span>
+<span>            value = call()</span>
+<span>        except NotImplementedError:</span>
+<span>            print(f&quot;TODO: {label}&quot;)</span>
+<span>        else:</span>
+<span>            print(f&quot;Completed: {label} -&gt; {value!r}&quot;)</span>
+<span> </span>
+<span> </span>
+<span># === Numbered professional practice ===</span>
+<span>#</span>
+<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
+<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
+<span># Full acceptance checks and progressive hints:</span>
+<span># companion-guides/py_pro_02_concurrency_parallelism.md</span>
+<span>#</span>
+<span># Exercise 1 — choose a model</span>
+<span># Prompt: Implement `choose_execution_model` in the learner artifact. For each case, write</span>
+<span># one sentence explaining the choice: - an async database driver, - a synchronous file</span>
+<span># metadata API, - image transforms written in pure Python, - three tiny computations.</span>
+<span># Reject labels that contradict each other. An async function that performs computation</span>
+<span># without `await` is still CPU work and blocks the event loop.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 2 — build a bounded async map</span>
+<span># Prompt: Implement `bounded_map` with: 1. `asyncio.Queue(maxsize=queue_capacity)`, 2. one</span>
+<span># producer, 3. a fixed number of consumers, 4. indexed items so results retain input</span>
+<span># order, 5. a unique sentinel per consumer, and 6. `asyncio.TaskGroup`. Place</span>
+<span># `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch</span>
+<span># `CancelledError` unless cleanup requires it; if caught, re-raise it.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 3 — add per-item timeouts</span>
+<span># Prompt: Wrap each worker call with `asyncio.timeout`. Test one worker slower than the</span>
+<span># limit. Inspect the `ExceptionGroup` from `TaskGroup`, and verify a `finally` block</span>
+<span># returns the active count to zero. Prediction: what happens to sibling consumers when one</span>
+<span># item times out?</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 4 — adapt blocking I/O</span>
+<span># Prompt: Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs.</span>
+<span># Compare sequential and threaded elapsed time with generous bounds, then verify ordered</span>
+<span># results rather than treating speed as the correctness assertion. Explain why a thread</span>
+<span># pool requires a deliberate `max_workers`, even if the remote service could theoretically</span>
+<span># accept more requests.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 5 — isolate CPU work</span>
+<span># Prompt: Make the CPU function a top-level function with serializable arguments and</span>
+<span># results. Use `multiprocessing.get_context(&quot;spawn&quot;)` with `ProcessPoolExecutor`, and</span>
+<span># create processes only beneath an `if __name__ == &quot;__main__&quot;:` guard. Run the solution</span>
+<span># with `--with-processes`; explain when startup makes a small workload slower.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 6 — reason about shared state</span>
+<span># Prompt: Implement `deterministic_lost_update`. Force two workers to read the same</span>
+<span># snapshot, then apply both writes. Compare with two serialized increments. List three</span>
+<span># repairs: - one owner task/process receives update messages, - a lock protects the</span>
+<span># complete read/modify/write unit, or - an external system performs an atomic update.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 7 — prove cancellation cleanup</span>
+<span># Prompt: Cancel `bounded_map` while workers are active. Instrument acquired resources and</span>
+<span># prove active count, queued acknowledgements, and child tasks return to zero before the</span>
+<span># parent finishes.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 8 — inspect structured failures</span>
+<span># Prompt: Run multiple workers that fail with different typed exceptions. Use `except*` to</span>
+<span># handle one expected category while preserving unexpected failures and their original</span>
+<span># tracebacks.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 9 — stream a backpressured producer</span>
+<span># Prompt: Adapt `bounded_map` from a finite Sequence to an async iterator whose length is</span>
+<span># unknown. Preserve output order without retaining every input or creating one task per</span>
+<span># item.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 10 — trace context across boundaries</span>
+<span># Prompt: Set a request ID in `contextvars`, then observe propagation through an async</span>
+<span># task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any</span>
+<span># explicit propagation visible.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 11 — design graceful executor shutdown</span>
+<span># Prompt: Own a thread or process pool through a context manager. Stop accepting new work,</span>
+<span># wait with a bounded policy, cancel pending futures when allowed, and report unfinished</span>
+<span># work without hanging interpreter exit.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 12 — make an evidence-based model decision</span>
+<span># Prompt: Benchmark sequential, bounded asyncio/threads, and spawned processes on</span>
+<span># representative I/O and CPU fixtures. Record correctness, startup, throughput, peak</span>
+<span># active work, transfer size, and cleanup—not just fastest elapsed time.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># === End numbered professional practice ===</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    asyncio.run(worked_example())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_pro_02_concurrency_parallelism_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_pro_02_concurrency_parallelism_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--concurrency-and-parallelism-solution-reasoning">Concurrency and parallelism solution reasoning<a class="heading-anchor" href="#solution-1--concurrency-and-parallelism-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Attempt <code>python-pro-02</code> before reading this file. The executable reference is <a href="python-pro-02.html#solution-2"><code>py_pro_02_concurrency_parallelism_solution.py</code></a>.</p>
+<h4 id="solution-1--choosing-by-behavior">Choosing by behavior<a class="heading-anchor" href="#solution-1--choosing-by-behavior" aria-label="Link to this section">#</a></h4>
+<p>The solution does not choose from task names such as “download” or “analysis.” It asks whether the API yields cooperatively, blocks a thread, or executes substantial Python bytecode. Asyncio is a concurrency model for awaitable work, threads adapt blocking I/O, and processes isolate CPU work and the interpreter.</p>
+<p>A three-item computation may remain sequential because startup, scheduling, and serialization cost more than the saved time. Correctness and measurement come before adding workers.</p>
+<h4 id="solution-1--bounded-queue-design">Bounded queue design<a class="heading-anchor" href="#solution-1--bounded-queue-design" aria-label="Link to this section">#</a></h4>
+<p>The producer inserts <code>(index, item)</code> pairs into a queue with a real maximum size. A fixed number of consumers performs work. This creates two independent bounds:</p>
+<ul>
+<li><code>queue_capacity</code> limits waiting inputs and applies backpressure.</li>
+<li><code>worker_count</code> limits active calls.</li>
+</ul>
+<p>Results are stored by index and assembled after the <code>TaskGroup</code>, so completion order does not change output order. A unique object is used as the sentinel; ordinary user data can never equal it accidentally.</p>
+<p><code>TaskGroup</code> is the ownership boundary. If one consumer raises, the group cancels its siblings, waits for their cleanup, and raises an <code>ExceptionGroup</code>. The implementation does not log and continue because that would silently return partial data.</p>
+<h4 id="solution-1--cancellation-and-timeouts">Cancellation and timeouts<a class="heading-anchor" href="#solution-1--cancellation-and-timeouts" aria-label="Link to this section">#</a></h4>
+<p><code>asyncio.timeout</code> transforms an overdue operation into <code>TimeoutError</code>. Cancellation reaches the worker at an await point. <code>ConcurrencyProbe.activity</code> decrements its count in <code>finally</code>, which proves cleanup for normal return, worker failure, timeout, and parent cancellation.</p>
+<p>Cancellation is cooperative. A CPU loop or blocking library call on the event loop cannot observe it promptly. Choosing the correct execution boundary is therefore part of timeout correctness.</p>
+<h4 id="solution-1--threads-and-processes">Threads and processes<a class="heading-anchor" href="#solution-1--threads-and-processes" aria-label="Link to this section">#</a></h4>
+<p>The thread example passes immutable job tuples and returns values. It avoids a shared output list, making ordering the executor&#x27;s responsibility. Threads share memory, so real programs still need ownership or synchronization for shared invariants.</p>
+<p>The process function is top-level and accepts an integer. The pool explicitly uses <code>spawn</code>, so tests exercise the same import behavior required by Windows. Pool creation occurs only inside called functions, and the executable calls it under a main guard. A child can import the module without recursively launching more children.</p>
+<h4 id="solution-1--lost-update-edge-case">Lost-update edge case<a class="heading-anchor" href="#solution-1--lost-update-edge-case" aria-label="Link to this section">#</a></h4>
+<p>Timing-sensitive race tests are unreliable. The solution models the dangerous interleaving directly:</p>
+<ol>
+<li>both workers read the same initial value,</li>
+<li>both compute <code>initial + 1</code>,</li>
+<li>the second write replaces the first.</li>
+</ol>
+<p>The unsafe result grows by one; the serialized result grows by two. A lock must cover the entire read/modify/write operation—not just the final assignment.</p>
+<h4 id="solution-1--alternatives">Alternatives<a class="heading-anchor" href="#solution-1--alternatives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><code>asyncio.Semaphore</code> is adequate when the number of created tasks is already bounded. A queue is safer for a large or streaming producer.</li>
+<li><code>asyncio.to_thread</code> is concise for occasional blocking calls. A named executor gives explicit lifecycle and capacity for a subsystem.</li>
+<li>Native-code libraries may release the Global Interpreter Lock and benefit from threads for CPU work. Measure the actual library rather than assuming.</li>
+<li>A job system may replace local process pools when work must survive process or machine failure. That introduces persistence and delivery semantics beyond this lesson.</li>
+</ul>
+<h4 id="solution-1--expected-behavior">Expected behavior<a class="heading-anchor" href="#solution-1--expected-behavior" aria-label="Link to this section">#</a></h4>
+<p>The tests prove ordered results, peak active work at or below the limit, timeout and failure propagation, cancellation cleanup, deterministic lost updates, thread output, and a small spawned-process calculation. No test relies on a narrow elapsed-time threshold, random scheduling, or external I/O.</p>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Use this map after an honest attempt. The executable implementation remains <a href="python-pro-02.html#solution-2"><code>py_pro_02_concurrency_parallelism_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
+<h5 id="solution-1--exercise-1-choose-a-model">Exercise 1 — choose a model<a class="heading-anchor" href="#solution-1--exercise-1-choose-a-model" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Implement <code>choose_execution_model</code> in the learner artifact. For each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations. Reject labels that contradict each other. An async function that performs computation without <code>await</code> is still CPU work and blocks the event loop.</p>
+<p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-2-build-a-bounded-async-map">Exercise 2 — build a bounded async map<a class="heading-anchor" href="#solution-1--exercise-2-build-a-bounded-async-map" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Implement <code>bounded_map</code> with: 1. <code>asyncio.Queue(maxsize=queue_capacity)</code>, 2. one producer, 3. a fixed number of consumers, 4. indexed items so results retain input order, 5. a unique sentinel per consumer, and 6. <code>asyncio.TaskGroup</code>. Place <code>queue.task_done()</code> in <code>finally</code>. Let exceptions propagate. Do not catch <code>CancelledError</code> unless cleanup requires it; if caught, re-raise it.</p>
+<p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-3-add-per-item-timeouts">Exercise 3 — add per-item timeouts<a class="heading-anchor" href="#solution-1--exercise-3-add-per-item-timeouts" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Wrap each worker call with <code>asyncio.timeout</code>. Test one worker slower than the limit. Inspect the <code>ExceptionGroup</code> from <code>TaskGroup</code>, and verify a <code>finally</code> block returns the active count to zero. Prediction: what happens to sibling consumers when one item times out?</p>
+<p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-4-adapt-blocking-i-o">Exercise 4 — adapt blocking I/O<a class="heading-anchor" href="#solution-1--exercise-4-adapt-blocking-i-o" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Use <code>ThreadPoolExecutor(max_workers=N)</code> for deterministic <code>time.sleep</code> jobs. Compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion. Explain why a thread pool requires a deliberate <code>max_workers</code>, even if the remote service could theoretically accept more requests.</p>
+<p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-5-isolate-cpu-work">Exercise 5 — isolate CPU work<a class="heading-anchor" href="#solution-1--exercise-5-isolate-cpu-work" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Make the CPU function top-level with serializable arguments and results. Use <code>multiprocessing.get_context(&quot;spawn&quot;)</code> with <code>ProcessPoolExecutor</code>, and create processes only beneath an <code>if <strong>name</strong> == &quot;<strong>main</strong>&quot;:</code> guard. Run the solution with <code>--with-processes</code>; explain why startup can make a small workload slower.</p>
+<p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-6-reason-about-shared-state">Exercise 6 — reason about shared state<a class="heading-anchor" href="#solution-1--exercise-6-reason-about-shared-state" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Implement <code>deterministic_lost_update</code>. Force two workers to read the same snapshot, then apply both writes. Compare with two serialized increments. List three repairs: - one owner task/process receives update messages, - a lock protects the complete read/modify/write unit, or - an external system performs an atomic update.</p>
+<p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-7-prove-cancellation-cleanup">Exercise 7 — prove cancellation cleanup<a class="heading-anchor" href="#solution-1--exercise-7-prove-cancellation-cleanup" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Cancel <code>bounded_map</code> while workers are active. Instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.</p>
+<p><strong>Reasoning path:</strong> Put cleanup in <code>finally</code>, do not suppress <code>CancelledError</code>, and use TaskGroup as the child ownership boundary.</p>
+<p>Start the operation as one parent task, wait on a deterministic probe until at least one worker is active, cancel the parent, and await it while expecting <code>CancelledError</code>. Every worker releases its probe/resource in <code>finally</code>, and the producer/consumers are owned by the TaskGroup so no orphan remains.</p>
+<p>Queue accounting must still call <code>task_done</code> for an item already removed. Cancellation is a normal control path; logging it as an application error or continuing with partial results is incorrect.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-8-inspect-structured-failures">Exercise 8 — inspect structured failures<a class="heading-anchor" href="#solution-1--exercise-8-inspect-structured-failures" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Run multiple workers that fail with different typed exceptions. Use <code>except*</code> to handle one expected category while preserving unexpected failures and their original tracebacks.</p>
+<p><strong>Reasoning path:</strong> ExceptionGroup is a tree. Match by exception type and re-raise what the current layer cannot translate.</p>
+<p>Allow TaskGroup to collect concurrent failures, then use <code>except* ExpectedError</code> for the domain category this boundary owns. Record bounded item identities, not full sensitive payloads. Any unmatched subgroup must propagate.</p>
+<p>Do not flatten everything into one string or return only the first exception; that destroys evidence. Cancellation caused by sibling failure is distinct from an independent worker defect.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-9-stream-a-backpressured-producer">Exercise 9 — stream a backpressured producer<a class="heading-anchor" href="#solution-1--exercise-9-stream-a-backpressured-producer" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Adapt <code>bounded_map</code> from a finite Sequence to an async iterator whose length is unknown. Preserve output order without retaining every input or creating one task per item.</p>
+<p><strong>Reasoning path:</strong> Assign increasing indexes at production, use a bounded queue, and emit completed results through a second bounded channel.</p>
+<p>Separate input and output backpressure. A fixed consumer pool receives indexed items; a coordinator buffers only the out-of-order window needed to emit the next index. If the downstream consumer is slow, a bounded result queue stops workers from accumulating unbounded completed objects.</p>
+<p>Define cancellation and partial-output semantics before implementation. Preserving all results in a final list is incompatible with truly unbounded input, so expose an async result iterator instead.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-10-trace-context-across-boundaries">Exercise 10 — trace context across boundaries<a class="heading-anchor" href="#solution-1--exercise-10-trace-context-across-boundaries" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Set a request ID in <code>contextvars</code>, then observe propagation through an async task, <code>asyncio.to_thread</code>, a raw thread-pool submission, and a spawned process. Make any explicit propagation visible.</p>
+<p><strong>Reasoning path:</strong> Async tasks and <code>to_thread</code> copy context by design; arbitrary executors and processes need deliberate value transfer.</p>
+<p>Pass correlation data as an explicit argument whenever crossing a process boundary. For a raw thread executor, submit <code>copy_context().run</code> only when implicit context is truly part of the API. The worker returns the observed ID so the test asserts behavior rather than inspecting logs by eye.</p>
+<p>Context propagation must never become credential propagation. Keep security tokens in a reviewed credential boundary, not a general diagnostic context.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-11-design-graceful-executor-shutdown">Exercise 11 — design graceful executor shutdown<a class="heading-anchor" href="#solution-1--exercise-11-design-graceful-executor-shutdown" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Own a thread or process pool through a context manager. Stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.</p>
+<p><strong>Reasoning path:</strong> Lifecycle ownership belongs to the component that created the executor. Differentiate pending work from already-running calls.</p>
+<p>Expose an explicit close/drain operation and make repeated close idempotent. The shutdown path prevents submissions first, waits for the documented grace period, and records still-running jobs. Threads cannot be safely killed; blocking calls require their own timeout/cancellation contract.</p>
+<p>Process pools also need import-safe top-level callables and a main guard. Avoid relying only on garbage collection or interpreter teardown.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-12-make-an-evidence-based-model-decision">Exercise 12 — make an evidence-based model decision<a class="heading-anchor" href="#solution-1--exercise-12-make-an-evidence-based-model-decision" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.</p>
+<p><strong>Reasoning path:</strong> Use generous repeated measurements and interpret each model only for the workload it matches. A tiny workload can legitimately stay sequential.</p>
+<p>First assert identical ordered results and failure behavior. Then run warmups and repeated local measurements, reporting distributions rather than flaky speed assertions. For processes, include serialization and startup; for async and threads, include dependency capacity and caller deadline.</p>
+<p>Choose the simplest model that satisfies the measured requirement and resource budget. Preserve the benchmark plan so future workloads can invalidate the decision honestly.</p>
+<p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-pro-02.</span>
+<span> </span>
+<span>The module demonstrates bounded asyncio work, blocking I/O in threads, and</span>
+<span>pure-Python CPU work in spawned processes. Workloads are deterministic and</span>
+<span>small enough for a lesson and its tests.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import argparse</span>
+<span>import asyncio</span>
+<span>import multiprocessing</span>
+<span>import time</span>
+<span>from collections.abc import AsyncIterator, Awaitable, Callable, Sequence</span>
+<span>from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor</span>
+<span>from contextlib import asynccontextmanager</span>
+<span>from dataclasses import dataclass</span>
+<span>from typing import Generic, Literal, TypeVar, cast</span>
+<span> </span>
+<span>T = TypeVar(&quot;T&quot;)</span>
+<span>R = TypeVar(&quot;R&quot;)</span>
+<span>Workload = Literal[&quot;async-io&quot;, &quot;blocking-io&quot;, &quot;cpu&quot;]</span>
+<span>Model = Literal[&quot;asyncio&quot;, &quot;threads&quot;, &quot;processes&quot;]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class ConcurrencyProbe:</span>
+<span>    &quot;&quot;&quot;Track active and peak work on one asyncio event loop.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    active: int = 0</span>
+<span>    peak: int = 0</span>
+<span> </span>
+<span>    @asynccontextmanager</span>
+<span>    async def activity(self) -&gt; AsyncIterator[None]:</span>
+<span>        self.active += 1</span>
+<span>        self.peak = max(self.peak, self.active)</span>
+<span>        try:</span>
+<span>            yield</span>
+<span>        finally:</span>
+<span>            self.active -= 1</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class BoundedRun(Generic[R]):</span>
+<span>    &quot;&quot;&quot;Ordered values and observable bounds from an async run.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    values: tuple[R, ...]</span>
+<span>    worker_count: int</span>
+<span>    queue_capacity: int</span>
+<span>    peak_active: int</span>
+<span> </span>
+<span> </span>
+<span>def choose_execution_model(</span>
+<span>    workload: Workload,</span>
+<span>    *,</span>
+<span>    async_api_available: bool,</span>
+<span>) -&gt; Model:</span>
+<span>    &quot;&quot;&quot;Choose a useful starting model from workload behavior.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if workload == &quot;cpu&quot;:</span>
+<span>        if async_api_available:</span>
+<span>            raise ValueError(&quot;a pure-Python CPU workload does not have an async API&quot;)</span>
+<span>        return &quot;processes&quot;</span>
+<span>    if workload == &quot;async-io&quot;:</span>
+<span>        if not async_api_available:</span>
+<span>            raise ValueError(&quot;async-io requires an awaitable API&quot;)</span>
+<span>        return &quot;asyncio&quot;</span>
+<span>    if async_api_available:</span>
+<span>        raise ValueError(&quot;blocking-io should not be labeled as an async API&quot;)</span>
+<span>    return &quot;threads&quot;</span>
+<span> </span>
+<span> </span>
+<span>async def bounded_map(</span>
+<span>    items: Sequence[T],</span>
+<span>    worker: Callable[[T], Awaitable[R]],</span>
+<span>    *,</span>
+<span>    worker_count: int,</span>
+<span>    queue_capacity: int,</span>
+<span>    item_timeout: float | None = None,</span>
+<span>    probe: ConcurrencyProbe | None = None,</span>
+<span>) -&gt; BoundedRun[R]:</span>
+<span>    &quot;&quot;&quot;Map async work through a bounded queue and structured task group.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if worker_count &lt; 1:</span>
+<span>        raise ValueError(&quot;worker_count must be at least 1&quot;)</span>
+<span>    if queue_capacity &lt; 1:</span>
+<span>        raise ValueError(&quot;queue_capacity must be at least 1&quot;)</span>
+<span>    if item_timeout is not None and item_timeout &lt;= 0:</span>
+<span>        raise ValueError(&quot;item_timeout must be positive&quot;)</span>
+<span> </span>
+<span>    sentinel = object()</span>
+<span>    queue: asyncio.Queue[tuple[int, T] | object] = asyncio.Queue(maxsize=queue_capacity)</span>
+<span>    results: dict[int, R] = {}</span>
+<span>    activity_probe = probe if probe is not None else ConcurrencyProbe()</span>
+<span> </span>
+<span>    async def produce() -&gt; None:</span>
+<span>        for index, item in enumerate(items):</span>
+<span>            await queue.put((index, item))</span>
+<span>        for _ in range(worker_count):</span>
+<span>            await queue.put(sentinel)</span>
+<span> </span>
+<span>    async def consume() -&gt; None:</span>
+<span>        while True:</span>
+<span>            entry = await queue.get()</span>
+<span>            try:</span>
+<span>                if entry is sentinel:</span>
+<span>                    return</span>
+<span>                index, item = cast(tuple[int, T], entry)</span>
+<span>                async with activity_probe.activity():</span>
+<span>                    if item_timeout is None:</span>
+<span>                        result = await worker(item)</span>
+<span>                    else:</span>
+<span>                        async with asyncio.timeout(item_timeout):</span>
+<span>                            result = await worker(item)</span>
+<span>                results[index] = result</span>
+<span>            finally:</span>
+<span>                queue.task_done()</span>
+<span> </span>
+<span>    async with asyncio.TaskGroup() as group:</span>
+<span>        group.create_task(produce(), name=&quot;bounded-producer&quot;)</span>
+<span>        for number in range(worker_count):</span>
+<span>            group.create_task(consume(), name=f&quot;bounded-consumer-{number}&quot;)</span>
+<span> </span>
+<span>    if len(results) != len(items):</span>
+<span>        raise RuntimeError(&quot;structured run finished without one result per input&quot;)</span>
+<span>    return BoundedRun(</span>
+<span>        values=tuple(results[index] for index in range(len(items))),</span>
+<span>        worker_count=worker_count,</span>
+<span>        queue_capacity=queue_capacity,</span>
+<span>        peak_active=activity_probe.peak,</span>
+<span>    )</span>
+<span> </span>
+<span> </span>
+<span>async def delayed_square(value: int, *, delay: float = 0.01) -&gt; int:</span>
+<span>    &quot;&quot;&quot;Represent cooperative local I/O with a deterministic result.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    await asyncio.sleep(delay)</span>
+<span>    return value * value</span>
+<span> </span>
+<span> </span>
+<span>def _blocking_wait(job: tuple[int, float]) -&gt; int:</span>
+<span>    &quot;&quot;&quot;Represent a library call that blocks its thread.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    value, delay = job</span>
+<span>    time.sleep(delay)</span>
+<span>    return value * value</span>
+<span> </span>
+<span> </span>
+<span>def run_blocking_io_in_threads(</span>
+<span>    jobs: Sequence[tuple[int, float]],</span>
+<span>    *,</span>
+<span>    max_workers: int,</span>
+<span>) -&gt; tuple[int, ...]:</span>
+<span>    &quot;&quot;&quot;Run independent blocking waits in a bounded thread pool.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if max_workers &lt; 1:</span>
+<span>        raise ValueError(&quot;max_workers must be at least 1&quot;)</span>
+<span>    with ThreadPoolExecutor(</span>
+<span>        max_workers=max_workers,</span>
+<span>        thread_name_prefix=&quot;ds60-io&quot;,</span>
+<span>    ) as executor:</span>
+<span>        return tuple(executor.map(_blocking_wait, jobs))</span>
+<span> </span>
+<span> </span>
+<span>def cpu_checksum(limit: int) -&gt; int:</span>
+<span>    &quot;&quot;&quot;Perform deterministic pure-Python CPU work in a picklable function.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if limit &lt; 0:</span>
+<span>        raise ValueError(&quot;limit must be non-negative&quot;)</span>
+<span>    return sum((number * number) % 97 for number in range(limit))</span>
+<span> </span>
+<span> </span>
+<span>def run_cpu_work_in_processes(</span>
+<span>    limits: Sequence[int],</span>
+<span>    *,</span>
+<span>    max_workers: int,</span>
+<span>) -&gt; tuple[int, ...]:</span>
+<span>    &quot;&quot;&quot;Use spawned processes so the example matches Windows behavior.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if max_workers &lt; 1:</span>
+<span>        raise ValueError(&quot;max_workers must be at least 1&quot;)</span>
+<span>    context = multiprocessing.get_context(&quot;spawn&quot;)</span>
+<span>    with ProcessPoolExecutor(</span>
+<span>        max_workers=max_workers,</span>
+<span>        mp_context=context,</span>
+<span>    ) as executor:</span>
+<span>        return tuple(executor.map(cpu_checksum, limits))</span>
+<span> </span>
+<span> </span>
+<span>def deterministic_lost_update(initial: int = 0) -&gt; tuple[int, int]:</span>
+<span>    &quot;&quot;&quot;Return unsafe and serialized results for two increments.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    first_snapshot = initial</span>
+<span>    second_snapshot = initial</span>
+<span>    unsafe_value = first_snapshot + 1</span>
+<span>    unsafe_value = second_snapshot + 1</span>
+<span> </span>
+<span>    serialized_value = initial</span>
+<span>    serialized_value += 1</span>
+<span>    serialized_value += 1</span>
+<span>    return unsafe_value, serialized_value</span>
+<span> </span>
+<span> </span>
+<span>def _flatten_exceptions(</span>
+<span>    group: BaseExceptionGroup[BaseException],</span>
+<span>) -&gt; tuple[BaseException, ...]:</span>
+<span>    &quot;&quot;&quot;Flatten a nested task-group exception for concise demonstration output.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    leaves: list[BaseException] = []</span>
+<span>    for exception in group.exceptions:</span>
+<span>        if isinstance(exception, BaseExceptionGroup):</span>
+<span>            leaves.extend(_flatten_exceptions(exception))</span>
+<span>        else:</span>
+<span>            leaves.append(exception)</span>
+<span>    return tuple(leaves)</span>
+<span> </span>
+<span> </span>
+<span>async def demonstrate_async_failure() -&gt; str:</span>
+<span>    &quot;&quot;&quot;Show that one failed item cancels sibling work and reaches the caller.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    async def worker(value: int) -&gt; int:</span>
+<span>        await asyncio.sleep(0)</span>
+<span>        if value == 2:</span>
+<span>            raise RuntimeError(&quot;item 2 failed&quot;)</span>
+<span>        await asyncio.sleep(0.02)</span>
+<span>        return value</span>
+<span> </span>
+<span>    try:</span>
+<span>        await bounded_map(</span>
+<span>            [1, 2, 3],</span>
+<span>            worker,</span>
+<span>            worker_count=2,</span>
+<span>            queue_capacity=1,</span>
+<span>        )</span>
+<span>    except ExceptionGroup as group:</span>
+<span>        leaves = _flatten_exceptions(group)</span>
+<span>        return &quot;, &quot;.join(f&quot;{type(exc).__name__}: {exc}&quot; for exc in leaves)</span>
+<span>    raise AssertionError(&quot;the failure demonstration unexpectedly succeeded&quot;)</span>
+<span> </span>
+<span> </span>
+<span>async def async_demo() -&gt; None:</span>
+<span>    &quot;&quot;&quot;Run bounded work, timeout behavior, and failure propagation.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    result = await bounded_map(</span>
+<span>        [1, 2, 3, 4],</span>
+<span>        delayed_square,</span>
+<span>        worker_count=2,</span>
+<span>        queue_capacity=1,</span>
+<span>        item_timeout=0.1,</span>
+<span>    )</span>
+<span>    print(f&quot;async values: {result.values}; peak active: {result.peak_active}&quot;)</span>
+<span>    print(f&quot;propagated failure: {await demonstrate_async_failure()}&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def build_parser() -&gt; argparse.ArgumentParser:</span>
+<span>    &quot;&quot;&quot;Create a parser whose process demo is explicit for notebook safety.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    parser = argparse.ArgumentParser(description=&quot;Run deterministic concurrency demos.&quot;)</span>
+<span>    parser.add_argument(</span>
+<span>        &quot;--with-processes&quot;,</span>
+<span>        action=&quot;store_true&quot;,</span>
+<span>        help=&quot;also launch a small Windows-spawn-compatible process pool&quot;,</span>
+<span>    )</span>
+<span>    return parser</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    &quot;&quot;&quot;Run local demonstrations behind the required process main guard.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    args = build_parser().parse_args()</span>
+<span>    asyncio.run(async_demo())</span>
+<span>    print(</span>
+<span>        &quot;thread values:&quot;,</span>
+<span>        run_blocking_io_in_threads(</span>
+<span>            [(1, 0.01), (2, 0.01), (3, 0.01)],</span>
+<span>            max_workers=2,</span>
+<span>        ),</span>
+<span>    )</span>
+<span>    print(&quot;lost update (unsafe, serialized):&quot;, deterministic_lost_update())</span>
+<span>    if args.with_processes:</span>
+<span>        print(</span>
+<span>            &quot;process checksums:&quot;,</span>
+<span>            run_cpu_work_in_processes([5_000, 5_500], max_workers=2),</span>
+<span>        )</span>
+<span>    else:</span>
+<span>        print(&quot;process demo skipped; pass --with-processes to run it&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    # Windows and macOS spawn a fresh interpreter. The guard prevents every</span>
+<span>    # child from recursively creating another process pool.</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-svc-01.html"><small>Previous lesson</small><strong>python-svc-01</strong><span>Reliable HTTP Clients and External-Service Boundaries</span></a>
+        <a class="nav-card next" href="python-data-01.html"><small>Next lesson</small><strong>python-data-01</strong><span>Columnar Data, Arrow, and Embedded Analytical SQL</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-pro-02";
+    const LEARNER_PATH = "python/professional/lessons/py_pro_02_concurrency_parallelism.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

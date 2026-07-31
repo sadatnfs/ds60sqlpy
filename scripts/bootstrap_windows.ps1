@@ -94,6 +94,7 @@ function Invoke-NativeCapture {
 function Add-ExistingFile {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
         [System.Collections.Generic.List[string]]$Candidates,
         [Parameter(Mandatory = $true)]
         [hashtable]$Seen,
@@ -120,6 +121,7 @@ function Add-ExistingFile {
 function Add-ExistingDirectory {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
         [System.Collections.Generic.List[string]]$Directories,
         [Parameter(Mandatory = $true)]
         [hashtable]$Seen,
@@ -589,7 +591,9 @@ function Install-WingetPackage {
 
 function Add-PathEntries {
     param(
-        [Parameter(Mandatory = $true)][string[]]$Entries,
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [string[]]$Entries,
         [Parameter(Mandatory = $true)]
         [System.EnvironmentVariableTarget]$Target
     )
@@ -1091,7 +1095,9 @@ if ($PsqlInfo) {
 }
 
 Write-Step "Running the course environment doctor"
-Invoke-Native -FilePath $VenvPython -ArgumentList @("scripts\course.py", "doctor")
+Invoke-Native `
+    -FilePath $VenvPython `
+    -ArgumentList @("scripts\course.py", "doctor", "--no-database")
 
 Write-Host ""
 Write-Host "Bootstrap complete." -ForegroundColor Green

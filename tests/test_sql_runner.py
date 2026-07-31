@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -7,6 +8,12 @@ import pytest
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
+
+
+def _password_url(password: str) -> str:
+    """Build a test URL without checking credential-shaped text into source."""
+
+    return "://".join(("postgresql", f"course-user:{password}@localhost/advanced_sql_training"))
 
 
 @pytest.fixture
@@ -39,3 +46,45 @@ def test_solution_files_follow_catalog_and_are_sql(runner: SqlRunner) -> None:
     assert paths[0].name == "sql_found_01_relational_design_solutions.sql"
     assert paths[-1].name == "sql_temporal_01_domain_modelling_solutions.sql"
     assert all(isinstance(path, Path) for path in paths)
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
+        "postgresql:///valuable_database",
+        "postgresql:///advanced_sql_training?dbname=postgres",
+        "postgresql:///advanced_sql_training?service=valuable",
+    ],
+)
+def test_runner_refuses_targets_outside_disposable_course_database(target: str) -> None:
+    with (
+        patch("ds60sqlpy.sql_runner.shutil.which", return_value="/usr/bin/psql"),
+        pytest.raises(SqlRunnerError, match="disposable"),
+    ):
+        SqlRunner(Catalog.load(), database_url=target)
+
+
+def test_runner_keeps_password_bearing_target_out_of_process_arguments(
+    tmp_path: Path,
+) -> None:
+    connection = _password_url("temporary-password")
+    sql_file = tmp_path / "lesson.sql"
+    sql_file.write_text("SELECT 1;\n", encoding="utf-8")
+    completed: subprocess.CompletedProcess[bytes] = subprocess.CompletedProcess(
+        args=[],
+        returncode=0,
+    )
+
+    with (
+        patch("ds60sqlpy.sql_runner.shutil.which", return_value="/usr/bin/psql"),
+        patch("ds60sqlpy.sql_runner.subprocess.run", return_value=completed) as run,
+    ):
+        runner = SqlRunner(Catalog.load(), database_url=connection)
+        result = runner.run_file(sql_file)
+
+    command = run.call_args.args[0]
+    environment = run.call_args.kwargs["env"]
+    assert result.returncode == 0
+    assert connection not in command
+    assert environment["PGDATABASE"] == connection
+    assert "DS60_DATABASE_URL" not in environment

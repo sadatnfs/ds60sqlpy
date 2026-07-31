@@ -73,6 +73,7 @@ professional = [
 ]
 sql-notebooks = [
   "jupysql>=0.10.17",
+  "pandas>=2.2",
   "psycopg[binary]>=3.2",
   "sqlalchemy>=2.0.36",
 ]
@@ -109,6 +110,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-config --strict-markers"
+pythonpath = ["."]
 testpaths = [
   "tests",
   "bridge/tests",
@@ -130,6 +132,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PTH"]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/build_course_guide.py" = ["E501"]
+"src/ds60sqlpy/lesson_reader.py" = ["E501"]
 "tests/*" = ["S101"]
 
 [tool.mypy]

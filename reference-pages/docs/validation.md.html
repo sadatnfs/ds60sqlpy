@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Validation · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Validation</h1>
+      <p class="source-path">Generated from <code>docs/validation.md</code></p>
+    </header>
+    <article class="document"><h2 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h2>
+<p>Validation separates structural confidence from actual execution. A notebook that parses has not necessarily run; a SQL file that looks plausible has not necessarily succeeded against PostgreSQL.</p>
+<p>Run commands from the repository root.</p>
+<h3 id="standard-commands">Standard commands<a class="heading-anchor" href="#standard-commands" aria-label="Link to this section">#</a></h3>
+<p>Environment:</p>
+<pre><code class="language-text">python scripts/course.py doctor</code></pre>
+<p>Catalog:</p>
+<pre><code class="language-text">python scripts/course.py catalog</code></pre>
+<p>Repository validation:</p>
+<pre><code class="language-text">python scripts/course.py validate</code></pre>
+<p>Sensitive-content guard:</p>
+<pre><code class="language-text">python scripts/scan_secrets.py --history</code></pre>
+<p>Practice-enrichment and generated portal drift:</p>
+<pre><code class="language-text">python scripts/audit_practice.py
+python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check</code></pre>
+<p>Add <code>--all</code> to print passing details as well as failures, warnings, and summaries. This command performs fast structural checks; it does not execute every notebook or SQL lesson.</p>
+<p>On Windows, use:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe scripts\course.py doctor
+.\.venv\Scripts\python.exe scripts\course.py catalog
+.\.venv\Scripts\python.exe scripts\course.py validate
+.\.venv\Scripts\python.exe scripts\scan_secrets.py --history
+.\.venv\Scripts\python.exe scripts\audit_practice.py
+.\.venv\Scripts\python.exe scripts\build_course_guide.py --check
+.\.venv\Scripts\python.exe scripts\build_lesson_readers.py --check</code></pre>
+<p>On macOS/Linux, use:</p>
+<pre><code class="language-bash">.venv/bin/python scripts/course.py doctor
+.venv/bin/python scripts/course.py catalog
+.venv/bin/python scripts/course.py validate
+.venv/bin/python scripts/scan_secrets.py --history
+.venv/bin/python scripts/audit_practice.py
+.venv/bin/python scripts/build_course_guide.py --check
+.venv/bin/python scripts/build_lesson_readers.py --check</code></pre>
+<p>The course CLI uses the standard library for pre-install inspection so catalog and environment diagnostics remain available before third-party packages are installed.</p>
+<p>The learner setup scripts install compatible dependency ranges with <code>pip</code>. Continuous integration uses the checked-in cross-platform <code>uv.lock</code> and rejects lock drift:</p>
+<pre><code class="language-text">uv lock --check</code></pre>
+<p>Maintainers with <code>uv</code> can reproduce the CI core environment with:</p>
+<pre><code class="language-text">uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
+uv run --no-sync pytest</code></pre>
+<h3 id="maintainer-checks">Maintainer checks<a class="heading-anchor" href="#maintainer-checks" aria-label="Link to this section">#</a></h3>
+<p>Core setup installs the quality tools used by continuous integration:</p>
+<pre><code class="language-text">python scripts/build_catalog.py
+python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
+python scripts/audit_practice.py
+python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
+python -m ruff check src scripts tests bridge python/professional
+python -m mypy
+python -m pytest
+python scripts/course.py validate
+python scripts/scan_secrets.py --history</code></pre>
+<p>Review the regenerated catalog diff. CI runs these core checks on Python 3.12 for Windows, macOS, and Linux and on Python 3.11 for Linux, then executes the full SQL sequence separately against PostgreSQL 17. Each matrix leg sets <code>UV_PYTHON</code> to the requested version and asserts <code>sys.version_info[:2]</code> after sync, so the learner-default <code>.python-version</code> cannot silently collapse the matrix onto Python 3.12. The Windows core runner also registers <code>Python (ds60sqlpy)</code> and runs <code>start_ds60.ps1 -DiagnosticsOnly -NonInteractive -SkipPostgreSql</code>, exercising the native PowerShell startup and both-environment-layout readiness path without opening a browser.</p>
+<p>The focused learner-entry tests cover different boundaries:</p>
+<ul>
+<li><code>test_course_guide.py</code> checks dashboard catalog links and generated copy.</li>
+<li><code>test_lesson_reader.py</code> checks deterministic rendered pages, safe link rewriting, recursive Markdown/SQL reference pages, mode-specific completion controls, and stale-page removal.</li>
+<li><code>test_portal.py</code> checks loopback/token/origin/path/launch restrictions and exact artifact commands.</li>
+<li><code>test_sql_notebook.py</code> checks stable SQL IDs, paths below <code>.learning/sql/</code>, no-overwrite behavior, fixed <code>psql</code> invocation, database/reset guards, bounded transcripts, and stateful prerequisite preparation.</li>
+<li><code>test_windows_startup.py</code> statically checks the double-click launcher and PowerShell 5.1 orchestration. Native execution remains a Windows CI boundary.</li>
+</ul>
+<p>Unit tests do not replace browser QA. For a learner-experience change, open both <code>file://.../START_HERE.html</code> and the private <code>127.0.0.1</code> portal. Verify a Python, SQL, and bridge card; guide/learner/solution tabs; keyboard navigation; desktop and narrow layouts; no raw <code>.md</code>, <code>.ipynb</code>, <code>.py</code>, or <code>.sql</code> browser view; rendered setup/reference navigation; dashboard-only static completion; the loopback lesson checkbox; no unexpected network requests; and the exact run controls available in each mode. Do not click an action that would reset PostgreSQL.</p>
+<p>The sensitive-content scan is deliberately offline and reports only an object ID, path, line number, and finding category so it does not copy a suspected credential into logs. It catches common token/key formats, private-key files, credential-bearing URLs, ignored credential-shaped local files, and reachable Git-history blobs. Its narrow fixture allowances are covered by tests. It is a guardrail, not proof against every secret format; still review changes and use an organization scanner when available.</p>
+<p>Every push and pull request also runs the actual learner <code>setup.ps1</code> or <code>setup.sh</code> flow on fresh Windows, macOS, and Ubuntu Python 3.12 runners, reruns doctor through the generated <code>.venv</code>, and checks that setup produced no trackable files. The Windows runner first executes <code>bootstrap_windows.ps1 -SkipPostgreSql -WhatIf</code>, which exercises native PowerShell parsing and discovery without changing PATH, installing packages, registering a kernel, or requiring a database server on the CI image.</p>
+<p>The weekly and manually dispatched heavy job resolves, installs, and imports every direct package in the <code>bridge</code>, <code>professional</code>, <code>sql-notebooks</code>, <code>ml</code>, <code>production</code>, <code>deep-learning</code>, <code>nlp</code>, and <code>geo</code> extras on fresh Windows and Ubuntu Python 3.12 runners:</p>
+<pre><code class="language-text">uv sync --frozen --all-extras
+uv run --no-sync python scripts/check_advanced_imports.py</code></pre>
+<p>Each import runs in an isolated process and does not fetch datasets, pretrained weights, spaCy pipelines, or external services. This proves locked package installation and basic import compatibility on those two platforms; it does not prove model training, GPU support, asset availability, live APIs, or every advanced lesson&#x27;s runtime behavior. macOS receives the core matrix but not this heavy all-extras gate.</p>
+<h3 id="local-validation-evidence-2026-07-30">Local validation evidence (2026-07-30)<a class="heading-anchor" href="#local-validation-evidence-2026-07-30" aria-label="Link to this section">#</a></h3>
+<p>The comprehensive local run recorded this evidence:</p>
+<ul>
+<li>Locked Python 3.11 suite: <strong>167 passed, 2 expected skips</strong>.</li>
+<li>Locked Python 3.12 suite: <strong>167 passed, 2 expected skips</strong>.</li>
+<li>PostgreSQL 16.14: <strong>72/72 learner scripts</strong> and <strong>72/72 executable solutions</strong> passed.</li>
+<li>The JupySQL solution notebook executed <strong>18/18 code cells</strong>, including <strong>9/9 live SQL cells</strong>.</li>
+<li>Notebook smoke checks passed <strong>13/13</strong>.</li>
+<li>Practice coverage passed <strong>154/154 lessons</strong>.</li>
+<li>The current-tree and reachable-Git-history sensitive-content scan passed.</li>
+</ul>
+<p>Native Windows execution was not verified locally and remains CI-only for this snapshot. These results describe this checkout and environment on the stated date; they are evidence, not a promise that later revisions or other machines will produce the same results.</p>
+<h3 id="validation-layers">Validation layers<a class="heading-anchor" href="#validation-layers" aria-label="Link to this section">#</a></h3>
+<h4 id="1-inventory-and-structure">1. Inventory and structure<a class="heading-anchor" href="#1-inventory-and-structure" aria-label="Link to this section">#</a></h4>
+<p>Check:</p>
+<ul>
+<li><code>curriculum/catalog.json</code> is valid JSON and matches a fresh run of <code>python scripts/build_catalog.py</code>.</li>
+<li>Every catalog path exists.</li>
+<li>Lesson IDs and ordering are unique.</li>
+<li>Declared companion guides and solutions exist.</li>
+<li>Notebook files are valid JSON and valid <code>nbformat</code>.</li>
+<li>Markdown internal links resolve.</li>
+<li>Every lesson surface meets its immutable <code>curriculum/practice_baseline.json</code> doubling target.</li>
+<li><code>START_HERE.html</code> matches a fresh deterministic portal render.</li>
+<li><code>lesson-pages/</code> contains exactly one current page per cataloged lesson and matches a fresh deterministic reader render.</li>
+<li><code>reference-pages/</code> matches the recursive closure of local Markdown/SQL links reachable from the dashboard and rendered course artifacts.</li>
+<li>No user-facing local Markdown or SQL link in the generated HTML surfaces opens raw browser source.</li>
+<li>The loopback portal rejects hidden files, invalid tokens, cross-origin mutations, unknown lesson IDs, and non-allowlisted launch actions.</li>
+<li>Static pages remain self-contained/read-only; loopback pages receive only the session token needed for fixed catalog-resolved actions.</li>
+<li>No unexpected generated artifacts are tracked.</li>
+</ul>
+<p>This layer is fast but does not prove lesson semantics.</p>
+<h4 id="2-python-import-and-notebook-smoke-checks">2. Python import and notebook smoke checks<a class="heading-anchor" href="#2-python-import-and-notebook-smoke-checks" aria-label="Link to this section">#</a></h4>
+<p>Check:</p>
+<ul>
+<li>Direct imports are declared in the appropriate dependency group.</li>
+<li>Notebook kernelspec metadata is consistent.</li>
+<li>Representative example cells run from a clean kernel.</li>
+<li>Exercise notebooks do not depend on hidden execution order.</li>
+<li>Expected failure demonstrations fail for the documented reason.</li>
+<li>Heavy or network-tagged cells are reported distinctly.</li>
+<li>SQL-magic cells are structurally checked through notebook tags; live PostgreSQL execution is recorded separately.</li>
+</ul>
+<p>Run the notebook-aware validator after installing the core environment:</p>
+<pre><code class="language-text">python scripts/validate_notebooks.py
+python scripts/validate_notebooks.py --smoke</code></pre>
+<p>The normal smoke set excludes the live PostgreSQL notebook. After setting <code>DS60_DATABASE_URL</code> to the disposable database, execute its solution from a clean kernel:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe -m nbconvert --execute --to notebook `
+    --output-dir .\artifacts\notebook-validation `
+    .\bridge\professional\solutions\bridge_jupyter_01_postgresql_magics_solution.ipynb</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python -m nbconvert --execute --to notebook \
+  --output-dir artifacts/notebook-validation \
+  bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb</code></pre>
+<p>The executed copy belongs under ignored <code>artifacts/</code>; keep the checked-in notebook output-free.</p>
+<p>Cleared notebook outputs are normal. Record execution evidence in validation logs or CI rather than committing noisy, machine-specific output.</p>
+<h5 id="guided-per-lesson-sql-notebooks">Guided per-lesson SQL notebooks<a class="heading-anchor" href="#guided-per-lesson-sql-notebooks" aria-label="Link to this section">#</a></h5>
+<p>These learner-local notebooks are generated from stable SQL catalog IDs and run complete scripts through <code>psql</code>; they are not the checked-in JupySQL magics lesson. Validate their safety and generation contract without writing into a learner&#x27;s existing <code>.learning/</code> directory:</p>
+<pre><code class="language-text">python -m pytest tests/test_sql_notebook.py tests/test_portal.py</code></pre>
+<p>The tests use isolated temporary repositories. They must prove valid notebook/kernelspec structure, no absolute checkout path or connection value, catalog-only source selection, no overwrite of learner files, fixed non-shell <code>psql -f</code>, unchanged line-start and inline meta-commands/includes, the <code>advanced_sql_training</code> restriction, and explicit reset confirmation.</p>
+<p>When manually exercising a generated notebook, first preserve any existing <code>.learning/sql/&lt;lesson-id&gt;/</code> work. Report separately whether generation, Jupyter launch, database preparation, learner SQL execution, and <code>00_verify.sql</code> succeeded. A rendered reader or structurally valid generated notebook is not evidence that PostgreSQL authentication or the lesson query succeeded.</p>
+<h4 id="3-offline-checks">3. Offline checks<a class="heading-anchor" href="#3-offline-checks" aria-label="Link to this section">#</a></h4>
+<p>After disclosed first-run caches:</p>
+<ul>
+<li>Block or disconnect network access.</li>
+<li>Run core notebooks.</li>
+<li>Require missing optional model caches to produce an actionable skip or error.</li>
+<li>Confirm no lesson silently fetches a dataset or package.</li>
+</ul>
+<p>See <a href="setup/offline.md.html">Offline use</a>.</p>
+<h4 id="4-sql-execution">4. SQL execution<a class="heading-anchor" href="#4-sql-execution" aria-label="Link to this section">#</a></h4>
+<p>Canonical automation uses PostgreSQL 17; supported learner environments are PostgreSQL 16+.</p>
+<p>Cross-platform Compose execution:</p>
+<pre><code class="language-text">docker compose up -d postgres
+docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
+docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql
+docker compose run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql
+docker compose down</code></pre>
+<p><code>00_setup.sql</code> is destructive within the course-owned <code>training</code> schema. The Compose database is disposable, but still resolve the target before running setup. <code>docker compose down</code> preserves its named volume.</p>
+<p>Reset only the disposable training database:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_verify.sql</code></pre>
+<p>Run a lesson:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
+<p>Named professional SQL modules live under <code>sql/professional/</code>. Run the learner and solution artifact in separate clean sessions. Role administration, extensions, physical recovery, and replication modules include capability boundaries; report an instructional skip separately from the default rollback-safe SQL that did execute.</p>
+<p>Check:</p>
+<ul>
+<li>Setup completes from a clean database.</li>
+<li>Setup produces the deterministic relationships and expected row counts checked by <code>00_verify.sql</code>; generated dates intentionally remain relative to <code>CURRENT_DATE</code>.</li>
+<li>Each independent day runs in a new <code>psql</code> session.</li>
+<li>Rollback leaves no unexpected persistent state.</li>
+<li>The Day 52–54 warehouse project is the declared stateful exception: Day 52 resets and commits the course-owned <code>dwh</code> schema, then Days 53 and 54 run in order.</li>
+<li>Executable solutions, where declared, run against the same schema.</li>
+</ul>
+<p>Do not drop <code>ON_ERROR_STOP</code>; without it, statement errors can be missed.</p>
+<h4 id="5-engineering-bridge">5. Engineering bridge<a class="heading-anchor" href="#5-engineering-bridge" aria-label="Link to this section">#</a></h4>
+<p>The bridge&#x27;s default validation does not require a database:</p>
+<pre><code class="language-text">python -m pytest bridge/tests
+python -m pytest bridge/professional/tests
+python -m compileall -q bridge</code></pre>
+<p>Check:</p>
+<ul>
+<li>learner and solution modules parse on Python 3.11 and 3.12;</li>
+<li>fake-backed tests cover configuration, parameters, transactions, retries, ETL accounting, async bounds, and capstone failure behavior;</li>
+<li>examples do not hard-code credentials or silently connect;</li>
+<li>optional live work reads <code>DS60_DATABASE_URL</code>, targets only the disposable course database, and documents its rollback or cleanup boundary.</li>
+</ul>
+<p>Fake-backed success does not prove server permissions, network behavior, or a real query plan. Label a live PostgreSQL check separately when one is run.</p>
+<h4 id="6-professional-python-modules">6. Professional Python modules<a class="heading-anchor" href="#6-professional-python-modules" aria-label="Link to this section">#</a></h4>
+<p>Run the professional solution tests independently from the learner scaffolds:</p>
+<pre><code class="language-text">python -m pytest python/professional/tests</code></pre>
+<p>Package-build tests install only into a temporary target. Arrow/DuckDB tests use generated local files. HTTP, concurrency, AI, analytics, migration, and service tests use deterministic fakes or local fixtures. No professional default test should require a public endpoint, hosted model, cloud account, or credential.</p>
+<h4 id="7-platform-checks">7. Platform checks<a class="heading-anchor" href="#7-platform-checks" aria-label="Link to this section">#</a></h4>
+<p>Core setup and doctor should run on:</p>
+<ul>
+<li>Windows with PowerShell</li>
+<li>macOS</li>
+<li>Linux</li>
+</ul>
+<p>Verify activation-free Windows commands. Test platform-sensitive packages separately from the core curriculum.</p>
+<h3 id="during-development">During development<a class="heading-anchor" href="#during-development" aria-label="Link to this section">#</a></h3>
+<p>Use focused checks first, then the full validation:</p>
+<ol>
+<li>Validate the changed notebook, guide, or SQL file.</li>
+<li>Validate its generated catalog entry and links.</li>
+<li>Run its prerequisite and successor smoke checks.</li>
+<li>Regenerate the catalog when artifact names or catalog-builder metadata changed:</li>
+</ol>
+<pre><code class="language-text">   python scripts/build_catalog.py
+   git diff -- curriculum/catalog.json</code></pre>
+<ol>
+<li>When lessons or portal behavior changed, regenerate the maintained outputs:</li>
+</ol>
+<pre><code class="language-text">   python scripts/audit_practice.py --write-report
+   python scripts/build_course_guide.py
+   python scripts/build_lesson_readers.py
+   git diff -- docs/practice-coverage.md START_HERE.html lesson-pages/</code></pre>
+<ol>
+<li>Run <code>python scripts/course.py validate</code>.</li>
+<li>Run:</li>
+</ol>
+<pre><code class="language-text">   git diff --check
+   git status --short</code></pre>
+<p>Do not reformat unrelated notebooks or SQL files merely to make a focused validation pass.</p>
+<h3 id="interpreting-results">Interpreting results<a class="heading-anchor" href="#interpreting-results" aria-label="Link to this section">#</a></h3>
+<p>Use precise labels:</p>
+<ul>
+<li><strong>Structure validated:</strong> the artifact parses and paths resolve.</li>
+<li><strong>Smoke tested:</strong> representative behavior ran.</li>
+<li><strong>Fully executed:</strong> the intended runnable artifact completed in the documented environment.</li>
+<li><strong>Offline validated:</strong> it completed with network unavailable after disclosed bootstrap.</li>
+<li><strong>Not validated:</strong> state the exact missing dependency, service, platform, or cache.</li>
+</ul>
+<p>Never report “all tests pass” when heavy, network, Windows, or SQL checks were skipped.</p>
+<h3 id="adding-a-validator">Adding a validator<a class="heading-anchor" href="#adding-a-validator" aria-label="Link to this section">#</a></h3>
+<p>A validator should:</p>
+<ul>
+<li>Be deterministic</li>
+<li>Work from the repository root</li>
+<li>Avoid changing learner artifacts</li>
+<li>Produce a nonzero exit status on failure</li>
+<li>Explain the file and remediation</li>
+<li>Distinguish unavailable optional prerequisites from defects</li>
+<li>Run without network unless explicitly testing connected bootstrap</li>
+</ul>
+<p>Update this document, the course CLI, CI, and applicable <code>AGENTS.md</code> together.</p></article>
+  </main>
+</body>
+</html>

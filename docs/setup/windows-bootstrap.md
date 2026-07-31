@@ -22,11 +22,37 @@ The bootstrapper:
    JupyterLab, Notebook, ipykernel, JupySQL, SQLAlchemy, and Psycopg 3.
 6. Registers `Python (ds60sqlpy)` as a per-user Jupyter kernel.
 7. Verifies the package imports, Jupyter installation, kernel interpreter,
-   `psql` version, and course environment doctor.
+   `psql` version, and course environment doctor. Bootstrap invokes doctor with
+   `--no-database`; the private portal launcher runs the normal bounded,
+   read-only course-database reachability check afterward.
 
 It does **not** request or display a PostgreSQL password, set
 `DS60_DATABASE_URL`, connect to PostgreSQL, create a database, or run a course
 schema reset.
+
+## Which Windows entry point should I use?
+
+For normal learning, double-click `START_DS60.cmd` in the repository root. Its
+orchestrator, `scripts\start_ds60.ps1`, checks readiness, runs this bootstrap
+only when the environment needs setup or repair, runs course doctor, and opens
+the private portal. A ready environment is reused without reinstalling
+packages.
+
+Use `bootstrap_windows.ps1` directly when you want to choose dependency
+profiles, persist narrowly scoped user `PATH` entries, preview a winget
+installation, or troubleshoot discovery. The guided launcher forwards
+`-Profile`, `-DependencyMode`, `-PersistUserPath`,
+`-InstallMissingWithWinget`, and `-SkipPostgreSql` when bootstrap is needed.
+
+Read-only launcher diagnostics are suitable for support or automation:
+
+```powershell
+& .\scripts\start_ds60.ps1 -DiagnosticsOnly -NonInteractive
+```
+
+For a noninteractive first setup, review `-WhatIf` first and then explicitly
+add `-AcceptConnectedSetup`. Without that acknowledgement, noninteractive mode
+will not begin a network-dependent package installation.
 
 ## Run the default bootstrap
 

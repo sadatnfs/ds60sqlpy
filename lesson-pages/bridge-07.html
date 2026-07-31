@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-07 · Async Bounded Concurrency · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-07</p>
+        <h1>Async Bounded Concurrency</h1>
+        <p class="hero-copy">Python and PostgreSQL engineering</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">bridge setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="bridge-06.html">bridge-06</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/lessons/day07_async_bounded_concurrency.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/lessons/day07_async_bounded_concurrency.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/companion-guides/day07_async_bounded_concurrency.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/companion-guides/day07_async_bounded_concurrency.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-day-7-async-i-o-and-bounded-concurrency">Bridge Day 7 — Async I/O and bounded concurrency<a class="heading-anchor" href="#guide--bridge-day-7-async-i-o-and-bounded-concurrency" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Advanced <strong>Prerequisite:</strong> <a href="bridge-06.html#guide">Bridge Day 6</a></p>
+<h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
+<p><code>asyncio</code> can overlap waiting, but it does not make database capacity infinite. Starting one task per input without a bound can exhaust a connection pool, increase latency, and overwhelm PostgreSQL. Structured concurrency, explicit limits, and async-aware resource cleanup make failure and cancellation predictable.</p>
+<h4 id="guide--objectives">Objectives<a class="heading-anchor" href="#guide--objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>distinguish I/O concurrency from CPU parallelism;</li>
+<li>manage async commit, rollback, and close paths;</li>
+<li>limit in-flight work with a semaphore;</li>
+<li>preserve result order independently of completion order;</li>
+<li>execute a parameterized Psycopg async query;</li>
+<li>test concurrency deterministically without network access.</li>
+</ul>
+<h4 id="guide--vocabulary">Vocabulary<a class="heading-anchor" href="#guide--vocabulary" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>event loop</td>
+<td>The scheduler that resumes coroutines when awaited work is ready</td>
+</tr>
+<tr>
+<td>coroutine</td>
+<td>A function execution that can suspend with <code>await</code></td>
+</tr>
+<tr>
+<td>task</td>
+<td>A scheduled coroutine</td>
+</tr>
+<tr>
+<td>bounded concurrency</td>
+<td>A fixed maximum number of operations in flight</td>
+</tr>
+<tr>
+<td>semaphore</td>
+<td>A counter-based synchronization primitive that enforces a limit</td>
+</tr>
+<tr>
+<td>structured concurrency</td>
+<td>Child tasks are owned and awaited within a lexical scope</td>
+</tr>
+<tr>
+<td>cancellation</td>
+<td>A request for a running coroutine to stop and clean up</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--run-the-starter">Run the starter<a class="heading-anchor" href="#guide--run-the-starter" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe bridge\lessons\day07_async_bounded_concurrency.py</code></pre>
+<pre><code class="language-bash">.venv/bin/python bridge/lessons/day07_async_bounded_concurrency.py</code></pre>
+<h4 id="guide--worked-example-concurrency-needs-a-measurable-limit">Worked example: concurrency needs a measurable limit<a class="heading-anchor" href="#guide--worked-example-concurrency-needs-a-measurable-limit" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">semaphore = asyncio.Semaphore(limit)
+
+
+async def guarded(item: str) -&gt; Result:
+    async with semaphore:
+        return await operation(item)</code></pre>
+<p>The semaphore caps operations inside its context. <code>asyncio.TaskGroup</code> owns the tasks: it waits for all on success and cancels siblings when one fails.</p>
+<p>Do not put <code>time.sleep()</code>, synchronous HTTP, or a synchronous Psycopg call inside an async function. Those block the event loop. Use an async API or deliberately move blocking work to a thread when the library is thread-safe.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Own async connection cleanup, bound active work with structured concurrency, preserve input order, and keep PostgreSQL value binding safe.</li>
+<li><strong>Assumptions:</strong> Cancellation must propagate after cleanup; <code>asyncio.Semaphore</code> bounds active operations but not the number of created tasks.</li>
+<li><strong>Primary failure mode:</strong> Blocking calls, shared unsafe cursors, swallowed cancellation, and unbounded task creation turn async code into a reliability hazard.</li>
+<li><strong>Evidence loop:</strong> predict the boundary, implement the smallest change, verify success and failure with a deterministic fake, then explain which behavior still requires an explicitly enabled PostgreSQL integration test.</li>
+</ul>
+<ol>
+<li><strong>Implementation:</strong> Implement <code>managed_async_connection()</code> with awaited factory, one yield, commit on success, rollback on failure, and close on every path.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Mirror the synchronous state machine with awaited lifecycle calls.</li>
+</ul>
+<ol>
+<li><strong>Concurrency:</strong> Implement <code>map_bounded()</code> with <code>asyncio.Semaphore</code> and <code>TaskGroup</code>, reject limits below one, and preserve input order.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Associate each task with its original index rather than append-on-completion order.</li>
+</ul>
+<ol>
+<li><strong>Testing:</strong> Measure active fake operations and assert maximum concurrency never exceeds the configured limit.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Increment before an await point and decrement in <code>finally</code>.</li>
+</ul>
+<ol>
+<li><strong>Ordering:</strong> Use different fake completion delays to prove output order follows input order rather than completion order.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Choose a completion schedule that visibly differs from the input.</li>
+</ul>
+<ol>
+<li><strong>Async SQL:</strong> Define <code>AsyncReadCursor</code> and implement one query using <code>customer_id = ANY(%s)</code> with the Python ID list as one bound parameter.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> The parameter sequence is a one-element tuple containing the list.</li>
+</ul>
+<ol>
+<li><strong>Validation:</strong> Return early for empty customer IDs without touching the cursor and reject any non-positive ID.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Validate the complete collection before the first database effect.</li>
+</ul>
+<ol>
+<li><strong>Scale design:</strong> Explain why a semaphore still creates one task per item and design a fixed-worker queue for a million inputs.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Separate active-operation bounds from task-count and memory bounds.</li>
+</ul>
+<ol>
+<li><strong>Cancellation:</strong> Cancel a task inside <code>managed_async_connection()</code> and verify rollback/close happen before cancellation escapes.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Never translate <code>CancelledError</code> into an empty or successful result.</li>
+</ul>
+<ol>
+<li><strong>Failure analysis:</strong> Trigger two concurrent task failures and inspect <code>ExceptionGroup</code> behavior from <code>TaskGroup</code>.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Structured concurrency cancels siblings and reports grouped failures.</li>
+</ul>
+<ol>
+<li><strong>Empty work:</strong> Test <code>map_bounded([], operation, limit=1)</code> and prove the operation is never called.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> An empty collection is a successful no-op, not an invalid concurrency request.</li>
+</ul>
+<ol>
+<li><strong>Duplicates:</strong> Define whether duplicate customer IDs are preserved, deduplicated, or rejected and test the chosen contract.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Input-order promises and dictionary outputs have different duplicate semantics.</li>
+</ul>
+<ol>
+<li><strong>Architecture:</strong> Compare a semaphore-per-item design with the worker queue on fairness, memory, cancellation, and complexity.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Choose based on workload scale rather than treating one pattern as universally superior.</li>
+</ul>
+<ol>
+<li><strong>Database ownership:</strong> Decide whether concurrent operations may share one connection/cursor or require a pool-acquired resource per worker.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Driver concurrency guarantees and transaction scope determine the safe choice.</li>
+</ul>
+<ol>
+<li><strong>Deterministic testing:</strong> Replace timing-based async assertions with events/barriers and explain why wall-clock sleeps make tests flaky.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Coordinate state transitions directly instead of hoping a scheduler runs in time.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>State the input/output and ownership boundary in one sentence.</li>
+<li>Show one normal case, one edge case, and one failure case.</li>
+<li>Inspect recorded calls rather than relying on plausible output.</li>
+<li>Confirm no credential, payload, or high-cardinality identifier was emitted.</li>
+</ul>
+<h4 id="guide--optional-live-db-step">Optional live-DB step<a class="heading-anchor" href="#guide--optional-live-db-step" aria-label="Link to this section">#</a></h4>
+<p>Psycopg 3 provides <code>AsyncConnection.connect()</code>. Use one disposable connection and a read-only cursor:</p>
+<pre><code class="language-python">connection = await psycopg.AsyncConnection.connect(database_url)
+try:
+    async with connection.cursor() as cursor:
+        names = await fetch_customer_names(cursor, [1, 2, 3])
+finally:
+    await connection.rollback()
+    await connection.close()</code></pre>
+<p>Set <code>DS60_DATABASE_URL</code> in the shell, but never print it:</p>
+<pre><code class="language-powershell">$env:DS60_DATABASE_URL = &quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;</code></pre>
+<pre><code class="language-bash">export DS60_DATABASE_URL=&quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;</code></pre>
+<p>For concurrent queries, pool size and semaphore limit must agree. A concurrency limit of 50 does not help if a pool of 5 causes 45 tasks to wait while still holding other resources.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Is the maximum active fake count never above the configured limit?</li>
+<li>Are results returned in input order?</li>
+<li>Does one child failure propagate and cancel unfinished siblings?</li>
+<li>Are rollback and close awaited on failure?</li>
+<li>Does empty ID input avoid a database round trip?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Calling <code>asyncio.run()</code> inside a running event loop:</strong> notebooks and async frameworks already own the loop; <code>await</code> the coroutine there.</li>
+<li><strong>Using blocking calls in coroutines:</strong> one call stalls every task.</li>
+<li><strong>Unlimited <code>gather()</code>:</strong> task creation itself can consume large memory.</li>
+<li><strong>Sharing one connection across concurrent transactions:</strong> transaction state and cursor use can interfere.</li>
+<li><strong>Swallowing cancellation:</strong> resources may remain open and shutdown hangs.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p><a href="bridge-08.html#guide">Day 8</a> assembles configuration, adapters, idempotency, tests, batches, and observability into a restartable job. See <a href="bridge-07.html#solution-1">the Day 7 solution notes</a> after attempting the exercises.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/lessons/day07_async_bounded_concurrency.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/lessons/day07_async_bounded_concurrency.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Bridge Day 7: asyncio, bounded concurrency, and async database patterns.</span>
+<span> </span>
+<span>Prerequisite: Bridge Day 6.</span>
+<span>Read ``bridge/companion-guides/day07_async_bounded_concurrency.md`` first.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import AsyncIterator, Awaitable, Callable, Sequence</span>
+<span>from contextlib import asynccontextmanager</span>
+<span>from typing import Protocol, TypeVar</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-07&quot;</span>
+<span>PREREQUISITES = (&quot;bridge-06&quot;,)</span>
+<span>LEVEL = &quot;advanced&quot;</span>
+<span> </span>
+<span>T = TypeVar(&quot;T&quot;)</span>
+<span>R = TypeVar(&quot;R&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class AsyncConnection(Protocol):</span>
+<span>    async def commit(self) -&gt; None: ...</span>
+<span> </span>
+<span>    async def rollback(self) -&gt; None: ...</span>
+<span> </span>
+<span>    async def close(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>@asynccontextmanager</span>
+<span>async def managed_async_connection(</span>
+<span>    factory: Callable[[], Awaitable[AsyncConnection]],</span>
+<span>) -&gt; AsyncIterator[AsyncConnection]:</span>
+<span>    &quot;&quot;&quot;Core implementation: own an async transaction and close on every path.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;implement async commit, rollback, and cleanup&quot;)</span>
+<span>    yield  # pragma: no cover - keeps this an async generator while unfinished</span>
+<span> </span>
+<span> </span>
+<span>async def map_bounded(</span>
+<span>    items: Sequence[T],</span>
+<span>    operation: Callable[[T], Awaitable[R]],</span>
+<span>    *,</span>
+<span>    limit: int,</span>
+<span>) -&gt; list[R]:</span>
+<span>    &quot;&quot;&quot;Core implementation: bound in-flight work while preserving input order.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;implement bounded structured concurrency&quot;)</span>
+<span> </span>
+<span> </span>
+<span>async def fetch_customer_names(cursor: object, customer_ids: Sequence[int]) -&gt; dict[int, str]:</span>
+<span>    &quot;&quot;&quot;Core implementation: make one parameterized async PostgreSQL query.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;define a small async cursor Protocol and execute safely&quot;)</span>
+<span> </span>
+<span> </span>
+<span># Exercises (answer-free)</span>
+<span># Focus: Own async connection cleanup, bound active work with structured concurrency, preserve</span>
+<span>#    input order, and keep PostgreSQL value binding safe.</span>
+<span># Assumptions: Cancellation must propagate after cleanup; `asyncio.Semaphore` bounds active</span>
+<span>#    operations but not the number of created tasks.</span>
+<span># Failure to watch for: Blocking calls, shared unsafe cursors, swallowed cancellation, and</span>
+<span>#    unbounded task creation turn async code into a reliability hazard.</span>
+<span># Work in order: predict -&gt; implement -&gt; test -&gt; debug -&gt; extend. Keep official</span>
+<span># answers out of this starter and collect deterministic fake-backed evidence.</span>
+<span># 1. [Implementation] Implement `managed_async_connection()` with awaited factory, one yield,</span>
+<span>#    commit on success, rollback on failure, and close on every path.</span>
+<span>#    Hint: Mirror the synchronous state machine with awaited lifecycle calls.</span>
+<span># 2. [Concurrency] Implement `map_bounded()` with `asyncio.Semaphore` and `TaskGroup`, reject</span>
+<span>#    limits below one, and preserve input order.</span>
+<span>#    Hint: Associate each task with its original index rather than append-on-completion order.</span>
+<span># 3. [Testing] Measure active fake operations and assert maximum concurrency never exceeds the</span>
+<span>#    configured limit.</span>
+<span>#    Hint: Increment before an await point and decrement in `finally`.</span>
+<span># 4. [Ordering] Use different fake completion delays to prove output order follows input order</span>
+<span>#    rather than completion order.</span>
+<span>#    Hint: Choose a completion schedule that visibly differs from the input.</span>
+<span># 5. [Async SQL] Define `AsyncReadCursor` and implement one query using `customer_id = ANY(%s)`</span>
+<span>#    with the Python ID list as one bound parameter.</span>
+<span>#    Hint: The parameter sequence is a one-element tuple containing the list.</span>
+<span># 6. [Validation] Return early for empty customer IDs without touching the cursor and reject any</span>
+<span>#    non-positive ID.</span>
+<span>#    Hint: Validate the complete collection before the first database effect.</span>
+<span># 7. [Scale design] Explain why a semaphore still creates one task per item and design a</span>
+<span>#    fixed-worker queue for a million inputs.</span>
+<span>#    Hint: Separate active-operation bounds from task-count and memory bounds.</span>
+<span># 8. [Cancellation] Cancel a task inside `managed_async_connection()` and verify rollback/close</span>
+<span>#    happen before cancellation escapes.</span>
+<span>#    Hint: Never translate `CancelledError` into an empty or successful result.</span>
+<span># 9. [Failure analysis] Trigger two concurrent task failures and inspect `ExceptionGroup`</span>
+<span>#    behavior from `TaskGroup`.</span>
+<span>#    Hint: Structured concurrency cancels siblings and reports grouped failures.</span>
+<span># 10. [Empty work] Test `map_bounded([], operation, limit=1)` and prove the operation is never</span>
+<span>#    called.</span>
+<span>#    Hint: An empty collection is a successful no-op, not an invalid concurrency request.</span>
+<span># 11. [Duplicates] Define whether duplicate customer IDs are preserved, deduplicated, or</span>
+<span>#    rejected and test the chosen contract.</span>
+<span>#    Hint: Input-order promises and dictionary outputs have different duplicate semantics.</span>
+<span># 12. [Architecture] Compare a semaphore-per-item design with the worker queue on fairness,</span>
+<span>#    memory, cancellation, and complexity.</span>
+<span>#    Hint: Choose based on workload scale rather than treating one pattern as universally</span>
+<span>#    superior.</span>
+<span># 13. [Database ownership] Decide whether concurrent operations may share one connection/cursor</span>
+<span>#    or require a pool-acquired resource per worker.</span>
+<span>#    Hint: Driver concurrency guarantees and transaction scope determine the safe choice.</span>
+<span># 14. [Deterministic testing] Replace timing-based async assertions with events/barriers and</span>
+<span>#    explain why wall-clock sleeps make tests flaky.</span>
+<span>#    Hint: Coordinate state transitions directly instead of hoping a scheduler runs in time.</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    print(&quot;Bridge Day 7 starter loaded; no event loop or database was started.&quot;)</span>
+<span>    print(&quot;Implement async resource ownership and measure maximum fake concurrency.&quot;)</span>
+<span>    print(&quot;Do not add blocking calls such as time.sleep() inside async functions.&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/solutions/day07_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day07_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-day-7-solution-notes">Bridge Day 7 — Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-7-solution-notes" aria-label="Link to this section">#</a></h3>
+<p>Start with the <a href="bridge-07.html#learner">learner file</a>. Then inspect <a href="bridge-07.html#solution-2">day07_solution.py</a>.</p>
+<h4 id="solution-1--structured-bounded-work">Structured, bounded work<a class="heading-anchor" href="#solution-1--structured-bounded-work" aria-label="Link to this section">#</a></h4>
+<p><code>map_bounded()</code> creates one task per input inside a <code>TaskGroup</code>, but each task must acquire a semaphore before calling the operation. Results are stored by input index and reconstructed in order. Completion order therefore cannot change the returned order.</p>
+<p><code>TaskGroup</code> gives failure ownership: one child failure cancels unfinished siblings, waits for cleanup, and reports the failure to the parent scope.</p>
+<p><code>managed_async_connection()</code> mirrors Day 2 but awaits transaction and cleanup methods. Cancellation is a failure path, so it rolls back and still closes.</p>
+<h4 id="solution-1--async-query">Async query<a class="heading-anchor" href="#solution-1--async-query" aria-label="Link to this section">#</a></h4>
+<p><code>fetch_customer_names()</code> validates IDs, avoids an empty round trip, and binds a list as one parameter to PostgreSQL <code>ANY(%s)</code>. The tuple&#x27;s trailing comma is significant.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A semaphore bounds active operations but still creates one task per input. For millions of items, use a bounded queue and a fixed worker set.</li>
+<li>Preserving input order requires retaining indexed results. A streaming caller may prefer completion order to reduce latency and memory.</li>
+<li>One failed task cancels the group. Some bulk workloads instead collect per-item failures, but that must be an explicit result type—not suppressed exceptions.</li>
+<li>Async improves overlap for I/O waits; it does not speed CPU-heavy transforms.</li>
+<li>Connection-pool capacity should usually be the same as or lower than the database concurrency limit. More tasks do not create more database capacity.</li>
+</ul>
+<p>Tests measure maximum active operations and resource events with <code>asyncio.run()</code>, fakes, and <code>asyncio.sleep(0)</code>. They require neither a network nor an async test plugin.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day07_solution.py</code>; use it only after an honest attempt.</p>
+<p><strong>Shared failure rule:</strong> Blocking calls, shared unsafe cursors, swallowed cancellation, and unbounded task creation turn async code into a reliability hazard.</p>
+<h5 id="solution-1--exercise-1-implementation">Exercise 1 — Implementation<a class="heading-anchor" href="#solution-1--exercise-1-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>managed_async_connection()</code> with awaited factory, one yield, commit on success, rollback on failure, and close on every path.</p>
+<p><strong>Approach:</strong> Await acquisition, yield inside <code>try</code>, await commit after normal return, await rollback on failure, re-raise, and await close in <code>finally</code>.</p>
+<p><strong>Why this boundary matters:</strong> Mirror the synchronous state machine with awaited lifecycle calls.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-2-concurrency">Exercise 2 — Concurrency<a class="heading-anchor" href="#solution-1--exercise-2-concurrency" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>map_bounded()</code> with <code>asyncio.Semaphore</code> and <code>TaskGroup</code>, reject limits below one, and preserve input order.</p>
+<p><strong>Approach:</strong> Preallocate indexed result slots, have each task acquire the semaphore before calling the operation, store at its index, and rebuild the typed list after the <code>TaskGroup</code> exits.</p>
+<p><strong>Why this boundary matters:</strong> Associate each task with its original index rather than append-on-completion order.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-3-testing">Exercise 3 — Testing<a class="heading-anchor" href="#solution-1--exercise-3-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Measure active fake operations and assert maximum concurrency never exceeds the configured limit.</p>
+<p><strong>Approach:</strong> Use an in-memory counter and <code>await asyncio.sleep(0)</code> only as a deterministic scheduling yield. Assert the measured maximum is at most the limit and all counters return to zero.</p>
+<p><strong>Why this boundary matters:</strong> Increment before an await point and decrement in <code>finally</code>.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-4-ordering">Exercise 4 — Ordering<a class="heading-anchor" href="#solution-1--exercise-4-ordering" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Use different fake completion delays to prove output order follows input order rather than completion order.</p>
+<p><strong>Approach:</strong> Return values after controlled events/delays, then assert the final list maps one-for-one to the original sequence. Indexed storage makes scheduling irrelevant.</p>
+<p><strong>Why this boundary matters:</strong> Choose a completion schedule that visibly differs from the input.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-5-async-sql">Exercise 5 — Async SQL<a class="heading-anchor" href="#solution-1--exercise-5-async-sql" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define <code>AsyncReadCursor</code> and implement one query using <code>customer_id = ANY(%s)</code> with the Python ID list as one bound parameter.</p>
+<p><strong>Approach:</strong> Await one static query with <code>(list(customer_ids),)</code>, await <code>fetchall</code>, convert rows to an ID/name mapping, and never interpolate IDs into SQL.</p>
+<p><strong>Why this boundary matters:</strong> The parameter sequence is a one-element tuple containing the list.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-6-validation">Exercise 6 — Validation<a class="heading-anchor" href="#solution-1--exercise-6-validation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Return early for empty customer IDs without touching the cursor and reject any non-positive ID.</p>
+<p><strong>Approach:</strong> An empty sequence returns <code>{}</code> and leaves the recording cursor untouched. Scan all IDs first and raise before execute if any value is non-positive.</p>
+<p><strong>Why this boundary matters:</strong> Validate the complete collection before the first database effect.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-7-scale-design">Exercise 7 — Scale design<a class="heading-anchor" href="#solution-1--exercise-7-scale-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain why a semaphore still creates one task per item and design a fixed-worker queue for a million inputs.</p>
+<p><strong>Approach:</strong> Create a bounded <code>asyncio.Queue</code>, start exactly N workers, feed indexed items with backpressure, collect indexed results, then send sentinels and join workers. This bounds both active work and task creation.</p>
+<p><strong>Why this boundary matters:</strong> Separate active-operation bounds from task-count and memory bounds.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-8-cancellation">Exercise 8 — Cancellation<a class="heading-anchor" href="#solution-1--exercise-8-cancellation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Cancel a task inside <code>managed_async_connection()</code> and verify rollback/close happen before cancellation escapes.</p>
+<p><strong>Approach:</strong> Use events to pause inside the body, cancel it, and assert lifecycle ordering. Cleanup completes (subject to shielding policy), then the original cancellation propagates.</p>
+<p><strong>Why this boundary matters:</strong> Never translate <code>CancelledError</code> into an empty or successful result.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-9-failure-analysis">Exercise 9 — Failure analysis<a class="heading-anchor" href="#solution-1--exercise-9-failure-analysis" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trigger two concurrent task failures and inspect <code>ExceptionGroup</code> behavior from <code>TaskGroup</code>.</p>
+<p><strong>Approach:</strong> Catch only in the test with <code>except*</code> to inspect expected types; production code should not flatten multiple failures into one misleading success or discard cancellation context.</p>
+<p><strong>Why this boundary matters:</strong> Structured concurrency cancels siblings and reports grouped failures.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-10-empty-work">Exercise 10 — Empty work<a class="heading-anchor" href="#solution-1--exercise-10-empty-work" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Test <code>map_bounded([], operation, limit=1)</code> and prove the operation is never called.</p>
+<p><strong>Approach:</strong> Return <code>[]</code> after validating the positive limit; a spy operation should have zero calls and no event loop resources should leak.</p>
+<p><strong>Why this boundary matters:</strong> An empty collection is a successful no-op, not an invalid concurrency request.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-11-duplicates">Exercise 11 — Duplicates<a class="heading-anchor" href="#solution-1--exercise-11-duplicates" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define whether duplicate customer IDs are preserved, deduplicated, or rejected and test the chosen contract.</p>
+<p><strong>Approach:</strong> <code>map_bounded</code> preserves duplicate inputs and outputs. For <code>fetch_customer_names</code>, validate/deduplicate IDs before the query if desired and document that the returned dictionary naturally has one value per ID.</p>
+<p><strong>Why this boundary matters:</strong> Input-order promises and dictionary outputs have different duplicate semantics.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-12-architecture">Exercise 12 — Architecture<a class="heading-anchor" href="#solution-1--exercise-12-architecture" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compare a semaphore-per-item design with the worker queue on fairness, memory, cancellation, and complexity.</p>
+<p><strong>Approach:</strong> Semaphore tasks are concise for bounded small inputs; workers bound task count and provide queue backpressure for large streams. Both require cancellation-safe cleanup and indexed results for ordering.</p>
+<p><strong>Why this boundary matters:</strong> Choose based on workload scale rather than treating one pattern as universally superior.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-13-database-ownership">Exercise 13 — Database ownership<a class="heading-anchor" href="#solution-1--exercise-13-database-ownership" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Decide whether concurrent operations may share one connection/cursor or require a pool-acquired resource per worker.</p>
+<p><strong>Approach:</strong> Do not share a cursor concurrently. Prefer a bounded pool resource per worker or serialize statements on one connection when they belong to one transaction; keep pool size aligned with the concurrency limit.</p>
+<p><strong>Why this boundary matters:</strong> Driver concurrency guarantees and transaction scope determine the safe choice.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-14-deterministic-testing">Exercise 14 — Deterministic testing<a class="heading-anchor" href="#solution-1--exercise-14-deterministic-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Replace timing-based async assertions with events/barriers and explain why wall-clock sleeps make tests flaky.</p>
+<p><strong>Approach:</strong> Use <code>asyncio.Event</code> objects to hold and release operations at known points, inspect active counts while blocked, and avoid thresholds tied to machine speed.</p>
+<p><strong>Why this boundary matters:</strong> Coordinate state transitions directly instead of hoping a scheduler runs in time.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/solutions/day07_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day07_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Day 7 reference: bounded async work and async transaction ownership.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import asyncio</span>
+<span>from collections.abc import AsyncIterator, Awaitable, Callable, Sequence</span>
+<span>from contextlib import asynccontextmanager</span>
+<span>from typing import Protocol, TypeVar, cast</span>
+<span> </span>
+<span>T = TypeVar(&quot;T&quot;)</span>
+<span>R = TypeVar(&quot;R&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class AsyncConnection(Protocol):</span>
+<span>    async def commit(self) -&gt; None: ...</span>
+<span> </span>
+<span>    async def rollback(self) -&gt; None: ...</span>
+<span> </span>
+<span>    async def close(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class AsyncReadCursor(Protocol):</span>
+<span>    async def execute(</span>
+<span>        self,</span>
+<span>        query: object,</span>
+<span>        params: Sequence[object] | None = None,</span>
+<span>    ) -&gt; object: ...</span>
+<span> </span>
+<span>    async def fetchall(self) -&gt; Sequence[Sequence[object]]: ...</span>
+<span> </span>
+<span> </span>
+<span>@asynccontextmanager</span>
+<span>async def managed_async_connection(</span>
+<span>    factory: Callable[[], Awaitable[AsyncConnection]],</span>
+<span>) -&gt; AsyncIterator[AsyncConnection]:</span>
+<span>    &quot;&quot;&quot;Own one async connection with the same success/failure rules as Day 2.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    connection = await factory()</span>
+<span>    try:</span>
+<span>        yield connection</span>
+<span>    except BaseException:</span>
+<span>        await connection.rollback()</span>
+<span>        raise</span>
+<span>    else:</span>
+<span>        await connection.commit()</span>
+<span>    finally:</span>
+<span>        await connection.close()</span>
+<span> </span>
+<span> </span>
+<span>async def map_bounded(</span>
+<span>    items: Sequence[T],</span>
+<span>    operation: Callable[[T], Awaitable[R]],</span>
+<span>    *,</span>
+<span>    limit: int,</span>
+<span>) -&gt; list[R]:</span>
+<span>    &quot;&quot;&quot;Run at most ``limit`` operations concurrently and preserve input order.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if limit &lt; 1:</span>
+<span>        raise ValueError(&quot;limit must be at least 1&quot;)</span>
+<span> </span>
+<span>    semaphore = asyncio.Semaphore(limit)</span>
+<span>    results: dict[int, R] = {}</span>
+<span> </span>
+<span>    async def run_one(index: int, item: T) -&gt; None:</span>
+<span>        async with semaphore:</span>
+<span>            results[index] = await operation(item)</span>
+<span> </span>
+<span>    async with asyncio.TaskGroup() as task_group:</span>
+<span>        for index, item in enumerate(items):</span>
+<span>            task_group.create_task(run_one(index, item))</span>
+<span> </span>
+<span>    return [results[index] for index in range(len(items))]</span>
+<span> </span>
+<span> </span>
+<span>CUSTOMER_NAMES_SQL = &quot;&quot;&quot;</span>
+<span>SELECT customer_id, full_name</span>
+<span>FROM training.customers</span>
+<span>WHERE customer_id = ANY(%s)</span>
+<span>ORDER BY customer_id</span>
+<span>&quot;&quot;&quot;.strip()</span>
+<span> </span>
+<span> </span>
+<span>async def fetch_customer_names(</span>
+<span>    cursor: AsyncReadCursor,</span>
+<span>    customer_ids: Sequence[int],</span>
+<span>) -&gt; dict[int, str]:</span>
+<span>    &quot;&quot;&quot;Execute one async PostgreSQL round trip for a set of IDs.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if any(customer_id &lt; 1 for customer_id in customer_ids):</span>
+<span>        raise ValueError(&quot;customer IDs must be positive&quot;)</span>
+<span>    if not customer_ids:</span>
+<span>        return {}</span>
+<span>    await cursor.execute(CUSTOMER_NAMES_SQL, (list(customer_ids),))</span>
+<span>    return {int(cast(int, row[0])): str(row[1]) for row in await cursor.fetchall()}</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="bridge-06.html"><small>Previous lesson</small><strong>bridge-06</strong><span>Bulk ETL Validation</span></a>
+        <a class="nav-card next" href="bridge-08.html"><small>Next lesson</small><strong>bridge-08</strong><span>Production Capstone</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-07";
+    const LEARNER_PATH = "bridge/lessons/day07_async_bounded_concurrency.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

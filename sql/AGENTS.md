@@ -9,6 +9,9 @@ This file extends the root [AGENTS.md](../AGENTS.md) for `sql/`.
 - Run against the disposable `advanced_sql_training` database.
 - Use the `training` schema unless a lesson explicitly creates another disposable schema.
 - Execute files with `psql -X -v ON_ERROR_STOP=1`.
+- Guided Jupyter workspaces must render SQL for reading but execute the
+  catalog-derived learner-local copy through `psql -f`; do not translate
+  `psql` meta-commands into JupySQL cells.
 
 Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Portable alternatives may appear only when clearly labeled.
 
@@ -76,3 +79,10 @@ Verify that:
 - Catalog and solution availability are accurate.
 
 When an artifact filename, stateful group, or solution availability changes, run `python scripts/build_catalog.py` before validation.
+
+The generated SQL notebook boundary lives in
+`src/ds60sqlpy/sql_notebook.py`. It accepts stable catalog identity only,
+writes under ignored `.learning/sql/`, refuses symlink/path escapes, and
+restricts execution to `advanced_sql_training`. Portal code may consume the
+returned notebook path but must not add arbitrary path, SQL, connection, or
+shell parameters.

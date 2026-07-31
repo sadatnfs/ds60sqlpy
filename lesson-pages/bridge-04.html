@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-04 · Transactions Idempotency Retries · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-04</p>
+        <h1>Transactions Idempotency Retries</h1>
+        <p class="hero-copy">Python and PostgreSQL engineering</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">105 minutes</span>
+          <span class="tag">bridge setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="bridge-03.html">bridge-03</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/lessons/day04_transactions_idempotency_retries.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/lessons/day04_transactions_idempotency_retries.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/companion-guides/day04_transactions_idempotency_retries.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/companion-guides/day04_transactions_idempotency_retries.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-day-4-transactions-idempotency-and-retries">Bridge Day 4 — Transactions, idempotency, and retries<a class="heading-anchor" href="#guide--bridge-day-4-transactions-idempotency-and-retries" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Intermediate <strong>Prerequisite:</strong> <a href="bridge-03.html#guide">Bridge Day 3</a></p>
+<h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
+<p>A transaction defines which changes succeed or fail as one unit. A retry repeats that unit, so retrying safely requires both a narrow transient-failure classification and idempotent behavior. Retrying every exception can duplicate data, hide programming bugs, and overload a struggling database.</p>
+<h4 id="guide--objectives">Objectives<a class="heading-anchor" href="#guide--objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>define an explicit transaction boundary around one operation;</li>
+<li>roll back before propagating failures;</li>
+<li>use a unique idempotency key with PostgreSQL <code>ON CONFLICT</code>;</li>
+<li>retry only classified transient failures;</li>
+<li>inject a sleeper to test exponential delays without waiting.</li>
+</ul>
+<h4 id="guide--vocabulary">Vocabulary<a class="heading-anchor" href="#guide--vocabulary" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>transaction</td>
+<td>A group of database changes that commits or rolls back as one unit</td>
+</tr>
+<tr>
+<td>atomicity</td>
+<td>The all-or-nothing property of a transaction</td>
+</tr>
+<tr>
+<td>idempotent</td>
+<td>Safe to repeat without creating an additional logical effect</td>
+</tr>
+<tr>
+<td>idempotency key</td>
+<td>A stable request identity protected by a uniqueness constraint</td>
+</tr>
+<tr>
+<td>transient failure</td>
+<td>A condition that may succeed later, such as a brief connection interruption</td>
+</tr>
+<tr>
+<td>exponential backoff</td>
+<td>Delays that grow between attempts</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--run-the-starter">Run the starter<a class="heading-anchor" href="#guide--run-the-starter" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe bridge\lessons\day04_transactions_idempotency_retries.py</code></pre>
+<pre><code class="language-bash">.venv/bin/python bridge/lessons/day04_transactions_idempotency_retries.py</code></pre>
+<h4 id="guide--worked-example-retry-is-a-policy-not-a-blanket-except">Worked example: retry is a policy, not a blanket <code>except</code><a class="heading-anchor" href="#guide--worked-example-retry-is-a-policy-not-a-blanket-except" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">for attempt in range(max_attempts):
+    try:
+        return operation()
+    except KnownTransientError:
+        if attempt + 1 == max_attempts:
+            raise
+        sleeper(delay_for(attempt))</code></pre>
+<p>The retry loop does not catch <code>Exception</code>. A syntax error, failed validation, or constraint violation needs investigation, not repetition. In production, Psycopg exception classes and SQLSTATE codes provide the classification; this exercise uses a deterministic custom exception.</p>
+<p>For idempotency, the database must enforce uniqueness. An application-side “check then insert” has a race between the two statements.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Make writes safe to repeat by combining a database uniqueness boundary, explicit transaction ownership, and narrowly classified retries.</li>
+<li><strong>Assumptions:</strong> One stable source key identifies one logical job; each retry executes a fresh transaction attempt; fake sleepers keep tests deterministic.</li>
+<li><strong>Primary failure mode:</strong> Retrying a non-idempotent or ambiguously committed write can duplicate effects even when backoff logic is correct.</li>
+<li><strong>Evidence loop:</strong> predict the boundary, implement the smallest change, verify success and failure with a deterministic fake, then explain which behavior still requires an explicitly enabled PostgreSQL integration test.</li>
+</ul>
+<ol>
+<li><strong>Validation:</strong> Validate <code>RetryPolicy</code> so attempts are at least one and base delay is finite and non-negative.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Reject unusable policy at construction rather than inside a failing retry loop.</li>
+</ul>
+<ol>
+<li><strong>SQL implementation:</strong> Implement <code>create_job_once()</code> with one parameterized <code>INSERT</code>, a unique idempotency key, <code>ON CONFLICT DO NOTHING</code>, and <code>RETURNING job_id</code>.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Let the uniqueness constraint arbitrate concurrency; do not pre-read.</li>
+</ul>
+<ol>
+<li><strong>Mapping:</strong> Return the inserted ID when <code>fetchone()</code> yields a row and <code>None</code> for a duplicate without issuing a second statement.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Treat <code>None</code> as the documented <code>DO NOTHING</code> result.</li>
+</ul>
+<ol>
+<li><strong>Transaction:</strong> Implement <code>run_in_transaction()</code> so success commits and any operation failure rolls back before re-raising.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> The wrapper owns the boundary; the operation owns only domain work.</li>
+</ul>
+<ol>
+<li><strong>Retry:</strong> Implement <code>run_with_retry()</code> for only <code>TransientDatabaseError</code>, stopping at <code>max_attempts</code> with delays <code>base * 2**(attempt - 1)</code>.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Never sleep after the last failed attempt and never catch permanent errors.</li>
+</ul>
+<ol>
+<li><strong>Testing:</strong> Test two transient failures followed by success with a list append sleeper, plus a permanent <code>ValueError</code> that escapes immediately.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Assert result, call count, and the complete delay sequence.</li>
+</ul>
+<ol>
+<li><strong>Design:</strong> Decide whether retry owns a statement, a complete transaction attempt, or an entire command and justify the chosen scope.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A failed PostgreSQL transaction cannot safely continue; retry needs fresh state.</li>
+</ul>
+<ol>
+<li><strong>Composition:</strong> Compose retry with transaction ownership so every attempt receives fresh connection state and cleanup happens before delay.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> The retry operation should create and finish one complete transaction attempt.</li>
+</ul>
+<ol>
+<li><strong>Extension:</strong> Add optional jitter through an injected function while keeping tests deterministic and delays bounded.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Randomness is another effect boundary and should be injected.</li>
+</ul>
+<ol>
+<li><strong>Failure analysis:</strong> Explain how a connection loss during commit creates an uncertain outcome and how the idempotency key resolves the next attempt.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> The client may not know whether the server committed.</li>
+</ul>
+<ol>
+<li><strong>Input validation:</strong> Define and test boundaries for blank idempotency keys and oversized payloads before opening a transaction.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Fast local validation avoids obviously invalid database work but does not replace constraints.</li>
+</ul>
+<ol>
+<li><strong>Concurrency:</strong> Model two workers racing on the same idempotency key and identify which outcome the unique constraint guarantees.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A read-then-insert sequence cannot provide the same atomic guarantee.</li>
+</ul>
+<ol>
+<li><strong>Observability:</strong> Design retry metrics with low-cardinality tags and no payload, key, exception message, or request ID.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Dimensions should describe bounded classes, not individual events.</li>
+</ul>
+<ol>
+<li><strong>Interruption:</strong> Decide how cancellation or <code>KeyboardInterrupt</code> crosses transaction and retry layers without being mistaken for a transient database error.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Cleanup may be broad, but retry classification should remain narrow.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>State the input/output and ownership boundary in one sentence.</li>
+<li>Show one normal case, one edge case, and one failure case.</li>
+<li>Inspect recorded calls rather than relying on plausible output.</li>
+<li>Confirm no credential, payload, or high-cardinality identifier was emitted.</li>
+</ul>
+<h4 id="guide--optional-live-db-step">Optional live-DB step<a class="heading-anchor" href="#guide--optional-live-db-step" aria-label="Link to this section">#</a></h4>
+<p>Use one disposable connection. Inside it, create:</p>
+<pre><code class="language-sql">CREATE TEMP TABLE bridge_jobs (
+    job_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    idempotency_key text NOT NULL UNIQUE,
+    payload text NOT NULL
+) ON COMMIT DROP;</code></pre>
+<p>Call your insert twice with the same key and verify that the second result is <code>None</code>. Then explicitly call <code>rollback()</code>. The solution targets <code>pg_temp.bridge_jobs</code>, so it cannot accidentally write a persistent table.</p>
+<p>Set the URL in the current shell only:</p>
+<pre><code class="language-powershell">$env:DS60_DATABASE_URL = &quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;</code></pre>
+<pre><code class="language-bash">export DS60_DATABASE_URL=&quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;</code></pre>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Is uniqueness enforced by PostgreSQL, not only Python?</li>
+<li>Does a duplicate request create zero additional rows?</li>
+<li>Does rollback occur exactly once on operation failure?</li>
+<li>Are delay values deterministic in tests?</li>
+<li>Does a permanent error escape after one attempt?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Retrying inside an aborted transaction:</strong> PostgreSQL rejects later statements until that transaction is rolled back.</li>
+<li><strong>Generating a fresh key for every attempt:</strong> that defeats idempotency.</li>
+<li><strong>Catching all exceptions:</strong> programming and data errors become slow, confusing failures.</li>
+<li><strong>Unbounded attempts:</strong> a command can hang and amplify an outage.</li>
+<li><strong>Keeping a transaction open while sleeping:</strong> release the failed transaction before backoff.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p><a href="bridge-05.html#guide">Day 5</a> separates fast contract tests from small PostgreSQL integration tests. After your attempt, review <a href="bridge-04.html#solution-1">the Day 4 solution notes</a>.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/lessons/day04_transactions_idempotency_retries.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/lessons/day04_transactions_idempotency_retries.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Bridge Day 4: transactions, idempotency, and bounded retries.</span>
+<span> </span>
+<span>Prerequisite: Bridge Day 3.</span>
+<span>Read ``bridge/companion-guides/day04_transactions_idempotency_retries.md`` first.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Callable, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from typing import Protocol, TypeVar</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-04&quot;</span>
+<span>PREREQUISITES = (&quot;bridge-03&quot;,)</span>
+<span>LEVEL = &quot;intermediate&quot;</span>
+<span> </span>
+<span>T = TypeVar(&quot;T&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class WriteCursor(Protocol):</span>
+<span>    def execute(</span>
+<span>        self,</span>
+<span>        query: object,</span>
+<span>        params: Sequence[object] | None = None,</span>
+<span>    ) -&gt; object: ...</span>
+<span> </span>
+<span>    def fetchone(self) -&gt; Sequence[object] | None: ...</span>
+<span> </span>
+<span> </span>
+<span>class TransactionConnection(Protocol):</span>
+<span>    def commit(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def rollback(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class TransientDatabaseError(RuntimeError):</span>
+<span>    &quot;&quot;&quot;Use this fake-friendly exception to classify retryable exercise failures.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RetryPolicy:</span>
+<span>    max_attempts: int = 3</span>
+<span>    base_delay_seconds: float = 0.05</span>
+<span> </span>
+<span> </span>
+<span>DEFAULT_RETRY_POLICY = RetryPolicy()</span>
+<span> </span>
+<span> </span>
+<span>def create_job_once(</span>
+<span>    cursor: WriteCursor,</span>
+<span>    *,</span>
+<span>    idempotency_key: str,</span>
+<span>    payload: str,</span>
+<span>) -&gt; int | None:</span>
+<span>    &quot;&quot;&quot;Core implementation: use ``ON CONFLICT`` and a unique idempotency key.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;perform an idempotent parameterized insert&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def run_in_transaction(</span>
+<span>    connection: TransactionConnection,</span>
+<span>    operation: Callable[[], T],</span>
+<span>) -&gt; T:</span>
+<span>    &quot;&quot;&quot;Core implementation: commit success and roll back failure.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;define one explicit transaction boundary&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def run_with_retry(</span>
+<span>    operation: Callable[[], T],</span>
+<span>    *,</span>
+<span>    policy: RetryPolicy = DEFAULT_RETRY_POLICY,</span>
+<span>    sleep: Callable[[float], None],</span>
+<span>) -&gt; T:</span>
+<span>    &quot;&quot;&quot;Core implementation: retry only transient failures with a bounded delay schedule.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;implement bounded retry behavior&quot;)</span>
+<span> </span>
+<span> </span>
+<span># Exercises (answer-free)</span>
+<span># Focus: Make writes safe to repeat by combining a database uniqueness boundary, explicit</span>
+<span>#    transaction ownership, and narrowly classified retries.</span>
+<span># Assumptions: One stable source key identifies one logical job; each retry executes a fresh</span>
+<span>#    transaction attempt; fake sleepers keep tests deterministic.</span>
+<span># Failure to watch for: Retrying a non-idempotent or ambiguously committed write can duplicate</span>
+<span>#    effects even when backoff logic is correct.</span>
+<span># Work in order: predict -&gt; implement -&gt; test -&gt; debug -&gt; extend. Keep official</span>
+<span># answers out of this starter and collect deterministic fake-backed evidence.</span>
+<span># 1. [Validation] Validate `RetryPolicy` so attempts are at least one and base delay is finite</span>
+<span>#    and non-negative.</span>
+<span>#    Hint: Reject unusable policy at construction rather than inside a failing retry loop.</span>
+<span># 2. [SQL implementation] Implement `create_job_once()` with one parameterized `INSERT`, a</span>
+<span>#    unique idempotency key, `ON CONFLICT DO NOTHING`, and `RETURNING job_id`.</span>
+<span>#    Hint: Let the uniqueness constraint arbitrate concurrency; do not pre-read.</span>
+<span># 3. [Mapping] Return the inserted ID when `fetchone()` yields a row and `None` for a duplicate</span>
+<span>#    without issuing a second statement.</span>
+<span>#    Hint: Treat `None` as the documented `DO NOTHING` result.</span>
+<span># 4. [Transaction] Implement `run_in_transaction()` so success commits and any operation failure</span>
+<span>#    rolls back before re-raising.</span>
+<span>#    Hint: The wrapper owns the boundary; the operation owns only domain work.</span>
+<span># 5. [Retry] Implement `run_with_retry()` for only `TransientDatabaseError`, stopping at</span>
+<span>#    `max_attempts` with delays `base * 2**(attempt - 1)`.</span>
+<span>#    Hint: Never sleep after the last failed attempt and never catch permanent errors.</span>
+<span># 6. [Testing] Test two transient failures followed by success with a list append sleeper, plus</span>
+<span>#    a permanent `ValueError` that escapes immediately.</span>
+<span>#    Hint: Assert result, call count, and the complete delay sequence.</span>
+<span># 7. [Design] Decide whether retry owns a statement, a complete transaction attempt, or an</span>
+<span>#    entire command and justify the chosen scope.</span>
+<span>#    Hint: A failed PostgreSQL transaction cannot safely continue; retry needs fresh state.</span>
+<span># 8. [Composition] Compose retry with transaction ownership so every attempt receives fresh</span>
+<span>#    connection state and cleanup happens before delay.</span>
+<span>#    Hint: The retry operation should create and finish one complete transaction attempt.</span>
+<span># 9. [Extension] Add optional jitter through an injected function while keeping tests</span>
+<span>#    deterministic and delays bounded.</span>
+<span>#    Hint: Randomness is another effect boundary and should be injected.</span>
+<span># 10. [Failure analysis] Explain how a connection loss during commit creates an uncertain</span>
+<span>#    outcome and how the idempotency key resolves the next attempt.</span>
+<span>#    Hint: The client may not know whether the server committed.</span>
+<span># 11. [Input validation] Define and test boundaries for blank idempotency keys and oversized</span>
+<span>#    payloads before opening a transaction.</span>
+<span>#    Hint: Fast local validation avoids obviously invalid database work but does not replace</span>
+<span>#    constraints.</span>
+<span># 12. [Concurrency] Model two workers racing on the same idempotency key and identify which</span>
+<span>#    outcome the unique constraint guarantees.</span>
+<span>#    Hint: A read-then-insert sequence cannot provide the same atomic guarantee.</span>
+<span># 13. [Observability] Design retry metrics with low-cardinality tags and no payload, key,</span>
+<span>#    exception message, or request ID.</span>
+<span>#    Hint: Dimensions should describe bounded classes, not individual events.</span>
+<span># 14. [Interruption] Decide how cancellation or `KeyboardInterrupt` crosses transaction and</span>
+<span>#    retry layers without being mistaken for a transient database error.</span>
+<span>#    Hint: Cleanup may be broad, but retry classification should remain narrow.</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    print(&quot;Bridge Day 4 starter loaded.&quot;)</span>
+<span>    print(&quot;Implement idempotency, transaction ownership, and classified retries.&quot;)</span>
+<span>    print(&quot;Use fake sleepers and failures so tests remain fast and deterministic.&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/solutions/day04_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day04_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-day-4-solution-notes">Bridge Day 4 — Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-4-solution-notes" aria-label="Link to this section">#</a></h3>
+<p>Try the <a href="bridge-04.html#learner">learner file</a> first. The executable reference is <a href="bridge-04.html#solution-2">day04_solution.py</a>.</p>
+<h4 id="solution-1--idempotent-insert">Idempotent insert<a class="heading-anchor" href="#solution-1--idempotent-insert" aria-label="Link to this section">#</a></h4>
+<p><code>create_job_once()</code> validates a non-blank key and performs one parameterized insert into <code>pg_temp.bridge_jobs</code>. PostgreSQL&#x27;s unique constraint arbitrates concurrent requests. <code>ON CONFLICT ... DO NOTHING RETURNING job_id</code> returns one row for an insert and no row for a duplicate.</p>
+<p>A prior <code>SELECT</code> would be incorrect: another transaction could insert after the check and before this transaction&#x27;s insert.</p>
+<h4 id="solution-1--transaction-and-retry-scopes">Transaction and retry scopes<a class="heading-anchor" href="#solution-1--transaction-and-retry-scopes" aria-label="Link to this section">#</a></h4>
+<p><code>run_in_transaction()</code> owns commit or rollback for one operation. <code>run_with_retry()</code> catches only explicitly classified transient exceptions, limits attempts, and injects <code>sleep</code>. Tests can collect delay values instantly.</p>
+<p>In a real adapter, a failed PostgreSQL transaction must be rolled back or discarded before the next attempt. The retried callable should therefore own a fresh complete transaction, not merely repeat one statement inside an already aborted transaction.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Deterministic exponential delays make the lesson testable. Production retries often add random jitter so many workers do not retry simultaneously.</li>
+<li>The custom transient exception is a teaching seam. Production code should classify specific Psycopg exceptions and SQLSTATE codes, not translate every <code>OperationalError</code> automatically.</li>
+<li>Returning <code>None</code> for a duplicate is compact. Some APIs return a richer result such as <code>Inserted(id)</code> versus <code>AlreadyExists</code>.</li>
+<li>Idempotency keys prevent duplicate logical jobs only while their uniqueness records are retained. Retention and key scope are product decisions.</li>
+</ul>
+<p>Test the last-attempt failure, zero delay, invalid policy, a permanent error, duplicate keys, and rollback-before-reraise behavior.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day04_solution.py</code>; use it only after an honest attempt.</p>
+<p><strong>Shared failure rule:</strong> Retrying a non-idempotent or ambiguously committed write can duplicate effects even when backoff logic is correct.</p>
+<h5 id="solution-1--exercise-1-validation">Exercise 1 — Validation<a class="heading-anchor" href="#solution-1--exercise-1-validation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Validate <code>RetryPolicy</code> so attempts are at least one and base delay is finite and non-negative.</p>
+<p><strong>Approach:</strong> Implement <code><strong>post_init</strong></code> checks for <code>max_attempts &lt; 1</code>, non-finite delay, and delay below zero, raising clear <code>ValueError</code> messages.</p>
+<p><strong>Why this boundary matters:</strong> Reject unusable policy at construction rather than inside a failing retry loop.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-2-sql-implementation">Exercise 2 — SQL implementation<a class="heading-anchor" href="#solution-1--exercise-2-sql-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>create_job_once()</code> with one parameterized <code>INSERT</code>, a unique idempotency key, <code>ON CONFLICT DO NOTHING</code>, and <code>RETURNING job_id</code>.</p>
+<p><strong>Approach:</strong> Execute one static statement with <code>(idempotency_key, payload)</code>. The database either inserts and returns a row or reports no returned row after the conflict path.</p>
+<p><strong>Why this boundary matters:</strong> Let the uniqueness constraint arbitrate concurrency; do not pre-read.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-3-mapping">Exercise 3 — Mapping<a class="heading-anchor" href="#solution-1--exercise-3-mapping" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Return the inserted ID when <code>fetchone()</code> yields a row and <code>None</code> for a duplicate without issuing a second statement.</p>
+<p><strong>Approach:</strong> Fetch exactly once; return <code>int(row[0])</code> when present and <code>None</code> otherwise. A preliminary <code>SELECT</code> would add a race window and is unnecessary.</p>
+<p><strong>Why this boundary matters:</strong> Treat <code>None</code> as the documented <code>DO NOTHING</code> result.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-4-transaction">Exercise 4 — Transaction<a class="heading-anchor" href="#solution-1--exercise-4-transaction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>run_in_transaction()</code> so success commits and any operation failure rolls back before re-raising.</p>
+<p><strong>Approach:</strong> Call the operation in <code>try</code>, commit after it returns, and return the value. On failure, roll back and use bare <code>raise</code> so type, traceback, and message are preserved.</p>
+<p><strong>Why this boundary matters:</strong> The wrapper owns the boundary; the operation owns only domain work.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-5-retry">Exercise 5 — Retry<a class="heading-anchor" href="#solution-1--exercise-5-retry" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>run_with_retry()</code> for only <code>TransientDatabaseError</code>, stopping at <code>max_attempts</code> with delays <code>base * 2**(attempt - 1)</code>.</p>
+<p><strong>Approach:</strong> Count attempts from one, return immediately on success, and on a transient failure either re-raise at the limit or call the injected sleeper with the current exponential delay.</p>
+<p><strong>Why this boundary matters:</strong> Never sleep after the last failed attempt and never catch permanent errors.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-6-testing">Exercise 6 — Testing<a class="heading-anchor" href="#solution-1--exercise-6-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Test two transient failures followed by success with a list append sleeper, plus a permanent <code>ValueError</code> that escapes immediately.</p>
+<p><strong>Approach:</strong> The successful scenario makes three calls and records <code>[base, base * 2]</code>; the permanent failure makes one call and adds no delay because it is outside the retry classification.</p>
+<p><strong>Why this boundary matters:</strong> Assert result, call count, and the complete delay sequence.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-7-design">Exercise 7 — Design<a class="heading-anchor" href="#solution-1--exercise-7-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Decide whether retry owns a statement, a complete transaction attempt, or an entire command and justify the chosen scope.</p>
+<p><strong>Approach:</strong> Wrap one complete transaction attempt, including acquisition and rollback/close, while the idempotency key protects replay. Retrying one statement inside an aborted transaction is invalid, and retrying an overly broad command may repeat unrelated effects.</p>
+<p><strong>Why this boundary matters:</strong> A failed PostgreSQL transaction cannot safely continue; retry needs fresh state.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-8-composition">Exercise 8 — Composition<a class="heading-anchor" href="#solution-1--exercise-8-composition" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compose retry with transaction ownership so every attempt receives fresh connection state and cleanup happens before delay.</p>
+<p><strong>Approach:</strong> Pass a closure to <code>run_with_retry</code> that acquires a fresh connection and calls <code>run_in_transaction</code>. Fake events should show rollback/close from attempt N before the sleeper and acquisition for attempt N+1.</p>
+<p><strong>Why this boundary matters:</strong> The retry operation should create and finish one complete transaction attempt.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-9-extension">Exercise 9 — Extension<a class="heading-anchor" href="#solution-1--exercise-9-extension" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add optional jitter through an injected function while keeping tests deterministic and delays bounded.</p>
+<p><strong>Approach:</strong> Compute the exponential base, pass it to an injected jitter function, clamp or validate the returned delay, and feed a deterministic fake during tests. Keep the no-sleep-after-final rule.</p>
+<p><strong>Why this boundary matters:</strong> Randomness is another effect boundary and should be injected.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-10-failure-analysis">Exercise 10 — Failure analysis<a class="heading-anchor" href="#solution-1--exercise-10-failure-analysis" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain how a connection loss during commit creates an uncertain outcome and how the idempotency key resolves the next attempt.</p>
+<p><strong>Approach:</strong> Retry with the same stable key. If the first commit succeeded, the unique conflict returns <code>None</code>; if it did not, the retry inserts. Application reporting may need a follow-up lookup when the existing job ID is required.</p>
+<p><strong>Why this boundary matters:</strong> The client may not know whether the server committed.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-11-input-validation">Exercise 11 — Input validation<a class="heading-anchor" href="#solution-1--exercise-11-input-validation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define and test boundaries for blank idempotency keys and oversized payloads before opening a transaction.</p>
+<p><strong>Approach:</strong> Reject blank/whitespace keys and enforce an application payload-size ceiling, then retain database <code>NOT NULL</code>, uniqueness, and size/type constraints as the authoritative concurrent boundary.</p>
+<p><strong>Why this boundary matters:</strong> Fast local validation avoids obviously invalid database work but does not replace constraints.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-12-concurrency">Exercise 12 — Concurrency<a class="heading-anchor" href="#solution-1--exercise-12-concurrency" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Model two workers racing on the same idempotency key and identify which outcome the unique constraint guarantees.</p>
+<p><strong>Approach:</strong> Exactly one insert can win; the other follows <code>DO NOTHING</code>. The order is nondeterministic, but the number of logical rows is deterministic and no preliminary read is required.</p>
+<p><strong>Why this boundary matters:</strong> A read-then-insert sequence cannot provide the same atomic guarantee.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-13-observability">Exercise 13 — Observability<a class="heading-anchor" href="#solution-1--exercise-13-observability" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design retry metrics with low-cardinality tags and no payload, key, exception message, or request ID.</p>
+<p><strong>Approach:</strong> Count attempts/success/exhaustion with tags such as operation and exception class from fixed allowlists; place a correlation ID only in redacted structured logs, never as a metric tag.</p>
+<p><strong>Why this boundary matters:</strong> Dimensions should describe bounded classes, not individual events.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-14-interruption">Exercise 14 — Interruption<a class="heading-anchor" href="#solution-1--exercise-14-interruption" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Decide how cancellation or <code>KeyboardInterrupt</code> crosses transaction and retry layers without being mistaken for a transient database error.</p>
+<p><strong>Approach:</strong> The transaction layer should roll back/close during interruption and re-raise. The retry layer catches only <code>TransientDatabaseError</code>, so cancellation and operator interruption escape immediately with no retry sleep.</p>
+<p><strong>Why this boundary matters:</strong> Cleanup may be broad, but retry classification should remain narrow.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/solutions/day04_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day04_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Day 4 reference: explicit transactions, idempotency keys, and bounded retries.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import time</span>
+<span>from collections.abc import Callable, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from typing import Protocol, TypeVar, cast</span>
+<span> </span>
+<span>T = TypeVar(&quot;T&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class WriteCursor(Protocol):</span>
+<span>    def execute(</span>
+<span>        self,</span>
+<span>        query: object,</span>
+<span>        params: Sequence[object] | None = None,</span>
+<span>    ) -&gt; object: ...</span>
+<span> </span>
+<span>    def fetchone(self) -&gt; Sequence[object] | None: ...</span>
+<span> </span>
+<span> </span>
+<span>class TransactionConnection(Protocol):</span>
+<span>    def commit(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def rollback(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class TransientDatabaseError(RuntimeError):</span>
+<span>    &quot;&quot;&quot;A retryable failure used by deterministic exercises and fakes.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RetryPolicy:</span>
+<span>    max_attempts: int = 3</span>
+<span>    base_delay_seconds: float = 0.05</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if self.max_attempts &lt; 1:</span>
+<span>            raise ValueError(&quot;max_attempts must be at least 1&quot;)</span>
+<span>        if self.base_delay_seconds &lt; 0:</span>
+<span>            raise ValueError(&quot;base_delay_seconds cannot be negative&quot;)</span>
+<span> </span>
+<span> </span>
+<span>DEFAULT_RETRY_POLICY = RetryPolicy()</span>
+<span> </span>
+<span> </span>
+<span>INSERT_JOB_SQL = &quot;&quot;&quot;</span>
+<span>INSERT INTO pg_temp.bridge_jobs (idempotency_key, payload)</span>
+<span>VALUES (%s, %s)</span>
+<span>ON CONFLICT (idempotency_key) DO NOTHING</span>
+<span>RETURNING job_id</span>
+<span>&quot;&quot;&quot;.strip()</span>
+<span> </span>
+<span> </span>
+<span>def create_job_once(</span>
+<span>    cursor: WriteCursor,</span>
+<span>    *,</span>
+<span>    idempotency_key: str,</span>
+<span>    payload: str,</span>
+<span>) -&gt; int | None:</span>
+<span>    &quot;&quot;&quot;Insert once; return ``None`` when the key already exists.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if not idempotency_key.strip():</span>
+<span>        raise ValueError(&quot;idempotency_key cannot be blank&quot;)</span>
+<span>    cursor.execute(INSERT_JOB_SQL, (idempotency_key, payload))</span>
+<span>    row = cursor.fetchone()</span>
+<span>    return None if row is None else int(cast(int, row[0]))</span>
+<span> </span>
+<span> </span>
+<span>def run_in_transaction(</span>
+<span>    connection: TransactionConnection,</span>
+<span>    operation: Callable[[], T],</span>
+<span>) -&gt; T:</span>
+<span>    &quot;&quot;&quot;Commit one unit of work or roll it back before re-raising.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    try:</span>
+<span>        result = operation()</span>
+<span>    except BaseException:</span>
+<span>        connection.rollback()</span>
+<span>        raise</span>
+<span>    connection.commit()</span>
+<span>    return result</span>
+<span> </span>
+<span> </span>
+<span>def run_with_retry(</span>
+<span>    operation: Callable[[], T],</span>
+<span>    *,</span>
+<span>    policy: RetryPolicy = DEFAULT_RETRY_POLICY,</span>
+<span>    retry_on: tuple[type[BaseException], ...] = (TransientDatabaseError,),</span>
+<span>    sleep: Callable[[float], None] = time.sleep,</span>
+<span>) -&gt; T:</span>
+<span>    &quot;&quot;&quot;Retry only classified transient failures with bounded exponential delay.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    for attempt in range(1, policy.max_attempts + 1):</span>
+<span>        try:</span>
+<span>            return operation()</span>
+<span>        except retry_on:</span>
+<span>            if attempt == policy.max_attempts:</span>
+<span>                raise</span>
+<span>            sleep(policy.base_delay_seconds * (2 ** (attempt - 1)))</span>
+<span>    raise AssertionError(&quot;retry loop exhausted without returning or raising&quot;)</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="bridge-03.html"><small>Previous lesson</small><strong>bridge-03</strong><span>Safe Psycopg Queries</span></a>
+        <a class="nav-card next" href="bridge-05.html"><small>Next lesson</small><strong>bridge-05</strong><span>DB Testing Fixtures Doubles</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-04";
+    const LEARNER_PATH = "bridge/lessons/day04_transactions_idempotency_retries.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

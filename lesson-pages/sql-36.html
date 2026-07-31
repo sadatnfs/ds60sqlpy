@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-36 · Materialized Views · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-36</p>
+        <h1>Materialized Views</h1>
+        <p class="hero-copy">Performance, transactions, and operations</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">105 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-35.html">sql-35</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day36_materialized_views.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day36_materialized_views.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day36_materialized_views.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-36-materialized-views-and-caching">Day 36 — Materialized Views and Caching<a class="heading-anchor" href="#guide--day-36-materialized-views-and-caching" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-35.html#guide">Day 35 — performance pitfalls</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-36.html#learner">learner SQL</a> · <a href="sql-36.html#solution-1">solution reasoning</a> · <a href="sql-36.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Materialize a query at a declared grain and reconcile it with source data.</li>
+<li>Design refresh, freshness, ownership, and failure expectations.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Materialized view:</strong> stored rows produced by a query and refreshed explicitly.</li>
+<li><strong>Freshness:</strong> how current cached output is relative to its sources.</li>
+<li><strong>Concurrent refresh:</strong> a read-preserving refresh mode with unique-index and transaction restrictions.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Create the monthly-category materialized view inside the learner transaction, reconcile its total revenue and row-grain uniqueness with the source query, then refresh it. Query speed is only one dimension; record when the stored rows become stale and who would own refresh failures.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete these in the <a href="sql-36.html#learner">learner SQL</a>:</p>
+<ol>
+<li>Create weekly country revenue materialization.</li>
+<li>Compare source-query and materialized-query plans.</li>
+<li>Predict and verify stale results before refresh.</li>
+<li>Design the unique index required by concurrent refresh.</li>
+<li>Reconcile line revenue with the chosen business definition.</li>
+<li>Explain absent dimension combinations versus explicit zeros.</li>
+</ol>
+<p>Write a freshness expectation and validation query beside the refresh design.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Does a declared key uniquely identify every materialized row?</li>
+<li>Can the consumer tolerate the documented refresh interval and failure mode?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-37.html#guide">Day 37 — partitioning and sharding</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--what-you-will-learn">What you will learn<a class="heading-anchor" href="#guide--what-you-will-learn" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Store the result of an expensive query in a materialized view (MV).</li>
+<li>Refresh cached results when source tables change.</li>
+<li>Compare freshness, storage, and query cost with querying base tables.</li>
+</ul>
+<h4 id="guide--how-the-learner-script-uses-the-current-schema">How the learner script uses the current schema<a class="heading-anchor" href="#guide--how-the-learner-script-uses-the-current-schema" aria-label="Link to this section">#</a></h4>
+<p>The script creates <code>mv_category_month_revenue</code> from <code>orders</code>, <code>order_items</code>, and <code>products</code>. Its grain is one row per <code>(category, month)</code>, and revenue is line price times quantity after discount. It queries and refreshes the MV, then rolls the object back.</p>
+<p>A normal view stores only SQL and executes it on every read. A materialized view stores rows and can be indexed, but those rows are stale until refreshed.</p>
+<h4 id="guide--refresh-behavior">Refresh behavior<a class="heading-anchor" href="#guide--refresh-behavior" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><code>REFRESH MATERIALIZED VIEW</code> replaces the stored contents and blocks reads of that MV during refresh.</li>
+<li><code>REFRESH ... CONCURRENTLY</code> permits reads but requires a qualifying unique index and cannot run inside an explicit transaction block.</li>
+<li>PostgreSQL does not provide general native incremental MV refresh; selective rollup tables are a separate design.</li>
+</ul>
+<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Create an MV for weekly revenue by <code>customers.country</code>. Use a clear grain of <code>(week, country)</code> and line-item net revenue.</li>
+<li>Compare the same weekly-country query over base tables with a query over the MV. Capture actual plans, buffers, row counts, and freshness assumptions.</li>
+</ol>
+<h4 id="guide--pitfalls-and-validation">Pitfalls and validation<a class="heading-anchor" href="#guide--pitfalls-and-validation" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Reconcile the MV&#x27;s total revenue to the source query before measuring speed.</li>
+<li>A fast stale result can be wrong for the consumer&#x27;s freshness requirement.</li>
+<li>The compact seed may make the raw query as fast as or faster than the MV.</li>
+<li>Document refresh ownership and failure behavior before relying on an MV.</li>
+<li>The learner transaction safely removes the demonstration MV at rollback.</li>
+</ul>
+<h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
+<p>Prompts 3–6 focus on the materialized view&#x27;s data contract. A new base row is invisible until refresh, so record both data time and refresh time. Concurrent refresh requires a qualifying unique index and cannot be demonstrated as a first population inside this rollback-only lesson.</p>
+<p>Reconcile the view to the exact line-revenue definition it materializes; stored order totals are a separate measure. Grouped aggregates emit no row for an absent dimension combination, so any displayed zero must come from an explicit dimension/date spine and outer join.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day36_materialized_views.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day36_materialized_views.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 36: Materialized Views &amp; Caching</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Materialized view for category revenue by month</span>
+<span>CREATE MATERIALIZED VIEW mv_category_month_revenue AS</span>
+<span>SELECT p.category,</span>
+<span>       date_trunc(&#x27;month&#x27;, o.order_date)::date AS month,</span>
+<span>       SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue</span>
+<span>FROM order_items oi</span>
+<span>JOIN products p ON p.product_id = oi.product_id</span>
+<span>JOIN orders o ON o.order_id = oi.order_id</span>
+<span>GROUP BY p.category, date_trunc(&#x27;month&#x27;, o.order_date);</span>
+<span> </span>
+<span>-- Query the MV</span>
+<span>SELECT * FROM mv_category_month_revenue ORDER BY month DESC, revenue DESC LIMIT 50;</span>
+<span> </span>
+<span>-- Refresh when needed (will be rolled back)</span>
+<span>REFRESH MATERIALIZED VIEW mv_category_month_revenue;</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- 1. Create a MV for weekly revenue by country.</span>
+<span>-- 2. Compare query time against base tables vs MV.</span>
+<span>-- 3. Prediction: insert a temporary order after the materialized view is built.</span>
+<span>--    Predict whether the view changes before REFRESH, then verify.</span>
+<span>-- 4. Construction: add a unique index that would make a concurrent refresh</span>
+<span>--    structurally possible; explain why this lesson still uses ordinary refresh.</span>
+<span>-- 5. Debugging: compare SUM(orders.total_amount) with line-item revenue and</span>
+<span>--    identify which business definition the materialized view actually stores.</span>
+<span>-- 6. Edge case: query a month/category combination with no source rows and</span>
+<span>--    explain why a materialized aggregate has no automatic zero-valued row.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day36_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day36_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-36-solutions-materialized-views">Day 36 — Solutions: Materialized Views<a class="heading-anchor" href="#solution-1--day-36-solutions-materialized-views" aria-label="Link to this section">#</a></h3>
+<p>A materialized view stores query results. Reads can become cheaper, but the result is a snapshot and must be refreshed when source data changes.</p>
+<h4 id="solution-1--exercise-1-weekly-revenue-by-country">Exercise 1 — Weekly revenue by country<a class="heading-anchor" href="#solution-1--exercise-1-weekly-revenue-by-country" aria-label="Link to this section">#</a></h4>
+<p>This demonstration is transactional and leaves no materialized view behind.</p>
+<pre><code class="language-sql">BEGIN;
+SET LOCAL search_path TO training, public;
+
+DROP MATERIALIZED VIEW IF EXISTS mv_weekly_country_revenue_solution;
+
+CREATE MATERIALIZED VIEW mv_weekly_country_revenue_solution AS
+SELECT date_trunc(&#x27;week&#x27;, o.order_date)::date AS week_start,
+       c.country,
+       SUM(
+         oi.unit_price * oi.quantity * (1 - oi.discount)
+       ) AS revenue
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY date_trunc(&#x27;week&#x27;, o.order_date), c.country;
+
+SELECT week_start,
+       country,
+       ROUND(revenue, 2) AS revenue
+FROM mv_weekly_country_revenue_solution
+ORDER BY week_start DESC, revenue DESC;
+
+ROLLBACK;</code></pre>
+<p>Expected shape: one row per observed week-country pair. PostgreSQL weeks begin on Monday under <code>date_trunc(&#x27;week&#x27;, ...)</code>.</p>
+<h4 id="solution-1--exercise-2-compare-base-table-and-snapshot-plans">Exercise 2 — Compare base-table and snapshot plans<a class="heading-anchor" href="#solution-1--exercise-2-compare-base-table-and-snapshot-plans" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">BEGIN;
+SET LOCAL search_path TO training, public;
+
+DROP MATERIALIZED VIEW IF EXISTS mv_weekly_country_revenue_compare;
+
+CREATE MATERIALIZED VIEW mv_weekly_country_revenue_compare AS
+SELECT date_trunc(&#x27;week&#x27;, o.order_date)::date AS week_start,
+       c.country,
+       SUM(
+         oi.unit_price * oi.quantity * (1 - oi.discount)
+       ) AS revenue
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY date_trunc(&#x27;week&#x27;, o.order_date), c.country;
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT date_trunc(&#x27;week&#x27;, o.order_date)::date AS week_start,
+       c.country,
+       SUM(
+         oi.unit_price * oi.quantity * (1 - oi.discount)
+       ) AS revenue
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY date_trunc(&#x27;week&#x27;, o.order_date), c.country;
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT week_start,
+       country,
+       revenue
+FROM mv_weekly_country_revenue_compare;
+
+ROLLBACK;</code></pre>
+<p>The materialized-view plan should avoid source joins and aggregation. On this small dataset, wall-clock differences can be noisy; compare plan work and buffers as well as execution time.</p>
+<h4 id="solution-1--pitfalls">Pitfalls<a class="heading-anchor" href="#solution-1--pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A normal <code>REFRESH MATERIALIZED VIEW</code> blocks concurrent reads of that view. <code>REFRESH ... CONCURRENTLY</code> requires a qualifying unique index and cannot run inside an explicit transaction block.</li>
+<li>Refresh is not automatic. Define freshness ownership and monitoring before using a materialized view for reporting.</li>
+<li>Materialized views duplicate data and add refresh cost; they are not a default replacement for indexing or query repair.</li>
+</ul>
+<h4 id="solution-1--exercise-3-observe-stale-then-refreshed-data">Exercise 3 — Observe stale then refreshed data<a class="heading-anchor" href="#solution-1--exercise-3-observe-stale-then-refreshed-data" aria-label="Link to this section">#</a></h4>
+<p>The transaction changes one disposable source row after materialization. Source and view totals diverge until <code>REFRESH</code>, making the freshness contract visible instead of merely described.</p>
+<h4 id="solution-1--exercise-4-explain-concurrent-refresh-eligibility">Exercise 4 — Explain concurrent-refresh eligibility<a class="heading-anchor" href="#solution-1--exercise-4-explain-concurrent-refresh-eligibility" aria-label="Link to this section">#</a></h4>
+<p>The unique <code>(week, country)</code> index supplies a stable row identity required by concurrent refresh. Initial population and this rollback lab still use ordinary refresh; concurrent refresh also has transaction restrictions.</p>
+<h4 id="solution-1--exercise-5-name-the-revenue-definition">Exercise 5 — Name the revenue definition<a class="heading-anchor" href="#solution-1--exercise-5-name-the-revenue-definition" aria-label="Link to this section">#</a></h4>
+<p>The view stores order-header totals. The control query prints header and line-item revenue side by side so a consumer must choose a business definition.</p>
+<h4 id="solution-1--exercise-6-materialize-missing-combinations-explicitly">Exercise 6 — Materialize missing combinations explicitly<a class="heading-anchor" href="#solution-1--exercise-6-materialize-missing-combinations-explicitly" aria-label="Link to this section">#</a></h4>
+<p>A cross-joined week/country spine defines requested combinations. The left join and <code>COALESCE</code> then implement a deliberate zero-display policy.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day36_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day36_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 36 solutions: materialized views</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Exercise 1: weekly revenue by country.</span>
+<span>CREATE MATERIALIZED VIEW mv_weekly_country_revenue_solution AS</span>
+<span>SELECT date_trunc(&#x27;week&#x27;, o.order_date)::date AS week,</span>
+<span>       c.country,</span>
+<span>       SUM(o.total_amount) AS revenue,</span>
+<span>       COUNT(*) AS orders</span>
+<span>FROM orders o</span>
+<span>JOIN customers c USING (customer_id)</span>
+<span>GROUP BY date_trunc(&#x27;week&#x27;, o.order_date), c.country;</span>
+<span> </span>
+<span>CREATE UNIQUE INDEX idx_mv_weekly_country_solution</span>
+<span>  ON mv_weekly_country_revenue_solution(week, country);</span>
+<span> </span>
+<span>-- Exercise 2: compare equivalent base-table and materialized-view plans.</span>
+<span>EXPLAIN (ANALYZE, BUFFERS)</span>
+<span>SELECT date_trunc(&#x27;week&#x27;, o.order_date)::date AS week,</span>
+<span>       c.country,</span>
+<span>       SUM(o.total_amount) AS revenue,</span>
+<span>       COUNT(*) AS orders</span>
+<span>FROM orders o</span>
+<span>JOIN customers c USING (customer_id)</span>
+<span>GROUP BY date_trunc(&#x27;week&#x27;, o.order_date), c.country;</span>
+<span> </span>
+<span>EXPLAIN (ANALYZE, BUFFERS)</span>
+<span>SELECT week, country, revenue, orders</span>
+<span>FROM mv_weekly_country_revenue_solution;</span>
+<span> </span>
+<span>-- Exercise 3: change one disposable base row after materialization. The first</span>
+<span>-- comparison exposes staleness; REFRESH then makes the view current.</span>
+<span>UPDATE orders</span>
+<span>SET total_amount = total_amount + 1</span>
+<span>WHERE order_id = (SELECT MIN(order_id) FROM orders);</span>
+<span> </span>
+<span>SELECT (SELECT SUM(total_amount) FROM orders) AS live_total,</span>
+<span>       (SELECT SUM(revenue) FROM mv_weekly_country_revenue_solution) AS stale_mv_total;</span>
+<span>REFRESH MATERIALIZED VIEW mv_weekly_country_revenue_solution;</span>
+<span>SELECT (SELECT SUM(total_amount) FROM orders) AS live_total,</span>
+<span>       (SELECT SUM(revenue) FROM mv_weekly_country_revenue_solution) AS refreshed_mv_total;</span>
+<span> </span>
+<span>-- Exercise 4: the unique (week,country) index above is the structural</span>
+<span>-- prerequisite for REFRESH ... CONCURRENTLY after initial population. Ordinary</span>
+<span>-- REFRESH remains appropriate inside this single-session rollback lab.</span>
+<span>SELECT indexdef</span>
+<span>FROM pg_indexes</span>
+<span>WHERE schemaname = &#x27;training&#x27;</span>
+<span>  AND tablename = &#x27;mv_weekly_country_revenue_solution&#x27;;</span>
+<span> </span>
+<span>-- Exercise 5: this view stores order-header totals. Name that definition and</span>
+<span>-- show the line-item alternative rather than assuming they are interchangeable.</span>
+<span>SELECT (SELECT SUM(total_amount) FROM orders) AS header_revenue,</span>
+<span>       (SELECT SUM(quantity * unit_price * (1 - discount)) FROM order_items)</span>
+<span>         AS line_revenue;</span>
+<span> </span>
+<span>-- Exercise 6: a spine supplies requested combinations; the outer join turns</span>
+<span>-- missing aggregate rows into an explicit display zero by policy.</span>
+<span>WITH months AS (</span>
+<span>  SELECT DISTINCT date_trunc(&#x27;week&#x27;, order_date)::date AS week FROM orders</span>
+<span>), countries AS (</span>
+<span>  SELECT DISTINCT country FROM customers</span>
+<span>)</span>
+<span>SELECT m.week, c.country, COALESCE(v.revenue, 0) AS revenue</span>
+<span>FROM months m</span>
+<span>CROSS JOIN countries c</span>
+<span>LEFT JOIN mv_weekly_country_revenue_solution v</span>
+<span>  ON v.week = m.week AND v.country = c.country</span>
+<span>ORDER BY m.week DESC, c.country</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-35.html"><small>Previous lesson</small><strong>sql-35</strong><span>Avoiding Pitfalls</span></a>
+        <a class="nav-card next" href="sql-37.html"><small>Next lesson</small><strong>sql-37</strong><span>Partitioning Sharding</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-36";
+    const LEARNER_PATH = "sql/postgres-60day/day36_materialized_views.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -100,6 +100,21 @@ def test_bootstrap_discovers_anaconda_and_postgresql_without_path() -> None:
     assert 'Join-Path $VenvDirectory "Library\\bin"' in text
 
 
+def test_discovery_helpers_accept_initially_empty_mutable_lists() -> None:
+    text = script_text()
+
+    for parameter_name in ("Candidates", "Directories"):
+        assert re.search(
+            rf"\[AllowEmptyCollection\(\)\]\s+"
+            rf"\[System\.Collections\.Generic\.List\[string\]\]\${parameter_name}",
+            text,
+        )
+    assert re.search(
+        r"\[AllowEmptyCollection\(\)\]\s+\[string\[\]\]\$Entries",
+        text,
+    )
+
+
 def test_bootstrap_reuses_both_windows_environment_layouts() -> None:
     text = script_text()
 
@@ -178,18 +193,25 @@ def test_bootstrap_installs_both_profiles_and_verifies_notebook_stack() -> None:
 
     assert '"--name", "ds60sqlpy"' in text
     assert '"--display-name", "Python (ds60sqlpy)"' in text
-    assert '"scripts\\course.py", "doctor"' in text
+    assert '"scripts\\course.py", "doctor", "--no-database"' in text
     assert '"kernelspec", "list", "--json"' in text
     assert 'Write-Host "  & `"$VenvPython`" -m jupyter lab"' in text
 
 
 def test_vscode_tasks_use_the_selected_cross_platform_interpreter() -> None:
     task_data = json.loads(VSCODE_TASKS.read_text(encoding="utf-8"))
-    python_tasks = [task for task in task_data["tasks"] if task["label"] != "Course: Setup"]
+    non_python_tasks = {"Course: Setup", "Course: Guided start (Windows)"}
+    python_tasks = [task for task in task_data["tasks"] if task["label"] not in non_python_tasks]
 
     assert python_tasks
     assert all(task["command"] == "${command:python.interpreterPath}" for task in python_tasks)
     assert all("windows" not in task for task in python_tasks)
+
+    guided = next(
+        task for task in task_data["tasks"] if task["label"] == "Course: Guided start (Windows)"
+    )
+    assert guided["command"] == "powershell.exe"
+    assert r"${workspaceFolder}\scripts\start_ds60.ps1" in guided["args"]
 
 
 def test_windows_bootstrap_guide_documents_safe_defaults() -> None:

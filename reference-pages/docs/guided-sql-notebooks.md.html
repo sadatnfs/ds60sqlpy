@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Guided SQL lesson notebooks · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Guided SQL lesson notebooks</h1>
+      <p class="source-path">Generated from <code>docs/guided-sql-notebooks.md</code></p>
+    </header>
+    <article class="document"><h2 id="guided-sql-lesson-notebooks">Guided SQL lesson notebooks<a class="heading-anchor" href="#guided-sql-lesson-notebooks" aria-label="Link to this section">#</a></h2>
+<p>Every cataloged SQL lesson and executable SQL solution can become a private, guided Jupyter notebook. The notebook is generated only when the learner opens it, under the Git-ignored <code>.learning/sql/</code> directory.</p>
+<p>This workflow is different from copying a <code>.sql</code> file into a <code>%%sql</code> cell. Course scripts can contain <code>psql</code> commands such as <code>\ir</code>, <code>\if</code>, <code>\gset</code>, and <code>\echo</code>. JupySQL does not implement those commands. The guided notebook renders the source for reading and runs the editable working copy with:</p>
+<pre><code class="language-text">psql -X --no-password -v ON_ERROR_STOP=1 --pset pager=off -f &lt;fixed-working-copy&gt;</code></pre>
+<p>There is no shell and no free-form path parameter. Lesson IDs, official source files, solution files, and learner-local output paths all come from the course catalog.</p>
+<h3 id="first-time-windows-path">First-time Windows path<a class="heading-anchor" href="#first-time-windows-path" aria-label="Link to this section">#</a></h3>
+<p>From a PowerShell window opened in the repository:</p>
+<pre><code class="language-powershell">Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+&amp; .\scripts\bootstrap_windows.ps1
+
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+
+&amp; $CoursePython scripts\course.py doctor
+&amp; $CoursePython scripts\course.py portal</code></pre>
+<p>Keep that PowerShell window open. The bootstrap adds a discovered PostgreSQL installation to the current process path, and Jupyter launched from the portal inherits it. If the notebook says <code>psql</code> is missing, close Jupyter, return to this PowerShell window, rerun the doctor, and start the portal again.</p>
+<p>The normal portal action is the easiest route: choose a SQL lesson and select the guided notebook action. The action creates an editable SQL copy and a notebook, then opens the notebook in JupyterLab.</p>
+<h3 id="macos-and-linux-path">macOS and Linux path<a class="heading-anchor" href="#macos-and-linux-path" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-bash">bash scripts/setup.sh --advanced
+.venv/bin/python scripts/course.py doctor
+.venv/bin/python scripts/course.py portal</code></pre>
+<p>Start the portal from the terminal where <code>psql</code> and any <code>DS60_DATABASE_URL</code> value are available.</p>
+<h3 id="generate-without-the-portal">Generate without the portal<a class="heading-anchor" href="#generate-without-the-portal" aria-label="Link to this section">#</a></h3>
+<p>The same catalog-restricted generator is available from the course CLI:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+&amp; $CoursePython scripts\course.py sql notebook sql-01
+&amp; $CoursePython scripts\course.py sql notebook sql-01 --artifact solution</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python scripts/course.py sql notebook sql-01
+.venv/bin/python scripts/course.py sql notebook sql-01 --artifact solution</code></pre>
+<p>The focused script exposes the same contract:</p>
+<pre><code class="language-text">python scripts/build_sql_lesson_notebook.py sql-01
+python scripts/build_sql_lesson_notebook.py sql-01 --artifact solution</code></pre>
+<p>Only stable SQL IDs in <code>curriculum/catalog.json</code> are accepted. The current catalog has one executable <code>.sql</code> solution for each SQL module. The optional <code>--solution-index</code> is one-based so the contract remains deterministic if a future module gains more than one.</p>
+<h3 id="what-the-generated-workspace-contains">What the generated workspace contains<a class="heading-anchor" href="#what-the-generated-workspace-contains" aria-label="Link to this section">#</a></h3>
+<p>For <code>sql-01</code>, the generated files are:</p>
+<pre><code class="language-text">.learning/
+└── sql/
+    └── sql-01/
+        ├── lesson/
+        │   ├── guided.ipynb
+        │   └── workspace/sql/postgres-60day/day01_select_where_orderby.sql
+        └── solution-1/
+            ├── guided.ipynb
+            └── workspace/sql/postgres-60day/solutions/day01_solutions.sql</code></pre>
+<p>The notebook follows this learning sequence:</p>
+<ol>
+<li><strong>Goal</strong> — identifies the lesson, guide, official source, and editable copy.</li>
+<li><strong>Setup</strong> — locates the repository and performs a secret-free readiness check.</li>
+<li><strong>Steps</strong> — renders the official SQL, links to the editable copy, prepares the database, and runs the complete working file.</li>
+<li><strong>Checks</strong> — reruns deterministic course database invariants.</li>
+<li><strong>Next Steps</strong> — sends the learner back to progress tracking and the next catalog prerequisite.</li>
+</ol>
+<p>Generation never overwrites an existing notebook or SQL copy. Reopening a lesson therefore preserves experiments and notes. To start over, first save anything worth keeping, remove only that lesson&#x27;s <code>.learning/sql/&lt;lesson-id&gt;/</code> directory, and reopen the cataloged artifact.</p>
+<p>The workspace mirrors the source&#x27;s repository-relative location. Fixed recursive <code>\ir</code> dependencies are copied into that mirror so their relative paths keep exactly the same meaning. Before execution, the runner confirms that every executable <code>psql</code> meta-command segment still matches the catalog source, including a command placed after SQL on the same line, and that included dependency files are unchanged. Backslashes inside SQL strings, quoted identifiers, dollar quotes, and comments are distinguished from executable client commands. Learners can edit SQL exercises, but cannot turn the notebook action into an arbitrary <code>\!</code> command or redirect an include to another file.</p>
+<h3 id="database-safety">Database safety<a class="heading-anchor" href="#database-safety" aria-label="Link to this section">#</a></h3>
+<p>Notebook execution is restricted to the database named <code>advanced_sql_training</code>. It accepts either that literal local database name or a local-socket/loopback <code>postgresql://</code> or <code>postgres://</code> URL whose path names that database. The only accepted URI query option is <code>sslmode</code>; the runner rejects:</p>
+<ul>
+<li>a different database name;</li>
+<li>remote or multi-host authorities;</li>
+<li>key-value connection strings;</li>
+<li>non-PostgreSQL URL schemes;</li>
+<li>URL fragments; and</li>
+<li>routing, service, file-reading, or other unsupported URL query options.</li>
+</ul>
+<p>If <code>DS60_DATABASE_URL</code> is unset, native local PostgreSQL connection defaults apply to <code>advanced_sql_training</code>. If it is set, the value stays in the Jupyter process environment: the notebook does not embed, print, or save it. The runner passes the validated target to libpq through the child environment rather than a visible command argument, and uses <code>--no-password</code> so a kernel cannot hang at an invisible password prompt. Configure native authentication, a local password file, or the disposable Compose URL before starting the portal.</p>
+<p>Database preparation is deliberately a separate cell with <code>CONFIRM_COURSE_RESET = False</code>. Change it to <code>True</code> only after reading the warning. The runner then:</p>
+<ol>
+<li>executes the fixed <code>sql/postgres-60day/00_setup.sql</code>;</li>
+<li>executes the fixed <code>sql/postgres-60day/00_verify.sql</code>; and</li>
+<li>executes earlier members of the selected lesson&#x27;s declared stateful group.</li>
+</ol>
+<p>The third step matters for Days 52–54: opening Day 54 prepares Days 52 and 53 in order. Other lessons receive the clean seed schema without replaying dozens of unrelated scripts.</p>
+<p>The launcher constrains runner paths and client-side <code>psql</code> commands; it is not an SQL sandbox. An editable exercise can still contain database statements with server-side effects, especially when PostgreSQL is running under a superuser role. Never paste untrusted SQL. Use only the disposable course database and a least-privileged course role for lessons.</p>
+<h3 id="when-to-use-jupysql-instead">When to use JupySQL instead<a class="heading-anchor" href="#when-to-use-jupysql-instead" aria-label="Link to this section">#</a></h3>
+<p>Use the guided notebook for complete course scripts, exercises, DDL, projects, and solutions. It preserves real <code>psql</code> behavior and shows a bounded transcript.</p>
+<p>Use the checked-in <code>bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb</code> lesson for short, bounded exploratory queries, result-to-DataFrame conversion, parameter binding, and explicit SQLAlchemy transaction ownership. See <a href="setup/jupyter-postgresql.md.html">PostgreSQL in Jupyter</a> for that separate workflow.</p>
+<h3 id="maintainer-contract">Maintainer contract<a class="heading-anchor" href="#maintainer-contract" aria-label="Link to this section">#</a></h3>
+<p>Portal and editor integrations should call:</p>
+<pre><code class="language-python">generate_sql_notebook(catalog, lesson_id, artifact_kind, solution_index)</code></pre>
+<p>The function returns a <code>SqlNotebookWorkspace</code> with the generated notebook and editable SQL paths. Callers must not accept a filesystem path or shell command from the browser. Notebook execution uses <code>run_sql_workspace</code>, which computes the same path from the catalog identity and rejects missing files, symlinks, and paths outside <code>.learning/sql/</code>.</p>
+<p>Generated notebooks are validated as nbformat 4.5, use the <code>ds60sqlpy</code> kernel, contain no saved output, and contain no absolute repository path or connection credential.</p></article>
+  </main>
+</body>
+</html>

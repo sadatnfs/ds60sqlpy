@@ -1,4 +1,4 @@
 interface:
   display_name: "DS60 Python & SQL Tutor"
   short_description: "Guided practice across the DS60 curriculum"
-  default_prompt: "Use $guide-ds60sqlpy-learning to inspect my local progress, assess my level, and guide me through the next Python, SQL, or engineering bridge lesson with hints before solutions."
+  default_prompt: "Use $guide-ds60sqlpy-learning to inspect my local progress, choose the next lesson, help me open its real VS Code or Jupyter artifact, and coach me through guide, prediction, attempt, hints, and solution comparison."

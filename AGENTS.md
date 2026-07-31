@@ -28,6 +28,16 @@ historical “60-day” shape.
   immutable pre-enrichment counts and the per-surface exercise-doubling gate
 - `scripts/build_course_guide.py`: source for generated `START_HERE.html`; never
   hand-edit the HTML
+- `src/ds60sqlpy/lesson_reader.py` and `scripts/build_lesson_readers.py`:
+  sources for generated `lesson-pages/<lesson-id>.html` and linked
+  `reference-pages/<source>.html`; never hand-edit those readers
+- `src/ds60sqlpy/sql_notebook.py` and
+  `scripts/build_sql_lesson_notebook.py`: catalog-restricted generator and
+  runner for learner-local SQL notebooks under `.learning/sql/`; never check
+  generated workspaces into Git
+- `START_DS60.cmd` and `scripts/start_ds60.ps1`: Windows learner entry point;
+  keep it path-safe, PowerShell 5.1-compatible, and aligned with
+  `scripts/bootstrap_windows.ps1`
 - `src/ds60sqlpy/portal.py`: optional loopback launcher and shared
   `.learning/progress.json` boundary
 - `docs/curriculum-gap-backlog.md`: implemented gap record and maintenance
@@ -57,6 +67,12 @@ Use `python -m pip`, repository-relative paths, and `pathlib`. Never add a devel
 - Explain new terms before relying on them.
 - Ask the learner to predict behavior and attempt exercises.
 - Give progressive hints before opening or reproducing official solutions.
+- Use the sequence **guide → prediction → learner attempt → progressive hints
+  → solution comparison**. Opening a file or checking a box is not evidence of
+  mastery.
+- Treat every rendered lesson page as a readable, read-only preview. Send
+  learners to the cataloged file in VS Code or JupyterLab, or to the generated
+  `.learning/sql/` working copy, when they need to execute or edit code.
 - Do not overwrite learner work.
 - Keep solutions separate from learner artifacts.
 - Do not silently skip failures or hide exceptions that teach an important concept.
@@ -70,6 +86,10 @@ Use `python -m pip`, repository-relative paths, and `pathlib`. Never add a devel
   `.\.venv\Scripts\python.exe`; the conda-prefix fallback uses
   `.\.venv\python.exe`. When the layout is not known, test those two paths in
   that order rather than assuming one.
+- Windows startup must keep `-DiagnosticsOnly -NonInteractive` read-only and
+  require explicit acknowledgement before a noninteractive connected setup.
+  It may rediscover tools and change only its process-local `PATH`; never add
+  credentials or an automatic database reset.
 - PostgreSQL notebooks read only `DS60_DATABASE_URL`, pass an engine object to
   `%sql`, hide connection display, bind values, and tag live/non-Python magic
   cells for notebook-aware validation. Never put `%pip` or a password in a
@@ -78,6 +98,25 @@ Use `python -m pip`, repository-relative paths, and `pathlib`. Never add a devel
 - First-run Seaborn downloads are accepted but must be disclosed and cacheable.
 - Pretrained model downloads and optional web resources must be explicit, tagged, and accompanied by a local fallback where practical.
 - Never add an undocumented network dependency.
+- A static `file://` page may render course content and offer a best-effort
+  registered VS Code URL, but it cannot safely start local programs. Keep
+  native actions in the authenticated private launcher and never regress to
+  opening raw Markdown, notebooks, Python, or SQL as the browser lesson view.
+- User-facing local Markdown and SQL links from the dashboard, lesson readers,
+  and rendered references must resolve to generated HTML rather than raw
+  browser source. In static mode, record completion on `START_HERE.html`; only
+  authenticated loopback readers expose their own completion checkbox.
+- Guided SQL notebooks must be derived from a stable catalog ID, write only
+  beneath ignored `.learning/sql/`, preserve an existing learner notebook and
+  SQL copy, run complete course scripts through fixed non-shell `psql -f`
+  commands, reject line-start or inline changes to cataloged `psql`
+  meta-commands, and require an explicit reset confirmation before preparing
+  the disposable course schema.
+- Every automated course SQL path, including doctor and `SqlRunner`, must
+  validate the exact local disposable `advanced_sql_training` target, reject
+  remote/multi-host and routing/service URL or environment overrides, and pass
+  a password-bearing target through the child environment rather than the
+  process argument list.
 
 ## Content changes
 
@@ -94,6 +133,8 @@ For each lesson change:
 7. Meet the audited practice target on the learner, guide, and every
    explanatory-solution artifact: at least `max(6, 2 × baseline)`, using
    distinct prompts rather than relabeled answer steps.
+8. Regenerate both navigation layers after artifact or catalog changes:
+   `START_HERE.html` and every affected `lesson-pages/<lesson-id>.html`.
 
 Do not expand the curriculum merely to increase lesson count. Add content only when it closes a documented learning gap.
 
@@ -107,7 +148,9 @@ python scripts/course.py catalog
 python scripts/course.py validate
 python scripts/audit_practice.py
 python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
 python scripts/scan_secrets.py --history
+python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
 ```
 
 SQL commands must use:
@@ -134,9 +177,12 @@ Definition of done:
 Portal changes must retain both delivery modes. `START_HERE.html` remains
 self-contained and useful over `file://`; launcher mode binds only to
 `127.0.0.1`, authenticates mutations with an in-memory session token, permits
-no cross-origin writes, blocks hidden/sensitive paths, and maps explicit clicks
-to a fixed VS Code/Jupyter action allowlist. Never add arbitrary shell text,
-arbitrary path launch, remote binding, CORS, or a credential to the portal.
+no cross-origin writes, requires the exact Host on every request, serves only
+generated guide/lesson/reference HTML, and maps explicit clicks to a fixed
+VS Code/Jupyter action allowlist. Never add arbitrary shell text, arbitrary
+path launch, remote binding, CORS, or a credential to the portal.
+`--no-launches` must continue to provide file-backed progress without native
+process actions.
 
 If a heavy or external prerequisite prevents a check, report the exact unverified surface.
 
@@ -145,6 +191,9 @@ If a heavy or external prerequisite prevents a check, report the exact unverifie
 - Treat `sql/postgres-60day/00_setup.sql` as a destructive reset of the disposable `training` schema.
 - Never point course reset commands at a production or shared database.
 - Do not commit secrets, `.env` files, model caches, notebook checkpoints, or learner-local progress.
+- Treat ignored learner state as private, not disposable. Do not remove
+  `.learning/progress.json`, `.learning/sql/`, `artifacts/`, or `mlruns/`
+  without confirming what the learner wants to preserve.
 - Avoid destructive Git commands and broad cleanup.
 
 ## Serena and repository tools

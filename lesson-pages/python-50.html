@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-50 · Time Series Modeling · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-50</p>
+        <h1>Time Series Modeling</h1>
+        <p class="hero-copy">Production, advanced topics, and capstone</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">ml setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-49.html">python-49</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day50_time_series_modeling.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/ds-60day/companion-guides/day50_time_series_modeling.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day50_time_series_modeling.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-50-time-series-modeling-and-forecast-evaluation">Day 50 — Time-Series Modeling and Forecast Evaluation<a class="heading-anchor" href="#guide--day-50-time-series-modeling-and-forecast-evaluation" aria-label="Link to this section">#</a></h3>
+<p><strong>Lesson ID:</strong> <code>python-50</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>ml</code> · <strong>Network:</strong> offline</p>
+<p>Forecasting differs from ordinary random-split prediction because the future must never influence the past. This lesson compares a small <code>pmdarima</code> model against simple time-safe baselines on deterministic synthetic data.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end of the lesson, you can:</p>
+<ul>
+<li>construct a chronological train/test split with a declared forecast horizon;</li>
+<li>build last-value and seasonal-naive forecasts;</li>
+<li>fit a bounded seasonal ARIMA candidate with <code>pmdarima</code>;</li>
+<li>evaluate every candidate on the same timestamps and metric; and</li>
+<li>engineer lags or rolling features without future leakage.</li>
+</ul>
+<h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Complete <code>python-49</code> (NLP survey).</li>
+<li>Recall pandas time indexes from <code>python-21</code>.</li>
+<li>Install the <code>ml</code> dependency group, which includes <code>pmdarima</code>.</li>
+</ul>
+<h4 id="guide--vocabulary-and-mental-models">Vocabulary and mental models<a class="heading-anchor" href="#guide--vocabulary-and-mental-models" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Definition</th>
+</tr></thead><tbody>
+<tr>
+<td>Forecast horizon</td>
+<td>Number of future steps predicted</td>
+</tr>
+<tr>
+<td>Temporal split</td>
+<td>Training observations occur before evaluation observations</td>
+</tr>
+<tr>
+<td>Naive forecast</td>
+<td>Simple rule, such as repeating the latest observation</td>
+</tr>
+<tr>
+<td>Seasonal-naive forecast</td>
+<td>Repeats the observation from one seasonal period earlier</td>
+</tr>
+<tr>
+<td>Lag</td>
+<td>Past value aligned as a current-row feature</td>
+</tr>
+<tr>
+<td>Rolling statistic</td>
+<td>Summary over a trailing window</td>
+</tr>
+<tr>
+<td>Differencing</td>
+<td>Subtracting an earlier observation to reduce trend/seasonality</td>
+</tr>
+<tr>
+<td>ARIMA</td>
+<td>Autoregressive integrated moving-average model</td>
+</tr>
+<tr>
+<td>Backtesting</td>
+<td>Repeating forward train/evaluate windows over historical time</td>
+</tr>
+</tbody></table></div>
+<p>The key boundary is “information available as of forecast time.” A feature can be mathematically shifted yet still be operationally unavailable because of reporting delay.</p>
+<h4 id="guide--worked-example-baseline-before-complexity">Worked example: baseline before complexity<a class="heading-anchor" href="#guide--worked-example-baseline-before-complexity" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error
+
+rng = np.random.default_rng(42)
+index = pd.date_range(&quot;2020-01-01&quot;, periods=300, freq=&quot;D&quot;)
+values = (
+    20
+    + np.linspace(0, 10, len(index))
+    + 2 * np.sin(2 * np.pi * np.arange(len(index)) / 30)
+    + rng.normal(scale=1.0, size=len(index))
+)
+series = pd.Series(values, index=index, name=&quot;y&quot;)
+train, test = series.iloc[:-30], series.iloc[-30:]
+
+last_value = np.repeat(train.iloc[-1], len(test))
+seasonal_naive = train.iloc[-30:].to_numpy()
+print(&quot;last:&quot;, mean_absolute_error(test, last_value))
+print(&quot;seasonal:&quot;, mean_absolute_error(test, seasonal_naive))</code></pre>
+<p>Every candidate must use this same 30-day horizon and metric. A more complex model earns its cost only if it improves the relevant evidence reliably.</p>
+<h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</li>
+<li>Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</li>
+<li>Difference the training series and inspect autocorrelation without using test-period observations.</li>
+</ol>
+<h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Change only the seasonal period. Keep the split, horizon, and MAE calculation fixed, and bound the search if runtime is high.</li>
+<li>Build each baseline solely from <code>train</code>; verify predictions have the same index/length as <code>test</code>.</li>
+<li>Call <code>train.diff().dropna()</code> before plotting autocorrelation. The test values should not appear anywhere in transformation fitting.</li>
+</ol>
+<p>The reference solution extends the lesson with <code>TimeSeriesSplit</code>, shifted rolling features, and a seasonal-naive evaluation. It uses a different synthetic weekly series to reinforce the method rather than mirror the notebook.</p>
+<h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Evaluate forecasts with forward-only information, multiple origins, meaningful baselines, and timestamp/data-quality checks before adding model complexity.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Rolling-origin evaluation:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE. <strong>Progressive hint:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</li>
+<li><strong>Prediction intervals:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often. <strong>Progressive hint:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</li>
+<li><strong>Timestamp/data-quality debugging:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling. <strong>Progressive hint:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</li>
+</ol>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Why is a shuffled train/test split invalid for this forecasting question?</li>
+<li>Why must rolling features use <code>shift(1)</code> before the window?</li>
+<li>When does MAPE behave badly, and why is MAE safer for values near zero?</li>
+<li>If ARIMA beats the naive baseline once, what additional evidence is needed?</li>
+</ul>
+<p>Expected behavior: the synthetic data and all model code run offline. Different seasonal periods can produce different search time and MAE; complexity is not guaranteed to win.</p>
+<h4 id="guide--pitfalls-diagnostics-and-tradeoffs">Pitfalls, diagnostics, and tradeoffs<a class="heading-anchor" href="#guide--pitfalls-diagnostics-and-tradeoffs" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Pitfall</th>
+<th>Consequence</th>
+<th>Better practice</th>
+</tr></thead><tbody>
+<tr>
+<td>Random CV</td>
+<td>Future observations train past predictions</td>
+<td>Use forward splits/backtests</td>
+</tr>
+<tr>
+<td>Rolling mean includes current target</td>
+<td>Direct leakage</td>
+<td>Shift before rolling</td>
+</tr>
+<tr>
+<td>Comparing different horizons</td>
+<td>Metrics are not comparable</td>
+<td>Align timestamps and horizon</td>
+</tr>
+<tr>
+<td><code>auto_arima</code> search left broad</td>
+<td>Long CPU runtime/selection noise</td>
+<td>Start with bounded orders and a baseline</td>
+</tr>
+<tr>
+<td>One final window treated as certainty</td>
+<td>Result depends on time regime</td>
+<td>Backtest multiple origins</td>
+</tr>
+<tr>
+<td>Forecast intervals ignored</td>
+<td>Point prediction looks overconfident</td>
+<td>Evaluate coverage and decision uncertainty</td>
+</tr>
+</tbody></table></div>
+<p>ARIMA encodes a structured temporal process. Tree models on lag features can capture nonlinearities but require careful recursive forecasting. Select by backtested evidence, operational latency, and maintainability.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Work in the <a href="python-50.html#learner">Day 50 learner notebook</a>.</li>
+<li>Then review the <a href="python-50.html#solution-1">Day 50 solution</a>.</li>
+<li>Continue to <a href="python-51.html#guide">Day 51 — Target Encoding</a>.</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/notebooks/day50_time_series_modeling.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day50_time_series_modeling.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-50-time-series-modeling-and-forecast-evaluation">Day 50 — Time-series modeling and forecast evaluation<a class="heading-anchor" href="#learner--cell-1--day-50-time-series-modeling-and-forecast-evaluation" aria-label="Link to this section">#</a></h3>
+<p>Objectives:</p>
+<ul>
+<li>Split time-ordered data without future leakage.</li>
+<li>Fit a small ARIMA model with pmdarima.</li>
+<li>Compare it with a naive forecast using the same horizon and metric.</li>
+<li>Treat more complex forecasting families as hypotheses to validate, not automatic upgrades.</li>
+</ul></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import numpy as np, pandas as pd</span>
+<span>import matplotlib.pyplot as plt</span>
+<span>rng = np.random.default_rng(42)</span>
+<span>idx = pd.date_range(&#x27;2020-01-01&#x27;, periods=300, freq=&#x27;D&#x27;)</span>
+<span>trend = np.linspace(0,10,300)</span>
+<span>season = 2*np.sin(2*np.pi*np.arange(300)/30)</span>
+<span>noise = rng.normal(scale=1.0, size=300)</span>
+<span>y = 20 + trend + season + noise</span>
+<span>ts = pd.Series(y, index=idx, name=&#x27;y&#x27;)</span>
+<span>ts.plot(figsize=(8,3)); plt.title(&#x27;Synthetic series&#x27;); plt.show()</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># ARIMA with pmdarima</span>
+<span>from pmdarima import auto_arima</span>
+<span>train = ts.iloc[:-30]</span>
+<span>test = ts.iloc[-30:]</span>
+<span>model = auto_arima(train, seasonal=True, m=30, trace=False, suppress_warnings=True)</span>
+<span>model.summary()</span>
+<span>pred = model.predict(n_periods=len(test))</span>
+<span>plt.plot(train.index, train.values, label=&#x27;train&#x27;)</span>
+<span>plt.plot(test.index, test.values, label=&#x27;test&#x27;)</span>
+<span>plt.plot(test.index, pred, label=&#x27;forecast&#x27;)</span>
+<span>plt.legend(); plt.show()</span>
+<span>from sklearn.metrics import mean_absolute_error</span>
+<span>mean_absolute_error(test.values, pred)</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-4--model-choice-and-baselines">Model choice and baselines<a class="heading-anchor" href="#learner--cell-4--model-choice-and-baselines" aria-label="Link to this section">#</a></h4>
+<p>Seasonal additive models, tree models with lag features, and neural sequence models can all be useful in the right setting. They also add assumptions and operational cost. Compare every candidate against a simple last-value or seasonal-naive forecast on a forward time split.</p>
+<h4 id="learner--cell-4--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-4--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</li>
+<li>Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</li>
+<li>Difference the training series and inspect autocorrelation without using test-period observations.</li>
+</ol>
+<h5 id="learner--cell-4--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-4--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Change only the seasonal period. Keep the split, horizon, and MAE calculation fixed, and bound the search if runtime is high.</li>
+<li>Build each baseline solely from <code>train</code>; verify predictions have the same index/length as <code>test</code>.</li>
+<li>Call <code>train.diff().dropna()</code> before plotting autocorrelation. The test values should not appear anywhere in transformation fitting.</li>
+</ol>
+<p>The reference solution extends the lesson with <code>TimeSeriesSplit</code>, shifted rolling features, and a seasonal-naive evaluation. It uses a different synthetic weekly series to reinforce the method rather than mirror the notebook.</p>
+<h5 id="learner--cell-4--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-4--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Evaluate forecasts with forward-only information, multiple origins, meaningful baselines, and timestamp/data-quality checks before adding model complexity.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Rolling-origin evaluation:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE. <strong>Progressive hint:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</li>
+<li><strong>Prediction intervals:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often. <strong>Progressive hint:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</li>
+<li><strong>Timestamp/data-quality debugging:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling. <strong>Progressive hint:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</li>
+</ol>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<span>#</span>
+<span># Keep the official solution closed until you have attempted each task.</span>
+<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
+<span> </span>
+<span># Practice 4 — Rolling-origin evaluation</span>
+<span> </span>
+<span> </span>
+<span># Practice 5 — Prediction intervals</span>
+<span> </span>
+<span> </span>
+<span># Practice 6 — Timestamp/data-quality debugging</span>
+<span> </span></code></pre>
+</article></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day50_time_series_modeling/day50_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day50_time_series_modeling/day50_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-50-solutions-time-series-modeling">Day 50 — Solutions: Time Series Modeling<a class="heading-anchor" href="#solution-1--day-50-solutions-time-series-modeling" aria-label="Link to this section">#</a></h3>
+<p>We implement seasonal naive baselines, leakage‑safe feature engineering with TimeSeriesSplit, and evaluation with MAPE including error visualization.</p>
+<p>Contents</p>
+<ul>
+<li>Exercise 1: Seasonal naive baseline and beat it</li>
+<li>Exercise 2: Use TimeSeriesSplit and compare models</li>
+<li>Exercise 3: Evaluate with MAPE and visualize errors</li>
+</ul>
+<hr>
+<p>Setup</p>
+<pre><code class="language-python">import pandas as pd, numpy as np
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import mean_absolute_percentage_error as MAPE
+import matplotlib.pyplot as plt
+
+# Example daily data with weekly seasonality
+rng = pd.date_range(&#x27;2020-01-01&#x27;, periods=400, freq=&#x27;D&#x27;)
+np.random.seed(0)
+y = 10 + 2*np.sin(2*np.pi*rng.dayofyear/7) + np.random.normal(0,0.8,len(rng))
+df = pd.DataFrame({&#x27;ds&#x27;: rng, &#x27;y&#x27;: y}).set_index(&#x27;ds&#x27;)</code></pre>
+<p>Exercise 1 — Seasonal naive baseline</p>
+<pre><code class="language-python"># 7-day seasonal naive: forecast y_t = y_{t-7}
+H = 14  # horizon
+df[&#x27;y_lag7&#x27;] = df[&#x27;y&#x27;].shift(7)
+valid = df.iloc[-(H+7):]  # ensure lag available
+baseline_fc = valid[&#x27;y_lag7&#x27;].iloc[-H:]
+truth = valid[&#x27;y&#x27;].iloc[-H:]
+base_mape = MAPE(truth, baseline_fc)
+print({&#x27;baseline_MAPE&#x27;: float(base_mape)})</code></pre>
+<p>Explanation</p>
+<ul>
+<li>Use last week’s value as forecast; compute MAPE on final horizon</li>
+<li>Always align lags to avoid peeking into the future</li>
+</ul>
+<hr>
+<p>Exercise 2 — TimeSeriesSplit and models</p>
+<pre><code class="language-python">from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+
+# Feature engineering with leakage‑safe lags and rolling means
+df[&#x27;lag1&#x27;] = df[&#x27;y&#x27;].shift(1)
+df[&#x27;lag7&#x27;] = df[&#x27;y&#x27;].shift(7)
+df[&#x27;roll7&#x27;] = df[&#x27;y&#x27;].shift(1).rolling(7).mean()
+df = df.dropna()
+
+X = df[[&#x27;lag1&#x27;,&#x27;lag7&#x27;,&#x27;roll7&#x27;]].values
+y = df[&#x27;y&#x27;].values
+
+split = TimeSeriesSplit(n_splits=5)
+res = []
+for tr, va in split.split(X):
+    Xtr, Xva = X[tr], X[va]
+    ytr, yva = y[tr], y[va]
+    # Models
+    lr = LinearRegression().fit(Xtr, ytr)
+    rf = RandomForestRegressor(n_estimators=300, random_state=0).fit(Xtr, ytr)
+    # Predictions
+    p_lr = lr.predict(Xva); p_rf = rf.predict(Xva)
+    res.append({
+        &#x27;mape_lr&#x27;: MAPE(yva, p_lr),
+        &#x27;mape_rf&#x27;: MAPE(yva, p_rf)
+    })
+
+cv = pd.DataFrame(res)
+print(cv.describe().loc[[&#x27;mean&#x27;,&#x27;std&#x27;]])</code></pre>
+<p>Line‑by‑line</p>
+<ul>
+<li>shift(1) on rolling mean prevents leakage (uses only past values)</li>
+<li>TimeSeriesSplit preserves order; no shuffling</li>
+<li>Compare models with average MAPE over folds</li>
+</ul>
+<hr>
+<p>Exercise 3 — Final fit and error visualization</p>
+<pre><code class="language-python"># Fit best model on full train and forecast last H steps using a walk‑forward loop
+H = 14
+train = df.iloc[:-H].copy(); test = df.iloc[-H:].copy()
+
+model = RandomForestRegressor(n_estimators=500, random_state=0).fit(train[[&#x27;lag1&#x27;,&#x27;lag7&#x27;,&#x27;roll7&#x27;]], train[&#x27;y&#x27;])
+fc = model.predict(test[[&#x27;lag1&#x27;,&#x27;lag7&#x27;,&#x27;roll7&#x27;]])
+print(&#x27;Test MAPE vs baseline:&#x27;, MAPE(test[&#x27;y&#x27;], fc), &#x27;vs&#x27;, base_mape)
+
+plt.figure(figsize=(8, 3))
+plt.plot(df.index[-120:], df[&#x27;y&#x27;].iloc[-120:], label=&#x27;actual&#x27;)
+plt.plot(test.index, fc, label=&#x27;forecast&#x27;)
+plt.legend(); plt.title(&#x27;Forecast vs actual&#x27;); plt.tight_layout(); plt.show()
+
+# Error over time
+err = pd.Series(fc, index=test.index) - test[&#x27;y&#x27;]
+err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw=1); plt.show()</code></pre>
+<p>Notes</p>
+<ul>
+<li>Prefer pinball/quantile loss for asymmetric costs</li>
+<li>For multi-step forecasting, compare direct and recursive strategies with validated ARIMA or lag-feature baselines before adding a heavier model</li>
+</ul>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</p>
+<p><strong>How to reason about it:</strong> Compare seasonal periods on the identical training window and forecast horizon. Bound auto-ARIMA search, report runtime, and remember that the best period may change across forecast origins.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</p>
+<p><strong>How to reason about it:</strong> Last-value and seasonal-naive forecasts are required baselines. Build them only from information available at each origin and align prediction indices exactly with the test targets.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Difference the training series and inspect autocorrelation without using test-period observations.</p>
+<p><strong>How to reason about it:</strong> Differencing and autocorrelation diagnostics use training data only. Inspect stationarity assumptions and avoid differencing mechanically without understanding what must be inverted for forecasts.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-4-rolling-origin-evaluation">Exercise 4 — Rolling-origin evaluation<a class="heading-anchor" href="#solution-1--exercise-4-rolling-origin-evaluation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.</p>
+<p><strong>Reasoning before implementation:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</p>
+<p>One holdout period can favor a model by chance or season. A tidy result table should contain model, origin, horizon step, actual, prediction, and absolute error. Aggregate by model and also inspect variation across origins.</p>
+<p>Never fit one candidate on the full series and slice its in-sample predictions for earlier origins. That uses future observations and invalidates the backtest.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-5-prediction-intervals">Exercise 5 — Prediction intervals<a class="heading-anchor" href="#solution-1--exercise-5-prediction-intervals" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.</p>
+<p><strong>Reasoning before implementation:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</p>
+<p>Coverage and sharpness must be read together. A trivially wide interval can cover nearly everything, while an overconfident narrow interval misses often. Report coverage by horizon because uncertainty usually grows farther ahead.</p>
+<p>Model-based intervals rely on residual/distribution assumptions. Residual bootstrap or conformal methods offer alternatives, but still require forward-only calibration data and exchangeability assumptions.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-6-timestamp-data-quality-debugging">Exercise 6 — Timestamp/data-quality debugging<a class="heading-anchor" href="#solution-1--exercise-6-timestamp-data-quality-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.</p>
+<p><strong>Reasoning before implementation:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</p>
+<p>Do not let a library silently reinterpret irregular observations as regular. Create an expected date range, compare it with observed timestamps, and report duplicates/missing periods. Aggregate duplicates only with a documented rule.</p>
+<p>Timezone-aware series should be normalized deliberately, often to UTC for storage while retaining local-calendar features separately. Imputation is a fitted or policy step and must not read future values in a forecasting evaluation.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day50_time_series_modeling/day50_solutions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day50_time_series_modeling/day50_solutions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-50-solutions-time-series-modeling">Day 50 — Solutions: Time Series Modeling<a class="heading-anchor" href="#solution-2--cell-1--day-50-solutions-time-series-modeling" aria-label="Link to this section">#</a></h3>
+<p>We implement seasonal naive baselines, leakage‑safe feature engineering with TimeSeriesSplit, and evaluation with MAPE including error visualization.</p>
+<p>Contents</p>
+<ul>
+<li>Exercise 1: Seasonal naive baseline and beat it</li>
+<li>Exercise 2: Use TimeSeriesSplit and compare models</li>
+<li>Exercise 3: Evaluate with MAPE and visualize errors</li>
+</ul>
+<hr>
+<p>Setup</p>
+<blockquote><p>Generated from <code>python/ds-60day/solutions/day50_time_series_modeling/day50_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd, numpy as np</span>
+<span>from sklearn.model_selection import TimeSeriesSplit</span>
+<span>from sklearn.metrics import mean_absolute_percentage_error as MAPE</span>
+<span>import matplotlib.pyplot as plt</span>
+<span> </span>
+<span># Example daily data with weekly seasonality</span>
+<span>rng = pd.date_range(&#x27;2020-01-01&#x27;, periods=400, freq=&#x27;D&#x27;)</span>
+<span>np.random.seed(0)</span>
+<span>y = 10 + 2*np.sin(2*np.pi*rng.dayofyear/7) + np.random.normal(0,0.8,len(rng))</span>
+<span>df = pd.DataFrame({&#x27;ds&#x27;: rng, &#x27;y&#x27;: y}).set_index(&#x27;ds&#x27;)</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Exercise 1 — Seasonal naive baseline</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># 7-day seasonal naive: forecast y_t = y_{t-7}</span>
+<span>H = 14  # horizon</span>
+<span>df[&#x27;y_lag7&#x27;] = df[&#x27;y&#x27;].shift(7)</span>
+<span>valid = df.iloc[-(H+7):]  # ensure lag available</span>
+<span>baseline_fc = valid[&#x27;y_lag7&#x27;].iloc[-H:]</span>
+<span>truth = valid[&#x27;y&#x27;].iloc[-H:]</span>
+<span>base_mape = MAPE(truth, baseline_fc)</span>
+<span>print({&#x27;baseline_MAPE&#x27;: float(base_mape)})</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Explanation</p>
+<ul>
+<li>Use last week’s value as forecast; compute MAPE on final horizon</li>
+<li>Always align lags to avoid peeking into the future</li>
+</ul>
+<hr>
+<p>Exercise 2 — TimeSeriesSplit and models</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from sklearn.linear_model import LinearRegression</span>
+<span>from sklearn.ensemble import RandomForestRegressor</span>
+<span> </span>
+<span># Feature engineering with leakage‑safe lags and rolling means</span>
+<span>df[&#x27;lag1&#x27;] = df[&#x27;y&#x27;].shift(1)</span>
+<span>df[&#x27;lag7&#x27;] = df[&#x27;y&#x27;].shift(7)</span>
+<span>df[&#x27;roll7&#x27;] = df[&#x27;y&#x27;].shift(1).rolling(7).mean()</span>
+<span>df = df.dropna()</span>
+<span> </span>
+<span>X = df[[&#x27;lag1&#x27;,&#x27;lag7&#x27;,&#x27;roll7&#x27;]].values</span>
+<span>y = df[&#x27;y&#x27;].values</span>
+<span> </span>
+<span>split = TimeSeriesSplit(n_splits=5)</span>
+<span>res = []</span>
+<span>for tr, va in split.split(X):</span>
+<span>    Xtr, Xva = X[tr], X[va]</span>
+<span>    ytr, yva = y[tr], y[va]</span>
+<span>    # Models</span>
+<span>    lr = LinearRegression().fit(Xtr, ytr)</span>
+<span>    rf = RandomForestRegressor(n_estimators=300, random_state=0).fit(Xtr, ytr)</span>
+<span>    # Predictions</span>
+<span>    p_lr = lr.predict(Xva); p_rf = rf.predict(Xva)</span>
+<span>    res.append({</span>
+<span>        &#x27;mape_lr&#x27;: MAPE(yva, p_lr),</span>
+<span>        &#x27;mape_rf&#x27;: MAPE(yva, p_rf)</span>
+<span>    })</span>
+<span> </span>
+<span>cv = pd.DataFrame(res)</span>
+<span>print(cv.describe().loc[[&#x27;mean&#x27;,&#x27;std&#x27;]])</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>Line‑by‑line</p>
+<ul>
+<li>shift(1) on rolling mean prevents leakage (uses only past values)</li>
+<li>TimeSeriesSplit preserves order; no shuffling</li>
+<li>Compare models with average MAPE over folds</li>
+</ul>
+<hr>
+<p>Exercise 3 — Final fit and error visualization</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Fit best model on full train and forecast last H steps using a walk‑forward loop</span>
+<span>H = 14</span>
+<span>train = df.iloc[:-H].copy(); test = df.iloc[-H:].copy()</span>
+<span> </span>
+<span>model = RandomForestRegressor(n_estimators=500, random_state=0).fit(train[[&#x27;lag1&#x27;,&#x27;lag7&#x27;,&#x27;roll7&#x27;]], train[&#x27;y&#x27;])</span>
+<span>fc = model.predict(test[[&#x27;lag1&#x27;,&#x27;lag7&#x27;,&#x27;roll7&#x27;]])</span>
+<span>print(&#x27;Test MAPE vs baseline:&#x27;, MAPE(test[&#x27;y&#x27;], fc), &#x27;vs&#x27;, base_mape)</span>
+<span> </span>
+<span>plt.figure(figsize=(8, 3))</span>
+<span>plt.plot(df.index[-120:], df[&#x27;y&#x27;].iloc[-120:], label=&#x27;actual&#x27;)</span>
+<span>plt.plot(test.index, fc, label=&#x27;forecast&#x27;)</span>
+<span>plt.legend(); plt.title(&#x27;Forecast vs actual&#x27;); plt.tight_layout(); plt.show()</span>
+<span> </span>
+<span># Error over time</span>
+<span>err = pd.Series(fc, index=test.index) - test[&#x27;y&#x27;]</span>
+<span>err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw=1); plt.show()</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p>Notes</p>
+<ul>
+<li>Prefer pinball/quantile loss for asymmetric costs</li>
+<li>For multi-step forecasting, compare direct and recursive strategies with validated ARIMA or lag-feature baselines before adding a heavier model</li>
+</ul>
+<hr>
+<h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</p>
+<p><strong>How to reason about it:</strong> Compare seasonal periods on the identical training window and forecast horizon. Bound auto-ARIMA search, report runtime, and remember that the best period may change across forecast origins.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</p>
+<p><strong>How to reason about it:</strong> Last-value and seasonal-naive forecasts are required baselines. Build them only from information available at each origin and align prediction indices exactly with the test targets.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Difference the training series and inspect autocorrelation without using test-period observations.</p>
+<p><strong>How to reason about it:</strong> Differencing and autocorrelation diagnostics use training data only. Inspect stationarity assumptions and avoid differencing mechanically without understanding what must be inverted for forecasts.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-9--exercise-4-rolling-origin-evaluation">Exercise 4 — Rolling-origin evaluation<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-rolling-origin-evaluation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.</p>
+<p><strong>Reasoning before implementation:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</p>
+<p>One holdout period can favor a model by chance or season. A tidy result table should contain model, origin, horizon step, actual, prediction, and absolute error. Aggregate by model and also inspect variation across origins.</p>
+<p>Never fit one candidate on the full series and slice its in-sample predictions for earlier origins. That uses future observations and invalidates the backtest.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-9--exercise-5-prediction-intervals">Exercise 5 — Prediction intervals<a class="heading-anchor" href="#solution-2--cell-9--exercise-5-prediction-intervals" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.</p>
+<p><strong>Reasoning before implementation:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</p>
+<p>Coverage and sharpness must be read together. A trivially wide interval can cover nearly everything, while an overconfident narrow interval misses often. Report coverage by horizon because uncertainty usually grows farther ahead.</p>
+<p>Model-based intervals rely on residual/distribution assumptions. Residual bootstrap or conformal methods offer alternatives, but still require forward-only calibration data and exchangeability assumptions.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-9--exercise-6-timestamp-data-quality-debugging">Exercise 6 — Timestamp/data-quality debugging<a class="heading-anchor" href="#solution-2--cell-9--exercise-6-timestamp-data-quality-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.</p>
+<p><strong>Reasoning before implementation:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</p>
+<p>Do not let a library silently reinterpret irregular observations as regular. Create an expected date range, compare it with observed timestamps, and report duplicates/missing periods. Aggregate duplicates only with a documented rule.</p>
+<p>Timezone-aware series should be normalized deliberately, often to UTC for storage while retaining local-calendar features separately. Imputation is a fitted or policy step and must not read future values in a forecasting evaluation.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-49.html"><small>Previous lesson</small><strong>python-49</strong><span>NLP Basics Hugging Face Spacy</span></a>
+        <a class="nav-card next" href="python-51.html"><small>Next lesson</small><strong>python-51</strong><span>Advanced Feature Engineering Target Encoding</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-50";
+    const LEARNER_PATH = "python/ds-60day/notebooks/day50_time_series_modeling.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

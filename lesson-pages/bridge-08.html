@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-08 · Production Capstone · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-08</p>
+        <h1>Production Capstone</h1>
+        <p class="hero-copy">Python and PostgreSQL engineering</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">bridge setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="bridge-07.html">bridge-07</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/lessons/day08_production_capstone.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/lessons/day08_production_capstone.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/companion-guides/day08_production_capstone.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/companion-guides/day08_production_capstone.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-day-8-production-capstone-observability-security-and-recovery">Bridge Day 8 — Production capstone: observability, security, and recovery<a class="heading-anchor" href="#guide--bridge-day-8-production-capstone-observability-security-and-recovery" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Advanced <strong>Prerequisite:</strong> <a href="bridge-07.html#guide">Bridge Day 7</a></p>
+<h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
+<p>Production readiness is not a framework choice. It is evidence that a program behaves predictably on success, invalid input, partial failure, retry, restart, and shutdown—without exposing secrets. This capstone keeps effectful adapters small and makes orchestration order observable with fakes before any live database run.</p>
+<h4 id="guide--objectives">Objectives<a class="heading-anchor" href="#guide--objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>orchestrate extractor, sink, checkpoint, metric, and logger boundaries;</li>
+<li>advance a checkpoint only after a durable batch write;</li>
+<li>resume deterministically after a partial failure;</li>
+<li>emit low-cardinality metrics and secret-safe logs;</li>
+<li>validate PostgreSQL transport requirements without exposing the URL;</li>
+<li>write a production-readiness and recovery checklist.</li>
+</ul>
+<h4 id="guide--vocabulary">Vocabulary<a class="heading-anchor" href="#guide--vocabulary" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>checkpoint</td>
+<td>Durable progress from which a job can safely resume</td>
+</tr>
+<tr>
+<td>at-least-once delivery</td>
+<td>A record may be retried, so the sink must tolerate duplicates</td>
+</tr>
+<tr>
+<td>observability</td>
+<td>Evidence from logs, metrics, and traces that explains system behavior</td>
+</tr>
+<tr>
+<td>cardinality</td>
+<td>The number of distinct metric label combinations</td>
+</tr>
+<tr>
+<td>recovery point</td>
+<td>The last durable state from which processing resumes</td>
+</tr>
+<tr>
+<td>least privilege</td>
+<td>Granting only the database permissions a job needs</td>
+</tr>
+<tr>
+<td>threat model</td>
+<td>A structured account of assets, attackers, boundaries, and mitigations</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--run-the-starter">Run the starter<a class="heading-anchor" href="#guide--run-the-starter" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe bridge\lessons\day08_production_capstone.py</code></pre>
+<pre><code class="language-bash">.venv/bin/python bridge/lessons/day08_production_capstone.py</code></pre>
+<h4 id="guide--capstone-scenario">Capstone scenario<a class="heading-anchor" href="#guide--capstone-scenario" aria-label="Link to this section">#</a></h4>
+<p>Build a <code>JobRunner</code> that:</p>
+<ol>
+<li>loads the last sequence checkpoint;</li>
+<li>asks an extractor for records strictly after it;</li>
+<li>validates positive, increasing sequences and unique record IDs;</li>
+<li>writes records in bounded batches;</li>
+<li>saves each batch&#x27;s final sequence only after the sink returns successfully;</li>
+<li>records safe counts and outcomes;</li>
+<li>re-raises failures so the scheduler observes a failed run.</li>
+</ol>
+<p>The ordering invariant is:</p>
+<pre><code class="language-text">sink.write(batch) succeeds -&gt; checkpoint.save(last_sequence)</code></pre>
+<p>Reversing it can lose data: after a crash, the job would skip a batch that was never durably written. Writing first can repeat a batch after an uncertain failure, so the sink needs the idempotency design from Day 4.</p>
+<h4 id="guide--worked-example-useful-bounded-telemetry">Worked example: useful, bounded telemetry<a class="heading-anchor" href="#guide--worked-example-useful-bounded-telemetry" aria-label="Link to this section">#</a></h4>
+<p>Good metric dimensions are stable and few:</p>
+<pre><code class="language-text">records_read{job=&quot;sales&quot;}
+records_written{job=&quot;sales&quot;}
+job_failures{job=&quot;sales&quot;, error_type=&quot;OperationalError&quot;}</code></pre>
+<p>Do not use record IDs, customer IDs, raw exceptions, URLs, or payload fields as metric labels. They create high cardinality or leak sensitive data. Logs may include job name, counts, checkpoint number, duration, and exception type. Avoid full records and connection strings.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Orchestrate a restart-safe batch job through injected effects, validation-before-write, post-write checkpoints, bounded observability, and safe database transport.</li>
+<li><strong>Assumptions:</strong> Records have strictly increasing positive sequences and finite positive Decimal amounts; a checkpoint advances only after its batch write succeeds.</li>
+<li><strong>Primary failure mode:</strong> An advanced checkpoint or non-idempotent ambiguous sink write can permanently skip or duplicate records during recovery.</li>
+<li><strong>Evidence loop:</strong> predict the boundary, implement the smallest change, verify success and failure with a deterministic fake, then explain which behavior still requires an explicitly enabled PostgreSQL integration test.</li>
+</ul>
+<ol>
+<li><strong>Validation:</strong> Validate constructor inputs, including non-blank job name and positive batch size, before retaining dependencies.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Reject invalid orchestration configuration before the first effect.</li>
+</ul>
+<ol>
+<li><strong>Orchestration:</strong> Implement <code>run_once()</code> in load-extract-validate-batch-write-checkpoint order and return read, written, and final checkpoint evidence.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Validate the full extracted sequence before the first sink call.</li>
+</ul>
+<ol>
+<li><strong>Test doubles:</strong> Build extractor, sink, checkpoint, and metric fakes; configure the sink to fail on a selected call.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Fakes should expose histories and deterministic failure switches.</li>
+</ul>
+<ol>
+<li><strong>Recovery test:</strong> With four records and batch size two, fail write two, assert only checkpoint two persists, then resume from two with a healthy sink.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Extraction on retry must receive the last durable checkpoint.</li>
+</ul>
+<ol>
+<li><strong>Record validation:</strong> Reject duplicate IDs, non-positive/non-increasing sequences, and non-finite/non-positive money before any sink effect.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Check global order/uniqueness after validating individual records.</li>
+</ul>
+<ol>
+<li><strong>Observability:</strong> Emit success/failure and record-count metrics with only job and exception-class tags.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Keep messages, record IDs, checkpoints, and request IDs out of metric dimensions.</li>
+</ul>
+<ol>
+<li><strong>Transport security:</strong> Implement <code>validate_database_transport()</code> for PostgreSQL schemes, local course hosts, and required TLS modes on remote hosts.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Parse without echoing; local and remote host policies differ.</li>
+</ul>
+<ol>
+<li><strong>Runbook:</strong> Write operational steps for startup, health evidence, retry ownership, checkpoint inspection, replay, rollback, credential rotation, and escalation.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Every action needs prerequisites, expected evidence, and a stop condition.</li>
+</ul>
+<ol>
+<li><strong>No-op behavior:</strong> Define the result and metrics when extraction returns no records.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A no-op should not write or advance a checkpoint.</li>
+</ul>
+<ol>
+<li><strong>Checkpoint validation:</strong> Detect records at or below the loaded checkpoint and out-of-order extractor results before writing.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Do not assume an injected extractor obeys its Protocol&#x27;s semantic promise.</li>
+</ul>
+<ol>
+<li><strong>Ambiguous writes:</strong> Explain recovery when the sink commits a batch but the client raises before seeing success.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Post-write checkpoint ordering alone cannot prevent a duplicate replay.</li>
+</ul>
+<ol>
+<li><strong>Metric design:</strong> Classify which fields belong in metrics, structured logs, or neither, and test cardinality.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Observability channels have different retention and indexing costs.</li>
+</ul>
+<ol>
+<li><strong>Health model:</strong> Separate process liveness, dependency readiness, and last-run success for the job.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A process can be alive while unable to make safe progress.</li>
+</ul>
+<ol>
+<li><strong>URL edge cases:</strong> Test loopback names, IPv4/IPv6, missing host, case-insensitive TLS values, unsupported schemes, and remote insecure modes.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Normalize parsed components and keep every failure message secret-free.</li>
+</ul>
+<ol>
+<li><strong>Operations drill:</strong> Simulate credential rotation and prove the runner can restart without resetting a valid checkpoint.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Credentials identify access, not processing position.</li>
+</ul>
+<ol>
+<li><strong>Invariant testing:</strong> Generate failure positions across multiple batch sizes and prove persisted checkpoints always correspond to fully successful batches.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Vary boundaries while holding deterministic records and fakes.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>State the input/output and ownership boundary in one sentence.</li>
+<li>Show one normal case, one edge case, and one failure case.</li>
+<li>Inspect recorded calls rather than relying on plausible output.</li>
+<li>Confirm no credential, payload, or high-cardinality identifier was emitted.</li>
+</ul>
+<h4 id="guide--optional-live-db-capstone">Optional live-DB capstone<a class="heading-anchor" href="#guide--optional-live-db-capstone" aria-label="Link to this section">#</a></h4>
+<p>Only after fake tests pass:</p>
+<ol>
+<li>use a disposable course database;</li>
+<li>create a temporary staging table <code>ON COMMIT DROP</code>;</li>
+<li>implement a Psycopg sink with parameter binding or COPY;</li>
+<li>store a test checkpoint in memory, not a persistent course table;</li>
+<li>inject a failure before the second batch commit;</li>
+<li>roll back and verify no persistent objects or rows remain.</li>
+</ol>
+<pre><code class="language-powershell">$env:DS60_DATABASE_URL = &quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;
+.\.venv\Scripts\python.exe -m pytest bridge\tests -q</code></pre>
+<pre><code class="language-bash">export DS60_DATABASE_URL=&quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;
+.venv/bin/python -m pytest bridge/tests -q</code></pre>
+<p>The repository&#x27;s normal bridge test suite remains fake-backed and does not contact this URL.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can the runner restart after every simulated failure point?</li>
+<li>Is a checkpoint never ahead of a confirmed sink write?</li>
+<li>Is a repeated batch safe at the sink?</li>
+<li>Can operators distinguish zero input, success, and failure from telemetry?</li>
+<li>Are credentials, payloads, and personal fields absent from logs and metrics?</li>
+<li>Does remote transport require TLS?</li>
+<li>Is the recovery procedure written for another person, not only remembered by the author?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Checkpointing before write:</strong> a crash can create silent data loss.</li>
+<li><strong>Assuming “exactly once”:</strong> most distributed boundaries provide at-least-once behavior; idempotent sinks make replay safe.</li>
+<li><strong>Logging whole records on failure:</strong> debugging creates a data leak.</li>
+<li><strong>High-cardinality metric labels:</strong> monitoring cost and usability deteriorate.</li>
+<li><strong>Health checks that mutate data:</strong> probes should be cheap and read-only.</li>
+<li><strong>Permanent broad database credentials:</strong> use a dedicated role with only required schema and statement privileges.</li>
+<li><strong>No recovery rehearsal:</strong> an untested runbook is a hypothesis.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Revisit weak areas using the <a href="../reference-pages/bridge/README.md.html">bridge index</a>, then complete a small project that replaces one fake adapter at a time while retaining the same contracts and tests. Compare your design with <a href="bridge-08.html#solution-1">the Day 8 solution notes</a>; differences are expected when your recovery contract is explicit and tested.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/lessons/day08_production_capstone.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/lessons/day08_production_capstone.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Bridge Day 8: observable, secure, failure-aware production capstone.</span>
+<span> </span>
+<span>Prerequisite: Bridge Day 7.</span>
+<span>Read ``bridge/companion-guides/day08_production_capstone.md`` first.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Mapping, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from decimal import Decimal</span>
+<span>from typing import Protocol</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-08&quot;</span>
+<span>PREREQUISITES = (&quot;bridge-07&quot;,)</span>
+<span>LEVEL = &quot;advanced&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Record:</span>
+<span>    sequence: int</span>
+<span>    record_id: str</span>
+<span>    amount: Decimal</span>
+<span> </span>
+<span> </span>
+<span>class Extractor(Protocol):</span>
+<span>    def extract_after(self, checkpoint: int | None) -&gt; Sequence[Record]: ...</span>
+<span> </span>
+<span> </span>
+<span>class Sink(Protocol):</span>
+<span>    def write(self, records: Sequence[Record]) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class CheckpointStore(Protocol):</span>
+<span>    def load(self) -&gt; int | None: ...</span>
+<span> </span>
+<span>    def save(self, checkpoint: int) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class Metrics(Protocol):</span>
+<span>    def increment(</span>
+<span>        self,</span>
+<span>        name: str,</span>
+<span>        value: int = 1,</span>
+<span>        *,</span>
+<span>        tags: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class JobRunner:</span>
+<span>    &quot;&quot;&quot;Core implementation: orchestrate effects with a recoverable checkpoint order.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def __init__(</span>
+<span>        self,</span>
+<span>        *,</span>
+<span>        extractor: Extractor,</span>
+<span>        sink: Sink,</span>
+<span>        checkpoints: CheckpointStore,</span>
+<span>        metrics: Metrics,</span>
+<span>        batch_size: int,</span>
+<span>    ) -&gt; None:</span>
+<span>        raise NotImplementedError(&quot;validate and retain injected dependencies&quot;)</span>
+<span> </span>
+<span>    def run_once(self) -&gt; object:</span>
+<span>        raise NotImplementedError(&quot;write each batch before advancing its checkpoint&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def validate_database_transport(database_url: str) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Core implementation: require PostgreSQL and transport security for remote hosts.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;validate without printing or returning the secret URL&quot;)</span>
+<span> </span>
+<span> </span>
+<span># Exercises (answer-free)</span>
+<span># Focus: Orchestrate a restart-safe batch job through injected effects, validation-before-write,</span>
+<span>#    post-write checkpoints, bounded observability, and safe database transport.</span>
+<span># Assumptions: Records have strictly increasing positive sequences and finite positive Decimal</span>
+<span>#    amounts; a checkpoint advances only after its batch write succeeds.</span>
+<span># Failure to watch for: An advanced checkpoint or non-idempotent ambiguous sink write can</span>
+<span>#    permanently skip or duplicate records during recovery.</span>
+<span># Work in order: predict -&gt; implement -&gt; test -&gt; debug -&gt; extend. Keep official</span>
+<span># answers out of this starter and collect deterministic fake-backed evidence.</span>
+<span># 1. [Validation] Validate constructor inputs, including non-blank job name and positive batch</span>
+<span>#    size, before retaining dependencies.</span>
+<span>#    Hint: Reject invalid orchestration configuration before the first effect.</span>
+<span># 2. [Orchestration] Implement `run_once()` in load-extract-validate-batch-write-checkpoint</span>
+<span>#    order and return read, written, and final checkpoint evidence.</span>
+<span>#    Hint: Validate the full extracted sequence before the first sink call.</span>
+<span># 3. [Test doubles] Build extractor, sink, checkpoint, and metric fakes; configure the sink to</span>
+<span>#    fail on a selected call.</span>
+<span>#    Hint: Fakes should expose histories and deterministic failure switches.</span>
+<span># 4. [Recovery test] With four records and batch size two, fail write two, assert only</span>
+<span>#    checkpoint two persists, then resume from two with a healthy sink.</span>
+<span>#    Hint: Extraction on retry must receive the last durable checkpoint.</span>
+<span># 5. [Record validation] Reject duplicate IDs, non-positive/non-increasing sequences, and</span>
+<span>#    non-finite/non-positive money before any sink effect.</span>
+<span>#    Hint: Check global order/uniqueness after validating individual records.</span>
+<span># 6. [Observability] Emit success/failure and record-count metrics with only job and</span>
+<span>#    exception-class tags.</span>
+<span>#    Hint: Keep messages, record IDs, checkpoints, and request IDs out of metric dimensions.</span>
+<span># 7. [Transport security] Implement `validate_database_transport()` for PostgreSQL schemes,</span>
+<span>#    local course hosts, and required TLS modes on remote hosts.</span>
+<span>#    Hint: Parse without echoing; local and remote host policies differ.</span>
+<span># 8. [Runbook] Write operational steps for startup, health evidence, retry ownership, checkpoint</span>
+<span>#    inspection, replay, rollback, credential rotation, and escalation.</span>
+<span>#    Hint: Every action needs prerequisites, expected evidence, and a stop condition.</span>
+<span># 9. [No-op behavior] Define the result and metrics when extraction returns no records.</span>
+<span>#    Hint: A no-op should not write or advance a checkpoint.</span>
+<span># 10. [Checkpoint validation] Detect records at or below the loaded checkpoint and out-of-order</span>
+<span>#    extractor results before writing.</span>
+<span>#    Hint: Do not assume an injected extractor obeys its Protocol&#x27;s semantic promise.</span>
+<span># 11. [Ambiguous writes] Explain recovery when the sink commits a batch but the client raises</span>
+<span>#    before seeing success.</span>
+<span>#    Hint: Post-write checkpoint ordering alone cannot prevent a duplicate replay.</span>
+<span># 12. [Metric design] Classify which fields belong in metrics, structured logs, or neither, and</span>
+<span>#    test cardinality.</span>
+<span>#    Hint: Observability channels have different retention and indexing costs.</span>
+<span># 13. [Health model] Separate process liveness, dependency readiness, and last-run success for</span>
+<span>#    the job.</span>
+<span>#    Hint: A process can be alive while unable to make safe progress.</span>
+<span># 14. [URL edge cases] Test loopback names, IPv4/IPv6, missing host, case-insensitive TLS</span>
+<span>#    values, unsupported schemes, and remote insecure modes.</span>
+<span>#    Hint: Normalize parsed components and keep every failure message secret-free.</span>
+<span># 15. [Operations drill] Simulate credential rotation and prove the runner can restart without</span>
+<span>#    resetting a valid checkpoint.</span>
+<span>#    Hint: Credentials identify access, not processing position.</span>
+<span># 16. [Invariant testing] Generate failure positions across multiple batch sizes and prove</span>
+<span>#    persisted checkpoints always correspond to fully successful batches.</span>
+<span>#    Hint: Vary boundaries while holding deterministic records and fakes.</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    print(&quot;Bridge Day 8 capstone starter loaded.&quot;)</span>
+<span>    print(&quot;Build the runner from small fakes before adding an optional Psycopg adapter.&quot;)</span>
+<span>    print(&quot;Prove restart safety by failing a batch and resuming from the last checkpoint.&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/solutions/day08_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day08_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-day-8-solution-notes">Bridge Day 8 — Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-8-solution-notes" aria-label="Link to this section">#</a></h3>
+<p>Complete the <a href="bridge-08.html#learner">capstone starter</a> before reviewing <a href="bridge-08.html#solution-2">day08_solution.py</a>.</p>
+<h4 id="solution-1--recovery-invariant">Recovery invariant<a class="heading-anchor" href="#solution-1--recovery-invariant" aria-label="Link to this section">#</a></h4>
+<p>The reference loads one checkpoint, validates the complete extracted sequence, and handles bounded batches in this order:</p>
+<ol>
+<li>write the batch;</li>
+<li>save the batch&#x27;s last sequence;</li>
+<li>record the successful write count.</li>
+</ol>
+<p>If the second batch fails, the first batch&#x27;s checkpoint remains durable. A restart asks the extractor only for later sequences. The sink still needs an idempotency key because a network failure can make write outcome uncertain.</p>
+<p>Input validation occurs before the first effect. Sequences must be positive and strictly increasing after the checkpoint, IDs unique within a run, and amounts finite.</p>
+<h4 id="solution-1--observability-and-security">Observability and security<a class="heading-anchor" href="#solution-1--observability-and-security" aria-label="Link to this section">#</a></h4>
+<p>Metrics use stable job and exception-type tags. Logs contain job name, counts, and exception type—never the exception message, records, or connection strings. The runner re-raises failure so an external scheduler can mark the run failed.</p>
+<p><code>validate_database_transport()</code> checks scheme, host, and remote TLS mode without returning or echoing the URL. Local course connections may omit TLS; remote hosts require <code>require</code>, <code>verify-ca</code>, or <code>verify-full</code>.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Saving a checkpoint after every batch reduces replay but increases checkpoint writes. Larger checkpoint intervals trade recovery work for throughput.</li>
+<li>The runner validates all extracted records in memory. A streaming design needs incremental order checks and bounded extraction.</li>
+<li>Omitting exception messages and tracebacks at this boundary protects secrets but reduces diagnostics. A protected error store can retain richer traces under an explicit access and retention policy.</li>
+<li>URL query validation is a minimum transport guard, not full security. Certificate validation, secret storage, role privileges, rotation, network policy, statement timeouts, and audit requirements belong in deployment.</li>
+<li>Exactly-once processing is not claimed. Checkpoint ordering plus an idempotent sink provides recoverable at-least-once behavior.</li>
+</ul>
+<p>The strongest capstone evidence is the failure test: the second batch fails, checkpoint <code>2</code> remains, and the next run processes only sequences <code>3</code> and <code>4</code>.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day08_solution.py</code>; use it only after an honest attempt.</p>
+<p><strong>Shared failure rule:</strong> An advanced checkpoint or non-idempotent ambiguous sink write can permanently skip or duplicate records during recovery.</p>
+<h5 id="solution-1--exercise-1-validation">Exercise 1 — Validation<a class="heading-anchor" href="#solution-1--exercise-1-validation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Validate constructor inputs, including non-blank job name and positive batch size, before retaining dependencies.</p>
+<p><strong>Approach:</strong> Strip/check the job name, require <code>batch_size &gt;= 1</code>, and store the injected Protocol implementations. Keep defaults explicit and do not contact any dependency during construction.</p>
+<p><strong>Why this boundary matters:</strong> Reject invalid orchestration configuration before the first effect.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-2-orchestration">Exercise 2 — Orchestration<a class="heading-anchor" href="#solution-1--exercise-2-orchestration" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>run_once()</code> in load-extract-validate-batch-write-checkpoint order and return read, written, and final checkpoint evidence.</p>
+<p><strong>Approach:</strong> Load the prior checkpoint, extract after it, validate all records, write deterministic batches, save each batch&#x27;s last sequence only after successful write, emit bounded metrics, and return <code>JobResult</code>.</p>
+<p><strong>Why this boundary matters:</strong> Validate the full extracted sequence before the first sink call.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-3-test-doubles">Exercise 3 — Test doubles<a class="heading-anchor" href="#solution-1--exercise-3-test-doubles" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Build extractor, sink, checkpoint, and metric fakes; configure the sink to fail on a selected call.</p>
+<p><strong>Approach:</strong> Each fake records calls and owns no assertions. The failing sink raises on its configured invocation after recording the attempted batch so the test can inspect recovery evidence.</p>
+<p><strong>Why this boundary matters:</strong> Fakes should expose histories and deterministic failure switches.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-4-recovery-test">Exercise 4 — Recovery test<a class="heading-anchor" href="#solution-1--exercise-4-recovery-test" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> With four records and batch size two, fail write two, assert only checkpoint two persists, then resume from two with a healthy sink.</p>
+<p><strong>Approach:</strong> The first run saves <code>[2]</code> and raises; the second extractor request is <code>2</code>, writes records 3–4, and saves <code>4</code>. No checkpoint for the failed batch is recorded.</p>
+<p><strong>Why this boundary matters:</strong> Extraction on retry must receive the last durable checkpoint.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-5-record-validation">Exercise 5 — Record validation<a class="heading-anchor" href="#solution-1--exercise-5-record-validation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Reject duplicate IDs, non-positive/non-increasing sequences, and non-finite/non-positive money before any sink effect.</p>
+<p><strong>Approach:</strong> Scan all extracted records once, tracking IDs and previous sequence, and raise on the first invariant violation. The sink history must remain empty for every invalid fixture.</p>
+<p><strong>Why this boundary matters:</strong> Check global order/uniqueness after validating individual records.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-6-observability">Exercise 6 — Observability<a class="heading-anchor" href="#solution-1--exercise-6-observability" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Emit success/failure and record-count metrics with only job and exception-class tags.</p>
+<p><strong>Approach:</strong> Use fixed metric names and a bounded job label plus exception type on failure. Emit numeric counts as values, not tags, and never use the exception message.</p>
+<p><strong>Why this boundary matters:</strong> Keep messages, record IDs, checkpoints, and request IDs out of metric dimensions.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-7-transport-security">Exercise 7 — Transport security<a class="heading-anchor" href="#solution-1--exercise-7-transport-security" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>validate_database_transport()</code> for PostgreSQL schemes, local course hosts, and required TLS modes on remote hosts.</p>
+<p><strong>Approach:</strong> Accept <code>postgresql</code>/<code>postgres</code>; permit loopback/local course hosts without forced TLS; require <code>sslmode</code> in <code>require</code>, <code>verify-ca</code>, or <code>verify-full</code> remotely; raise constant safe messages.</p>
+<p><strong>Why this boundary matters:</strong> Parse without echoing; local and remote host policies differ.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-8-runbook">Exercise 8 — Runbook<a class="heading-anchor" href="#solution-1--exercise-8-runbook" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write operational steps for startup, health evidence, retry ownership, checkpoint inspection, replay, rollback, credential rotation, and escalation.</p>
+<p><strong>Approach:</strong> The runbook names the disposable/production boundary, commands or queries that reveal no credentials, one retry owner, how to compare sink/checkpoint state, when to pause, and how to rotate without logging the URL.</p>
+<p><strong>Why this boundary matters:</strong> Every action needs prerequisites, expected evidence, and a stop condition.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-9-no-op-behavior">Exercise 9 — No-op behavior<a class="heading-anchor" href="#solution-1--exercise-9-no-op-behavior" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define the result and metrics when extraction returns no records.</p>
+<p><strong>Approach:</strong> Return zero read/written with the loaded checkpoint unchanged, emit a bounded success/no-op count, and leave sink/checkpoint save histories empty.</p>
+<p><strong>Why this boundary matters:</strong> A no-op should not write or advance a checkpoint.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-10-checkpoint-validation">Exercise 10 — Checkpoint validation<a class="heading-anchor" href="#solution-1--exercise-10-checkpoint-validation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Detect records at or below the loaded checkpoint and out-of-order extractor results before writing.</p>
+<p><strong>Approach:</strong> Require every sequence to be greater than the loaded checkpoint and strictly increasing. Reject a stale or regressing response with no sink calls.</p>
+<p><strong>Why this boundary matters:</strong> Do not assume an injected extractor obeys its Protocol&#x27;s semantic promise.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-11-ambiguous-writes">Exercise 11 — Ambiguous writes<a class="heading-anchor" href="#solution-1--exercise-11-ambiguous-writes" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain recovery when the sink commits a batch but the client raises before seeing success.</p>
+<p><strong>Approach:</strong> The sink must be idempotent on record ID or expose commit evidence. On retry, replaying the batch is safe only under that contract; otherwise pause and reconcile before advancing the checkpoint.</p>
+<p><strong>Why this boundary matters:</strong> Post-write checkpoint ordering alone cannot prevent a duplicate replay.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-12-metric-design">Exercise 12 — Metric design<a class="heading-anchor" href="#solution-1--exercise-12-metric-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Classify which fields belong in metrics, structured logs, or neither, and test cardinality.</p>
+<p><strong>Approach:</strong> Metrics receive bounded job/outcome/class tags; redacted structured logs may hold a correlation ID and checkpoint; record payloads, amounts, URLs, and exception messages belong in neither default channel.</p>
+<p><strong>Why this boundary matters:</strong> Observability channels have different retention and indexing costs.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-13-health-model">Exercise 13 — Health model<a class="heading-anchor" href="#solution-1--exercise-13-health-model" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Separate process liveness, dependency readiness, and last-run success for the job.</p>
+<p><strong>Approach:</strong> Liveness checks the process loop only; readiness verifies required dependencies/configuration without mutation; run status reports the latest job evidence. Do not collapse them into one green flag.</p>
+<p><strong>Why this boundary matters:</strong> A process can be alive while unable to make safe progress.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-14-url-edge-cases">Exercise 14 — URL edge cases<a class="heading-anchor" href="#solution-1--exercise-14-url-edge-cases" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Test loopback names, IPv4/IPv6, missing host, case-insensitive TLS values, unsupported schemes, and remote insecure modes.</p>
+<p><strong>Approach:</strong> Treat <code>localhost</code>, <code>127.0.0.1</code>, and <code>::1</code> as local; validate a database/host exists as policy requires; case-normalize <code>sslmode</code>; reject unsupported/missing remote modes without returning the original URL.</p>
+<p><strong>Why this boundary matters:</strong> Normalize parsed components and keep every failure message secret-free.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-15-operations-drill">Exercise 15 — Operations drill<a class="heading-anchor" href="#solution-1--exercise-15-operations-drill" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Simulate credential rotation and prove the runner can restart without resetting a valid checkpoint.</p>
+<p><strong>Approach:</strong> Stop acquisition, rotate the external secret, validate a new connection through the safe boundary, resume with the same checkpoint store, and verify extraction begins after the durable sequence.</p>
+<p><strong>Why this boundary matters:</strong> Credentials identify access, not processing position.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-16-invariant-testing">Exercise 16 — Invariant testing<a class="heading-anchor" href="#solution-1--exercise-16-invariant-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Generate failure positions across multiple batch sizes and prove persisted checkpoints always correspond to fully successful batches.</p>
+<p><strong>Approach:</strong> For each batch size/failure call, compute the last completed batch end and assert saved history never exceeds it. Resume and reconcile that every logical record is eventually written under an idempotent sink.</p>
+<p><strong>Why this boundary matters:</strong> Vary boundaries while holding deterministic records and fakes.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/solutions/day08_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day08_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Day 8 reference: observable, resumable, security-conscious pipeline orchestration.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import logging</span>
+<span>from collections.abc import Mapping, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from decimal import Decimal</span>
+<span>from typing import Protocol</span>
+<span>from urllib.parse import parse_qs, urlsplit</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Record:</span>
+<span>    sequence: int</span>
+<span>    record_id: str</span>
+<span>    amount: Decimal</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class JobResult:</span>
+<span>    records_read: int</span>
+<span>    records_written: int</span>
+<span>    checkpoint: int | None</span>
+<span> </span>
+<span> </span>
+<span>class Extractor(Protocol):</span>
+<span>    def extract_after(self, checkpoint: int | None) -&gt; Sequence[Record]: ...</span>
+<span> </span>
+<span> </span>
+<span>class Sink(Protocol):</span>
+<span>    def write(self, records: Sequence[Record]) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class CheckpointStore(Protocol):</span>
+<span>    def load(self) -&gt; int | None: ...</span>
+<span> </span>
+<span>    def save(self, checkpoint: int) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class Metrics(Protocol):</span>
+<span>    def increment(</span>
+<span>        self,</span>
+<span>        name: str,</span>
+<span>        value: int = 1,</span>
+<span>        *,</span>
+<span>        tags: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class JobRunner:</span>
+<span>    &quot;&quot;&quot;Coordinate effects while keeping recovery order explicit.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def __init__(</span>
+<span>        self,</span>
+<span>        *,</span>
+<span>        job_name: str,</span>
+<span>        extractor: Extractor,</span>
+<span>        sink: Sink,</span>
+<span>        checkpoints: CheckpointStore,</span>
+<span>        metrics: Metrics,</span>
+<span>        batch_size: int = 100,</span>
+<span>        logger: logging.Logger | None = None,</span>
+<span>    ) -&gt; None:</span>
+<span>        if not job_name.strip():</span>
+<span>            raise ValueError(&quot;job_name cannot be blank&quot;)</span>
+<span>        if batch_size &lt; 1:</span>
+<span>            raise ValueError(&quot;batch_size must be at least 1&quot;)</span>
+<span>        self._job_name = job_name</span>
+<span>        self._extractor = extractor</span>
+<span>        self._sink = sink</span>
+<span>        self._checkpoints = checkpoints</span>
+<span>        self._metrics = metrics</span>
+<span>        self._batch_size = batch_size</span>
+<span>        self._logger = logger or logging.getLogger(__name__)</span>
+<span> </span>
+<span>    def run_once(self) -&gt; JobResult:</span>
+<span>        &quot;&quot;&quot;Resume after the durable checkpoint and advance it only after each write.&quot;&quot;&quot;</span>
+<span> </span>
+<span>        starting_checkpoint = self._checkpoints.load()</span>
+<span>        records = list(self._extractor.extract_after(starting_checkpoint))</span>
+<span>        self._validate_order(records, starting_checkpoint)</span>
+<span>        tags = {&quot;job&quot;: self._job_name}</span>
+<span>        self._metrics.increment(&quot;records_read&quot;, len(records), tags=tags)</span>
+<span>        current_checkpoint = starting_checkpoint</span>
+<span>        written = 0</span>
+<span> </span>
+<span>        try:</span>
+<span>            for start in range(0, len(records), self._batch_size):</span>
+<span>                batch = records[start : start + self._batch_size]</span>
+<span>                self._sink.write(batch)</span>
+<span>                current_checkpoint = batch[-1].sequence</span>
+<span>                self._checkpoints.save(current_checkpoint)</span>
+<span>                written += len(batch)</span>
+<span>                self._metrics.increment(&quot;records_written&quot;, len(batch), tags=tags)</span>
+<span>        except BaseException as exc:</span>
+<span>            error_type = type(exc).__name__</span>
+<span>            self._metrics.increment(</span>
+<span>                &quot;job_failures&quot;,</span>
+<span>                tags={**tags, &quot;error_type&quot;: error_type},</span>
+<span>            )</span>
+<span>            self._logger.error(</span>
+<span>                &quot;job failed job=%s records_written=%d error_type=%s&quot;,</span>
+<span>                self._job_name,</span>
+<span>                written,</span>
+<span>                error_type,</span>
+<span>            )</span>
+<span>            raise</span>
+<span> </span>
+<span>        self._metrics.increment(&quot;job_successes&quot;, tags=tags)</span>
+<span>        self._logger.info(</span>
+<span>            &quot;job complete job=%s records_read=%d records_written=%d&quot;,</span>
+<span>            self._job_name,</span>
+<span>            len(records),</span>
+<span>            written,</span>
+<span>        )</span>
+<span>        return JobResult(len(records), written, current_checkpoint)</span>
+<span> </span>
+<span>    @staticmethod</span>
+<span>    def _validate_order(records: Sequence[Record], checkpoint: int | None) -&gt; None:</span>
+<span>        previous = checkpoint</span>
+<span>        seen_ids: set[str] = set()</span>
+<span>        for record in records:</span>
+<span>            if record.sequence &lt; 1:</span>
+<span>                raise ValueError(&quot;record sequence must be positive&quot;)</span>
+<span>            if previous is not None and record.sequence &lt;= previous:</span>
+<span>                raise ValueError(&quot;records must be strictly ordered after the checkpoint&quot;)</span>
+<span>            if not record.record_id or record.record_id in seen_ids:</span>
+<span>                raise ValueError(&quot;record IDs must be non-empty and unique within a run&quot;)</span>
+<span>            if not record.amount.is_finite() or record.amount &lt;= 0:</span>
+<span>                raise ValueError(&quot;record amount must be finite and positive&quot;)</span>
+<span>            previous = record.sequence</span>
+<span>            seen_ids.add(record.record_id)</span>
+<span> </span>
+<span> </span>
+<span>def validate_database_transport(database_url: str) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Reject non-PostgreSQL URLs and insecure non-local connections.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    parsed = urlsplit(database_url)</span>
+<span>    if parsed.scheme not in {&quot;postgresql&quot;, &quot;postgres&quot;} or not parsed.hostname:</span>
+<span>        raise ValueError(&quot;DS60_DATABASE_URL must be a PostgreSQL URL&quot;)</span>
+<span>    if parsed.hostname in {&quot;localhost&quot;, &quot;127.0.0.1&quot;, &quot;::1&quot;}:</span>
+<span>        return</span>
+<span>    ssl_modes = parse_qs(parsed.query).get(&quot;sslmode&quot;, [])</span>
+<span>    if not ssl_modes or ssl_modes[-1] not in {&quot;require&quot;, &quot;verify-ca&quot;, &quot;verify-full&quot;}:</span>
+<span>        raise ValueError(&quot;remote PostgreSQL connections must require TLS&quot;)</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="bridge-07.html"><small>Previous lesson</small><strong>bridge-07</strong><span>Async Bounded Concurrency</span></a>
+        <a class="nav-card next" href="bridge-jupyter-01.html"><small>Next lesson</small><strong>bridge-jupyter-01</strong><span>PostgreSQL in Jupyter with SQL Magics</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-08";
+    const LEARNER_PATH = "bridge/lessons/day08_production_capstone.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

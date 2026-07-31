@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Companion Guides for 60-Day Python Data Science Notebooks · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Companion Guides for 60-Day Python Data Science Notebooks</h1>
+      <p class="source-path">Generated from <code>python/ds-60day/companion-guides/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="companion-guides-for-60-day-python-data-science-notebooks">Companion Guides for 60-Day Python Data Science Notebooks<a class="heading-anchor" href="#companion-guides-for-60-day-python-data-science-notebooks" aria-label="Link to this section">#</a></h2>
+<p>This folder contains narrative, text-only companion guides for each daily notebook in <code>../notebooks</code>. Each guide includes:</p>
+<ul>
+<li>Learning objectives and why the topic matters</li>
+<li>Conceptual explanations and multiple worked examples (beyond the notebook)</li>
+<li>Common pitfalls and mental models</li>
+<li>Practice exercises, stretch goals, and “check your understanding” prompts</li>
+<li>Further reading and docs links</li>
+</ul>
+<p>Naming matches the notebooks, e.g.:</p>
+<ul>
+<li>day01_setup_and_repl.md → notebooks/day01_setup_and_repl.ipynb</li>
+<li>...</li>
+<li>day60_capstone_completion_presentation.md → notebooks/day60_capstone_completion_presentation.ipynb</li>
+</ul>
+<p>Index of guides (16–60 added):</p>
+<ul>
+<li>16: NumPy fundamentals — arrays, vectorization, broadcasting</li>
+<li>17: Pandas intro — Series, DataFrame, Index</li>
+<li>18: Pandas I/O and cleaning</li>
+<li>19: GroupBy, aggregation, pivoting</li>
+<li>20: Merging and joins</li>
+<li>21: Time series with pandas</li>
+<li>22: Advanced pandas — apply/pipe/query/eval</li>
+<li>23: Data pipelines and generators</li>
+<li>24: EDA best practices</li>
+<li>25: Viz with Matplotlib/Seaborn</li>
+<li>26: Interactive viz with Plotly/Altair</li>
+<li>27: Geospatial/domain viz</li>
+<li>28: Feature engineering</li>
+<li>29: Data validation with schemas</li>
+<li>30: Project: EDA and preprocessing</li>
+<li>31: Probability basics</li>
+<li>32: Statistical inference</li>
+<li>33: Linear algebra for DS</li>
+<li>34: sklearn intro and pipelines</li>
+<li>35: Model evaluation and CV</li>
+<li>36: PCA and dimensionality reduction</li>
+<li>37: Regularization and linear models</li>
+<li>38: Trees and random forests</li>
+<li>39: Gradient boosting (XGBoost/LightGBM)</li>
+<li>40: Hyperparameter tuning (SearchCV)</li>
+<li>41: Class imbalance</li>
+<li>42: Unsupervised: k-means/anomaly</li>
+<li>43: Interpretation: SHAP/PDP</li>
+<li>44: Deployment with FastAPI</li>
+<li>45: End-to-end modeling project</li>
+<li>46: Deep learning overview</li>
+<li>47: PyTorch basics and training loop</li>
+<li>48: Transfer learning with CNNs</li>
+<li>49: NLP basics with HF and spaCy</li>
+<li>50: Time series modeling</li>
+<li>51: Advanced feature engineering: target encoding</li>
+<li>52: Scalability with Dask</li>
+<li>53: MLOps with MLflow tracking</li>
+<li>54: Monitoring and governance</li>
+<li>55: APIs and Docker</li>
+<li>56: Orchestration with Prefect</li>
+<li>57: Security, privacy, ethics</li>
+<li>58: Code review, refactor, tests</li>
+<li>59: Capstone kickoff</li>
+<li>60: Capstone completion &amp; presentation</li>
+</ul></article>
+  </main>
+</body>
+</html>

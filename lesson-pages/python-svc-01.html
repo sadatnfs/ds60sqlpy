@@ -1,0 +1,1521 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-svc-01 · Reliable HTTP Clients and External-Service Boundaries · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-svc-01</p>
+        <h1>Reliable HTTP Clients and External-Service Boundaries</h1>
+        <p class="hero-copy">Professional Python engineering</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">professional setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-15.html">python-15</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_svc_01_reliable_http_clients.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_svc_01_reliable_http_clients.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_svc_01_reliable_http_clients.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_svc_01_reliable_http_clients.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--reliable-http-clients-and-external-service-boundaries">Reliable HTTP clients and external-service boundaries<a class="heading-anchor" href="#guide--reliable-http-clients-and-external-service-boundaries" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-svc-01</code></p>
+<p><strong>Level:</strong> advanced</p>
+<p><strong>Estimated time:</strong> 180–240 minutes</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Catalog prerequisite:</strong> <code>python-15</code></li>
+<li>Python Days 1–15, including exceptions, dataclasses, logging, testing, and CLI configuration</li>
+<li>HTTP method/status vocabulary from Python Day 44 is helpful</li>
+<li>No API key, public service, HTTP package, or network connection</li>
+</ul>
+<p>The lesson uses a <code>Transport</code> protocol and scripted local responses. A future adapter may use <code>httpx</code>, <code>requests</code>, or the standard library, but policy tests must remain transport-independent.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ol>
+<li>Put an explicit timeout on every request attempt.</li>
+<li>Classify success, retryable failures, and permanent failures.</li>
+<li>Retry only replay-safe operations with bounded backoff and jitter.</li>
+<li>Respect a numeric <code>Retry-After</code> value for rate limiting.</li>
+<li>Preserve one correlation and idempotency identity across attempts.</li>
+<li>Consume cursor pagination with loop and page-count guards.</li>
+<li>Read authentication from runtime configuration.</li>
+<li>Produce diagnostic logs without exposing credentials.</li>
+<li>Test the complete policy with an injected deterministic transport.</li>
+</ol>
+<h5 id="guide--motivation">Motivation<a class="heading-anchor" href="#guide--motivation" aria-label="Link to this section">#</a></h5>
+<p>A one-line HTTP call works on the happy path but leaves important questions unanswered: How long may it wait? Can an operation be replayed? Does a 400 mean the same thing as a 503? What prevents infinite pagination? Which identifiers help operators connect attempts without putting a credential into logs?</p>
+<p>The reliable unit is not a library call. It is a policy boundary whose behavior can be proved without relying on a real service.</p>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Attempt:</strong> one transport call.</li>
+<li><strong>Logical request:</strong> the user operation, possibly made of several attempts.</li>
+<li><strong>Timeout:</strong> maximum time allowed for an attempt before it fails.</li>
+<li><strong>Transient failure:</strong> a condition likely to succeed later, such as 503.</li>
+<li><strong>Permanent failure:</strong> a condition retry policy should return immediately, such as most validation-related 4xx responses.</li>
+<li><strong>Idempotent:</strong> repeating an operation has the same intended effect as doing it once.</li>
+<li><strong>Idempotency key:</strong> a client-generated operation identity that a cooperating server uses to deduplicate replays.</li>
+<li><strong>Exponential backoff:</strong> waits that grow after repeated failures.</li>
+<li><strong>Jitter:</strong> bounded randomness added so many clients do not retry together.</li>
+<li><strong>Rate limit:</strong> a service-imposed request budget, commonly reported with 429.</li>
+<li><strong>Correlation ID:</strong> an identifier connecting logs and attempts.</li>
+<li><strong>Pagination cursor:</strong> an opaque continuation value supplied by a service.</li>
+<li><strong>Transport:</strong> the mechanism that sends bytes; it does not own retry policy.</li>
+<li><strong>Redaction:</strong> replacement of sensitive material before logging.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--classify-a-local-script">Classify a local script<a class="heading-anchor" href="#guide--classify-a-local-script" aria-label="Link to this section">#</a></h5>
+<p>Open <a href="python-svc-01.html#learner"><code>lessons/py_svc_01_reliable_http_clients.py</code></a>. It contains two local responses: 503 followed by 200. Predict the classification, then run it.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_svc_01_reliable_http_clients.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_svc_01_reliable_http_clients.py</code></pre>
+<p>Status classification alone does not authorize a replay. The request method and idempotency contract must also permit it.</p>
+<h5 id="guide--follow-one-logical-request">Follow one logical request<a class="heading-anchor" href="#guide--follow-one-logical-request" aria-label="Link to this section">#</a></h5>
+<p>The reference client prepares timeout, auth, correlation ID, and optional idempotency key once. Each attempt uses the same prepared request:</p>
+<pre><code class="language-text">logical request
+    |
+    +-- attempt 1 -&gt; 503 -&gt; bounded delay
+    |
+    +-- attempt 2 -&gt; 200 -&gt; return response</code></pre>
+<p>The retry counter is bounded. A failure after the final attempt includes the attempt count and correlation ID, not the authorization value.</p>
+<p>Run the offline demo:</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\solutions\py_svc_01_reliable_http_clients_solution.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_svc_01_reliable_http_clients_solution.py</code></pre>
+<p>Inspect the printed first log event. Its authorization value must be <code>&lt;redacted&gt;</code>.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--exercise-1-classify-status">Exercise 1 — classify status<a class="heading-anchor" href="#guide--exercise-1-classify-status" aria-label="Link to this section">#</a></h5>
+<p>Implement <code>classify_status</code>. Treat 2xx as success and 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this course policy. Reject impossible values.</p>
+<p>Classification is configurable in real systems. For example, a particular 409 may be retryable only when the API contract says so.</p>
+<h5 id="guide--exercise-2-authorize-replay">Exercise 2 — authorize replay<a class="heading-anchor" href="#guide--exercise-2-authorize-replay" aria-label="Link to this section">#</a></h5>
+<p>Implement <code>method_can_retry</code>:</p>
+<ul>
+<li>GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics.</li>
+<li>POST and PATCH require a non-empty idempotency key in this lesson.</li>
+</ul>
+<p>An idempotency header helps only if the server documents and enforces it. Never invent safety solely on the client side.</p>
+<h5 id="guide--exercise-3-add-bounded-backoff">Exercise 3 — add bounded backoff<a class="heading-anchor" href="#guide--exercise-3-add-bounded-backoff" aria-label="Link to this section">#</a></h5>
+<p>For a one-based failed attempt <code>n</code>, start with:</p>
+<pre><code class="language-text">base_delay * 2 ** (n - 1) + base_delay * jitter_fraction</code></pre>
+<p>Cap the result. Inject the jitter source and sleep function so tests record delays without actually waiting. For 429 with numeric <code>Retry-After</code>, wait at least the server value but no longer than the policy cap.</p>
+<h5 id="guide--exercise-4-keep-identities-stable">Exercise 4 — keep identities stable<a class="heading-anchor" href="#guide--exercise-4-keep-identities-stable" aria-label="Link to this section">#</a></h5>
+<p>Generate one correlation ID before the attempt loop. Generate or accept one idempotency key per logical mutation. Assert every scripted attempt sees the same values.</p>
+<p>Do not create a new idempotency key inside a retry loop; the server would see each replay as a new operation.</p>
+<h5 id="guide--exercise-5-paginate-defensively">Exercise 5 — paginate defensively<a class="heading-anchor" href="#guide--exercise-5-paginate-defensively" aria-label="Link to this section">#</a></h5>
+<p>Collect <code>items</code> until <code>next_cursor</code> is null. Require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count.</p>
+<p>Treat the cursor as opaque. URL-encode it rather than parsing or concatenating it manually.</p>
+<h5 id="guide--exercise-6-configure-and-redact-auth">Exercise 6 — configure and redact auth<a class="heading-anchor" href="#guide--exercise-6-configure-and-redact-auth" aria-label="Link to this section">#</a></h5>
+<p>Read <code>DS60_API_TOKEN</code>, <code>DS60_API_BASE_URL</code>, and a numeric timeout from an injected environment mapping. Make the token field <code>repr=False</code>.</p>
+<p>Implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers. Redact common query credential keys before logging URLs. Do not log bodies by default.</p>
+<h5 id="guide--exercise-7-prove-policy-with-scripts">Exercise 7 — prove policy with scripts<a class="heading-anchor" href="#guide--exercise-7-prove-policy-with-scripts" aria-label="Link to this section">#</a></h5>
+<p>Create deterministic scripts for:</p>
+<ol>
+<li>503 then 200 for GET,</li>
+<li>400 for GET,</li>
+<li>503 for POST without a key,</li>
+<li>503 then 200 for POST with a key,</li>
+<li>429 with <code>Retry-After</code>,</li>
+<li>three transport timeouts,</li>
+<li>two valid pages, and</li>
+<li>a repeated cursor.</li>
+</ol>
+<p>Assert request count, delays, identities, timeout propagation, returned items, and redacted logs.</p>
+<h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
+<p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
+<h5 id="guide--exercise-8-allocate-an-end-to-end-timeout-budget">Exercise 8 — allocate an end-to-end timeout budget<a class="heading-anchor" href="#guide--exercise-8-allocate-an-end-to-end-timeout-budget" aria-label="Link to this section">#</a></h5>
+<p>Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts. Reject a retry when the remaining budget cannot support another useful attempt.</p>
+<p><strong>Progressive hint:</strong> Use an injected monotonic clock and compute a deadline once per logical request. Per-attempt timeouts must shrink with remaining time.</p>
+<h5 id="guide--exercise-9-support-retry-after-dates-safely">Exercise 9 — support Retry-After dates safely<a class="heading-anchor" href="#guide--exercise-9-support-retry-after-dates-safely" aria-label="Link to this section">#</a></h5>
+<p>Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.</p>
+<p><strong>Progressive hint:</strong> HTTP-date parsing needs wall time; sleeping and deadline accounting need monotonic time. Invalid server guidance falls back to local backoff.</p>
+<h5 id="guide--exercise-10-model-a-circuit-breaker">Exercise 10 — model a circuit breaker<a class="heading-anchor" href="#guide--exercise-10-model-a-circuit-breaker" aria-label="Link to this section">#</a></h5>
+<p>Design closed, open, and half-open states around the existing retrying client. Specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.</p>
+<p><strong>Progressive hint:</strong> A breaker protects a dependency across logical requests; it does not replace per-attempt timeout or retry policy.</p>
+<h5 id="guide--exercise-11-bound-concurrent-requests">Exercise 11 — bound concurrent requests<a class="heading-anchor" href="#guide--exercise-11-bound-concurrent-requests" aria-label="Link to this section">#</a></h5>
+<p>Add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately. Prove permits release on success, exception, timeout, and cancellation.</p>
+<p><strong>Progressive hint:</strong> The concurrency permit surrounds only the scarce external call. A <code>finally</code> block or context manager owns release.</p>
+<h5 id="guide--exercise-12-close-streaming-responses">Exercise 12 — close streaming responses<a class="heading-anchor" href="#guide--exercise-12-close-streaming-responses" aria-label="Link to this section">#</a></h5>
+<p>Define a streaming-response protocol with explicit close and cancellation semantics. Test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.</p>
+<p><strong>Progressive hint:</strong> Ownership must say who closes the response. Use a context manager and enforce size while reading chunks, not after buffering everything.</p>
+<h5 id="guide--exercise-13-inject-a-credential-provider">Exercise 13 — inject a credential provider<a class="heading-anchor" href="#guide--exercise-13-inject-a-credential-provider" aria-label="Link to this section">#</a></h5>
+<p>Replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge. Preserve redaction and prevent refresh loops.</p>
+<p><strong>Progressive hint:</strong> Credential acquisition is a separate boundary. Cache/expiry policy and single-flight refresh belong to the provider.</p>
+<h5 id="guide--exercise-14-build-an-adversarial-transport-contract-suite">Exercise 14 — build an adversarial transport contract suite<a class="heading-anchor" href="#guide--exercise-14-build-an-adversarial-transport-contract-suite" aria-label="Link to this section">#</a></h5>
+<p>Extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.</p>
+<p><strong>Progressive hint:</strong> Assert bounded attempts, exact request identity, closed resources, typed errors, and the absence of secret material in every diagnostic.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Every attempt has a positive timeout.</li>
+<li>Permanent statuses produce exactly one transport call.</li>
+<li>A POST without an idempotency key is never replayed.</li>
+<li>A keyed POST preserves the same key across attempts.</li>
+<li>Backoff grows, is jitterable, and never exceeds its cap.</li>
+<li>429 honors the supported numeric <code>Retry-After</code> form.</li>
+<li>Pagination stops, detects cursor loops, and has a maximum page count.</li>
+<li>Correlation IDs appear in diagnostic errors.</li>
+<li>Authentication, cookies, API keys, and sensitive query values do not appear in structured logs or configuration <code>repr</code>.</li>
+<li>Tests open no socket and sleep for no real time.</li>
+</ul>
+<p>Run the focused suite:</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
+.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_svc_01_reliable_http_clients -v</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_svc_01_reliable_http_clients -v</code></pre>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>The default client can wait forever:</strong> no explicit connect/read/overall timeout reached the concrete transport.</li>
+<li><strong>Every exception retries:</strong> programming errors, invalid requests, and permanent statuses were confused with transient transport failures.</li>
+<li><strong>POST retries create duplicates:</strong> replay occurred without a server-backed idempotency contract.</li>
+<li><strong>Tests take seconds:</strong> real <code>sleep</code> was not injected.</li>
+<li><strong>All clients retry at once:</strong> exponential backoff lacks jitter.</li>
+<li><strong>429 loops forever:</strong> retry count or delay cap is missing.</li>
+<li><strong>Pagination repeats data:</strong> a cursor loop or changing page contract was not detected.</li>
+<li><strong>A token appears in logs:</strong> headers or query parameters were rendered before redaction, or a configuration dataclass exposed its field in <code>repr</code>.</li>
+<li><strong>The fake proves the network adapter:</strong> it does not. It proves policy. Separately contract-test the chosen adapter&#x27;s timeout and response mapping.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Add a thin adapter for one HTTP library and keep these policy tests unchanged.</li>
+<li>Combine this lesson with <code>python-pro-02</code>, using a bounded queue whose workers call the reliable client.</li>
+<li>Continue to Bridge Days 3–4 to compare HTTP value binding, transaction boundaries, retry eligibility, and idempotency with database operations.</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_svc_01_reliable_http_clients.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_svc_01_reliable_http_clients.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-svc-01 learner lab: reliable HTTP client boundaries.</span>
+<span> </span>
+<span>This artifact makes no network calls. The worked example feeds local response</span>
+<span>objects through a classifier. Complete the TODO policy functions before</span>
+<span>opening the reference implementation.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Callable, Mapping</span>
+<span>from dataclasses import dataclass</span>
+<span>from typing import Literal</span>
+<span> </span>
+<span>Method = Literal[&quot;GET&quot;, &quot;HEAD&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;PATCH&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;]</span>
+<span>Outcome = Literal[&quot;success&quot;, &quot;retryable&quot;, &quot;permanent&quot;]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Response:</span>
+<span>    &quot;&quot;&quot;Minimal local response used to practise policy.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    status: int</span>
+<span>    headers: Mapping[str, str]</span>
+<span> </span>
+<span> </span>
+<span>def classify_status(status: int) -&gt; Outcome:</span>
+<span>    &quot;&quot;&quot;Classify an HTTP status without sending a request.</span>
+<span> </span>
+<span>    TODO:</span>
+<span>    - 2xx is success</span>
+<span>    - 408, 425, 429, 500, 502, 503, and 504 are retryable</span>
+<span>    - every other valid status is permanent</span>
+<span>    Reject values outside 100..599.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete classify_status&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def method_can_retry(method: Method, idempotency_key: str | None) -&gt; bool:</span>
+<span>    &quot;&quot;&quot;Return whether replaying this logical operation is permitted.</span>
+<span> </span>
+<span>    TODO: safe/idempotent methods may retry. Require a non-empty idempotency key</span>
+<span>    before replaying POST or PATCH.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete method_can_retry&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def redact_headers(headers: Mapping[str, str]) -&gt; dict[str, str]:</span>
+<span>    &quot;&quot;&quot;Return log-safe headers without changing the caller&#x27;s mapping.</span>
+<span> </span>
+<span>    TODO: replace Authorization, Cookie, Set-Cookie, and X-API-Key values with</span>
+<span>    ``&lt;redacted&gt;`` using case-insensitive header-name matching.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete redact_headers&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def worked_example() -&gt; None:</span>
+<span>    &quot;&quot;&quot;Show a local response sequence and activate completed exercises.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    script = [</span>
+<span>        Response(503, {&quot;Retry-After&quot;: &quot;1&quot;}),</span>
+<span>        Response(200, {&quot;Content-Type&quot;: &quot;application/json&quot;}),</span>
+<span>    ]</span>
+<span>    print(&quot;Local scripted statuses:&quot;, [response.status for response in script])</span>
+<span>    for response in script:</span>
+<span>        try:</span>
+<span>            outcome = classify_status(response.status)</span>
+<span>        except NotImplementedError:</span>
+<span>            print(&quot;TODO: status classification&quot;)</span>
+<span>            break</span>
+<span>        else:</span>
+<span>            print(f&quot;{response.status} -&gt; {outcome}&quot;)</span>
+<span> </span>
+<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
+<span>        (&quot;POST replay policy&quot;, lambda: method_can_retry(&quot;POST&quot;, &quot;order-1001&quot;)),</span>
+<span>        (</span>
+<span>            &quot;header redaction&quot;,</span>
+<span>            lambda: redact_headers(</span>
+<span>                {&quot;Authorization&quot;: &quot;Bearer local-example&quot;, &quot;Accept&quot;: &quot;application/json&quot;}</span>
+<span>            ),</span>
+<span>        ),</span>
+<span>    )</span>
+<span>    for label, call in checks:</span>
+<span>        try:</span>
+<span>            value = call()</span>
+<span>        except NotImplementedError:</span>
+<span>            print(f&quot;TODO: {label}&quot;)</span>
+<span>        else:</span>
+<span>            print(f&quot;Completed: {label} -&gt; {value!r}&quot;)</span>
+<span> </span>
+<span> </span>
+<span># === Numbered professional practice ===</span>
+<span>#</span>
+<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
+<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
+<span># Full acceptance checks and progressive hints:</span>
+<span># companion-guides/py_svc_01_reliable_http_clients.md</span>
+<span>#</span>
+<span># Exercise 1 — classify status</span>
+<span># Prompt: Implement `classify_status`. Treat 2xx as success and</span>
+<span># 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this</span>
+<span># course policy. Reject impossible values. Classification is configurable in real systems.</span>
+<span># For example, a particular 409 may be retryable only when the API contract says so.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 2 — authorize replay</span>
+<span># Prompt: Implement `method_can_retry`: - GET, HEAD, PUT, DELETE, and OPTIONS are</span>
+<span># replayable by HTTP semantics. - POST and PATCH require a non-empty idempotency key in</span>
+<span># this lesson. An idempotency header helps only if the server documents and enforces it.</span>
+<span># Never invent safety solely on the client side.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 3 — add bounded backoff</span>
+<span># Prompt: For one-based failed attempt `n`, start with</span>
+<span># `base_delay * 2 ** (n - 1) + base_delay * jitter_fraction`, then cap the result. Inject</span>
+<span># jitter and sleep so tests record delays without waiting. Bound numeric `Retry-After`.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 4 — keep identities stable</span>
+<span># Prompt: Generate one correlation ID before the attempt loop. Generate or accept one</span>
+<span># idempotency key per logical mutation. Assert every scripted attempt sees the same</span>
+<span># values. Do not create a new idempotency key inside a retry loop; the server would see</span>
+<span># each replay as a new operation.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 5 — paginate defensively</span>
+<span># Prompt: Collect `items` until `next_cursor` is null. Require a list of objects, reject</span>
+<span># blank cursors, remember seen cursors, and enforce a maximum page count. Treat the cursor</span>
+<span># as opaque. URL-encode it rather than parsing or concatenating it manually.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 6 — configure and redact auth</span>
+<span># Prompt: Read `DS60_API_TOKEN`, `DS60_API_BASE_URL`, and a numeric timeout from an</span>
+<span># injected environment mapping. Make the token field `repr=False`. Implement case-</span>
+<span># insensitive redaction for authorization, cookies, proxy authorization, and API-key</span>
+<span># headers. Redact common query credential keys before logging URLs. Do not log bodies by</span>
+<span># default.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 7 — prove policy with scripts</span>
+<span># Prompt: Create deterministic scripts for: 1. 503 then 200 for GET, 2. 400 for GET, 3.</span>
+<span># 503 for POST without a key, 4. 503 then 200 for POST with a key, 5. 429 with `Retry-</span>
+<span># After`, 6. three transport timeouts, 7. two valid pages, and 8. a repeated cursor.</span>
+<span># Assert request count, delays, identities, timeout propagation, returned items, and</span>
+<span># redacted logs.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 8 — allocate an end-to-end timeout budget</span>
+<span># Prompt: Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and</span>
+<span># parsing budgets across at most three attempts. Reject a retry when the remaining budget</span>
+<span># cannot support another useful attempt.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 9 — support Retry-After dates safely</span>
+<span># Prompt: Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject</span>
+<span># wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local</span>
+<span># delay cap.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 10 — model a circuit breaker</span>
+<span># Prompt: Design closed, open, and half-open states around the existing retrying client.</span>
+<span># Specify counted failures, threshold, cooldown, one probe, success reset, and concurrency</span>
+<span># ownership.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 11 — bound concurrent requests</span>
+<span># Prompt: Add a client-side bulkhead that caps active transport calls and defines whether</span>
+<span># excess work waits with a deadline or fails immediately. Prove permits release on</span>
+<span># success, exception, timeout, and cancellation.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 12 — close streaming responses</span>
+<span># Prompt: Define a streaming-response protocol with explicit close and cancellation</span>
+<span># semantics. Test partial consumption, parse failure, caller cancellation, and a body</span>
+<span># larger than the configured byte limit.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 13 — inject a credential provider</span>
+<span># Prompt: Replace a static token field with a credential-provider protocol that can</span>
+<span># refresh once after a documented authentication challenge. Preserve redaction and prevent</span>
+<span># refresh loops.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 14 — build an adversarial transport contract suite</span>
+<span># Prompt: Extend scripted tests with redirect loops, malformed JSON, wrong content type,</span>
+<span># repeated/blank cursors, oversized bodies, connection reset after send, and credentials</span>
+<span># embedded in mixed-case headers or query strings.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># === End numbered professional practice ===</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    worked_example()</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_svc_01_reliable_http_clients_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_svc_01_reliable_http_clients_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--reliable-http-client-solution-reasoning">Reliable HTTP client solution reasoning<a class="heading-anchor" href="#solution-1--reliable-http-client-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Attempt <code>python-svc-01</code> before opening <a href="python-svc-01.html#solution-2"><code>py_svc_01_reliable_http_clients_solution.py</code></a>.</p>
+<h4 id="solution-1--separate-mechanism-from-policy">Separate mechanism from policy<a class="heading-anchor" href="#solution-1--separate-mechanism-from-policy" aria-label="Link to this section">#</a></h4>
+<p><code>Transport</code> has one method: send a prepared request or raise a known timeout. It does not decide whether to retry. <code>ReliableClient</code> owns classification, replay eligibility, identity, delay, pagination, and safe diagnostics. A real HTTP-library adapter can replace <code>ScriptedTransport</code> without rewriting policy tests.</p>
+<p>This structural protocol is intentional gradual typing: any adapter with the right method satisfies it without inheriting from a framework base class.</p>
+<h4 id="solution-1--status-and-replay-are-two-gates">Status and replay are two gates<a class="heading-anchor" href="#solution-1--status-and-replay-are-two-gates" aria-label="Link to this section">#</a></h4>
+<p>A 503 is transient, but replay is allowed only if the operation is safe. GET, HEAD, PUT, DELETE, and OPTIONS use their idempotent semantics. POST and PATCH require a non-empty idempotency key. The key remains identical across attempts.</p>
+<p>If a non-replayable POST receives 503, the client raises immediately. The caller must reconcile the operation instead of guessing whether a side effect occurred.</p>
+<h4 id="solution-1--retry-timing">Retry timing<a class="heading-anchor" href="#solution-1--retry-timing" aria-label="Link to this section">#</a></h4>
+<p>The policy uses one-based attempts and computes exponential delay plus injected jitter. It caps every delay. For the supported numeric <code>Retry-After</code> form, it takes the larger of local backoff and the server request, then applies the cap.</p>
+<p>Both <code>sleep</code> and <code>jitter</code> are injected. Tests can assert exact values without waiting or depending on randomness. Production code would inject a real random source; deterministic tests remain unchanged.</p>
+<h4 id="solution-1--timeout-and-diagnostic-boundary">Timeout and diagnostic boundary<a class="heading-anchor" href="#solution-1--timeout-and-diagnostic-boundary" aria-label="Link to this section">#</a></h4>
+<p><code>timeout_seconds</code> is part of every prepared request, forcing a concrete adapter to receive it. Exhaustion errors expose attempt count and correlation ID. Authorization is never included.</p>
+<p><code>ClientConfig</code> reads credentials from an environment mapping and hides the token from dataclass representation. Request logs copy and redact sensitive headers, and the displayed URL redacts common query credential keys. Logging response bodies is deliberately absent because bodies may contain personal or secret data.</p>
+<h4 id="solution-1--pagination">Pagination<a class="heading-anchor" href="#solution-1--pagination" aria-label="Link to this section">#</a></h4>
+<p>The page method validates the container and each item, treats cursors as opaque, detects repeats, and enforces a page ceiling. A null cursor is the only normal stop signal. These guards convert malformed service behavior into bounded, diagnosable errors.</p>
+<p>Each page is a separate logical GET and gets its own correlation ID in a real configuration. Retries <em>within</em> a page preserve that page&#x27;s correlation ID.</p>
+<h4 id="solution-1--alternatives-and-edge-cases">Alternatives and edge cases<a class="heading-anchor" href="#solution-1--alternatives-and-edge-cases" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>HTTP-date <code>Retry-After</code> needs clock injection and date parsing. This lab deliberately supports only numeric seconds and documents that boundary.</li>
+<li>Streaming responses need separate connect/read/write/pool timeouts and a close/cancellation contract.</li>
+<li>OAuth refresh should live in a credential provider with redacted tests, not inside generic retry handling.</li>
+<li>Circuit breakers, concurrency rate limiters, and bulkheads address broader failure pressure. They do not replace per-request timeouts.</li>
+<li>PUT and DELETE are idempotent by specification, but a particular service may violate or narrow that contract. The service API remains authoritative.</li>
+<li>An idempotency key needs server-side retention and conflict semantics.</li>
+</ul>
+<h4 id="solution-1--expected-results">Expected results<a class="heading-anchor" href="#solution-1--expected-results" aria-label="Link to this section">#</a></h4>
+<p>Tests prove that only permitted failures replay, attempts and delays are bounded, 429 delay is honored, identities are stable, timeout errors retain context, pagination terminates or fails safely, and no test credential reaches logs. All behavior is local and deterministic.</p>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Use this map after an honest attempt. The executable implementation remains <a href="python-svc-01.html#solution-2"><code>py_svc_01_reliable_http_clients_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
+<h5 id="solution-1--exercise-1-classify-status">Exercise 1 — classify status<a class="heading-anchor" href="#solution-1--exercise-1-classify-status" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Implement <code>classify_status</code>. Treat 2xx as success and 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this course policy. Reject impossible values. Classification is configurable in real systems. For example, a particular 409 may be retryable only when the API contract says so.</p>
+<p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-2-authorize-replay">Exercise 2 — authorize replay<a class="heading-anchor" href="#solution-1--exercise-2-authorize-replay" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Implement <code>method_can_retry</code>: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics. - POST and PATCH require a non-empty idempotency key in this lesson. An idempotency header helps only if the server documents and enforces it. Never invent safety solely on the client side.</p>
+<p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-3-add-bounded-backoff">Exercise 3 — add bounded backoff<a class="heading-anchor" href="#solution-1--exercise-3-add-bounded-backoff" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> For one-based failed attempt <code>n</code>, start with <code>base_delay * 2 ** (n - 1) + base_delay * jitter_fraction</code>, then cap the result. Inject jitter and sleep so tests record delays without waiting. For 429 with numeric <code>Retry-After</code>, honor at least the server value without exceeding policy.</p>
+<p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-4-keep-identities-stable">Exercise 4 — keep identities stable<a class="heading-anchor" href="#solution-1--exercise-4-keep-identities-stable" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Generate one correlation ID before the attempt loop. Generate or accept one idempotency key per logical mutation. Assert every scripted attempt sees the same values. Do not create a new idempotency key inside a retry loop; the server would see each replay as a new operation.</p>
+<p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-5-paginate-defensively">Exercise 5 — paginate defensively<a class="heading-anchor" href="#solution-1--exercise-5-paginate-defensively" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Collect <code>items</code> until <code>next_cursor</code> is null. Require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count. Treat the cursor as opaque. URL-encode it rather than parsing or concatenating it manually.</p>
+<p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-6-configure-and-redact-auth">Exercise 6 — configure and redact auth<a class="heading-anchor" href="#solution-1--exercise-6-configure-and-redact-auth" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Read <code>DS60_API_TOKEN</code>, <code>DS60_API_BASE_URL</code>, and a numeric timeout from an injected environment mapping. Make the token field <code>repr=False</code>. Implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers. Redact common query credential keys before logging URLs. Do not log bodies by default.</p>
+<p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-7-prove-policy-with-scripts">Exercise 7 — prove policy with scripts<a class="heading-anchor" href="#solution-1--exercise-7-prove-policy-with-scripts" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Create deterministic scripts for: 1. 503 then 200 for GET, 2. 400 for GET, 3. 503 for POST without a key, 4. 503 then 200 for POST with a key, 5. 429 with <code>Retry-After</code>, 6. three transport timeouts, 7. two valid pages, and 8. a repeated cursor. Assert request count, delays, identities, timeout propagation, returned items, and redacted logs.</p>
+<p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-8-allocate-an-end-to-end-timeout-budget">Exercise 8 — allocate an end-to-end timeout budget<a class="heading-anchor" href="#solution-1--exercise-8-allocate-an-end-to-end-timeout-budget" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts. Reject a retry when the remaining budget cannot support another useful attempt.</p>
+<p><strong>Reasoning path:</strong> Use an injected monotonic clock and compute a deadline once per logical request. Per-attempt timeouts must shrink with remaining time.</p>
+<p>Create <code>deadline = now + total_budget</code> before the attempt loop. Before sleeping or sending, compute remaining time and stop when it cannot cover the minimum attempt budget. Pass bounded connect/read/pool values to the transport rather than one unexamined global timeout.</p>
+<p>The final error should preserve attempts, correlation ID, and whether the deadline or retry count ended the request. Wall-clock time is unsuitable because clock adjustment can move it backward.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-9-support-retry-after-dates-safely">Exercise 9 — support Retry-After dates safely<a class="heading-anchor" href="#solution-1--exercise-9-support-retry-after-dates-safely" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.</p>
+<p><strong>Reasoning path:</strong> HTTP-date parsing needs wall time; sleeping and deadline accounting need monotonic time. Invalid server guidance falls back to local backoff.</p>
+<p>Parse only the documented HTTP-date format with a timezone-aware standard library parser. Convert the server date to a nonnegative delay from injected wall time, then combine it with local exponential backoff and cap it by both policy and caller deadline. A past date contributes zero.</p>
+<p>Malformed guidance should be recorded safely and ignored, not crash the client or produce an unbounded sleep. Tests use fixed clocks and recorded sleep; they never wait in real time.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-10-model-a-circuit-breaker">Exercise 10 — model a circuit breaker<a class="heading-anchor" href="#solution-1--exercise-10-model-a-circuit-breaker" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Design closed, open, and half-open states around the existing retrying client. Specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.</p>
+<p><strong>Reasoning path:</strong> A breaker protects a dependency across logical requests; it does not replace per-attempt timeout or retry policy.</p>
+<p>In closed state, count only configured dependency failures. Crossing the threshold opens until an injected monotonic deadline. After cooldown, permit a bounded probe; success closes and resets, while failure reopens. Concurrent callers must not all become the half-open probe.</p>
+<p>Expose state transitions as low-cardinality metrics/events. Do not count local validation or caller-cancellation errors as dependency health unless the contract explicitly says so.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-11-bound-concurrent-requests">Exercise 11 — bound concurrent requests<a class="heading-anchor" href="#solution-1--exercise-11-bound-concurrent-requests" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately. Prove permits release on success, exception, timeout, and cancellation.</p>
+<p><strong>Reasoning path:</strong> The concurrency permit surrounds only the scarce external call. A <code>finally</code> block or context manager owns release.</p>
+<p>Use an injected semaphore/gate with an explicit acquisition policy and maximum queue or wait time. Return a distinct saturation error so callers can distinguish local protection from a remote status. Hold the permit during the transport call, not during unrelated parsing or caller work.</p>
+<p>A bulkhead limits one process; distributed request pressure requires an upstream/shared policy. Avoid unbounded queues that merely move the overload into memory and latency.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-12-close-streaming-responses">Exercise 12 — close streaming responses<a class="heading-anchor" href="#solution-1--exercise-12-close-streaming-responses" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Define a streaming-response protocol with explicit close and cancellation semantics. Test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.</p>
+<p><strong>Reasoning path:</strong> Ownership must say who closes the response. Use a context manager and enforce size while reading chunks, not after buffering everything.</p>
+<p>The transport returns an async or synchronous context-managed byte stream. The client reads bounded chunks, updates a byte count, and closes in <code>finally</code> for normal completion and every failure. Parsing happens after or incrementally within the same ownership boundary.</p>
+<p>Reject oversized or decompression-expanded content before it exhausts memory. Never retry after an unsafe partial side effect merely because stream parsing failed.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-13-inject-a-credential-provider">Exercise 13 — inject a credential provider<a class="heading-anchor" href="#solution-1--exercise-13-inject-a-credential-provider" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge. Preserve redaction and prevent refresh loops.</p>
+<p><strong>Reasoning path:</strong> Credential acquisition is a separate boundary. Cache/expiry policy and single-flight refresh belong to the provider.</p>
+<p>Ask the provider for a credential immediately before preparing an attempt. After the API&#x27;s documented expired-token response, invalidate/refresh at most once for the logical request, then replay only when the operation is otherwise safe. Keep token values out of dataclass repr, errors, and logs.</p>
+<p>Concurrent expired requests should share one refresh where practical. Authentication failure is not a reason for unbounded general retries.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-14-build-an-adversarial-transport-contract-suite">Exercise 14 — build an adversarial transport contract suite<a class="heading-anchor" href="#solution-1--exercise-14-build-an-adversarial-transport-contract-suite" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.</p>
+<p><strong>Reasoning path:</strong> Assert bounded attempts, exact request identity, closed resources, typed errors, and the absence of secret material in every diagnostic.</p>
+<p>Each script names the expected call count, retry decision, error type, delay, and log projection. Redirect behavior must be explicit because forwarding authorization across origins is dangerous. Validate content type and response shape before using fields.</p>
+<p>Use only local fake transports and placeholder credentials. A contract suite proves client policy independent of any particular HTTP library adapter; each real adapter still needs a small local integration test.</p>
+<p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_svc_01_reliable_http_clients_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_svc_01_reliable_http_clients_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-svc-01.</span>
+<span> </span>
+<span>The client depends on a Transport protocol. Tests and the demo inject a</span>
+<span>ScriptedTransport, so the entire module runs offline without a socket, API</span>
+<span>account, credential, or public service.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import os</span>
+<span>import re</span>
+<span>import time</span>
+<span>from collections import deque</span>
+<span>from collections.abc import Callable, Mapping, MutableSequence, Sequence</span>
+<span>from dataclasses import dataclass, field</span>
+<span>from typing import Any, Literal, Protocol, TypeAlias</span>
+<span>from urllib.parse import urlencode</span>
+<span> </span>
+<span>Method = Literal[&quot;GET&quot;, &quot;HEAD&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;PATCH&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;]</span>
+<span>Outcome = Literal[&quot;success&quot;, &quot;retryable&quot;, &quot;permanent&quot;]</span>
+<span>JsonObject: TypeAlias = dict[str, Any]</span>
+<span>LogSink: TypeAlias = Callable[[str, Mapping[str, object]], None]</span>
+<span>Sleep: TypeAlias = Callable[[float], None]</span>
+<span>Jitter: TypeAlias = Callable[[], float]</span>
+<span>IdFactory: TypeAlias = Callable[[], str]</span>
+<span> </span>
+<span>RETRYABLE_STATUSES = frozenset({408, 425, 429, 500, 502, 503, 504})</span>
+<span>REPLAYABLE_METHODS = frozenset({&quot;GET&quot;, &quot;HEAD&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;})</span>
+<span>SENSITIVE_HEADERS = frozenset(</span>
+<span>    {&quot;authorization&quot;, &quot;cookie&quot;, &quot;set-cookie&quot;, &quot;x-api-key&quot;, &quot;proxy-authorization&quot;}</span>
+<span>)</span>
+<span>SENSITIVE_QUERY = re.compile(r&quot;(?i)(access_token|api_key|password|secret|token)=([^&amp;\s]+)&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class TransportTimeout(TimeoutError):</span>
+<span>    &quot;&quot;&quot;Raised by a transport when its configured deadline expires.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>class ClientError(RuntimeError):</span>
+<span>    &quot;&quot;&quot;Base class for failures at the HTTP client boundary.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>class PermanentHttpError(ClientError):</span>
+<span>    &quot;&quot;&quot;A response should reach the caller without automatic replay.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def __init__(self, status: int, correlation_id: str) -&gt; None:</span>
+<span>        super().__init__(f&quot;HTTP {status} for correlation_id={correlation_id}; request not retried&quot;)</span>
+<span>        self.status = status</span>
+<span>        self.correlation_id = correlation_id</span>
+<span> </span>
+<span> </span>
+<span>class RetryExhausted(ClientError):</span>
+<span>    &quot;&quot;&quot;All policy-permitted attempts failed.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def __init__(self, attempts: int, correlation_id: str, reason: str) -&gt; None:</span>
+<span>        super().__init__(</span>
+<span>            f&quot;request failed after {attempts} attempts &quot;</span>
+<span>            f&quot;for correlation_id={correlation_id}: {reason}&quot;</span>
+<span>        )</span>
+<span>        self.attempts = attempts</span>
+<span>        self.correlation_id = correlation_id</span>
+<span> </span>
+<span> </span>
+<span>class ResponseProtocolError(ClientError):</span>
+<span>    &quot;&quot;&quot;A successful response violates the declared pagination contract.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Request:</span>
+<span>    &quot;&quot;&quot;Transport-neutral prepared request.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    method: Method</span>
+<span>    url: str</span>
+<span>    headers: Mapping[str, str]</span>
+<span>    timeout_seconds: float</span>
+<span>    json_body: JsonObject | None = None</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Response:</span>
+<span>    &quot;&quot;&quot;Transport-neutral response with already-decoded local JSON.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    status: int</span>
+<span>    headers: Mapping[str, str] = field(default_factory=dict)</span>
+<span>    json_body: JsonObject | None = None</span>
+<span> </span>
+<span> </span>
+<span>class Transport(Protocol):</span>
+<span>    &quot;&quot;&quot;Structural boundary implemented by a real adapter or local fake.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def send(self, request: Request) -&gt; Response:</span>
+<span>        &quot;&quot;&quot;Send one prepared attempt or raise ``TransportTimeout``.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ClientConfig:</span>
+<span>    &quot;&quot;&quot;Validated runtime configuration; token is hidden from ``repr``.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    base_url: str</span>
+<span>    auth_token: str = field(repr=False)</span>
+<span>    timeout_seconds: float = 5.0</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if not self.base_url.startswith((&quot;http://&quot;, &quot;https://&quot;)):</span>
+<span>            raise ValueError(&quot;base_url must start with http:// or https://&quot;)</span>
+<span>        if not self.auth_token.strip():</span>
+<span>            raise ValueError(&quot;auth_token must not be blank&quot;)</span>
+<span>        if self.timeout_seconds &lt;= 0:</span>
+<span>            raise ValueError(&quot;timeout_seconds must be positive&quot;)</span>
+<span> </span>
+<span>    @classmethod</span>
+<span>    def from_env(</span>
+<span>        cls,</span>
+<span>        environ: Mapping[str, str] | None = None,</span>
+<span>    ) -&gt; ClientConfig:</span>
+<span>        &quot;&quot;&quot;Read authentication at runtime rather than from source control.&quot;&quot;&quot;</span>
+<span> </span>
+<span>        values = os.environ if environ is None else environ</span>
+<span>        token = values.get(&quot;DS60_API_TOKEN&quot;, &quot;&quot;)</span>
+<span>        base_url = values.get(&quot;DS60_API_BASE_URL&quot;, &quot;https://local.invalid&quot;)</span>
+<span>        timeout_text = values.get(&quot;DS60_API_TIMEOUT_SECONDS&quot;, &quot;5&quot;)</span>
+<span>        if not token.strip():</span>
+<span>            raise ValueError(&quot;DS60_API_TOKEN is required&quot;)</span>
+<span>        try:</span>
+<span>            timeout_seconds = float(timeout_text)</span>
+<span>        except ValueError as exc:</span>
+<span>            raise ValueError(&quot;DS60_API_TIMEOUT_SECONDS must be numeric&quot;) from exc</span>
+<span>        return cls(</span>
+<span>            base_url=base_url.rstrip(&quot;/&quot;),</span>
+<span>            auth_token=token,</span>
+<span>            timeout_seconds=timeout_seconds,</span>
+<span>        )</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RetryPolicy:</span>
+<span>    &quot;&quot;&quot;Bounded exponential backoff policy.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    max_attempts: int = 3</span>
+<span>    base_delay_seconds: float = 0.1</span>
+<span>    maximum_delay_seconds: float = 2.0</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if self.max_attempts &lt; 1:</span>
+<span>            raise ValueError(&quot;max_attempts must be at least 1&quot;)</span>
+<span>        if self.base_delay_seconds &lt; 0:</span>
+<span>            raise ValueError(&quot;base_delay_seconds must be non-negative&quot;)</span>
+<span>        if self.maximum_delay_seconds &lt; self.base_delay_seconds:</span>
+<span>            raise ValueError(&quot;maximum delay must be at least the base delay&quot;)</span>
+<span> </span>
+<span>    def delay_before_retry(</span>
+<span>        self,</span>
+<span>        completed_attempt: int,</span>
+<span>        *,</span>
+<span>        retry_after: str | None,</span>
+<span>        jitter_fraction: float,</span>
+<span>    ) -&gt; float:</span>
+<span>        &quot;&quot;&quot;Return a capped delay after a one-based failed attempt.&quot;&quot;&quot;</span>
+<span> </span>
+<span>        if not 0 &lt;= jitter_fraction &lt;= 1:</span>
+<span>            raise ValueError(&quot;jitter_fraction must be between 0 and 1&quot;)</span>
+<span>        exponential: float = self.base_delay_seconds * float(2 ** (completed_attempt - 1))</span>
+<span>        jitter: float = self.base_delay_seconds * jitter_fraction</span>
+<span>        delay: float = exponential + jitter</span>
+<span>        if retry_after is not None:</span>
+<span>            try:</span>
+<span>                server_delay = max(0.0, float(retry_after))</span>
+<span>            except ValueError:</span>
+<span>                server_delay = 0.0</span>
+<span>            delay = max(delay, server_delay)</span>
+<span>        return float(min(delay, self.maximum_delay_seconds))</span>
+<span> </span>
+<span> </span>
+<span>def classify_status(status: int) -&gt; Outcome:</span>
+<span>    &quot;&quot;&quot;Classify valid HTTP status codes for retry policy.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if not 100 &lt;= status &lt;= 599:</span>
+<span>        raise ValueError(f&quot;invalid HTTP status: {status}&quot;)</span>
+<span>    if 200 &lt;= status &lt;= 299:</span>
+<span>        return &quot;success&quot;</span>
+<span>    if status in RETRYABLE_STATUSES:</span>
+<span>        return &quot;retryable&quot;</span>
+<span>    return &quot;permanent&quot;</span>
+<span> </span>
+<span> </span>
+<span>def method_can_retry(method: Method, idempotency_key: str | None) -&gt; bool:</span>
+<span>    &quot;&quot;&quot;Decide whether replaying the logical operation is safe enough.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if method in REPLAYABLE_METHODS:</span>
+<span>        return True</span>
+<span>    return method in {&quot;POST&quot;, &quot;PATCH&quot;} and bool(idempotency_key and idempotency_key.strip())</span>
+<span> </span>
+<span> </span>
+<span>def redact_headers(headers: Mapping[str, str]) -&gt; dict[str, str]:</span>
+<span>    &quot;&quot;&quot;Return a case-insensitively redacted copy for logging.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    return {</span>
+<span>        name: &quot;&lt;redacted&gt;&quot; if name.lower() in SENSITIVE_HEADERS else value</span>
+<span>        for name, value in headers.items()</span>
+<span>    }</span>
+<span> </span>
+<span> </span>
+<span>def redact_url(url: str) -&gt; str:</span>
+<span>    &quot;&quot;&quot;Redact common sensitive query parameters in a display URL.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    return SENSITIVE_QUERY.sub(lambda match: f&quot;{match.group(1)}=&lt;redacted&gt;&quot;, url)</span>
+<span> </span>
+<span> </span>
+<span>def _header(headers: Mapping[str, str], name: str) -&gt; str | None:</span>
+<span>    &quot;&quot;&quot;Look up one HTTP header case-insensitively.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    wanted = name.lower()</span>
+<span>    return next(</span>
+<span>        (value for key, value in headers.items() if key.lower() == wanted),</span>
+<span>        None,</span>
+<span>    )</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class MemoryLog:</span>
+<span>    &quot;&quot;&quot;Simple log sink that lets tests inspect structured events.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    events: MutableSequence[tuple[str, dict[str, object]]] = field(default_factory=list)</span>
+<span> </span>
+<span>    def __call__(self, event: str, fields: Mapping[str, object]) -&gt; None:</span>
+<span>        self.events.append((event, dict(fields)))</span>
+<span> </span>
+<span> </span>
+<span>ScriptStep: TypeAlias = Response | BaseException | Callable[[Request], Response]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class ScriptedTransport:</span>
+<span>    &quot;&quot;&quot;Deterministic injected transport for tests and offline practice.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    steps: Sequence[ScriptStep]</span>
+<span>    requests: list[Request] = field(default_factory=list, init=False)</span>
+<span>    _remaining: deque[ScriptStep] = field(init=False, repr=False)</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        self._remaining = deque(self.steps)</span>
+<span> </span>
+<span>    def send(self, request: Request) -&gt; Response:</span>
+<span>        self.requests.append(request)</span>
+<span>        if not self._remaining:</span>
+<span>            raise AssertionError(&quot;scripted transport received an unexpected request&quot;)</span>
+<span>        step = self._remaining.popleft()</span>
+<span>        if isinstance(step, BaseException):</span>
+<span>            raise step</span>
+<span>        if callable(step):</span>
+<span>            return step(request)</span>
+<span>        return step</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class ReliableClient:</span>
+<span>    &quot;&quot;&quot;Policy layer independent from a concrete network library.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    config: ClientConfig</span>
+<span>    transport: Transport</span>
+<span>    retry_policy: RetryPolicy = field(default_factory=RetryPolicy)</span>
+<span>    sleep: Sleep = time.sleep</span>
+<span>    jitter: Jitter = lambda: 0.0</span>
+<span>    id_factory: IdFactory = lambda: &quot;correlation-local&quot;</span>
+<span>    log: LogSink = lambda _event, _fields: None</span>
+<span> </span>
+<span>    def _url(self, path: str, query: Mapping[str, str] | None = None) -&gt; str:</span>
+<span>        if not path.startswith(&quot;/&quot;):</span>
+<span>            raise ValueError(&quot;path must start with /&quot;)</span>
+<span>        url = f&quot;{self.config.base_url.rstrip(&#x27;/&#x27;)}{path}&quot;</span>
+<span>        if query:</span>
+<span>            url = f&quot;{url}?{urlencode(query)}&quot;</span>
+<span>        return url</span>
+<span> </span>
+<span>    def request(</span>
+<span>        self,</span>
+<span>        method: Method,</span>
+<span>        path: str,</span>
+<span>        *,</span>
+<span>        query: Mapping[str, str] | None = None,</span>
+<span>        json_body: JsonObject | None = None,</span>
+<span>        idempotency_key: str | None = None,</span>
+<span>    ) -&gt; Response:</span>
+<span>        &quot;&quot;&quot;Execute one logical request with bounded, policy-safe retries.&quot;&quot;&quot;</span>
+<span> </span>
+<span>        correlation_id = self.id_factory()</span>
+<span>        if not correlation_id.strip():</span>
+<span>            raise ValueError(&quot;id_factory returned a blank correlation ID&quot;)</span>
+<span>        headers = {</span>
+<span>            &quot;Accept&quot;: &quot;application/json&quot;,</span>
+<span>            &quot;Authorization&quot;: f&quot;Bearer {self.config.auth_token}&quot;,</span>
+<span>            &quot;X-Correlation-ID&quot;: correlation_id,</span>
+<span>        }</span>
+<span>        if idempotency_key is not None:</span>
+<span>            if not idempotency_key.strip():</span>
+<span>                raise ValueError(&quot;idempotency_key must not be blank&quot;)</span>
+<span>            headers[&quot;Idempotency-Key&quot;] = idempotency_key</span>
+<span> </span>
+<span>        prepared = Request(</span>
+<span>            method=method,</span>
+<span>            url=self._url(path, query),</span>
+<span>            headers=headers,</span>
+<span>            timeout_seconds=self.config.timeout_seconds,</span>
+<span>            json_body=json_body,</span>
+<span>        )</span>
+<span>        replay_allowed = method_can_retry(method, idempotency_key)</span>
+<span> </span>
+<span>        for attempt in range(1, self.retry_policy.max_attempts + 1):</span>
+<span>            self.log(</span>
+<span>                &quot;http_attempt&quot;,</span>
+<span>                {</span>
+<span>                    &quot;method&quot;: method,</span>
+<span>                    &quot;url&quot;: redact_url(prepared.url),</span>
+<span>                    &quot;headers&quot;: redact_headers(prepared.headers),</span>
+<span>                    &quot;attempt&quot;: attempt,</span>
+<span>                    &quot;correlation_id&quot;: correlation_id,</span>
+<span>                    &quot;timeout_seconds&quot;: prepared.timeout_seconds,</span>
+<span>                },</span>
+<span>            )</span>
+<span>            try:</span>
+<span>                response = self.transport.send(prepared)</span>
+<span>            except TransportTimeout as exc:</span>
+<span>                if not replay_allowed or attempt == self.retry_policy.max_attempts:</span>
+<span>                    raise RetryExhausted(</span>
+<span>                        attempt,</span>
+<span>                        correlation_id,</span>
+<span>                        &quot;transport timeout&quot;,</span>
+<span>                    ) from exc</span>
+<span>                delay = self.retry_policy.delay_before_retry(</span>
+<span>                    attempt,</span>
+<span>                    retry_after=None,</span>
+<span>                    jitter_fraction=self.jitter(),</span>
+<span>                )</span>
+<span>                self.log(</span>
+<span>                    &quot;http_retry&quot;,</span>
+<span>                    {</span>
+<span>                        &quot;reason&quot;: &quot;timeout&quot;,</span>
+<span>                        &quot;delay_seconds&quot;: delay,</span>
+<span>                        &quot;attempt&quot;: attempt,</span>
+<span>                        &quot;correlation_id&quot;: correlation_id,</span>
+<span>                    },</span>
+<span>                )</span>
+<span>                self.sleep(delay)</span>
+<span>                continue</span>
+<span> </span>
+<span>            outcome = classify_status(response.status)</span>
+<span>            if outcome == &quot;success&quot;:</span>
+<span>                return response</span>
+<span>            if outcome == &quot;permanent&quot; or not replay_allowed:</span>
+<span>                raise PermanentHttpError(response.status, correlation_id)</span>
+<span>            if attempt == self.retry_policy.max_attempts:</span>
+<span>                raise RetryExhausted(</span>
+<span>                    attempt,</span>
+<span>                    correlation_id,</span>
+<span>                    f&quot;last HTTP status {response.status}&quot;,</span>
+<span>                )</span>
+<span> </span>
+<span>            retry_after = (</span>
+<span>                _header(response.headers, &quot;Retry-After&quot;) if response.status == 429 else None</span>
+<span>            )</span>
+<span>            delay = self.retry_policy.delay_before_retry(</span>
+<span>                attempt,</span>
+<span>                retry_after=retry_after,</span>
+<span>                jitter_fraction=self.jitter(),</span>
+<span>            )</span>
+<span>            self.log(</span>
+<span>                &quot;http_retry&quot;,</span>
+<span>                {</span>
+<span>                    &quot;reason&quot;: f&quot;status_{response.status}&quot;,</span>
+<span>                    &quot;delay_seconds&quot;: delay,</span>
+<span>                    &quot;attempt&quot;: attempt,</span>
+<span>                    &quot;correlation_id&quot;: correlation_id,</span>
+<span>                },</span>
+<span>            )</span>
+<span>            self.sleep(delay)</span>
+<span> </span>
+<span>        raise AssertionError(&quot;retry loop exhausted without returning or raising&quot;)</span>
+<span> </span>
+<span>    def get_all_pages(</span>
+<span>        self,</span>
+<span>        path: str,</span>
+<span>        *,</span>
+<span>        items_key: str = &quot;items&quot;,</span>
+<span>        cursor_key: str = &quot;next_cursor&quot;,</span>
+<span>        maximum_pages: int = 100,</span>
+<span>    ) -&gt; list[JsonObject]:</span>
+<span>        &quot;&quot;&quot;Collect cursor pages while detecting loops and malformed payloads.&quot;&quot;&quot;</span>
+<span> </span>
+<span>        if maximum_pages &lt; 1:</span>
+<span>            raise ValueError(&quot;maximum_pages must be at least 1&quot;)</span>
+<span>        items: list[JsonObject] = []</span>
+<span>        cursor: str | None = None</span>
+<span>        seen_cursors: set[str] = set()</span>
+<span> </span>
+<span>        for _page_number in range(1, maximum_pages + 1):</span>
+<span>            query = {&quot;cursor&quot;: cursor} if cursor is not None else None</span>
+<span>            response = self.request(&quot;GET&quot;, path, query=query)</span>
+<span>            body = response.json_body</span>
+<span>            if not isinstance(body, dict):</span>
+<span>                raise ResponseProtocolError(&quot;page body must be a JSON object&quot;)</span>
+<span>            raw_items = body.get(items_key)</span>
+<span>            if not isinstance(raw_items, list) or not all(</span>
+<span>                isinstance(item, dict) for item in raw_items</span>
+<span>            ):</span>
+<span>                raise ResponseProtocolError(f&quot;{items_key!r} must be a list of objects&quot;)</span>
+<span>            items.extend(raw_items)</span>
+<span> </span>
+<span>            next_cursor = body.get(cursor_key)</span>
+<span>            if next_cursor is None:</span>
+<span>                return items</span>
+<span>            if not isinstance(next_cursor, str) or not next_cursor:</span>
+<span>                raise ResponseProtocolError(f&quot;{cursor_key!r} must be a non-empty string or null&quot;)</span>
+<span>            if next_cursor in seen_cursors:</span>
+<span>                raise ResponseProtocolError(f&quot;pagination repeated cursor {next_cursor!r}&quot;)</span>
+<span>            seen_cursors.add(next_cursor)</span>
+<span>            cursor = next_cursor</span>
+<span> </span>
+<span>        raise ResponseProtocolError(f&quot;pagination exceeded maximum_pages={maximum_pages}&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    &quot;&quot;&quot;Run retry and pagination examples through local scripted transports.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    retry_log = MemoryLog()</span>
+<span>    retry_delays: list[float] = []</span>
+<span>    retry_transport = ScriptedTransport(</span>
+<span>        [</span>
+<span>            Response(503),</span>
+<span>            Response(200, json_body={&quot;message&quot;: &quot;local success&quot;}),</span>
+<span>        ]</span>
+<span>    )</span>
+<span>    client = ReliableClient(</span>
+<span>        config=ClientConfig(</span>
+<span>            base_url=&quot;https://local.invalid&quot;,</span>
+<span>            auth_token=&quot;local-example-credential&quot;,</span>
+<span>            timeout_seconds=0.25,</span>
+<span>        ),</span>
+<span>        transport=retry_transport,</span>
+<span>        sleep=retry_delays.append,</span>
+<span>        jitter=lambda: 0.0,</span>
+<span>        id_factory=lambda: &quot;correlation-demo-1&quot;,</span>
+<span>        log=retry_log,</span>
+<span>    )</span>
+<span>    response = client.request(&quot;GET&quot;, &quot;/health&quot;)</span>
+<span>    print(&quot;retry demo:&quot;, response.status, &quot;delays:&quot;, retry_delays)</span>
+<span>    print(&quot;safe first log:&quot;, retry_log.events[0])</span>
+<span> </span>
+<span>    page_transport = ScriptedTransport(</span>
+<span>        [</span>
+<span>            Response(200, json_body={&quot;items&quot;: [{&quot;id&quot;: 1}], &quot;next_cursor&quot;: &quot;p2&quot;}),</span>
+<span>            Response(200, json_body={&quot;items&quot;: [{&quot;id&quot;: 2}], &quot;next_cursor&quot;: None}),</span>
+<span>        ]</span>
+<span>    )</span>
+<span>    page_client = ReliableClient(</span>
+<span>        config=client.config,</span>
+<span>        transport=page_transport,</span>
+<span>        sleep=lambda _seconds: None,</span>
+<span>        id_factory=lambda: &quot;correlation-page&quot;,</span>
+<span>    )</span>
+<span>    print(&quot;pagination demo:&quot;, page_client.get_all_pages(&quot;/items&quot;))</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-pro-01.html"><small>Previous lesson</small><strong>python-pro-01</strong><span>Package Engineering and Local Release Workflow</span></a>
+        <a class="nav-card next" href="python-pro-02.html"><small>Next lesson</small><strong>python-pro-02</strong><span>Concurrency and Parallelism Decision Lab</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-svc-01";
+    const LEARNER_PATH = "python/professional/lessons/py_svc_01_reliable_http_clients.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

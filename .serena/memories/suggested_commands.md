@@ -7,6 +7,8 @@ the discovery bootstrap: `.venv\Scripts\python.exe` for standard `venv` or
 
 ## Setup and learner navigation
 
+- Windows guided start: double-click `START_DS60.cmd`
+- Windows read-only readiness: `powershell -ExecutionPolicy Bypass -File .\scripts\start_ds60.ps1 -DiagnosticsOnly -NonInteractive`
 - Windows core/discovery: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; & .\scripts\bootstrap_windows.ps1`
 - Windows advanced: `& .\scripts\bootstrap_windows.ps1 -Profile Advanced`
 - macOS/Linux core: `bash scripts/setup.sh`
@@ -17,13 +19,19 @@ the discovery bootstrap: `.venv\Scripts\python.exe` for standard `venv` or
 - Progress: `.venv/bin/python scripts/course.py progress show`
 - Private progress portal: `.venv/bin/python scripts/learning_portal.py`
 - Static portal only: open `START_HERE.html`; its progress stays in browser localStorage
+- Rendered lesson page: `lesson-pages/<lesson-id>.html` (read-only; execute the
+  printed catalog path in VS Code/Jupyter)
+- Guided SQL notebook: `.venv/bin/python scripts/course.py sql notebook sql-01`
+- Guided SQL solution notebook: `.venv/bin/python scripts/course.py sql notebook sql-01 --artifact solution`
 
 ## Fast validation
 
 - `.venv/bin/python scripts/course.py validate --all`
 - `.venv/bin/python scripts/audit_practice.py`
 - `.venv/bin/python scripts/build_course_guide.py --check`
+- `.venv/bin/python scripts/build_lesson_readers.py --check`
 - `.venv/bin/python scripts/scan_secrets.py --history`
+- `.venv/bin/python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py`
 - `.venv/bin/python scripts/validate_notebooks.py`
 - `.venv/bin/python scripts/normalize_notebooks.py --check`
 - `.venv/bin/python scripts/build_solution_notebooks.py --check`
@@ -59,6 +67,8 @@ than `/tmp`.
 ## Generated inventory and lock
 
 - Regenerate catalog: `.venv/bin/python scripts/build_catalog.py`
+- Regenerate static dashboard: `.venv/bin/python scripts/build_course_guide.py`
+- Regenerate rendered readers: `.venv/bin/python scripts/build_lesson_readers.py`
 - Check lock: `UV_CACHE_DIR=/tmp/ds60sqlpy-uv-cache uv lock --check`
 - Reproduce CI core: `uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks`
 - Install every optional lesson dependency only for a full maintainer audit: `uv sync --frozen --all-extras`

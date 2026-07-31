@@ -25,7 +25,7 @@ Run these while connected before relying on the corresponding lessons offline:
 | Seaborn sample datasets | Several data-analysis lessons | Accepted first-run download; Seaborn reuses its local cache afterward |
 | Python packages and platform wheels | Course environment | Installed once by the setup script |
 | PostgreSQL or PostgreSQL container image | SQL track | Runs locally after installation or image pull |
-| JupySQL, SQLAlchemy, and Psycopg wheels | PostgreSQL notebook bridge | Installed by advanced setup; queries stay local afterward |
+| JupySQL, pandas, SQLAlchemy, and Psycopg wheels | PostgreSQL notebook bridge | Installed by advanced setup; queries stay local afterward |
 | torchvision pretrained weights | Transfer-learning lesson | Must already be cached, or use the lesson’s non-pretrained fallback |
 | Hugging Face model/tokenizer | NLP lesson | Must already be cached, or use the local fallback |
 | spaCy language model | NLP lesson | Must be installed while connected, or use `spacy.blank(...)` where the lesson permits |

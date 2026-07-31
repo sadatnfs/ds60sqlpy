@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
+from ds60sqlpy.lesson_reader import COURSE_GUIDE_REFERENCE_PATHS, reference_relative_path
 from scripts.build_course_guide import _catalog_payload, build_html, main
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 GUIDE = REPO_ROOT / "START_HERE.html"
+RAW_LOCAL_ARTIFACT_HREF = re.compile(
+    r'href="(?!https?://|mailto:|#)[^"]+\.(?:md|sql|ipynb|py)(?:[?#][^"]*)?"',
+    flags=re.IGNORECASE,
+)
 
 
 def test_portable_course_guide_matches_catalog() -> None:
@@ -17,6 +23,7 @@ def test_portable_course_guide_matches_catalog() -> None:
     assert f"<strong>{len(payload['lessons'])}</strong><span>cataloged lessons</span>" in rendered
     for lesson in payload["lessons"]:
         assert f'"id":"{lesson["id"]}"' in rendered
+    assert "lesson-pages/${lesson.id}.html" in rendered
 
 
 def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
@@ -29,6 +36,11 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
     assert "void loadServerProgress();" in rendered
     assert "localStorage" in rendered
     assert "DS60_DATABASE_URL" in rendered
+    assert "START_DS60.cmd" in rendered
+    assert "Double-click" in rendered
+    assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
+    for source_path in COURSE_GUIDE_REFERENCE_PATHS:
+        assert f'href="{reference_relative_path(source_path)}"' in rendered
 
 
 def test_portable_course_guide_has_runnable_windows_resolver() -> None:

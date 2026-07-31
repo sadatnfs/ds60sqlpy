@@ -1,0 +1,1283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-test-01 · SQL Tests, Migration Checks, and Data Contracts · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-test-01</p>
+        <h1>SQL Tests, Migration Checks, and Data Contracts</h1>
+        <p class="hero-copy">Database quality engineering</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">180 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-found-02.html">sql-found-02</a> <a class="tag" href="sql-42.html">sql-42</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_test_01_contracts_migrations.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_test_01_contracts_migrations.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_test_01_contracts_migrations.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--sql-test-01-sql-tests-migration-checks-and-data-contracts">SQL-TEST-01 — SQL Tests, Migration Checks, and Data Contracts<a class="heading-anchor" href="#guide--sql-test-01-sql-tests-migration-checks-and-data-contracts" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-found-02</code> and <code>sql-42</code></li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-02.html#guide">SQL-FOUND-02 — migrations</a>, <a href="sql-42.html#guide">SQL Day 42 data-quality checks</a>, constraints, catalogs, and transactions.</li>
+<li><strong>Artifacts:</strong> <a href="sql-test-01.html#learner">learner SQL</a> · <a href="sql-test-01.html#solution-1">solution reasoning</a> · <a href="sql-test-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run on any supported operating system:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_test_01_contracts_migrations.sql</code></pre>
+<p>The harness needs no third-party framework and rolls back its test schema.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Build fail-fast SQL assertions, deterministic owned fixtures, and schema contract comparisons.</li>
+<li>Verify exact migration manifests with invariant, reconciliation, and negative controls.</li>
+<li>Use rollback isolation in a CI database created solely for testing.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Assertion:</strong> named condition that raises an error when false or unknown.</li>
+<li><strong>Fixture:</strong> controlled input data with explicit owner, version, and expected grain/count.</li>
+<li><strong>Negative control:</strong> deliberately invalid case proving a test detects the failure it claims to detect.</li>
+<li><strong>Contract:</strong> expected columns, types, nullability, keys, semantics, and compatibility between producer and consumer.</li>
+<li><strong>Invariant test:</strong> proves a condition such as no orphan keys.</li>
+<li><strong>Reconciliation:</strong> compares independently derived totals/counts at a stated grain.</li>
+<li><strong>Migration regression:</strong> checks exact ordered versions and post-migration schema behavior.</li>
+<li><strong>Isolation:</strong> preventing tests from depending on or polluting other runs.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p><code>assert_true(name, condition, detail)</code> treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With <code>ON_ERROR_STOP=1</code>, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success.</p>
+<p>The fixture manifest names its owner (<code>sql-test-01</code>), content tag, and expected row count. This distinguishes course-owned deterministic rows from arbitrary business data. A test may reset its own schema; it must not delete shared data to obtain repeatability.</p>
+<p>The expected orders contract compares ordinal position, name, information-schema type, and nullability through a full join. A missing, extra, reordered, retyped, or nullability-changed column becomes a visible mismatch. Production contracts also need semantic meaning, units, time zone, keys, defaults, and compatibility policy; catalogs cannot infer those.</p>
+<p>Migration testing uses an ordered integer array, not only a count. Versions <code>1,2,9</code> have the same count as <code>1,2,3</code> but different history. Applied checksums belong in a real migration runner.</p>
+<p>The invariant anti-join duplicates the foreign-key claim deliberately: it detects drift in imported/disabled-constraint scenarios and documents intent. The total reconciliation derives line totals independently from <code>reported_total</code>. Its grain is one order and its money type is fixed-scale numeric.</p>
+<p>The negative control invokes the assertion with false and catches only its expected named exception. If the assertion stops failing, the control raises an unexpected error. This tests the test rather than trusting its appearance.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete all ten prompts. Begin by migrating and updating the contract, detecting producer duplicates with precise grains, inspect key/default constraints without brittle generated names, reconcile zero-line orders correctly, and explain ownership and CI behavior; then test SQLSTATEs, boundaries, concurrency, schema drift, and a destructive-migration rehearsal.</p>
+<p>For each check, write expected result, observed result, result grain, and failure action. Detection is not automatic remediation permission.</p>
+<p>Make every test fail loudly on the wrong result and independently verify the test harness with a negative control:</p>
+<ol>
+<li><strong>Currency migration:</strong> update migration manifest and expected contract for the new required defaulted column.</li>
+<li><strong>Producer duplicates:</strong> report duplicate groups and participating detail rows without confusing their grains.</li>
+<li><strong>Key contracts:</strong> inspect defaults, primary/unique keys, and foreign keys by properties rather than generated names.</li>
+<li><strong>Zero-line reconciliation:</strong> preserve every order and distinguish absent detail from a numeric zero.</li>
+<li><strong>Harness:</strong> document fixture ownership, isolation, negative control, CI exit, and cleanup.</li>
+<li><strong>Expected SQLSTATE:</strong> reject a duplicate for the intended category and fail if no error or the wrong error occurs.</li>
+<li><strong>Boundary matrix:</strong> drive below/exact/above/malformed/NULL cases from data with an expected outcome for each.</li>
+<li><strong>Concurrency:</strong> specify sessions, barriers, timeouts, observed states, deterministic assertions, and cleanup.</li>
+<li><strong>Schema fingerprint:</strong> compare stable semantic properties while excluding OIDs and unstable generated names.</li>
+<li><strong>Destructive rehearsal:</strong> restore, migrate, reconcile, test critical queries, measure, assess rollback, and preserve approval evidence.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Does false or NULL make the process exit nonzero unless intentionally caught?</li>
+<li>Does the negative control prove the assertion path?</li>
+<li>Are fixture owner, content tag, expected count, and deterministic keys clear?</li>
+<li>Does the contract detect missing and extra columns?</li>
+<li>Does the migration check prove exact ordered versions?</li>
+<li>Do reconciliations include missing-side rows where required?</li>
+<li>Can tests run repeatedly without depending on another test?</li>
+<li>Does rollback leave no schema or fixture rows?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Printing “FAIL” while exiting zero creates false-green automation.</li>
+<li>Comparing only row counts can miss replacements and duplicates.</li>
+<li>Querying generated constraint names makes tests brittle across versions.</li>
+<li><code>COUNT(column)</code> ignores NULL; know whether that is intended.</li>
+<li>Inner joins silently exclude missing-side records from reconciliation.</li>
+<li>Production-like random fixtures make failures difficult to reproduce.</li>
+<li>Resetting a shared schema for test isolation destroys other users&#x27; state.</li>
+<li>Schema equality does not prove semantic compatibility or safe rollout order.</li>
+<li>Golden snapshots without reviewed change policy normalize accidental drift.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-analytics-01.html#guide">SQL-ANALYTICS-01 — reusable analytical query patterns</a> and apply these assertion/reconciliation habits to every pattern. Pair this module with migration delivery so contract tests run on both fresh installs and upgrades.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_test_01_contracts_migrations.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_test_01_contracts_migrations.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TEST-01: SQL tests, migration checks, and data contracts</span>
+<span>-- Target: PostgreSQL 16+</span>
+<span> </span>
+<span>\set ON_ERROR_STOP on</span>
+<span>\echo &#x27;SQL-TEST-01: disposable SQL contract-test lab&#x27;</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_contract_test_lab;</span>
+<span> </span>
+<span>-- A minimal assertion helper: false and NULL both fail with a named message.</span>
+<span>CREATE FUNCTION pro_contract_test_lab.assert_true(</span>
+<span>    p_test_name text,</span>
+<span>    p_condition boolean,</span>
+<span>    p_detail text</span>
+<span>)</span>
+<span>RETURNS void</span>
+<span>LANGUAGE plpgsql</span>
+<span>VOLATILE</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    IF p_condition IS DISTINCT FROM true THEN</span>
+<span>        RAISE EXCEPTION &#x27;FAIL [%]: %&#x27;, p_test_name, p_detail;</span>
+<span>    END IF;</span>
+<span>    RAISE NOTICE &#x27;PASS [%]&#x27;, p_test_name;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TABLE pro_contract_test_lab.schema_migrations (</span>
+<span>    migration_id integer PRIMARY KEY,</span>
+<span>    migration_name text NOT NULL UNIQUE</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_contract_test_lab.customers (</span>
+<span>    customer_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    customer_key text NOT NULL UNIQUE,</span>
+<span>    display_name text NOT NULL CHECK (btrim(display_name) &lt;&gt; &#x27;&#x27;)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_contract_test_lab.orders (</span>
+<span>    order_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    order_key text NOT NULL UNIQUE,</span>
+<span>    customer_id bigint NOT NULL</span>
+<span>        REFERENCES pro_contract_test_lab.customers (customer_id),</span>
+<span>    status text NOT NULL DEFAULT &#x27;open&#x27;</span>
+<span>        CHECK (status IN (&#x27;open&#x27;, &#x27;paid&#x27;, &#x27;cancelled&#x27;)),</span>
+<span>    reported_total numeric(12, 2) NOT NULL</span>
+<span>        CHECK (reported_total &gt;= 0),</span>
+<span>    created_at timestamptz NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_contract_test_lab.order_lines (</span>
+<span>    order_line_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    order_id bigint NOT NULL</span>
+<span>        REFERENCES pro_contract_test_lab.orders (order_id),</span>
+<span>    product_key text NOT NULL,</span>
+<span>    quantity integer NOT NULL CHECK (quantity &gt; 0),</span>
+<span>    unit_price numeric(12, 2) NOT NULL CHECK (unit_price &gt;= 0),</span>
+<span>    UNIQUE (order_id, product_key)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_contract_test_lab.fixture_manifest (</span>
+<span>    fixture_name text PRIMARY KEY,</span>
+<span>    fixture_owner text NOT NULL,</span>
+<span>    content_tag text NOT NULL,</span>
+<span>    expected_rows integer NOT NULL CHECK (expected_rows &gt;= 0)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.schema_migrations</span>
+<span>VALUES</span>
+<span>    (1, &#x27;create_order_model&#x27;),</span>
+<span>    (2, &#x27;require_order_status&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.customers (customer_key, display_name)</span>
+<span>VALUES</span>
+<span>    (&#x27;CUS-100&#x27;, &#x27;Avery&#x27;),</span>
+<span>    (&#x27;CUS-101&#x27;, &#x27;Morgan&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.orders (</span>
+<span>    order_key,</span>
+<span>    customer_id,</span>
+<span>    status,</span>
+<span>    reported_total,</span>
+<span>    created_at</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    fixture.order_key,</span>
+<span>    c.customer_id,</span>
+<span>    fixture.status,</span>
+<span>    fixture.reported_total,</span>
+<span>    fixture.created_at</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (</span>
+<span>            &#x27;ORD-100&#x27;::text,</span>
+<span>            &#x27;CUS-100&#x27;::text,</span>
+<span>            &#x27;paid&#x27;::text,</span>
+<span>            25.00::numeric,</span>
+<span>            TIMESTAMPTZ &#x27;2026-02-01 10:00:00+00&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            &#x27;ORD-101&#x27;::text,</span>
+<span>            &#x27;CUS-101&#x27;::text,</span>
+<span>            &#x27;open&#x27;::text,</span>
+<span>            14.00::numeric,</span>
+<span>            TIMESTAMPTZ &#x27;2026-02-02 11:00:00+00&#x27;</span>
+<span>        )</span>
+<span>) AS fixture(</span>
+<span>    order_key,</span>
+<span>    customer_key,</span>
+<span>    status,</span>
+<span>    reported_total,</span>
+<span>    created_at</span>
+<span>)</span>
+<span>JOIN pro_contract_test_lab.customers AS c</span>
+<span>  ON c.customer_key = fixture.customer_key;</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.order_lines (</span>
+<span>    order_id,</span>
+<span>    product_key,</span>
+<span>    quantity,</span>
+<span>    unit_price</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    o.order_id,</span>
+<span>    fixture.product_key,</span>
+<span>    fixture.quantity,</span>
+<span>    fixture.unit_price</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;ORD-100&#x27;::text, &#x27;ITEM-A&#x27;::text, 1, 10.00::numeric),</span>
+<span>        (&#x27;ORD-100&#x27;::text, &#x27;ITEM-B&#x27;::text, 3, 5.00::numeric),</span>
+<span>        (&#x27;ORD-101&#x27;::text, &#x27;ITEM-A&#x27;::text, 2, 7.00::numeric)</span>
+<span>) AS fixture(order_key, product_key, quantity, unit_price)</span>
+<span>JOIN pro_contract_test_lab.orders AS o</span>
+<span>  ON o.order_key = fixture.order_key;</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.fixture_manifest</span>
+<span>VALUES</span>
+<span>    (&#x27;customers&#x27;, &#x27;sql-test-01&#x27;, &#x27;customers-v1&#x27;, 2),</span>
+<span>    (&#x27;orders&#x27;, &#x27;sql-test-01&#x27;, &#x27;orders-v1&#x27;, 2),</span>
+<span>    (&#x27;order_lines&#x27;, &#x27;sql-test-01&#x27;, &#x27;order-lines-v1&#x27;, 3);</span>
+<span> </span>
+<span>-- Expected producer/consumer contract for the orders relation.</span>
+<span>CREATE TABLE pro_contract_test_lab.expected_orders_contract (</span>
+<span>    ordinal_position integer PRIMARY KEY,</span>
+<span>    column_name text NOT NULL UNIQUE,</span>
+<span>    data_type text NOT NULL,</span>
+<span>    is_nullable text NOT NULL CHECK (is_nullable IN (&#x27;YES&#x27;, &#x27;NO&#x27;))</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.expected_orders_contract</span>
+<span>VALUES</span>
+<span>    (1, &#x27;order_id&#x27;, &#x27;bigint&#x27;, &#x27;NO&#x27;),</span>
+<span>    (2, &#x27;order_key&#x27;, &#x27;text&#x27;, &#x27;NO&#x27;),</span>
+<span>    (3, &#x27;customer_id&#x27;, &#x27;bigint&#x27;, &#x27;NO&#x27;),</span>
+<span>    (4, &#x27;status&#x27;, &#x27;text&#x27;, &#x27;NO&#x27;),</span>
+<span>    (5, &#x27;reported_total&#x27;, &#x27;numeric&#x27;, &#x27;NO&#x27;),</span>
+<span>    (6, &#x27;created_at&#x27;, &#x27;timestamp with time zone&#x27;, &#x27;NO&#x27;);</span>
+<span> </span>
+<span>CREATE VIEW pro_contract_test_lab.orders_contract_mismatches AS</span>
+<span>WITH actual AS (</span>
+<span>    SELECT</span>
+<span>        c.ordinal_position,</span>
+<span>        c.column_name,</span>
+<span>        c.data_type,</span>
+<span>        c.is_nullable</span>
+<span>    FROM information_schema.columns AS c</span>
+<span>    WHERE c.table_schema = &#x27;pro_contract_test_lab&#x27;</span>
+<span>      AND c.table_name = &#x27;orders&#x27;</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    COALESCE(e.ordinal_position, a.ordinal_position) AS ordinal_position,</span>
+<span>    e.column_name AS expected_column,</span>
+<span>    a.column_name AS actual_column,</span>
+<span>    e.data_type AS expected_type,</span>
+<span>    a.data_type AS actual_type,</span>
+<span>    e.is_nullable AS expected_nullable,</span>
+<span>    a.is_nullable AS actual_nullable</span>
+<span>FROM pro_contract_test_lab.expected_orders_contract AS e</span>
+<span>FULL JOIN actual AS a</span>
+<span>  ON a.ordinal_position = e.ordinal_position</span>
+<span>WHERE ROW(e.column_name, e.data_type, e.is_nullable)</span>
+<span>      IS DISTINCT FROM</span>
+<span>      ROW(a.column_name, a.data_type, a.is_nullable);</span>
+<span> </span>
+<span>\echo &#x27;Contract and migration assertions&#x27;</span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;orders column contract&#x27;,</span>
+<span>    NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_contract_test_lab.orders_contract_mismatches</span>
+<span>    ),</span>
+<span>    &#x27;orders columns, types, order, or nullability drifted&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;ordered migration manifest&#x27;,</span>
+<span>    (</span>
+<span>        SELECT array_agg(sm.migration_id ORDER BY sm.migration_id)</span>
+<span>        FROM pro_contract_test_lab.schema_migrations AS sm</span>
+<span>    ) = ARRAY[1, 2],</span>
+<span>    &#x27;expected exactly migration versions 1 and 2&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>\echo &#x27;Invariant and reconciliation assertions&#x27;</span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;no order orphans&#x27;,</span>
+<span>    NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_contract_test_lab.orders AS o</span>
+<span>        LEFT JOIN pro_contract_test_lab.customers AS c</span>
+<span>          ON c.customer_id = o.customer_id</span>
+<span>        WHERE c.customer_id IS NULL</span>
+<span>    ),</span>
+<span>    &#x27;an order has no customer&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;reported totals reconcile&#x27;,</span>
+<span>    NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_contract_test_lab.orders AS o</span>
+<span>        JOIN (</span>
+<span>            SELECT</span>
+<span>                ol.order_id,</span>
+<span>                SUM(ol.quantity * ol.unit_price) AS calculated_total</span>
+<span>            FROM pro_contract_test_lab.order_lines AS ol</span>
+<span>            GROUP BY ol.order_id</span>
+<span>        ) AS totals</span>
+<span>          ON totals.order_id = o.order_id</span>
+<span>        WHERE o.reported_total IS DISTINCT FROM totals.calculated_total</span>
+<span>    ),</span>
+<span>    &#x27;reported_total differs from line total&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;fixture manifest counts&#x27;,</span>
+<span>    NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM (</span>
+<span>            SELECT &#x27;customers&#x27;::text AS fixture_name, COUNT(*)::integer AS rows</span>
+<span>            FROM pro_contract_test_lab.customers</span>
+<span>            UNION ALL</span>
+<span>            SELECT &#x27;orders&#x27;, COUNT(*)::integer</span>
+<span>            FROM pro_contract_test_lab.orders</span>
+<span>            UNION ALL</span>
+<span>            SELECT &#x27;order_lines&#x27;, COUNT(*)::integer</span>
+<span>            FROM pro_contract_test_lab.order_lines</span>
+<span>        ) AS actual</span>
+<span>        JOIN pro_contract_test_lab.fixture_manifest AS fm</span>
+<span>          ON fm.fixture_name = actual.fixture_name</span>
+<span>        WHERE actual.rows &lt;&gt; fm.expected_rows</span>
+<span>    ),</span>
+<span>    &#x27;fixture count drifted from its owned manifest&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>-- A negative control proves the assertion helper really fails. The nested block</span>
+<span>-- catches only the expected named failure and keeps the outer test transaction.</span>
+<span>DO $negative_control$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        PERFORM pro_contract_test_lab.assert_true(</span>
+<span>            &#x27;negative control&#x27;,</span>
+<span>            false,</span>
+<span>            &#x27;intentional failure&#x27;</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;negative control unexpectedly passed&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN raise_exception THEN</span>
+<span>            IF SQLERRM NOT LIKE &#x27;FAIL [negative control]:%&#x27; THEN</span>
+<span>                RAISE;</span>
+<span>            END IF;</span>
+<span>            RAISE NOTICE &#x27;Expected assertion failure was observed&#x27;;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$negative_control$;</span>
+<span> </span>
+<span>-- Exercises:</span>
+<span>--</span>
+<span>-- 1. Add migration 3: currency_code character(3) NOT NULL DEFAULT &#x27;USD&#x27;.</span>
+<span>--    Update the expected contract and prove versions 1-3 are exact.</span>
+<span>--</span>
+<span>-- 2. Create a raw producer fixture with duplicate source_order_key values.</span>
+<span>--    Write one summary check and one detail query; label whether you count</span>
+<span>--    duplicate groups, keys, or participating rows.</span>
+<span>--</span>
+<span>-- 3. Add contract checks for defaults, primary/unique keys, and the customer</span>
+<span>--    foreign key without depending on generated constraint names.</span>
+<span>--</span>
+<span>-- 4. Add a reconciliation that includes orders with zero lines and distinguishes</span>
+<span>--    a missing total from numeric zero.</span>
+<span>--</span>
+<span>-- 5. Explain fixture ownership, rollback isolation, negative controls, and why</span>
+<span>--    a test that only prints failures is unsafe in CI.</span>
+<span>--</span>
+<span>-- 6. Assert that duplicate source_order_key fails with the expected SQLSTATE and</span>
+<span>--    constraint category. Explain why matching the entire localized error text</span>
+<span>--    or accepting any exception makes a brittle or false-positive test.</span>
+<span>--</span>
+<span>-- 7. Build table-driven boundary fixtures for quantity, money, dates, NULL, and</span>
+<span>--    Unicode text. Include just-below, exact-boundary, just-above, and malformed</span>
+<span>--    cases, with an explicit expected outcome for every row.</span>
+<span>--</span>
+<span>-- 8. Design a two-session concurrency test for lost updates or double claims.</span>
+<span>--    Document synchronization barriers, timeouts, cleanup, deterministic pass</span>
+<span>--    criteria, and why a single transaction cannot reproduce every anomaly.</span>
+<span>--</span>
+<span>-- 9. Capture a stable schema fingerprint before and after a migration. Exclude</span>
+<span>--    volatile OIDs and generated names, but detect changed types, defaults,</span>
+<span>--    nullability, constraints, indexes, privileges, and routine signatures.</span>
+<span>--</span>
+<span>-- 10. Rehearse a destructive migration against a disposable restored database.</span>
+<span>--     Compare row counts, checksums, rejected rows, critical queries, rollback</span>
+<span>--     feasibility, elapsed time, and application compatibility before approval.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span>\echo &#x27;SQL-TEST-01 complete: pro_contract_test_lab was rolled back&#x27;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_test_01_contracts_migrations_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_test_01_contracts_migrations_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-test-01-solutions-contracts-and-migration-checks">SQL-TEST-01 Solutions — Contracts and Migration Checks<a class="heading-anchor" href="#solution-1--sql-test-01-solutions-contracts-and-migration-checks" aria-label="Link to this section">#</a></h3>
+<p>Run:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql</code></pre>
+<p>The solution rolls back its schema and uses only PostgreSQL catalogs.</p>
+<h4 id="solution-1--exercise-1-migration-and-currency-contract">Exercise 1 — Migration and currency contract<a class="heading-anchor" href="#solution-1--exercise-1-migration-and-currency-contract" aria-label="Link to this section">#</a></h4>
+<p>The exact manifest is <code>ARRAY[1,2,3]</code>. The column contract checks information schema type <code>character</code>, length 3, <code>NOT NULL</code>, and a USD default. A production contract should additionally define ISO vocabulary, conversion policy, and whether totals may combine currencies.</p>
+<h4 id="solution-1--exercise-2-duplicate-producer-keys">Exercise 2 — Duplicate producer keys<a class="heading-anchor" href="#solution-1--exercise-2-duplicate-producer-keys" aria-label="Link to this section">#</a></h4>
+<p>The detail query returns one row per duplicate key group and labels its count <code>participating_rows</code>. The summary wraps that query and expects one duplicate group. Counting all rows with a window would answer a different grain.</p>
+<p>Raw staging intentionally permits duplicates so the contract test can observe them. Curated storage should add the appropriate key only after a duplicate resolution policy is explicit.</p>
+<h4 id="solution-1--exercise-3-constraint-contracts">Exercise 3 — Constraint contracts<a class="heading-anchor" href="#solution-1--exercise-3-constraint-contracts" aria-label="Link to this section">#</a></h4>
+<p>The solution searches <code>pg_constraint</code> by schema, relation, type, and rendered definition rather than relying on an auto-generated name. A more rigorous helper can inspect <code>conkey</code> attribute numbers directly. Test semantic properties while allowing harmless naming differences.</p>
+<p>Primary keys, foreign keys, checks, defaults, ownership, privileges, indexes, and RLS policies may all be part of a migration contract.</p>
+<h4 id="solution-1--exercise-4-zero-line-reconciliation">Exercise 4 — Zero-line reconciliation<a class="heading-anchor" href="#solution-1--exercise-4-zero-line-reconciliation" aria-label="Link to this section">#</a></h4>
+<p>A LEFT JOIN retains orders with no line aggregate. <code>COALESCE(line_total, 0)</code> implements the stated rule that no lines sum to numeric zero. Without that business rule, missing may need to remain NULL and fail separately. <code>IS DISTINCT FROM</code> compares NULL safely.</p>
+<h4 id="solution-1--exercise-5-harness-reasoning">Exercise 5 — Harness reasoning<a class="heading-anchor" href="#solution-1--exercise-5-harness-reasoning" aria-label="Link to this section">#</a></h4>
+<p>Fixtures belong to this test module, carry deterministic keys/content tags, and live in a rollback-isolated schema. A negative control proves failure detection. CI requires raised errors plus <code>ON_ERROR_STOP=1</code>; human-readable failure rows alone can still exit zero.</p>
+<p>Tests must never reset production/shared schemas. Use a disposable database, per-run schema/database, or transaction whose code does not require commits.</p>
+<h4 id="solution-1--exercise-6-assert-the-intended-error">Exercise 6 — Assert the intended error<a class="heading-anchor" href="#solution-1--exercise-6-assert-the-intended-error" aria-label="Link to this section">#</a></h4>
+<p>Wrap the duplicate insert in a nested block, require <code>unique_violation</code> (SQLSTATE <code>23505</code>), and raise if the insert succeeds. Optionally inspect <code>CONSTRAINT_NAME</code> with <code>GET STACKED DIAGNOSTICS</code> when the exact stable constraint is contractual; do not accept every integrity error as proof of this rule.</p>
+<p>Full server messages vary with version, locale, detail, and object names. Matching them makes tests brittle, while <code>WHEN OTHERS</code> can falsely pass on permissions, missing objects, or syntax defects.</p>
+<h4 id="solution-1--exercise-7-table-driven-boundaries">Exercise 7 — Table-driven boundaries<a class="heading-anchor" href="#solution-1--exercise-7-table-driven-boundaries" aria-label="Link to this section">#</a></h4>
+<p>Represent cases as rows with case ID, input fields, and expected accept/reject or normalized result. Cover just below, exact, and just above numeric/date bounds; NULL versus empty; Unicode normalization/case/length; malformed values; and arithmetic overflow/rounding.</p>
+<p>Execute each case in an isolated subtransaction when rejection is expected and record observed SQLSTATE. Finally assert every case ran exactly once and matched its expected outcome so an accidentally filtered case cannot disappear.</p>
+<h4 id="solution-1--exercise-8-deterministic-concurrency-test">Exercise 8 — Deterministic concurrency test<a class="heading-anchor" href="#solution-1--exercise-8-deterministic-concurrency-test" aria-label="Link to this section">#</a></h4>
+<p>Use two independent sessions because one PostgreSQL transaction cannot observe every competing-transaction anomaly. Establish fixture state, set short <code>lock_timeout</code>/<code>statement_timeout</code>, coordinate named barriers, perform the interleaving, commit/rollback explicitly, and assert final rows plus errors.</p>
+<p>Avoid arbitrary sleeps as the only synchronization—they create flaky tests. Use locks/advisory barriers or a harness that waits for observable session state, capture both session logs, and always clean a disposable target after failure.</p>
+<h4 id="solution-1--exercise-9-stable-schema-fingerprint">Exercise 9 — Stable schema fingerprint<a class="heading-anchor" href="#solution-1--exercise-9-stable-schema-fingerprint" aria-label="Link to this section">#</a></h4>
+<p>Canonicalize ordered semantic rows for columns/types/defaults/nullability, constraints and referenced columns, indexes/predicates/operator classes, privileges/policies, and routine signatures/attributes. Compare expected and observed rows directly before hashing so drift remains diagnosable.</p>
+<p>Exclude OIDs, relation file identifiers, statistics, timestamps, and auto-generated names unless explicitly contractual. Test both missing and unexpected objects; a one-way expected-subset check misses accidental exposure.</p>
+<h4 id="solution-1--exercise-10-destructive-migration-rehearsal">Exercise 10 — Destructive migration rehearsal<a class="heading-anchor" href="#solution-1--exercise-10-destructive-migration-rehearsal" aria-label="Link to this section">#</a></h4>
+<p>Restore a representative, access-isolated backup to a disposable database, record tool/server versions and baseline contracts, run the exact migration, then reconcile counts/checksums/rejected keys and execute critical read/write queries with compatible application versions.</p>
+<p>Measure locks, WAL, lag proxy, storage, and elapsed time. Determine whether rollback preserves new writes or whether recovery requires restore/forward fix. Archive results, approvals, cleanup, gaps, and owners; never infer production permission from a successful course fixture.</p>
+<h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>DDL that commits externally cannot be isolated by one rollback.</li>
+<li>Concurrent migration runners need serialization.</li>
+<li>Information-schema types can differ from domain/underlying type expectations.</li>
+<li>Reconciliation tolerances need explicit units and rounding rules.</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TEST-01 executable solutions</span>
+<span>\set ON_ERROR_STOP on</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_contract_test_lab;</span>
+<span> </span>
+<span>CREATE FUNCTION pro_contract_test_lab.assert_true(</span>
+<span>    p_name text,</span>
+<span>    p_condition boolean,</span>
+<span>    p_detail text</span>
+<span>)</span>
+<span>RETURNS void</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    IF p_condition IS DISTINCT FROM true THEN</span>
+<span>        RAISE EXCEPTION &#x27;FAIL [%]: %&#x27;, p_name, p_detail;</span>
+<span>    END IF;</span>
+<span>    RAISE NOTICE &#x27;PASS [%]&#x27;, p_name;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TABLE pro_contract_test_lab.schema_migrations (</span>
+<span>    migration_id integer PRIMARY KEY,</span>
+<span>    migration_name text NOT NULL UNIQUE</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_contract_test_lab.orders (</span>
+<span>    order_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    order_key text NOT NULL UNIQUE,</span>
+<span>    reported_total numeric(12, 2) NOT NULL,</span>
+<span>    currency_code character(3) NOT NULL DEFAULT &#x27;USD&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.schema_migrations</span>
+<span>VALUES</span>
+<span>    (1, &#x27;create_orders&#x27;),</span>
+<span>    (2, &#x27;require_total&#x27;),</span>
+<span>    (3, &#x27;add_currency_code&#x27;);</span>
+<span> </span>
+<span>-- Exercise 1.</span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;versions 1-3 exact&#x27;,</span>
+<span>    (</span>
+<span>        SELECT array_agg(sm.migration_id ORDER BY sm.migration_id)</span>
+<span>        FROM pro_contract_test_lab.schema_migrations AS sm</span>
+<span>    ) = ARRAY[1, 2, 3],</span>
+<span>    &#x27;unexpected migration sequence&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;currency contract&#x27;,</span>
+<span>    EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM information_schema.columns AS c</span>
+<span>        WHERE c.table_schema = &#x27;pro_contract_test_lab&#x27;</span>
+<span>          AND c.table_name = &#x27;orders&#x27;</span>
+<span>          AND c.column_name = &#x27;currency_code&#x27;</span>
+<span>          AND c.data_type = &#x27;character&#x27;</span>
+<span>          AND c.character_maximum_length = 3</span>
+<span>          AND c.is_nullable = &#x27;NO&#x27;</span>
+<span>          AND c.column_default LIKE &#x27;%USD%&#x27;</span>
+<span>    ),</span>
+<span>    &#x27;currency_code type, nullability, length, or default drifted&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>-- Exercise 2: raw producer data can contain duplicates before validation.</span>
+<span>CREATE TABLE pro_contract_test_lab.raw_orders (</span>
+<span>    source_row_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    source_order_key text NOT NULL,</span>
+<span>    payload_total numeric(12, 2)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.raw_orders (</span>
+<span>    source_order_key, payload_total</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (&#x27;ORD-100&#x27;, 10.00),</span>
+<span>    (&#x27;ORD-100&#x27;, 10.00),</span>
+<span>    (&#x27;ORD-101&#x27;, 0.00);</span>
+<span> </span>
+<span>SELECT</span>
+<span>    ro.source_order_key,</span>
+<span>    COUNT(*) AS participating_rows</span>
+<span>FROM pro_contract_test_lab.raw_orders AS ro</span>
+<span>GROUP BY ro.source_order_key</span>
+<span>HAVING COUNT(*) &gt; 1</span>
+<span>ORDER BY ro.source_order_key;</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;one duplicate key group detected&#x27;,</span>
+<span>    (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM (</span>
+<span>            SELECT ro.source_order_key</span>
+<span>            FROM pro_contract_test_lab.raw_orders AS ro</span>
+<span>            GROUP BY ro.source_order_key</span>
+<span>            HAVING COUNT(*) &gt; 1</span>
+<span>        ) AS duplicate_groups</span>
+<span>    ) = 1,</span>
+<span>    &#x27;expected one duplicate source_order_key group&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>-- Exercise 3: use catalog properties rather than generated names.</span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;order key unique&#x27;,</span>
+<span>    EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pg_catalog.pg_constraint AS con</span>
+<span>        JOIN pg_catalog.pg_class AS rel</span>
+<span>          ON rel.oid = con.conrelid</span>
+<span>        JOIN pg_catalog.pg_namespace AS n</span>
+<span>          ON n.oid = rel.relnamespace</span>
+<span>        WHERE n.nspname = &#x27;pro_contract_test_lab&#x27;</span>
+<span>          AND rel.relname = &#x27;orders&#x27;</span>
+<span>          AND con.contype = &#x27;u&#x27;</span>
+<span>          AND pg_catalog.pg_get_constraintdef(con.oid)</span>
+<span>              LIKE &#x27;UNIQUE (order_key)%&#x27;</span>
+<span>    ),</span>
+<span>    &#x27;orders.order_key unique contract missing&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>-- Exercise 4: LEFT JOIN and COALESCE distinguish no lines from nonzero lines.</span>
+<span>CREATE TABLE pro_contract_test_lab.order_lines (</span>
+<span>    line_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    order_id bigint NOT NULL</span>
+<span>        REFERENCES pro_contract_test_lab.orders (order_id),</span>
+<span>    amount numeric(12, 2) NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.orders (order_key, reported_total)</span>
+<span>VALUES (&#x27;ORD-200&#x27;, 5.00), (&#x27;ORD-201&#x27;, 0.00);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.order_lines (order_id, amount)</span>
+<span>SELECT o.order_id, 5.00</span>
+<span>FROM pro_contract_test_lab.orders AS o</span>
+<span>WHERE o.order_key = &#x27;ORD-200&#x27;;</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;zero-line reconciliation&#x27;,</span>
+<span>    NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_contract_test_lab.orders AS o</span>
+<span>        LEFT JOIN (</span>
+<span>            SELECT ol.order_id, SUM(ol.amount) AS line_total</span>
+<span>            FROM pro_contract_test_lab.order_lines AS ol</span>
+<span>            GROUP BY ol.order_id</span>
+<span>        ) AS totals</span>
+<span>          ON totals.order_id = o.order_id</span>
+<span>        WHERE o.reported_total</span>
+<span>              IS DISTINCT FROM COALESCE(totals.line_total, 0::numeric)</span>
+<span>    ),</span>
+<span>    &#x27;reported total differs from line total including zero-line orders&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>-- Exercise 5: every assertion raises on failure under ON_ERROR_STOP, fixtures</span>
+<span>-- live in this rollback-isolated schema, and earlier negative controls prove</span>
+<span>-- the harness can fail.</span>
+<span> </span>
+<span>-- Exercise 6: require the intended SQLSTATE category and fail if no error or a</span>
+<span>-- different error occurs. Full localized error text is deliberately ignored.</span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_contract_test_lab.orders (</span>
+<span>            order_key, reported_total</span>
+<span>        )</span>
+<span>        VALUES (&#x27;ORD-200&#x27;, 5.00);</span>
+<span>        RAISE EXCEPTION &#x27;duplicate order key unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN unique_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected unique violation observed&#x27;;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- Exercise 7: table-driven exact-boundary cases. The expected outcome is data,</span>
+<span>-- so an accidentally omitted or misclassified case is visible.</span>
+<span>CREATE TABLE pro_contract_test_lab.boundary_probe (</span>
+<span>    quantity integer NOT NULL CHECK (quantity BETWEEN 1 AND 100)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_contract_test_lab.boundary_results (</span>
+<span>    case_id text PRIMARY KEY,</span>
+<span>    expected_accept boolean NOT NULL,</span>
+<span>    observed_accept boolean NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>DECLARE</span>
+<span>    test_case record;</span>
+<span>    accepted boolean;</span>
+<span>BEGIN</span>
+<span>    FOR test_case IN</span>
+<span>        SELECT *</span>
+<span>        FROM (</span>
+<span>            VALUES</span>
+<span>                (&#x27;below&#x27;::text, 0, false),</span>
+<span>                (&#x27;lower&#x27;, 1, true),</span>
+<span>                (&#x27;upper&#x27;, 100, true),</span>
+<span>                (&#x27;above&#x27;, 101, false)</span>
+<span>        ) AS cases(case_id, quantity, expected_accept)</span>
+<span>        ORDER BY case_id</span>
+<span>    LOOP</span>
+<span>        accepted := true;</span>
+<span>        BEGIN</span>
+<span>            INSERT INTO pro_contract_test_lab.boundary_probe (quantity)</span>
+<span>            VALUES (test_case.quantity);</span>
+<span>        EXCEPTION</span>
+<span>            WHEN check_violation THEN</span>
+<span>                accepted := false;</span>
+<span>        END;</span>
+<span> </span>
+<span>        INSERT INTO pro_contract_test_lab.boundary_results (</span>
+<span>            case_id, expected_accept, observed_accept</span>
+<span>        )</span>
+<span>        VALUES (test_case.case_id, test_case.expected_accept, accepted);</span>
+<span>    END LOOP;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;all quantity boundaries match&#x27;,</span>
+<span>    NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_contract_test_lab.boundary_results AS r</span>
+<span>        WHERE r.expected_accept IS DISTINCT FROM r.observed_accept</span>
+<span>    ),</span>
+<span>    &#x27;a boundary case differed from its expected acceptance&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>-- Exercise 8: concurrency needs two independent sessions, named barriers,</span>
+<span>-- bounded timeouts, captured outcomes, deterministic final assertions, and</span>
+<span>-- cleanup. One transaction cannot simulate every conflicting snapshot.</span>
+<span> </span>
+<span>-- Exercise 9: inspect ordered semantic properties; omit OIDs/statistics and</span>
+<span>-- compare rows before hashing so any drift remains diagnosable.</span>
+<span>SELECT</span>
+<span>    c.ordinal_position,</span>
+<span>    c.column_name,</span>
+<span>    c.data_type,</span>
+<span>    c.is_nullable,</span>
+<span>    c.column_default</span>
+<span>FROM information_schema.columns AS c</span>
+<span>WHERE c.table_schema = &#x27;pro_contract_test_lab&#x27;</span>
+<span>  AND c.table_name = &#x27;orders&#x27;</span>
+<span>ORDER BY c.ordinal_position;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    con.contype,</span>
+<span>    pg_catalog.pg_get_constraintdef(con.oid) AS definition</span>
+<span>FROM pg_catalog.pg_constraint AS con</span>
+<span>JOIN pg_catalog.pg_class AS rel</span>
+<span>  ON rel.oid = con.conrelid</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = rel.relnamespace</span>
+<span>WHERE n.nspname = &#x27;pro_contract_test_lab&#x27;</span>
+<span>  AND rel.relname = &#x27;orders&#x27;</span>
+<span>ORDER BY con.contype, definition;</span>
+<span> </span>
+<span>-- Exercise 10: destructive migration validation belongs in a restored,</span>
+<span>-- disposable database with baseline/post counts, checksums, rejected keys,</span>
+<span>-- critical application queries, elapsed time, rollback evidence, and approval.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-ops-01.html"><small>Previous lesson</small><strong>sql-ops-01</strong><span>Index Types, Statistics, and Maintenance Lifecycle</span></a>
+        <a class="nav-card next" href="sql-analytics-01.html"><small>Next lesson</small><strong>sql-analytics-01</strong><span>Reusable Analytical Query Patterns</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-test-01";
+    const LEARNER_PATH = "sql/professional/lessons/sql_test_01_contracts_migrations.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

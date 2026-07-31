@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-test-01 · Test Architecture, Doubles, and Generative Testing · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-test-01</p>
+        <h1>Test Architecture, Doubles, and Generative Testing</h1>
+        <p class="hero-copy">Professional Python engineering</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">180 minutes</span>
+          <span class="tag">professional setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-10.html">python-10</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_test_01_architecture_generative.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_test_01_architecture_generative.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_test_01_architecture_generative.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_test_01_architecture_generative.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--test-architecture-doubles-and-generative-testing">Test architecture, doubles, and generative testing<a class="heading-anchor" href="#guide--test-architecture-doubles-and-generative-testing" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-test-01</code></p>
+<p><strong>Level:</strong> intermediate</p>
+<p><strong>Estimated time:</strong> 180–240 minutes</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Catalog prerequisite:</strong> <code>python-10</code></li>
+<li>Python Days 1–10, especially functions, exceptions, files, and pytest</li>
+<li>Bridge Day 5 is a useful database-specific follow-on, not a prerequisite</li>
+<li>The <code>professional</code> dependency group for Hypothesis</li>
+</ul>
+<p>The lab uses temporary files, injected clocks, in-memory fakes, and deterministic Hypothesis settings. It opens no network connection and creates no Hypothesis example database.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>You will be able to:</p>
+<ol>
+<li>Choose fixture scope from ownership and lifetime.</li>
+<li>Patch environment state inside a restoration boundary.</li>
+<li>Replace real time with a <code>Clock</code> seam.</li>
+<li>Choose a fake, mock, or real-local implementation deliberately.</li>
+<li>Reuse one contract suite across an I/O fake and implementation.</li>
+<li>State properties before generating examples.</li>
+<li>Interpret a shrunk counterexample and turn it into a regression test.</li>
+</ol>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Fixture:</strong> setup data or resources with a defined lifetime.</li>
+<li><strong>Test seam:</strong> a dependency boundary that can be replaced or injected.</li>
+<li><strong>Fake:</strong> a working, simplified implementation with state and behavior.</li>
+<li><strong>Mock:</strong> an interaction recorder used to assert a narrow call contract.</li>
+<li><strong>Stub:</strong> a fixed response provider.</li>
+<li><strong>Monkeypatch:</strong> a temporary replacement of process or module state.</li>
+<li><strong>Contract test:</strong> the same behavior requirements applied to implementations of one boundary.</li>
+<li><strong>Property:</strong> an invariant that should hold for a broad input domain.</li>
+<li><strong>Generator/strategy:</strong> a description of values Hypothesis may create.</li>
+<li><strong>Shrinking:</strong> reducing a failure to a smaller counterexample.</li>
+<li><strong>Example database:</strong> Hypothesis&#x27;s optional persisted failure history; this lesson disables it to keep the repository clean.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>The learner file injects <code>FixedClock(12.0)</code> into a TTL decision. The test does not sleep and cannot become slow under load.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_test_01_architecture_generative.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_test_01_architecture_generative.py</code></pre>
+<p>The reference solution builds:</p>
+<pre><code class="language-text">ExpiringCache -&gt; KeyValueStore Protocol -&gt; MemoryStore fake
+                                      \-&gt; JsonFileStore real-local boundary
+              -&gt; Clock Protocol       -&gt; FixedClock
+SessionService -&gt; AuditSink Protocol  -&gt; one narrow mock in the test</code></pre>
+<p>Both stores receive the same create/read/update/delete contract. Temporary-file tests prove JSON and replacement behavior that the fake cannot prove.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--1-choose-fixture-lifetime">1. Choose fixture lifetime<a class="heading-anchor" href="#guide--1-choose-fixture-lifetime" aria-label="Link to this section">#</a></h5>
+<p>For each resource—immutable input rows, mutable in-memory store, temporary JSON file, and database connection—choose function, class, module, or session scope. Prefer the narrowest lifetime that is fast enough and keeps tests independent.</p>
+<h5 id="guide--2-complete-interval-merging">2. Complete interval merging<a class="heading-anchor" href="#guide--2-complete-interval-merging" aria-label="Link to this section">#</a></h5>
+<p>Implement <code>merge_intervals</code>. Add examples for empty input, reversed endpoints, adjacent intervals, duplicates, and nesting.</p>
+<p>Then express properties:</p>
+<ul>
+<li>output is sorted,</li>
+<li>output intervals no longer touch,</li>
+<li>every original integer point remains covered, and</li>
+<li>no new point is created.</li>
+</ul>
+<h5 id="guide--3-use-hypothesis-meaningfully">3. Use Hypothesis meaningfully<a class="heading-anchor" href="#guide--3-use-hypothesis-meaningfully" aria-label="Link to this section">#</a></h5>
+<p>Generate lists of bounded integer endpoint pairs. Use:</p>
+<pre><code class="language-python">settings(max_examples=100, derandomize=True, database=None, deadline=None)</code></pre>
+<p>Temporarily introduce a bug such as failing to merge adjacency. Read the smallest failing example. Restore the implementation and keep that example as a named regression test if it communicates an important rule.</p>
+<h5 id="guide--4-compare-test-doubles">4. Compare test doubles<a class="heading-anchor" href="#guide--4-compare-test-doubles" aria-label="Link to this section">#</a></h5>
+<p>Complete <code>choose_double</code>. Use a fake for the stateful store, a mock only for one audit interaction, and a real temporary file for serialization behavior. Explain why mocking every store method couples tests to implementation steps.</p>
+<h5 id="guide--5-patch-and-restore-process-state">5. Patch and restore process state<a class="heading-anchor" href="#guide--5-patch-and-restore-process-state" aria-label="Link to this section">#</a></h5>
+<p>Use <code>patch.dict(os.environ, ..., clear=False)</code> or pytest&#x27;s <code>monkeypatch</code> fixture to change cache settings for one test. Assert the original environment is restored afterward. Prefer passing a mapping directly when the API permits it.</p>
+<h5 id="guide--6-add-a-contract-failure">6. Add a contract failure<a class="heading-anchor" href="#guide--6-add-a-contract-failure" aria-label="Link to this section">#</a></h5>
+<p>Create a deliberately broken store that never overwrites values. Run the shared contract and locate the exact violated behavior. Contract tests complement, rather than replace, implementation-specific failure tests.</p>
+<h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
+<p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
+<h5 id="guide--exercise-7-model-a-state-machine">Exercise 7 — model a state machine<a class="heading-anchor" href="#guide--exercise-7-model-a-state-machine" aria-label="Link to this section">#</a></h5>
+<p>Create a deterministic rule-based state machine for <code>ExpiringCache</code>: put, get, delete, advance time, and overwrite. Compare every action with a simple in-memory model.</p>
+<p><strong>Progressive hint:</strong> Keep keys/values bounded, use the injected FixedClock, and assert observable state after each rule rather than inspecting implementation fields.</p>
+<h5 id="guide--exercise-8-add-metamorphic-tests">Exercise 8 — add metamorphic tests<a class="heading-anchor" href="#guide--exercise-8-add-metamorphic-tests" aria-label="Link to this section">#</a></h5>
+<p>Write metamorphic relations for interval merging when the exact output is inconvenient: input permutation, duplicate insertion, endpoint translation, and applying merge twice.</p>
+<p><strong>Progressive hint:</strong> A valid relation transforms input and predicts a corresponding output relationship without copying the implementation.</p>
+<h5 id="guide--exercise-9-evaluate-mutation-test-survivors">Exercise 9 — evaluate mutation-test survivors<a class="heading-anchor" href="#guide--exercise-9-evaluate-mutation-test-survivors" aria-label="Link to this section">#</a></h5>
+<p>Make three deliberate mutations: change expiry <code>&lt;</code> to <code>&lt;=</code>, stop merging adjacent intervals, and skip store overwrite. Predict which test should fail and add a focused test for any survivor.</p>
+<p><strong>Progressive hint:</strong> Mutation testing evaluates the tests, not code quality by itself. Use tiny manual mutations if no optional tool is installed.</p>
+<h5 id="guide--exercise-10-test-concurrency-without-timing-races">Exercise 10 — test concurrency without timing races<a class="heading-anchor" href="#guide--exercise-10-test-concurrency-without-timing-races" aria-label="Link to this section">#</a></h5>
+<p>Design a two-worker cache/store test using barriers/events to force a specific interleaving. State whether the contract promises thread safety; if it does not, test the synchronization wrapper instead.</p>
+<p><strong>Progressive hint:</strong> Control checkpoints explicitly. Do not assert that a race happens within a tiny sleep window.</p>
+<h5 id="guide--exercise-11-triage-a-flaky-test">Exercise 11 — triage a flaky test<a class="heading-anchor" href="#guide--exercise-11-triage-a-flaky-test" aria-label="Link to this section">#</a></h5>
+<p>Take a test that depends on wall-clock sleep, random data, shared files, or unordered output. Classify the cause, collect repeat evidence, and replace the unstable boundary rather than adding retries.</p>
+<p><strong>Progressive hint:</strong> Control clock/randomness, isolate storage, sort only when order is not contractual, and keep the original failure seed/input.</p>
+<h5 id="guide--exercise-12-design-a-layered-verification-portfolio">Exercise 12 — design a layered verification portfolio<a class="heading-anchor" href="#guide--exercise-12-design-a-layered-verification-portfolio" aria-label="Link to this section">#</a></h5>
+<p>Map one feature across pure unit/property tests, shared store contract, real temporary-file integration, CLI/process smoke, and optional external system test. Define what each layer proves and does not prove.</p>
+<p><strong>Progressive hint:</strong> Keep the default suite offline and fast. Use the fewest expensive tests that cover serialization, process, or external boundaries.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>No test sleeps or depends on wall-clock time.</li>
+<li>Mutable fixtures cannot leak between tests.</li>
+<li>Environment patches are restored.</li>
+<li>Fake and real-local stores pass the same contract.</li>
+<li>The mock asserts one meaningful audit interaction, not internal call order.</li>
+<li>Hypothesis runs at least 100 examples with <code>database=None</code>.</li>
+<li>Interval properties verify coverage, ordering, and disjoint output.</li>
+<li>A malformed JSON file fails visibly.</li>
+</ul>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
+.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_test_01_architecture_generative -v</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_test_01_architecture_generative -v</code></pre>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>A suite passes alone but fails together:</strong> shared mutable fixture state escaped its intended lifetime.</li>
+<li><strong>A time test takes seconds:</strong> production code called the global clock or sleep rather than an injected seam.</li>
+<li><strong>A mock breaks after harmless refactoring:</strong> the test asserted call order instead of observable behavior.</li>
+<li><strong>The fake passes but production fails:</strong> the fake did not share a contract with a real-local boundary.</li>
+<li><strong>Property tests are random fuzzing:</strong> no invariant was stated. Define what must remain true before selecting strategies.</li>
+<li><strong>Hypothesis creates <code>.hypothesis/</code>:</strong> the example database was not disabled for this repository exercise.</li>
+<li><strong>A failing case is huge:</strong> inspect Hypothesis&#x27;s final shrunk example, not the first generated input shown during verbose debugging.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Apply the same contract/fake pattern to Bridge Day 5. Continue to <code>python-lang-01</code> to make test seams precise with generics, Protocols, overloads, and runtime validation.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_test_01_architecture_generative.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_test_01_architecture_generative.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-test-01 learner lab: test architecture and generative testing.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Callable, Iterable</span>
+<span>from typing import Protocol</span>
+<span> </span>
+<span> </span>
+<span>class Clock(Protocol):</span>
+<span>    &quot;&quot;&quot;Small seam that avoids sleeping in tests.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def now(self) -&gt; float:</span>
+<span>        &quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>def ttl_is_valid(created_at: float, ttl_seconds: float, clock: Clock) -&gt; bool:</span>
+<span>    &quot;&quot;&quot;Worked example: test time through an injected clock.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if ttl_seconds &lt;= 0:</span>
+<span>        raise ValueError(&quot;ttl_seconds must be positive&quot;)</span>
+<span>    return clock.now() &lt; created_at + ttl_seconds</span>
+<span> </span>
+<span> </span>
+<span>def merge_intervals(intervals: Iterable[tuple[int, int]]) -&gt; list[tuple[int, int]]:</span>
+<span>    &quot;&quot;&quot;Normalize and merge closed integer intervals.</span>
+<span> </span>
+<span>    TODO: normalize reversed endpoints, sort them, and merge overlapping or</span>
+<span>    touching intervals. This pure function will become the Hypothesis target.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete merge_intervals&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def choose_double(boundary: str) -&gt; str:</span>
+<span>    &quot;&quot;&quot;Choose ``fake``, ``mock``, or ``real-local`` for a test boundary.</span>
+<span> </span>
+<span>    TODO: return a fake for stateful collaboration, a mock for one interaction,</span>
+<span>    and a real local implementation for a file-format contract. Reject unknown</span>
+<span>    boundary labels.</span>
+<span>    &quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete choose_double&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class FixedClock:</span>
+<span>    def __init__(self, value: float) -&gt; None:</span>
+<span>        self.value = value</span>
+<span> </span>
+<span>    def now(self) -&gt; float:</span>
+<span>        return self.value</span>
+<span> </span>
+<span> </span>
+<span>def self_check() -&gt; None:</span>
+<span>    clock = FixedClock(12.0)</span>
+<span>    print(&quot;Worked clock seam:&quot;, ttl_is_valid(10.0, 3.0, clock))</span>
+<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
+<span>        (&quot;interval property target&quot;, lambda: merge_intervals([(5, 2), (3, 8)])),</span>
+<span>        (&quot;double choice&quot;, lambda: choose_double(&quot;stateful-collaborator&quot;)),</span>
+<span>    )</span>
+<span>    for label, call in checks:</span>
+<span>        try:</span>
+<span>            print(label, &quot;-&gt;&quot;, call())</span>
+<span>        except NotImplementedError:</span>
+<span>            print(&quot;TODO:&quot;, label)</span>
+<span> </span>
+<span> </span>
+<span># === Numbered professional practice ===</span>
+<span>#</span>
+<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
+<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
+<span># Full acceptance checks and progressive hints:</span>
+<span># companion-guides/py_test_01_architecture_generative.md</span>
+<span>#</span>
+<span># Exercise 1 — Choose fixture lifetime</span>
+<span># Prompt: For each resource—immutable input rows, mutable in-memory store, temporary JSON</span>
+<span># file, and database connection—choose function, class, module, or session scope. Prefer</span>
+<span># the narrowest lifetime that is fast enough and keeps tests independent.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 2 — Complete interval merging</span>
+<span># Prompt: Implement `merge_intervals`. Add examples for empty input, reversed endpoints,</span>
+<span># adjacent intervals, duplicates, and nesting. Then express properties: - output is</span>
+<span># sorted, - output intervals no longer touch, - every original integer point remains</span>
+<span># covered, and - no new point is created.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 3 — Use Hypothesis meaningfully</span>
+<span># Prompt: Generate lists of bounded integer endpoint pairs with 100 deterministic examples,</span>
+<span># no example database, and no deadline. Introduce an adjacency bug briefly, inspect the</span>
+<span># smallest counterexample, restore the implementation, and keep a useful regression case.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 4 — Compare test doubles</span>
+<span># Prompt: Complete `choose_double`. Use a fake for the stateful store, a mock only for one</span>
+<span># audit interaction, and a real temporary file for serialization behavior. Explain why</span>
+<span># mocking every store method couples tests to implementation steps.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 5 — Patch and restore process state</span>
+<span># Prompt: Use `patch.dict(os.environ, ..., clear=False)` or pytest&#x27;s `monkeypatch` fixture</span>
+<span># to change cache settings for one test. Assert the original environment is restored</span>
+<span># afterward. Prefer passing a mapping directly when the API permits it.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 6 — Add a contract failure</span>
+<span># Prompt: Create a deliberately broken store that never overwrites values. Run the shared</span>
+<span># contract and locate the exact violated behavior. Contract tests complement, rather than</span>
+<span># replace, implementation-specific failure tests.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 7 — model a state machine</span>
+<span># Prompt: Create a deterministic rule-based state machine for `ExpiringCache`: put, get,</span>
+<span># delete, advance time, and overwrite. Compare every action with a simple in-memory model.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 8 — add metamorphic tests</span>
+<span># Prompt: Write metamorphic relations for interval merging when the exact output is</span>
+<span># inconvenient: input permutation, duplicate insertion, endpoint translation, and applying</span>
+<span># merge twice.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 9 — evaluate mutation-test survivors</span>
+<span># Prompt: Make three deliberate mutations: change expiry `&lt;` to `&lt;=`, stop merging</span>
+<span># adjacent intervals, and skip store overwrite. Predict which test should fail and add a</span>
+<span># focused test for any survivor.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 10 — test concurrency without timing races</span>
+<span># Prompt: Design a two-worker cache/store test using barriers/events to force a specific</span>
+<span># interleaving. State whether the contract promises thread safety; if it does not, test</span>
+<span># the synchronization wrapper instead.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 11 — triage a flaky test</span>
+<span># Prompt: Take a test that depends on wall-clock sleep, random data, shared files, or</span>
+<span># unordered output. Classify the cause, collect repeat evidence, and replace the unstable</span>
+<span># boundary rather than adding retries.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 12 — design a layered verification portfolio</span>
+<span># Prompt: Map one feature across pure unit/property tests, shared store contract, real</span>
+<span># temporary-file integration, CLI/process smoke, and optional external system test. Define</span>
+<span># what each layer proves and does not prove.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># === End numbered professional practice ===</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    self_check()</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_test_01_architecture_generative_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_test_01_architecture_generative_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--test-architecture-and-generative-testing-solution-reasoning">Test architecture and generative testing solution reasoning<a class="heading-anchor" href="#solution-1--test-architecture-and-generative-testing-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Attempt <code>python-test-01</code> before reading the executable <a href="python-test-01.html#solution-2"><code>py_test_01_architecture_generative_solution.py</code></a>.</p>
+<p>The solution separates pure logic, stateful fakes, real-local boundaries, and one-interaction mocks. <code>Clock</code> removes real waiting; <code>KeyValueStore</code> lets the same contract exercise an in-memory fake and a JSON file implementation. <code>patch.dict</code> is scoped so process environment state is restored after a test.</p>
+<p><code>merge_intervals</code> is the property-based target because many examples can miss reversed endpoints, adjacency, nesting, duplicates, and empty input. Hypothesis generates those combinations and shrinks a failure toward the smallest useful counterexample. Its test disables the example database, uses deterministic generation, and has no deadline, so it creates no repository cache and avoids machine-speed failures.</p>
+<p>A fake is valuable when behavior and state matter across several calls. A mock is useful for one narrow interaction such as “audit once.” A real temporary file is the right level for serialization and filesystem contract behavior. Fixture lifetime should be the narrowest scope that preserves independence; sharing mutable session state makes failures order-dependent.</p>
+<p>Edge cases include expiry exactly at the deadline, malformed persisted JSON, environment values that are blank or nonnumeric, interval endpoints in reverse order, and a backend that passes fake-only tests but violates the real contract.</p>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Use this map after an honest attempt. The executable implementation remains <a href="python-test-01.html#solution-2"><code>py_test_01_architecture_generative_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
+<h5 id="solution-1--exercise-1-choose-fixture-lifetime">Exercise 1 — Choose fixture lifetime<a class="heading-anchor" href="#solution-1--exercise-1-choose-fixture-lifetime" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> For each resource—immutable input rows, mutable in-memory store, temporary JSON file, and database connection—choose function, class, module, or session scope. Prefer the narrowest lifetime that is fast enough and keeps tests independent.</p>
+<p><strong>Reference reasoning:</strong> Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-2-complete-interval-merging">Exercise 2 — Complete interval merging<a class="heading-anchor" href="#solution-1--exercise-2-complete-interval-merging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Implement <code>merge_intervals</code>. Add examples for empty input, reversed endpoints, adjacent intervals, duplicates, and nesting. Then express properties: - output is sorted, - output intervals no longer touch, - every original integer point remains covered, and - no new point is created.</p>
+<p><strong>Reference reasoning:</strong> Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-3-use-hypothesis-meaningfully">Exercise 3 — Use Hypothesis meaningfully<a class="heading-anchor" href="#solution-1--exercise-3-use-hypothesis-meaningfully" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Generate lists of bounded integer endpoint pairs with 100 deterministic examples, no example database, and no deadline. Introduce an adjacency bug briefly, inspect the smallest counterexample, restore the implementation, and keep a useful named regression case.</p>
+<p><strong>Reference reasoning:</strong> Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-4-compare-test-doubles">Exercise 4 — Compare test doubles<a class="heading-anchor" href="#solution-1--exercise-4-compare-test-doubles" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Complete <code>choose_double</code>. Use a fake for the stateful store, a mock only for one audit interaction, and a real temporary file for serialization behavior. Explain why mocking every store method couples tests to implementation steps.</p>
+<p><strong>Reference reasoning:</strong> Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-5-patch-and-restore-process-state">Exercise 5 — Patch and restore process state<a class="heading-anchor" href="#solution-1--exercise-5-patch-and-restore-process-state" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Use <code>patch.dict(os.environ, ..., clear=False)</code> or pytest&#x27;s <code>monkeypatch</code> fixture to change cache settings for one test. Assert the original environment is restored afterward. Prefer passing a mapping directly when the API permits it.</p>
+<p><strong>Reference reasoning:</strong> Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-6-add-a-contract-failure">Exercise 6 — Add a contract failure<a class="heading-anchor" href="#solution-1--exercise-6-add-a-contract-failure" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Create a deliberately broken store that never overwrites values. Run the shared contract and locate the exact violated behavior. Contract tests complement, rather than replace, implementation-specific failure tests.</p>
+<p><strong>Reference reasoning:</strong> Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-7-model-a-state-machine">Exercise 7 — model a state machine<a class="heading-anchor" href="#solution-1--exercise-7-model-a-state-machine" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Create a deterministic rule-based state machine for <code>ExpiringCache</code>: put, get, delete, advance time, and overwrite. Compare every action with a simple in-memory model.</p>
+<p><strong>Reasoning path:</strong> Keep keys/values bounded, use the injected FixedClock, and assert observable state after each rule rather than inspecting implementation fields.</p>
+<p>The model stores value plus expiry and applies the documented boundary rule (<code>now &lt; expiry</code>, or whichever contract is chosen). Each generated command is run against model and system, then return values and surviving keys are compared. Invariants include no expired value returned and overwrite replacing both value and deadline.</p>
+<p>Use deterministic Hypothesis settings and no example database. A failing sequence should shrink to a short reproducible command list suitable for a named regression test.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-8-add-metamorphic-tests">Exercise 8 — add metamorphic tests<a class="heading-anchor" href="#solution-1--exercise-8-add-metamorphic-tests" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Write metamorphic relations for interval merging when the exact output is inconvenient: input permutation, duplicate insertion, endpoint translation, and applying merge twice.</p>
+<p><strong>Reasoning path:</strong> A valid relation transforms input and predicts a corresponding output relationship without copying the implementation.</p>
+<p>Merging is invariant to input order and duplicates, idempotent after one merge, and equivariant under adding the same integer offset to every endpoint. Generate bounded intervals, run each transformation, and compare normalized outputs. Also retain the direct coverage/no-new-points properties.</p>
+<p>Metamorphic tests complement examples; a shared wrong assumption can still infect both relation and implementation, so review the mathematical contract.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-9-evaluate-mutation-test-survivors">Exercise 9 — evaluate mutation-test survivors<a class="heading-anchor" href="#solution-1--exercise-9-evaluate-mutation-test-survivors" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Make three deliberate mutations: change expiry <code>&lt;</code> to <code>&lt;=</code>, stop merging adjacent intervals, and skip store overwrite. Predict which test should fail and add a focused test for any survivor.</p>
+<p><strong>Reasoning path:</strong> Mutation testing evaluates the tests, not code quality by itself. Use tiny manual mutations if no optional tool is installed.</p>
+<p>The expiry mutation requires an exact-deadline example, adjacency requires touching intervals, and overwrite requires two puts of one key followed by a get. Restore production code after each controlled mutation and verify the focused test passes normally and fails under mutation.</p>
+<p>Do not chase a perfect mutation score: equivalent or unreachable mutations need review. The useful output is a concrete missing behavioral assertion.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-10-test-concurrency-without-timing-races">Exercise 10 — test concurrency without timing races<a class="heading-anchor" href="#solution-1--exercise-10-test-concurrency-without-timing-races" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Design a two-worker cache/store test using barriers/events to force a specific interleaving. State whether the contract promises thread safety; if it does not, test the synchronization wrapper instead.</p>
+<p><strong>Reasoning path:</strong> Control checkpoints explicitly. Do not assert that a race happens within a tiny sleep window.</p>
+<p>Represent the unsafe read/modify/write steps with synchronization events so both workers read before either writes, then assert the documented lost-update or wrapper repair. If thread safety is out of scope, make that limitation explicit and avoid a misleading flaky stress test.</p>
+<p>For a synchronized wrapper, assert the entire compound operation is protected and invariants hold after both workers complete. Join with a generous timeout only to prevent a hung test, not as the correctness condition.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-11-triage-a-flaky-test">Exercise 11 — triage a flaky test<a class="heading-anchor" href="#solution-1--exercise-11-triage-a-flaky-test" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Take a test that depends on wall-clock sleep, random data, shared files, or unordered output. Classify the cause, collect repeat evidence, and replace the unstable boundary rather than adding retries.</p>
+<p><strong>Reasoning path:</strong> Control clock/randomness, isolate storage, sort only when order is not contractual, and keep the original failure seed/input.</p>
+<p>First prove reproducibility with repeated focused runs and capture environment, seed, worker count, and failing input. Determine whether the product behavior is nondeterministic or merely the assertion. Inject the clock/random source, use <code>tmp_path</code>, and remove order assumptions only when the API promises no order.</p>
+<p>Quarantine and retry can preserve CI temporarily but are not fixes; retain an owner and deadline if used.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-12-design-a-layered-verification-portfolio">Exercise 12 — design a layered verification portfolio<a class="heading-anchor" href="#solution-1--exercise-12-design-a-layered-verification-portfolio" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Map one feature across pure unit/property tests, shared store contract, real temporary-file integration, CLI/process smoke, and optional external system test. Define what each layer proves and does not prove.</p>
+<p><strong>Reasoning path:</strong> Keep the default suite offline and fast. Use the fewest expensive tests that cover serialization, process, or external boundaries.</p>
+<p>Pure tests cover transformation and expiry policy; the shared contract covers backend semantics; a temporary JSON adapter test proves real serialization and atomic replacement; a subprocess smoke proves packaging/CLI boundaries. External tests are explicit, credentialed, and never required for the portable default.</p>
+<p>Avoid duplicating every assertion at every layer. Assign each risk to the cheapest boundary capable of exposing it, then retain one end-to-end path for wiring evidence.</p>
+<p><strong>Common trap:</strong> Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_test_01_architecture_generative_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_test_01_architecture_generative_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-test-01.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import json</span>
+<span>import os</span>
+<span>from collections.abc import Callable, Iterable, Mapping</span>
+<span>from dataclasses import dataclass</span>
+<span>from pathlib import Path</span>
+<span>from typing import Literal, Protocol</span>
+<span> </span>
+<span> </span>
+<span>class Clock(Protocol):</span>
+<span>    def now(self) -&gt; float:</span>
+<span>        &quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>class KeyValueStore(Protocol):</span>
+<span>    def get(self, key: str) -&gt; str | None:</span>
+<span>        &quot;&quot;&quot;Return a value or ``None``.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def put(self, key: str, value: str) -&gt; None:</span>
+<span>        &quot;&quot;&quot;Create or replace a value.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def delete(self, key: str) -&gt; bool:</span>
+<span>        &quot;&quot;&quot;Delete a value and report whether it existed.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>class AuditSink(Protocol):</span>
+<span>    def record(self, event: str, subject: str) -&gt; None:</span>
+<span>        &quot;&quot;&quot;Record one domain event.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class CacheSettings:</span>
+<span>    ttl_seconds: float</span>
+<span>    namespace: str</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class FixedClock:</span>
+<span>    value: float</span>
+<span> </span>
+<span>    def now(self) -&gt; float:</span>
+<span>        return self.value</span>
+<span> </span>
+<span>    def advance(self, seconds: float) -&gt; None:</span>
+<span>        if seconds &lt; 0:</span>
+<span>            raise ValueError(&quot;cannot move a monotonic clock backward&quot;)</span>
+<span>        self.value += seconds</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class MemoryStore:</span>
+<span>    values: dict[str, str]</span>
+<span> </span>
+<span>    @classmethod</span>
+<span>    def empty(cls) -&gt; MemoryStore:</span>
+<span>        return cls({})</span>
+<span> </span>
+<span>    def get(self, key: str) -&gt; str | None:</span>
+<span>        return self.values.get(key)</span>
+<span> </span>
+<span>    def put(self, key: str, value: str) -&gt; None:</span>
+<span>        self.values[key] = value</span>
+<span> </span>
+<span>    def delete(self, key: str) -&gt; bool:</span>
+<span>        return self.values.pop(key, None) is not None</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class JsonFileStore:</span>
+<span>    &quot;&quot;&quot;Small real-local boundary used by the same contract tests as the fake.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    path: Path</span>
+<span> </span>
+<span>    def _read(self) -&gt; dict[str, str]:</span>
+<span>        if not self.path.exists():</span>
+<span>            return {}</span>
+<span>        payload = json.loads(self.path.read_text(encoding=&quot;utf-8&quot;))</span>
+<span>        if not isinstance(payload, dict) or not all(</span>
+<span>            isinstance(key, str) and isinstance(value, str) for key, value in payload.items()</span>
+<span>        ):</span>
+<span>            raise ValueError(&quot;store file must contain a string-to-string object&quot;)</span>
+<span>        return payload</span>
+<span> </span>
+<span>    def _write(self, values: Mapping[str, str]) -&gt; None:</span>
+<span>        self.path.parent.mkdir(parents=True, exist_ok=True)</span>
+<span>        temporary = self.path.with_suffix(&quot;.tmp&quot;)</span>
+<span>        temporary.write_text(</span>
+<span>            json.dumps(dict(sorted(values.items())), separators=(&quot;,&quot;, &quot;:&quot;)),</span>
+<span>            encoding=&quot;utf-8&quot;,</span>
+<span>        )</span>
+<span>        temporary.replace(self.path)</span>
+<span> </span>
+<span>    def get(self, key: str) -&gt; str | None:</span>
+<span>        return self._read().get(key)</span>
+<span> </span>
+<span>    def put(self, key: str, value: str) -&gt; None:</span>
+<span>        values = self._read()</span>
+<span>        values[key] = value</span>
+<span>        self._write(values)</span>
+<span> </span>
+<span>    def delete(self, key: str) -&gt; bool:</span>
+<span>        values = self._read()</span>
+<span>        existed = values.pop(key, None) is not None</span>
+<span>        if existed:</span>
+<span>            self._write(values)</span>
+<span>        return existed</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class ExpiringCache:</span>
+<span>    store: KeyValueStore</span>
+<span>    clock: Clock</span>
+<span>    settings: CacheSettings</span>
+<span> </span>
+<span>    def _key(self, key: str) -&gt; str:</span>
+<span>        return f&quot;{self.settings.namespace}:{key}&quot;</span>
+<span> </span>
+<span>    def put(self, key: str, value: str) -&gt; None:</span>
+<span>        payload = {</span>
+<span>            &quot;expires_at&quot;: self.clock.now() + self.settings.ttl_seconds,</span>
+<span>            &quot;value&quot;: value,</span>
+<span>        }</span>
+<span>        self.store.put(</span>
+<span>            self._key(key),</span>
+<span>            json.dumps(payload, separators=(&quot;,&quot;, &quot;:&quot;), sort_keys=True),</span>
+<span>        )</span>
+<span> </span>
+<span>    def get(self, key: str) -&gt; str | None:</span>
+<span>        storage_key = self._key(key)</span>
+<span>        raw = self.store.get(storage_key)</span>
+<span>        if raw is None:</span>
+<span>            return None</span>
+<span>        payload = json.loads(raw)</span>
+<span>        if not isinstance(payload, dict):</span>
+<span>            raise ValueError(&quot;cache payload must be an object&quot;)</span>
+<span>        expires_at = payload.get(&quot;expires_at&quot;)</span>
+<span>        value = payload.get(&quot;value&quot;)</span>
+<span>        if not isinstance(expires_at, int | float) or not isinstance(value, str):</span>
+<span>            raise ValueError(&quot;cache payload has the wrong schema&quot;)</span>
+<span>        if self.clock.now() &gt;= float(expires_at):</span>
+<span>            self.store.delete(storage_key)</span>
+<span>            return None</span>
+<span>        return value</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class SessionService:</span>
+<span>    cache: ExpiringCache</span>
+<span>    audit: AuditSink</span>
+<span> </span>
+<span>    def issue(self, user_id: str, session_id: str) -&gt; None:</span>
+<span>        if not user_id or not session_id:</span>
+<span>            raise ValueError(&quot;identifiers must not be blank&quot;)</span>
+<span>        self.cache.put(user_id, session_id)</span>
+<span>        self.audit.record(&quot;session_issued&quot;, user_id)</span>
+<span> </span>
+<span> </span>
+<span>def load_cache_settings(</span>
+<span>    environ: Mapping[str, str] | None = None,</span>
+<span>) -&gt; CacheSettings:</span>
+<span>    values = os.environ if environ is None else environ</span>
+<span>    namespace = values.get(&quot;DS60_CACHE_NAMESPACE&quot;, &quot;sessions&quot;).strip()</span>
+<span>    if not namespace:</span>
+<span>        raise ValueError(&quot;DS60_CACHE_NAMESPACE must not be blank&quot;)</span>
+<span>    try:</span>
+<span>        ttl_seconds = float(values.get(&quot;DS60_CACHE_TTL_SECONDS&quot;, &quot;60&quot;))</span>
+<span>    except ValueError as exc:</span>
+<span>        raise ValueError(&quot;DS60_CACHE_TTL_SECONDS must be numeric&quot;) from exc</span>
+<span>    if ttl_seconds &lt;= 0:</span>
+<span>        raise ValueError(&quot;DS60_CACHE_TTL_SECONDS must be positive&quot;)</span>
+<span>    return CacheSettings(ttl_seconds=ttl_seconds, namespace=namespace)</span>
+<span> </span>
+<span> </span>
+<span>def verify_store_contract(factory: Callable[[], KeyValueStore]) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Run reusable behavior checks against a fresh store implementation.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    store = factory()</span>
+<span>    assert store.get(&quot;missing&quot;) is None</span>
+<span>    assert store.delete(&quot;missing&quot;) is False</span>
+<span>    store.put(&quot;key&quot;, &quot;first&quot;)</span>
+<span>    assert store.get(&quot;key&quot;) == &quot;first&quot;</span>
+<span>    store.put(&quot;key&quot;, &quot;second&quot;)</span>
+<span>    assert store.get(&quot;key&quot;) == &quot;second&quot;</span>
+<span>    assert store.delete(&quot;key&quot;) is True</span>
+<span>    assert store.get(&quot;key&quot;) is None</span>
+<span> </span>
+<span> </span>
+<span>def merge_intervals(intervals: Iterable[tuple[int, int]]) -&gt; list[tuple[int, int]]:</span>
+<span>    &quot;&quot;&quot;Normalize and merge overlapping or touching closed intervals.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    normalized = sorted((min(left, right), max(left, right)) for left, right in intervals)</span>
+<span>    merged: list[tuple[int, int]] = []</span>
+<span>    for left, right in normalized:</span>
+<span>        if not merged or left &gt; merged[-1][1] + 1:</span>
+<span>            merged.append((left, right))</span>
+<span>            continue</span>
+<span>        previous_left, previous_right = merged[-1]</span>
+<span>        merged[-1] = (previous_left, max(previous_right, right))</span>
+<span>    return merged</span>
+<span> </span>
+<span> </span>
+<span>DoubleChoice = Literal[&quot;fake&quot;, &quot;mock&quot;, &quot;real-local&quot;]</span>
+<span> </span>
+<span> </span>
+<span>def choose_double(boundary: str) -&gt; DoubleChoice:</span>
+<span>    choices: dict[str, DoubleChoice] = {</span>
+<span>        &quot;stateful-collaborator&quot;: &quot;fake&quot;,</span>
+<span>        &quot;single-interaction&quot;: &quot;mock&quot;,</span>
+<span>        &quot;file-format-contract&quot;: &quot;real-local&quot;,</span>
+<span>    }</span>
+<span>    try:</span>
+<span>        return choices[boundary]</span>
+<span>    except KeyError as exc:</span>
+<span>        raise ValueError(f&quot;unknown boundary: {boundary}&quot;) from exc</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    clock = FixedClock(100.0)</span>
+<span>    cache = ExpiringCache(</span>
+<span>        MemoryStore.empty(),</span>
+<span>        clock,</span>
+<span>        CacheSettings(ttl_seconds=5.0, namespace=&quot;demo&quot;),</span>
+<span>    )</span>
+<span>    cache.put(&quot;learner&quot;, &quot;session-local&quot;)</span>
+<span>    print(&quot;before expiry:&quot;, cache.get(&quot;learner&quot;))</span>
+<span>    clock.advance(5.0)</span>
+<span>    print(&quot;at expiry:&quot;, cache.get(&quot;learner&quot;))</span>
+<span>    print(&quot;merged intervals:&quot;, merge_intervals([(5, 2), (3, 8), (20, 20)]))</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-data-01.html"><small>Previous lesson</small><strong>python-data-01</strong><span>Columnar Data, Arrow, and Embedded Analytical SQL</span></a>
+        <a class="nav-card next" href="python-lang-01.html"><small>Next lesson</small><strong>python-lang-01</strong><span>Advanced Typing and the Python Data Model</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-test-01";
+    const LEARNER_PATH = "python/professional/lessons/py_test_01_architecture_generative.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

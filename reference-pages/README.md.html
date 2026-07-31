@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>DS60 Python, Data Science, SQL, and Engineering Learning Lab · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>DS60 Python, Data Science, SQL, and Engineering Learning Lab</h1>
+      <p class="source-path">Generated from <code>README.md</code></p>
+    </header>
+    <article class="document"><h2 id="ds60-python-data-science-sql-and-engineering-learning-lab">DS60 Python, Data Science, SQL, and Engineering Learning Lab<a class="heading-anchor" href="#ds60-python-data-science-sql-and-engineering-learning-lab" aria-label="Link to this section">#</a></h2>
+<p><a href="https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml/badge.svg">![Course validation</a>](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml)</p>
+<p>DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.</p>
+<blockquote><p>[!TIP] <strong>On Windows, double-click <code>START_DS60.cmd</code>.</strong> It checks the machine, guides the connected first setup when <code>.venv</code> is absent or incomplete, runs the course doctor, and opens the private portal that can launch cataloged artifacts in VS Code or JupyterLab. On macOS/Linux—or before setup—double-click <a href="../START_HERE.html">START_HERE.html</a> for the static offline guide. Static browser mode can render lesson pages, but a browser cannot execute Python or SQL; use the private launcher for runnable actions.</p></blockquote>
+<p>The repository is designed for:</p>
+<ul>
+<li>A learner working locally in Visual Studio Code</li>
+<li>Windows, macOS, and Linux</li>
+<li>A one-time connected setup followed by offline study</li>
+<li>Optional guidance from Codex without requiring Codex to run the lessons</li>
+</ul>
+<blockquote><p>[!IMPORTANT] The repository runs locally after setup, but a brand-new machine still needs internet access to install Python packages, PostgreSQL or Docker, and VS Code extensions. A few lessons use Seaborn datasets that download on first use and are cached afterward. Pretrained Hugging Face, spaCy, and torchvision exercises can also require a deliberate first download; their lesson notes identify those cases. See <a href="docs/setup/offline.md.html">Offline use</a>.</p></blockquote>
+<h3 id="choose-a-track">Choose a track<a class="heading-anchor" href="#choose-a-track" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Track</th>
+<th>Start here</th>
+<th>What it covers</th>
+</tr></thead><tbody>
+<tr>
+<td>Python and data science</td>
+<td><a href="python/ds-60day/README.md.html">Python track</a></td>
+<td>Core Python, notebooks, data work, statistics, machine learning, APIs, and production topics</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td><a href="sql/postgres-60day/README.md.html">SQL track</a></td>
+<td>Relational design, SQL fundamentals, analytics, performance, operations, and projects</td>
+</tr>
+<tr>
+<td>Python + PostgreSQL engineering</td>
+<td><a href="bridge/README.md.html">Engineering bridge</a></td>
+<td>Typed configuration, safe database access, transactions, testing, ETL, concurrency, and production operations</td>
+</tr>
+<tr>
+<td>Both</td>
+<td>Start with Python Days 1–15, then alternate tracks</td>
+<td>A broader data-practitioner path</td>
+</tr>
+</tbody></table></div>
+<p>The human-readable overview is <a href="docs/curriculum-map.md.html">docs/curriculum-map.md</a>. The checked-in <code>curriculum/catalog.json</code> is a generated index for tools; lesson artifact filenames and the metadata rules in <code>src/ds60sqlpy/catalog_builder.py</code> are its inputs. Inspect the generated view with:</p>
+<pre><code class="language-text">python scripts/course.py catalog</code></pre>
+<p>After the shared lessons, use <a href="docs/professional-paths.md.html">professional and specialization paths</a> for the named modules. New SQL learners start with <code>sql-found-01</code> and <code>sql-found-02</code> before SQL Day 1.</p>
+<h3 id="quick-start">Quick start<a class="heading-anchor" href="#quick-start" aria-label="Link to this section">#</a></h3>
+<p>Run commands from the repository root—the directory containing this README.</p>
+<h4 id="1-install-prerequisites">1. Install prerequisites<a class="heading-anchor" href="#1-install-prerequisites" aria-label="Link to this section">#</a></h4>
+<p>The recommended compatibility baseline is:</p>
+<ul>
+<li>Python 3.12</li>
+<li>PostgreSQL 16 or newer</li>
+<li>PostgreSQL 17 for the canonical automated environment</li>
+<li>Current Visual Studio Code with the recommended extensions</li>
+</ul>
+<p>Follow the guide for your operating system:</p>
+<ul>
+<li><a href="docs/setup/windows.md.html">Windows</a></li>
+<li><a href="docs/setup/macos.md.html">macOS</a></li>
+<li><a href="docs/setup/linux.md.html">Linux</a></li>
+</ul>
+<h4 id="2-set-up-the-python-environment">2. Set up the Python environment<a class="heading-anchor" href="#2-set-up-the-python-environment" aria-label="Link to this section">#</a></h4>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell"># Easiest guided route: double-click START_DS60.cmd in File Explorer.
+#
+# Recommended on a new Windows machine, including when Anaconda or PostgreSQL
+# is installed but not on PATH:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+&amp; .\scripts\bootstrap_windows.ps1
+
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py doctor</code></pre>
+<p>The discovery bootstrap leaves PATH process-local by default, installs IPython, JupyterLab, classic Notebook, ipykernel, and the course dependency profile, registers <code>Python (ds60sqlpy)</code>, and verifies <code>psql</code> without connecting to a database. A standard <code>venv</code> puts Python under <code>.venv\Scripts</code>; the Anaconda fallback creates a conda prefix whose interpreter is <code>.venv\python.exe</code>. Resolve <code>$CoursePython</code> once per PowerShell window and reuse it for the commands below. See the <a href="docs/setup/windows-bootstrap.md.html">one-command Windows bootstrap guide</a>. Use the smaller historical <code>scripts\setup.ps1</code> only when a supported Python is already discoverable and you specifically want its standard-<code>venv</code> <code>.venv\Scripts\python.exe</code> layout; do not run it over a conda-prefix <code>.venv</code>.</p>
+<p><code>START_DS60.cmd</code> is the day-to-day Windows entry point; the PowerShell command above is the lower-level setup tool. The launcher reuses a ready environment without reinstalling packages. Before its first download it clearly labels the connected setup and asks you to type <code>SETUP</code>. It never asks for a database credential and never creates, drops, or resets database data.</p>
+<p>macOS or Linux:</p>
+<pre><code class="language-bash">bash scripts/setup.sh
+.venv/bin/python scripts/course.py doctor</code></pre>
+<p>The Windows workflow intentionally does not require activating the virtual environment. In VS Code, select the interpreter inside <code>.venv</code>.</p>
+<p>Core setup installs notebook, data, and quality tooling. Before later machine-learning and production lessons, install the larger optional groups while connected:</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -Profile Advanced</code></pre>
+<p>macOS or Linux:</p>
+<pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
+<p>The advanced profile includes machine learning, production, Python/PostgreSQL bridge, professional data tooling, PostgreSQL notebook magics, deep-learning, natural-language-processing, and geospatial packages. It can take substantially longer and may use platform-specific wheels, so install it when the catalog shows that you need it. Catalog labels are not all literal package extras; use the <a href="docs/dependency-profiles.md.html">dependency-label mapping</a> before choosing a targeted install.</p>
+<h4 id="3-see-what-is-ready">3. See what is ready<a class="heading-anchor" href="#3-see-what-is-ready" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-text">python scripts/course.py catalog
+python scripts/course.py validate</code></pre>
+<p>If <code>python</code> does not resolve to the repository environment, use <code>.venv/bin/python</code> on macOS/Linux or <code>&amp; $CoursePython</code> on Windows. In a new PowerShell window, rerun the resolver from step 2 first.</p>
+<p>To use the progress dashboard and launcher:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+&amp; $CoursePython scripts\learning_portal.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python scripts/learning_portal.py</code></pre>
+<p>The server binds only to <code>127.0.0.1</code>, chooses a free port, uses a per-session request token, and accepts no arbitrary commands or paths. Use <code>--no-launches</code> for progress synchronization without native launch buttons.</p>
+<h4 id="4-start-a-lesson">4. Start a lesson<a class="heading-anchor" href="#4-start-a-lesson" aria-label="Link to this section">#</a></h4>
+<p>Python:</p>
+<ol>
+<li>Read <a href="../lesson-pages/python-01.html#guide">Python Day 1 companion guide</a>.</li>
+<li>Open <a href="../lesson-pages/python-01.html#learner">Python Day 1 notebook</a> in VS Code.</li>
+<li>Attempt exercises before opening <a href="../lesson-pages/python-01.html#solution-1">the worked solution</a>.</li>
+</ol>
+<p>SQL:</p>
+<ol>
+<li>Complete <a href="sql/postgres-60day/README.md.html">SQL setup</a>.</li>
+<li>Complete the <a href="../lesson-pages/sql-found-01.html#guide">relational-design foundation</a> and <a href="../lesson-pages/sql-found-02.html#guide">versioned-migrations foundation</a>.</li>
+<li>Read <a href="../lesson-pages/sql-01.html#guide">SQL Day 1 companion guide</a>.</li>
+<li>Run the lesson with error-stop behavior:</li>
+</ol>
+<pre><code class="language-text">   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
+<ol>
+<li>Attempt the exercises before opening <a href="../lesson-pages/sql-01.html#solution-1">the worked solution</a>.</li>
+</ol>
+<p><code>sql/postgres-60day/00_setup.sql</code> is a destructive reset of the disposable <code>training</code> schema. Never run it against a database that contains data you care about.</p>
+<p>Python + PostgreSQL engineering bridge:</p>
+<ol>
+<li>Complete at least Python Day 15 and SQL Day 15.</li>
+<li>Read the <a href="bridge/README.md.html">bridge guide</a>.</li>
+<li>Open <a href="../lesson-pages/bridge-01.html#learner">Bridge Day 1</a> and its <a href="../lesson-pages/bridge-01.html#guide">companion guide</a>.</li>
+<li>Run it with the repository interpreter; live-database work is optional and uses <code>DS60_DATABASE_URL</code>.</li>
+</ol>
+<h3 id="learn-with-codex">Learn with Codex<a class="heading-anchor" href="#learn-with-codex" aria-label="Link to this section">#</a></h3>
+<p>Codex is optional. The lessons, examples, and local tools remain usable without it.</p>
+<p>This repository includes the repo-local skill <code>$guide-ds60sqlpy-learning</code>. Try:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to assess my level and guide me through the next Python, SQL, or bridge lesson. Give hints before solutions.</code></pre>
+<p>The tutor should adapt commands to your operating system, inspect your actual work, and avoid opening official solutions until you ask. See <a href="docs/learning-with-codex.md.html">Learning with Codex</a>.</p>
+<h3 id="what-is-in-the-repository">What is in the repository<a class="heading-anchor" href="#what-is-in-the-repository" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">python/
+  PYTHON_TRAINING.md
+  ds-60day/
+    notebooks/
+    companion-guides/
+    solutions/
+  professional/
+sql/
+  ADVANCED_SQL_60DAY_PLAN.md
+  postgres-60day/
+    00_setup.sql
+    day*.sql
+    companion-guides/
+    solutions/
+  professional/
+bridge/
+  lessons/
+  companion-guides/
+  solutions/
+  tests/
+  professional/
+curriculum/catalog.json
+scripts/
+docs/
+.agents/skills/guide-ds60sqlpy-learning/</code></pre>
+<p>The maintained content has learner artifacts, companion guides, and runnable solutions for all 60 lessons in both main tracks, eight engineering bridge lessons, and 26 named foundation/professional/specialization modules. The generated catalog indexes 154 learning modules and reports their exact artifact paths.</p>
+<p>Every lesson also has a checked exercise-enrichment target. The immutable baseline lives in <code>curriculum/practice_baseline.json</code>; the target for each learner artifact, guide, and every explanatory solution artifact is at least <code>max(6, 2 × audited baseline)</code>. Run <code>python scripts/audit_practice.py</code> or read the generated <a href="docs/practice-coverage.md.html">practice coverage report</a>.</p>
+<h3 id="documentation">Documentation<a class="heading-anchor" href="#documentation" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="docs/curriculum-map.md.html">Curriculum map</a></li>
+<li><a href="../START_HERE.html">Portable guided course portal</a></li>
+<li><a href="docs/learning-portal.md.html">Portal modes, progress, and launcher security</a></li>
+<li><a href="docs/professional-paths.md.html">Professional and specialization paths</a></li>
+<li><a href="docs/vscode.md.html">VS Code workflow</a></li>
+<li><a href="docs/setup/windows-bootstrap.md.html">One-command Windows bootstrap</a></li>
+<li><a href="docs/setup/offline.md.html">Offline use</a></li>
+<li><a href="docs/setup/jupyter-postgresql.md.html">PostgreSQL in Jupyter</a></li>
+<li><a href="docs/practice-coverage.md.html">Practice coverage</a></li>
+<li><a href="docs/local-files-and-caches.md.html">Local environments and caches</a></li>
+<li><a href="docs/troubleshooting.md.html">Troubleshooting</a></li>
+<li><a href="docs/validation.md.html">Validation</a></li>
+<li><a href="docs/content-authoring.md.html">Content authoring</a></li>
+<li><a href="CONTRIBUTING.md.html">Contributing</a></li>
+</ul>
+<h3 id="continuous-validation">Continuous validation<a class="heading-anchor" href="#continuous-validation" aria-label="Link to this section">#</a></h3>
+<p>The badge at the top reflects <code>.github/workflows/ci.yml</code>. Every push and pull request runs locked core checks on Ubuntu (Python 3.11 and 3.12), Windows (3.12), and macOS (3.12), exercises the learner bootstrap, and executes the complete learner/solution SQL sequence against PostgreSQL 17. A scheduled or manual job also verifies every optional dependency group on Windows and Ubuntu. See <a href="docs/validation.md.html">Validation</a> for the exact local equivalents and the difference between structural, smoke, and full execution evidence.</p>
+<h3 id="scope-and-expectations">Scope and expectations<a class="heading-anchor" href="#scope-and-expectations" aria-label="Link to this section">#</a></h3>
+<p>The Python track is strongest as a practical Python-for-data-science path; it is not a substitute for the complete Python language reference. The SQL track targets PostgreSQL. The bridge adds focused application-engineering practice, not a full distributed-systems or database-administration program. Treat lesson objectives and the generated catalog view—not a promise to teach “everything”—as the contract.</p>
+<p>Progress matters more than the 60-day label. A good session ends with runnable work, an explanation in your own words, and one small note about what to revisit.</p>
+<h3 id="license">License<a class="heading-anchor" href="#license" aria-label="Link to this section">#</a></h3>
+<p>See <a href="../LICENSE">LICENSE</a>.</p></article>
+  </main>
+</body>
+</html>

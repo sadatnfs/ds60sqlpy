@@ -1,0 +1,1482 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-analytics-01 · Reusable Analytical Query Patterns · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-analytics-01</p>
+        <h1>Reusable Analytical Query Patterns</h1>
+        <p class="hero-copy">Advanced analytical SQL</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">240 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-30.html">sql-30</a> <a class="tag" href="sql-test-01.html">sql-test-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_analytics_01_query_patterns.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_analytics_01_query_patterns.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_analytics_01_query_patterns.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--sql-analytics-01-reusable-analytical-query-patterns">SQL-ANALYTICS-01 — Reusable Analytical Query Patterns<a class="heading-anchor" href="#guide--sql-analytics-01-reusable-analytical-query-patterns" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-30</code> and <code>sql-test-01</code></li>
+<li><strong>Prerequisites:</strong> <a href="sql-30.html#guide">SQL Day 30 Phase 2 project</a>, CTEs, window functions, conditional aggregation, intervals, and <a href="sql-test-01.html#guide">SQL-TEST-01</a>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-analytics-01.html#learner">learner SQL</a> · <a href="sql-analytics-01.html#solution-1">solution reasoning</a> · <a href="sql-analytics-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run from the repository root:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_analytics_01_query_patterns.sql</code></pre>
+<p>Every timestamp is explicit and interpreted in UTC for business grouping. The lab rolls back its fixture.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Implement deterministic deduplication, sessionization, and gaps-and-islands patterns.</li>
+<li>Build ordered funnels, bounded last-touch attribution, temporal as-of joins, and cohort retention.</li>
+<li>State grain, time-zone/boundary assumptions, tie breaks, denominators, and validation queries for each pattern.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Grain:</strong> what one input/output row represents.</li>
+<li><strong>Canonical row:</strong> deterministic winner selected from duplicate versions.</li>
+<li><strong>Session:</strong> ordered events grouped by an inactivity threshold.</li>
+<li><strong>Gap/island:</strong> break or consecutive run in ordered values.</li>
+<li><strong>Funnel:</strong> ordered sequence of qualifying steps.</li>
+<li><strong>Attribution window:</strong> bounded period in which a touch may receive credit.</li>
+<li><strong>As-of join:</strong> match fact time to the version valid at that instant.</li>
+<li><strong>Half-open interval:</strong> includes lower bound and excludes upper <code>[from,to)</code>.</li>
+<li><strong>Cohort:</strong> entities sharing a start period.</li>
+<li><strong>Retention denominator:</strong> original eligible cohort population, not merely users who later returned.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>The raw event grain is one ingestion attempt, so <code>source_event_id</code> can repeat. The canonical view partitions by source ID and chooses latest <code>ingested_at</code>, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.</p>
+<p>Sessionization orders each user&#x27;s canonical events, compares with <code>LAG</code>, marks a new session after more than 30 minutes, and cumulatively sums markers. <code>ROWS</code> makes the window frame explicit. The output grain is one user-session.</p>
+<p>Gaps and islands subtracts row number from each unique activity date. Consecutive dates share the same derived key. Duplicate dates must be removed first or they distort row numbers.</p>
+<p>The funnel computes each step only at or after the prior step. Independently taking each event type&#x27;s minimum can count out-of-order behavior as conversion. Output counts retain all signed-up users through LEFT joins.</p>
+<p>Attribution starts from each purchase and uses a LEFT LATERAL query for the latest touch no later than purchase and no earlier than seven days before. Touch identity breaks timestamp ties. LEFT preserves unattributed purchases. This is one declared model, not causal proof.</p>
+<p>The as-of join uses <code>valid_from &lt;= event_at</code> and <code>event_at &lt; valid_to</code>, with NULL as open-ended. A fact exactly at <code>valid_to</code> belongs to the successor row. Production history needs a constraint or test preventing overlaps; <code>LIMIT 1</code> must not hide invalid overlapping versions.</p>
+<p>Cohort retention derives UTC signup month, distinct active months, cohort size, and retained users before division. The denominator remains the starting cohort size. Month arithmetic is calendar-based, not a fixed number of days.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete all fourteen prompts and add fail-fast checks from SQL-TEST-01. For every query, write input grain, output grain, duplicate rule, time zone, interval bounds, NULL behavior, and deterministic order before editing SQL.</p>
+<p>Treat attribution and retention as definitions that stakeholders must approve, not universal mathematical truths.</p>
+<p>For every answer, state input grain, output grain, duplicate policy, NULL policy, time zone, half-open bounds, tie-break, and an invariant query:</p>
+<ol>
+<li><strong>Deduplication:</strong> prove one canonical row per source event and justify the winner order.</li>
+<li><strong>Sessions:</strong> use a 60-minute rule, calculate duration, and test the exact threshold.</li>
+<li><strong>Funnel:</strong> produce one ordered row per user and reject step regressions.</li>
+<li><strong>Islands:</strong> retain islands with at least two active days and verify gaps.</li>
+<li><strong>Attribution:</strong> test missing touches and timestamp ties with a deterministic winner.</li>
+<li><strong>Retention:</strong> independently verify cohort size, retained numerator, and division.</li>
+<li><strong>As-of join:</strong> test an event at an upper boundary and require one successor.</li>
+<li><strong>Trailing window:</strong> use a dense date spine and compare <code>ROWS</code> with <code>RANGE</code>.</li>
+<li><strong>Percentiles:</strong> calculate median/P90 session duration and document interpolation and NULL behavior.</li>
+<li><strong>Top-N:</strong> compare <code>row_number</code>, <code>rank</code>, and <code>dense_rank</code> under ties.</li>
+<li><strong>Hierarchy:</strong> traverse recursively with depth, path, and cycle protection.</li>
+<li><strong>Zero-activity funnel:</strong> retain empty dates and make denominators explicit.</li>
+<li><strong>Approximation:</strong> specify error, scale, merge, refresh, and exact-check requirements before proposing approximate distinct counts.</li>
+<li><strong>Reusable query:</strong> validate parameters and add grain, duplicate, NULL, ordering, and time-boundary contracts.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Does deduplication produce exactly one deterministic row per source event?</li>
+<li>Is the session threshold boundary (<code>&gt;</code> versus <code>&gt;=</code>) explicit?</li>
+<li>Do islands start from unique ordered dates?</li>
+<li>Can no user reach a funnel step before its predecessor?</li>
+<li>Are unattributed purchases preserved?</li>
+<li>Can an as-of fact match at most one history row?</li>
+<li>Are cohort numerator and denominator independently inspectable?</li>
+<li>Do every final sort and tie-break produce deterministic output?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Window functions over raw retries silently duplicate sessions and funnels.</li>
+<li>Default window frames can change running calculations when timestamps tie.</li>
+<li>Inner joins discard non-converters and unattributed facts.</li>
+<li><code>LIMIT 1</code> can conceal overlapping temporal history.</li>
+<li>Local-time month boundaries differ from UTC; choose the business zone.</li>
+<li>Funnel minima without step dependency count out-of-order events.</li>
+<li>Last-touch attribution is a convention, not causal impact.</li>
+<li>Retention rates using active users as denominator are not cohort retention.</li>
+<li>Integer division truncates unless one side is numeric.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-ops-02.html#guide">SQL-OPS-02 — backup, restore, and recovery rehearsals</a>. Use the contract-test module to freeze each analytical definition and add edge-case fixtures before turning a pattern into a metric.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_analytics_01_query_patterns.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_analytics_01_query_patterns.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-ANALYTICS-01: Reusable analytical query patterns</span>
+<span>-- Target: PostgreSQL 16+</span>
+<span> </span>
+<span>\set ON_ERROR_STOP on</span>
+<span>\echo &#x27;SQL-ANALYTICS-01: disposable analytical-pattern lab&#x27;</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_analytics_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_analytics_lab.users (</span>
+<span>    user_id bigint PRIMARY KEY,</span>
+<span>    signup_at timestamptz NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_analytics_lab.events (</span>
+<span>    ingestion_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    source_event_id text NOT NULL,</span>
+<span>    user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),</span>
+<span>    event_name text NOT NULL,</span>
+<span>    event_at timestamptz NOT NULL,</span>
+<span>    ingested_at timestamptz NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_analytics_lab.daily_activity (</span>
+<span>    user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),</span>
+<span>    activity_date date NOT NULL,</span>
+<span>    PRIMARY KEY (user_id, activity_date)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_analytics_lab.campaign_touches (</span>
+<span>    touch_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),</span>
+<span>    campaign text NOT NULL,</span>
+<span>    touched_at timestamptz NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_analytics_lab.tier_history (</span>
+<span>    user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),</span>
+<span>    valid_from timestamptz NOT NULL,</span>
+<span>    valid_to timestamptz,</span>
+<span>    tier text NOT NULL,</span>
+<span>    PRIMARY KEY (user_id, valid_from),</span>
+<span>    CHECK (valid_to IS NULL OR valid_to &gt; valid_from)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_analytics_lab.users (user_id, signup_at)</span>
+<span>VALUES</span>
+<span>    (1, TIMESTAMPTZ &#x27;2026-01-01 09:00:00+00&#x27;),</span>
+<span>    (2, TIMESTAMPTZ &#x27;2026-01-15 10:00:00+00&#x27;),</span>
+<span>    (3, TIMESTAMPTZ &#x27;2026-02-01 08:00:00+00&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_analytics_lab.events (</span>
+<span>    source_event_id, user_id, event_name, event_at, ingested_at</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (&#x27;E100&#x27;, 1, &#x27;signup&#x27;,       TIMESTAMPTZ &#x27;2026-01-01 09:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:01:00+00&#x27;),</span>
+<span>    (&#x27;E101&#x27;, 1, &#x27;view_item&#x27;,    TIMESTAMPTZ &#x27;2026-01-01 09:05:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:06:00+00&#x27;),</span>
+<span>    (&#x27;E102&#x27;, 1, &#x27;add_to_cart&#x27;,  TIMESTAMPTZ &#x27;2026-01-01 09:10:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:11:00+00&#x27;),</span>
+<span>    (&#x27;E103&#x27;, 1, &#x27;purchase&#x27;,     TIMESTAMPTZ &#x27;2026-01-01 09:20:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:21:00+00&#x27;),</span>
+<span>    (&#x27;E103&#x27;, 1, &#x27;purchase&#x27;,     TIMESTAMPTZ &#x27;2026-01-01 09:20:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:25:00+00&#x27;),</span>
+<span>    (&#x27;E104&#x27;, 1, &#x27;view_item&#x27;,    TIMESTAMPTZ &#x27;2026-01-01 11:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 11:01:00+00&#x27;),</span>
+<span>    (&#x27;E105&#x27;, 1, &#x27;active&#x27;,       TIMESTAMPTZ &#x27;2026-01-02 12:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-02 12:01:00+00&#x27;),</span>
+<span>    (&#x27;E106&#x27;, 1, &#x27;active&#x27;,       TIMESTAMPTZ &#x27;2026-01-03 12:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-03 12:01:00+00&#x27;),</span>
+<span>    (&#x27;E200&#x27;, 2, &#x27;signup&#x27;,       TIMESTAMPTZ &#x27;2026-01-15 10:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-15 10:01:00+00&#x27;),</span>
+<span>    (&#x27;E201&#x27;, 2, &#x27;view_item&#x27;,    TIMESTAMPTZ &#x27;2026-01-15 10:04:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-15 10:05:00+00&#x27;),</span>
+<span>    (&#x27;E202&#x27;, 2, &#x27;add_to_cart&#x27;,  TIMESTAMPTZ &#x27;2026-01-15 10:07:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-15 10:08:00+00&#x27;),</span>
+<span>    (&#x27;E203&#x27;, 2, &#x27;purchase&#x27;,     TIMESTAMPTZ &#x27;2026-01-15 10:15:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-15 10:16:00+00&#x27;),</span>
+<span>    (&#x27;E204&#x27;, 2, &#x27;active&#x27;,       TIMESTAMPTZ &#x27;2026-01-16 09:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-16 09:01:00+00&#x27;),</span>
+<span>    (&#x27;E300&#x27;, 3, &#x27;signup&#x27;,       TIMESTAMPTZ &#x27;2026-02-01 08:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-02-01 08:01:00+00&#x27;),</span>
+<span>    (&#x27;E301&#x27;, 3, &#x27;view_item&#x27;,    TIMESTAMPTZ &#x27;2026-02-01 08:05:00+00&#x27;, TIMESTAMPTZ &#x27;2026-02-01 08:06:00+00&#x27;),</span>
+<span>    (&#x27;E302&#x27;, 3, &#x27;active&#x27;,       TIMESTAMPTZ &#x27;2026-02-03 08:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-02-03 08:01:00+00&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_analytics_lab.daily_activity (user_id, activity_date)</span>
+<span>VALUES</span>
+<span>    (1, DATE &#x27;2026-01-01&#x27;),</span>
+<span>    (1, DATE &#x27;2026-01-02&#x27;),</span>
+<span>    (1, DATE &#x27;2026-01-03&#x27;),</span>
+<span>    (1, DATE &#x27;2026-01-05&#x27;),</span>
+<span>    (1, DATE &#x27;2026-01-06&#x27;),</span>
+<span>    (2, DATE &#x27;2026-01-15&#x27;),</span>
+<span>    (2, DATE &#x27;2026-01-16&#x27;),</span>
+<span>    (2, DATE &#x27;2026-01-18&#x27;),</span>
+<span>    (3, DATE &#x27;2026-02-01&#x27;),</span>
+<span>    (3, DATE &#x27;2026-02-03&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_analytics_lab.campaign_touches (</span>
+<span>    user_id, campaign, touched_at</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (1, &#x27;search&#x27;, TIMESTAMPTZ &#x27;2025-12-30 10:00:00+00&#x27;),</span>
+<span>    (1, &#x27;email&#x27;,  TIMESTAMPTZ &#x27;2026-01-01 09:15:00+00&#x27;),</span>
+<span>    (2, &#x27;search&#x27;, TIMESTAMPTZ &#x27;2026-01-10 12:00:00+00&#x27;),</span>
+<span>    (3, &#x27;social&#x27;, TIMESTAMPTZ &#x27;2026-01-20 12:00:00+00&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_analytics_lab.tier_history (</span>
+<span>    user_id, valid_from, valid_to, tier</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (1, TIMESTAMPTZ &#x27;2026-01-01 00:00:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-10 00:00:00+00&#x27;, &#x27;basic&#x27;),</span>
+<span>    (1, TIMESTAMPTZ &#x27;2026-01-10 00:00:00+00&#x27;, NULL, &#x27;pro&#x27;),</span>
+<span>    (2, TIMESTAMPTZ &#x27;2026-01-01 00:00:00+00&#x27;, NULL, &#x27;basic&#x27;),</span>
+<span>    (3, TIMESTAMPTZ &#x27;2026-02-01 00:00:00+00&#x27;, NULL, &#x27;basic&#x27;);</span>
+<span> </span>
+<span>-- Canonicalize duplicate ingestion with an explicit winner rule.</span>
+<span>CREATE VIEW pro_analytics_lab.deduplicated_events AS</span>
+<span>SELECT</span>
+<span>    ranked.source_event_id,</span>
+<span>    ranked.user_id,</span>
+<span>    ranked.event_name,</span>
+<span>    ranked.event_at,</span>
+<span>    ranked.ingested_at</span>
+<span>FROM (</span>
+<span>    SELECT</span>
+<span>        e.*,</span>
+<span>        row_number() OVER (</span>
+<span>            PARTITION BY e.source_event_id</span>
+<span>            ORDER BY e.ingested_at DESC, e.ingestion_id DESC</span>
+<span>        ) AS winner_rank</span>
+<span>    FROM pro_analytics_lab.events AS e</span>
+<span>) AS ranked</span>
+<span>WHERE ranked.winner_rank = 1;</span>
+<span> </span>
+<span>\echo &#x27;Deduplication: one deterministic winner per source event&#x27;</span>
+<span>SELECT</span>
+<span>    de.source_event_id,</span>
+<span>    de.user_id,</span>
+<span>    de.event_name,</span>
+<span>    de.event_at,</span>
+<span>    de.ingested_at</span>
+<span>FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>ORDER BY de.source_event_id;</span>
+<span> </span>
+<span>\echo &#x27;Sessionization: a new session starts after more than 30 minutes&#x27;</span>
+<span>WITH lagged AS (</span>
+<span>    SELECT</span>
+<span>        de.*,</span>
+<span>        lag(de.event_at) OVER (</span>
+<span>            PARTITION BY de.user_id</span>
+<span>            ORDER BY de.event_at, de.source_event_id</span>
+<span>        ) AS previous_event_at</span>
+<span>    FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>),</span>
+<span>marked AS (</span>
+<span>    SELECT</span>
+<span>        lagged.*,</span>
+<span>        CASE</span>
+<span>            WHEN lagged.previous_event_at IS NULL</span>
+<span>              OR lagged.event_at - lagged.previous_event_at &gt; INTERVAL &#x27;30 minutes&#x27;</span>
+<span>            THEN 1</span>
+<span>            ELSE 0</span>
+<span>        END AS new_session</span>
+<span>    FROM lagged</span>
+<span>),</span>
+<span>numbered AS (</span>
+<span>    SELECT</span>
+<span>        marked.*,</span>
+<span>        sum(marked.new_session) OVER (</span>
+<span>            PARTITION BY marked.user_id</span>
+<span>            ORDER BY marked.event_at, marked.source_event_id</span>
+<span>            ROWS UNBOUNDED PRECEDING</span>
+<span>        ) AS session_number</span>
+<span>    FROM marked</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    numbered.user_id,</span>
+<span>    numbered.session_number,</span>
+<span>    min(numbered.event_at) AS session_started_at,</span>
+<span>    max(numbered.event_at) AS session_ended_at,</span>
+<span>    count(*) AS event_count</span>
+<span>FROM numbered</span>
+<span>GROUP BY numbered.user_id, numbered.session_number</span>
+<span>ORDER BY numbered.user_id, numbered.session_number;</span>
+<span> </span>
+<span>\echo &#x27;Gaps and islands: consecutive activity dates&#x27;</span>
+<span>WITH numbered AS (</span>
+<span>    SELECT</span>
+<span>        da.user_id,</span>
+<span>        da.activity_date,</span>
+<span>        da.activity_date</span>
+<span>            - row_number() OVER (</span>
+<span>                PARTITION BY da.user_id</span>
+<span>                ORDER BY da.activity_date</span>
+<span>            )::integer AS island_key</span>
+<span>    FROM pro_analytics_lab.daily_activity AS da</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    numbered.user_id,</span>
+<span>    min(numbered.activity_date) AS island_start,</span>
+<span>    max(numbered.activity_date) AS island_end,</span>
+<span>    count(*) AS active_days</span>
+<span>FROM numbered</span>
+<span>GROUP BY numbered.user_id, numbered.island_key</span>
+<span>ORDER BY numbered.user_id, island_start;</span>
+<span> </span>
+<span>\echo &#x27;Ordered funnel: later steps must occur after the prior step&#x27;</span>
+<span>WITH step_1 AS (</span>
+<span>    SELECT de.user_id, min(de.event_at) AS signup_at</span>
+<span>    FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>    WHERE de.event_name = &#x27;signup&#x27;</span>
+<span>    GROUP BY de.user_id</span>
+<span>),</span>
+<span>step_2 AS (</span>
+<span>    SELECT</span>
+<span>        s1.user_id,</span>
+<span>        s1.signup_at,</span>
+<span>        min(de.event_at) FILTER (</span>
+<span>            WHERE de.event_name = &#x27;view_item&#x27;</span>
+<span>              AND de.event_at &gt;= s1.signup_at</span>
+<span>        ) AS viewed_at</span>
+<span>    FROM step_1 AS s1</span>
+<span>    LEFT JOIN pro_analytics_lab.deduplicated_events AS de</span>
+<span>      ON de.user_id = s1.user_id</span>
+<span>    GROUP BY s1.user_id, s1.signup_at</span>
+<span>),</span>
+<span>step_3 AS (</span>
+<span>    SELECT</span>
+<span>        s2.user_id,</span>
+<span>        s2.signup_at,</span>
+<span>        s2.viewed_at,</span>
+<span>        min(de.event_at) FILTER (</span>
+<span>            WHERE de.event_name = &#x27;add_to_cart&#x27;</span>
+<span>              AND de.event_at &gt;= s2.viewed_at</span>
+<span>        ) AS added_at</span>
+<span>    FROM step_2 AS s2</span>
+<span>    LEFT JOIN pro_analytics_lab.deduplicated_events AS de</span>
+<span>      ON de.user_id = s2.user_id</span>
+<span>    GROUP BY s2.user_id, s2.signup_at, s2.viewed_at</span>
+<span>),</span>
+<span>step_4 AS (</span>
+<span>    SELECT</span>
+<span>        s3.user_id,</span>
+<span>        s3.signup_at,</span>
+<span>        s3.viewed_at,</span>
+<span>        s3.added_at,</span>
+<span>        min(de.event_at) FILTER (</span>
+<span>            WHERE de.event_name = &#x27;purchase&#x27;</span>
+<span>              AND de.event_at &gt;= s3.added_at</span>
+<span>        ) AS purchased_at</span>
+<span>    FROM step_3 AS s3</span>
+<span>    LEFT JOIN pro_analytics_lab.deduplicated_events AS de</span>
+<span>      ON de.user_id = s3.user_id</span>
+<span>    GROUP BY s3.user_id, s3.signup_at, s3.viewed_at, s3.added_at</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    count(*) AS signed_up,</span>
+<span>    count(*) FILTER (WHERE viewed_at IS NOT NULL) AS viewed,</span>
+<span>    count(*) FILTER (WHERE added_at IS NOT NULL) AS added,</span>
+<span>    count(*) FILTER (WHERE purchased_at IS NOT NULL) AS purchased</span>
+<span>FROM step_4;</span>
+<span> </span>
+<span>\echo &#x27;Last-touch attribution within a seven-day lookback&#x27;</span>
+<span>SELECT</span>
+<span>    purchase.source_event_id AS purchase_event_id,</span>
+<span>    purchase.user_id,</span>
+<span>    purchase.event_at AS purchased_at,</span>
+<span>    touch.campaign,</span>
+<span>    touch.touched_at</span>
+<span>FROM pro_analytics_lab.deduplicated_events AS purchase</span>
+<span>LEFT JOIN LATERAL (</span>
+<span>    SELECT</span>
+<span>        ct.campaign,</span>
+<span>        ct.touched_at,</span>
+<span>        ct.touch_id</span>
+<span>    FROM pro_analytics_lab.campaign_touches AS ct</span>
+<span>    WHERE ct.user_id = purchase.user_id</span>
+<span>      AND ct.touched_at &lt;= purchase.event_at</span>
+<span>      AND ct.touched_at &gt;= purchase.event_at - INTERVAL &#x27;7 days&#x27;</span>
+<span>    ORDER BY ct.touched_at DESC, ct.touch_id DESC</span>
+<span>    LIMIT 1</span>
+<span>) AS touch</span>
+<span>  ON true</span>
+<span>WHERE purchase.event_name = &#x27;purchase&#x27;</span>
+<span>ORDER BY purchase.source_event_id;</span>
+<span> </span>
+<span>\echo &#x27;As-of join: [valid_from, valid_to) tier at event time&#x27;</span>
+<span>SELECT</span>
+<span>    de.source_event_id,</span>
+<span>    de.user_id,</span>
+<span>    de.event_at,</span>
+<span>    history.tier</span>
+<span>FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>LEFT JOIN LATERAL (</span>
+<span>    SELECT th.tier</span>
+<span>    FROM pro_analytics_lab.tier_history AS th</span>
+<span>    WHERE th.user_id = de.user_id</span>
+<span>      AND th.valid_from &lt;= de.event_at</span>
+<span>      AND (th.valid_to IS NULL OR de.event_at &lt; th.valid_to)</span>
+<span>    ORDER BY th.valid_from DESC</span>
+<span>    LIMIT 1</span>
+<span>) AS history</span>
+<span>  ON true</span>
+<span>WHERE de.event_name = &#x27;purchase&#x27;</span>
+<span>ORDER BY de.source_event_id;</span>
+<span> </span>
+<span>\echo &#x27;Monthly cohort retention with explicit denominator&#x27;</span>
+<span>WITH cohorts AS (</span>
+<span>    SELECT</span>
+<span>        u.user_id,</span>
+<span>        date_trunc(&#x27;month&#x27;, u.signup_at AT TIME ZONE &#x27;UTC&#x27;)::date</span>
+<span>            AS cohort_month</span>
+<span>    FROM pro_analytics_lab.users AS u</span>
+<span>),</span>
+<span>activity AS (</span>
+<span>    SELECT DISTINCT</span>
+<span>        da.user_id,</span>
+<span>        date_trunc(&#x27;month&#x27;, da.activity_date::timestamp)::date</span>
+<span>            AS activity_month</span>
+<span>    FROM pro_analytics_lab.daily_activity AS da</span>
+<span>),</span>
+<span>retention AS (</span>
+<span>    SELECT</span>
+<span>        c.cohort_month,</span>
+<span>        (</span>
+<span>            extract(year FROM age(a.activity_month, c.cohort_month)) * 12</span>
+<span>            + extract(month FROM age(a.activity_month, c.cohort_month))</span>
+<span>        )::integer AS month_number,</span>
+<span>        count(DISTINCT a.user_id) AS retained_users</span>
+<span>    FROM cohorts AS c</span>
+<span>    JOIN activity AS a</span>
+<span>      ON a.user_id = c.user_id</span>
+<span>     AND a.activity_month &gt;= c.cohort_month</span>
+<span>    GROUP BY c.cohort_month, month_number</span>
+<span>),</span>
+<span>sizes AS (</span>
+<span>    SELECT c.cohort_month, count(*) AS cohort_users</span>
+<span>    FROM cohorts AS c</span>
+<span>    GROUP BY c.cohort_month</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    r.cohort_month,</span>
+<span>    r.month_number,</span>
+<span>    s.cohort_users,</span>
+<span>    r.retained_users,</span>
+<span>    round(r.retained_users::numeric / NULLIF(s.cohort_users, 0), 4)</span>
+<span>        AS retention_rate</span>
+<span>FROM retention AS r</span>
+<span>JOIN sizes AS s USING (cohort_month)</span>
+<span>ORDER BY r.cohort_month, r.month_number;</span>
+<span> </span>
+<span>-- Exercises:</span>
+<span>--</span>
+<span>-- 1. Prove the dedup view has one row per source_event_id and document why the</span>
+<span>--    latest ingested row wins.</span>
+<span>-- 2. Recalculate sessions with a 60-minute threshold and add duration. Decide</span>
+<span>--    whether an event exactly 60 minutes later starts a new session.</span>
+<span>-- 3. Return one row per user with every funnel timestamp, then test that each</span>
+<span>--    non-NULL step is no earlier than its predecessor.</span>
+<span>-- 4. Return only islands lasting at least two active days.</span>
+<span>-- 5. Add an unattributed purchase and two touches at the same timestamp. Define</span>
+<span>--    and test the deterministic tie-break and NULL attribution behavior.</span>
+<span>-- 6. Add month 1 activity and verify numerator, cohort denominator, and rate</span>
+<span>--    independently before division.</span>
+<span>-- 7. Add an event exactly at a tier valid_to boundary and prove it joins the</span>
+<span>--    successor [valid_from, valid_to) row, not both rows.</span>
+<span>-- 8. Compute a trailing seven-day active-user metric over a dense date spine.</span>
+<span>--    Compare ROWS and RANGE frames and prove missing calendar dates do not</span>
+<span>--    silently change the business window.</span>
+<span>-- 9. Calculate median and 90th-percentile session duration with percentile_cont.</span>
+<span>--    State input/output grain, interpolation behavior, NULL handling, and why</span>
+<span>--    an average cannot answer the same distribution question.</span>
+<span>-- 10. Return the top two event types per user with row_number, rank, and</span>
+<span>--     dense_rank side by side. Define a deterministic tie policy and explain</span>
+<span>--     when each ranking function changes the number of returned rows.</span>
+<span>-- 11. Traverse a parent/child campaign hierarchy with a recursive CTE. Include</span>
+<span>--     depth, a path, and cycle detection; prove malformed cyclic input</span>
+<span>--     terminates rather than looping until a resource limit.</span>
+<span>-- 12. Build a daily funnel report that retains zero-activity dates. Keep event</span>
+<span>--     filters in the appropriate JOIN condition, make each denominator</span>
+<span>--     explicit, and distinguish zero from missing data.</span>
+<span>-- 13. Compare an exact distinct-user count with a documented approximate</span>
+<span>--     strategy suitable for very large data. Define acceptable error, memory,</span>
+<span>--     mergeability, refresh, and verification requirements before choosing.</span>
+<span>-- 14. Turn one analysis into a reusable parameterized query. Validate time-zone,</span>
+<span>--     interval, and cohort inputs; preserve half-open bounds and deterministic</span>
+<span>--     order; add grain, duplicate, NULL, and boundary contract checks.</span>
+<span> </span>
+<span>DO $self_check$</span>
+<span>BEGIN</span>
+<span>    IF (SELECT COUNT(*) FROM pro_analytics_lab.events) &lt;&gt; 16 THEN</span>
+<span>        RAISE EXCEPTION &#x27;unexpected raw event count&#x27;;</span>
+<span>    END IF;</span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_analytics_lab.deduplicated_events</span>
+<span>    ) &lt;&gt; 15 THEN</span>
+<span>        RAISE EXCEPTION &#x27;deduplication did not remove exactly one retry&#x27;;</span>
+<span>    END IF;</span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>        WHERE de.event_name = &#x27;purchase&#x27;</span>
+<span>    ) &lt;&gt; 2 THEN</span>
+<span>        RAISE EXCEPTION &#x27;unexpected purchase grain&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$self_check$;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span>\echo &#x27;SQL-ANALYTICS-01 complete: pro_analytics_lab was rolled back&#x27;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_analytics_01_query_patterns_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_analytics_01_query_patterns_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-analytics-01-solutions-analytical-patterns">SQL-ANALYTICS-01 Solutions — Analytical Patterns<a class="heading-anchor" href="#solution-1--sql-analytics-01-solutions-analytical-patterns" aria-label="Link to this section">#</a></h3>
+<p>Run:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql</code></pre>
+<p>The executable solution demonstrates safe, deterministic versions of all fourteen prompts; the reasoning below explains the definitions and trade-offs that query output alone cannot establish.</p>
+<h4 id="solution-1--exercise-1-deduplication-proof">Exercise 1 — Deduplication proof<a class="heading-anchor" href="#solution-1--exercise-1-deduplication-proof" aria-label="Link to this section">#</a></h4>
+<p>Group the canonical view by <code>source_event_id</code> and fail on any count other than one. Latest <code>ingested_at</code> wins because the source may retry/correct delivery; <code>ingestion_id DESC</code> is the deterministic final tie-break. A real producer contract must say whether later delivery is actually authoritative.</p>
+<h4 id="solution-1--exercise-2-sixty-minute-sessions">Exercise 2 — Sixty-minute sessions<a class="heading-anchor" href="#solution-1--exercise-2-sixty-minute-sessions" aria-label="Link to this section">#</a></h4>
+<p>The solution uses <code>gap &gt; interval &#x27;60 minutes&#x27;</code>, so an event exactly 60 minutes later remains in the session. Change to <code>&gt;=</code> if the definition says 60 minutes starts a new session. Duration is <code>max(event_at)-min(event_at)</code>; a one-event session has zero observed duration, not an estimate of user attention.</p>
+<h4 id="solution-1--exercise-3-ordered-funnel">Exercise 3 — Ordered funnel<a class="heading-anchor" href="#solution-1--exercise-3-ordered-funnel" aria-label="Link to this section">#</a></h4>
+<p>Each correlated step selects its first event no earlier than the prior timestamp. NULL propagates: a missing view means no add or purchase can qualify. Validate <code>signup &lt;= view &lt;= add &lt;= purchase</code> for non-NULL steps and retain non-converters.</p>
+<h4 id="solution-1--exercise-4-multi-day-islands">Exercise 4 — Multi-day islands<a class="heading-anchor" href="#solution-1--exercise-4-multi-day-islands" aria-label="Link to this section">#</a></h4>
+<p>After deriving <code>activity_date - row_number()</code>, group by user/island key and use <code>HAVING COUNT(*) &gt;= 2</code>. Input must first have one row per user-date. The output grain is one consecutive run.</p>
+<h4 id="solution-1--exercise-5-attribution-ties-and-missing-touches">Exercise 5 — Attribution ties and missing touches<a class="heading-anchor" href="#solution-1--exercise-5-attribution-ties-and-missing-touches" aria-label="Link to this section">#</a></h4>
+<p>Use a LEFT LATERAL join ordered by <code>touched_at DESC, touch_id DESC</code>. The identity defines the same-timestamp winner. A purchase with no qualifying seven-day touch remains with NULL campaign. Never turn the join inner unless the metric excludes unattributed purchases by definition.</p>
+<h4 id="solution-1--exercise-6-retention">Exercise 6 — Retention<a class="heading-anchor" href="#solution-1--exercise-6-retention" aria-label="Link to this section">#</a></h4>
+<p>Calculate and expose three fields separately: original cohort size, distinct returning users in month N, and numeric division. Add a user with no later activity to prove the denominator does not shrink. Decide whether signup itself counts as month-zero activity.</p>
+<h4 id="solution-1--exercise-7-as-of-boundary">Exercise 7 — As-of boundary<a class="heading-anchor" href="#solution-1--exercise-7-as-of-boundary" aria-label="Link to this section">#</a></h4>
+<p>Use <code>valid_from &lt;= event_at AND event_at &lt; valid_to</code>, treating NULL <code>valid_to</code> as open-ended. At the boundary the old row is excluded and the successor included. Also assert that every fact matches at most one history row; <code>LIMIT 1</code> alone can hide overlap corruption.</p>
+<h4 id="solution-1--exercise-8-dense-trailing-seven-day-activity">Exercise 8 — Dense trailing seven-day activity<a class="heading-anchor" href="#solution-1--exercise-8-dense-trailing-seven-day-activity" aria-label="Link to this section">#</a></h4>
+<p>Generate one row per calendar date in the requested business zone and LEFT JOIN deduplicated activity by local date. For each spine date, count distinct users whose activity date is between that date minus six days and the date, inclusive.</p>
+<p><code>ROWS 6 PRECEDING</code> means six prior <em>rows</em>, so missing dates shorten the calendar window. Daily distinct counts also cannot be summed for weekly uniques because one user can appear on several days; retain user/date grain until the window.</p>
+<h4 id="solution-1--exercise-9-session-percentiles">Exercise 9 — Session percentiles<a class="heading-anchor" href="#solution-1--exercise-9-session-percentiles" aria-label="Link to this section">#</a></h4>
+<p>First derive one row per session with duration. Then use <code>percentile_cont(ARRAY[0.5,0.9]) WITHIN GROUP (ORDER BY duration)</code> over non-NULL durations. Continuous percentile can interpolate; <code>percentile_disc</code> chooses an observed value.</p>
+<p>Expose session and NULL counts beside percentiles. Average answers a different question and can hide a long tail; tiny cohorts need explicit caution.</p>
+<h4 id="solution-1--exercise-10-ranking-ties">Exercise 10 — Ranking ties<a class="heading-anchor" href="#solution-1--exercise-10-ranking-ties" aria-label="Link to this section">#</a></h4>
+<p>Aggregate to one row per <code>(user_id,event_name)</code>, then calculate all three functions ordered by count descending. <code>row_number</code> chooses exactly N rows; <code>rank</code> gives ties one rank and leaves gaps; <code>dense_rank</code> leaves no gaps and can return more than N rows.</p>
+<p>Decide whether “top two” means exactly two categories or every category tied in the top two score levels. Use a stable final display order without accidentally destroying intentional score ties.</p>
+<h4 id="solution-1--exercise-11-cycle-safe-recursive-hierarchy">Exercise 11 — Cycle-safe recursive hierarchy<a class="heading-anchor" href="#solution-1--exercise-11-cycle-safe-recursive-hierarchy" aria-label="Link to this section">#</a></h4>
+<p>Seed roots in a recursive CTE and carry <code>depth</code> plus an array path of visited IDs. Recurse only when the next ID is absent from the path; emit or quarantine a cycle flag so malformed data is visible rather than silently ignored.</p>
+<p>The output grain is one reachable path/node relationship, not necessarily one row per node in a multi-parent graph. Add operational depth/row guards, but enforce the intended parent/cycle policy on writes when possible.</p>
+<h4 id="solution-1--exercise-12-keep-zero-activity-dates">Exercise 12 — Keep zero-activity dates<a class="heading-anchor" href="#solution-1--exercise-12-keep-zero-activity-dates" aria-label="Link to this section">#</a></h4>
+<p>Start from a date spine and LEFT JOIN events with event predicates in <code>ON</code>. Conditional aggregate each step without filtering away the preserved date. Name each denominator and use <code>NULLIF(denominator,0)</code>.</p>
+<p>Return numerators and denominators beside rates. Zero means an observed date with no events; NULL can mean undefined rate or unavailable source.</p>
+<h4 id="solution-1--exercise-13-approximate-distinct-counts">Exercise 13 — Approximate distinct counts<a class="heading-anchor" href="#solution-1--exercise-13-approximate-distinct-counts" aria-label="Link to this section">#</a></h4>
+<p>PostgreSQL core provides exact <code>count(DISTINCT user_id)</code>; approximation commonly uses an approved sketch such as HyperLogLog outside this base lesson. Specify error at expected cardinalities, memory, serialization, merge compatibility, version ownership, privacy, and rebuild behavior before adoption.</p>
+<p>Continuously compare sampled periods with exact counts. Daily estimates cannot be summed for weekly uniques unless the sketch itself is mergeable.</p>
+<h4 id="solution-1--exercise-14-parameterized-analytical-contract">Exercise 14 — Parameterized analytical contract<a class="heading-anchor" href="#solution-1--exercise-14-parameterized-analytical-contract" aria-label="Link to this section">#</a></h4>
+<p>Use typed start/end instants, zone, cohort, and threshold. Reject unknown zones, nonpositive intervals, and <code>end &lt;= start</code>; use half-open time filtering and convert to local calendar labels only after defining instants.</p>
+<p>Document result grain and stable order. Test duplicate sources, output-key uniqueness, NULLs, empty windows, exact endpoints, timestamp ties, and a daylight-saving transition.</p>
+<h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Late events can rewrite sessions/funnels unless an as-of cutoff is recorded.</li>
+<li>Identity resolution across devices can change user grain.</li>
+<li>Calendar cohorts require an explicit business time zone.</li>
+<li>Attribution windows and models need versioning when definitions change.</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-ANALYTICS-01 executable solutions</span>
+<span>\set ON_ERROR_STOP on</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_analytics_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_analytics_lab.events (</span>
+<span>    ingestion_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    source_event_id text NOT NULL,</span>
+<span>    user_id bigint NOT NULL,</span>
+<span>    event_name text NOT NULL,</span>
+<span>    event_at timestamptz NOT NULL,</span>
+<span>    ingested_at timestamptz NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_analytics_lab.events (</span>
+<span>    source_event_id, user_id, event_name, event_at, ingested_at</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (&#x27;A1&#x27;, 1, &#x27;signup&#x27;,      TIMESTAMPTZ &#x27;2026-01-01 09:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:01+00&#x27;),</span>
+<span>    (&#x27;A2&#x27;, 1, &#x27;view_item&#x27;,   TIMESTAMPTZ &#x27;2026-01-01 09:10+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:11+00&#x27;),</span>
+<span>    (&#x27;A3&#x27;, 1, &#x27;add_to_cart&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:20+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:21+00&#x27;),</span>
+<span>    (&#x27;A4&#x27;, 1, &#x27;purchase&#x27;,    TIMESTAMPTZ &#x27;2026-01-01 09:30+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:31+00&#x27;),</span>
+<span>    (&#x27;A4&#x27;, 1, &#x27;purchase&#x27;,    TIMESTAMPTZ &#x27;2026-01-01 09:30+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 09:32+00&#x27;),</span>
+<span>    (&#x27;A5&#x27;, 1, &#x27;view_item&#x27;,   TIMESTAMPTZ &#x27;2026-01-01 10:30+00&#x27;, TIMESTAMPTZ &#x27;2026-01-01 10:31+00&#x27;),</span>
+<span>    (&#x27;B1&#x27;, 2, &#x27;signup&#x27;,      TIMESTAMPTZ &#x27;2026-01-02 09:00+00&#x27;, TIMESTAMPTZ &#x27;2026-01-02 09:01+00&#x27;),</span>
+<span>    (&#x27;B2&#x27;, 2, &#x27;view_item&#x27;,   TIMESTAMPTZ &#x27;2026-01-02 09:10+00&#x27;, TIMESTAMPTZ &#x27;2026-01-02 09:11+00&#x27;);</span>
+<span> </span>
+<span>CREATE VIEW pro_analytics_lab.deduplicated_events AS</span>
+<span>SELECT source_event_id, user_id, event_name, event_at, ingested_at</span>
+<span>FROM (</span>
+<span>    SELECT</span>
+<span>        e.*,</span>
+<span>        row_number() OVER (</span>
+<span>            PARTITION BY e.source_event_id</span>
+<span>            ORDER BY e.ingested_at DESC, e.ingestion_id DESC</span>
+<span>        ) AS rn</span>
+<span>    FROM pro_analytics_lab.events AS e</span>
+<span>) AS ranked</span>
+<span>WHERE rn = 1;</span>
+<span> </span>
+<span>-- Exercise 1.</span>
+<span>SELECT</span>
+<span>    de.source_event_id,</span>
+<span>    COUNT(*) AS canonical_rows</span>
+<span>FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>GROUP BY de.source_event_id</span>
+<span>ORDER BY de.source_event_id;</span>
+<span> </span>
+<span>-- Exercise 2: exactly 60 minutes remains in the same session because the rule</span>
+<span>-- starts a new session only when the gap is greater than 60 minutes.</span>
+<span>WITH lagged AS (</span>
+<span>    SELECT</span>
+<span>        de.*,</span>
+<span>        lag(de.event_at) OVER (</span>
+<span>            PARTITION BY de.user_id</span>
+<span>            ORDER BY de.event_at, de.source_event_id</span>
+<span>        ) AS previous_at</span>
+<span>    FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>),</span>
+<span>numbered AS (</span>
+<span>    SELECT</span>
+<span>        lagged.*,</span>
+<span>        sum(</span>
+<span>            CASE</span>
+<span>                WHEN previous_at IS NULL</span>
+<span>                  OR event_at - previous_at &gt; INTERVAL &#x27;60 minutes&#x27;</span>
+<span>                THEN 1 ELSE 0</span>
+<span>            END</span>
+<span>        ) OVER (</span>
+<span>            PARTITION BY user_id</span>
+<span>            ORDER BY event_at, source_event_id</span>
+<span>            ROWS UNBOUNDED PRECEDING</span>
+<span>        ) AS session_number</span>
+<span>    FROM lagged</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    user_id,</span>
+<span>    session_number,</span>
+<span>    min(event_at) AS started_at,</span>
+<span>    max(event_at) AS ended_at,</span>
+<span>    max(event_at) - min(event_at) AS duration,</span>
+<span>    count(*) AS events</span>
+<span>FROM numbered</span>
+<span>GROUP BY user_id, session_number</span>
+<span>ORDER BY user_id, session_number;</span>
+<span> </span>
+<span>-- Exercise 3: ordered per-user funnel timestamps.</span>
+<span>WITH signup AS (</span>
+<span>    SELECT user_id, min(event_at) AS signup_at</span>
+<span>    FROM pro_analytics_lab.deduplicated_events</span>
+<span>    WHERE event_name = &#x27;signup&#x27;</span>
+<span>    GROUP BY user_id</span>
+<span>),</span>
+<span>funnel AS (</span>
+<span>    SELECT</span>
+<span>        s.user_id,</span>
+<span>        s.signup_at,</span>
+<span>        (</span>
+<span>            SELECT min(v.event_at)</span>
+<span>            FROM pro_analytics_lab.deduplicated_events AS v</span>
+<span>            WHERE v.user_id = s.user_id</span>
+<span>              AND v.event_name = &#x27;view_item&#x27;</span>
+<span>              AND v.event_at &gt;= s.signup_at</span>
+<span>        ) AS viewed_at</span>
+<span>    FROM signup AS s</span>
+<span>),</span>
+<span>completed AS (</span>
+<span>    SELECT</span>
+<span>        f.*,</span>
+<span>        (</span>
+<span>            SELECT min(a.event_at)</span>
+<span>            FROM pro_analytics_lab.deduplicated_events AS a</span>
+<span>            WHERE a.user_id = f.user_id</span>
+<span>              AND a.event_name = &#x27;add_to_cart&#x27;</span>
+<span>              AND a.event_at &gt;= f.viewed_at</span>
+<span>        ) AS added_at</span>
+<span>    FROM funnel AS f</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    c.user_id,</span>
+<span>    c.signup_at,</span>
+<span>    c.viewed_at,</span>
+<span>    c.added_at,</span>
+<span>    (</span>
+<span>        SELECT min(p.event_at)</span>
+<span>        FROM pro_analytics_lab.deduplicated_events AS p</span>
+<span>        WHERE p.user_id = c.user_id</span>
+<span>          AND p.event_name = &#x27;purchase&#x27;</span>
+<span>          AND p.event_at &gt;= c.added_at</span>
+<span>    ) AS purchased_at</span>
+<span>FROM completed AS c</span>
+<span>ORDER BY c.user_id;</span>
+<span> </span>
+<span>-- Exercise 4: derive islands only after reducing to one row per user/day. This</span>
+<span>-- fixture has no multi-day island, so the deterministic result is empty.</span>
+<span>WITH active_days AS (</span>
+<span>    SELECT DISTINCT de.user_id, de.event_at::date AS activity_date</span>
+<span>    FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>),</span>
+<span>numbered AS (</span>
+<span>    SELECT</span>
+<span>        ad.*,</span>
+<span>        ad.activity_date</span>
+<span>        - row_number() OVER (</span>
+<span>            PARTITION BY ad.user_id</span>
+<span>            ORDER BY ad.activity_date</span>
+<span>        )::integer AS island_key</span>
+<span>    FROM active_days AS ad</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    n.user_id,</span>
+<span>    min(n.activity_date) AS island_start,</span>
+<span>    max(n.activity_date) AS island_end,</span>
+<span>    COUNT(*) AS active_days</span>
+<span>FROM numbered AS n</span>
+<span>GROUP BY n.user_id, n.island_key</span>
+<span>HAVING COUNT(*) &gt;= 2</span>
+<span>ORDER BY n.user_id, island_start;</span>
+<span> </span>
+<span>-- Exercise 5: attribution needs separate touch/purchase fixture rows. The</span>
+<span>-- reference rule is LEFT LATERAL, ordered touched_at DESC, touch_id DESC, so</span>
+<span>-- purchases with no qualifying touch remain with NULL attribution.</span>
+<span> </span>
+<span>-- Exercise 6: expose cohort denominator and retained numerator before division.</span>
+<span>WITH cohorts AS (</span>
+<span>    SELECT</span>
+<span>        de.user_id,</span>
+<span>        date_trunc(&#x27;month&#x27;, min(de.event_at))::date AS cohort_month</span>
+<span>    FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>    GROUP BY de.user_id</span>
+<span>),</span>
+<span>activity AS (</span>
+<span>    SELECT DISTINCT</span>
+<span>        de.user_id,</span>
+<span>        date_trunc(&#x27;month&#x27;, de.event_at)::date AS activity_month</span>
+<span>    FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    c.cohort_month,</span>
+<span>    COUNT(DISTINCT c.user_id) AS cohort_users,</span>
+<span>    COUNT(DISTINCT a.user_id) FILTER (</span>
+<span>        WHERE a.activity_month = (c.cohort_month + INTERVAL &#x27;1 month&#x27;)::date</span>
+<span>    ) AS month_1_users</span>
+<span>FROM cohorts AS c</span>
+<span>LEFT JOIN activity AS a</span>
+<span>  ON a.user_id = c.user_id</span>
+<span>GROUP BY c.cohort_month</span>
+<span>ORDER BY c.cohort_month;</span>
+<span> </span>
+<span>-- Exercise 7: the as-of contract is valid_from &lt;= event_at AND</span>
+<span>-- event_at &lt; valid_to. It must assert at most one match, not hide overlap with</span>
+<span>-- ORDER BY/LIMIT 1.</span>
+<span> </span>
+<span>-- Exercise 8: a dense spine preserves calendar meaning for the trailing window.</span>
+<span>WITH spine AS (</span>
+<span>    SELECT day::date AS report_date</span>
+<span>    FROM generate_series(</span>
+<span>        DATE &#x27;2026-01-01&#x27;,</span>
+<span>        DATE &#x27;2026-01-08&#x27;,</span>
+<span>        INTERVAL &#x27;1 day&#x27;</span>
+<span>    ) AS day</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    s.report_date,</span>
+<span>    (</span>
+<span>        SELECT COUNT(DISTINCT de.user_id)</span>
+<span>        FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>        WHERE de.event_at &gt;= s.report_date::timestamp</span>
+<span>                              AT TIME ZONE &#x27;UTC&#x27; - INTERVAL &#x27;6 days&#x27;</span>
+<span>          AND de.event_at &lt; (s.report_date + 1)::timestamp</span>
+<span>                             AT TIME ZONE &#x27;UTC&#x27;</span>
+<span>    ) AS trailing_7d_active_users</span>
+<span>FROM spine AS s</span>
+<span>ORDER BY s.report_date;</span>
+<span> </span>
+<span>-- Exercise 9: percentile input is exactly one row per derived session.</span>
+<span>WITH lagged AS (</span>
+<span>    SELECT</span>
+<span>        de.*,</span>
+<span>        lag(de.event_at) OVER (</span>
+<span>            PARTITION BY de.user_id</span>
+<span>            ORDER BY de.event_at, de.source_event_id</span>
+<span>        ) AS previous_at</span>
+<span>    FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>),</span>
+<span>numbered AS (</span>
+<span>    SELECT</span>
+<span>        l.*,</span>
+<span>        sum(</span>
+<span>            CASE</span>
+<span>                WHEN l.previous_at IS NULL</span>
+<span>                  OR l.event_at - l.previous_at &gt; INTERVAL &#x27;60 minutes&#x27;</span>
+<span>                THEN 1 ELSE 0</span>
+<span>            END</span>
+<span>        ) OVER (</span>
+<span>            PARTITION BY l.user_id</span>
+<span>            ORDER BY l.event_at, l.source_event_id</span>
+<span>            ROWS UNBOUNDED PRECEDING</span>
+<span>        ) AS session_number</span>
+<span>    FROM lagged AS l</span>
+<span>),</span>
+<span>sessions AS (</span>
+<span>    SELECT</span>
+<span>        n.user_id,</span>
+<span>        n.session_number,</span>
+<span>        max(n.event_at) - min(n.event_at) AS duration</span>
+<span>    FROM numbered AS n</span>
+<span>    GROUP BY n.user_id, n.session_number</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    COUNT(*) AS session_count,</span>
+<span>    percentile_cont(ARRAY[0.5, 0.9])</span>
+<span>        WITHIN GROUP (ORDER BY s.duration) AS median_and_p90</span>
+<span>FROM sessions AS s;</span>
+<span> </span>
+<span>-- Exercise 10: compare rank semantics before choosing the top-N contract.</span>
+<span>WITH counts AS (</span>
+<span>    SELECT de.user_id, de.event_name, COUNT(*) AS event_count</span>
+<span>    FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>    GROUP BY de.user_id, de.event_name</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    c.*,</span>
+<span>    row_number() OVER (</span>
+<span>        PARTITION BY c.user_id</span>
+<span>        ORDER BY c.event_count DESC, c.event_name</span>
+<span>    ) AS row_number_position,</span>
+<span>    rank() OVER (</span>
+<span>        PARTITION BY c.user_id ORDER BY c.event_count DESC</span>
+<span>    ) AS rank_position,</span>
+<span>    dense_rank() OVER (</span>
+<span>        PARTITION BY c.user_id ORDER BY c.event_count DESC</span>
+<span>    ) AS dense_rank_position</span>
+<span>FROM counts AS c</span>
+<span>ORDER BY c.user_id, row_number_position;</span>
+<span> </span>
+<span>-- Exercise 11: carry a visited-ID path and refuse to recurse into it.</span>
+<span>CREATE TABLE pro_analytics_lab.campaign_nodes (</span>
+<span>    campaign_id integer PRIMARY KEY,</span>
+<span>    parent_campaign_id integer</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_analytics_lab.campaign_nodes</span>
+<span>VALUES (1, NULL), (2, 1), (3, 2), (4, 3);</span>
+<span> </span>
+<span>WITH RECURSIVE tree AS (</span>
+<span>    SELECT</span>
+<span>        c.campaign_id,</span>
+<span>        c.parent_campaign_id,</span>
+<span>        0 AS depth,</span>
+<span>        ARRAY[c.campaign_id] AS path</span>
+<span>    FROM pro_analytics_lab.campaign_nodes AS c</span>
+<span>    WHERE c.parent_campaign_id IS NULL</span>
+<span> </span>
+<span>    UNION ALL</span>
+<span> </span>
+<span>    SELECT</span>
+<span>        child.campaign_id,</span>
+<span>        child.parent_campaign_id,</span>
+<span>        tree.depth + 1,</span>
+<span>        tree.path || child.campaign_id</span>
+<span>    FROM tree</span>
+<span>    JOIN pro_analytics_lab.campaign_nodes AS child</span>
+<span>      ON child.parent_campaign_id = tree.campaign_id</span>
+<span>    WHERE NOT child.campaign_id = ANY (tree.path)</span>
+<span>)</span>
+<span>SELECT campaign_id, parent_campaign_id, depth, path</span>
+<span>FROM tree</span>
+<span>ORDER BY path;</span>
+<span> </span>
+<span>-- Exercise 12: start from dates and keep event filters in the join/aggregate.</span>
+<span>WITH spine AS (</span>
+<span>    SELECT day::date AS report_date</span>
+<span>    FROM generate_series(</span>
+<span>        DATE &#x27;2026-01-01&#x27;,</span>
+<span>        DATE &#x27;2026-01-04&#x27;,</span>
+<span>        INTERVAL &#x27;1 day&#x27;</span>
+<span>    ) AS day</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    s.report_date,</span>
+<span>    COUNT(DISTINCT de.user_id) FILTER (</span>
+<span>        WHERE de.event_name = &#x27;signup&#x27;</span>
+<span>    ) AS signups,</span>
+<span>    COUNT(DISTINCT de.user_id) FILTER (</span>
+<span>        WHERE de.event_name = &#x27;purchase&#x27;</span>
+<span>    ) AS purchasers</span>
+<span>FROM spine AS s</span>
+<span>LEFT JOIN pro_analytics_lab.deduplicated_events AS de</span>
+<span>  ON de.event_at &gt;= s.report_date::timestamp AT TIME ZONE &#x27;UTC&#x27;</span>
+<span> AND de.event_at &lt; (s.report_date + 1)::timestamp AT TIME ZONE &#x27;UTC&#x27;</span>
+<span>GROUP BY s.report_date</span>
+<span>ORDER BY s.report_date;</span>
+<span> </span>
+<span>-- Exercise 13: core PostgreSQL gives an exact answer. An approximate sketch</span>
+<span>-- requires an approved implementation and a measured error/merge contract.</span>
+<span>SELECT COUNT(DISTINCT de.user_id) AS exact_distinct_users</span>
+<span>FROM pro_analytics_lab.deduplicated_events AS de;</span>
+<span> </span>
+<span>-- Exercise 14: validate parameters before applying the same half-open bound.</span>
+<span>WITH parameters AS (</span>
+<span>    SELECT</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-01 00:00+00&#x27; AS starts_at,</span>
+<span>        TIMESTAMPTZ &#x27;2026-02-01 00:00+00&#x27; AS ends_at</span>
+<span>)</span>
+<span>SELECT de.source_event_id, de.event_at</span>
+<span>FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>CROSS JOIN parameters AS p</span>
+<span>WHERE p.ends_at &gt; p.starts_at</span>
+<span>  AND de.event_at &gt;= p.starts_at</span>
+<span>  AND de.event_at &lt; p.ends_at</span>
+<span>ORDER BY de.event_at, de.source_event_id;</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    IF EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_analytics_lab.deduplicated_events AS de</span>
+<span>        GROUP BY de.source_event_id</span>
+<span>        HAVING COUNT(*) &lt;&gt; 1</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;deduplication grain failed&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF (SELECT COUNT(*) FROM pro_analytics_lab.deduplicated_events) &lt;&gt; 7 THEN</span>
+<span>        RAISE EXCEPTION &#x27;unexpected canonical event count&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-test-01.html"><small>Previous lesson</small><strong>sql-test-01</strong><span>SQL Tests, Migration Checks, and Data Contracts</span></a>
+        <a class="nav-card next" href="sql-ops-02.html"><small>Next lesson</small><strong>sql-ops-02</strong><span>Backup, Restore, and Recovery Rehearsals</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-analytics-01";
+    const LEARNER_PATH = "sql/professional/lessons/sql_analytics_01_query_patterns.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

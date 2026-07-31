@@ -1,0 +1,1241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-prog-01 · Functions, Procedures, and Triggers · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-prog-01</p>
+        <h1>Functions, Procedures, and Triggers</h1>
+        <p class="hero-copy">Database programming</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">180 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-found-02.html">sql-found-02</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_prog_01_routines_triggers.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_prog_01_routines_triggers.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_prog_01_routines_triggers.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--sql-prog-01-functions-procedures-and-triggers">SQL-PROG-01 — Functions, Procedures, and Triggers<a class="heading-anchor" href="#guide--sql-prog-01-functions-procedures-and-triggers" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisite:</strong> <code>sql-found-02</code></li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-02.html#guide">SQL-FOUND-02 — versioned migrations</a>, transactions, constraints, and multirow <code>UPDATE</code>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-prog-01.html#learner">learner SQL</a> · <a href="sql-prog-01.html#solution-1">solution reasoning</a> · <a href="sql-prog-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run from the repository root on Windows PowerShell, macOS, or Linux:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_prog_01_routines_triggers.sql</code></pre>
+<p>The schema, functions, procedures, triggers, and audit rows are created inside one transaction and removed by <code>ROLLBACK</code>.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Create composable SQL functions, caller-transaction procedures, and <code>BEFORE</code>/<code>AFTER</code> triggers.</li>
+<li>Build row-level and statement-level audit trails with transition-table tests.</li>
+<li>Choose volatility and security attributes, distinguish declarative constraints from procedural enforcement, and explain where transaction control is permitted.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Routine:</strong> a function or procedure stored in PostgreSQL.</li>
+<li><strong>Function:</strong> invoked in an expression or query and returns a value or rows; it cannot commit or roll back its caller&#x27;s transaction.</li>
+<li><strong>Procedure:</strong> invoked with <code>CALL</code>; a top-level procedure can sometimes use transaction control, subject to call context and procedure definition.</li>
+<li><strong>Volatility:</strong> <code>IMMUTABLE</code>, <code>STABLE</code>, or <code>VOLATILE</code>, describing whether a routine&#x27;s result can change and whether it may modify data.</li>
+<li><strong>Security invoker/definer:</strong> execute with caller or owner privileges.</li>
+<li><strong>Trigger:</strong> a routine invoked automatically by a table event.</li>
+<li><strong>OLD/NEW:</strong> row images made available to row triggers.</li>
+<li><strong>Transition table:</strong> statement-level relation containing all affected OLD or NEW rows.</li>
+<li><strong>Trigger grain:</strong> once per row versus once per statement.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p><code>open_item_count(text)</code> is a <code>STABLE</code>, <code>PARALLEL SAFE</code>, <code>SECURITY INVOKER</code> SQL function. It reads one statement snapshot and composes inside <code>SELECT</code>. Do not label a routine <code>IMMUTABLE</code> merely because its source text looks simple: a table-reading function changes when table data changes.</p>
+<p>The allowed <code>status</code> values remain a <code>CHECK</code> constraint. A trigger would hide a row-local invariant behind procedural code and be harder for tools to inspect. Triggers are used where their event context is useful:</p>
+<ul>
+<li>a BEFORE row trigger updates <code>NEW.updated_at</code>;</li>
+<li>an AFTER row trigger records one row per status transition; and</li>
+<li>an AFTER statement trigger uses <code>OLD TABLE</code> and <code>NEW TABLE</code> to record the changed row count and IDs once per update statement.</li>
+</ul>
+<p><code>close_owner_items(text)</code> is a procedure because it represents a command rather than a query value. It does not commit; the caller owns the transaction. A procedure may issue <code>COMMIT</code>/<code>ROLLBACK</code> only from a permitted top-level <code>CALL</code> context, not when nested inside this lesson&#x27;s explicit transaction, and not when its definition imposes incompatible <code>SET</code> or security-definer restrictions. Application-managed transactions should normally remain application-managed.</p>
+<p>All routines qualify relations and avoid dynamic SQL. When dynamic identifiers are genuinely required, validate them and use <code>format(&#x27;%I&#x27;, identifier)</code> or a client identifier API; never interpolate untrusted text as SQL.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Implement all ten prompts in a scratch copy of the learner script. Start with a audit-count function, a reassigning procedure, a transition guard trigger, row-versus-statement grain reconciliation, and constraint/transaction boundaries; then address routine promises, transition tables, exact errors, definer hardening, and concurrent claims. Keep tests deterministic and inside the outer transaction.</p>
+<p>The guard exercise is intentionally debatable. A complex workflow may deserve an explicit transition table and service command rather than a growing trigger. State the trade-off in your answer.</p>
+<p>Use a scratch transaction and label routine volatility, caller/owner identity, input contract, output grain, side effects, and failure behavior:</p>
+<ol>
+<li><strong>Audit count function:</strong> define NULL behavior and verify zero, one, and multiple matching rows.</li>
+<li><strong>Reassignment procedure:</strong> reject blank owners and prove closed rows remain unchanged.</li>
+<li><strong>Transition guard:</strong> catch the expected denial and compare a trigger with an explicit workflow model.</li>
+<li><strong>Audit grain:</strong> reconcile one row per changed row with one row per statement.</li>
+<li><strong>Declarative boundary:</strong> explain checks, trigger use, function transactions, and top-level procedure transactions.</li>
+<li><strong>Routine promises:</strong> justify volatility and parallel-safety declarations; identify the failure caused by an over-strong promise.</li>
+<li><strong>Transition tables:</strong> record a statement summary, including the zero-row update contract, and reconcile it to row audit.</li>
+<li><strong>Expected error:</strong> catch one exact SQLSTATE in a nested block, prove outer work survives, and re-raise anything unexpected.</li>
+<li><strong>Definer hardening:</strong> review fixed search path, qualified objects, owner, inputs, PUBLIC revocation, and explicit execution grants.</li>
+<li><strong>Concurrent claims:</strong> design deterministic <code>FOR UPDATE SKIP LOCKED</code> batching with transaction, retry, fairness, and starvation boundaries.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can the query function be used in <code>SELECT</code> without modifying data?</li>
+<li>Does one two-row update create two row audit records and one statement record?</li>
+<li>Does the statement audit list IDs in deterministic order?</li>
+<li>Does <code>CALL</code> participate in the lesson&#x27;s transaction?</li>
+<li>Does an unexpected forbidden transition make the solution fail?</li>
+<li>Are relations qualified and routines left as <code>SECURITY INVOKER</code> unless an audited privilege boundary requires otherwise?</li>
+<li>Does rollback remove every routine and trigger?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Marking a table-reading function <code>IMMUTABLE</code> can produce incorrect cached or indexed results.</li>
+<li>Row triggers multiply work by affected rows; bulk updates can amplify hidden I/O dramatically.</li>
+<li>Statement triggers fire even when zero rows change, so define the recorded meaning precisely.</li>
+<li>Recursive triggers can update their own table repeatedly.</li>
+<li>Trigger order and side effects become difficult to reason about when many routines mutate <code>NEW</code>.</li>
+<li>A SECURITY DEFINER routine needs fixed path, qualified objects, narrow grants, and adversarial tests.</li>
+<li>A procedure is not automatic permission to commit inside any call stack.</li>
+<li>DDL and routine changes belong in ordered migrations, not manual production console edits.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-types-01.html#guide">SQL-TYPES-01 — PostgreSQL-native types and searchable documents</a>. Later, combine routines with the migration and contract-test modules so their signatures, owners, grants, triggers, and side effects are release-tested.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_prog_01_routines_triggers.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_prog_01_routines_triggers.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-PROG-01: Functions, procedures, and triggers</span>
+<span>-- Target: PostgreSQL 16+</span>
+<span>-- All objects are rolled back.</span>
+<span> </span>
+<span>\set ON_ERROR_STOP on</span>
+<span>\echo &#x27;SQL-PROG-01: disposable routines and trigger lab&#x27;</span>
+<span> </span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_routines_lab;</span>
+<span> </span>
+<span>-- Declarative constraints are the first choice for row-local invariants.</span>
+<span>CREATE TABLE pro_routines_lab.work_items (</span>
+<span>    item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    owner_name text NOT NULL CHECK (btrim(owner_name) &lt;&gt; &#x27;&#x27;),</span>
+<span>    title text NOT NULL CHECK (btrim(title) &lt;&gt; &#x27;&#x27;),</span>
+<span>    status text NOT NULL DEFAULT &#x27;open&#x27;</span>
+<span>        CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;closed&#x27;)),</span>
+<span>    created_at timestamptz NOT NULL DEFAULT clock_timestamp(),</span>
+<span>    updated_at timestamptz NOT NULL DEFAULT clock_timestamp()</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_routines_lab.work_item_audit (</span>
+<span>    audit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    item_id bigint NOT NULL,</span>
+<span>    old_status text NOT NULL,</span>
+<span>    new_status text NOT NULL,</span>
+<span>    changed_by text NOT NULL,</span>
+<span>    changed_at timestamptz NOT NULL DEFAULT clock_timestamp()</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_routines_lab.statement_audit (</span>
+<span>    statement_audit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    changed_rows integer NOT NULL CHECK (changed_rows &gt;= 0),</span>
+<span>    item_ids bigint[] NOT NULL,</span>
+<span>    changed_at timestamptz NOT NULL DEFAULT clock_timestamp()</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_routines_lab.work_items (owner_name, title, status)</span>
+<span>VALUES</span>
+<span>    (&#x27;Avery&#x27;, &#x27;Review intake form&#x27;, &#x27;open&#x27;),</span>
+<span>    (&#x27;Avery&#x27;, &#x27;Publish reference notes&#x27;, &#x27;in_progress&#x27;),</span>
+<span>    (&#x27;Morgan&#x27;, &#x27;Archive completed records&#x27;, &#x27;open&#x27;);</span>
+<span> </span>
+<span>-- Query functions can be composed inside SELECT. STABLE promises that this</span>
+<span>-- function does not modify data and sees one statement snapshot.</span>
+<span>CREATE FUNCTION pro_routines_lab.open_item_count(p_owner_name text)</span>
+<span>RETURNS bigint</span>
+<span>LANGUAGE sql</span>
+<span>STABLE</span>
+<span>PARALLEL SAFE</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>    SELECT COUNT(*)</span>
+<span>    FROM pro_routines_lab.work_items AS wi</span>
+<span>    WHERE wi.owner_name = p_owner_name</span>
+<span>      AND wi.status &lt;&gt; &#x27;closed&#x27;</span>
+<span>$function$;</span>
+<span> </span>
+<span>-- A BEFORE row trigger may replace NEW before storage.</span>
+<span>CREATE FUNCTION pro_routines_lab.set_work_item_updated_at()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>VOLATILE</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    NEW.updated_at := clock_timestamp();</span>
+<span>    RETURN NEW;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER work_items_set_updated_at</span>
+<span>BEFORE UPDATE ON pro_routines_lab.work_items</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_routines_lab.set_work_item_updated_at();</span>
+<span> </span>
+<span>-- An AFTER row trigger records one audit row per status transition.</span>
+<span>CREATE FUNCTION pro_routines_lab.audit_work_item_status()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>VOLATILE</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    IF OLD.status IS DISTINCT FROM NEW.status THEN</span>
+<span>        INSERT INTO pro_routines_lab.work_item_audit (</span>
+<span>            item_id,</span>
+<span>            old_status,</span>
+<span>            new_status,</span>
+<span>            changed_by</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            NEW.item_id,</span>
+<span>            OLD.status,</span>
+<span>            NEW.status,</span>
+<span>            CURRENT_USER</span>
+<span>        );</span>
+<span>    END IF;</span>
+<span>    RETURN NULL;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER work_items_status_audit</span>
+<span>AFTER UPDATE ON pro_routines_lab.work_items</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_routines_lab.audit_work_item_status();</span>
+<span> </span>
+<span>-- A statement trigger runs once and can inspect transition tables containing</span>
+<span>-- all OLD and NEW rows affected by that statement.</span>
+<span>CREATE FUNCTION pro_routines_lab.audit_work_item_statement()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>VOLATILE</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    INSERT INTO pro_routines_lab.statement_audit (changed_rows, item_ids)</span>
+<span>    SELECT</span>
+<span>        COUNT(*)::integer,</span>
+<span>        COALESCE(</span>
+<span>            array_agg(n.item_id ORDER BY n.item_id),</span>
+<span>            ARRAY[]::bigint[]</span>
+<span>        )</span>
+<span>    FROM new_rows AS n</span>
+<span>    JOIN old_rows AS o</span>
+<span>      ON o.item_id = n.item_id</span>
+<span>    WHERE ROW(n.owner_name, n.title, n.status)</span>
+<span>          IS DISTINCT FROM</span>
+<span>          ROW(o.owner_name, o.title, o.status);</span>
+<span>    RETURN NULL;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER work_items_statement_audit</span>
+<span>AFTER UPDATE ON pro_routines_lab.work_items</span>
+<span>REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows</span>
+<span>FOR EACH STATEMENT</span>
+<span>EXECUTE FUNCTION pro_routines_lab.audit_work_item_statement();</span>
+<span> </span>
+<span>-- Procedures are invoked with CALL and do not return a query relation. This</span>
+<span>-- procedure deliberately participates in its caller&#x27;s transaction.</span>
+<span>CREATE PROCEDURE pro_routines_lab.close_owner_items(p_owner_name text)</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>AS $procedure$</span>
+<span>BEGIN</span>
+<span>    UPDATE pro_routines_lab.work_items AS wi</span>
+<span>    SET status = &#x27;closed&#x27;</span>
+<span>    WHERE wi.owner_name = p_owner_name</span>
+<span>      AND wi.status &lt;&gt; &#x27;closed&#x27;;</span>
+<span>END</span>
+<span>$procedure$;</span>
+<span> </span>
+<span>\echo &#x27;Function used as a query expression&#x27;</span>
+<span>SELECT</span>
+<span>    owners.owner_name,</span>
+<span>    pro_routines_lab.open_item_count(owners.owner_name) AS open_items</span>
+<span>FROM (</span>
+<span>    VALUES (&#x27;Avery&#x27;::text), (&#x27;Morgan&#x27;::text)</span>
+<span>) AS owners(owner_name)</span>
+<span>ORDER BY owners.owner_name;</span>
+<span> </span>
+<span>\echo &#x27;One multirow statement fires two row audits and one statement audit&#x27;</span>
+<span>UPDATE pro_routines_lab.work_items AS wi</span>
+<span>SET status = &#x27;closed&#x27;</span>
+<span>WHERE wi.owner_name = &#x27;Avery&#x27;;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    a.item_id,</span>
+<span>    a.old_status,</span>
+<span>    a.new_status,</span>
+<span>    a.changed_by</span>
+<span>FROM pro_routines_lab.work_item_audit AS a</span>
+<span>ORDER BY a.audit_id;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    sa.changed_rows,</span>
+<span>    sa.item_ids</span>
+<span>FROM pro_routines_lab.statement_audit AS sa</span>
+<span>ORDER BY sa.statement_audit_id;</span>
+<span> </span>
+<span>\echo &#x27;Procedure invoked with CALL inside the caller-owned transaction&#x27;</span>
+<span>CALL pro_routines_lab.close_owner_items(&#x27;Morgan&#x27;);</span>
+<span> </span>
+<span>SELECT</span>
+<span>    wi.item_id,</span>
+<span>    wi.owner_name,</span>
+<span>    wi.title,</span>
+<span>    wi.status</span>
+<span>FROM pro_routines_lab.work_items AS wi</span>
+<span>ORDER BY wi.item_id;</span>
+<span> </span>
+<span>-- Exercises:</span>
+<span>--</span>
+<span>-- 1. Write a STABLE SQL function status_change_count(item_id) that returns the</span>
+<span>--    number of audit rows for one item. Decide what NULL input should return.</span>
+<span>--</span>
+<span>-- 2. Write a procedure reassign_open_items(from_owner, to_owner) that changes</span>
+<span>--    only non-closed items and rejects a blank destination owner.</span>
+<span>--</span>
+<span>-- 3. Add a BEFORE UPDATE trigger that rejects a direct closed -&gt; open</span>
+<span>--    transition. Safely prove the rejection and explain when application code</span>
+<span>--    or a dedicated transition table would be clearer.</span>
+<span>--</span>
+<span>-- 4. Compare the number of row-audit records with statement-audit records after</span>
+<span>--    a multirow update. State the grain of each audit table.</span>
+<span>--</span>
+<span>-- 5. Explain why a CHECK constraint, not a trigger, enforces the allowed status</span>
+<span>--    values. Explain why functions cannot COMMIT, and when a top-level procedure</span>
+<span>--    may control transactions.</span>
+<span>--</span>
+<span>-- 6. Classify the lesson routines as VOLATILE, STABLE, or IMMUTABLE and decide</span>
+<span>--    whether each can be PARALLEL SAFE. Explain why an incorrect promise can</span>
+<span>--    produce wrong plans or results even when a demo appears to work.</span>
+<span>--</span>
+<span>-- 7. Add an AFTER UPDATE statement trigger with transition tables that records</span>
+<span>--    one summary row per statement. Reconcile affected rows against the</span>
+<span>--    row-level audit and define behavior for an update that changes zero rows.</span>
+<span>--</span>
+<span>-- 8. Use a nested PL/pgSQL block to catch one expected unique_violation, then</span>
+<span>--    prove only the inner subtransaction was rolled back. Re-raise every</span>
+<span>--    unexpected SQLSTATE instead of using WHEN OTHERS as silent control flow.</span>
+<span>--</span>
+<span>-- 9. Harden a SECURITY DEFINER reporting function: fixed search_path,</span>
+<span>--    schema-qualified objects, validated parameters, revoked PUBLIC execution,</span>
+<span>--    narrow owner privileges, and explicit grants. State why ownership itself</span>
+<span>--    is part of the security boundary.</span>
+<span>--</span>
+<span>-- 10. Simulate two workers claiming open items. Design one solution using</span>
+<span>--     SELECT ... FOR UPDATE SKIP LOCKED, define deterministic batch order, and</span>
+<span>--     explain starvation, retry, and transaction-length trade-offs.</span>
+<span> </span>
+<span>DO $self_check$</span>
+<span>BEGIN</span>
+<span>    IF (SELECT COUNT(*) FROM pro_routines_lab.work_items) &lt;&gt; 3 THEN</span>
+<span>        RAISE EXCEPTION &#x27;unexpected work-item count&#x27;;</span>
+<span>    END IF;</span>
+<span>    IF (SELECT COUNT(*) FROM pro_routines_lab.work_item_audit) &lt;&gt; 3 THEN</span>
+<span>        RAISE EXCEPTION &#x27;expected three row-level status audits&#x27;;</span>
+<span>    END IF;</span>
+<span>    IF (</span>
+<span>        SELECT COALESCE(SUM(sa.changed_rows), 0)</span>
+<span>        FROM pro_routines_lab.statement_audit AS sa</span>
+<span>    ) &lt;&gt; 3 THEN</span>
+<span>        RAISE EXCEPTION &#x27;statement audit did not account for three changed rows&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$self_check$;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span>\echo &#x27;SQL-PROG-01 complete: pro_routines_lab was rolled back&#x27;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_prog_01_routines_triggers_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_prog_01_routines_triggers_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-prog-01-solutions-routines-and-triggers">SQL-PROG-01 Solutions — Routines and Triggers<a class="heading-anchor" href="#solution-1--sql-prog-01-solutions-routines-and-triggers" aria-label="Link to this section">#</a></h3>
+<p>Run:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql</code></pre>
+<p>The solution is transactional and leaves no schema behind.</p>
+<h4 id="solution-1--exercise-1-audit-count-function">Exercise 1 — Audit-count function<a class="heading-anchor" href="#solution-1--exercise-1-audit-count-function" aria-label="Link to this section">#</a></h4>
+<p><code>status_change_count(bigint)</code> is <code>STABLE</code>, <code>PARALLEL SAFE</code>, and security invoker. It uses <code>COUNT(*)</code>, so a NULL or unknown item returns zero rather than NULL. That behavior is part of the function contract and should be tested.</p>
+<p>It is not immutable: inserting an audit row changes the result for the same argument.</p>
+<h4 id="solution-1--exercise-2-reassignment-procedure">Exercise 2 — Reassignment procedure<a class="heading-anchor" href="#solution-1--exercise-2-reassignment-procedure" aria-label="Link to this section">#</a></h4>
+<p>The procedure rejects a NULL/blank destination and updates only rows whose status is not closed. It participates in the caller&#x27;s transaction. Closed items remain with their historical owner.</p>
+<p>An alternative is one parameterized <code>UPDATE</code> from application code. A procedure is justified when the command is shared by several trusted callers and its permissions, migration, observability, and tests are maintained as an API.</p>
+<h4 id="solution-1--exercise-3-transition-guard">Exercise 3 — Transition guard<a class="heading-anchor" href="#solution-1--exercise-3-transition-guard" aria-label="Link to this section">#</a></h4>
+<p>The BEFORE trigger compares OLD and NEW status and raises <code>check_violation</code> for <code>closed -&gt; open</code>. The solution catches that expected condition and raises a different exception if the forbidden update succeeds.</p>
+<p>A richer workflow should usually model allowed transitions in data or expose named application commands. A growing chain of trigger <code>IF</code> statements hides business policy and can be difficult to version.</p>
+<h4 id="solution-1--exercise-4-audit-grain">Exercise 4 — Audit grain<a class="heading-anchor" href="#solution-1--exercise-4-audit-grain" aria-label="Link to this section">#</a></h4>
+<p>The learner row audit has grain “one changed item status.” The statement audit has grain “one UPDATE statement,” with an array of affected item IDs. Therefore two changed rows can legitimately produce two rows in one table and one row in the other. Reconcile <code>SUM(changed_rows)</code> to the row-audit count, not raw table row counts.</p>
+<h4 id="solution-1--exercise-5-declarative-and-transaction-boundaries">Exercise 5 — Declarative and transaction boundaries<a class="heading-anchor" href="#solution-1--exercise-5-declarative-and-transaction-boundaries" aria-label="Link to this section">#</a></h4>
+<p>Allowed status values are row-local and declarative, so a <code>CHECK</code> is visible, automatically enforced for every writer, and simpler than a trigger. Audit history needs OLD/NEW event context, which fits a trigger.</p>
+<p>Functions execute within their statement and cannot commit. Procedures may control transactions only in permitted top-level <code>CALL</code> contexts; nested calls, explicit outer transactions, exception blocks, and certain procedure attributes restrict that ability. Default to caller-owned transactions unless the procedure&#x27;s transaction contract is deliberate and integration-tested.</p>
+<h4 id="solution-1--exercise-6-volatility-and-parallel-promises">Exercise 6 — Volatility and parallel promises<a class="heading-anchor" href="#solution-1--exercise-6-volatility-and-parallel-promises" aria-label="Link to this section">#</a></h4>
+<p>The audit-count function is STABLE because it reads tables and should see one statement snapshot; it is not IMMUTABLE because table contents can change. Procedures and trigger functions that write are VOLATILE. A pure immutable arithmetic function can be IMMUTABLE only when its result does not depend on tables, configuration, collation changes, clock, or session state.</p>
+<p>Read-only SQL may be parallel safe, but routines that write, manipulate sequences, use unsafe functions, or depend on backend-local state are unsafe. PostgreSQL trusts these declarations for planning and constant folding, so an incorrect promise can reuse a stale result or execute in an invalid worker.</p>
+<h4 id="solution-1--exercise-7-statement-trigger-with-transition-tables">Exercise 7 — Statement trigger with transition tables<a class="heading-anchor" href="#solution-1--exercise-7-statement-trigger-with-transition-tables" aria-label="Link to this section">#</a></h4>
+<p>Define an AFTER UPDATE ... REFERENCING OLD TABLE/NEW TABLE trigger. Its function counts rows whose status is distinct and stores one summary row for that statement. Transition tables expose the whole affected set and are unavailable to row triggers.</p>
+<p>An UPDATE matching zero rows still fires an applicable statement trigger, so decide whether to store a zero summary. Reconcile <code>sum(changed_rows)</code> to the row-audit count over the same transaction/test window; raw statement rows have a different grain.</p>
+<h4 id="solution-1--exercise-8-exact-expected-failure">Exercise 8 — Exact expected failure<a class="heading-anchor" href="#solution-1--exercise-8-exact-expected-failure" aria-label="Link to this section">#</a></h4>
+<p>A PL/pgSQL block with an inner <code>BEGIN ... EXCEPTION WHEN unique_violation</code> creates a subtransaction. Changes inside the failed inner block roll back, while earlier outer-block changes remain. After the handler, assert both facts.</p>
+<p>The handler must raise if the statement succeeds and re-raise an unexpected condition. <code>WHEN OTHERS THEN NULL</code> makes permission errors, missing tables, and programmer mistakes look like passing negative tests.</p>
+<h4 id="solution-1--exercise-9-security-definer-hardening">Exercise 9 — SECURITY DEFINER hardening<a class="heading-anchor" href="#solution-1--exercise-9-security-definer-hardening" aria-label="Link to this section">#</a></h4>
+<p>Own the function with a NOLOGIN role that has only the required read access, set a fixed safe <code>search_path</code>, qualify every relation/operator-sensitive object, avoid writable helper schemas and unsafe dynamic SQL, validate parameters, and return a bounded result. Revoke PUBLIC execution before granting named callers.</p>
+<p>The routine executes with owner privileges, so changing its owner can silently change its authority. Test identity, RLS behavior, error leakage, overloads, temporary-object attacks, grants, and dependency changes as part of the API.</p>
+<h4 id="solution-1--exercise-10-concurrent-work-claiming">Exercise 10 — Concurrent work claiming<a class="heading-anchor" href="#solution-1--exercise-10-concurrent-work-claiming" aria-label="Link to this section">#</a></h4>
+<p>In a short transaction, select eligible IDs in a deterministic order <code>FOR UPDATE SKIP LOCKED LIMIT n</code>, then update only those IDs and commit. Competing workers skip locks instead of blocking and cannot claim the same row.</p>
+<p>This favors throughput, not fairness: a repeatedly locked early row can starve. Use bounded batches, lease/attempt metadata, retry/backoff, stale-claim recovery, and monitoring. Keep external work outside the lock transaction or use an outbox so slow calls do not retain row locks.</p>
+<h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Concurrent updates may interleave audit timestamps; use keys and transaction metadata rather than timestamp order alone.</li>
+<li>Bulk statements need bounded audit volume and retention.</li>
+<li>Disabling triggers for a load changes correctness and requires explicit reconciliation.</li>
+<li>Trigger functions should avoid unqualified objects and unexpected recursive writes.</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-PROG-01 executable solutions</span>
+<span>\set ON_ERROR_STOP on</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_routines_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_routines_lab.work_items (</span>
+<span>    item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    owner_name text NOT NULL CHECK (btrim(owner_name) &lt;&gt; &#x27;&#x27;),</span>
+<span>    title text NOT NULL,</span>
+<span>    status text NOT NULL CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;closed&#x27;))</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_routines_lab.work_item_audit (</span>
+<span>    audit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    item_id bigint NOT NULL,</span>
+<span>    old_status text NOT NULL,</span>
+<span>    new_status text NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_routines_lab.work_items (owner_name, title, status)</span>
+<span>VALUES</span>
+<span>    (&#x27;Avery&#x27;, &#x27;One&#x27;, &#x27;open&#x27;),</span>
+<span>    (&#x27;Avery&#x27;, &#x27;Two&#x27;, &#x27;closed&#x27;),</span>
+<span>    (&#x27;Morgan&#x27;, &#x27;Three&#x27;, &#x27;in_progress&#x27;);</span>
+<span> </span>
+<span>CREATE FUNCTION pro_routines_lab.audit_status()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    IF OLD.status IS DISTINCT FROM NEW.status THEN</span>
+<span>        INSERT INTO pro_routines_lab.work_item_audit (</span>
+<span>            item_id, old_status, new_status</span>
+<span>        )</span>
+<span>        VALUES (NEW.item_id, OLD.status, NEW.status);</span>
+<span>    END IF;</span>
+<span>    RETURN NULL;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER work_items_audit_status</span>
+<span>AFTER UPDATE ON pro_routines_lab.work_items</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_routines_lab.audit_status();</span>
+<span> </span>
+<span>-- Exercise 1: NULL input returns zero because equality matches no item.</span>
+<span>CREATE FUNCTION pro_routines_lab.status_change_count(p_item_id bigint)</span>
+<span>RETURNS bigint</span>
+<span>LANGUAGE sql</span>
+<span>STABLE</span>
+<span>PARALLEL SAFE</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>    SELECT COUNT(*)</span>
+<span>    FROM pro_routines_lab.work_item_audit AS a</span>
+<span>    WHERE a.item_id = p_item_id</span>
+<span>$function$;</span>
+<span> </span>
+<span>-- Exercise 2.</span>
+<span>CREATE PROCEDURE pro_routines_lab.reassign_open_items(</span>
+<span>    p_from_owner text,</span>
+<span>    p_to_owner text</span>
+<span>)</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>AS $procedure$</span>
+<span>BEGIN</span>
+<span>    IF p_to_owner IS NULL OR btrim(p_to_owner) = &#x27;&#x27; THEN</span>
+<span>        RAISE EXCEPTION &#x27;destination owner must not be blank&#x27;</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    UPDATE pro_routines_lab.work_items AS wi</span>
+<span>    SET owner_name = p_to_owner</span>
+<span>    WHERE wi.owner_name = p_from_owner</span>
+<span>      AND wi.status &lt;&gt; &#x27;closed&#x27;;</span>
+<span>END</span>
+<span>$procedure$;</span>
+<span> </span>
+<span>-- Exercise 3.</span>
+<span>CREATE FUNCTION pro_routines_lab.prevent_direct_reopen()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    IF OLD.status = &#x27;closed&#x27; AND NEW.status = &#x27;open&#x27; THEN</span>
+<span>        RAISE EXCEPTION &#x27;closed item % cannot reopen directly&#x27;, OLD.item_id</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span>    RETURN NEW;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER work_items_prevent_direct_reopen</span>
+<span>BEFORE UPDATE OF status ON pro_routines_lab.work_items</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_routines_lab.prevent_direct_reopen();</span>
+<span> </span>
+<span>UPDATE pro_routines_lab.work_items AS wi</span>
+<span>SET status = &#x27;closed&#x27;</span>
+<span>WHERE wi.item_id = 1;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    pro_routines_lab.status_change_count(1) AS item_1_changes,</span>
+<span>    pro_routines_lab.status_change_count(NULL) AS null_item_changes;</span>
+<span> </span>
+<span>CALL pro_routines_lab.reassign_open_items(&#x27;Morgan&#x27;, &#x27;Taylor&#x27;);</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        UPDATE pro_routines_lab.work_items AS wi</span>
+<span>        SET status = &#x27;open&#x27;</span>
+<span>        WHERE wi.item_id = 2;</span>
+<span>        RAISE EXCEPTION &#x27;direct reopen unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected transition rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    wi.item_id,</span>
+<span>    wi.owner_name,</span>
+<span>    wi.status</span>
+<span>FROM pro_routines_lab.work_items AS wi</span>
+<span>ORDER BY wi.item_id;</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    IF pro_routines_lab.status_change_count(1) &lt;&gt; 1 THEN</span>
+<span>        RAISE EXCEPTION &#x27;status-change function returned wrong count&#x27;;</span>
+<span>    END IF;</span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_routines_lab.work_items AS wi</span>
+<span>        WHERE wi.item_id = 3</span>
+<span>          AND wi.owner_name = &#x27;Taylor&#x27;</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;procedure did not reassign eligible item&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- Exercise 4: the row audit grain is one changed item. A statement-level</span>
+<span>-- transition-table summary below records one row per UPDATE statement.</span>
+<span> </span>
+<span>-- Exercise 5: status vocabulary is row-local and belongs in CHECK. Trigger</span>
+<span>-- logic is reserved here for OLD/NEW transition and audit behavior.</span>
+<span> </span>
+<span>-- Exercise 6: inspect the promises PostgreSQL&#x27;s planner relies on.</span>
+<span>SELECT</span>
+<span>    p.proname,</span>
+<span>    CASE p.provolatile</span>
+<span>        WHEN &#x27;i&#x27; THEN &#x27;immutable&#x27;</span>
+<span>        WHEN &#x27;s&#x27; THEN &#x27;stable&#x27;</span>
+<span>        ELSE &#x27;volatile&#x27;</span>
+<span>    END AS volatility,</span>
+<span>    CASE p.proparallel</span>
+<span>        WHEN &#x27;s&#x27; THEN &#x27;safe&#x27;</span>
+<span>        WHEN &#x27;r&#x27; THEN &#x27;restricted&#x27;</span>
+<span>        ELSE &#x27;unsafe&#x27;</span>
+<span>    END AS parallel_mode</span>
+<span>FROM pg_catalog.pg_proc AS p</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = p.pronamespace</span>
+<span>WHERE n.nspname = &#x27;pro_routines_lab&#x27;</span>
+<span>ORDER BY p.proname;</span>
+<span> </span>
+<span>-- Exercise 7: transition tables expose the complete affected set once per</span>
+<span>-- statement, including a legitimate zero-change status summary.</span>
+<span>CREATE TABLE pro_routines_lab.statement_status_summary (</span>
+<span>    summary_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    matched_rows integer NOT NULL,</span>
+<span>    changed_status_rows integer NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>CREATE FUNCTION pro_routines_lab.summarize_status_statement()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    INSERT INTO pro_routines_lab.statement_status_summary (</span>
+<span>        matched_rows, changed_status_rows</span>
+<span>    )</span>
+<span>    SELECT</span>
+<span>        COUNT(*)::integer,</span>
+<span>        COUNT(*) FILTER (</span>
+<span>            WHERE o.status IS DISTINCT FROM n.status</span>
+<span>        )::integer</span>
+<span>    FROM old_rows AS o</span>
+<span>    JOIN new_rows AS n USING (item_id);</span>
+<span>    RETURN NULL;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER work_items_statement_status_summary</span>
+<span>AFTER UPDATE ON pro_routines_lab.work_items</span>
+<span>REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows</span>
+<span>FOR EACH STATEMENT</span>
+<span>EXECUTE FUNCTION pro_routines_lab.summarize_status_statement();</span>
+<span> </span>
+<span>UPDATE pro_routines_lab.work_items AS wi</span>
+<span>SET title = wi.title || &#x27; (reviewed)&#x27;</span>
+<span>WHERE wi.item_id IN (1, 3);</span>
+<span> </span>
+<span>SELECT</span>
+<span>    s.summary_id,</span>
+<span>    s.matched_rows,</span>
+<span>    s.changed_status_rows</span>
+<span>FROM pro_routines_lab.statement_status_summary AS s</span>
+<span>ORDER BY s.summary_id;</span>
+<span> </span>
+<span>-- Exercise 8: only the inner duplicate insert rolls back. The outer marker</span>
+<span>-- remains, and an unexpected condition is never swallowed.</span>
+<span>CREATE TABLE pro_routines_lab.exception_probe (</span>
+<span>    probe_key text PRIMARY KEY</span>
+<span>);</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    INSERT INTO pro_routines_lab.exception_probe VALUES (&#x27;outer-survives&#x27;);</span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_routines_lab.exception_probe VALUES (&#x27;duplicate&#x27;);</span>
+<span>        INSERT INTO pro_routines_lab.exception_probe VALUES (&#x27;duplicate&#x27;);</span>
+<span>        RAISE EXCEPTION &#x27;duplicate insert unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN unique_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected unique violation rolled back inner work&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_routines_lab.exception_probe AS p</span>
+<span>        WHERE p.probe_key = &#x27;outer-survives&#x27;</span>
+<span>    ) OR EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_routines_lab.exception_probe AS p</span>
+<span>        WHERE p.probe_key = &#x27;duplicate&#x27;</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;subtransaction rollback boundary was incorrect&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- Exercise 9: SECURITY DEFINER would additionally require a narrow NOLOGIN</span>
+<span>-- owner, fixed path, qualified objects, validated inputs, PUBLIC revocation,</span>
+<span>-- and explicit EXECUTE grants. Security-invoker remains the safer default.</span>
+<span> </span>
+<span>-- Exercise 10: claim a deterministic batch under row locks. Production workers</span>
+<span>-- commit quickly, recover stale leases, and keep external work out of this lock.</span>
+<span>CREATE TABLE pro_routines_lab.claim_queue (</span>
+<span>    queue_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    claimed_by text,</span>
+<span>    claimed_at timestamptz</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_routines_lab.claim_queue (claimed_by)</span>
+<span>VALUES (NULL), (NULL), (NULL);</span>
+<span> </span>
+<span>WITH claimable AS (</span>
+<span>    SELECT q.queue_id</span>
+<span>    FROM pro_routines_lab.claim_queue AS q</span>
+<span>    WHERE q.claimed_by IS NULL</span>
+<span>    ORDER BY q.queue_id</span>
+<span>    FOR UPDATE SKIP LOCKED</span>
+<span>    LIMIT 2</span>
+<span>)</span>
+<span>UPDATE pro_routines_lab.claim_queue AS q</span>
+<span>SET claimed_by = &#x27;worker-1&#x27;,</span>
+<span>    claimed_at = TIMESTAMPTZ &#x27;2026-06-01 00:00:00+00&#x27;</span>
+<span>FROM claimable AS c</span>
+<span>WHERE q.queue_id = c.queue_id</span>
+<span>RETURNING q.queue_id, q.claimed_by, q.claimed_at;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-sec-01.html"><small>Previous lesson</small><strong>sql-sec-01</strong><span>Schemas, Roles, Privileges, and Row-Level Security</span></a>
+        <a class="nav-card next" href="sql-types-01.html"><small>Next lesson</small><strong>sql-types-01</strong><span>PostgreSQL-Native Types and Searchable Documents</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-prog-01";
+    const LEARNER_PATH = "sql/professional/lessons/sql_prog_01_routines_triggers.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

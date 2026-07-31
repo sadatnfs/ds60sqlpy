@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Agent guidance for the engineering bridge · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Agent guidance for the engineering bridge</h1>
+      <p class="source-path">Generated from <code>bridge/AGENTS.md</code></p>
+    </header>
+    <article class="document"><h2 id="agent-guidance-for-the-engineering-bridge">Agent guidance for the engineering bridge<a class="heading-anchor" href="#agent-guidance-for-the-engineering-bridge" aria-label="Link to this section">#</a></h2>
+<p>This file governs everything under <code>bridge/</code>.</p>
+<h3 id="purpose-and-prerequisites">Purpose and prerequisites<a class="heading-anchor" href="#purpose-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>The bridge connects the Python and PostgreSQL tracks without becoming a second beginner course. Day 1 follows Python Day 15 and SQL Day 15. Days 2–8 are sequential. Preserve this dependency chain when changing lesson order.</p>
+<h3 id="artifact-contract">Artifact contract<a class="heading-anchor" href="#artifact-contract" aria-label="Link to this section">#</a></h3>
+<p>Every day must have:</p>
+<ul>
+<li>one answer-free, syntax-valid learner file in <code>lessons/</code>;</li>
+<li>one companion guide in <code>companion-guides/</code>;</li>
+<li>one executable reference implementation and one reasoning-focused Markdown solution in <code>solutions/</code>;</li>
+<li>deterministic, fake-backed coverage in <code>tests/</code>.</li>
+</ul>
+<p>Named modules under <code>bridge/professional/</code> follow the same separation but may use a clean notebook as the learner/reference executable when the objective is interactive SQL. PostgreSQL magic cells must be tagged <code>skip-static-validation</code> and live cells must also be tagged <code>live-postgres</code>.</p>
+<p>Companion guides include objectives, prerequisites, vocabulary, worked examples, exercises, self-checks, common pitfalls, and a next step. Solution notes discuss tradeoffs and failure behavior instead of merely repeating code. Each cataloged bridge module must meet its immutable <code>curriculum/practice_baseline.json</code> target on learner, guide, and explanatory solution surfaces with aligned, distinct numbered prompts.</p>
+<h3 id="database-and-security-rules">Database and security rules<a class="heading-anchor" href="#database-and-security-rules" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Target Python 3.11–3.12, PostgreSQL 16+, and Psycopg 3.</li>
+<li>Read the disposable course connection string from <code>DS60_DATABASE_URL</code>.</li>
+<li>Never commit or log credentials.</li>
+<li>Keep Psycopg imports inside optional live-DB boundaries when possible so core examples remain importable without the dependency.</li>
+<li>Bind values with <code>%s</code> and a separate parameter sequence.</li>
+<li>Use <code>psycopg.sql.Identifier</code> for dynamic table or column names. An allowlist is still required when the application controls the set of acceptable names.</li>
+<li>Do not use SQLite as a PostgreSQL test substitute.</li>
+<li>Make live steps opt-in, rollback-safe, and explicit about the target database.</li>
+<li>JupySQL notebooks use a SQLAlchemy engine with the explicit <code>postgresql+psycopg://</code> dialect, keep connection display disabled, and use named binding for values. Jinja SQL rendering is code generation and must not be presented as safe parameter binding.</li>
+</ul>
+<h3 id="teaching-and-typing-style">Teaching and typing style<a class="heading-anchor" href="#teaching-and-typing-style" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Use modern Python 3.11-compatible annotations: built-in generics, <code>X | None</code>, <code>Protocol</code>, <code>TypedDict</code>, <code>ParamSpec</code>, and abstract collection types.</li>
+<li>Prefer dependency injection and small Protocols so behavior can be tested without a database.</li>
+<li>Define a new term before relying on it.</li>
+<li>Do not call unfinished learner functions from <code>main()</code>.</li>
+<li>Do not leak solution code or answer-shaped pseudocode into learner files.</li>
+<li>Keep examples deterministic; inject clocks, sleepers, and external effects.</li>
+<li>Preserve input order when the lesson promises it.</li>
+</ul>
+<h3 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h3>
+<p>Run from the repository root:</p>
+<pre><code class="language-text">python -m compileall -q bridge
+python -m pytest bridge/tests -q
+python bridge/scripts/validate_bridge.py
+python scripts/audit_practice.py
+ruff check bridge
+ruff format --check bridge</code></pre>
+<p>Also check local Markdown links and <code>git diff --check</code>. Remove any generated <code><strong>pycache</strong></code>, <code>.pytest_cache</code>, coverage, or learner-output files before handoff.</p></article>
+  </main>
+</body>
+</html>

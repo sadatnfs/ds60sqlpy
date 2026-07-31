@@ -4,13 +4,61 @@ This guide assumes a new Windows 10 or Windows 11 machine and PowerShell. The re
 
 Run course commands from the repository root—the directory containing `README.md`.
 
+## Fastest route: double-click the guided launcher
+
+After downloading or cloning the repository, open its folder in File Explorer
+and double-click:
+
+```text
+START_DS60.cmd
+```
+
+The launcher finds the repository from its own location, so the folder may
+contain spaces and you do not need to type a path. It:
+
+1. Reuses either `.venv\Scripts\python.exe` or the Anaconda conda-prefix
+   `.venv\python.exe` layout.
+2. If the environment is missing or incomplete, clearly announces the
+   **connected first setup**, asks you to type `SETUP`, and delegates to the
+   safe discovery bootstrap.
+3. Finds VS Code even when its launcher is not on `PATH`, and verifies Python
+   3.11-3.12, Jupyter/IPython/JupySQL/Psycopg/SQLAlchemy, and the
+   `Python (ds60sqlpy)` kernel.
+4. Runs `course.py doctor`.
+5. Opens the private learning portal and keeps its terminal window visible.
+
+Keep the launcher window open while studying; press `Ctrl+C` there to stop the
+portal. The launcher does not ask for, store, or print a database password and
+does not create, drop, or reset data. Course doctor may make its documented
+no-prompt, read-only reachability check against only the disposable course
+database; configuration and initialization remain separate guided steps in
+section 5.
+
+For read-only troubleshooting without installing anything or opening a
+browser:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start_ds60.ps1 `
+    -DiagnosticsOnly -NonInteractive
+```
+
+Preview a needed setup without changing the machine:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start_ds60.ps1 -WhatIf
+```
+
+The rest of this document explains every step that the launcher coordinates
+and provides manual alternatives.
+
 ## 1. Install the base tools
 
 Install:
 
 1. [Git for Windows](https://git-scm.com/download/win)
-2. [Python 3.12](https://www.python.org/downloads/windows/) or an Anaconda
-   distribution whose Python is 3.11 or 3.12
+2. [Python 3.12](https://www.python.org/downloads/windows/) or a current
+   Anaconda/Miniconda distribution. If its base Python is outside 3.11-3.12,
+   bootstrap creates a supported repository-local conda prefix.
 3. [Visual Studio Code](https://code.visualstudio.com/download)
 4. [PostgreSQL 16+](https://www.postgresql.org/download/windows/) or
    [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)
@@ -100,10 +148,10 @@ uses `.venv\python.exe`. Resolve `$CoursePython` once in each new PowerShell
 window. Invoking it directly avoids activation-policy issues and guarantees
 that commands use the intended environment.
 
-Core setup installs notebook, data, and quality tooling. Before the engineering
-bridge, PostgreSQL-in-Jupyter lesson, professional modules, or later
+Core setup installs notebook, data, quality, engineering-bridge, professional,
+and PostgreSQL-in-Jupyter tooling. Before lessons labeled for the larger
 machine-learning, production, deep-learning, natural-language-processing, or
-geospatial lessons, install the advanced profile while connected:
+geospatial profiles, install the advanced profile while connected:
 
 ```powershell
 & .\scripts\bootstrap_windows.ps1 -Profile Advanced
@@ -147,7 +195,9 @@ The conda-prefix fallback does not contain that activation script. Keep using
 6. Open a notebook and select the same `.venv` interpreter as its kernel.
 
 The checked-in tasks under **Terminal → Run Task** can run setup, the private
-learning portal, doctor, catalog, validation, and JupyterLab.
+learning portal, doctor, catalog, validation, and JupyterLab. Choose
+**Course: Guided start (Windows)** for the same readiness-and-launch sequence
+as `START_DS60.cmd`.
 
 ## 5. Set up PostgreSQL
 

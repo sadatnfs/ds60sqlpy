@@ -35,6 +35,7 @@ Practice-enrichment and generated portal drift:
 ```text
 python scripts/audit_practice.py
 python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
 ```
 
 Add `--all` to print passing details as well as failures, warnings, and summaries. This command performs fast structural checks; it does not execute every notebook or SQL lesson.
@@ -48,6 +49,7 @@ On Windows, use:
 .\.venv\Scripts\python.exe scripts\scan_secrets.py --history
 .\.venv\Scripts\python.exe scripts\audit_practice.py
 .\.venv\Scripts\python.exe scripts\build_course_guide.py --check
+.\.venv\Scripts\python.exe scripts\build_lesson_readers.py --check
 ```
 
 On macOS/Linux, use:
@@ -59,6 +61,7 @@ On macOS/Linux, use:
 .venv/bin/python scripts/scan_secrets.py --history
 .venv/bin/python scripts/audit_practice.py
 .venv/bin/python scripts/build_course_guide.py --check
+.venv/bin/python scripts/build_lesson_readers.py --check
 ```
 
 The course CLI uses the standard library for pre-install inspection so catalog and environment diagnostics remain available before third-party packages are installed.
@@ -85,7 +88,9 @@ Core setup installs the quality tools used by continuous integration:
 ```text
 python scripts/build_catalog.py
 python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
 python scripts/audit_practice.py
+python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
 python -m ruff check src scripts tests bridge python/professional
 python -m mypy
 python -m pytest
@@ -94,8 +99,39 @@ python scripts/scan_secrets.py --history
 ```
 
 Review the regenerated catalog diff. CI runs these core checks on Python 3.12
-for Windows, macOS, and Linux, then executes the full SQL sequence separately
-against PostgreSQL 17.
+for Windows, macOS, and Linux and on Python 3.11 for Linux, then executes the
+full SQL sequence separately against PostgreSQL 17. Each matrix leg sets
+`UV_PYTHON` to the requested version and asserts `sys.version_info[:2]` after
+sync, so the learner-default `.python-version` cannot silently collapse the
+matrix onto Python 3.12. The Windows core runner also registers
+`Python (ds60sqlpy)` and runs
+`start_ds60.ps1 -DiagnosticsOnly -NonInteractive -SkipPostgreSql`, exercising
+the native PowerShell startup and both-environment-layout readiness path
+without opening a browser.
+
+The focused learner-entry tests cover different boundaries:
+
+- `test_course_guide.py` checks dashboard catalog links and generated copy.
+- `test_lesson_reader.py` checks deterministic rendered pages, safe link
+  rewriting, recursive Markdown/SQL reference pages, mode-specific completion
+  controls, and stale-page removal.
+- `test_portal.py` checks loopback/token/origin/path/launch restrictions and
+  exact artifact commands.
+- `test_sql_notebook.py` checks stable SQL IDs, paths below `.learning/sql/`,
+  no-overwrite behavior, fixed `psql` invocation, database/reset guards,
+  bounded transcripts, and stateful prerequisite preparation.
+- `test_windows_startup.py` statically checks the double-click launcher and
+  PowerShell 5.1 orchestration. Native execution remains a Windows CI
+  boundary.
+
+Unit tests do not replace browser QA. For a learner-experience change, open
+both `file://.../START_HERE.html` and the private `127.0.0.1` portal. Verify a
+Python, SQL, and bridge card; guide/learner/solution tabs; keyboard navigation;
+desktop and narrow layouts; no raw `.md`, `.ipynb`, `.py`, or `.sql` browser
+view; rendered setup/reference navigation; dashboard-only static completion;
+the loopback lesson checkbox; no unexpected network requests; and the exact
+run controls available in each mode. Do not click an action that would reset
+PostgreSQL.
 
 The sensitive-content scan is deliberately offline and reports only an object
 ID, path, line number, and finding category so it does not copy a suspected
@@ -164,8 +200,16 @@ Check:
 - Every lesson surface meets its immutable
   `curriculum/practice_baseline.json` doubling target.
 - `START_HERE.html` matches a fresh deterministic portal render.
+- `lesson-pages/` contains exactly one current page per cataloged lesson and
+  matches a fresh deterministic reader render.
+- `reference-pages/` matches the recursive closure of local Markdown/SQL links
+  reachable from the dashboard and rendered course artifacts.
+- No user-facing local Markdown or SQL link in the generated HTML surfaces
+  opens raw browser source.
 - The loopback portal rejects hidden files, invalid tokens, cross-origin
   mutations, unknown lesson IDs, and non-allowlisted launch actions.
+- Static pages remain self-contained/read-only; loopback pages receive only
+  the session token needed for fixed catalog-resolved actions.
 - No unexpected generated artifacts are tracked.
 
 This layer is fast but does not prove lesson semantics.
@@ -212,6 +256,30 @@ The executed copy belongs under ignored `artifacts/`; keep the checked-in
 notebook output-free.
 
 Cleared notebook outputs are normal. Record execution evidence in validation logs or CI rather than committing noisy, machine-specific output.
+
+#### Guided per-lesson SQL notebooks
+
+These learner-local notebooks are generated from stable SQL catalog IDs and
+run complete scripts through `psql`; they are not the checked-in JupySQL
+magics lesson. Validate their safety and generation contract without writing
+into a learner's existing `.learning/` directory:
+
+```text
+python -m pytest tests/test_sql_notebook.py tests/test_portal.py
+```
+
+The tests use isolated temporary repositories. They must prove valid
+notebook/kernelspec structure, no absolute checkout path or connection value,
+catalog-only source selection, no overwrite of learner files, fixed
+non-shell `psql -f`, unchanged line-start and inline meta-commands/includes, the
+`advanced_sql_training` restriction, and explicit reset confirmation.
+
+When manually exercising a generated notebook, first preserve any existing
+`.learning/sql/<lesson-id>/` work. Report separately whether generation,
+Jupyter launch, database preparation, learner SQL execution, and
+`00_verify.sql` succeeded. A rendered reader or structurally valid generated
+notebook is not evidence that PostgreSQL authentication or the lesson query
+succeeded.
 
 ### 3. Offline checks
 
@@ -335,7 +403,8 @@ Use focused checks first, then the full validation:
    ```text
    python scripts/audit_practice.py --write-report
    python scripts/build_course_guide.py
-   git diff -- docs/practice-coverage.md START_HERE.html
+   python scripts/build_lesson_readers.py
+   git diff -- docs/practice-coverage.md START_HERE.html lesson-pages/
    ```
 
 6. Run `python scripts/course.py validate`.

@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-ops-01 · Index Types, Statistics, and Maintenance Lifecycle · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-ops-01</p>
+        <h1>Index Types, Statistics, and Maintenance Lifecycle</h1>
+        <p class="hero-copy">PostgreSQL operations</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">210 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-35.html">sql-35</a> <a class="tag" href="sql-types-01.html">sql-types-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--sql-ops-01-index-types-statistics-and-maintenance-lifecycle">SQL-OPS-01 — Index Types, Statistics, and Maintenance Lifecycle<a class="heading-anchor" href="#guide--sql-ops-01-index-types-statistics-and-maintenance-lifecycle" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-35</code> and <code>sql-types-01</code></li>
+<li><strong>Prerequisites:</strong> SQL Days 31–34 on plans and B-tree indexes, <a href="sql-35.html#guide">SQL Day 35 query pitfalls</a>, plus <a href="sql-types-01.html#guide">SQL-TYPES-01</a> for array/range operators.</li>
+<li><strong>Artifacts:</strong> <a href="sql-ops-01.html#learner">learner SQL</a> · <a href="sql-ops-01.html#solution-1">solution reasoning</a> · <a href="sql-ops-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run from the repository root:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code></pre>
+<p>The same command works in PowerShell and POSIX shells. The default lab rolls back. It reads configuration/statistics but never changes host settings, runs <code>VACUUM</code>, or enables <code>pg_stat_statements</code>.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Match B-tree, GIN, GiST, SP-GiST, and BRIN operator classes to concrete query shapes.</li>
+<li>Build expression, partial, and covering indexes and create extended statistics.</li>
+<li>Review planner evidence without promising a universal plan and design an index/ANALYZE/VACUUM/autovacuum maintenance lifecycle.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Access method:</strong> index structure such as B-tree, GIN, GiST, SP-GiST, or BRIN.</li>
+<li><strong>Operator class:</strong> data-type/operator semantics implemented by an index.</li>
+<li><strong>Partial index:</strong> index containing only rows satisfying a fixed predicate.</li>
+<li><strong>Expression index:</strong> index over a computed immutable expression.</li>
+<li><strong>Covering index:</strong> key columns plus <code>INCLUDE</code> payload that may permit an index-only scan when visibility allows.</li>
+<li><strong>BRIN range:</strong> block-range summary rather than one entry per row.</li>
+<li><strong>Statistics target:</strong> sampling/detail budget used for planner estimates.</li>
+<li><strong>Extended statistics:</strong> cross-column dependencies, most-common values, or distinct-count evidence.</li>
+<li><strong>Dead tuple:</strong> obsolete row version awaiting vacuum reuse.</li>
+<li><strong>Visibility map:</strong> page-level evidence that can support index-only scans.</li>
+<li><strong>Bloat:</strong> space/layout inefficiency requiring measured diagnosis, not a universal percentage threshold.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>The fixture inserts 6,000 events in timestamp order. That physical correlation makes time a plausible BRIN candidate in a much larger append-oriented table. The teaching table is intentionally small, so PostgreSQL may still prefer a sequential scan; that is a valid cost decision.</p>
+<ul>
+<li>B-tree serves device equality plus descending time order.</li>
+<li>BRIN summarizes time-correlated heap ranges compactly.</li>
+<li>GIN maps tag elements to rows for array containment.</li>
+<li>GiST supports point distance/nearest-neighbour operations.</li>
+<li>SP-GiST partitions text search space for its supported operators.</li>
+<li>An expression index stores <code>lower(message)</code>.</li>
+<li>A partial index stores only severity 4–5 rows.</li>
+</ul>
+<p>A query must match the indexed expression and operator. <code>lower(message) = ...</code> can use the expression index; plain <code>message = ...</code> is a different expression. A partial-index query must logically imply <code>severity &gt;= 4</code>; a parameterized predicate whose value is unknown at planning time may not.</p>
+<p><code>CREATE STATISTICS ... (dependencies, mcv)</code> supplies correlation evidence after <code>ANALYZE</code>. It improves estimates; it cannot force a join type or index. Compare estimated versus observed rows with representative, safe <code>EXPLAIN (ANALYZE)</code> only when executing the query is acceptable. Remember that <code>ANALYZE</code> after a write actually performs the write query.</p>
+<p>Index lifecycle review combines workload observation, query latency/plans, constraint ownership, size, cache effects, maintenance/write cost, and a full business cycle. A zero <code>idx_scan</code> after a restart or short window is not proof that an index is disposable.</p>
+<p>VACUUM reclaims dead-row space for reuse and maintains visibility/freeze state; it does not usually shrink the file. ANALYZE refreshes planner statistics. Autovacuum schedules both using per-table change thresholds. Changing its configuration or running aggressive vacuum modes is DBA work outside this transactional lab.</p>
+<p><code>pg_stat_statements</code> requires approved extension/preload configuration and its query text may contain sensitive literals. The lesson checks only installation status. A production review needs access control and normalized query IDs.</p>
+<h5 id="guide--dba-only-statement-statistics-boundary">DBA-only statement-statistics boundary<a class="heading-anchor" href="#guide--dba-only-statement-statistics-boundary" aria-label="Link to this section">#</a></h5>
+<p>The following is an operator runbook fragment, not a learner command. A DBA must first approve adding <code>pg_stat_statements</code> to <code>shared_preload_libraries</code> and restarting the PostgreSQL service. Only then, and only in the intended database, would an administrator run:</p>
+<pre><code class="language-sql">CREATE EXTENSION pg_stat_statements;
+
+SELECT
+    queryid,
+    calls,
+    total_exec_time,
+    rows
+FROM pg_stat_statements
+ORDER BY total_exec_time DESC
+LIMIT 20;</code></pre>
+<p>Grant monitoring access narrowly, prefer <code>queryid</code> for aggregation, and decide whether query text is safe to expose. Removing the extension from one database does not undo the server-wide preload setting; configuration rollback and restart belong in the same approved change plan.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete all twelve prompts. Begin with a predicate-compatible covering index, access-method operator mapping, extended statistics, a cautious lifecycle review, maintenance semantics, and a safe statement-statistics plan; then address redundancy, expressions, HOT, partitioning, plan instrumentation, and an owned scorecard. Include the exact target query beside every proposed index.</p>
+<p>Use <code>EXPLAIN</code> as evidence, not as a pass/fail assertion that one node type must appear on every machine or data size.</p>
+<p>Every recommendation needs target query, operator, representative data, before/after evidence, write/storage cost, owner, review date, and rollback:</p>
+<ol>
+<li><strong>Covering partial index:</strong> make the query predicate imply the index predicate and identify which columns are keys versus payload.</li>
+<li><strong>Access methods:</strong> map each GIN, GiST, SP-GiST, and BRIN index to supported operators and one nonmatching query.</li>
+<li><strong>Extended statistics:</strong> choose correlated columns, analyze, inspect, and explain the planner’s freedom.</li>
+<li><strong>Lifecycle review:</strong> combine usage window, size, writes, constraints, and plans without producing an automatic drop list.</li>
+<li><strong>Maintenance:</strong> connect vacuum/analyze, visibility, dead tuples, bloat, autovacuum, and long transactions.</li>
+<li><strong>Statement statistics:</strong> design restricted, privacy-aware collection and review without enabling or exposing it here.</li>
+<li><strong>Redundancy candidates:</strong> compare keys, order, predicate, operator class, collation, INCLUDE data, uniqueness, and plans.</li>
+<li><strong>Expression index:</strong> test expression matching and document collation, function-volatility, and generated-column alternatives.</li>
+<li><strong>HOT updates:</strong> observe a controlled workload and relate indexed columns, free space, fillfactor, vacuum, and old snapshots.</li>
+<li><strong>Partition indexes:</strong> account for pruning, local indexes, statistics, attach/detach, and global uniqueness limitations.</li>
+<li><strong>Plan instrumentation:</strong> distinguish execution and overhead across <code>EXPLAIN</code> options, especially for writes and cache state.</li>
+<li><strong>Maintenance scorecard:</strong> define owners, budgets, cadence, escalation, and evidence for growth, health, waits, lag, and slow queries.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Does each index name a concrete query and compatible operator?</li>
+<li>Is a partial predicate implied by its target query?</li>
+<li>Are expression/query forms identical where required?</li>
+<li>Did <code>ANALYZE</code> populate the intended extended statistics?</li>
+<li>Can you explain why a sequential scan may beat an available index?</li>
+<li>Does an unused-index review cover restart timing and a representative cycle?</li>
+<li>Are VACUUM, configuration, extension, and destructive actions left outside the rollback-based learner path?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Adding every plausible index increases writes, WAL, cache pressure, vacuum work, backups, and restore time.</li>
+<li>BRIN is not automatically useful on a small or physically uncorrelated table.</li>
+<li>GIN/GiST/SP-GiST are families; the operator class is the real compatibility contract.</li>
+<li>Included columns are payload, not search keys.</li>
+<li>Index-only scans still depend on page visibility.</li>
+<li><code>REINDEX</code>, <code>VACUUM FULL</code>, and <code>CLUSTER</code> have lock/disk implications and are not routine first responses.</li>
+<li>Planner settings forced in a demo are not production tuning evidence.</li>
+<li>Query text from monitoring views can disclose confidential literals.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-test-01.html#guide">SQL-TEST-01 — SQL tests, migration checks, and data contracts</a>. Then use <a href="sql-ops-02.html#guide">SQL-OPS-02</a> to include index, statistics, extension, and post-restore verification in a recovery rehearsal.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-OPS-01: Index types, statistics, and maintenance lifecycle</span>
+<span>-- Target: PostgreSQL 16+</span>
+<span>-- VACUUM and host configuration changes are intentionally not executed.</span>
+<span> </span>
+<span>\set ON_ERROR_STOP on</span>
+<span>\echo &#x27;SQL-OPS-01: disposable index and statistics lab&#x27;</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_ops_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_ops_lab.events (</span>
+<span>    event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    device_id text NOT NULL,</span>
+<span>    occurred_at timestamptz NOT NULL,</span>
+<span>    severity smallint NOT NULL CHECK (severity BETWEEN 1 AND 5),</span>
+<span>    tags text[] NOT NULL DEFAULT ARRAY[]::text[],</span>
+<span>    location point NOT NULL,</span>
+<span>    message text NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_ops_lab.events (</span>
+<span>    device_id,</span>
+<span>    occurred_at,</span>
+<span>    severity,</span>
+<span>    tags,</span>
+<span>    location,</span>
+<span>    message</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    &#x27;device-&#x27; || lpad(((g.n % 40) + 1)::text, 3, &#x27;0&#x27;),</span>
+<span>    TIMESTAMPTZ &#x27;2026-01-01 00:00:00+00&#x27;</span>
+<span>        + g.n * INTERVAL &#x27;1 minute&#x27;,</span>
+<span>    ((g.n % 5) + 1)::smallint,</span>
+<span>    CASE</span>
+<span>        WHEN g.n % 3 = 0 THEN ARRAY[&#x27;network&#x27;, &#x27;retry&#x27;]</span>
+<span>        WHEN g.n % 3 = 1 THEN ARRAY[&#x27;storage&#x27;]</span>
+<span>        ELSE ARRAY[&#x27;application&#x27;, &#x27;latency&#x27;]</span>
+<span>    END,</span>
+<span>    point((g.n % 100)::double precision, ((g.n * 7) % 100)::double precision),</span>
+<span>    CASE</span>
+<span>        WHEN g.n % 10 = 0 THEN &#x27;Connection retry threshold reached&#x27;</span>
+<span>        ELSE &#x27;Routine device observation&#x27;</span>
+<span>    END</span>
+<span>FROM generate_series(1, 6000) AS g(n);</span>
+<span> </span>
+<span>-- B-tree: equality and ordered/range access.</span>
+<span>CREATE INDEX events_device_time_btree</span>
+<span>ON pro_ops_lab.events (device_id, occurred_at DESC)</span>
+<span>INCLUDE (severity);</span>
+<span> </span>
+<span>-- BRIN: compact summaries for a large table physically correlated with time.</span>
+<span>CREATE INDEX events_occurred_at_brin</span>
+<span>ON pro_ops_lab.events</span>
+<span>USING brin (occurred_at)</span>
+<span>WITH (pages_per_range = 8);</span>
+<span> </span>
+<span>-- GIN: inverted membership over array elements.</span>
+<span>CREATE INDEX events_tags_gin</span>
+<span>ON pro_ops_lab.events</span>
+<span>USING gin (tags);</span>
+<span> </span>
+<span>-- GiST: nearest-neighbour and geometric operators for point.</span>
+<span>CREATE INDEX events_location_gist</span>
+<span>ON pro_ops_lab.events</span>
+<span>USING gist (location);</span>
+<span> </span>
+<span>-- SP-GiST: partitioned search structure with a text operator class.</span>
+<span>CREATE INDEX events_device_spgist</span>
+<span>ON pro_ops_lab.events</span>
+<span>USING spgist (device_id);</span>
+<span> </span>
+<span>-- Expression and partial indexes require query expressions/predicates that are</span>
+<span>-- compatible with their stored expressions.</span>
+<span>CREATE INDEX events_lower_message_btree</span>
+<span>ON pro_ops_lab.events (lower(message));</span>
+<span> </span>
+<span>CREATE INDEX events_high_severity_partial</span>
+<span>ON pro_ops_lab.events (occurred_at DESC, device_id)</span>
+<span>WHERE severity &gt;= 4;</span>
+<span> </span>
+<span>CREATE STATISTICS events_device_severity_stats (dependencies, mcv)</span>
+<span>ON device_id, severity</span>
+<span>FROM pro_ops_lab.events;</span>
+<span> </span>
+<span>ANALYZE pro_ops_lab.events;</span>
+<span> </span>
+<span>\echo &#x27;Catalog every index method, definition, predicate, and measured size&#x27;</span>
+<span>SELECT</span>
+<span>    ci.relname AS index_name,</span>
+<span>    am.amname AS access_method,</span>
+<span>    pg_catalog.pg_get_indexdef(i.indexrelid) AS index_definition,</span>
+<span>    pg_catalog.pg_get_expr(i.indpred, i.indrelid) AS predicate,</span>
+<span>    pg_catalog.pg_relation_size(i.indexrelid) AS index_bytes</span>
+<span>FROM pg_catalog.pg_index AS i</span>
+<span>JOIN pg_catalog.pg_class AS ci</span>
+<span>  ON ci.oid = i.indexrelid</span>
+<span>JOIN pg_catalog.pg_class AS ct</span>
+<span>  ON ct.oid = i.indrelid</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = ct.relnamespace</span>
+<span>JOIN pg_catalog.pg_am AS am</span>
+<span>  ON am.oid = ci.relam</span>
+<span>WHERE n.nspname = &#x27;pro_ops_lab&#x27;</span>
+<span>  AND ct.relname = &#x27;events&#x27;</span>
+<span>ORDER BY ci.relname;</span>
+<span> </span>
+<span>\echo &#x27;Plans are environment evidence, not promises&#x27;</span>
+<span>EXPLAIN (COSTS OFF)</span>
+<span>SELECT</span>
+<span>    e.event_id,</span>
+<span>    e.occurred_at,</span>
+<span>    e.severity</span>
+<span>FROM pro_ops_lab.events AS e</span>
+<span>WHERE e.device_id = &#x27;device-007&#x27;</span>
+<span>ORDER BY e.occurred_at DESC</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>EXPLAIN (COSTS OFF)</span>
+<span>SELECT</span>
+<span>    e.event_id,</span>
+<span>    e.tags</span>
+<span>FROM pro_ops_lab.events AS e</span>
+<span>WHERE e.tags @&gt; ARRAY[&#x27;network&#x27;]::text[]</span>
+<span>ORDER BY e.event_id;</span>
+<span> </span>
+<span>EXPLAIN (COSTS OFF)</span>
+<span>SELECT</span>
+<span>    e.event_id,</span>
+<span>    e.location</span>
+<span>FROM pro_ops_lab.events AS e</span>
+<span>ORDER BY e.location &lt;-&gt; point(50, 50)</span>
+<span>LIMIT 5;</span>
+<span> </span>
+<span>EXPLAIN (COSTS OFF)</span>
+<span>SELECT</span>
+<span>    COUNT(*)</span>
+<span>FROM pro_ops_lab.events AS e</span>
+<span>WHERE e.occurred_at &gt;= TIMESTAMPTZ &#x27;2026-01-04 00:00:00+00&#x27;</span>
+<span>  AND e.occurred_at &lt; TIMESTAMPTZ &#x27;2026-01-05 00:00:00+00&#x27;;</span>
+<span> </span>
+<span>\echo &#x27;Extended statistics and table/index lifecycle observations&#x27;</span>
+<span>SELECT</span>
+<span>    s.statistics_name,</span>
+<span>    s.kinds,</span>
+<span>    s.attnames</span>
+<span>FROM pg_catalog.pg_stats_ext AS s</span>
+<span>WHERE s.schemaname = &#x27;pro_ops_lab&#x27;</span>
+<span>ORDER BY s.statistics_name;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    st.relname,</span>
+<span>    st.seq_scan,</span>
+<span>    st.idx_scan,</span>
+<span>    st.n_live_tup,</span>
+<span>    st.n_dead_tup,</span>
+<span>    st.last_analyze,</span>
+<span>    st.last_autoanalyze,</span>
+<span>    st.last_autovacuum</span>
+<span>FROM pg_catalog.pg_stat_all_tables AS st</span>
+<span>WHERE st.schemaname = &#x27;pro_ops_lab&#x27;</span>
+<span>ORDER BY st.relname;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    psui.indexrelname,</span>
+<span>    psui.idx_scan,</span>
+<span>    psui.idx_tup_read,</span>
+<span>    psui.idx_tup_fetch</span>
+<span>FROM pg_catalog.pg_stat_user_indexes AS psui</span>
+<span>WHERE psui.schemaname = &#x27;pro_ops_lab&#x27;</span>
+<span>ORDER BY psui.indexrelname;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    setting.name,</span>
+<span>    setting.setting,</span>
+<span>    setting.unit,</span>
+<span>    setting.source</span>
+<span>FROM pg_catalog.pg_settings AS setting</span>
+<span>WHERE setting.name IN (</span>
+<span>    &#x27;autovacuum&#x27;,</span>
+<span>    &#x27;autovacuum_analyze_scale_factor&#x27;,</span>
+<span>    &#x27;autovacuum_vacuum_scale_factor&#x27;,</span>
+<span>    &#x27;default_statistics_target&#x27;,</span>
+<span>    &#x27;shared_preload_libraries&#x27;</span>
+<span>)</span>
+<span>ORDER BY setting.name;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pg_catalog.pg_extension AS ext</span>
+<span>        WHERE ext.extname = &#x27;pg_stat_statements&#x27;</span>
+<span>    ) AS pg_stat_statements_installed;</span>
+<span> </span>
+<span>-- Exercises:</span>
+<span>--</span>
+<span>-- 1. Design a covering partial index for high-severity device history. Write</span>
+<span>--    the exact query it serves and make its WHERE clause imply the predicate.</span>
+<span>--</span>
+<span>-- 2. Explain which operators each GIN, GiST, SP-GiST, and BRIN example serves.</span>
+<span>--    Show one superficially similar query that cannot use that operator class.</span>
+<span>--</span>
+<span>-- 3. Create useful extended statistics for two correlated filter columns,</span>
+<span>--    ANALYZE, and inspect pg_stats_ext. Explain why statistics do not force a</span>
+<span>--    plan.</span>
+<span>--</span>
+<span>-- 4. Build an index lifecycle review using pg_stat_user_indexes, relation size,</span>
+<span>--    write cost, constraint ownership, and a representative observation window.</span>
+<span>--    Do not drop an index from a single zero idx_scan snapshot.</span>
+<span>--</span>
+<span>-- 5. Explain VACUUM, ANALYZE, autovacuum, dead tuples, visibility, and bloat.</span>
+<span>--    The DBA-only command below is documentation, not part of this transaction:</span>
+<span>--      VACUUM (ANALYZE, VERBOSE) pro_ops_lab.events;</span>
+<span>--</span>
+<span>-- 6. Describe a safe pg_stat_statements review. Query text can contain sensitive</span>
+<span>--    literals; do not enable the extension or expose query text in this lesson.</span>
+<span>--</span>
+<span>-- 7. Detect indexes whose leading columns and predicates make another index</span>
+<span>--    appear redundant. Then list the evidence that can disprove redundancy:</span>
+<span>--    uniqueness, operator class, collation, ordering, INCLUDE columns, and</span>
+<span>--    representative plans. Produce candidates, never an automatic DROP script.</span>
+<span>--</span>
+<span>-- 8. Design an expression index for case-insensitive device lookup. Explain</span>
+<span>--    expression matching, collation/version drift, function volatility, and</span>
+<span>--    when a generated normalized column gives a clearer contract.</span>
+<span>--</span>
+<span>-- 9. Run a controlled update workload and inspect HOT-update and dead-tuple</span>
+<span>--    statistics. Explain how indexed columns, page free space, fillfactor,</span>
+<span>--    autovacuum thresholds, and long transactions affect the result.</span>
+<span>--</span>
+<span>-- 10. Design indexes for a range-partitioned event table. Compare local indexes,</span>
+<span>--     partition pruning, per-partition statistics, attach/detach operations,</span>
+<span>--     and the absence of a general PostgreSQL global index.</span>
+<span>--</span>
+<span>-- 11. Compare EXPLAIN, EXPLAIN ANALYZE, BUFFERS, WAL, and TIMING. State which</span>
+<span>--     forms execute writes, how to test a write safely, and why one warm-cache</span>
+<span>--     plan is not a production benchmark.</span>
+<span>--</span>
+<span>-- 12. Create a maintenance scorecard with owners and budgets for table/index</span>
+<span>--     growth, dead tuples, analyze freshness, invalid indexes, lock wait,</span>
+<span>--     replication lag, and slow-query evidence. Define escalation and review</span>
+<span>--     cadence rather than universal thresholds.</span>
+<span> </span>
+<span>DO $self_check$</span>
+<span>BEGIN</span>
+<span>    IF (SELECT COUNT(*) FROM pro_ops_lab.events) &lt;&gt; 6000 THEN</span>
+<span>        RAISE EXCEPTION &#x27;unexpected event count&#x27;;</span>
+<span>    END IF;</span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pg_catalog.pg_indexes AS i</span>
+<span>        WHERE i.schemaname = &#x27;pro_ops_lab&#x27;</span>
+<span>          AND i.tablename = &#x27;events&#x27;</span>
+<span>    ) &lt; 8 THEN</span>
+<span>        RAISE EXCEPTION &#x27;expected primary-key plus seven teaching indexes&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$self_check$;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span>\echo &#x27;SQL-OPS-01 complete: pro_ops_lab was rolled back&#x27;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-ops-01-solutions-indexes-and-maintenance">SQL-OPS-01 Solutions — Indexes and Maintenance<a class="heading-anchor" href="#solution-1--sql-ops-01-solutions-indexes-and-maintenance" aria-label="Link to this section">#</a></h3>
+<p>Run:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql</code></pre>
+<p>The solution rolls back <code>pro_ops_lab</code> and performs no vacuum or configuration change.</p>
+<h4 id="solution-1--exercise-1-covering-partial-index">Exercise 1 — Covering partial index<a class="heading-anchor" href="#solution-1--exercise-1-covering-partial-index" aria-label="Link to this section">#</a></h4>
+<p>The solution pairs its exact high-severity device-history query with:</p>
+<pre><code class="language-sql">CREATE INDEX events_high_device_time_covering
+ON pro_ops_lab.events (device_id, occurred_at DESC)
+INCLUDE (severity, message)
+WHERE severity &gt;= 4;</code></pre>
+<p>Device equality and time order are keys. Severity/message are returned payload. The query explicitly includes <code>severity &gt;= 4</code>, so it implies the partial predicate. Whether an index-only scan occurs also depends on visibility and cost.</p>
+<h4 id="solution-1--exercise-2-operator-compatibility">Exercise 2 — Operator compatibility<a class="heading-anchor" href="#solution-1--exercise-2-operator-compatibility" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>GIN array ops support containment/overlap, not arbitrary element transformations.</li>
+<li>GiST point ops support geometry and distance, not text equality.</li>
+<li>SP-GiST text ops support their prefix/ordering family, not array containment.</li>
+<li>BRIN time min/max summaries help range predicates when heap order correlates, not random lookup on an unrelated column.</li>
+</ul>
+<p>An index method name alone is incomplete; inspect the data type and operator class.</p>
+<h4 id="solution-1--exercise-3-correlated-statistics">Exercise 3 — Correlated statistics<a class="heading-anchor" href="#solution-1--exercise-3-correlated-statistics" aria-label="Link to this section">#</a></h4>
+<p>The fixture deliberately correlates <code>category</code> and <code>severity</code>. Dependencies and MCV statistics can improve combined-filter cardinality after <code>ANALYZE</code>. Statistics shape estimates; they do not force an access method and need refresh as data distribution changes.</p>
+<h4 id="solution-1--exercise-4-lifecycle-review">Exercise 4 — Lifecycle review<a class="heading-anchor" href="#solution-1--exercise-4-lifecycle-review" aria-label="Link to this section">#</a></h4>
+<p>The solution inventories size, scans, predicate, uniqueness, and primary-key ownership. A real decision also records stats-reset/restart time, full workload cycle, replica usage, query regressions, write amplification, and rollback evidence. Constraint-owned indexes are not casual drop candidates.</p>
+<h4 id="solution-1--exercise-5-maintenance">Exercise 5 — Maintenance<a class="heading-anchor" href="#solution-1--exercise-5-maintenance" aria-label="Link to this section">#</a></h4>
+<p>VACUUM makes dead tuple space reusable, advances freeze safety, and updates visibility. ANALYZE samples values for estimates. Autovacuum triggers each using table-size/change thresholds and can be tuned per table after measurement. Ordinary VACUUM usually does not shrink the relation file; <code>VACUUM FULL</code> rewrites and locks, so it is exceptional maintenance.</p>
+<h4 id="solution-1--exercise-6-statement-statistics">Exercise 6 — Statement statistics<a class="heading-anchor" href="#solution-1--exercise-6-statement-statistics" aria-label="Link to this section">#</a></h4>
+<p>A safe <code>pg_stat_statements</code> plan requires approved preload/extension ownership, restricted view access, retention/reset rules, normalized <code>queryid</code> analysis, and redaction awareness. Do not expose raw query text by default; literals can contain confidential values. This course does not enable the extension or alter <code>shared_preload_libraries</code>.</p>
+<h4 id="solution-1--exercise-7-redundancy-is-a-hypothesis">Exercise 7 — Redundancy is a hypothesis<a class="heading-anchor" href="#solution-1--exercise-7-redundancy-is-a-hypothesis" aria-label="Link to this section">#</a></h4>
+<p>Compare index key attributes in order, INCLUDE columns, predicate, <code>indisunique</code>/constraint ownership, expressions, collations, sort direction, NULL ordering, and operator classes. A left-prefix match can produce a review candidate, but a differently ordered, partial, unique, or specialized index is not equivalent.</p>
+<p>Then inspect representative plans and a full workload observation window on primary and replicas. Output a candidate report with evidence and owner; never generate/drop automatically from catalog similarity or one zero scan count.</p>
+<h4 id="solution-1--exercise-8-expression-index-and-collation">Exercise 8 — Expression index and collation<a class="heading-anchor" href="#solution-1--exercise-8-expression-index-and-collation" aria-label="Link to this section">#</a></h4>
+<p>An index on <code>lower(device_name) COLLATE ...</code> helps a query only when its expression/operator/collation is compatible. PostgreSQL will not infer every semantically similar spelling. The function must be index-safe (IMMUTABLE from the database&#x27;s perspective).</p>
+<p>Record the normalization and collation contract. Provider/version changes can invalidate ordering assumptions and require review/reindex. A generated normalized column is often clearer when many writers/queries must share and inspect the exact transformed value.</p>
+<h4 id="solution-1--exercise-9-hot-and-dead-tuples">Exercise 9 — HOT and dead tuples<a class="heading-anchor" href="#solution-1--exercise-9-hot-and-dead-tuples" aria-label="Link to this section">#</a></h4>
+<p>HOT can avoid new index entries when no indexed column changes and the same heap page has room. Lower fillfactor may reserve that room at a storage/scan cost. Updating an indexed value, a full page, or an incompatible chain prevents HOT.</p>
+<p>Use before/after stats with a controlled workload and account for asynchronous collector visibility and reset time. Long transactions retain old tuple versions; vacuum may run yet be unable to remove them. Tune from measured table behavior, not one universal dead-tuple percentage.</p>
+<h4 id="solution-1--exercise-10-partitioned-indexing">Exercise 10 — Partitioned indexing<a class="heading-anchor" href="#solution-1--exercise-10-partitioned-indexing" aria-label="Link to this section">#</a></h4>
+<p>Partition pruning removes irrelevant children when bounds can be inferred. Indexes and statistics are physically per partition even when declared through the partitioned parent; verify new/attached partitions and analyze data distribution individually.</p>
+<p>PostgreSQL has no general global index spanning partitions, so global uniqueness normally must include the partition key or use another design. Plan index build, attach validation, locks, detached-partition queries, and lifecycle automation.</p>
+<h4 id="solution-1--exercise-11-reading-plan-instrumentation-safely">Exercise 11 — Reading plan instrumentation safely<a class="heading-anchor" href="#solution-1--exercise-11-reading-plan-instrumentation-safely" aria-label="Link to this section">#</a></h4>
+<p>Plain EXPLAIN estimates without executing. EXPLAIN ANALYZE executes and adds actual timing/rows; BUFFERS shows cache/I/O counters, WAL shows generated WAL, and TIMING can add measurable overhead. A data-changing statement really changes data unless isolated and rolled back.</p>
+<p>Compare cold/warm cache, parameters, concurrency, row counts, server settings, and repeated runs. Planning/execution time in one tiny transaction is evidence about that setup, not a production capacity claim.</p>
+<h4 id="solution-1--exercise-12-owned-maintenance-scorecard">Exercise 12 — Owned maintenance scorecard<a class="heading-anchor" href="#solution-1--exercise-12-owned-maintenance-scorecard" aria-label="Link to this section">#</a></h4>
+<p>Track semantic signals: relation/index growth, dead/live tuples, last analyze, invalid indexes, long transactions, lock waits, WAL/replica lag, query latency, and error/regression evidence. Attach source, observation window, reset state, budget, owner, runbook, and review cadence to each.</p>
+<p>Thresholds depend on workload and capacity. Use trends and service objectives, define warning/critical escalation, suppress known maintenance windows carefully, and require human review before invasive maintenance.</p>
+<h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Prepared parameters can prevent partial-predicate implication at plan time.</li>
+<li>Heap correlation changes as updates rewrite pages.</li>
+<li>Statistics and usage counters reset or lag.</li>
+<li>Index size alone does not measure cache or WAL cost.</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-OPS-01 executable solutions</span>
+<span>\set ON_ERROR_STOP on</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_ops_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_ops_lab.events (</span>
+<span>    event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    device_id text NOT NULL,</span>
+<span>    occurred_at timestamptz NOT NULL,</span>
+<span>    severity smallint NOT NULL,</span>
+<span>    category text NOT NULL,</span>
+<span>    message text NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_ops_lab.events (</span>
+<span>    device_id, occurred_at, severity, category, message</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    &#x27;device-&#x27; || lpad(((g.n % 20) + 1)::text, 3, &#x27;0&#x27;),</span>
+<span>    TIMESTAMPTZ &#x27;2026-01-01 00:00:00+00&#x27; + g.n * INTERVAL &#x27;1 minute&#x27;,</span>
+<span>    ((g.n % 5) + 1)::smallint,</span>
+<span>    CASE WHEN g.n % 5 &gt;= 3 THEN &#x27;urgent&#x27; ELSE &#x27;routine&#x27; END,</span>
+<span>    CASE WHEN g.n % 10 = 0 THEN &#x27;Retry warning&#x27; ELSE &#x27;Observation&#x27; END</span>
+<span>FROM generate_series(1, 3000) AS g(n);</span>
+<span> </span>
+<span>-- Exercise 1: query and predicate-compatible covering partial index.</span>
+<span>CREATE INDEX events_high_device_time_covering</span>
+<span>ON pro_ops_lab.events (device_id, occurred_at DESC)</span>
+<span>INCLUDE (severity, message)</span>
+<span>WHERE severity &gt;= 4;</span>
+<span> </span>
+<span>EXPLAIN (COSTS OFF)</span>
+<span>SELECT</span>
+<span>    e.occurred_at,</span>
+<span>    e.severity,</span>
+<span>    e.message</span>
+<span>FROM pro_ops_lab.events AS e</span>
+<span>WHERE e.device_id = &#x27;device-007&#x27;</span>
+<span>  AND e.severity &gt;= 4</span>
+<span>ORDER BY e.occurred_at DESC</span>
+<span>LIMIT 25;</span>
+<span> </span>
+<span>-- Exercise 3: category and severity are correlated by fixture construction.</span>
+<span>CREATE STATISTICS events_category_severity_stats (dependencies, mcv)</span>
+<span>ON category, severity</span>
+<span>FROM pro_ops_lab.events;</span>
+<span> </span>
+<span>ANALYZE pro_ops_lab.events;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    s.statistics_name,</span>
+<span>    s.kinds,</span>
+<span>    s.attnames</span>
+<span>FROM pg_catalog.pg_stats_ext AS s</span>
+<span>WHERE s.schemaname = &#x27;pro_ops_lab&#x27;</span>
+<span>ORDER BY s.statistics_name;</span>
+<span> </span>
+<span>-- Exercise 4: a compact lifecycle inventory, not an automatic drop list.</span>
+<span>SELECT</span>
+<span>    ci.relname AS index_name,</span>
+<span>    pg_catalog.pg_relation_size(ci.oid) AS index_bytes,</span>
+<span>    COALESCE(si.idx_scan, 0) AS observed_scans,</span>
+<span>    i.indisunique,</span>
+<span>    i.indisprimary,</span>
+<span>    pg_catalog.pg_get_expr(i.indpred, i.indrelid) AS predicate</span>
+<span>FROM pg_catalog.pg_index AS i</span>
+<span>JOIN pg_catalog.pg_class AS ci</span>
+<span>  ON ci.oid = i.indexrelid</span>
+<span>JOIN pg_catalog.pg_class AS ct</span>
+<span>  ON ct.oid = i.indrelid</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = ct.relnamespace</span>
+<span>LEFT JOIN pg_catalog.pg_stat_user_indexes AS si</span>
+<span>  ON si.indexrelid = i.indexrelid</span>
+<span>WHERE n.nspname = &#x27;pro_ops_lab&#x27;</span>
+<span>  AND ct.relname = &#x27;events&#x27;</span>
+<span>ORDER BY ci.relname;</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pg_catalog.pg_indexes AS i</span>
+<span>        WHERE i.schemaname = &#x27;pro_ops_lab&#x27;</span>
+<span>          AND i.indexname = &#x27;events_high_device_time_covering&#x27;</span>
+<span>          AND i.indexdef LIKE &#x27;%WHERE (severity &gt;= 4)%&#x27;</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;partial covering index definition missing&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pg_catalog.pg_stats_ext AS s</span>
+<span>        WHERE s.schemaname = &#x27;pro_ops_lab&#x27;</span>
+<span>          AND s.statistics_name = &#x27;events_category_severity_stats&#x27;</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;extended statistics were not analyzed&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- Exercise 2: access methods are meaningful only with type/operator class and</span>
+<span>-- target operator. The Markdown solution maps GIN, GiST, SP-GiST, and BRIN.</span>
+<span> </span>
+<span>-- Exercise 5: this transaction does not run VACUUM. VACUUM reclaims dead-tuple</span>
+<span>-- space/freeze safety/visibility; ANALYZE samples values for estimates.</span>
+<span> </span>
+<span>-- Exercise 6: this solution neither enables pg_stat_statements nor exposes</span>
+<span>-- query text. Production access and retention require privacy review.</span>
+<span> </span>
+<span>-- Exercise 7: show semantic index properties for human review. Similarity is a</span>
+<span>-- candidate signal, never an automatic DROP decision.</span>
+<span>SELECT</span>
+<span>    ci.relname AS index_name,</span>
+<span>    i.indisunique,</span>
+<span>    i.indisprimary,</span>
+<span>    pg_catalog.pg_get_indexdef(i.indexrelid) AS index_definition,</span>
+<span>    pg_catalog.pg_get_expr(i.indpred, i.indrelid) AS predicate</span>
+<span>FROM pg_catalog.pg_index AS i</span>
+<span>JOIN pg_catalog.pg_class AS ci</span>
+<span>  ON ci.oid = i.indexrelid</span>
+<span>JOIN pg_catalog.pg_class AS ct</span>
+<span>  ON ct.oid = i.indrelid</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = ct.relnamespace</span>
+<span>WHERE n.nspname = &#x27;pro_ops_lab&#x27;</span>
+<span>  AND ct.relname = &#x27;events&#x27;</span>
+<span>ORDER BY ci.relname;</span>
+<span> </span>
+<span>-- Exercise 8: the query expression must match the indexed expression and its</span>
+<span>-- collation/operator semantics.</span>
+<span>CREATE INDEX events_device_lower_idx</span>
+<span>ON pro_ops_lab.events (lower(device_id));</span>
+<span> </span>
+<span>EXPLAIN (COSTS OFF)</span>
+<span>SELECT e.event_id, e.device_id</span>
+<span>FROM pro_ops_lab.events AS e</span>
+<span>WHERE lower(e.device_id) = &#x27;device-007&#x27;</span>
+<span>ORDER BY e.event_id;</span>
+<span> </span>
+<span>-- Exercise 9: observe rather than assert a HOT rate; page space, indexed</span>
+<span>-- columns, vacuum horizons, and asynchronous statistics affect the result.</span>
+<span>UPDATE pro_ops_lab.events AS e</span>
+<span>SET category = CASE e.category</span>
+<span>    WHEN &#x27;routine&#x27; THEN &#x27;routine-reviewed&#x27;</span>
+<span>    ELSE e.category</span>
+<span>END</span>
+<span>WHERE e.event_id &lt;= 100;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    s.relname,</span>
+<span>    s.n_tup_upd,</span>
+<span>    s.n_tup_hot_upd,</span>
+<span>    s.n_dead_tup,</span>
+<span>    s.last_autovacuum,</span>
+<span>    s.last_autoanalyze</span>
+<span>FROM pg_catalog.pg_stat_user_tables AS s</span>
+<span>WHERE s.schemaname = &#x27;pro_ops_lab&#x27;</span>
+<span>  AND s.relname = &#x27;events&#x27;;</span>
+<span> </span>
+<span>-- Exercise 10: partition pruning and indexes are validated per partition.</span>
+<span>-- PostgreSQL has no general global index, so cross-partition uniqueness usually</span>
+<span>-- includes the partition key or uses another ownership design.</span>
+<span> </span>
+<span>-- Exercise 11: ANALYZE executes this read. BUFFERS is cache/I/O evidence for</span>
+<span>-- this fixture, not a production benchmark.</span>
+<span>EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, TIMING OFF)</span>
+<span>SELECT COUNT(*)</span>
+<span>FROM pro_ops_lab.events AS e</span>
+<span>WHERE e.device_id = &#x27;device-007&#x27;</span>
+<span>  AND e.severity &gt;= 4;</span>
+<span> </span>
+<span>-- Exercise 12: an owned scorecard attaches source, budget, cadence, and action</span>
+<span>-- instead of pretending one threshold fits every workload.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;dead tuples&#x27;::text, &#x27;pg_stat_user_tables&#x27;::text, &#x27;table owner&#x27;::text),</span>
+<span>        (&#x27;invalid indexes&#x27;, &#x27;pg_index.indisvalid&#x27;, &#x27;database operator&#x27;),</span>
+<span>        (&#x27;lock wait&#x27;, &#x27;pg_stat_activity/pg_locks&#x27;, &#x27;service owner&#x27;),</span>
+<span>        (&#x27;replication lag&#x27;, &#x27;replay LSN and user SLO&#x27;, &#x27;HA owner&#x27;)</span>
+<span>) AS scorecard(signal, evidence_source, owner)</span>
+<span>ORDER BY signal;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-types-01.html"><small>Previous lesson</small><strong>sql-types-01</strong><span>PostgreSQL-Native Types and Searchable Documents</span></a>
+        <a class="nav-card next" href="sql-test-01.html"><small>Next lesson</small><strong>sql-test-01</strong><span>SQL Tests, Migration Checks, and Data Contracts</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-ops-01";
+    const LEARNER_PATH = "sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

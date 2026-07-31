@@ -1,0 +1,1042 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-02 · Protocols Context Decorators · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-02</p>
+        <h1>Protocols Context Decorators</h1>
+        <p class="hero-copy">Python and PostgreSQL engineering</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">105 minutes</span>
+          <span class="tag">bridge setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="bridge-01.html">bridge-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/lessons/day02_protocols_context_decorators.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/lessons/day02_protocols_context_decorators.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/companion-guides/day02_protocols_context_decorators.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/companion-guides/day02_protocols_context_decorators.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-day-2-protocols-context-managers-and-decorators">Bridge Day 2 — Protocols, context managers, and decorators<a class="heading-anchor" href="#guide--bridge-day-2-protocols-context-managers-and-decorators" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Intermediate <strong>Prerequisite:</strong> <a href="bridge-01.html#guide">Bridge Day 1</a></p>
+<h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
+<p>Application code should depend on the behavior it needs, not every method a driver happens to expose. Small <code>Protocol</code> types document that behavior. A context manager then gives one owner responsibility for commit, rollback, and close. A carefully typed decorator can add diagnostics without changing the caller&#x27;s interface or logging sensitive arguments.</p>
+<h4 id="guide--objectives">Objectives<a class="heading-anchor" href="#guide--objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>express structural interfaces with small <code>Protocol</code> classes;</li>
+<li>inject a connection factory rather than opening global resources;</li>
+<li>encode success, failure, and cleanup in a context manager;</li>
+<li>type a signature-preserving decorator with <code>ParamSpec</code> and <code>TypeVar</code>;</li>
+<li>verify resource ordering with a fake instead of a live database.</li>
+</ul>
+<h4 id="guide--vocabulary">Vocabulary<a class="heading-anchor" href="#guide--vocabulary" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>structural typing</td>
+<td>Compatibility based on available methods rather than explicit inheritance</td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td>A typing construct that describes required behavior</td>
+</tr>
+<tr>
+<td>dependency injection</td>
+<td>Supplying an effectful dependency from outside the code that uses it</td>
+</tr>
+<tr>
+<td>context manager</td>
+<td>An object or generator that owns setup and cleanup around a <code>with</code> block</td>
+</tr>
+<tr>
+<td>decorator</td>
+<td>A callable that wraps another callable</td>
+</tr>
+<tr>
+<td><code>ParamSpec</code></td>
+<td>A type variable that captures a callable&#x27;s complete parameter signature</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--run-the-starter">Run the starter<a class="heading-anchor" href="#guide--run-the-starter" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe bridge\lessons\day02_protocols_context_decorators.py</code></pre>
+<pre><code class="language-bash">.venv/bin/python bridge/lessons/day02_protocols_context_decorators.py</code></pre>
+<h4 id="guide--worked-example-depend-on-one-behavior">Worked example: depend on one behavior<a class="heading-anchor" href="#guide--worked-example-depend-on-one-behavior" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">from typing import Protocol
+
+
+class Clock(Protocol):
+    def monotonic(self) -&gt; float: ...
+
+
+def elapsed(clock: Clock, start: float) -&gt; float:
+    return clock.monotonic() - start</code></pre>
+<p>A production clock and a deterministic fake can both satisfy this Protocol without inheriting from it. That is structural typing.</p>
+<p>A resource context has four observable paths:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Path</th>
+<th>Required events</th>
+</tr></thead><tbody>
+<tr>
+<td>factory fails</td>
+<td>propagate; there is no connection to close</td>
+</tr>
+<tr>
+<td>body succeeds</td>
+<td>commit, then close</td>
+</tr>
+<tr>
+<td>body fails</td>
+<td>rollback, re-raise, then close</td>
+</tr>
+<tr>
+<td>commit or rollback fails</td>
+<td>still attempt close; preserve useful failure context</td>
+</tr>
+</tbody></table></div>
+<p>The starter focuses on the first three. The fourth is a stretch exercise because multi-error reporting requires an explicit policy.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Express resource ownership with small Protocols, a transaction-aware context manager, and a signature-preserving safe logger.</li>
+<li><strong>Assumptions:</strong> The factory acquires exactly one connection; success commits; failure rolls back and re-raises; every path closes.</li>
+<li><strong>Primary failure mode:</strong> Logging arguments or allowing cleanup to suppress the original failure can violate both security and debugging contracts.</li>
+<li><strong>Evidence loop:</strong> predict the boundary, implement the smallest change, verify success and failure with a deterministic fake, then explain which behavior still requires an explicitly enabled PostgreSQL integration test.</li>
+</ul>
+<ol>
+<li><strong>Design:</strong> Review the starter <code>Cursor</code> and <code>Connection</code> Protocols; minimize each boundary or justify every retained method.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A consumer Protocol should describe what the consumer calls, not an entire driver object.</li>
+</ul>
+<ol>
+<li><strong>Implementation:</strong> Implement <code>managed_connection(factory)</code> with acquire-once, yield-once, commit-on-success, rollback-on-failure, re-raise, and close-in-finally behavior.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Place closure in <code>finally</code>; keep commit after the yielded body returns.</li>
+</ul>
+<ol>
+<li><strong>Testing:</strong> Build a fake connection that records exact event order and test success, body failure, rollback, and close.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> The order is part of the contract, so assert the entire event list.</li>
+</ul>
+<ol>
+<li><strong>Implementation:</strong> Implement <code>logged()</code> with <code>ParamSpec</code>, <code>TypeVar</code>, <code>functools.wraps</code>, and an injected or module logger.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Type wrapper parameters as <code>P.args</code>/<code>P.kwargs</code> and return the original <code>R</code>.</li>
+</ul>
+<ol>
+<li><strong>Security:</strong> Restrict decorator logs to function identity and outcome; prove arguments, keyword values, return values, and connection representations are absent.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Treat every callable value as potentially sensitive.</li>
+</ul>
+<ol>
+<li><strong>Typing:</strong> Verify that decoration preserves name, docstring, return behavior, exception identity, and a statically visible signature.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> <code>wraps</code> fixes runtime metadata; <code>ParamSpec</code> preserves the type-level call shape.</li>
+</ul>
+<ol>
+<li><strong>Prediction:</strong> Predict cleanup when the managed body raises <code>KeyboardInterrupt</code> or cancellation-like <code>BaseException</code>; state whether your boundary catches it.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> The exception scope is a policy decision, but closure must still be guaranteed.</li>
+</ul>
+<ol>
+<li><strong>Debugging:</strong> Analyze what happens if rollback or close raises while a body exception is active, and design a test that exposes exception masking.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Cleanup failures can replace the error that caused cleanup.</li>
+</ul>
+<ol>
+<li><strong>Design:</strong> Compose two nested managed resources and decide which layer owns commit, rollback, and close.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Exactly one layer should own each lifecycle transition.</li>
+</ul>
+<ol>
+<li><strong>Comparison:</strong> Sketch the async equivalent and identify which operations require <code>await</code> and which typing primitives change.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Preserve the same ownership state machine while changing the execution protocol.</li>
+</ul>
+<ol>
+<li><strong>Typing:</strong> Define a callable Protocol for the connection factory and compare it with <code>Callable[[], Connection]</code> in tests and adapters.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Use a Protocol when the boundary needs attributes or overloads beyond a bare call.</li>
+</ul>
+<ol>
+<li><strong>Extension:</strong> Design a timing decorator with an injected monotonic clock while retaining the no-argument/no-result logging policy.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Compute duration from two injected clock calls and emit a bounded numeric field.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>State the input/output and ownership boundary in one sentence.</li>
+<li>Show one normal case, one edge case, and one failure case.</li>
+<li>Inspect recorded calls rather than relying on plausible output.</li>
+<li>Confirm no credential, payload, or high-cardinality identifier was emitted.</li>
+</ul>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can an unrelated fake satisfy the Protocol without inheriting from it?</li>
+<li>Does a body exception remain the exception observed by the caller?</li>
+<li>Is <code>close</code> recorded exactly once on both normal and failing paths?</li>
+<li>Does the decorator preserve <code><strong>name</strong></code>?</li>
+<li>Could any log line reveal a database URL or customer record?</li>
+</ul>
+<p>Expected behavior: the fake event list is <code>[&quot;work&quot;, &quot;commit&quot;, &quot;close&quot;]</code> on success and <code>[&quot;work&quot;, &quot;rollback&quot;, &quot;close&quot;]</code> on body failure.</p>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Committing in <code>finally</code>:</strong> that commits partial changes after failures.</li>
+<li><strong>Catching and suppressing exceptions:</strong> callers may believe failed work succeeded.</li>
+<li><strong>Defining an enormous Protocol:</strong> it couples fakes to behavior the function never uses.</li>
+<li><strong>Using <code>Callable[..., Any]</code>:</strong> it discards the useful signature types.</li>
+<li><strong>Logging arguments in a generic decorator:</strong> the wrapper cannot know which values contain passwords or personal data.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p><a href="bridge-03.html#guide">Day 3</a> uses a cursor Protocol to test SQL and parameters separately. After your attempt, see <a href="bridge-02.html#solution-1">the Day 2 solution notes</a>.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/lessons/day02_protocols_context_decorators.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/lessons/day02_protocols_context_decorators.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Bridge Day 2: Protocols, context managers, and typed decorators.</span>
+<span> </span>
+<span>Prerequisite: Bridge Day 1.</span>
+<span>Read ``bridge/companion-guides/day02_protocols_context_decorators.md`` first.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import logging</span>
+<span>from collections.abc import Callable, Iterator, Sequence</span>
+<span>from contextlib import contextmanager</span>
+<span>from typing import ParamSpec, Protocol, TypeVar</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-02&quot;</span>
+<span>PREREQUISITES = (&quot;bridge-01&quot;,)</span>
+<span>LEVEL = &quot;intermediate&quot;</span>
+<span> </span>
+<span>P = ParamSpec(&quot;P&quot;)</span>
+<span>R = TypeVar(&quot;R&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class Cursor(Protocol):</span>
+<span>    def execute(</span>
+<span>        self,</span>
+<span>        query: object,</span>
+<span>        params: Sequence[object] | None = None,</span>
+<span>    ) -&gt; object: ...</span>
+<span> </span>
+<span> </span>
+<span>class Connection(Protocol):</span>
+<span>    def cursor(self) -&gt; Cursor: ...</span>
+<span> </span>
+<span>    def commit(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def rollback(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def close(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>@contextmanager</span>
+<span>def managed_connection(factory: Callable[[], Connection]) -&gt; Iterator[Connection]:</span>
+<span>    &quot;&quot;&quot;Core implementation: encode commit, rollback, and close ownership.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;implement resource and transaction cleanup&quot;)</span>
+<span>    yield  # pragma: no cover - keeps this function a generator while unfinished</span>
+<span> </span>
+<span> </span>
+<span>def logged(</span>
+<span>    function: Callable[P, R],</span>
+<span>    *,</span>
+<span>    logger: logging.Logger | None = None,</span>
+<span>) -&gt; Callable[P, R]:</span>
+<span>    &quot;&quot;&quot;Core implementation: preserve the wrapped signature and never log arguments.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;implement a signature-preserving decorator&quot;)</span>
+<span> </span>
+<span> </span>
+<span># Exercises (answer-free)</span>
+<span># Focus: Express resource ownership with small Protocols, a transaction-aware context manager,</span>
+<span>#    and a signature-preserving safe logger.</span>
+<span># Assumptions: The factory acquires exactly one connection; success commits; failure rolls back</span>
+<span>#    and re-raises; every path closes.</span>
+<span># Failure to watch for: Logging arguments or allowing cleanup to suppress the original failure</span>
+<span>#    can violate both security and debugging contracts.</span>
+<span># Work in order: predict -&gt; implement -&gt; test -&gt; debug -&gt; extend. Keep official</span>
+<span># answers out of this starter and collect deterministic fake-backed evidence.</span>
+<span># 1. [Design] Review the starter `Cursor` and `Connection` Protocols; minimize each boundary or</span>
+<span>#    justify every retained method.</span>
+<span>#    Hint: A consumer Protocol should describe what the consumer calls, not an entire driver</span>
+<span>#    object.</span>
+<span># 2. [Implementation] Implement `managed_connection(factory)` with acquire-once, yield-once,</span>
+<span>#    commit-on-success, rollback-on-failure, re-raise, and close-in-finally behavior.</span>
+<span>#    Hint: Place closure in `finally`; keep commit after the yielded body returns.</span>
+<span># 3. [Testing] Build a fake connection that records exact event order and test success, body</span>
+<span>#    failure, rollback, and close.</span>
+<span>#    Hint: The order is part of the contract, so assert the entire event list.</span>
+<span># 4. [Implementation] Implement `logged()` with `ParamSpec`, `TypeVar`, `functools.wraps`, and</span>
+<span>#    an injected or module logger.</span>
+<span>#    Hint: Type wrapper parameters as `P.args`/`P.kwargs` and return the original `R`.</span>
+<span># 5. [Security] Restrict decorator logs to function identity and outcome; prove arguments,</span>
+<span>#    keyword values, return values, and connection representations are absent.</span>
+<span>#    Hint: Treat every callable value as potentially sensitive.</span>
+<span># 6. [Typing] Verify that decoration preserves name, docstring, return behavior, exception</span>
+<span>#    identity, and a statically visible signature.</span>
+<span>#    Hint: `wraps` fixes runtime metadata; `ParamSpec` preserves the type-level call shape.</span>
+<span># 7. [Prediction] Predict cleanup when the managed body raises `KeyboardInterrupt` or</span>
+<span>#    cancellation-like `BaseException`; state whether your boundary catches it.</span>
+<span>#    Hint: The exception scope is a policy decision, but closure must still be guaranteed.</span>
+<span># 8. [Debugging] Analyze what happens if rollback or close raises while a body exception is</span>
+<span>#    active, and design a test that exposes exception masking.</span>
+<span>#    Hint: Cleanup failures can replace the error that caused cleanup.</span>
+<span># 9. [Design] Compose two nested managed resources and decide which layer owns commit, rollback,</span>
+<span>#    and close.</span>
+<span>#    Hint: Exactly one layer should own each lifecycle transition.</span>
+<span># 10. [Comparison] Sketch the async equivalent and identify which operations require `await` and</span>
+<span>#    which typing primitives change.</span>
+<span>#    Hint: Preserve the same ownership state machine while changing the execution protocol.</span>
+<span># 11. [Typing] Define a callable Protocol for the connection factory and compare it with</span>
+<span>#    `Callable[[], Connection]` in tests and adapters.</span>
+<span>#    Hint: Use a Protocol when the boundary needs attributes or overloads beyond a bare call.</span>
+<span># 12. [Extension] Design a timing decorator with an injected monotonic clock while retaining the</span>
+<span>#    no-argument/no-result logging policy.</span>
+<span>#    Hint: Compute duration from two injected clock calls and emit a bounded numeric field.</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    print(&quot;Bridge Day 2 starter loaded.&quot;)</span>
+<span>    print(&quot;Implement the Protocol-backed context manager and typed decorator.&quot;)</span>
+<span>    print(&quot;Test success, failure, cleanup, metadata, and return types with fakes.&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/solutions/day02_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day02_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-day-2-solution-notes">Bridge Day 2 — Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-2-solution-notes" aria-label="Link to this section">#</a></h3>
+<p>Attempt the <a href="bridge-02.html#learner">learner file</a> before reading <a href="bridge-02.html#solution-2">day02_solution.py</a>.</p>
+<h4 id="solution-1--design">Design<a class="heading-anchor" href="#solution-1--design" aria-label="Link to this section">#</a></h4>
+<p>The reference context manager depends on a three-method <code>Connection</code> Protocol and a callable factory Protocol. It acquires the resource before entering its <code>try</code>, commits only after the body returns, rolls back if the body raises, and closes in <code>finally</code>.</p>
+<p>The decorator uses <code>ParamSpec</code> for all parameters and <code>TypeVar</code> for the return type. <code>functools.wraps()</code> preserves runtime metadata. Log entries include only the qualified function name and outcome; generic wrappers cannot know which arguments are sensitive.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Catching <code>BaseException</code> ensures rollback during cancellation and keyboard interruption. Some applications catch <code>Exception</code> and rely on a lower-level owner for process-level cancellation cleanup. The ownership policy must be explicit either way.</li>
+<li>If rollback fails while handling an earlier body error, Python exception chaining can make diagnosis complicated. Production infrastructure may use <code>ExceptionGroup</code> or driver-managed transaction contexts to preserve both failures.</li>
+<li>A factory returning a Protocol is easy to fake. A pool lease is also a resource and may need “return to pool” rather than physical <code>close</code>.</li>
+<li>A decorator is convenient for uniform diagnostics, but explicit logging inside a workflow can include safer domain context and clearer timing.</li>
+</ul>
+<h4 id="solution-1--verification">Verification<a class="heading-anchor" href="#solution-1--verification" aria-label="Link to this section">#</a></h4>
+<p>A recording fake makes order observable:</p>
+<ul>
+<li>success: <code>work</code>, <code>commit</code>, <code>close</code>;</li>
+<li>body failure: <code>work</code>, <code>rollback</code>, <code>close</code>;</li>
+<li>the same body exception reaches the caller.</li>
+</ul>
+<p>Also verify the decorated function&#x27;s name, return type, and exception behavior. Do not assert timestamps or complete log formatting; those are incidental.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day02_solution.py</code>; use it only after an honest attempt.</p>
+<p><strong>Shared failure rule:</strong> Logging arguments or allowing cleanup to suppress the original failure can violate both security and debugging contracts.</p>
+<h5 id="solution-1--exercise-1-design">Exercise 1 — Design<a class="heading-anchor" href="#solution-1--exercise-1-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Review the starter <code>Cursor</code> and <code>Connection</code> Protocols; minimize each boundary or justify every retained method.</p>
+<p><strong>Approach:</strong> For <code>managed_connection</code>, only <code>commit</code>, <code>rollback</code>, and <code>close</code> are required; cursor access belongs only if the manager itself uses it. Smaller structural types make fakes simpler and prevent accidental coupling.</p>
+<p><strong>Why this boundary matters:</strong> A consumer Protocol should describe what the consumer calls, not an entire driver object.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-2-implementation">Exercise 2 — Implementation<a class="heading-anchor" href="#solution-1--exercise-2-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>managed_connection(factory)</code> with acquire-once, yield-once, commit-on-success, rollback-on-failure, re-raise, and close-in-finally behavior.</p>
+<p><strong>Approach:</strong> Call the factory before entering the <code>try</code>, yield the connection, and commit afterward. Catch the chosen failure scope, roll back, use bare <code>raise</code>, and close in <code>finally</code> so normal and exceptional exits share cleanup.</p>
+<p><strong>Why this boundary matters:</strong> Place closure in <code>finally</code>; keep commit after the yielded body returns.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-3-testing">Exercise 3 — Testing<a class="heading-anchor" href="#solution-1--exercise-3-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Build a fake connection that records exact event order and test success, body failure, rollback, and close.</p>
+<p><strong>Approach:</strong> A passing body records <code>work, commit, close</code>; a failing body records <code>work, rollback, close</code> and the original exception escapes. The fake contains observations only and makes no assertions itself.</p>
+<p><strong>Why this boundary matters:</strong> The order is part of the contract, so assert the entire event list.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-4-implementation">Exercise 4 — Implementation<a class="heading-anchor" href="#solution-1--exercise-4-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>logged()</code> with <code>ParamSpec</code>, <code>TypeVar</code>, <code>functools.wraps</code>, and an injected or module logger.</p>
+<p><strong>Approach:</strong> Create a wrapper with the same parameter pack, decorate it with <code>wraps(function)</code>, log safe start/outcome fields, call the original, and return its value. The decorator&#x27;s annotated return is <code>Callable[P, R]</code>.</p>
+<p><strong>Why this boundary matters:</strong> Type wrapper parameters as <code>P.args</code>/<code>P.kwargs</code> and return the original <code>R</code>.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-5-security">Exercise 5 — Security<a class="heading-anchor" href="#solution-1--exercise-5-security" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Restrict decorator logs to function identity and outcome; prove arguments, keyword values, return values, and connection representations are absent.</p>
+<p><strong>Approach:</strong> Log a stable function name and a success/failure marker only. Tests should pass sentinel secrets through every value channel and assert those sentinels never appear in captured records.</p>
+<p><strong>Why this boundary matters:</strong> Treat every callable value as potentially sensitive.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-6-typing">Exercise 6 — Typing<a class="heading-anchor" href="#solution-1--exercise-6-typing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Verify that decoration preserves name, docstring, return behavior, exception identity, and a statically visible signature.</p>
+<p><strong>Approach:</strong> Assert <code><strong>name</strong></code>/<code><strong>wrapped</strong></code>, call the decorated function on success and failure, and run the configured type checker against calls with correct and incorrect argument shapes.</p>
+<p><strong>Why this boundary matters:</strong> <code>wraps</code> fixes runtime metadata; <code>ParamSpec</code> preserves the type-level call shape.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-7-prediction">Exercise 7 — Prediction<a class="heading-anchor" href="#solution-1--exercise-7-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict cleanup when the managed body raises <code>KeyboardInterrupt</code> or cancellation-like <code>BaseException</code>; state whether your boundary catches it.</p>
+<p><strong>Approach:</strong> With <code>except BaseException</code>, rollback runs before the interruption is re-raised; with <code>except Exception</code>, rollback may not run, though <code>finally</code> still closes. The reference chooses broad cleanup while never translating interruption into success.</p>
+<p><strong>Why this boundary matters:</strong> The exception scope is a policy decision, but closure must still be guaranteed.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-8-debugging">Exercise 8 — Debugging<a class="heading-anchor" href="#solution-1--exercise-8-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Analyze what happens if rollback or close raises while a body exception is active, and design a test that exposes exception masking.</p>
+<p><strong>Approach:</strong> A new exception from rollback/close normally becomes the visible exception and chains the body failure in <code><strong>context</strong></code>. Record both events and choose an application policy—often log cleanup failure safely while preserving the primary exception.</p>
+<p><strong>Why this boundary matters:</strong> Cleanup failures can replace the error that caused cleanup.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-9-design">Exercise 9 — Design<a class="heading-anchor" href="#solution-1--exercise-9-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compose two nested managed resources and decide which layer owns commit, rollback, and close.</p>
+<p><strong>Approach:</strong> Use an outer owner for the connection transaction and inner managers for subordinate cursors/resources that do not commit. Tests should show inner cleanup precedes the outer commit or rollback.</p>
+<p><strong>Why this boundary matters:</strong> Exactly one layer should own each lifecycle transition.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-10-comparison">Exercise 10 — Comparison<a class="heading-anchor" href="#solution-1--exercise-10-comparison" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Sketch the async equivalent and identify which operations require <code>await</code> and which typing primitives change.</p>
+<p><strong>Approach:</strong> Use <code>@asynccontextmanager</code>, <code>AsyncIterator</code>, an awaitable factory, and await commit/rollback/close. The success/failure ordering remains identical; only acquisition and lifecycle calls become asynchronous.</p>
+<p><strong>Why this boundary matters:</strong> Preserve the same ownership state machine while changing the execution protocol.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-11-typing">Exercise 11 — Typing<a class="heading-anchor" href="#solution-1--exercise-11-typing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define a callable Protocol for the connection factory and compare it with <code>Callable[[], Connection]</code> in tests and adapters.</p>
+<p><strong>Approach:</strong> A <code>Protocol</code> with <code><strong>call</strong>() -&gt; Connection</code> supports structural fakes and future metadata, while <code>Callable</code> is sufficient for a simple zero-argument factory. Do not broaden the return to a concrete driver class.</p>
+<p><strong>Why this boundary matters:</strong> Use a Protocol when the boundary needs attributes or overloads beyond a bare call.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-12-extension">Exercise 12 — Extension<a class="heading-anchor" href="#solution-1--exercise-12-extension" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design a timing decorator with an injected monotonic clock while retaining the no-argument/no-result logging policy.</p>
+<p><strong>Approach:</strong> Accept a <code>Callable[[], float]</code>, subtract start from finish in <code>finally</code>, and log function identity, outcome, and duration only. Keep <code>ParamSpec</code>, <code>wraps</code>, and exception propagation identical to <code>logged()</code>.</p>
+<p><strong>Why this boundary matters:</strong> Compute duration from two injected clock calls and emit a bounded numeric field.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/solutions/day02_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day02_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Day 2 reference: small Protocols, resource contexts, and typed decorators.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import logging</span>
+<span>from collections.abc import Callable, Iterator</span>
+<span>from contextlib import contextmanager</span>
+<span>from functools import wraps</span>
+<span>from typing import ParamSpec, Protocol, TypeVar</span>
+<span> </span>
+<span>P = ParamSpec(&quot;P&quot;)</span>
+<span>R = TypeVar(&quot;R&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class Connection(Protocol):</span>
+<span>    &quot;&quot;&quot;The behavior needed by the transaction context—not a concrete driver class.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def commit(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def rollback(self) -&gt; None: ...</span>
+<span> </span>
+<span>    def close(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>class ConnectionFactory(Protocol):</span>
+<span>    &quot;&quot;&quot;A callable that opens one connection.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    def __call__(self) -&gt; Connection: ...</span>
+<span> </span>
+<span> </span>
+<span>@contextmanager</span>
+<span>def managed_connection(factory: ConnectionFactory) -&gt; Iterator[Connection]:</span>
+<span>    &quot;&quot;&quot;Commit on success, roll back on failure, and always close.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    connection = factory()</span>
+<span>    try:</span>
+<span>        yield connection</span>
+<span>    except BaseException:</span>
+<span>        connection.rollback()</span>
+<span>        raise</span>
+<span>    else:</span>
+<span>        connection.commit()</span>
+<span>    finally:</span>
+<span>        connection.close()</span>
+<span> </span>
+<span> </span>
+<span>def logged(</span>
+<span>    function: Callable[P, R],</span>
+<span>    *,</span>
+<span>    logger: logging.Logger | None = None,</span>
+<span>) -&gt; Callable[P, R]:</span>
+<span>    &quot;&quot;&quot;Log call outcome while preserving the wrapped function&#x27;s signature.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    selected_logger = logger or logging.getLogger(function.__module__)</span>
+<span> </span>
+<span>    @wraps(function)</span>
+<span>    def wrapper(*args: P.args, **kwargs: P.kwargs) -&gt; R:</span>
+<span>        selected_logger.debug(&quot;starting function=%s&quot;, function.__qualname__)</span>
+<span>        try:</span>
+<span>            result = function(*args, **kwargs)</span>
+<span>        except BaseException:</span>
+<span>            selected_logger.exception(&quot;failed function=%s&quot;, function.__qualname__)</span>
+<span>            raise</span>
+<span>        selected_logger.debug(&quot;finished function=%s&quot;, function.__qualname__)</span>
+<span>        return result</span>
+<span> </span>
+<span>    return wrapper</span>
+<span> </span>
+<span> </span>
+<span>@logged</span>
+<span>def normalize_customer_name(name: str) -&gt; str:</span>
+<span>    &quot;&quot;&quot;A small function used to demonstrate signature-preserving decoration.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    normalized = &quot; &quot;.join(name.split())</span>
+<span>    if not normalized:</span>
+<span>        raise ValueError(&quot;customer name cannot be blank&quot;)</span>
+<span>    return normalized.title()</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="bridge-01.html"><small>Previous lesson</small><strong>bridge-01</strong><span>Config Logging CLI</span></a>
+        <a class="nav-card next" href="bridge-03.html"><small>Next lesson</small><strong>bridge-03</strong><span>Safe Psycopg Queries</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-02";
+    const LEARNER_PATH = "bridge/lessons/day02_protocols_context_decorators.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

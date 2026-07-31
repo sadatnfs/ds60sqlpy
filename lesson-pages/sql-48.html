@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-48 · Project1 Ecommerce Part3 · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-48</p>
+        <h1>Project1 Ecommerce Part3</h1>
+        <p class="hero-copy">Applied analytics and capstones</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-47.html">sql-47</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day48_project1_ecommerce_part3.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day48_project1_ecommerce_part3.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day48_project1_ecommerce_part3.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-48-e-commerce-project-part-3-affinity-and-attribution">Day 48 — E-commerce Project, Part 3: Affinity and Attribution<a class="heading-anchor" href="#guide--day-48-e-commerce-project-part-3-affinity-and-attribution" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-47.html#guide">Day 47 — cohort retention</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-48.html#learner">learner SQL</a> · <a href="sql-48.html#solution-1">solution reasoning</a> · <a href="sql-48.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Count each undirected basket pair once per order.</li>
+<li>Attribute a purchase event across distinct qualifying campaigns under an explicit lookback rule.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Market basket:</strong> the distinct products associated with one order.</li>
+<li><strong>Attribution window:</strong> the time interval in which a touch can qualify for conversion credit.</li>
+<li><strong>Fractional credit:</strong> one conversion divided across several qualifying touches or campaigns.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Deduplicate products within each order, self-join with <code>a.product_id &lt; b.product_id</code>, and count orders per pair. For attribution, deduplicate campaigns per purchase before dividing one credit by the distinct campaign count; verify allocated credit sums to one for every assisted purchase.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete these in the <a href="sql-48.html#learner">learner SQL</a>:</p>
+<ol>
+<li>Calculate seven-day assisted conversions.</li>
+<li>Allocate equal fractional multi-touch credit.</li>
+<li>Predict repeated-campaign behavior at touch versus campaign grain.</li>
+<li>Calculate product-pair support, bidirectional confidence, and lift.</li>
+<li>Assign a touch only to the next purchase.</li>
+<li>Add a direct bucket and reconcile credit to eligible purchases.</li>
+</ol>
+<p>Test touches exactly at both seven-day boundaries.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Are reversed pairs, self-pairs, and repeat quantities excluded as intended?</li>
+<li>Does fractional credit reconcile to assisted conversions without implying causal impact?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-49.html#guide">Day 49 — revenue forecasting</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--project-focus">Project focus<a class="heading-anchor" href="#guide--project-focus" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Form undirected market-basket product pairs.</li>
+<li>Count campaign-assisted purchase events in a seven-day lookback.</li>
+<li>Allocate equal fractional credit across distinct qualifying campaigns.</li>
+</ul>
+<h4 id="guide--how-the-learner-script-uses-the-current-schema">How the learner script uses the current schema<a class="heading-anchor" href="#guide--how-the-learner-script-uses-the-current-schema" aria-label="Link to this section">#</a></h4>
+<p>The starter deduplicates products within each order and pairs them with <code>a.product_id &lt; b.product_id</code>. It also extracts campaign from <code>events.metadata-&gt;&gt;&#x27;campaign&#x27;</code> and demonstrates each customer&#x27;s first and last touch by <code>events.event_time</code>.</p>
+<p>The setup provides event types <code>page_view</code>, <code>add_to_cart</code>, <code>checkout</code>, <code>purchase</code>, and <code>support</code>. It has no separate sessions or experiment assignment table.</p>
+<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>For every <code>purchase</code> event, find non-purchase campaign touches for the same customer from seven days before the purchase up to, but not including, the purchase timestamp. Count distinct assisted purchases by campaign.</li>
+<li>Deduplicate repeated campaign touches per purchase, divide one conversion equally across its distinct campaigns with a window count, and sum fractional credit by campaign.</li>
+</ol>
+<h4 id="guide--attribution-reasoning">Attribution reasoning<a class="heading-anchor" href="#guide--attribution-reasoning" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>The conversion anchor is a purchase event, not an order. State that definition before comparing results with order revenue.</li>
+<li>Assisted counts are not additive because one purchase can have several assisting campaigns.</li>
+<li>Equal credit for a qualifying purchase should sum to exactly one across its distinct campaigns.</li>
+<li>Decide whether missing campaign metadata, represented as <code>none</code>, should receive credit.</li>
+</ul>
+<h4 id="guide--validation-and-limits">Validation and limits<a class="heading-anchor" href="#guide--validation-and-limits" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Enforce <code>product_id</code> ordering to avoid self-pairs and reversed duplicates.</li>
+<li>The exercise does not establish causal marketing impact.</li>
+<li>The seven-day half-open window needs explicit boundary tests.</li>
+<li>Without session IDs, do not imply session-level journeys.</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day48_project1_ecommerce_part3.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day48_project1_ecommerce_part3.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 48: Project 1 - E-commerce Analytics (Part 3)</span>
+<span>-- Topics: Product affinity and attribution analysis</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Product affinity (market-basket pairs by order)</span>
+<span>WITH items AS (</span>
+<span>  SELECT order_id, product_id FROM order_items GROUP BY order_id, product_id</span>
+<span>), pairs AS (</span>
+<span>  SELECT a.product_id AS p1, b.product_id AS p2, COUNT(*) AS together</span>
+<span>  FROM items a</span>
+<span>  JOIN items b ON a.order_id = b.order_id AND a.product_id &lt; b.product_id</span>
+<span>  GROUP BY a.product_id, b.product_id</span>
+<span>)</span>
+<span>SELECT p1.name AS product_a, p2.name AS product_b, together</span>
+<span>FROM pairs</span>
+<span>JOIN products p1 ON p1.product_id = pairs.p1</span>
+<span>JOIN products p2 ON p2.product_id = pairs.p2</span>
+<span>ORDER BY together DESC</span>
+<span>LIMIT 50;</span>
+<span> </span>
+<span>-- Attribution: first touch vs last touch (by event campaign)</span>
+<span>WITH ev AS (</span>
+<span>  SELECT e.customer_id, e.event_time, coalesce(e.metadata-&gt;&gt;&#x27;campaign&#x27;,&#x27;none&#x27;) AS campaign</span>
+<span>  FROM events e</span>
+<span>), first_last AS (</span>
+<span>  SELECT customer_id,</span>
+<span>         (ARRAY_AGG(campaign ORDER BY event_time ASC))[1] AS first_touch,</span>
+<span>         (ARRAY_AGG(campaign ORDER BY event_time DESC))[1] AS last_touch</span>
+<span>  FROM ev</span>
+<span>  GROUP BY customer_id</span>
+<span>)</span>
+<span>SELECT first_touch, last_touch, COUNT(*)</span>
+<span>FROM first_last</span>
+<span>GROUP BY first_touch, last_touch</span>
+<span>ORDER BY COUNT(*) DESC</span>
+<span>LIMIT 50;</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- 1. Compute assisted conversions: campaigns that appear before purchase within 7 days.</span>
+<span>-- 2. Build multi-touch attribution with fractional credit using window functions.</span>
+<span>-- 3. Prediction: explain how repeated touches from the same campaign affect</span>
+<span>--    touch-level versus campaign-level equal-credit attribution.</span>
+<span>-- 4. Construction: calculate product-pair support, confidence in both</span>
+<span>--    directions, and lift using distinct order baskets.</span>
+<span>-- 5. Debugging: prevent one event touch from being credited to several purchases</span>
+<span>--    when the intended model assigns it only to the next purchase.</span>
+<span>-- 6. Edge case: place unattributed purchases in an explicit &#x27;(direct)&#x27; bucket</span>
+<span>--    so total attributed credit reconciles to total eligible purchases.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day48_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day48_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-48-solutions-e-commerce-analytics-part-3">Day 48 Solutions — E-commerce Analytics, Part 3<a class="heading-anchor" href="#solution-1--day-48-solutions-e-commerce-analytics-part-3" aria-label="Link to this section">#</a></h3>
+<p>The starter demonstrates market-basket pairs and first/last touch. The exercises ask for seven-day assisted conversions and equal-credit multi-touch attribution. The canonical file is <a href="sql-48.html#solution-2"><code>day48_solutions.sql</code></a>.</p>
+<h4 id="solution-1--exercise-1-assisted-conversions">Exercise 1 — Assisted conversions<a class="heading-anchor" href="#solution-1--exercise-1-assisted-conversions" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH purchases AS (
+  SELECT event_id AS purchase_event_id,
+         customer_id,
+         event_time AS purchase_time
+  FROM events
+  WHERE event_type = &#x27;purchase&#x27;
+), qualifying_touches AS (
+  SELECT p.purchase_event_id,
+         p.customer_id,
+         COALESCE(t.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;none&#x27;) AS campaign
+  FROM purchases p
+  JOIN events t
+    ON t.customer_id = p.customer_id
+   AND t.event_type &lt;&gt; &#x27;purchase&#x27;
+   AND t.event_time &gt;= p.purchase_time - interval &#x27;7 days&#x27;
+   AND t.event_time &lt; p.purchase_time
+)
+SELECT campaign,
+       COUNT(DISTINCT purchase_event_id) AS assisted_conversions,
+       COUNT(DISTINCT customer_id) AS assisted_customers
+FROM qualifying_touches
+GROUP BY campaign
+ORDER BY assisted_conversions DESC, campaign;</code></pre>
+<p>Expected grain: one row per campaign. A purchase can appear under several campaigns, so <code>assisted_conversions</code> is not additive across rows.</p>
+<h4 id="solution-1--exercise-2-equal-fractional-multi-touch-credit">Exercise 2 — Equal fractional multi-touch credit<a class="heading-anchor" href="#solution-1--exercise-2-equal-fractional-multi-touch-credit" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH purchases AS (
+  SELECT event_id AS purchase_event_id,
+         customer_id,
+         event_time AS purchase_time
+  FROM events
+  WHERE event_type = &#x27;purchase&#x27;
+), campaign_touches AS (
+  SELECT DISTINCT
+         p.purchase_event_id,
+         p.customer_id,
+         COALESCE(t.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;none&#x27;) AS campaign
+  FROM purchases p
+  JOIN events t
+    ON t.customer_id = p.customer_id
+   AND t.event_type &lt;&gt; &#x27;purchase&#x27;
+   AND t.event_time &gt;= p.purchase_time - interval &#x27;7 days&#x27;
+   AND t.event_time &lt; p.purchase_time
+), credited AS (
+  SELECT *,
+         1.0 / COUNT(*) OVER (PARTITION BY purchase_event_id) AS fractional_credit
+  FROM campaign_touches
+)
+SELECT campaign,
+       ROUND(SUM(fractional_credit), 4) AS attributed_conversions,
+       COUNT(DISTINCT purchase_event_id) AS touched_conversions
+FROM credited
+GROUP BY campaign
+ORDER BY attributed_conversions DESC, campaign;</code></pre>
+<p>For every purchase that has at least one qualifying campaign, credits across its distinct campaigns sum to 1.</p>
+<h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>The conversion anchor here is a <code>purchase</code> event, not an order. State and test that business definition before comparing this result with order metrics.</li>
+<li><code>DISTINCT</code> prevents repeated touches by the same campaign from receiving multiple shares.</li>
+<li>The half-open interval includes exactly seven days before the purchase but excludes the purchase timestamp itself.</li>
+<li>Campaign value <code>&#x27;none&#x27;</code> makes missing metadata visible; decide whether it should receive attribution in production.</li>
+</ul>
+<h4 id="solution-1--exercise-3-credit-distinct-campaigns">Exercise 3 — Credit distinct campaigns<a class="heading-anchor" href="#solution-1--exercise-3-credit-distinct-campaigns" aria-label="Link to this section">#</a></h4>
+<p>The solution collapses repeated touches to <code>(purchase, campaign)</code> before dividing. That implements equal credit per distinct campaign rather than per event.</p>
+<h4 id="solution-1--exercise-4-compute-basket-association-metrics">Exercise 4 — Compute basket association metrics<a class="heading-anchor" href="#solution-1--exercise-4-compute-basket-association-metrics" aria-label="Link to this section">#</a></h4>
+<p>Distinct order/product membership defines baskets. Pair counts feed support; single-product basket counts feed directional confidence; lift compares the observed pair rate with independence.</p>
+<h4 id="solution-1--exercise-5-assign-a-touch-only-once">Exercise 5 — Assign a touch only once<a class="heading-anchor" href="#solution-1--exercise-5-assign-a-touch-only-once" aria-label="Link to this section">#</a></h4>
+<p>A LATERAL subquery chooses the earliest qualifying purchase after each touch. <code>ORDER BY order_date, order_id LIMIT 1</code> prevents reuse and makes ties stable.</p>
+<h4 id="solution-1--exercise-6-reconcile-direct-purchases">Exercise 6 — Reconcile direct purchases<a class="heading-anchor" href="#solution-1--exercise-6-reconcile-direct-purchases" aria-label="Link to this section">#</a></h4>
+<p>The query starts from every order and left-joins its most recent qualifying touch. Missing touches become <code>(direct)</code>, so bucket counts sum to purchases.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day48_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day48_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 48 solutions: attribution</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Exercise 1: campaign touches before a purchase event within seven days.</span>
+<span>WITH purchases AS (</span>
+<span>  SELECT event_id AS purchase_event_id,</span>
+<span>         customer_id,</span>
+<span>         event_time AS purchase_time</span>
+<span>  FROM events</span>
+<span>  WHERE event_type = &#x27;purchase&#x27;</span>
+<span>), qualifying_touches AS (</span>
+<span>  SELECT p.purchase_event_id,</span>
+<span>         p.customer_id,</span>
+<span>         COALESCE(t.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;none&#x27;) AS campaign</span>
+<span>  FROM purchases p</span>
+<span>  JOIN events t</span>
+<span>    ON t.customer_id = p.customer_id</span>
+<span>   AND t.event_type &lt;&gt; &#x27;purchase&#x27;</span>
+<span>   AND t.event_time &gt;= p.purchase_time - interval &#x27;7 days&#x27;</span>
+<span>   AND t.event_time &lt; p.purchase_time</span>
+<span>)</span>
+<span>SELECT campaign,</span>
+<span>       COUNT(DISTINCT purchase_event_id) AS assisted_conversions,</span>
+<span>       COUNT(DISTINCT customer_id) AS assisted_customers</span>
+<span>FROM qualifying_touches</span>
+<span>GROUP BY campaign</span>
+<span>ORDER BY assisted_conversions DESC, campaign;</span>
+<span> </span>
+<span>-- Exercise 2: every qualifying campaign receives an equal fraction of one</span>
+<span>-- conversion. Deduplicate repeated campaign touches before assigning credit.</span>
+<span>WITH purchases AS (</span>
+<span>  SELECT event_id AS purchase_event_id,</span>
+<span>         customer_id,</span>
+<span>         event_time AS purchase_time</span>
+<span>  FROM events</span>
+<span>  WHERE event_type = &#x27;purchase&#x27;</span>
+<span>), campaign_touches AS (</span>
+<span>  SELECT DISTINCT</span>
+<span>         p.purchase_event_id,</span>
+<span>         p.customer_id,</span>
+<span>         COALESCE(t.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;none&#x27;) AS campaign</span>
+<span>  FROM purchases p</span>
+<span>  JOIN events t</span>
+<span>    ON t.customer_id = p.customer_id</span>
+<span>   AND t.event_type &lt;&gt; &#x27;purchase&#x27;</span>
+<span>   AND t.event_time &gt;= p.purchase_time - interval &#x27;7 days&#x27;</span>
+<span>   AND t.event_time &lt; p.purchase_time</span>
+<span>), credited AS (</span>
+<span>  SELECT *,</span>
+<span>         1.0 / COUNT(*) OVER (PARTITION BY purchase_event_id) AS fractional_credit</span>
+<span>  FROM campaign_touches</span>
+<span>)</span>
+<span>SELECT campaign,</span>
+<span>       ROUND(SUM(fractional_credit), 4) AS attributed_conversions,</span>
+<span>       COUNT(DISTINCT purchase_event_id) AS touched_conversions</span>
+<span>FROM credited</span>
+<span>GROUP BY campaign</span>
+<span>ORDER BY attributed_conversions DESC, campaign;</span>
+<span> </span>
+<span>-- Exercise 3: collapse repeated touches to campaign grain before dividing when</span>
+<span>-- policy grants equal credit per distinct campaign rather than per event.</span>
+<span>WITH purchases AS (</span>
+<span>  SELECT event_id AS purchase_id, customer_id, event_time AS purchased_at</span>
+<span>  FROM events WHERE event_type = &#x27;purchase&#x27;</span>
+<span>), eligible_campaigns AS (</span>
+<span>  SELECT DISTINCT p.purchase_id,</span>
+<span>         COALESCE(e.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;(direct)&#x27;) AS campaign</span>
+<span>  FROM purchases p</span>
+<span>  JOIN events e</span>
+<span>    ON e.customer_id = p.customer_id</span>
+<span>   AND e.event_time &gt;= p.purchased_at - interval &#x27;7 days&#x27;</span>
+<span>   AND e.event_time &lt; p.purchased_at</span>
+<span>)</span>
+<span>SELECT purchase_id, campaign,</span>
+<span>       1.0 / COUNT(*) OVER (PARTITION BY purchase_id) AS campaign_credit</span>
+<span>FROM eligible_campaigns</span>
+<span>ORDER BY purchase_id, campaign;</span>
+<span> </span>
+<span>-- Exercise 4: distinct baskets prevent duplicate lines from inflating support.</span>
+<span>WITH baskets AS (</span>
+<span>  SELECT DISTINCT order_id, product_id FROM order_items</span>
+<span>), order_count AS (</span>
+<span>  SELECT COUNT(DISTINCT order_id)::numeric AS n FROM baskets</span>
+<span>), product_counts AS (</span>
+<span>  SELECT product_id, COUNT(*)::numeric AS baskets FROM baskets GROUP BY product_id</span>
+<span>), pairs AS (</span>
+<span>  SELECT a.product_id AS product_a, b.product_id AS product_b,</span>
+<span>         COUNT(*)::numeric AS together</span>
+<span>  FROM baskets a JOIN baskets b</span>
+<span>    ON a.order_id = b.order_id AND a.product_id &lt; b.product_id</span>
+<span>  GROUP BY a.product_id, b.product_id</span>
+<span>)</span>
+<span>SELECT p.product_a, p.product_b,</span>
+<span>       ROUND(p.together / n, 4) AS support,</span>
+<span>       ROUND(p.together / ca.baskets, 4) AS confidence_a_to_b,</span>
+<span>       ROUND(p.together / cb.baskets, 4) AS confidence_b_to_a,</span>
+<span>       ROUND((p.together * n) / NULLIF(ca.baskets * cb.baskets, 0), 4) AS lift</span>
+<span>FROM pairs p</span>
+<span>CROSS JOIN order_count</span>
+<span>JOIN product_counts ca ON ca.product_id = p.product_a</span>
+<span>JOIN product_counts cb ON cb.product_id = p.product_b</span>
+<span>ORDER BY lift DESC, product_a, product_b</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>-- Exercise 5: LATERAL chooses only the next purchase for each touch, preventing</span>
+<span>-- one touch from being reused across several later purchases.</span>
+<span>SELECT e.event_id AS touch_id,</span>
+<span>       e.metadata-&gt;&gt;&#x27;campaign&#x27; AS campaign,</span>
+<span>       next_purchase.order_id,</span>
+<span>       next_purchase.order_date</span>
+<span>FROM events e</span>
+<span>LEFT JOIN LATERAL (</span>
+<span>  SELECT o.order_id, o.order_date</span>
+<span>  FROM orders o</span>
+<span>  WHERE o.customer_id = e.customer_id</span>
+<span>    AND o.order_date &gt; e.event_time</span>
+<span>    AND o.order_date &lt;= e.event_time + interval &#x27;7 days&#x27;</span>
+<span>  ORDER BY o.order_date, o.order_id</span>
+<span>  LIMIT 1</span>
+<span>) next_purchase ON true</span>
+<span>WHERE e.metadata ? &#x27;campaign&#x27;</span>
+<span>ORDER BY e.event_id;</span>
+<span> </span>
+<span>-- Exercise 6: start from purchases and LEFT JOIN touches so every purchase</span>
+<span>-- receives either a qualifying campaign or the explicit direct bucket.</span>
+<span>SELECT COALESCE(t.campaign, &#x27;(direct)&#x27;) AS attribution_bucket,</span>
+<span>       COUNT(*) AS purchases</span>
+<span>FROM orders o</span>
+<span>LEFT JOIN LATERAL (</span>
+<span>  SELECT e.metadata-&gt;&gt;&#x27;campaign&#x27; AS campaign</span>
+<span>  FROM events e</span>
+<span>  WHERE e.customer_id = o.customer_id</span>
+<span>    AND e.event_time &gt;= o.order_date - interval &#x27;7 days&#x27;</span>
+<span>    AND e.event_time &lt; o.order_date</span>
+<span>    AND e.metadata ? &#x27;campaign&#x27;</span>
+<span>  ORDER BY e.event_time DESC, e.event_id DESC</span>
+<span>  LIMIT 1</span>
+<span>) t ON true</span>
+<span>GROUP BY COALESCE(t.campaign, &#x27;(direct)&#x27;)</span>
+<span>ORDER BY purchases DESC, attribution_bucket;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-47.html"><small>Previous lesson</small><strong>sql-47</strong><span>Project1 Ecommerce Part2</span></a>
+        <a class="nav-card next" href="sql-49.html"><small>Next lesson</small><strong>sql-49</strong><span>Project2 Finance Part1</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-48";
+    const LEARNER_PATH = "sql/postgres-60day/day48_project1_ecommerce_part3.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

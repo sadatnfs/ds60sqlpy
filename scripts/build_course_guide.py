@@ -15,6 +15,14 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = REPO_ROOT / "START_HERE.html"
+SRC = REPO_ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from ds60sqlpy.lesson_reader import (  # noqa: E402
+    COURSE_GUIDE_REFERENCE_PATHS,
+    reference_relative_path,
+)
 
 
 def _catalog_payload() -> dict[str, Any]:
@@ -440,6 +448,11 @@ def build_html(payload: dict[str, Any]) -> str:
       font-weight: 700;
       text-decoration: none;
     }
+    .lesson-links a.lesson-start {
+      color: #fff;
+      background: var(--navy);
+    }
+    .lesson-links a.lesson-start:hover { background: var(--green); }
     .lesson-links button:hover { color: #fff; }
     .empty {
       grid-column: 1 / -1;
@@ -507,6 +520,44 @@ def build_html(payload: dict[str, Any]) -> str:
     }
     .launcher-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .launcher-status { min-height: 1.35rem; margin: 0.7rem 0 0; }
+    .readiness-box {
+      margin-top: 1rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+    }
+    .readiness-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .readiness-head h4 { margin: 0; }
+    .readiness-results {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+    }
+    .readiness-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.15rem 0.55rem;
+      align-items: start;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.55rem 0.65rem;
+      background: rgb(255 255 255 / 55%);
+    }
+    .readiness-mark {
+      grid-row: 1 / 3;
+      color: var(--green);
+      font-weight: 900;
+    }
+    .readiness-item[data-status="warn"] .readiness-mark { color: #9a5b05; }
+    .readiness-item[data-status="fail"] .readiness-mark { color: var(--red); }
+    .readiness-item strong { font-size: 0.82rem; }
+    .readiness-item span:last-child { color: var(--muted); font-size: 0.74rem; }
     .mode-badge {
       display: inline-flex;
       align-items: center;
@@ -557,7 +608,7 @@ def build_html(payload: dict[str, Any]) -> str:
       h1 { font-size: clamp(2.8rem, 17vw, 4.4rem); }
       .grid.three, .grid.two, .lesson-grid, .workflow, .controls { grid-template-columns: 1fr; }
       .section-head { align-items: flex-start; flex-direction: column; }
-      .progress-panel, .track-progress-grid { grid-template-columns: 1fr; }
+      .progress-panel, .track-progress-grid, .readiness-results { grid-template-columns: 1fr; }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -601,7 +652,8 @@ def build_html(payload: dict[str, Any]) -> str:
         and ask Codex for coaching without giving away the solution.
       </p>
       <div class="hero-actions">
-        <a class="button" href="#setup">Start setup</a>
+        <a class="button" href="#windows-quick-start">Windows: start here</a>
+        <a class="button secondary" href="#setup">macOS/Linux setup</a>
         <a class="button secondary" href="#catalog">Browse all lessons</a>
       </div>
     </div>
@@ -653,6 +705,25 @@ def build_html(payload: dict[str, Any]) -> str:
         </div>
 
         <div id="os-windows" class="os-panel panel" role="tabpanel" aria-labelledby="tab-windows" data-os-panel="windows">
+          <div class="callout" id="windows-quick-start">
+            <p class="eyebrow">Recommended Windows route</p>
+            <h3>Double-click <code>START_DS60.cmd</code>.</h3>
+            <p>
+              Open the cloned repository in File Explorer and double-click
+              <code>START_DS60.cmd</code>. It checks or prepares the course
+              environment, runs readiness diagnostics, and reopens this guide
+              in private launcher mode. Keep its terminal window open while
+              studying so lesson buttons can open VS Code and Jupyter for you.
+            </p>
+            <p class="microcopy">
+              The first connected start installs missing course packages.
+              Missing system tools are diagnosed with guided next steps;
+              installing them through WinGet remains an explicit opt-in.
+              Normal lessons can run offline afterward.
+            </p>
+          </div>
+          <details style="margin-top: 1rem">
+            <summary><strong>Manual setup or repair commands</strong></summary>
           <h3>Windows PowerShell</h3>
           <p>
             If Anaconda and PostgreSQL are installed but absent from PATH, use
@@ -675,6 +746,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             PATH changes are opt-in; read
             <a href="docs/setup/windows.md">the Windows guide</a> first.
           </p>
+          </details>
         </div>
 
         <div id="os-macos" class="os-panel panel" role="tabpanel" aria-labelledby="tab-macos" data-os-panel="macos" hidden>
@@ -767,6 +839,24 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <button type="button" class="secondary" data-launch-action="jupyter-sql">Launch PostgreSQL notebook lab</button>
           </div>
           <p class="microcopy launcher-status" id="launcher-status" aria-live="polite"></p>
+          <div class="readiness-box">
+            <div class="readiness-head">
+              <div>
+                <h4>This computer</h4>
+                <p class="microcopy" id="readiness-summary">
+                  Checking the repository environment…
+                </p>
+              </div>
+              <button type="button" class="secondary" id="check-readiness">
+                Run checks again
+              </button>
+            </div>
+            <div class="readiness-results" id="readiness-results"></div>
+            <p class="microcopy">
+              Docker and PostgreSQL are optional until you enter the SQL track.
+              A warning is a next-step prompt, not necessarily a blocker.
+            </p>
+          </div>
         </div>
 
         <div class="panel" style="margin-top: 1rem">
@@ -1075,6 +1165,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         saveState();
         renderCatalog();
         renderProgress();
+        renderReadiness(payload.diagnostics || []);
         setLauncherStatus(
           payload.launches_enabled
             ? "Launcher ready. Progress is synchronized with .learning/progress.json."
@@ -1083,6 +1174,33 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       } catch (error) {
         setLauncherStatus(`Could not synchronize launcher mode: ${error.message}`, true);
       }
+    }
+
+    function renderReadiness(diagnostics) {
+      const results = document.querySelector("#readiness-results");
+      const summary = document.querySelector("#readiness-summary");
+      results.replaceChildren();
+      diagnostics.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "readiness-item";
+        row.dataset.status = item.status;
+        const mark = document.createElement("span");
+        mark.className = "readiness-mark";
+        mark.textContent = item.status === "pass" ? "✓" : item.status === "warn" ? "!" : "×";
+        const name = document.createElement("strong");
+        name.textContent = item.name;
+        const detail = document.createElement("span");
+        detail.textContent = item.detail;
+        row.append(mark, name, detail);
+        results.append(row);
+      });
+      const failed = diagnostics.filter((item) => item.status === "fail").length;
+      const warned = diagnostics.filter((item) => item.status === "warn").length;
+      summary.textContent = failed
+        ? `${failed} required check(s) need attention before lessons can run.`
+        : warned
+          ? `Core checks passed; ${warned} optional or track-specific item(s) need attention.`
+          : "Everything checked by the course is ready.";
     }
 
     async function syncCompletion(lessonId, complete) {
@@ -1129,11 +1247,12 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 
     function renderCard(lesson) {
       const completed = completedSet().has(lesson.id);
+      const reader = relativeLink(`lesson-pages/${lesson.id}.html`);
       const prerequisites = lesson.prerequisites.length
         ? lesson.prerequisites.map((id) => `<code>${escapeHtml(id)}</code>`).join(", ")
         : "none";
       const solutions = lesson.solution_paths
-        .map((path, index) => `<a href="${relativeLink(path)}">Solution ${index + 1}</a>`)
+        .map((_path, index) => `<a href="${reader}#solution-${index + 1}">Solution ${index + 1}</a>`)
         .join("");
       return `
         <article class="lesson-card ${completed ? "complete" : ""}" data-lesson-id="${escapeHtml(lesson.id)}">
@@ -1155,8 +1274,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <p class="lesson-phase">${escapeHtml(lesson.phase)}</p>
           <p class="prereqs"><strong>Prerequisites:</strong> ${prerequisites}</p>
           <div class="lesson-links">
-            <a href="${relativeLink(lesson.guide_path)}">Guide</a>
-            <a href="${relativeLink(lesson.lesson_path)}">Learner artifact</a>
+            <a class="lesson-start" href="${reader}">Start lesson</a>
+            <a href="${reader}#guide">Guide</a>
+            <a href="${reader}#learner">Learner artifact</a>
             ${solutions}
             ${launcherMode ? `<button type="button" class="ghost" data-open-lesson="${escapeHtml(lesson.id)}">Open in VS Code</button>` : ""}
           </div>
@@ -1291,6 +1411,10 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       button.addEventListener("click", () => {
         void launchNative(button.dataset.launchAction);
       });
+    });
+    document.querySelector("#check-readiness").addEventListener("click", () => {
+      document.querySelector("#readiness-summary").textContent = "Checking this computer…";
+      void loadServerProgress();
     });
 
     [search, trackFilter, levelFilter, statusFilter].forEach((control) => {
@@ -1465,6 +1589,14 @@ First verify that I am using the repository interpreter/kernel and ask 2–3 sho
     }
     for marker, value in replacements.items():
         document = document.replace(marker, value)
+    for source_path in COURSE_GUIDE_REFERENCE_PATHS:
+        source_href = f'href="{source_path}"'
+        if source_href not in document:
+            raise ValueError(f"course-guide reference is no longer linked: {source_path}")
+        document = document.replace(
+            source_href,
+            f'href="{reference_relative_path(source_path)}"',
+        )
     if "__" in document:
         unresolved = sorted(
             {token for token in document.split() if token.startswith("__") and token.endswith("__")}

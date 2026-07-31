@@ -98,6 +98,10 @@ fragment to a lesson notebook.
 - Declare persistent project fixtures.
 - Explain NULL, ordering, time zone, and money assumptions.
 - Use `psql -X -v ON_ERROR_STOP=1` for file validation.
+- Keep `psql` meta-commands deliberate and repository-relative. Guided SQL
+  notebooks preserve the official meta-command lines and mirror fixed
+  recursive `\ir` dependencies; do not add shell escape commands or dynamic
+  include paths to learner content.
 - Never use a production or shared database for examples.
 
 ## Python and PostgreSQL bridge
@@ -170,6 +174,56 @@ Do not guess the catalog schema; inspect the builder and checked-in generated ou
 
 Use relative Markdown links for repository navigation. Avoid plain-text file paths when a clickable link is clearer.
 
+## Generated learner readers
+
+`START_HERE.html`, `lesson-pages/<lesson-id>.html`, and
+`reference-pages/<source>.html` are checked-in, deterministic course
+artifacts, not hand-authored pages. The dashboard comes from
+`scripts/build_course_guide.py`; the lesson/reference readers come from
+`src/ds60sqlpy/lesson_reader.py` through
+`scripts/build_lesson_readers.py`. Never edit any generated HTML surface by
+hand.
+
+Each reader must keep this learner journey:
+
+1. rendered companion guide;
+2. read-only learner-artifact preview with a path to the real file;
+3. execution in VS Code, JupyterLab, or the guided SQL workspace; and
+4. visibly separated solutions after the attempt.
+
+Reader generation must remain offline and self-contained. Escape source,
+reject unsafe URL schemes, render no untrusted notebook HTML, load no remote
+fonts/scripts/analytics, and rewrite known course links to the matching reader
+section. A static `file://` page may offer a best-effort registered VS Code
+URL, but only the authenticated loopback launcher may start allowlisted native
+actions.
+
+Every learner-visible local Markdown or SQL link from the dashboard, lesson
+readers, or rendered references must point to generated HTML. The generator
+derives a deterministic recursive closure from explicit dashboard references
+and links rendered from catalog artifacts; do not replace it with a scan of
+arbitrary untracked files. Keep completion on the dashboard in static mode and
+show the per-lesson checkbox only when the private launcher token is present.
+
+Do not create 154 hand-maintained SQL notebooks. For a cataloged SQL lesson,
+the private launcher derives an ignored working notebook and editable SQL copy
+under `.learning/sql/<lesson-id>/` through
+`src/ds60sqlpy/sql_notebook.py`. The generator must preserve existing learner
+files, accept only stable catalog identities, keep paths below `.learning/sql/`,
+run fixed non-shell `psql -f` commands, detect changed meta-commands even when
+they follow SQL on the same line, hide connection values, and require explicit
+confirmation before resetting the disposable course schema.
+
+After lesson artifacts, paths, or catalog metadata change, regenerate and
+check both navigation layers:
+
+```text
+python scripts/build_course_guide.py
+python scripts/build_lesson_readers.py
+python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
+```
+
 ## Accessibility and tone
 
 - Use plain language without talking down to the learner.
@@ -191,6 +245,10 @@ Use relative Markdown links for repository navigation. Avoid plain-text file pat
 - Direct dependencies are declared.
 - Solution paths are truthful.
 - Catalog and internal links validate.
-- Generated artifacts and secrets are absent.
+- Generated dashboard, lesson readers, and reference pages have no drift and
+  still open the real artifact rather than raw source in a browser tab.
+- Guided SQL notebook tests prove catalog/path/reset/no-overwrite boundaries;
+  no `.learning/sql/` workspace is tracked.
+- Unexpected machine-generated artifacts and secrets are absent.
 
 Run [repository validation](validation.md) before handoff.

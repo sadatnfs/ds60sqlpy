@@ -9,6 +9,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.sql_notebook import (
+    SqlNotebookError,
+    course_psql_environment,
+    validate_course_database_target,
+)
 
 DEFAULT_DATABASE_URL = "postgresql://ds60:ds60@localhost:5432/advanced_sql_training"
 
@@ -43,9 +48,16 @@ class SqlRunner:
             )
         self.executable = executable
         self.catalog = catalog
-        self.database_url = (
+        database_target = (
             database_url or os.environ.get("DS60_DATABASE_URL") or DEFAULT_DATABASE_URL
         )
+        try:
+            self.database_url = validate_course_database_target(database_target)
+        except SqlNotebookError as exc:
+            raise SqlRunnerError(
+                "Refusing to run SQL: the connection target is not the disposable "
+                "advanced_sql_training course database."
+            ) from exc
         self.quiet = quiet
 
     def run_file(self, path: Path) -> SqlRun:
@@ -54,15 +66,25 @@ class SqlRunner:
         command = [
             self.executable,
             "-X",
+            "--no-password",
             "-v",
             "ON_ERROR_STOP=1",
-            "--dbname",
-            self.database_url,
             "-f",
             str(path),
         ]
+        environment = course_psql_environment(
+            self.database_url,
+            application_name="ds60sqlpy-course-runner",
+            connect_timeout=10,
+        )
         stdout = subprocess.DEVNULL if self.quiet else None
-        result = subprocess.run(command, check=False, stdout=stdout)
+        result = subprocess.run(
+            command,
+            check=False,
+            env=environment,
+            stdin=subprocess.DEVNULL,
+            stdout=stdout,
+        )
         return SqlRun(path=path, returncode=result.returncode)
 
     def setup(self) -> SqlRun:

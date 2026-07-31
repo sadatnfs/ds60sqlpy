@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-06 · Bulk ETL Validation · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-06</p>
+        <h1>Bulk ETL Validation</h1>
+        <p class="hero-copy">Python and PostgreSQL engineering</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">bridge setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="bridge-05.html">bridge-05</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/lessons/day06_bulk_etl_validation.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/lessons/day06_bulk_etl_validation.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/companion-guides/day06_bulk_etl_validation.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/companion-guides/day06_bulk_etl_validation.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-day-6-bulk-etl-and-data-validation">Bridge Day 6 — Bulk ETL and data validation<a class="heading-anchor" href="#guide--bridge-day-6-bulk-etl-and-data-validation" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Advanced <strong>Prerequisite:</strong> <a href="bridge-05.html#guide">Bridge Day 5</a></p>
+<h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
+<p>Extract-transform-load (ETL) code crosses a trust boundary. Source strings may be malformed, duplicated, too large, or semantically invalid. A sound pipeline converts raw rows into a typed record before loading, keeps rejection diagnostics minimal, and writes batches with parameter binding. Performance comes after the data contract is explicit.</p>
+<h4 id="guide--objectives">Objectives<a class="heading-anchor" href="#guide--objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>validate an external mapping into an immutable typed record;</li>
+<li>preserve exact decimal money and parse ISO dates;</li>
+<li>separate accepted and rejected rows without exposing whole records;</li>
+<li>create deterministic batches with tested boundary cases;</li>
+<li>compare <code>executemany()</code> and Psycopg <code>COPY</code> tradeoffs;</li>
+<li>use a source ID and <code>ON CONFLICT</code> for restart-safe loading.</li>
+</ul>
+<h4 id="guide--vocabulary">Vocabulary<a class="heading-anchor" href="#guide--vocabulary" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>ETL</td>
+<td>Extract data, transform it to a contract, then load it</td>
+</tr>
+<tr>
+<td>schema</td>
+<td>The expected fields, types, and constraints of a record or table</td>
+</tr>
+<tr>
+<td>quarantine</td>
+<td>A controlled destination for rejected records or diagnostics</td>
+</tr>
+<tr>
+<td>batch</td>
+<td>A bounded group handled as one loading unit</td>
+</tr>
+<tr>
+<td>upsert</td>
+<td>Insert a new row or update the conflicting existing row</td>
+</tr>
+<tr>
+<td>COPY</td>
+<td>PostgreSQL&#x27;s high-throughput bulk transfer protocol</td>
+</tr>
+<tr>
+<td>data lineage</td>
+<td>Information about where a record came from and how it changed</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--run-the-starter">Run the starter<a class="heading-anchor" href="#guide--run-the-starter" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe bridge\lessons\day06_bulk_etl_validation.py</code></pre>
+<pre><code class="language-bash">.venv/bin/python bridge/lessons/day06_bulk_etl_validation.py</code></pre>
+<h4 id="guide--worked-example-conversion-is-part-of-validation">Worked example: conversion is part of validation<a class="heading-anchor" href="#guide--worked-example-conversion-is-part-of-validation" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">raw_amount = &quot;12.345&quot;
+amount = Decimal(raw_amount)
+if not amount.is_finite() or amount &lt;= 0:
+    raise RowValidationError(&quot;amount must be finite and positive&quot;)
+normalized = amount.quantize(Decimal(&quot;0.01&quot;))</code></pre>
+<p>This creates a declared rounding policy and rejects <code>NaN</code> or infinity. Binary <code>float</code> is a poor money boundary because values such as <code>0.1</code> are not exact.</p>
+<p>Decide separately:</p>
+<ul>
+<li><strong>record validity:</strong> can one row become a <code>Sale</code>?</li>
+<li><strong>batch policy:</strong> how many validated rows are submitted together?</li>
+<li><strong>load semantics:</strong> insert-only, upsert, or reject duplicates?</li>
+<li><strong>transaction policy:</strong> all rows, one batch, or another recovery unit?</li>
+</ul>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Validate untrusted rows before I/O, retain minimal rejection evidence, batch deterministically, and submit typed parameters through an idempotent bulk boundary.</li>
+<li><strong>Assumptions:</strong> Money is finite, positive, and quantized to two decimals; source IDs are stable replay keys; raw records may contain sensitive fields.</li>
+<li><strong>Primary failure mode:</strong> Bulk speed does not excuse weak validation, unbounded materialization, or diagnostics that copy entire rejected records.</li>
+<li><strong>Evidence loop:</strong> predict the boundary, implement the smallest change, verify success and failure with a deterministic fake, then explain which behavior still requires an explicitly enabled PostgreSQL integration test.</li>
+</ul>
+<ol>
+<li><strong>Validation:</strong> Implement <code>parse_sale()</code> for non-blank source ID, positive integer customer ID, finite positive amount, and ISO date without mutating input.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Convert each field explicitly and translate only expected conversion failures.</li>
+</ul>
+<ol>
+<li><strong>Money:</strong> Quantize accepted amounts to two decimals and document the chosen rounding rule.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Quantization is a domain decision, not merely display formatting.</li>
+</ul>
+<ol>
+<li><strong>Partitioning:</strong> Implement <code>partition_rows()</code> so accepted sales and rejected source IDs/reasons retain input order without storing full raw rows.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Catch only <code>RowValidationError</code> from the conversion boundary.</li>
+</ul>
+<ol>
+<li><strong>Batching:</strong> Implement <code>batches()</code> with positive-size validation and tests for empty, exact, and remainder cases.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Slice deterministic tuples from the original sequence.</li>
+</ul>
+<ol>
+<li><strong>Bulk SQL:</strong> Implement a parameterized <code>executemany()</code> upsert into <code>pg_temp.bridge_sales</code> with no values in SQL text.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Convert typed sales to one parameter tuple per row.</li>
+</ul>
+<ol>
+<li><strong>Accounting:</strong> Track accepted, rejected, submitted, inserted, and updated counts separately and state what <code>executemany()</code> cannot cheaply distinguish.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Do not infer business outcomes from submitted row count.</li>
+</ul>
+<ol>
+<li><strong>Extension:</strong> Design the Psycopg COPY variant using typed <code>write_row()</code> calls and a staging table instead of hand-built delimited text.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> COPY handles transport; a later set-based statement owns merge semantics.</li>
+</ul>
+<ol>
+<li><strong>Edge cases:</strong> Test NaN, infinities, zero, negatives, whitespace IDs, leading-zero customer IDs, and invalid dates.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Classify each rejection at the field boundary and keep its reason safe.</li>
+</ul>
+<ol>
+<li><strong>Idempotency:</strong> Choose a policy for duplicate <code>source_id</code> values within one input batch and test it before database submission.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Database upsert resolves persisted conflicts but may hide contradictory source rows.</li>
+</ul>
+<ol>
+<li><strong>Scale design:</strong> Compare materializing all accepted rows with a streaming validator and identify where bounded memory changes APIs.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A tuple return is convenient for lessons but not for unlimited sources.</li>
+</ul>
+<ol>
+<li><strong>Capacity:</strong> Select batch size from parameter count, row width, memory, and transaction duration rather than a universal constant.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Measure the real adapter and keep a safe configurable default.</li>
+</ul>
+<ol>
+<li><strong>Transaction failure:</strong> Specify behavior when <code>executemany()</code> fails halfway and identify which layer owns rollback and retry.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Submission count is not committed count.</li>
+</ul>
+<ol>
+<li><strong>Observability:</strong> Create a bounded rejection taxonomy and metrics that do not use source IDs or raw reasons as tags.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Metric labels must come from a fixed vocabulary.</li>
+</ul>
+<ol>
+<li><strong>Reconciliation:</strong> Design a replay test that loads the same accepted sales twice and reconciles source IDs and total amount.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Idempotency is proven by stable final state, not by absence of exceptions.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>State the input/output and ownership boundary in one sentence.</li>
+<li>Show one normal case, one edge case, and one failure case.</li>
+<li>Inspect recorded calls rather than relying on plausible output.</li>
+<li>Confirm no credential, payload, or high-cardinality identifier was emitted.</li>
+</ul>
+<h4 id="guide--optional-live-db-step">Optional live-DB step<a class="heading-anchor" href="#guide--optional-live-db-step" aria-label="Link to this section">#</a></h4>
+<p>Within one disposable connection, create a temporary target:</p>
+<pre><code class="language-sql">CREATE TEMP TABLE bridge_sales (
+    source_id text PRIMARY KEY,
+    customer_id integer NOT NULL REFERENCES training.customers(customer_id),
+    amount numeric(12,2) NOT NULL CHECK (amount &gt; 0),
+    occurred_on date NOT NULL
+) ON COMMIT DROP;</code></pre>
+<p>Load a tiny valid batch twice, verify the stable final row count, and explicitly roll back. The reference SQL uses <code>pg_temp.bridge_sales</code>, which cannot resolve to a persistent production table.</p>
+<pre><code class="language-powershell">$env:DS60_DATABASE_URL = &quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;</code></pre>
+<pre><code class="language-bash">export DS60_DATABASE_URL=&quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;</code></pre>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Does malformed input become a rejection rather than a partial <code>Sale</code>?</li>
+<li>Are <code>NaN</code>, infinity, zero, negative money, and invalid dates rejected?</li>
+<li>Does every batch preserve input order and stay within the size?</li>
+<li>Are values sent separately from the upsert text?</li>
+<li>Can a rerun produce the same logical target state?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Loading before validating:</strong> one bad row can abort a large transaction late.</li>
+<li><strong>Catching every exception as “bad data”:</strong> database outages and programming bugs must not become quarantine rows.</li>
+<li><strong>Logging raw rejected records:</strong> they may contain personal or secret fields.</li>
+<li><strong>Reporting submitted rows as inserted rows:</strong> upserts and conflicts make those different metrics.</li>
+<li><strong>One enormous transaction:</strong> it increases lock time, rollback cost, and recovery work.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p><a href="bridge-07.html#guide">Day 7</a> introduces async database I/O while keeping concurrency bounded. Review <a href="bridge-06.html#solution-1">the Day 6 solution notes</a> after your attempt.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/lessons/day06_bulk_etl_validation.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/lessons/day06_bulk_etl_validation.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Bridge Day 6: bulk extract-transform-load work and validation.</span>
+<span> </span>
+<span>Prerequisite: Bridge Day 5.</span>
+<span>Read ``bridge/companion-guides/day06_bulk_etl_validation.md`` first.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Iterable, Mapping, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from datetime import date</span>
+<span>from decimal import Decimal</span>
+<span>from typing import Protocol, TypeVar</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-06&quot;</span>
+<span>PREREQUISITES = (&quot;bridge-05&quot;,)</span>
+<span>LEVEL = &quot;advanced&quot;</span>
+<span> </span>
+<span>T = TypeVar(&quot;T&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class RowValidationError(ValueError):</span>
+<span>    &quot;&quot;&quot;One source row did not satisfy the input contract.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Sale:</span>
+<span>    source_id: str</span>
+<span>    customer_id: int</span>
+<span>    amount: Decimal</span>
+<span>    occurred_on: date</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RejectedRow:</span>
+<span>    source_id: str</span>
+<span>    reason: str</span>
+<span> </span>
+<span> </span>
+<span>class BulkCursor(Protocol):</span>
+<span>    def executemany(</span>
+<span>        self,</span>
+<span>        query: object,</span>
+<span>        params_seq: Iterable[Sequence[object]],</span>
+<span>    ) -&gt; object: ...</span>
+<span> </span>
+<span> </span>
+<span>def parse_sale(raw: Mapping[str, str]) -&gt; Sale:</span>
+<span>    &quot;&quot;&quot;Core implementation: validate identifiers, numeric fields, and ISO dates.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;convert one raw row or raise RowValidationError&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def partition_rows(</span>
+<span>    rows: Iterable[Mapping[str, str]],</span>
+<span>) -&gt; tuple[list[Sale], list[RejectedRow]]:</span>
+<span>    &quot;&quot;&quot;Core implementation: retain valid rows and minimal diagnostics for rejected rows.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;partition without logging complete source records&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def batches(items: Sequence[T], size: int) -&gt; list[tuple[T, ...]]:</span>
+<span>    &quot;&quot;&quot;Core implementation: create deterministic batches and reject invalid sizes.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;split a sequence into non-empty batches&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def load_sales(cursor: BulkCursor, sales: Sequence[Sale]) -&gt; int:</span>
+<span>    &quot;&quot;&quot;Core implementation: use parameterized ``executemany`` or a Psycopg COPY path.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;bulk-load already validated records&quot;)</span>
+<span> </span>
+<span> </span>
+<span># Exercises (answer-free)</span>
+<span># Focus: Validate untrusted rows before I/O, retain minimal rejection evidence, batch</span>
+<span>#    deterministically, and submit typed parameters through an idempotent bulk boundary.</span>
+<span># Assumptions: Money is finite, positive, and quantized to two decimals; source IDs are stable</span>
+<span>#    replay keys; raw records may contain sensitive fields.</span>
+<span># Failure to watch for: Bulk speed does not excuse weak validation, unbounded materialization,</span>
+<span>#    or diagnostics that copy entire rejected records.</span>
+<span># Work in order: predict -&gt; implement -&gt; test -&gt; debug -&gt; extend. Keep official</span>
+<span># answers out of this starter and collect deterministic fake-backed evidence.</span>
+<span># 1. [Validation] Implement `parse_sale()` for non-blank source ID, positive integer customer</span>
+<span>#    ID, finite positive amount, and ISO date without mutating input.</span>
+<span>#    Hint: Convert each field explicitly and translate only expected conversion failures.</span>
+<span># 2. [Money] Quantize accepted amounts to two decimals and document the chosen rounding rule.</span>
+<span>#    Hint: Quantization is a domain decision, not merely display formatting.</span>
+<span># 3. [Partitioning] Implement `partition_rows()` so accepted sales and rejected source</span>
+<span>#    IDs/reasons retain input order without storing full raw rows.</span>
+<span>#    Hint: Catch only `RowValidationError` from the conversion boundary.</span>
+<span># 4. [Batching] Implement `batches()` with positive-size validation and tests for empty, exact,</span>
+<span>#    and remainder cases.</span>
+<span>#    Hint: Slice deterministic tuples from the original sequence.</span>
+<span># 5. [Bulk SQL] Implement a parameterized `executemany()` upsert into `pg_temp.bridge_sales`</span>
+<span>#    with no values in SQL text.</span>
+<span>#    Hint: Convert typed sales to one parameter tuple per row.</span>
+<span># 6. [Accounting] Track accepted, rejected, submitted, inserted, and updated counts separately</span>
+<span>#    and state what `executemany()` cannot cheaply distinguish.</span>
+<span>#    Hint: Do not infer business outcomes from submitted row count.</span>
+<span># 7. [Extension] Design the Psycopg COPY variant using typed `write_row()` calls and a staging</span>
+<span>#    table instead of hand-built delimited text.</span>
+<span>#    Hint: COPY handles transport; a later set-based statement owns merge semantics.</span>
+<span># 8. [Edge cases] Test NaN, infinities, zero, negatives, whitespace IDs, leading-zero customer</span>
+<span>#    IDs, and invalid dates.</span>
+<span>#    Hint: Classify each rejection at the field boundary and keep its reason safe.</span>
+<span># 9. [Idempotency] Choose a policy for duplicate `source_id` values within one input batch and</span>
+<span>#    test it before database submission.</span>
+<span>#    Hint: Database upsert resolves persisted conflicts but may hide contradictory source rows.</span>
+<span># 10. [Scale design] Compare materializing all accepted rows with a streaming validator and</span>
+<span>#    identify where bounded memory changes APIs.</span>
+<span>#    Hint: A tuple return is convenient for lessons but not for unlimited sources.</span>
+<span># 11. [Capacity] Select batch size from parameter count, row width, memory, and transaction</span>
+<span>#    duration rather than a universal constant.</span>
+<span>#    Hint: Measure the real adapter and keep a safe configurable default.</span>
+<span># 12. [Transaction failure] Specify behavior when `executemany()` fails halfway and identify</span>
+<span>#    which layer owns rollback and retry.</span>
+<span>#    Hint: Submission count is not committed count.</span>
+<span># 13. [Observability] Create a bounded rejection taxonomy and metrics that do not use source IDs</span>
+<span>#    or raw reasons as tags.</span>
+<span>#    Hint: Metric labels must come from a fixed vocabulary.</span>
+<span># 14. [Reconciliation] Design a replay test that loads the same accepted sales twice and</span>
+<span>#    reconciles source IDs and total amount.</span>
+<span>#    Hint: Idempotency is proven by stable final state, not by absence of exceptions.</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    print(&quot;Bridge Day 6 starter loaded; it performs no I/O by default.&quot;)</span>
+<span>    print(&quot;Validate, partition, batch, and load deterministic sales rows.&quot;)</span>
+<span>    print(&quot;Track accepted, rejected, and submitted counts separately.&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/solutions/day06_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day06_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-day-6-solution-notes">Bridge Day 6 — Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-6-solution-notes" aria-label="Link to this section">#</a></h3>
+<p>Work through the <a href="bridge-06.html#learner">learner file</a> before opening <a href="bridge-06.html#solution-2">day06_solution.py</a>.</p>
+<h4 id="solution-1--validation-pipeline">Validation pipeline<a class="heading-anchor" href="#solution-1--validation-pipeline" aria-label="Link to this section">#</a></h4>
+<p><code>parse_sale()</code> validates one raw mapping and produces an immutable <code>Sale</code>. Money stays as <code>Decimal</code>, non-finite or non-positive values fail, and ISO dates become <code>date</code> objects. The two-decimal quantization is an explicit course policy, not an accidental database conversion.</p>
+<p><code>plan_load()</code> catches only <code>RowValidationError</code>. Programmer errors and infrastructure failures still fail the run. Rejections retain source ID and a safe reason, not the entire external row.</p>
+<p><code>batches()</code> returns deterministic tuples and rejects invalid sizes. <code>load_sales()</code> sends a list of parameter tuples to <code>executemany()</code> and targets a temporary PostgreSQL table for the optional live exercise.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>The reference quantization uses the active decimal rounding context. A financial domain should name its rounding mode explicitly and test half-way values.</li>
+<li>Collecting all accepted rows is easy to understand but uses memory proportional to input. A large pipeline can validate an iterator and flush bounded batches.</li>
+<li><code>executemany()</code> is convenient and preserves parameter safety. Psycopg COPY is usually faster for large loads but upsert commonly needs a temporary staging table plus set-based merge.</li>
+<li>The return value is submitted row count, not inserted row count. Conflicts can update existing rows; observability should not label these as inserts.</li>
+<li>Upserting makes restarts converge on a stable state, but overwriting an existing amount may be wrong for append-only audit data. Choose semantics from the source contract.</li>
+</ul>
+<p>Test empty input, invalid batch sizes, invalid numeric forms, <code>NaN</code>, dates, rounding boundaries, remainders, and exact parameter rows.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day06_solution.py</code>; use it only after an honest attempt.</p>
+<p><strong>Shared failure rule:</strong> Bulk speed does not excuse weak validation, unbounded materialization, or diagnostics that copy entire rejected records.</p>
+<h5 id="solution-1--exercise-1-validation">Exercise 1 — Validation<a class="heading-anchor" href="#solution-1--exercise-1-validation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>parse_sale()</code> for non-blank source ID, positive integer customer ID, finite positive amount, and ISO date without mutating input.</p>
+<p><strong>Approach:</strong> Read values into locals, validate every invariant, parse with <code>Decimal</code> and <code>date.fromisoformat</code>, and return a new frozen <code>Sale</code>. Raise <code>RowValidationError</code> with a safe field-level reason.</p>
+<p><strong>Why this boundary matters:</strong> Convert each field explicitly and translate only expected conversion failures.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-2-money">Exercise 2 — Money<a class="heading-anchor" href="#solution-1--exercise-2-money" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Quantize accepted amounts to two decimals and document the chosen rounding rule.</p>
+<p><strong>Approach:</strong> Use <code>Decimal.quantize(Decimal(&#x27;0.01&#x27;), rounding=ROUND_HALF_EVEN)</code> as the reference teaching policy and test boundary values. Another policy is valid only when explicitly required and tested.</p>
+<p><strong>Why this boundary matters:</strong> Quantization is a domain decision, not merely display formatting.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-3-partitioning">Exercise 3 — Partitioning<a class="heading-anchor" href="#solution-1--exercise-3-partitioning" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>partition_rows()</code> so accepted sales and rejected source IDs/reasons retain input order without storing full raw rows.</p>
+<p><strong>Approach:</strong> Iterate once, append parsed sales on success, and append <code>RejectedRow(safe_source_id, reason)</code> on expected validation failure. Do not include the original mapping or unrelated exceptions.</p>
+<p><strong>Why this boundary matters:</strong> Catch only <code>RowValidationError</code> from the conversion boundary.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-4-batching">Exercise 4 — Batching<a class="heading-anchor" href="#solution-1--exercise-4-batching" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>batches()</code> with positive-size validation and tests for empty, exact, and remainder cases.</p>
+<p><strong>Approach:</strong> Raise for <code>size &lt; 1</code>; step over indexes by <code>size</code>; convert each non-empty slice to a tuple. Empty input returns an empty list and input order is unchanged.</p>
+<p><strong>Why this boundary matters:</strong> Slice deterministic tuples from the original sequence.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-5-bulk-sql">Exercise 5 — Bulk SQL<a class="heading-anchor" href="#solution-1--exercise-5-bulk-sql" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement a parameterized <code>executemany()</code> upsert into <code>pg_temp.bridge_sales</code> with no values in SQL text.</p>
+<p><strong>Approach:</strong> Use a static <code>INSERT ... VALUES (%s, ...) ON CONFLICT (source_id) DO UPDATE</code> and pass an iterable of <code>(source_id, customer_id, amount, occurred_on)</code> tuples to <code>executemany</code>.</p>
+<p><strong>Why this boundary matters:</strong> Convert typed sales to one parameter tuple per row.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-6-accounting">Exercise 6 — Accounting<a class="heading-anchor" href="#solution-1--exercise-6-accounting" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Track accepted, rejected, submitted, inserted, and updated counts separately and state what <code>executemany()</code> cannot cheaply distinguish.</p>
+<p><strong>Approach:</strong> Validation provides accepted/rejected/submitted counts. Ordinary <code>executemany</code> does not cheaply classify each upsert as insert versus update; use staging plus set-based comparison/<code>RETURNING</code> if that distinction is required.</p>
+<p><strong>Why this boundary matters:</strong> Do not infer business outcomes from submitted row count.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-7-extension">Exercise 7 — Extension<a class="heading-anchor" href="#solution-1--exercise-7-extension" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design the Psycopg COPY variant using typed <code>write_row()</code> calls and a staging table instead of hand-built delimited text.</p>
+<p><strong>Approach:</strong> Open a COPY context for typed columns, call <code>write_row</code> per validated <code>Sale</code>, then merge staging rows into the target in the same transaction. Never concatenate tab/newline-delimited source strings.</p>
+<p><strong>Why this boundary matters:</strong> COPY handles transport; a later set-based statement owns merge semantics.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-8-edge-cases">Exercise 8 — Edge cases<a class="heading-anchor" href="#solution-1--exercise-8-edge-cases" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Test NaN, infinities, zero, negatives, whitespace IDs, leading-zero customer IDs, and invalid dates.</p>
+<p><strong>Approach:</strong> Reject non-finite or non-positive Decimal values and blank IDs; define whether <code>&#x27;007&#x27;</code> is a valid integer representation; reject invalid calendar dates. None of the full raw inputs should appear in reasons.</p>
+<p><strong>Why this boundary matters:</strong> Classify each rejection at the field boundary and keep its reason safe.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-9-idempotency">Exercise 9 — Idempotency<a class="heading-anchor" href="#solution-1--exercise-9-idempotency" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Choose a policy for duplicate <code>source_id</code> values within one input batch and test it before database submission.</p>
+<p><strong>Approach:</strong> The safer teaching policy rejects duplicate source IDs during planning, because last-write-wins would depend on input order. Track seen IDs and reject before opening the transaction.</p>
+<p><strong>Why this boundary matters:</strong> Database upsert resolves persisted conflicts but may hide contradictory source rows.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-10-scale-design">Exercise 10 — Scale design<a class="heading-anchor" href="#solution-1--exercise-10-scale-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compare materializing all accepted rows with a streaming validator and identify where bounded memory changes APIs.</p>
+<p><strong>Approach:</strong> For large inputs, yield accepted/rejected events or bounded batches from an iterator and aggregate counters incrementally. Preserve source order and avoid keeping raw rows after validation.</p>
+<p><strong>Why this boundary matters:</strong> A tuple return is convenient for lessons but not for unlimited sources.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-11-capacity">Exercise 11 — Capacity<a class="heading-anchor" href="#solution-1--exercise-11-capacity" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Select batch size from parameter count, row width, memory, and transaction duration rather than a universal constant.</p>
+<p><strong>Approach:</strong> Bound rows so parameters and memory remain reasonable, then benchmark throughput/latency. Validate a positive configured size and expose submitted batch counts for tuning.</p>
+<p><strong>Why this boundary matters:</strong> Measure the real adapter and keep a safe configurable default.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-12-transaction-failure">Exercise 12 — Transaction failure<a class="heading-anchor" href="#solution-1--exercise-12-transaction-failure" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Specify behavior when <code>executemany()</code> fails halfway and identify which layer owns rollback and retry.</p>
+<p><strong>Approach:</strong> Let the caller&#x27;s transaction boundary roll back the entire batch and classify the exception there. Retry the same stable source IDs in a fresh transaction; never report partial rows as committed without database evidence.</p>
+<p><strong>Why this boundary matters:</strong> Submission count is not committed count.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-13-observability">Exercise 13 — Observability<a class="heading-anchor" href="#solution-1--exercise-13-observability" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Create a bounded rejection taxonomy and metrics that do not use source IDs or raw reasons as tags.</p>
+<p><strong>Approach:</strong> Map failures to codes such as <code>missing_source_id</code>, <code>invalid_customer_id</code>, <code>invalid_amount</code>, and <code>invalid_date</code>; count by code while retaining minimal per-row diagnostics in a protected bounded sink.</p>
+<p><strong>Why this boundary matters:</strong> Metric labels must come from a fixed vocabulary.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-14-reconciliation">Exercise 14 — Reconciliation<a class="heading-anchor" href="#solution-1--exercise-14-reconciliation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design a replay test that loads the same accepted sales twice and reconciles source IDs and total amount.</p>
+<p><strong>Approach:</strong> After two upserts, query one row per source ID and compare exact counts/sums with the deduplicated accepted plan. The second run may update but must not duplicate logical rows.</p>
+<p><strong>Why this boundary matters:</strong> Idempotency is proven by stable final state, not by absence of exceptions.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/solutions/day06_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day06_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Day 6 reference: deterministic validation, batching, and parameterized loading.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Iterable, Mapping, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from datetime import date</span>
+<span>from decimal import Decimal, InvalidOperation</span>
+<span>from typing import Protocol, TypeVar</span>
+<span> </span>
+<span>T = TypeVar(&quot;T&quot;)</span>
+<span> </span>
+<span> </span>
+<span>class RowValidationError(ValueError):</span>
+<span>    &quot;&quot;&quot;One input row failed the course contract.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Sale:</span>
+<span>    source_id: str</span>
+<span>    customer_id: int</span>
+<span>    amount: Decimal</span>
+<span>    occurred_on: date</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class RejectedRow:</span>
+<span>    source_id: str</span>
+<span>    reason: str</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class LoadPlan:</span>
+<span>    accepted: tuple[Sale, ...]</span>
+<span>    rejected: tuple[RejectedRow, ...]</span>
+<span> </span>
+<span> </span>
+<span>class BulkCursor(Protocol):</span>
+<span>    def executemany(</span>
+<span>        self,</span>
+<span>        query: object,</span>
+<span>        params_seq: Iterable[Sequence[object]],</span>
+<span>    ) -&gt; object: ...</span>
+<span> </span>
+<span> </span>
+<span>UPSERT_SALES_SQL = &quot;&quot;&quot;</span>
+<span>INSERT INTO pg_temp.bridge_sales (source_id, customer_id, amount, occurred_on)</span>
+<span>VALUES (%s, %s, %s, %s)</span>
+<span>ON CONFLICT (source_id) DO UPDATE</span>
+<span>SET customer_id = EXCLUDED.customer_id,</span>
+<span>    amount = EXCLUDED.amount,</span>
+<span>    occurred_on = EXCLUDED.occurred_on</span>
+<span>&quot;&quot;&quot;.strip()</span>
+<span> </span>
+<span> </span>
+<span>def parse_sale(raw: Mapping[str, str]) -&gt; Sale:</span>
+<span>    &quot;&quot;&quot;Validate and convert one external row without mutating it.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    source_id = raw.get(&quot;source_id&quot;, &quot;&quot;).strip()</span>
+<span>    if not source_id or len(source_id) &gt; 64:</span>
+<span>        raise RowValidationError(&quot;source_id must contain 1 to 64 characters&quot;)</span>
+<span> </span>
+<span>    try:</span>
+<span>        customer_id = int(raw.get(&quot;customer_id&quot;, &quot;&quot;))</span>
+<span>    except ValueError as exc:</span>
+<span>        raise RowValidationError(&quot;customer_id must be an integer&quot;) from exc</span>
+<span>    if customer_id &lt; 1:</span>
+<span>        raise RowValidationError(&quot;customer_id must be positive&quot;)</span>
+<span> </span>
+<span>    try:</span>
+<span>        amount = Decimal(raw.get(&quot;amount&quot;, &quot;&quot;))</span>
+<span>    except InvalidOperation as exc:</span>
+<span>        raise RowValidationError(&quot;amount must be a decimal number&quot;) from exc</span>
+<span>    if not amount.is_finite() or amount &lt;= 0:</span>
+<span>        raise RowValidationError(&quot;amount must be finite and positive&quot;)</span>
+<span>    amount = amount.quantize(Decimal(&quot;0.01&quot;))</span>
+<span> </span>
+<span>    try:</span>
+<span>        occurred_on = date.fromisoformat(raw.get(&quot;occurred_on&quot;, &quot;&quot;))</span>
+<span>    except ValueError as exc:</span>
+<span>        raise RowValidationError(&quot;occurred_on must use YYYY-MM-DD&quot;) from exc</span>
+<span> </span>
+<span>    return Sale(source_id, customer_id, amount, occurred_on)</span>
+<span> </span>
+<span> </span>
+<span>def plan_load(rows: Iterable[Mapping[str, str]]) -&gt; LoadPlan:</span>
+<span>    &quot;&quot;&quot;Partition rows into accepted records and minimal rejection diagnostics.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    accepted: list[Sale] = []</span>
+<span>    rejected: list[RejectedRow] = []</span>
+<span>    for raw in rows:</span>
+<span>        try:</span>
+<span>            accepted.append(parse_sale(raw))</span>
+<span>        except RowValidationError as exc:</span>
+<span>            rejected.append(</span>
+<span>                RejectedRow(</span>
+<span>                    source_id=raw.get(&quot;source_id&quot;, &quot;&lt;missing&gt;&quot;) or &quot;&lt;missing&gt;&quot;,</span>
+<span>                    reason=str(exc),</span>
+<span>                )</span>
+<span>            )</span>
+<span>    return LoadPlan(tuple(accepted), tuple(rejected))</span>
+<span> </span>
+<span> </span>
+<span>def batches(items: Sequence[T], size: int) -&gt; list[tuple[T, ...]]:</span>
+<span>    &quot;&quot;&quot;Split a finite sequence into deterministic, non-empty batches.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if size &lt; 1:</span>
+<span>        raise ValueError(&quot;batch size must be at least 1&quot;)</span>
+<span>    return [tuple(items[start : start + size]) for start in range(0, len(items), size)]</span>
+<span> </span>
+<span> </span>
+<span>def load_sales(cursor: BulkCursor, sales: Sequence[Sale]) -&gt; int:</span>
+<span>    &quot;&quot;&quot;Submit validated sales with parameters separate from SQL text.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if not sales:</span>
+<span>        return 0</span>
+<span>    parameters = [</span>
+<span>        (sale.source_id, sale.customer_id, sale.amount, sale.occurred_on) for sale in sales</span>
+<span>    ]</span>
+<span>    cursor.executemany(UPSERT_SALES_SQL, parameters)</span>
+<span>    return len(parameters)</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="bridge-05.html"><small>Previous lesson</small><strong>bridge-05</strong><span>DB Testing Fixtures Doubles</span></a>
+        <a class="nav-card next" href="bridge-07.html"><small>Next lesson</small><strong>bridge-07</strong><span>Async Bounded Concurrency</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-06";
+    const LEARNER_PATH = "bridge/lessons/day06_bulk_etl_validation.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

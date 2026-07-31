@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-found-01 · Relational Design, DDL, and Integrity Constraints · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-found-01</p>
+        <h1>Relational Design, DDL, and Integrity Constraints</h1>
+        <p class="hero-copy">Relational foundations</p>
+        <div class="meta">
+          <span class="tag">foundation</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><span class="tag">None</span></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_found_01_relational_design.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_found_01_relational_design.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_found_01_relational_design.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--sql-found-01-relational-design-ddl-and-integrity-constraints">SQL-FOUND-01 — Relational Design, DDL, and Integrity Constraints<a class="heading-anchor" href="#guide--sql-found-01-relational-design-ddl-and-integrity-constraints" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Foundation</li>
+<li><strong>Catalog prerequisites:</strong> none</li>
+<li><strong>Prerequisites:</strong> PostgreSQL setup and comfort running a <code>.sql</code> file with <code>psql</code>; no earlier SQL lesson is required.</li>
+<li><strong>Artifacts:</strong> <a href="sql-found-01.html#learner">learner SQL</a> · <a href="sql-found-01.html#solution-1">solution reasoning</a> · <a href="sql-found-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run this portable command from the repository root in Windows PowerShell, macOS, or Linux:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_01_relational_design.sql</code></pre>
+<p>The file creates <code>pro_relational_lab</code> inside a transaction and rolls it back. Expected constraint failures are caught as notices; any unexpected error still stops the script.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>State a table&#x27;s grain, map one-to-one and one-to-many requirements to keys, and create a normalized schema.</li>
+<li>Choose database constraints for durable invariants and explain one deliberate denormalization.</li>
+<li>Predict and observe safe <code>NOT NULL</code>, <code>CHECK</code>, <code>UNIQUE</code>, primary-key, and foreign-key failures.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Grain:</strong> exactly what one row represents. State it before naming columns.</li>
+<li><strong>Cardinality:</strong> how many rows on one side may relate to rows on another side, such as one category to many physical items.</li>
+<li><strong>Natural key:</strong> a meaningful value from the domain, such as an asset tag.</li>
+<li><strong>Surrogate key:</strong> a generated identifier with no domain meaning.</li>
+<li><strong>Primary key:</strong> the chosen unique, non-null identity for a row.</li>
+<li><strong>Foreign key:</strong> a reference whose value must identify an allowed parent row.</li>
+<li><strong>Invariant:</strong> a rule that must remain true for every valid database state.</li>
+<li><strong>Identity column:</strong> a PostgreSQL-managed sequence value declared with <code>GENERATED ... AS IDENTITY</code>.</li>
+<li><strong>Generated column:</strong> a stored value calculated from other columns in the same row; its expression must be immutable.</li>
+<li><strong>Normalization:</strong> separating facts so each is stored at the appropriate grain and accidental update contradictions are reduced.</li>
+<li><strong>Deliberate denormalization:</strong> intentionally copying or deriving a value for a stated historical, performance, or availability reason, with an explicit consistency rule.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>The example begins with four requirements and turns each into a grain:</p>
+<ol>
+<li>A member is one person who may borrow equipment.</li>
+<li>A category is one reusable classification.</li>
+<li>An equipment item is one physical asset and belongs to one category.</li>
+<li>A loan is one checkout of one item to one member.</li>
+</ol>
+<p><code>members.member_id</code>, <code>equipment_items.item_id</code>, and <code>loans.loan_id</code> are identity primary keys. Meaningful identifiers such as <code>email</code> and <code>asset_tag</code> also receive <code>UNIQUE</code> constraints. The item and member identifiers in <code>loans</code> are foreign keys, so an application bug cannot create an orphan checkout.</p>
+<p>Constraints express the smallest durable rule:</p>
+<ul>
+<li><code>NOT NULL</code> says absence is invalid.</li>
+<li><code>CHECK</code> limits values or relationships within a row.</li>
+<li><code>UNIQUE</code> prevents duplicate keys.</li>
+<li><code>PRIMARY KEY</code> supplies row identity.</li>
+<li><code>FOREIGN KEY</code> protects a relationship between tables.</li>
+<li><code>DEFAULT</code> supplies a value only when the insert omits that column.</li>
+</ul>
+<p>An ordinary PostgreSQL <code>UNIQUE</code> constraint allows multiple NULL values. NULL means “unknown,” and unknown is not equal to unknown. PostgreSQL 15 and newer also support <code>UNIQUE NULLS NOT DISTINCT</code> when the requirement says that at most one unknown value is allowed.</p>
+<p>The loan stores <code>daily_fee_at_checkout</code> even though the current item has <code>daily_fee</code>. That is deliberate denormalization: the snapshot answers “what fee was quoted then?” after the catalog fee changes. By contrast, copying the category display name into every item would create a needless update anomaly.</p>
+<p>The learner script catches expected exceptions inside small anonymous blocks. The wrapper is only test scaffolding: the important event is PostgreSQL rejecting the invalid statement while the outer transaction remains usable.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete all eight prompts at the bottom of the learner SQL. Begin by designing <code>maintenance_visits</code> from prose, load a valid row, prove an invalid cost is rejected, investigate NULL uniqueness, and justify whether the checkout fee snapshot is deliberate denormalization; then continue through normalization, outer joins, deletion policy, and catalog contracts. Keep your DDL inside the existing transaction so a rerun begins cleanly.</p>
+<p>Before typing, write the proposed grain and cardinality in comments. For every constraint, complete the sentence: “This belongs in the database because without it, ___ could become false regardless of which application wrote the row.”</p>
+<p>Work through these in order; each item names the evidence to leave in your scratch SQL:</p>
+<ol>
+<li><strong>Maintenance DDL:</strong> translate every visit requirement into a column, constraint, key, default, or generated expression; annotate the table grain.</li>
+<li><strong>Negative cost:</strong> insert one valid visit, isolate the rejected insert in a nested block, and verify the expected SQLSTATE category.</li>
+<li><strong>NULL uniqueness:</strong> insert two NULL references, explain the observed rule, and write—but do not blindly apply—the stricter PostgreSQL 15+ alternative.</li>
+<li><strong>Historical fee:</strong> state the invariant, the historical question, and why the checkout snapshot is or is not deliberate denormalization.</li>
+<li><strong>Many-to-many work:</strong> model providers, technicians, and assignments with one declared grain and key per relation; do not use delimited text.</li>
+<li><strong>Outer-join report:</strong> retain never-borrowed equipment, make date ties deterministic, and test the result with an item that has no loan.</li>
+<li><strong>Deletion policy:</strong> choose and defend one referential action for each named relationship, including what happens to historical records.</li>
+<li><strong>Contract introspection:</strong> prove key, check, generated-value, and uniqueness properties from catalogs without depending on generated object names.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can you say what one row means for all five tables without using a vague word such as “data”?</li>
+<li>Does every foreign key point from the many side to a declared parent key?</li>
+<li>Can valid absence still use NULL without a fake empty string or zero?</li>
+<li>Do invalid dates, negative costs, duplicates, and orphan identifiers fail at the database boundary?</li>
+<li>Can you distinguish a current catalog value from a historical snapshot?</li>
+<li>Does the final <code>ROLLBACK</code> leave no <code>pro_relational_lab</code> schema behind?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Starting with columns before defining grain often creates mixed-grain tables.</li>
+<li>A surrogate primary key does not make a meaningful duplicate valid; add the natural <code>UNIQUE</code> rule when the domain requires it.</li>
+<li><code>CHECK (value &gt; 0)</code> permits NULL unless the column is also <code>NOT NULL</code>.</li>
+<li><code>DEFAULT</code> does not replace an explicitly supplied NULL.</li>
+<li>Foreign keys do not automatically create an index on the referencing column.</li>
+<li>Money-like examples use fixed-scale <code>numeric</code>, not binary floating point.</li>
+<li>Generated columns are not a place for volatile values such as “today.”</li>
+<li>Normalization is a reasoning tool, not a command to split every table.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-found-02.html#guide">SQL-FOUND-02 — versioned schema migrations</a> to evolve a schema without rewriting deployment history. Then begin the <a href="../reference-pages/sql/postgres-60day/README.md.html">numbered SQL track</a> and query a larger supplied model.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_found_01_relational_design.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_found_01_relational_design.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-FOUND-01: Relational design, DDL, and integrity constraints</span>
+<span>-- Target: PostgreSQL 16+</span>
+<span>--</span>
+<span>-- This learner file is safe to run with:</span>
+<span>-- psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \</span>
+<span>--   -f sql/professional/lessons/sql_found_01_relational_design.sql</span>
+<span>--</span>
+<span>-- Every object is created inside a transaction and removed by ROLLBACK.</span>
+<span> </span>
+<span>\echo &#x27;SQL-FOUND-01: building a disposable equipment-lending model&#x27;</span>
+<span> </span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span> </span>
+<span>CREATE SCHEMA pro_relational_lab;</span>
+<span> </span>
+<span>-- Requirement: one row represents one person who can borrow equipment.</span>
+<span>-- The row grain is &quot;one member&quot;, and member_id is its surrogate key.</span>
+<span>CREATE TABLE pro_relational_lab.members (</span>
+<span>    member_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    display_name text NOT NULL</span>
+<span>        CHECK (btrim(display_name) &lt;&gt; &#x27;&#x27;),</span>
+<span>    email text NOT NULL UNIQUE,</span>
+<span>    backup_contact text UNIQUE,</span>
+<span>    joined_on date NOT NULL DEFAULT CURRENT_DATE</span>
+<span>);</span>
+<span> </span>
+<span>-- Requirement: one row represents one reusable category, not one physical item.</span>
+<span>CREATE TABLE pro_relational_lab.equipment_categories (</span>
+<span>    category_code text PRIMARY KEY,</span>
+<span>    display_name text NOT NULL UNIQUE,</span>
+<span>    standard_loan_days integer NOT NULL</span>
+<span>        CHECK (standard_loan_days BETWEEN 1 AND 90)</span>
+<span>);</span>
+<span> </span>
+<span>-- Requirement: one row represents one physical item.</span>
+<span>-- The foreign key encodes many items belonging to one category.</span>
+<span>CREATE TABLE pro_relational_lab.equipment_items (</span>
+<span>    item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    asset_tag text NOT NULL UNIQUE,</span>
+<span>    category_code text NOT NULL</span>
+<span>        REFERENCES pro_relational_lab.equipment_categories (category_code)</span>
+<span>        ON UPDATE CASCADE</span>
+<span>        ON DELETE RESTRICT,</span>
+<span>    description text NOT NULL</span>
+<span>        CHECK (btrim(description) &lt;&gt; &#x27;&#x27;),</span>
+<span>    replacement_cost numeric(10, 2) NOT NULL</span>
+<span>        CHECK (replacement_cost &gt;= 0),</span>
+<span>    daily_fee numeric(8, 2) NOT NULL DEFAULT 0</span>
+<span>        CHECK (daily_fee &gt;= 0),</span>
+<span>    item_condition text NOT NULL DEFAULT &#x27;ready&#x27;</span>
+<span>        CHECK (item_condition IN (&#x27;ready&#x27;, &#x27;on_loan&#x27;, &#x27;maintenance&#x27;, &#x27;retired&#x27;)),</span>
+<span>    catalog_label text GENERATED ALWAYS AS</span>
+<span>        (asset_tag || &#x27; - &#x27; || description) STORED</span>
+<span>);</span>
+<span> </span>
+<span>-- Requirement: one row represents one checkout of one item to one member.</span>
+<span>-- A member can have many loans; an item can appear in many historical loans.</span>
+<span>CREATE TABLE pro_relational_lab.loans (</span>
+<span>    loan_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    item_id bigint NOT NULL</span>
+<span>        REFERENCES pro_relational_lab.equipment_items (item_id)</span>
+<span>        ON DELETE RESTRICT,</span>
+<span>    member_id bigint NOT NULL</span>
+<span>        REFERENCES pro_relational_lab.members (member_id)</span>
+<span>        ON DELETE RESTRICT,</span>
+<span>    checked_out_on date NOT NULL DEFAULT CURRENT_DATE,</span>
+<span>    due_on date NOT NULL,</span>
+<span>    returned_on date,</span>
+<span>    -- This deliberate snapshot preserves the fee quoted for this checkout even</span>
+<span>    -- if the item&#x27;s current fee changes later.</span>
+<span>    daily_fee_at_checkout numeric(8, 2) NOT NULL</span>
+<span>        CHECK (daily_fee_at_checkout &gt;= 0),</span>
+<span>    planned_days integer GENERATED ALWAYS AS</span>
+<span>        (due_on - checked_out_on) STORED,</span>
+<span>    notes text,</span>
+<span>    CONSTRAINT loans_due_after_checkout_ck</span>
+<span>        CHECK (due_on &gt;= checked_out_on),</span>
+<span>    CONSTRAINT loans_return_after_checkout_ck</span>
+<span>        CHECK (returned_on IS NULL OR returned_on &gt;= checked_out_on),</span>
+<span>    CONSTRAINT loans_item_checkout_uk</span>
+<span>        UNIQUE (item_id, checked_out_on)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_relational_lab.equipment_categories</span>
+<span>    (category_code, display_name, standard_loan_days)</span>
+<span>VALUES</span>
+<span>    (&#x27;AUDIO&#x27;, &#x27;Audio equipment&#x27;, 7),</span>
+<span>    (&#x27;TOOL&#x27;, &#x27;Hand tools&#x27;, 14);</span>
+<span> </span>
+<span>-- PostgreSQL&#x27;s ordinary UNIQUE constraint permits multiple NULL values because</span>
+<span>-- NULL means &quot;unknown&quot;, and two unknowns are not considered equal.</span>
+<span>INSERT INTO pro_relational_lab.members</span>
+<span>    (display_name, email, backup_contact, joined_on)</span>
+<span>VALUES</span>
+<span>    (&#x27;Avery Chen&#x27;, &#x27;avery@example.test&#x27;, NULL, DATE &#x27;2026-01-10&#x27;),</span>
+<span>    (&#x27;Morgan Diaz&#x27;, &#x27;morgan@example.test&#x27;, NULL, DATE &#x27;2026-01-12&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_relational_lab.equipment_items</span>
+<span>    (asset_tag, category_code, description, replacement_cost, daily_fee)</span>
+<span>VALUES</span>
+<span>    (&#x27;AUD-001&#x27;, &#x27;AUDIO&#x27;, &#x27;Portable recorder&#x27;, 180.00, 3.50),</span>
+<span>    (&#x27;TOL-001&#x27;, &#x27;TOOL&#x27;, &#x27;Torque wrench&#x27;, 95.00, 2.00);</span>
+<span> </span>
+<span>INSERT INTO pro_relational_lab.loans</span>
+<span>    (item_id, member_id, checked_out_on, due_on, daily_fee_at_checkout, notes)</span>
+<span>SELECT</span>
+<span>    i.item_id,</span>
+<span>    m.member_id,</span>
+<span>    DATE &#x27;2026-02-01&#x27;,</span>
+<span>    DATE &#x27;2026-02-08&#x27;,</span>
+<span>    i.daily_fee,</span>
+<span>    &#x27;Worked example&#x27;</span>
+<span>FROM pro_relational_lab.equipment_items AS i</span>
+<span>JOIN pro_relational_lab.members AS m</span>
+<span>  ON m.email = &#x27;avery@example.test&#x27;</span>
+<span>WHERE i.asset_tag = &#x27;AUD-001&#x27;;</span>
+<span> </span>
+<span>\echo &#x27;A normalized join reconstructs a useful loan description&#x27;</span>
+<span>SELECT</span>
+<span>    l.loan_id,</span>
+<span>    m.display_name AS borrower,</span>
+<span>    i.catalog_label,</span>
+<span>    c.display_name AS category,</span>
+<span>    l.checked_out_on,</span>
+<span>    l.due_on,</span>
+<span>    l.planned_days,</span>
+<span>    l.daily_fee_at_checkout</span>
+<span>FROM pro_relational_lab.loans AS l</span>
+<span>JOIN pro_relational_lab.members AS m</span>
+<span>  ON m.member_id = l.member_id</span>
+<span>JOIN pro_relational_lab.equipment_items AS i</span>
+<span>  ON i.item_id = l.item_id</span>
+<span>JOIN pro_relational_lab.equipment_categories AS c</span>
+<span>  ON c.category_code = i.category_code</span>
+<span>ORDER BY l.loan_id;</span>
+<span> </span>
+<span>\echo &#x27;Multiple NULL backup contacts are valid under ordinary UNIQUE semantics&#x27;</span>
+<span>SELECT</span>
+<span>    COUNT(*) FILTER (WHERE m.backup_contact IS NULL) AS null_backup_contacts,</span>
+<span>    COUNT(DISTINCT m.backup_contact) AS distinct_nonnull_backup_contacts</span>
+<span>FROM pro_relational_lab.members AS m;</span>
+<span> </span>
+<span>\echo &#x27;The loan fee snapshot does not change when the current catalog fee changes&#x27;</span>
+<span>UPDATE pro_relational_lab.equipment_items AS i</span>
+<span>SET daily_fee = 4.25</span>
+<span>WHERE i.asset_tag = &#x27;AUD-001&#x27;;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    i.daily_fee AS current_daily_fee,</span>
+<span>    l.daily_fee_at_checkout AS quoted_daily_fee</span>
+<span>FROM pro_relational_lab.loans AS l</span>
+<span>JOIN pro_relational_lab.equipment_items AS i</span>
+<span>  ON i.item_id = l.item_id</span>
+<span>WHERE i.asset_tag = &#x27;AUD-001&#x27;</span>
+<span>ORDER BY l.loan_id;</span>
+<span> </span>
+<span>-- These anonymous blocks catch an expected constraint exception. If an invalid</span>
+<span>-- row unexpectedly succeeds, the explicit RAISE makes the lesson fail.</span>
+<span>\echo &#x27;Expected failure: duplicate email violates UNIQUE&#x27;</span>
+<span>DO $lesson$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_relational_lab.members (display_name, email)</span>
+<span>        VALUES (&#x27;Duplicate Example&#x27;, &#x27;avery@example.test&#x27;);</span>
+<span>        RAISE EXCEPTION &#x27;duplicate email unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN unique_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected UNIQUE failure: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$lesson$;</span>
+<span> </span>
+<span>\echo &#x27;Expected failure: due date before checkout violates CHECK&#x27;</span>
+<span>DO $lesson$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_relational_lab.loans (</span>
+<span>            item_id,</span>
+<span>            member_id,</span>
+<span>            checked_out_on,</span>
+<span>            due_on,</span>
+<span>            daily_fee_at_checkout</span>
+<span>        )</span>
+<span>        SELECT</span>
+<span>            i.item_id,</span>
+<span>            m.member_id,</span>
+<span>            DATE &#x27;2026-03-10&#x27;,</span>
+<span>            DATE &#x27;2026-03-09&#x27;,</span>
+<span>            2.00</span>
+<span>        FROM pro_relational_lab.equipment_items AS i</span>
+<span>        CROSS JOIN pro_relational_lab.members AS m</span>
+<span>        WHERE i.asset_tag = &#x27;TOL-001&#x27;</span>
+<span>          AND m.email = &#x27;morgan@example.test&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;invalid date range unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected CHECK failure: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$lesson$;</span>
+<span> </span>
+<span>\echo &#x27;Expected failure: nonexistent member violates the foreign key&#x27;</span>
+<span>DO $lesson$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_relational_lab.loans (</span>
+<span>            item_id,</span>
+<span>            member_id,</span>
+<span>            checked_out_on,</span>
+<span>            due_on,</span>
+<span>            daily_fee_at_checkout</span>
+<span>        )</span>
+<span>        SELECT</span>
+<span>            i.item_id,</span>
+<span>            999999,</span>
+<span>            DATE &#x27;2026-03-10&#x27;,</span>
+<span>            DATE &#x27;2026-03-12&#x27;,</span>
+<span>            2.00</span>
+<span>        FROM pro_relational_lab.equipment_items AS i</span>
+<span>        WHERE i.asset_tag = &#x27;TOL-001&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;orphan loan unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN foreign_key_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected FOREIGN KEY failure: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$lesson$;</span>
+<span> </span>
+<span>-- Exercises (leave your answers below each prompt or in a scratch copy).</span>
+<span>--</span>
+<span>-- 1. Translate these requirements into a maintenance_visits table:</span>
+<span>--    * one row per visit for one equipment item;</span>
+<span>--    * an identity primary key and a foreign key to equipment_items;</span>
+<span>--    * opened_on defaults to the current date;</span>
+<span>--    * provider_name and service_note cannot be blank;</span>
+<span>--    * cost cannot be negative;</span>
+<span>--    * completed_on is NULL while open, otherwise it cannot precede opened_on;</span>
+<span>--    * external_reference is unique when supplied, but may be NULL;</span>
+<span>--    * service_days is a stored generated value.</span>
+<span>--</span>
+<span>-- 2. Insert one valid visit, then safely prove that a negative cost is rejected.</span>
+<span>--</span>
+<span>-- 3. Insert two visits whose external_reference is NULL. Explain why an ordinary</span>
+<span>--    UNIQUE constraint permits them. What PostgreSQL 15+ syntax would you choose</span>
+<span>--    if NULL had to behave like a duplicate?</span>
+<span>--</span>
+<span>-- 4. Classify daily_fee_at_checkout as normalized duplication, an accidental</span>
+<span>--    inconsistency, or deliberate denormalization. State the invariant and the</span>
+<span>--    historical question that justify your choice.</span>
+<span>--</span>
+<span>-- 5. A provider can perform many visits and a visit can involve several</span>
+<span>--    technicians. Model providers, technicians, and visit assignments without</span>
+<span>--    storing comma-separated names. State the grain and keys of every table.</span>
+<span>--</span>
+<span>-- 6. Write a query that reports every equipment item, including items with no</span>
+<span>--    loans, plus its loan count and latest checkout date. Explain why filtering</span>
+<span>--    the loan table in WHERE can accidentally turn the LEFT JOIN into an inner</span>
+<span>--    join, and make ties deterministic.</span>
+<span>--</span>
+<span>-- 7. Choose ON DELETE behavior for category -&gt; equipment, equipment -&gt; loans,</span>
+<span>--    and equipment -&gt; maintenance_visits. Defend each RESTRICT, CASCADE, or</span>
+<span>--    SET NULL decision in terms of historical truth rather than convenience.</span>
+<span>--</span>
+<span>-- 8. Write catalog queries that prove the maintenance_visits primary key,</span>
+<span>--    foreign key, checks, generated column, and NULL-aware uniqueness contract.</span>
+<span>--    Do not depend on PostgreSQL-generated constraint names.</span>
+<span> </span>
+<span>\echo &#x27;Self-check: the worked model has the expected deterministic row counts&#x27;</span>
+<span>DO $lesson$</span>
+<span>DECLARE</span>
+<span>    member_count integer;</span>
+<span>    item_count integer;</span>
+<span>    loan_count integer;</span>
+<span>BEGIN</span>
+<span>    SELECT COUNT(*) INTO member_count</span>
+<span>    FROM pro_relational_lab.members;</span>
+<span>    SELECT COUNT(*) INTO item_count</span>
+<span>    FROM pro_relational_lab.equipment_items;</span>
+<span>    SELECT COUNT(*) INTO loan_count</span>
+<span>    FROM pro_relational_lab.loans;</span>
+<span> </span>
+<span>    IF member_count &lt;&gt; 2 OR item_count &lt;&gt; 2 OR loan_count &lt;&gt; 1 THEN</span>
+<span>        RAISE EXCEPTION</span>
+<span>            &#x27;unexpected counts: members %, items %, loans %&#x27;,</span>
+<span>            member_count,</span>
+<span>            item_count,</span>
+<span>            loan_count;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$lesson$;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span>\echo &#x27;SQL-FOUND-01 complete: pro_relational_lab was rolled back&#x27;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_found_01_relational_design_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_found_01_relational_design_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-found-01-solutions-relational-design">SQL-FOUND-01 Solutions — Relational Design<a class="heading-anchor" href="#solution-1--sql-found-01-solutions-relational-design" aria-label="Link to this section">#</a></h3>
+<p>Run the complete disposable solution with:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_found_01_relational_design_solutions.sql</code></pre>
+<p>It creates <code>pro_relational_lab</code> inside a transaction and rolls it back.</p>
+<h4 id="solution-1--exercise-1-translate-requirements-into-ddl">Exercise 1 — Translate requirements into DDL<a class="heading-anchor" href="#solution-1--exercise-1-translate-requirements-into-ddl" aria-label="Link to this section">#</a></h4>
+<p>The grain is <strong>one maintenance visit for one physical equipment item</strong>. An item can have many visits, while each visit names exactly one item, so the foreign key belongs on <code>maintenance_visits</code>.</p>
+<p>The executable solution uses an identity primary key for internal row identity and keeps <code>external_reference</code> as a nullable natural identifier:</p>
+<pre><code class="language-sql">CREATE TABLE pro_relational_lab.maintenance_visits (
+    visit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    item_id bigint NOT NULL
+        REFERENCES pro_relational_lab.equipment_items (item_id)
+        ON DELETE RESTRICT,
+    opened_on date NOT NULL DEFAULT CURRENT_DATE,
+    completed_on date,
+    provider_name text NOT NULL CHECK (btrim(provider_name) &lt;&gt; &#x27;&#x27;),
+    service_note text NOT NULL CHECK (btrim(service_note) &lt;&gt; &#x27;&#x27;),
+    cost numeric(10, 2) NOT NULL DEFAULT 0 CHECK (cost &gt;= 0),
+    external_reference text UNIQUE,
+    service_days integer GENERATED ALWAYS AS
+        (COALESCE(completed_on, opened_on) - opened_on) STORED,
+    CONSTRAINT maintenance_completion_order_ck
+        CHECK (completed_on IS NULL OR completed_on &gt;= opened_on)
+);</code></pre>
+<p><code>service_days</code> is zero while a visit is open. Another valid design would leave it NULL until completion by using <code>completed_on - opened_on</code> without <code>COALESCE</code>. That is a product-semantic choice, not merely a syntax choice.</p>
+<h4 id="solution-1--exercise-2-prove-an-invalid-cost-is-rejected">Exercise 2 — Prove an invalid cost is rejected<a class="heading-anchor" href="#solution-1--exercise-2-prove-an-invalid-cost-is-rejected" aria-label="Link to this section">#</a></h4>
+<p>The solution inserts one valid completed visit, then attempts a negative cost inside an exception-catching test block. Catching <code>check_violation</code> keeps the outer transaction healthy. The block deliberately raises an unexpected exception if the insert ever succeeds, so weakening or removing the constraint causes the test to fail.</p>
+<p>An application should still validate cost early for a helpful user experience, but the database constraint is the final invariant because every writer—not only that application—must obey it.</p>
+<h4 id="solution-1--exercise-3-null-uniqueness">Exercise 3 — NULL uniqueness<a class="heading-anchor" href="#solution-1--exercise-3-null-uniqueness" aria-label="Link to this section">#</a></h4>
+<p>Two rows with <code>external_reference IS NULL</code> succeed under an ordinary <code>UNIQUE</code> constraint. The database does not infer that the two unknown references are the same reference.</p>
+<p>If the rule were “at most one row may have no external reference,” PostgreSQL 15+ supports:</p>
+<pre><code class="language-sql">UNIQUE NULLS NOT DISTINCT (external_reference)</code></pre>
+<p>That is uncommon for external identifiers. Usually many visits legitimately lack a provider reference, while every supplied non-NULL reference must be unique.</p>
+<h4 id="solution-1--exercise-4-deliberate-denormalization">Exercise 4 — Deliberate denormalization<a class="heading-anchor" href="#solution-1--exercise-4-deliberate-denormalization" aria-label="Link to this section">#</a></h4>
+<p><code>daily_fee_at_checkout</code> is deliberate denormalization. The normalized current fee belongs to the equipment item, but a historical loan must preserve the fee quoted when the checkout occurred. The invariant is:</p>
+<blockquote><p>Once a checkout is accepted, its quoted fee changes only through an explicit correction workflow; later catalog-price changes do not rewrite history.</p></blockquote>
+<p>This snapshot answers historical billing questions reliably. Copying a category&#x27;s display name into each equipment row would not provide that benefit and would create an update anomaly when the category is renamed.</p>
+<h4 id="solution-1--exercise-5-providers-technicians-and-assignments">Exercise 5 — Providers, technicians, and assignments<a class="heading-anchor" href="#solution-1--exercise-5-providers-technicians-and-assignments" aria-label="Link to this section">#</a></h4>
+<p>Use one row per provider, one row per technician, and one row per visit/technician assignment. A provider-to-technician relationship may be modeled separately if employment changes independently of a visit. The assignment table needs a composite key such as <code>(visit_id, technician_id)</code> (or an identity plus that unique constraint) so the same technician cannot be silently assigned twice.</p>
+<p>Delimited names fail because the database cannot enforce a technician foreign key, distinguish a comma inside a name, or update/query one participant without parsing text. The executable solution creates normalized tables and demonstrates the join at one row per visit/technician assignment.</p>
+<h4 id="solution-1--exercise-6-preserve-equipment-with-no-loans">Exercise 6 — Preserve equipment with no loans<a class="heading-anchor" href="#solution-1--exercise-6-preserve-equipment-with-no-loans" aria-label="Link to this section">#</a></h4>
+<p>Start from <code>equipment_items</code>, LEFT JOIN <code>loans</code>, and aggregate by item. Put a loan-side time filter in the <code>ON</code> clause when equipment with no qualifying loan must remain. The latest date is <code>max(checked_out_on)</code> and count should use a non-NULL loan key, not <code>count(*)</code>, which counts the preserved outer row.</p>
+<p>If the report also needs columns from the latest loan, rank loans by <code>checked_out_on DESC, loan_id DESC</code> before joining. The identity is the stated tie-break; a date alone does not impose a total order.</p>
+<h4 id="solution-1--exercise-7-referential-deletion-policy">Exercise 7 — Referential deletion policy<a class="heading-anchor" href="#solution-1--exercise-7-referential-deletion-policy" aria-label="Link to this section">#</a></h4>
+<p><code>category -&gt; equipment</code> and <code>equipment -&gt; loans</code> should normally RESTRICT physical deletion because silently deleting assets or historical checkouts destroys facts. <code>equipment -&gt; maintenance_visits</code> should also RESTRICT under the same audit requirement. Retire a category/item with status or effective dates.</p>
+<p>CASCADE is appropriate for components that have no meaning outside their parent, not merely because cleanup is easy. <code>SET NULL</code> is valid only when the child remains truthful without its parent and the column is deliberately nullable. Every choice is a domain rule and requires a deletion test.</p>
+<h4 id="solution-1--exercise-8-catalog-level-contract">Exercise 8 — Catalog-level contract<a class="heading-anchor" href="#solution-1--exercise-8-catalog-level-contract" aria-label="Link to this section">#</a></h4>
+<p>Join <code>pg_constraint</code>, <code>pg_class</code>, <code>pg_namespace</code>, and <code>pg_attribute</code>, and inspect constraint type plus <code>pg_get_constraintdef</code>. Inspect <code>pg_attribute.attgenerated</code> and <code>pg_get_expr(pg_attrdef.adbin, ...)</code> for the generated expression. This checks semantic properties without coupling a test to a generated name.</p>
+<p>For NULL-aware uniqueness, inspect <code>pg_index.indnullsnotdistinct</code> on PostgreSQL 15+. The ordinary solution expects it to be false. A robust contract also checks column order/types and the referenced relation/columns rather than searching rendered text alone.</p>
+<h4 id="solution-1--edge-cases-and-alternatives">Edge cases and alternatives<a class="heading-anchor" href="#solution-1--edge-cases-and-alternatives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>If overlapping loans must be impossible, a same-day <code>UNIQUE</code> constraint is insufficient. A later temporal-modeling lesson can use date ranges and an exclusion constraint.</li>
+<li>Case-insensitive email uniqueness needs a defined normalization strategy, such as a unique index over <code>lower(email)</code>; email semantics should not be guessed casually.</li>
+<li><code>ON DELETE RESTRICT</code> preserves history. Soft deletion or a status column can retire an item without deleting referenced facts.</li>
+<li>A generated value is convenient for row-local immutable arithmetic. Values depending on the current clock or another table need a query, snapshot, or reviewed update process instead.</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_found_01_relational_design_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_found_01_relational_design_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-FOUND-01 executable solutions</span>
+<span>-- Creates and removes only pro_relational_lab.</span>
+<span> </span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span> </span>
+<span>CREATE SCHEMA pro_relational_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_relational_lab.equipment_items (</span>
+<span>    item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    asset_tag text NOT NULL UNIQUE,</span>
+<span>    description text NOT NULL CHECK (btrim(description) &lt;&gt; &#x27;&#x27;)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_relational_lab.equipment_items (asset_tag, description)</span>
+<span>VALUES</span>
+<span>    (&#x27;AUD-001&#x27;, &#x27;Portable recorder&#x27;),</span>
+<span>    (&#x27;TOL-001&#x27;, &#x27;Torque wrench&#x27;);</span>
+<span> </span>
+<span>-- Exercise 1: one row is one maintenance visit for one physical item.</span>
+<span>CREATE TABLE pro_relational_lab.maintenance_visits (</span>
+<span>    visit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    item_id bigint NOT NULL</span>
+<span>        REFERENCES pro_relational_lab.equipment_items (item_id)</span>
+<span>        ON DELETE RESTRICT,</span>
+<span>    opened_on date NOT NULL DEFAULT CURRENT_DATE,</span>
+<span>    completed_on date,</span>
+<span>    provider_name text NOT NULL</span>
+<span>        CHECK (btrim(provider_name) &lt;&gt; &#x27;&#x27;),</span>
+<span>    service_note text NOT NULL</span>
+<span>        CHECK (btrim(service_note) &lt;&gt; &#x27;&#x27;),</span>
+<span>    cost numeric(10, 2) NOT NULL DEFAULT 0</span>
+<span>        CHECK (cost &gt;= 0),</span>
+<span>    external_reference text UNIQUE,</span>
+<span>    service_days integer GENERATED ALWAYS AS</span>
+<span>        (COALESCE(completed_on, opened_on) - opened_on) STORED,</span>
+<span>    CONSTRAINT maintenance_completion_order_ck</span>
+<span>        CHECK (completed_on IS NULL OR completed_on &gt;= opened_on)</span>
+<span>);</span>
+<span> </span>
+<span>-- Exercise 2: one valid visit.</span>
+<span>INSERT INTO pro_relational_lab.maintenance_visits (</span>
+<span>    item_id,</span>
+<span>    opened_on,</span>
+<span>    completed_on,</span>
+<span>    provider_name,</span>
+<span>    service_note,</span>
+<span>    cost,</span>
+<span>    external_reference</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    i.item_id,</span>
+<span>    DATE &#x27;2026-04-01&#x27;,</span>
+<span>    DATE &#x27;2026-04-03&#x27;,</span>
+<span>    &#x27;Community repair desk&#x27;,</span>
+<span>    &#x27;Calibration and safety check&#x27;,</span>
+<span>    28.50,</span>
+<span>    &#x27;VISIT-100&#x27;</span>
+<span>FROM pro_relational_lab.equipment_items AS i</span>
+<span>WHERE i.asset_tag = &#x27;AUD-001&#x27;;</span>
+<span> </span>
+<span>-- Exercise 2: safely prove that the database rejects a negative cost.</span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_relational_lab.maintenance_visits (</span>
+<span>            item_id,</span>
+<span>            opened_on,</span>
+<span>            provider_name,</span>
+<span>            service_note,</span>
+<span>            cost</span>
+<span>        )</span>
+<span>        SELECT</span>
+<span>            i.item_id,</span>
+<span>            DATE &#x27;2026-04-04&#x27;,</span>
+<span>            &#x27;Community repair desk&#x27;,</span>
+<span>            &#x27;Impossible refund represented as service cost&#x27;,</span>
+<span>            -1.00</span>
+<span>        FROM pro_relational_lab.equipment_items AS i</span>
+<span>        WHERE i.asset_tag = &#x27;AUD-001&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;negative maintenance cost unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected negative-cost rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- Exercise 3: two NULL external references are valid with ordinary UNIQUE.</span>
+<span>INSERT INTO pro_relational_lab.maintenance_visits (</span>
+<span>    item_id,</span>
+<span>    opened_on,</span>
+<span>    provider_name,</span>
+<span>    service_note,</span>
+<span>    cost,</span>
+<span>    external_reference</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    i.item_id,</span>
+<span>    dates.opened_on,</span>
+<span>    &#x27;Internal maintenance&#x27;,</span>
+<span>    dates.service_note,</span>
+<span>    0,</span>
+<span>    NULL</span>
+<span>FROM pro_relational_lab.equipment_items AS i</span>
+<span>JOIN (</span>
+<span>    VALUES</span>
+<span>        (&#x27;AUD-001&#x27;::text, DATE &#x27;2026-05-01&#x27;, &#x27;Cleaned controls&#x27;::text),</span>
+<span>        (&#x27;TOL-001&#x27;::text, DATE &#x27;2026-05-02&#x27;, &#x27;Checked calibration&#x27;::text)</span>
+<span>) AS dates(asset_tag, opened_on, service_note)</span>
+<span>  ON dates.asset_tag = i.asset_tag;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    mv.visit_id,</span>
+<span>    i.asset_tag,</span>
+<span>    mv.opened_on,</span>
+<span>    mv.completed_on,</span>
+<span>    mv.service_days,</span>
+<span>    mv.cost,</span>
+<span>    mv.external_reference</span>
+<span>FROM pro_relational_lab.maintenance_visits AS mv</span>
+<span>JOIN pro_relational_lab.equipment_items AS i</span>
+<span>  ON i.item_id = mv.item_id</span>
+<span>ORDER BY mv.visit_id;</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>DECLARE</span>
+<span>    visit_count integer;</span>
+<span>    null_reference_count integer;</span>
+<span>BEGIN</span>
+<span>    SELECT</span>
+<span>        COUNT(*),</span>
+<span>        COUNT(*) FILTER (WHERE mv.external_reference IS NULL)</span>
+<span>    INTO visit_count, null_reference_count</span>
+<span>    FROM pro_relational_lab.maintenance_visits AS mv;</span>
+<span> </span>
+<span>    IF visit_count &lt;&gt; 3 OR null_reference_count &lt;&gt; 2 THEN</span>
+<span>        RAISE EXCEPTION</span>
+<span>            &#x27;unexpected visit counts: total %, NULL references %&#x27;,</span>
+<span>            visit_count,</span>
+<span>            null_reference_count;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- Exercise 4: daily_fee_at_checkout belongs on a loan because it is the quoted</span>
+<span>-- historical value. A later equipment price change must not rewrite it.</span>
+<span> </span>
+<span>-- Exercise 5: names become referenced entities; the bridge grain is one</span>
+<span>-- technician assignment to one maintenance visit.</span>
+<span>CREATE TABLE pro_relational_lab.providers (</span>
+<span>    provider_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    provider_name text NOT NULL UNIQUE CHECK (btrim(provider_name) &lt;&gt; &#x27;&#x27;)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_relational_lab.technicians (</span>
+<span>    technician_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    technician_name text NOT NULL CHECK (btrim(technician_name) &lt;&gt; &#x27;&#x27;)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_relational_lab.visit_technicians (</span>
+<span>    visit_id bigint NOT NULL</span>
+<span>        REFERENCES pro_relational_lab.maintenance_visits (visit_id)</span>
+<span>        ON DELETE CASCADE,</span>
+<span>    technician_id bigint NOT NULL</span>
+<span>        REFERENCES pro_relational_lab.technicians (technician_id)</span>
+<span>        ON DELETE RESTRICT,</span>
+<span>    PRIMARY KEY (visit_id, technician_id)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_relational_lab.providers (provider_name)</span>
+<span>VALUES (&#x27;Community repair desk&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_relational_lab.technicians (technician_name)</span>
+<span>VALUES (&#x27;Riley Chen&#x27;), (&#x27;Sam Rivera&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_relational_lab.visit_technicians (visit_id, technician_id)</span>
+<span>SELECT mv.visit_id, t.technician_id</span>
+<span>FROM pro_relational_lab.maintenance_visits AS mv</span>
+<span>CROSS JOIN pro_relational_lab.technicians AS t</span>
+<span>WHERE mv.external_reference = &#x27;VISIT-100&#x27;;</span>
+<span> </span>
+<span>-- Exercise 6: count a nullable-side key, not COUNT(*), so never-loaned items</span>
+<span>-- correctly report zero. A loan-side date predicate would belong in ON.</span>
+<span>CREATE TABLE pro_relational_lab.loans (</span>
+<span>    loan_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    item_id bigint NOT NULL</span>
+<span>        REFERENCES pro_relational_lab.equipment_items (item_id)</span>
+<span>        ON DELETE RESTRICT,</span>
+<span>    checked_out_on date NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_relational_lab.loans (item_id, checked_out_on)</span>
+<span>SELECT i.item_id, DATE &#x27;2026-03-15&#x27;</span>
+<span>FROM pro_relational_lab.equipment_items AS i</span>
+<span>WHERE i.asset_tag = &#x27;AUD-001&#x27;;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    i.item_id,</span>
+<span>    i.asset_tag,</span>
+<span>    COUNT(l.loan_id) AS loan_count,</span>
+<span>    MAX(l.checked_out_on) AS latest_checkout</span>
+<span>FROM pro_relational_lab.equipment_items AS i</span>
+<span>LEFT JOIN pro_relational_lab.loans AS l</span>
+<span>  ON l.item_id = i.item_id</span>
+<span>GROUP BY i.item_id, i.asset_tag</span>
+<span>ORDER BY i.asset_tag;</span>
+<span> </span>
+<span>-- Exercise 7: RESTRICT preserves visits and loans as historical facts. CASCADE</span>
+<span>-- is used only for the assignment bridge, which has no meaning without a visit.</span>
+<span> </span>
+<span>-- Exercise 8: inspect semantic catalog properties instead of generated names.</span>
+<span>SELECT</span>
+<span>    con.contype,</span>
+<span>    pg_catalog.pg_get_constraintdef(con.oid) AS constraint_definition</span>
+<span>FROM pg_catalog.pg_constraint AS con</span>
+<span>JOIN pg_catalog.pg_class AS rel</span>
+<span>  ON rel.oid = con.conrelid</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = rel.relnamespace</span>
+<span>WHERE n.nspname = &#x27;pro_relational_lab&#x27;</span>
+<span>  AND rel.relname = &#x27;maintenance_visits&#x27;</span>
+<span>ORDER BY con.contype, constraint_definition;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    a.attname AS column_name,</span>
+<span>    a.attgenerated,</span>
+<span>    pg_catalog.pg_get_expr(def.adbin, def.adrelid) AS generated_expression</span>
+<span>FROM pg_catalog.pg_attribute AS a</span>
+<span>JOIN pg_catalog.pg_class AS rel</span>
+<span>  ON rel.oid = a.attrelid</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = rel.relnamespace</span>
+<span>LEFT JOIN pg_catalog.pg_attrdef AS def</span>
+<span>  ON def.adrelid = a.attrelid</span>
+<span> AND def.adnum = a.attnum</span>
+<span>WHERE n.nspname = &#x27;pro_relational_lab&#x27;</span>
+<span>  AND rel.relname = &#x27;maintenance_visits&#x27;</span>
+<span>  AND a.attnum &gt; 0</span>
+<span>  AND NOT a.attisdropped</span>
+<span>ORDER BY a.attnum;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-perf-01.html"><small>Previous lesson</small><strong>python-perf-01</strong><span>Measurement-First Performance Engineering</span></a>
+        <a class="nav-card next" href="sql-found-02.html"><small>Next lesson</small><strong>sql-found-02</strong><span>Versioned Schema Migrations and Safe Evolution</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-found-01";
+    const LEARNER_PATH = "sql/professional/lessons/sql_found_01_relational_design.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

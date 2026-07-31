@@ -1,0 +1,2045 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-analytics-01 · Analytics Engineering, Lineage, and Data Contracts · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-analytics-01</p>
+        <h1>Analytics Engineering, Lineage, and Data Contracts</h1>
+        <p class="hero-copy">Data engineering specialization</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">240 minutes</span>
+          <span class="tag">professional setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="bridge-05.html">bridge-05</a> <a class="tag" href="python-data-01.html">python-data-01</a> <a class="tag" href="sql-analytics-01.html">sql-analytics-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/professional/lessons/bridge_analytics_01_local_project.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/professional/lessons/bridge_analytics_01_local_project.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/professional/companion-guides/bridge_analytics_01_local_project.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/companion-guides/bridge_analytics_01_local_project.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-analytics-01-local-analytics-engineering-project">BRIDGE-ANALYTICS-01 — Local analytics engineering project<a class="heading-anchor" href="#guide--bridge-analytics-01-local-analytics-engineering-project" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<p><strong>Level:</strong> Advanced <strong>Stable lesson ID:</strong> <code>bridge-analytics-01</code> <strong>Catalog prerequisites:</strong> <code>python-data-01</code>, <code>sql-analytics-01</code>, and <code>bridge-05</code> <strong>Prerequisites:</strong> the <a href="python-data-01.html#guide">professional columnar-data module</a>, <a href="sql-analytics-01.html#guide">advanced analytical SQL lab</a>, and <a href="bridge-05.html#guide">Bridge Day 5</a>. Those paths include the Python Day 23 and SQL Day 30 foundations.</p>
+<p>This module builds a small dbt-style analytics project entirely in an in-memory DuckDB database. “dbt-style” means models form a declared directed acyclic graph (DAG), transformations are select statements materialized in dependency order, grain and contracts are explicit, and data tests plus reconciliation gate the mart. It does not require the dbt package, a hosted warehouse, an account, credentials, a network connection, or local database files.</p>
+<p>Install the professional and quality profiles once while connected if the normal setup has not already installed them:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe -m pip install -e &quot;.[professional,quality]&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python -m pip install -e &quot;.[professional,quality]&quot;</code></pre>
+<p>Run the answer-free starter:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe bridge\professional\lessons\bridge_analytics_01_local_project.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python bridge/professional/lessons/bridge_analytics_01_local_project.py</code></pre>
+<p>Run the completed local project:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe bridge\professional\solutions\bridge_analytics_01_local_project_solution.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python bridge/professional/solutions/bridge_analytics_01_local_project_solution.py</code></pre>
+<p>The solution builds twice in the same in-memory connection and asserts that the ordered snapshot is identical. Closing the process removes all tables.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>describe source, staging, intermediate, and mart responsibilities;</li>
+<li>declare a table&#x27;s grain before writing its query;</li>
+<li>represent model lineage as a dependency DAG;</li>
+<li>topologically order models and reject missing dependencies or cycles;</li>
+<li>validate deterministic producer fixtures before loading them;</li>
+<li>keep source contracts distinct from transformed table contracts;</li>
+<li>rebuild models idempotently with trusted names and <code>CREATE OR REPLACE</code>;</li>
+<li>define a semantic metric with model, expression, aggregation, time dimension, unit, and exclusions;</li>
+<li>express data tests as queries returning violating rows;</li>
+<li>test uniqueness, not-null, accepted values, relationships, and business rules;</li>
+<li>reconcile a mart to its intermediate-detail source;</li>
+<li>prove a second clean rebuild returns the same rows and tests.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>analytics engineering</td>
+<td>Building tested, documented, reusable data models for analysis</td>
+</tr>
+<tr>
+<td>source</td>
+<td>Producer-owned raw input boundary</td>
+</tr>
+<tr>
+<td>staging model</td>
+<td>Thin rename, cast, trim, and standardization layer</td>
+</tr>
+<tr>
+<td>intermediate model</td>
+<td>Reusable transformation at a clearly declared grain</td>
+</tr>
+<tr>
+<td>mart</td>
+<td>Consumer-facing table shaped for a business question</td>
+</tr>
+<tr>
+<td>grain</td>
+<td>What exactly one row represents</td>
+</tr>
+<tr>
+<td>DAG</td>
+<td>Directed acyclic graph of model dependencies</td>
+</tr>
+<tr>
+<td>lineage</td>
+<td>Upstream sources and models that contribute to an output</td>
+</tr>
+<tr>
+<td>producer contract</td>
+<td>Expected source columns, types, nullability, and key</td>
+</tr>
+<tr>
+<td>table contract</td>
+<td>Expected transformed columns, SQL types, and semantic key</td>
+</tr>
+<tr>
+<td>data test</td>
+<td>Query whose returned rows represent violations</td>
+</tr>
+<tr>
+<td>reconciliation</td>
+<td>Independent comparison proving aggregate outputs match detail</td>
+</tr>
+<tr>
+<td>semantic metric</td>
+<td>Shared definition of a measure, aggregation, time, unit, and exclusions</td>
+</tr>
+<tr>
+<td>idempotent rebuild</td>
+<td>Repeating the same build yields the same declared state</td>
+</tr>
+<tr>
+<td>materialization</td>
+<td>How a select statement becomes a relation; this lab uses tables</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--1-start-from-deterministic-producer-fixtures">1. Start from deterministic producer fixtures<a class="heading-anchor" href="#guide--1-start-from-deterministic-producer-fixtures" aria-label="Link to this section">#</a></h5>
+<p>Three local sources model customers, orders, and order lines. Values are fixed tuples in source control; no clock, random generator, download, or personal data is involved.</p>
+<p>Each <code>ProducerContract</code> declares:</p>
+<ul>
+<li>source name;</li>
+<li>grain statement;</li>
+<li>primary-key columns;</li>
+<li>ordered columns;</li>
+<li>allowed Python types;</li>
+<li>nullability;</li>
+<li>expected SQL type family.</li>
+</ul>
+<p><code>validate_producer_rows()</code> checks width, types, nullability, and unique keys before a value reaches DuckDB. SQL values are inserted with <code>?</code> parameters; fixture data is never interpolated into query text.</p>
+<p>Producer contracts do not make upstream data trustworthy forever. In a real pipeline, record schema version, producer owner, freshness expectation, late arrival policy, and compatibility window.</p>
+<h5 id="guide--2-declare-model-grain-and-lineage">2. Declare model grain and lineage<a class="heading-anchor" href="#guide--2-declare-model-grain-and-lineage" aria-label="Link to this section">#</a></h5>
+<p>The project DAG is:</p>
+<pre><code class="language-text">raw_customers ───────────────&gt; stg_customers ───────────────┐
+                                                            │
+raw_orders ──────────────────&gt; stg_orders ───────────┐       │
+                                                    ├──&gt; int_order_revenue
+raw_order_items ─────────────&gt; stg_order_items ─────┘              │
+                                                                   v
+                                                        mart_daily_revenue</code></pre>
+<p><code>stg_customers</code> participates in the relationship tests even though the current revenue intermediate model needs only customer IDs from orders.</p>
+<p>The declared grains are:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Model</th>
+<th>Grain</th>
+</tr></thead><tbody>
+<tr>
+<td><code>stg_customers</code></td>
+<td>one row per <code>customer_id</code></td>
+</tr>
+<tr>
+<td><code>stg_orders</code></td>
+<td>one row per <code>order_id</code></td>
+</tr>
+<tr>
+<td><code>stg_order_items</code></td>
+<td>one row per <code>order_id</code>, <code>line_id</code></td>
+</tr>
+<tr>
+<td><code>int_order_revenue</code></td>
+<td>one row per paid/shipped <code>order_id</code></td>
+</tr>
+<tr>
+<td><code>mart_daily_revenue</code></td>
+<td>one row per <code>order_date</code></td>
+</tr>
+</tbody></table></div>
+<p>Write the grain before SQL. If a join changes row count unexpectedly, compare both sides to their declared grain before adding <code>DISTINCT</code>, which often hides the defect.</p>
+<h5 id="guide--3-topologically-order-the-dag">3. Topologically order the DAG<a class="heading-anchor" href="#guide--3-topologically-order-the-dag" aria-label="Link to this section">#</a></h5>
+<p><code>topological_order()</code> treats raw names as already resolved. On each pass it selects all models whose dependencies are resolved, sorts their names for determinism, and appends them. It rejects:</p>
+<ul>
+<li>duplicate model names;</li>
+<li>a dependency that is neither a source nor a model;</li>
+<li>a cycle with no resolvable next model.</li>
+</ul>
+<p>A deterministic build order makes logs, tests, and diffs easier to compare.</p>
+<h5 id="guide--4-give-each-layer-one-job">4. Give each layer one job<a class="heading-anchor" href="#guide--4-give-each-layer-one-job" aria-label="Link to this section">#</a></h5>
+<p>Staging models:</p>
+<ul>
+<li>cast IDs and dates;</li>
+<li>trim names;</li>
+<li>normalize categorical case;</li>
+<li>preserve source grain;</li>
+<li>avoid business aggregation.</li>
+</ul>
+<p><code>int_order_revenue</code> joins completed orders to line items and computes one <code>order_revenue</code> per order. It excludes <code>cancelled</code> and <code>placed</code> status by a documented business rule.</p>
+<p><code>mart_daily_revenue</code> aggregates completed-order revenue by date and publishes gross revenue, order count, and distinct customer count.</p>
+<p>The project uses trusted checked-in model names. <code>_trusted_identifier()</code> guards the small f-string boundary used for <code>CREATE OR REPLACE TABLE</code> and <code>DESCRIBE</code>. Runtime data values use DuckDB parameters. Do not generalize this into accepting arbitrary user-provided model names or SQL.</p>
+<h5 id="guide--5-define-a-semantic-metric">5. Define a semantic metric<a class="heading-anchor" href="#guide--5-define-a-semantic-metric" aria-label="Link to this section">#</a></h5>
+<p>The reference metric records:</p>
+<pre><code class="language-text">name: gross_revenue
+model: mart_daily_revenue
+expression: gross_revenue
+aggregation: sum
+time dimension: order_date
+unit: currency units</code></pre>
+<p>Its description states the calculation and exclusions: quantity times unit price for paid or shipped orders; cancelled and placed orders are excluded.</p>
+<p>A useful metric definition also needs currency handling, refund policy, time zone, late-arriving data behavior, and ownership in a real system. The course fixture uses one abstract currency and a date without time-zone conversion, so the definition says so rather than implying global correctness.</p>
+<h5 id="guide--6-validate-the-transformed-table-contract">6. Validate the transformed table contract<a class="heading-anchor" href="#guide--6-validate-the-transformed-table-contract" aria-label="Link to this section">#</a></h5>
+<p><code>MART_CONTRACT</code> declares ordered column names, compatible DuckDB type prefixes, primary key, and grain. <code>validate_table_contract()</code> compares <code>DESCRIBE</code> output with this declaration.</p>
+<p>DuckDB <code>CREATE TABLE AS SELECT</code> does not automatically preserve every source constraint. Semantic nullability and uniqueness therefore remain data tests, not assumptions inferred from physical DDL.</p>
+<h5 id="guide--7-treat-tests-as-violation-queries">7. Treat tests as violation queries<a class="heading-anchor" href="#guide--7-treat-tests-as-violation-queries" aria-label="Link to this section">#</a></h5>
+<p>Every <code>DataTest</code> returns bad rows:</p>
+<ul>
+<li>duplicate or null customer IDs;</li>
+<li>duplicate or null order IDs and unsupported statuses;</li>
+<li>orders without a customer;</li>
+<li>null/non-positive line quantities or negative prices;</li>
+<li>duplicate/non-positive intermediate order revenue;</li>
+<li>duplicate/null/negative daily mart rows.</li>
+</ul>
+<p>The runner wraps each query and counts violations. Zero is pass. Returning bad rows instead of a boolean makes a failure inspectable during development.</p>
+<p>Do not use SQLite as a DuckDB test substitute. SQL functions, type behavior, date casting, decimal arithmetic, and query plans differ.</p>
+<h5 id="guide--8-reconcile-independently">8. Reconcile independently<a class="heading-anchor" href="#guide--8-reconcile-independently" aria-label="Link to this section">#</a></h5>
+<p>The reconciliation recomputes daily revenue, order count, and distinct customer count from <code>int_order_revenue</code>, full-outer-joins to the mart, and fails if any value is distinct.</p>
+<p>This catches mistakes a mart-only uniqueness test cannot, such as dropping a date or double-counting one order. The comparison is independent of the mart SQL while retaining the same documented metric policy.</p>
+<p>In financial systems, use explicit currency grain and tolerance/rounding policy. Here both paths retain exact <code>DECIMAL</code> values, so <code>IS DISTINCT FROM</code> is appropriate.</p>
+<h5 id="guide--9-prove-rebuild-idempotency">9. Prove rebuild idempotency<a class="heading-anchor" href="#guide--9-prove-rebuild-idempotency" aria-label="Link to this section">#</a></h5>
+<p>Source and model loaders use <code>CREATE OR REPLACE TABLE</code>, then parameterized fixture inserts and deterministic select statements. <code>main()</code> runs the full project twice and compares:</p>
+<ul>
+<li>build order;</li>
+<li>named test results;</li>
+<li>ordered mart snapshot.</li>
+</ul>
+<p>Idempotency here means a clean rebuild converges to the same local state. It does not prove incremental processing, late-arriving updates, or concurrent deployment safety; those need separate stateful exercises.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Build a local dbt-style DuckDB project with producer contracts, deterministic DAG order, layered grain, table/metric contracts, violation tests, and independent reconciliation.</li>
+<li><strong>Assumptions:</strong> The project runs offline on deterministic local fixtures; source rows preserve types/order; trusted model names are validated before DDL structure is generated.</li>
+<li><strong>Primary failure mode:</strong> A model can execute successfully while still duplicating grain, drifting schema, misdefining a metric, or failing reconciliation.</li>
+<li><strong>Evidence loop:</strong> state the boundary and prediction, implement against deterministic local doubles, test success/failure/cleanup, and label any optional live-adapter evidence separately from offline proof.</li>
+</ul>
+<ol>
+<li><strong>Producer contract:</strong> Add primary-key validation and a duplicate fixture failure for every producer contract.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Validate the complete key tuple and report only safe row position/key metadata.</li>
+</ul>
+<ol>
+<li><strong>DAG:</strong> Draw dependencies and implement deterministic topological order with missing-dependency and cycle detection.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Break ties by stable model name so valid independent branches are reproducible.</li>
+</ul>
+<ol>
+<li><strong>Staging:</strong> Implement the three staging models without aggregation or <code>DISTINCT</code> and state each row grain.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Staging should rename/cast, not hide duplicate producer rows.</li>
+</ul>
+<ol>
+<li><strong>Intermediate model:</strong> Declare <code>int_order_revenue</code> grain, predict row count, then implement its join and aggregate.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Aggregate line items to one row per order before joining other facts.</li>
+</ul>
+<ol>
+<li><strong>Mart:</strong> Build <code>mart_daily_revenue</code> and document exact status exclusions and UTC/date semantics.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Every selected non-aggregate must belong to the daily grain.</li>
+</ul>
+<ol>
+<li><strong>Identifier safety:</strong> Validate trusted model names before using them in generated DDL.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Parameters cannot bind identifiers; constrain structure with a strict grammar/allowlist.</li>
+</ul>
+<ol>
+<li><strong>Schema contract:</strong> Compare <code>DESCRIBE</code> output with <code>MART_CONTRACT</code>; make separate name and type drift fixtures.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Check position, normalized type prefix, and nullability according to declared policy.</li>
+</ul>
+<ol>
+<li><strong>Data tests:</strong> Write zero-row violation queries for uniqueness, not-null, accepted status, relationships, and positive money/quantity rules.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A test query returns violating rows; passing means count zero.</li>
+</ul>
+<ol>
+<li><strong>Reconciliation:</strong> Write an independent reconciliation for mart revenue, orders, and customers by day.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Do not reuse the mart&#x27;s exact transformation path for its check.</li>
+</ul>
+<ol>
+<li><strong>Semantic metric:</strong> Define one extra metric with aggregation, grain, time dimension, unit, exclusions, and denominator.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A metric definition is a contract, not merely a SQL expression.</li>
+</ul>
+<ol>
+<li><strong>Idempotency:</strong> Run the project twice in one connection and prove identical ordered snapshots.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Rebuild semantics should replace trusted models rather than append.</li>
+</ul>
+<ol>
+<li><strong>Impact analysis:</strong> Add one deterministic source row, predict every downstream change, then update tests without weakening contracts.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Write expected deltas before executing the rebuild.</li>
+</ul>
+<ol>
+<li><strong>Freshness:</strong> Add a producer freshness contract with an injected as-of time and distinguish stale from missing data.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Time-based tests must not call the wall clock directly.</li>
+</ul>
+<ol>
+<li><strong>Build strategy:</strong> Compare full rebuild and incremental processing for this local project and state what evidence is missing for incrementality.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Idempotent full rebuild is the reference correctness baseline.</li>
+</ul>
+<ol>
+<li><strong>Money correctness:</strong> Trace exact revenue from producer Decimal through DuckDB type, aggregation, Python snapshot, and reconciliation.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Reject silent float conversion and premature rounding.</li>
+</ul>
+<ol>
+<li><strong>NULL semantics:</strong> Choose behavior for missing dimension labels and prove it does not change fact row count or measure totals.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> An <code>unknown</code> label is a business rule; a filtering join is a data-loss bug unless declared.</li>
+</ul>
+<ol>
+<li><strong>Time semantics:</strong> Define daily boundaries for timezone-aware source instants and test an order around midnight.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Convert the instant to the reporting zone before deriving its date.</li>
+</ul>
+<ol>
+<li><strong>Late data:</strong> Model a late-arriving order for a previously built day and compare full rebuild with an incremental repair.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Watermarks based only on event time can miss late records.</li>
+</ul>
+<ol>
+<li><strong>Snapshot determinism:</strong> Require explicit ordering and stable serialization for mart snapshots across platforms.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Database row order is undefined without final <code>ORDER BY</code>.</li>
+</ul>
+<ol>
+<li><strong>Performance:</strong> Inspect a bounded <code>EXPLAIN</code> for the intermediate/mart build and identify one optimization that preserves grain.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Optimize after contracts and reconciliation pass.</li>
+</ul>
+<ol>
+<li><strong>Lineage:</strong> Produce a compact source-to-metric lineage table from <code>depends_on</code> and metric definitions.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Lineage should be derivable from checked-in contracts rather than hand-maintained prose alone.</li>
+</ul>
+<ol>
+<li><strong>Transaction:</strong> Design build publication so readers do not observe half-rebuilt models after a failure.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Check DuckDB transaction/DDL semantics rather than assuming atomicity.</li>
+</ul>
+<ol>
+<li><strong>Failure policy:</strong> Make any contract, data-test, or reconciliation failure stop publication while retaining inspectable results.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Do not continue to a green artifact after a red quality gate.</li>
+</ul>
+<ol>
+<li><strong>Portable artifact:</strong> Export a deterministic local result with manifest, metric definitions, test evidence, and cleanup instructions.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Separate generated artifacts from source and never include local paths or credentials.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>Record what the offline doubles prove and what they cannot prove.</li>
+<li>Inspect exact call order, parameters, schema, and failure behavior.</li>
+<li>Keep credentials, payloads, and high-cardinality identifiers out of output.</li>
+<li>Require deterministic reruns before considering an exercise complete.</li>
+</ul>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Is every source and model grain written in plain language?</li>
+<li>Can you trace every mart column to its upstream models?</li>
+<li>Does the DAG reject missing dependencies and cycles?</li>
+<li>Are producer rows checked before loading?</li>
+<li>Are SQL values parameterized?</li>
+<li>Are dynamic DDL names limited to trusted checked-in identifiers?</li>
+<li>Does staging avoid business aggregation?</li>
+<li>Is intermediate order revenue exactly one row per completed order?</li>
+<li>Does the semantic metric define calculation, aggregation, time, unit, and exclusions?</li>
+<li>Do data tests return violating rows and pass only at zero?</li>
+<li>Does reconciliation compare all published measures to detail?</li>
+<li>Does the second full rebuild produce an identical ordered snapshot?</li>
+<li>Does the project use in-memory DuckDB with no hosted account or local data file?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Writing SQL before grain:</strong> join and aggregate defects become hard to name.</li>
+<li><strong>Using <code>DISTINCT</code> to fix duplicates:</strong> it can hide an incorrect many-to-many join.</li>
+<li><strong>Mixing business rules into staging:</strong> downstream reuse and debugging suffer.</li>
+<li><strong>Treating a DAG diagram as executable lineage:</strong> dependencies must drive actual build order.</li>
+<li><strong>Validating only column presence:</strong> order, type, key, nullability, and semantics can still drift.</li>
+<li><strong>Testing only the mart:</strong> source, relationship, and intermediate-grain failures remain hidden.</li>
+<li><strong>Reusing mart SQL for reconciliation:</strong> both paths can share the same defect.</li>
+<li><strong>Interpolating fixture values:</strong> use DuckDB parameter sequences.</li>
+<li><strong>Accepting runtime identifiers:</strong> checked-in model names are a code boundary, not user data.</li>
+<li><strong>Using floats for money:</strong> the project casts to exact decimal arithmetic.</li>
+<li><strong>Claiming incremental idempotency from a full rebuild:</strong> stateful incremental behavior needs its own fixtures and watermarks.</li>
+<li><strong>Writing a local <code>.duckdb</code> file by default:</strong> in-memory execution keeps tests isolated and USB-safe.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Complete the <a href="bridge-analytics-01.html#learner">learner file</a> and add a deliberately failing contract case before reviewing the <a href="bridge-analytics-01.html#solution-2">reference implementation</a> and <a href="bridge-analytics-01.html#solution-1">solution reasoning</a>. Then adapt the same source → staging → intermediate → mart pattern to a small local dataset whose grain and ownership you can state precisely.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/professional/lessons/bridge_analytics_01_local_project.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/lessons/bridge_analytics_01_local_project.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;BRIDGE-ANALYTICS-01: a local dbt-style analytics project.</span>
+<span> </span>
+<span>Prerequisites: Python Day 23, SQL Day 30, and Bridge Day 5.</span>
+<span>This learner file defines contracts and TODOs without importing its solution.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from typing import Protocol</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-analytics-01&quot;</span>
+<span>PREREQUISITES = (&quot;python-23&quot;, &quot;sql-30&quot;, &quot;bridge-05&quot;)</span>
+<span>LEVEL = &quot;advanced&quot;</span>
+<span> </span>
+<span> </span>
+<span>class QueryResult(Protocol):</span>
+<span>    def fetchone(self) -&gt; Sequence[object] | None: ...</span>
+<span> </span>
+<span>    def fetchall(self) -&gt; Sequence[Sequence[object]]: ...</span>
+<span> </span>
+<span> </span>
+<span>class AnalyticsConnection(Protocol):</span>
+<span>    def execute(</span>
+<span>        self,</span>
+<span>        query: str,</span>
+<span>        parameters: Sequence[object] | None = None,</span>
+<span>    ) -&gt; QueryResult: ...</span>
+<span> </span>
+<span>    def executemany(</span>
+<span>        self,</span>
+<span>        query: str,</span>
+<span>        parameters: Sequence[Sequence[object]],</span>
+<span>    ) -&gt; QueryResult: ...</span>
+<span> </span>
+<span>    def close(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ColumnContract:</span>
+<span>    name: str</span>
+<span>    sql_type_prefixes: tuple[str, ...]</span>
+<span>    nullable: bool</span>
+<span>    python_types: tuple[type[object], ...] = ()</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ProducerContract:</span>
+<span>    source_name: str</span>
+<span>    grain: str</span>
+<span>    primary_key: tuple[str, ...]</span>
+<span>    columns: tuple[ColumnContract, ...]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ModelSpec:</span>
+<span>    name: str</span>
+<span>    layer: str</span>
+<span>    grain: str</span>
+<span>    depends_on: tuple[str, ...]</span>
+<span>    sql: str</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class TableContract:</span>
+<span>    model_name: str</span>
+<span>    grain: str</span>
+<span>    primary_key: tuple[str, ...]</span>
+<span>    columns: tuple[ColumnContract, ...]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class MetricDefinition:</span>
+<span>    name: str</span>
+<span>    label: str</span>
+<span>    model_name: str</span>
+<span>    expression: str</span>
+<span>    aggregation: str</span>
+<span>    time_dimension: str</span>
+<span>    unit: str</span>
+<span>    description: str</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class DataTest:</span>
+<span>    name: str</span>
+<span>    model_name: str</span>
+<span>    violation_query: str</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class DataTestResult:</span>
+<span>    name: str</span>
+<span>    violation_count: int</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ProjectResult:</span>
+<span>    build_order: tuple[str, ...]</span>
+<span>    test_results: tuple[DataTestResult, ...]</span>
+<span>    mart_rows: tuple[tuple[object, ...], ...]</span>
+<span> </span>
+<span> </span>
+<span>def validate_producer_rows(</span>
+<span>    contract: ProducerContract,</span>
+<span>    rows: Sequence[Sequence[object]],</span>
+<span>) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Core implementation: enforce producer row shape, types, and nullability.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;reject contract violations before loading DuckDB&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def topological_order(</span>
+<span>    models: Sequence[ModelSpec],</span>
+<span>    *,</span>
+<span>    source_names: frozenset[str],</span>
+<span>) -&gt; tuple[ModelSpec, ...]:</span>
+<span>    &quot;&quot;&quot;Core implementation: order the DAG and reject missing dependencies or cycles.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;return deterministic staging-to-mart order&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def build_models(</span>
+<span>    connection: AnalyticsConnection,</span>
+<span>    models: Sequence[ModelSpec],</span>
+<span>    *,</span>
+<span>    source_names: frozenset[str],</span>
+<span>) -&gt; tuple[str, ...]:</span>
+<span>    &quot;&quot;&quot;Core implementation: rebuild every trusted model in DAG order.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;use create-or-replace for idempotent local rebuilds&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def validate_table_contract(</span>
+<span>    connection: AnalyticsConnection,</span>
+<span>    contract: TableContract,</span>
+<span>) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Core implementation: compare actual names/types with the declared model contract.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;inspect DuckDB metadata and fail on drift&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def run_data_tests(</span>
+<span>    connection: AnalyticsConnection,</span>
+<span>    tests: Sequence[DataTest],</span>
+<span>) -&gt; tuple[DataTestResult, ...]:</span>
+<span>    &quot;&quot;&quot;Core implementation: execute zero-row violation queries deterministically.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;a passing data test returns zero violating rows&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def reconcile_mart(connection: AnalyticsConnection) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Core implementation: prove the mart reconciles to intermediate order grain.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;compare revenue, orders, and customers by day&quot;)</span>
+<span> </span>
+<span> </span>
+<span># Exercises (answer-free)</span>
+<span># Focus: Build a local dbt-style DuckDB project with producer contracts, deterministic DAG</span>
+<span>#    order, layered grain, table/metric contracts, violation tests, and independent</span>
+<span>#    reconciliation.</span>
+<span># Assumptions: The project runs offline on deterministic local fixtures; source rows preserve</span>
+<span>#    types/order; trusted model names are validated before DDL structure is generated.</span>
+<span># Failure to watch for: A model can execute successfully while still duplicating grain, drifting</span>
+<span>#    schema, misdefining a metric, or failing reconciliation.</span>
+<span># Work in order: predict -&gt; implement -&gt; test -&gt; debug -&gt; extend. Keep official</span>
+<span># answers out of this starter and collect deterministic fake-backed evidence.</span>
+<span># 1. [Producer contract] Add primary-key validation and a duplicate fixture failure for every</span>
+<span>#    producer contract.</span>
+<span>#    Hint: Validate the complete key tuple and report only safe row position/key metadata.</span>
+<span># 2. [DAG] Draw dependencies and implement deterministic topological order with</span>
+<span>#    missing-dependency and cycle detection.</span>
+<span>#    Hint: Break ties by stable model name so valid independent branches are reproducible.</span>
+<span># 3. [Staging] Implement the three staging models without aggregation or `DISTINCT` and state</span>
+<span>#    each row grain.</span>
+<span>#    Hint: Staging should rename/cast, not hide duplicate producer rows.</span>
+<span># 4. [Intermediate model] Declare `int_order_revenue` grain, predict row count, then implement</span>
+<span>#    its join and aggregate.</span>
+<span>#    Hint: Aggregate line items to one row per order before joining other facts.</span>
+<span># 5. [Mart] Build `mart_daily_revenue` and document exact status exclusions and UTC/date</span>
+<span>#    semantics.</span>
+<span>#    Hint: Every selected non-aggregate must belong to the daily grain.</span>
+<span># 6. [Identifier safety] Validate trusted model names before using them in generated DDL.</span>
+<span>#    Hint: Parameters cannot bind identifiers; constrain structure with a strict</span>
+<span>#    grammar/allowlist.</span>
+<span># 7. [Schema contract] Compare `DESCRIBE` output with `MART_CONTRACT`; make separate name and</span>
+<span>#    type drift fixtures.</span>
+<span>#    Hint: Check position, normalized type prefix, and nullability according to declared policy.</span>
+<span># 8. [Data tests] Write zero-row violation queries for uniqueness, not-null, accepted status,</span>
+<span>#    relationships, and positive money/quantity rules.</span>
+<span>#    Hint: A test query returns violating rows; passing means count zero.</span>
+<span># 9. [Reconciliation] Write an independent reconciliation for mart revenue, orders, and</span>
+<span>#    customers by day.</span>
+<span>#    Hint: Do not reuse the mart&#x27;s exact transformation path for its check.</span>
+<span># 10. [Semantic metric] Define one extra metric with aggregation, grain, time dimension, unit,</span>
+<span>#    exclusions, and denominator.</span>
+<span>#    Hint: A metric definition is a contract, not merely a SQL expression.</span>
+<span># 11. [Idempotency] Run the project twice in one connection and prove identical ordered</span>
+<span>#    snapshots.</span>
+<span>#    Hint: Rebuild semantics should replace trusted models rather than append.</span>
+<span># 12. [Impact analysis] Add one deterministic source row, predict every downstream change, then</span>
+<span>#    update tests without weakening contracts.</span>
+<span>#    Hint: Write expected deltas before executing the rebuild.</span>
+<span># 13. [Freshness] Add a producer freshness contract with an injected as-of time and distinguish</span>
+<span>#    stale from missing data.</span>
+<span>#    Hint: Time-based tests must not call the wall clock directly.</span>
+<span># 14. [Build strategy] Compare full rebuild and incremental processing for this local project</span>
+<span>#    and state what evidence is missing for incrementality.</span>
+<span>#    Hint: Idempotent full rebuild is the reference correctness baseline.</span>
+<span># 15. [Money correctness] Trace exact revenue from producer Decimal through DuckDB type,</span>
+<span>#    aggregation, Python snapshot, and reconciliation.</span>
+<span>#    Hint: Reject silent float conversion and premature rounding.</span>
+<span># 16. [NULL semantics] Choose behavior for missing dimension labels and prove it does not change</span>
+<span>#    fact row count or measure totals.</span>
+<span>#    Hint: An `unknown` label is a business rule; a filtering join is a data-loss bug unless</span>
+<span>#    declared.</span>
+<span># 17. [Time semantics] Define daily boundaries for timezone-aware source instants and test an</span>
+<span>#    order around midnight.</span>
+<span>#    Hint: Convert the instant to the reporting zone before deriving its date.</span>
+<span># 18. [Late data] Model a late-arriving order for a previously built day and compare full</span>
+<span>#    rebuild with an incremental repair.</span>
+<span>#    Hint: Watermarks based only on event time can miss late records.</span>
+<span># 19. [Snapshot determinism] Require explicit ordering and stable serialization for mart</span>
+<span>#    snapshots across platforms.</span>
+<span>#    Hint: Database row order is undefined without final `ORDER BY`.</span>
+<span># 20. [Performance] Inspect a bounded `EXPLAIN` for the intermediate/mart build and identify one</span>
+<span>#    optimization that preserves grain.</span>
+<span>#    Hint: Optimize after contracts and reconciliation pass.</span>
+<span># 21. [Lineage] Produce a compact source-to-metric lineage table from `depends_on` and metric</span>
+<span>#    definitions.</span>
+<span>#    Hint: Lineage should be derivable from checked-in contracts rather than hand-maintained</span>
+<span>#    prose alone.</span>
+<span># 22. [Transaction] Design build publication so readers do not observe half-rebuilt models after</span>
+<span>#    a failure.</span>
+<span>#    Hint: Check DuckDB transaction/DDL semantics rather than assuming atomicity.</span>
+<span># 23. [Failure policy] Make any contract, data-test, or reconciliation failure stop publication</span>
+<span>#    while retaining inspectable results.</span>
+<span>#    Hint: Do not continue to a green artifact after a red quality gate.</span>
+<span># 24. [Portable artifact] Export a deterministic local result with manifest, metric definitions,</span>
+<span>#    test evidence, and cleanup instructions.</span>
+<span>#    Hint: Separate generated artifacts from source and never include local paths or</span>
+<span>#    credentials.</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    print(&quot;BRIDGE-ANALYTICS-01 starter loaded; no file or hosted account was used.&quot;)</span>
+<span>    print(&quot;Implement contracts and the DAG before running the local DuckDB project.&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/professional/solutions/bridge_analytics_01_local_project_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/solutions/bridge_analytics_01_local_project_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-analytics-01-solution-reasoning">BRIDGE-ANALYTICS-01 — Solution reasoning<a class="heading-anchor" href="#solution-1--bridge-analytics-01-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Start with the <a href="bridge-analytics-01.html#learner">learner file</a>. The executable reference is <a href="bridge-analytics-01.html#solution-2">bridge_analytics_01_local_project_solution.py</a>.</p>
+<h4 id="solution-1--source-and-contract-boundaries">Source and contract boundaries<a class="heading-anchor" href="#solution-1--source-and-contract-boundaries" aria-label="Link to this section">#</a></h4>
+<p>The solution keeps source fixtures as immutable tuples and validates them against producer contracts before insertion. Contracts include ordered columns, Python types, nullability, declared grain, and primary-key fields. DuckDB values are bound with <code>?</code> parameters.</p>
+<p>This proves the producer boundary using deterministic synthetic data. It does not imply that a real producer will honor freshness, schema evolution, or late arrival expectations; those belong in a versioned external contract.</p>
+<h4 id="solution-1--dag-and-layer-reasoning">DAG and layer reasoning<a class="heading-anchor" href="#solution-1--dag-and-layer-reasoning" aria-label="Link to this section">#</a></h4>
+<p><code>topological_order()</code> resolves raw sources first, then selects dependency-ready models in name order. Duplicate names, unknown dependencies, and cycles fail before any model build.</p>
+<p>Staging models only cast and normalize. <code>int_order_revenue</code> establishes completed-order grain before the daily mart aggregates it. Keeping the intermediate model makes order-level tests and reconciliation possible without reverse-engineering a daily aggregate.</p>
+<p>Model names and SQL are checked-in code. <code>_trusted_identifier()</code> validates the small identifier interpolation boundary. This is distinct from parameterized fixture values.</p>
+<h4 id="solution-1--metric-and-table-contracts">Metric and table contracts<a class="heading-anchor" href="#solution-1--metric-and-table-contracts" aria-label="Link to this section">#</a></h4>
+<p><code>GROSS_REVENUE_METRIC</code> names the consumer model, expression, sum aggregation, date dimension, unit, calculation, and status exclusions. The definition is deliberately honest about the simplified course domain.</p>
+<p><code>MART_CONTRACT</code> validates exact column order and compatible type prefixes from DuckDB <code>DESCRIBE</code>. Semantic uniqueness and nullability remain queries because <code>CREATE TABLE AS SELECT</code> does not carry every physical constraint.</p>
+<h4 id="solution-1--test-and-reconciliation-reasoning">Test and reconciliation reasoning<a class="heading-anchor" href="#solution-1--test-and-reconciliation-reasoning" aria-label="Link to this section">#</a></h4>
+<p>Data tests are zero-row violation queries. Wrapping them in <code>SELECT count(*)</code> creates stable pass/fail results while retaining a query that can be run directly to inspect offending rows.</p>
+<p>The reconciliation independently recomputes all three daily measures from order grain and full-outer-joins them to the mart. <code>IS DISTINCT FROM</code> handles missing rows and NULL differences without float tolerance because the fixture uses exact decimals.</p>
+<h4 id="solution-1--rebuild-reasoning">Rebuild reasoning<a class="heading-anchor" href="#solution-1--rebuild-reasoning" aria-label="Link to this section">#</a></h4>
+<p>Every raw table and model is replaced from deterministic inputs. The project then validates the mart contract, runs all data tests, reconciles measures, and returns an ordered snapshot. Running this sequence twice proves convergence and that no hidden append or session-order state affects the result.</p>
+<p>The in-memory connection ensures cleanup on close and avoids generated database files, caches, credentials, and hosted services.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><code>CREATE OR REPLACE TABLE</code> is simple and deterministic but not a zero-downtime production deployment strategy.</li>
+<li>Python tuple fixtures make source behavior transparent but do not exercise large-file parsing or evolving producer schemas.</li>
+<li>Type-prefix matching tolerates DuckDB decimal precision widening but is less exact than a fully versioned physical schema contract.</li>
+<li>Full-table tests are appropriate for a tiny local project. Large warehouses need partition-aware tests, sampling policy, and freshness controls.</li>
+<li>One semantic metric dataclass documents intent but is not a complete semantic query engine.</li>
+<li>A full rebuild proves one kind of idempotency, not incremental correctness, late-arriving updates, snapshots, or slowly changing dimensions.</li>
+<li>In-memory DuckDB is portable and fast but does not prove PostgreSQL or cloud warehouse behavior.</li>
+</ul>
+<p>Extend this project only when a new model has a declared grain, dependencies, contract, violation queries, independent reconciliation where applicable, and a deterministic expected change to the final snapshot.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_analytics_01_local_project_solution.py</code>.</p>
+<p><strong>Shared failure rule:</strong> A model can execute successfully while still duplicating grain, drifting schema, misdefining a metric, or failing reconciliation.</p>
+<h5 id="solution-1--exercise-1-producer-contract">Exercise 1 — Producer contract<a class="heading-anchor" href="#solution-1--exercise-1-producer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add primary-key validation and a duplicate fixture failure for every producer contract.</p>
+<p><strong>Approach:</strong> Track seen key tuples after shape/type/null checks, reject null or repeated keys, and add deterministic fixtures that differ only by the duplicate row.</p>
+<p><strong>Why:</strong> Validate the complete key tuple and report only safe row position/key metadata.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-2-dag">Exercise 2 — DAG<a class="heading-anchor" href="#solution-1--exercise-2-dag" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Draw dependencies and implement deterministic topological order with missing-dependency and cycle detection.</p>
+<p><strong>Approach:</strong> Validate unique names/dependencies, use Kahn&#x27;s algorithm or DFS with explicit states, choose lexicographic ready nodes, and raise with the bounded cycle/missing names.</p>
+<p><strong>Why:</strong> Break ties by stable model name so valid independent branches are reproducible.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-3-staging">Exercise 3 — Staging<a class="heading-anchor" href="#solution-1--exercise-3-staging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement the three staging models without aggregation or <code>DISTINCT</code> and state each row grain.</p>
+<p><strong>Approach:</strong> Select source columns explicitly with trusted casts/aliases and one output row per source row. Let producer tests expose duplicates rather than masking them.</p>
+<p><strong>Why:</strong> Staging should rename/cast, not hide duplicate producer rows.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-4-intermediate-model">Exercise 4 — Intermediate model<a class="heading-anchor" href="#solution-1--exercise-4-intermediate-model" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Declare <code>int_order_revenue</code> grain, predict row count, then implement its join and aggregate.</p>
+<p><strong>Approach:</strong> Use order ID as primary grain, sum exact net line amounts from item rows, join only dimensions/many-to-one sources, and reconcile predicted order count with source orders.</p>
+<p><strong>Why:</strong> Aggregate line items to one row per order before joining other facts.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-5-mart">Exercise 5 — Mart<a class="heading-anchor" href="#solution-1--exercise-5-mart" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Build <code>mart_daily_revenue</code> and document exact status exclusions and UTC/date semantics.</p>
+<p><strong>Approach:</strong> Group eligible order-grain rows by declared day, compute exact revenue/order/customer measures, and encode excluded statuses in both SQL and metric documentation.</p>
+<p><strong>Why:</strong> Every selected non-aggregate must belong to the daily grain.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-6-identifier-safety">Exercise 6 — Identifier safety<a class="heading-anchor" href="#solution-1--exercise-6-identifier-safety" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Validate trusted model names before using them in generated DDL.</p>
+<p><strong>Approach:</strong> Require known <code>ModelSpec</code> names matching a conservative identifier regex, reject schema separators/quotes, and generate DDL only from validated internal specs.</p>
+<p><strong>Why:</strong> Parameters cannot bind identifiers; constrain structure with a strict grammar/allowlist.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-7-schema-contract">Exercise 7 — Schema contract<a class="heading-anchor" href="#solution-1--exercise-7-schema-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compare <code>DESCRIBE</code> output with <code>MART_CONTRACT</code>; make separate name and type drift fixtures.</p>
+<p><strong>Approach:</strong> Build an actual-column map/order, compare exact names and accepted type prefixes, and raise targeted errors for missing/extra/type/nullability drift.</p>
+<p><strong>Why:</strong> Check position, normalized type prefix, and nullability according to declared policy.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-8-data-tests">Exercise 8 — Data tests<a class="heading-anchor" href="#solution-1--exercise-8-data-tests" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write zero-row violation queries for uniqueness, not-null, accepted status, relationships, and positive money/quantity rules.</p>
+<p><strong>Approach:</strong> Keep each invariant in a named query, count its rows through <code>run_data_tests</code>, and preserve individual results rather than one combined opaque flag.</p>
+<p><strong>Why:</strong> A test query returns violating rows; passing means count zero.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-9-reconciliation">Exercise 9 — Reconciliation<a class="heading-anchor" href="#solution-1--exercise-9-reconciliation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write an independent reconciliation for mart revenue, orders, and customers by day.</p>
+<p><strong>Approach:</strong> Aggregate from the trusted intermediate/source path independently, full-join by day, and fail on missing sides or exact measure differences.</p>
+<p><strong>Why:</strong> Do not reuse the mart&#x27;s exact transformation path for its check.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-10-semantic-metric">Exercise 10 — Semantic metric<a class="heading-anchor" href="#solution-1--exercise-10-semantic-metric" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define one extra metric with aggregation, grain, time dimension, unit, exclusions, and denominator.</p>
+<p><strong>Approach:</strong> Create a <code>MetricDefinition</code> such as revenue per purchasing customer with explicit numerator/denominator, daily grain, currency unit, eligible statuses, and zero-denominator behavior.</p>
+<p><strong>Why:</strong> A metric definition is a contract, not merely a SQL expression.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-11-idempotency">Exercise 11 — Idempotency<a class="heading-anchor" href="#solution-1--exercise-11-idempotency" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Run the project twice in one connection and prove identical ordered snapshots.</p>
+<p><strong>Approach:</strong> Use create-or-replace in topological order, run contracts/tests/reconciliation both times, and compare deterministic <code>ORDER BY</code> snapshots plus unchanged row counts/sums.</p>
+<p><strong>Why:</strong> Rebuild semantics should replace trusted models rather than append.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-12-impact-analysis">Exercise 12 — Impact analysis<a class="heading-anchor" href="#solution-1--exercise-12-impact-analysis" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add one deterministic source row, predict every downstream change, then update tests without weakening contracts.</p>
+<p><strong>Approach:</strong> Choose a valid linked row, calculate affected staging/intermediate/day measures, rebuild, and assert only those rows/measures change while all contracts remain identical.</p>
+<p><strong>Why:</strong> Write expected deltas before executing the rebuild.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-13-freshness">Exercise 13 — Freshness<a class="heading-anchor" href="#solution-1--exercise-13-freshness" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add a producer freshness contract with an injected as-of time and distinguish stale from missing data.</p>
+<p><strong>Approach:</strong> Declare source timestamp, maximum age, and timezone; compare maximum observed timestamp with injected UTC as-of; report empty and stale sources as separate failures.</p>
+<p><strong>Why:</strong> Time-based tests must not call the wall clock directly.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-14-build-strategy">Exercise 14 — Build strategy<a class="heading-anchor" href="#solution-1--exercise-14-build-strategy" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compare full rebuild and incremental processing for this local project and state what evidence is missing for incrementality.</p>
+<p><strong>Approach:</strong> Keep full create-or-replace for bounded fixtures; an incremental design needs stable unique keys, watermark/late-data policy, merge semantics, and reconciliation against periodic full rebuilds.</p>
+<p><strong>Why:</strong> Idempotent full rebuild is the reference correctness baseline.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-15-money-correctness">Exercise 15 — Money correctness<a class="heading-anchor" href="#solution-1--exercise-15-money-correctness" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trace exact revenue from producer Decimal through DuckDB type, aggregation, Python snapshot, and reconciliation.</p>
+<p><strong>Approach:</strong> Declare DECIMAL types/scales, keep exact arithmetic through models/tests, convert to Decimal at the boundary, and round only labeled presentation values.</p>
+<p><strong>Why:</strong> Reject silent float conversion and premature rounding.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-16-null-semantics">Exercise 16 — NULL semantics<a class="heading-anchor" href="#solution-1--exercise-16-null-semantics" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Choose behavior for missing dimension labels and prove it does not change fact row count or measure totals.</p>
+<p><strong>Approach:</strong> Use a left join and explicit <code>COALESCE</code> to a documented unknown member, then reconcile fact counts/revenue before and after enrichment.</p>
+<p><strong>Why:</strong> An <code>unknown</code> label is a business rule; a filtering join is a data-loss bug unless declared.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-17-time-semantics">Exercise 17 — Time semantics<a class="heading-anchor" href="#solution-1--exercise-17-time-semantics" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define daily boundaries for timezone-aware source instants and test an order around midnight.</p>
+<p><strong>Approach:</strong> Declare UTC or a named reporting zone, apply conversion once in staging/intermediate logic, and fixture instants on both sides of midnight to verify bucket assignment.</p>
+<p><strong>Why:</strong> Convert the instant to the reporting zone before deriving its date.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-18-late-data">Exercise 18 — Late data<a class="heading-anchor" href="#solution-1--exercise-18-late-data" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Model a late-arriving order for a previously built day and compare full rebuild with an incremental repair.</p>
+<p><strong>Approach:</strong> The full rebuild updates the old day automatically; incrementality needs ingestion-time lookback or affected-partition reprocessing plus reconciliation.</p>
+<p><strong>Why:</strong> Watermarks based only on event time can miss late records.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-19-snapshot-determinism">Exercise 19 — Snapshot determinism<a class="heading-anchor" href="#solution-1--exercise-19-snapshot-determinism" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Require explicit ordering and stable serialization for mart snapshots across platforms.</p>
+<p><strong>Approach:</strong> Select declared columns in contract order, order by the primary/time key, normalize exact scalar serialization, and compare tuples rather than display-formatted text.</p>
+<p><strong>Why:</strong> Database row order is undefined without final <code>ORDER BY</code>.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-20-performance">Exercise 20 — Performance<a class="heading-anchor" href="#solution-1--exercise-20-performance" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Inspect a bounded <code>EXPLAIN</code> for the intermediate/mart build and identify one optimization that preserves grain.</p>
+<p><strong>Approach:</strong> Look for repeated scans, large joins, and unnecessary sorts; reduce projected columns or pre-aggregate at declared grain, then re-run all tests/reconciliation.</p>
+<p><strong>Why:</strong> Optimize after contracts and reconciliation pass.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-21-lineage">Exercise 21 — Lineage<a class="heading-anchor" href="#solution-1--exercise-21-lineage" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Produce a compact source-to-metric lineage table from <code>depends_on</code> and metric definitions.</p>
+<p><strong>Approach:</strong> Traverse the DAG from metric model to producers, emit ordered model/layer/grain edges and metric exclusions, and test the expected path.</p>
+<p><strong>Why:</strong> Lineage should be derivable from checked-in contracts rather than hand-maintained prose alone.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-22-transaction">Exercise 22 — Transaction<a class="heading-anchor" href="#solution-1--exercise-22-transaction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design build publication so readers do not observe half-rebuilt models after a failure.</p>
+<p><strong>Approach:</strong> Run the model sequence in an explicit transaction when supported, validate contracts/tests before commit, roll back on failure, or build versioned temporary models then swap after validation.</p>
+<p><strong>Why:</strong> Check DuckDB transaction/DDL semantics rather than assuming atomicity.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-23-failure-policy">Exercise 23 — Failure policy<a class="heading-anchor" href="#solution-1--exercise-23-failure-policy" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Make any contract, data-test, or reconciliation failure stop publication while retaining inspectable results.</p>
+<p><strong>Approach:</strong> Collect named results, raise before commit/export when one fails, and return bounded failure evidence without mutating the last known-good artifact.</p>
+<p><strong>Why:</strong> Do not continue to a green artifact after a red quality gate.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<h5 id="solution-1--exercise-24-portable-artifact">Exercise 24 — Portable artifact<a class="heading-anchor" href="#solution-1--exercise-24-portable-artifact" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Export a deterministic local result with manifest, metric definitions, test evidence, and cleanup instructions.</p>
+<p><strong>Approach:</strong> Write under ignored <code>artifacts/</code>, include build timestamp from an injected clock, source fixture/version, ordered schema/data, quality results and definitions, then document safe regeneration/removal.</p>
+<p><strong>Why:</strong> Separate generated artifacts from source and never include local paths or credentials.</p>
+<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/professional/solutions/bridge_analytics_01_local_project_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/professional/solutions/bridge_analytics_01_local_project_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;BRIDGE-ANALYTICS-01 reference: deterministic local dbt-style DuckDB project.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import re</span>
+<span>from collections.abc import Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from decimal import Decimal</span>
+<span>from importlib import import_module</span>
+<span>from typing import Protocol, cast</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-analytics-01&quot;</span>
+<span>PREREQUISITES = (&quot;python-23&quot;, &quot;sql-30&quot;, &quot;bridge-05&quot;)</span>
+<span>LEVEL = &quot;advanced&quot;</span>
+<span> </span>
+<span>IDENTIFIER = re.compile(r&quot;^[a-z][a-z0-9_]*$&quot;)</span>
+<span>SOURCE_NAMES = frozenset({&quot;raw_customers&quot;, &quot;raw_orders&quot;, &quot;raw_order_items&quot;})</span>
+<span> </span>
+<span> </span>
+<span>class QueryResult(Protocol):</span>
+<span>    def fetchone(self) -&gt; Sequence[object] | None: ...</span>
+<span> </span>
+<span>    def fetchall(self) -&gt; Sequence[Sequence[object]]: ...</span>
+<span> </span>
+<span> </span>
+<span>class AnalyticsConnection(Protocol):</span>
+<span>    def execute(</span>
+<span>        self,</span>
+<span>        query: str,</span>
+<span>        parameters: Sequence[object] | None = None,</span>
+<span>    ) -&gt; QueryResult: ...</span>
+<span> </span>
+<span>    def executemany(</span>
+<span>        self,</span>
+<span>        query: str,</span>
+<span>        parameters: Sequence[Sequence[object]],</span>
+<span>    ) -&gt; QueryResult: ...</span>
+<span> </span>
+<span>    def close(self) -&gt; None: ...</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ColumnContract:</span>
+<span>    name: str</span>
+<span>    sql_type_prefixes: tuple[str, ...]</span>
+<span>    nullable: bool</span>
+<span>    python_types: tuple[type[object], ...] = ()</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        _trusted_identifier(self.name)</span>
+<span>        if not self.sql_type_prefixes:</span>
+<span>            raise ValueError(&quot;column contract needs at least one SQL type prefix&quot;)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ProducerContract:</span>
+<span>    source_name: str</span>
+<span>    grain: str</span>
+<span>    primary_key: tuple[str, ...]</span>
+<span>    columns: tuple[ColumnContract, ...]</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        _trusted_identifier(self.source_name)</span>
+<span>        if not self.grain.strip() or not self.primary_key or not self.columns:</span>
+<span>            raise ValueError(&quot;producer contract needs grain, primary key, and columns&quot;)</span>
+<span>        column_names = {column.name for column in self.columns}</span>
+<span>        if not set(self.primary_key).issubset(column_names):</span>
+<span>            raise ValueError(&quot;producer primary-key columns must exist in the contract&quot;)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ModelSpec:</span>
+<span>    name: str</span>
+<span>    layer: str</span>
+<span>    grain: str</span>
+<span>    depends_on: tuple[str, ...]</span>
+<span>    sql: str</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        _trusted_identifier(self.name)</span>
+<span>        if self.layer not in {&quot;staging&quot;, &quot;intermediate&quot;, &quot;mart&quot;}:</span>
+<span>            raise ValueError(&quot;model layer must be staging, intermediate, or mart&quot;)</span>
+<span>        if not self.grain.strip() or not self.depends_on or not self.sql.strip():</span>
+<span>            raise ValueError(&quot;model needs grain, dependencies, and SQL&quot;)</span>
+<span>        for dependency in self.depends_on:</span>
+<span>            _trusted_identifier(dependency)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class TableContract:</span>
+<span>    model_name: str</span>
+<span>    grain: str</span>
+<span>    primary_key: tuple[str, ...]</span>
+<span>    columns: tuple[ColumnContract, ...]</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        _trusted_identifier(self.model_name)</span>
+<span>        if not self.grain.strip() or not self.primary_key or not self.columns:</span>
+<span>            raise ValueError(&quot;table contract needs grain, primary key, and columns&quot;)</span>
+<span>        column_names = {column.name for column in self.columns}</span>
+<span>        if not set(self.primary_key).issubset(column_names):</span>
+<span>            raise ValueError(&quot;primary-key columns must exist in the contract&quot;)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class MetricDefinition:</span>
+<span>    name: str</span>
+<span>    label: str</span>
+<span>    model_name: str</span>
+<span>    expression: str</span>
+<span>    aggregation: str</span>
+<span>    time_dimension: str</span>
+<span>    unit: str</span>
+<span>    description: str</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        _trusted_identifier(self.name)</span>
+<span>        _trusted_identifier(self.model_name)</span>
+<span>        _trusted_identifier(self.time_dimension)</span>
+<span>        if self.aggregation not in {&quot;sum&quot;, &quot;count&quot;, &quot;count_distinct&quot;, &quot;average&quot;}:</span>
+<span>            raise ValueError(&quot;unsupported metric aggregation&quot;)</span>
+<span>        if not all(</span>
+<span>            value.strip() for value in (self.label, self.expression, self.unit, self.description)</span>
+<span>        ):</span>
+<span>            raise ValueError(&quot;metric fields cannot be blank&quot;)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class DataTest:</span>
+<span>    name: str</span>
+<span>    model_name: str</span>
+<span>    violation_query: str</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        _trusted_identifier(self.name)</span>
+<span>        _trusted_identifier(self.model_name)</span>
+<span>        if not self.violation_query.strip():</span>
+<span>            raise ValueError(&quot;data test query cannot be blank&quot;)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class DataTestResult:</span>
+<span>    name: str</span>
+<span>    violation_count: int</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ProjectResult:</span>
+<span>    build_order: tuple[str, ...]</span>
+<span>    test_results: tuple[DataTestResult, ...]</span>
+<span>    mart_rows: tuple[tuple[object, ...], ...]</span>
+<span> </span>
+<span> </span>
+<span>def _trusted_identifier(value: str) -&gt; str:</span>
+<span>    if not IDENTIFIER.fullmatch(value):</span>
+<span>        raise ValueError(f&quot;untrusted SQL identifier: {value!r}&quot;)</span>
+<span>    return value</span>
+<span> </span>
+<span> </span>
+<span>RAW_CUSTOMERS = (</span>
+<span>    (1, &quot;Ada Lovelace&quot;, &quot;enterprise&quot;),</span>
+<span>    (2, &quot;Grace Hopper&quot;, &quot;small_business&quot;),</span>
+<span>    (3, &quot;Lin Chen&quot;, &quot;enterprise&quot;),</span>
+<span>)</span>
+<span>RAW_ORDERS = (</span>
+<span>    (100, 1, &quot;2026-01-01&quot;, &quot;paid&quot;),</span>
+<span>    (101, 1, &quot;2026-01-01&quot;, &quot;shipped&quot;),</span>
+<span>    (102, 2, &quot;2026-01-02&quot;, &quot;cancelled&quot;),</span>
+<span>    (103, 2, &quot;2026-01-02&quot;, &quot;paid&quot;),</span>
+<span>    (104, 3, &quot;2026-01-03&quot;, &quot;placed&quot;),</span>
+<span>)</span>
+<span>RAW_ORDER_ITEMS = (</span>
+<span>    (100, 1, 2, &quot;10.00&quot;),</span>
+<span>    (100, 2, 1, &quot;5.50&quot;),</span>
+<span>    (101, 3, 1, &quot;12.00&quot;),</span>
+<span>    (102, 4, 10, &quot;1.00&quot;),</span>
+<span>    (103, 5, 3, &quot;7.25&quot;),</span>
+<span>    (104, 6, 2, &quot;100.00&quot;),</span>
+<span>)</span>
+<span> </span>
+<span>PRODUCER_CONTRACTS = (</span>
+<span>    ProducerContract(</span>
+<span>        &quot;raw_customers&quot;,</span>
+<span>        &quot;one row per customer_id&quot;,</span>
+<span>        (&quot;customer_id&quot;,),</span>
+<span>        (</span>
+<span>            ColumnContract(&quot;customer_id&quot;, (&quot;BIGINT&quot;,), False, (int,)),</span>
+<span>            ColumnContract(&quot;full_name&quot;, (&quot;VARCHAR&quot;,), False, (str,)),</span>
+<span>            ColumnContract(&quot;segment&quot;, (&quot;VARCHAR&quot;,), False, (str,)),</span>
+<span>        ),</span>
+<span>    ),</span>
+<span>    ProducerContract(</span>
+<span>        &quot;raw_orders&quot;,</span>
+<span>        &quot;one row per order_id&quot;,</span>
+<span>        (&quot;order_id&quot;,),</span>
+<span>        (</span>
+<span>            ColumnContract(&quot;order_id&quot;, (&quot;BIGINT&quot;,), False, (int,)),</span>
+<span>            ColumnContract(&quot;customer_id&quot;, (&quot;BIGINT&quot;,), False, (int,)),</span>
+<span>            ColumnContract(&quot;order_date&quot;, (&quot;DATE&quot;,), False, (str,)),</span>
+<span>            ColumnContract(&quot;status&quot;, (&quot;VARCHAR&quot;,), False, (str,)),</span>
+<span>        ),</span>
+<span>    ),</span>
+<span>    ProducerContract(</span>
+<span>        &quot;raw_order_items&quot;,</span>
+<span>        &quot;one row per order_id and line_id&quot;,</span>
+<span>        (&quot;order_id&quot;, &quot;line_id&quot;),</span>
+<span>        (</span>
+<span>            ColumnContract(&quot;order_id&quot;, (&quot;BIGINT&quot;,), False, (int,)),</span>
+<span>            ColumnContract(&quot;line_id&quot;, (&quot;BIGINT&quot;,), False, (int,)),</span>
+<span>            ColumnContract(&quot;quantity&quot;, (&quot;INTEGER&quot;, &quot;BIGINT&quot;), False, (int,)),</span>
+<span>            ColumnContract(&quot;unit_price&quot;, (&quot;DECIMAL&quot;,), False, (str, Decimal)),</span>
+<span>        ),</span>
+<span>    ),</span>
+<span>)</span>
+<span> </span>
+<span>SOURCE_ROWS: dict[str, tuple[tuple[object, ...], ...]] = {</span>
+<span>    &quot;raw_customers&quot;: RAW_CUSTOMERS,</span>
+<span>    &quot;raw_orders&quot;: RAW_ORDERS,</span>
+<span>    &quot;raw_order_items&quot;: RAW_ORDER_ITEMS,</span>
+<span>}</span>
+<span> </span>
+<span>MODELS = (</span>
+<span>    ModelSpec(</span>
+<span>        &quot;stg_customers&quot;,</span>
+<span>        &quot;staging&quot;,</span>
+<span>        &quot;one row per customer_id&quot;,</span>
+<span>        (&quot;raw_customers&quot;,),</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT</span>
+<span>    CAST(customer_id AS BIGINT) AS customer_id,</span>
+<span>    trim(full_name) AS full_name,</span>
+<span>    lower(trim(segment)) AS segment</span>
+<span>FROM raw_customers</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    ModelSpec(</span>
+<span>        &quot;stg_orders&quot;,</span>
+<span>        &quot;staging&quot;,</span>
+<span>        &quot;one row per order_id&quot;,</span>
+<span>        (&quot;raw_orders&quot;,),</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT</span>
+<span>    CAST(order_id AS BIGINT) AS order_id,</span>
+<span>    CAST(customer_id AS BIGINT) AS customer_id,</span>
+<span>    CAST(order_date AS DATE) AS order_date,</span>
+<span>    lower(trim(status)) AS status</span>
+<span>FROM raw_orders</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    ModelSpec(</span>
+<span>        &quot;stg_order_items&quot;,</span>
+<span>        &quot;staging&quot;,</span>
+<span>        &quot;one row per order_id and line_id&quot;,</span>
+<span>        (&quot;raw_order_items&quot;,),</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT</span>
+<span>    CAST(order_id AS BIGINT) AS order_id,</span>
+<span>    CAST(line_id AS BIGINT) AS line_id,</span>
+<span>    CAST(quantity AS INTEGER) AS quantity,</span>
+<span>    CAST(unit_price AS DECIMAL(18, 2)) AS unit_price</span>
+<span>FROM raw_order_items</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    ModelSpec(</span>
+<span>        &quot;int_order_revenue&quot;,</span>
+<span>        &quot;intermediate&quot;,</span>
+<span>        &quot;one row per completed order_id&quot;,</span>
+<span>        (&quot;stg_orders&quot;, &quot;stg_order_items&quot;),</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT</span>
+<span>    o.order_id,</span>
+<span>    o.customer_id,</span>
+<span>    o.order_date,</span>
+<span>    sum(i.quantity * i.unit_price) AS order_revenue</span>
+<span>FROM stg_orders AS o</span>
+<span>JOIN stg_order_items AS i USING (order_id)</span>
+<span>WHERE o.status IN (&#x27;paid&#x27;, &#x27;shipped&#x27;)</span>
+<span>GROUP BY o.order_id, o.customer_id, o.order_date</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    ModelSpec(</span>
+<span>        &quot;mart_daily_revenue&quot;,</span>
+<span>        &quot;mart&quot;,</span>
+<span>        &quot;one row per order_date&quot;,</span>
+<span>        (&quot;int_order_revenue&quot;,),</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT</span>
+<span>    order_date,</span>
+<span>    sum(order_revenue) AS gross_revenue,</span>
+<span>    count(*) AS order_count,</span>
+<span>    count(DISTINCT customer_id) AS customer_count</span>
+<span>FROM int_order_revenue</span>
+<span>GROUP BY order_date</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>)</span>
+<span> </span>
+<span>MART_CONTRACT = TableContract(</span>
+<span>    &quot;mart_daily_revenue&quot;,</span>
+<span>    &quot;one row per order_date&quot;,</span>
+<span>    (&quot;order_date&quot;,),</span>
+<span>    (</span>
+<span>        ColumnContract(&quot;order_date&quot;, (&quot;DATE&quot;,), False),</span>
+<span>        ColumnContract(&quot;gross_revenue&quot;, (&quot;DECIMAL&quot;,), False),</span>
+<span>        ColumnContract(&quot;order_count&quot;, (&quot;BIGINT&quot;,), False),</span>
+<span>        ColumnContract(&quot;customer_count&quot;, (&quot;BIGINT&quot;,), False),</span>
+<span>    ),</span>
+<span>)</span>
+<span> </span>
+<span>GROSS_REVENUE_METRIC = MetricDefinition(</span>
+<span>    name=&quot;gross_revenue&quot;,</span>
+<span>    label=&quot;Gross revenue&quot;,</span>
+<span>    model_name=&quot;mart_daily_revenue&quot;,</span>
+<span>    expression=&quot;gross_revenue&quot;,</span>
+<span>    aggregation=&quot;sum&quot;,</span>
+<span>    time_dimension=&quot;order_date&quot;,</span>
+<span>    unit=&quot;currency units&quot;,</span>
+<span>    description=(</span>
+<span>        &quot;Sum of quantity times unit price for paid or shipped orders, &quot;</span>
+<span>        &quot;grouped by UTC-neutral course order_date; cancelled and placed orders are excluded.&quot;</span>
+<span>    ),</span>
+<span>)</span>
+<span> </span>
+<span>DATA_TESTS = (</span>
+<span>    DataTest(</span>
+<span>        &quot;stg_customers_key&quot;,</span>
+<span>        &quot;stg_customers&quot;,</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT customer_id</span>
+<span>FROM stg_customers</span>
+<span>GROUP BY customer_id</span>
+<span>HAVING customer_id IS NULL OR count(*) &lt;&gt; 1</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    DataTest(</span>
+<span>        &quot;stg_orders_key_status&quot;,</span>
+<span>        &quot;stg_orders&quot;,</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT order_id</span>
+<span>FROM stg_orders</span>
+<span>GROUP BY order_id</span>
+<span>HAVING order_id IS NULL</span>
+<span>    OR count(*) &lt;&gt; 1</span>
+<span>    OR bool_or(status NOT IN (&#x27;paid&#x27;, &#x27;shipped&#x27;, &#x27;cancelled&#x27;, &#x27;placed&#x27;))</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    DataTest(</span>
+<span>        &quot;orders_customer_relationship&quot;,</span>
+<span>        &quot;stg_orders&quot;,</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT o.order_id</span>
+<span>FROM stg_orders AS o</span>
+<span>LEFT JOIN stg_customers AS c USING (customer_id)</span>
+<span>WHERE c.customer_id IS NULL</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    DataTest(</span>
+<span>        &quot;order_item_business_rules&quot;,</span>
+<span>        &quot;stg_order_items&quot;,</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT order_id, line_id</span>
+<span>FROM stg_order_items</span>
+<span>WHERE order_id IS NULL</span>
+<span>   OR line_id IS NULL</span>
+<span>   OR quantity &lt;= 0</span>
+<span>   OR unit_price &lt; 0</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    DataTest(</span>
+<span>        &quot;intermediate_order_grain&quot;,</span>
+<span>        &quot;int_order_revenue&quot;,</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT order_id</span>
+<span>FROM int_order_revenue</span>
+<span>GROUP BY order_id</span>
+<span>HAVING order_id IS NULL OR count(*) &lt;&gt; 1 OR min(order_revenue) &lt; 0</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>    DataTest(</span>
+<span>        &quot;mart_daily_grain&quot;,</span>
+<span>        &quot;mart_daily_revenue&quot;,</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT order_date</span>
+<span>FROM mart_daily_revenue</span>
+<span>GROUP BY order_date</span>
+<span>HAVING order_date IS NULL</span>
+<span>    OR count(*) &lt;&gt; 1</span>
+<span>    OR min(gross_revenue) &lt; 0</span>
+<span>    OR min(order_count) &lt; 1</span>
+<span>    OR min(customer_count) &lt; 1</span>
+<span>&quot;&quot;&quot;.strip(),</span>
+<span>    ),</span>
+<span>)</span>
+<span> </span>
+<span> </span>
+<span>def validate_producer_rows(</span>
+<span>    contract: ProducerContract,</span>
+<span>    rows: Sequence[Sequence[object]],</span>
+<span>) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Enforce source shape, nullability, types, and declared grain keys.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    expected_width = len(contract.columns)</span>
+<span>    for row_number, row in enumerate(rows, start=1):</span>
+<span>        if len(row) != expected_width:</span>
+<span>            raise ValueError(</span>
+<span>                f&quot;{contract.source_name} row {row_number} has {len(row)} values; &quot;</span>
+<span>                f&quot;expected {expected_width}&quot;</span>
+<span>            )</span>
+<span>        for column, value in zip(contract.columns, row, strict=True):</span>
+<span>            if value is None and not column.nullable:</span>
+<span>                raise ValueError(f&quot;{contract.source_name}.{column.name} cannot be null&quot;)</span>
+<span>            if (</span>
+<span>                value is not None</span>
+<span>                and column.python_types</span>
+<span>                and not isinstance(value, column.python_types)</span>
+<span>            ):</span>
+<span>                raise TypeError(f&quot;{contract.source_name}.{column.name} has invalid Python type&quot;)</span>
+<span> </span>
+<span>    column_indexes = {column.name: index for index, column in enumerate(contract.columns)}</span>
+<span>    keys = [</span>
+<span>        tuple(row[column_indexes[column_name]] for column_name in contract.primary_key)</span>
+<span>        for row in rows</span>
+<span>    ]</span>
+<span>    if len(keys) != len(set(keys)):</span>
+<span>        raise ValueError(f&quot;{contract.source_name} violates declared grain: {contract.grain}&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def topological_order(</span>
+<span>    models: Sequence[ModelSpec],</span>
+<span>    *,</span>
+<span>    source_names: frozenset[str],</span>
+<span>) -&gt; tuple[ModelSpec, ...]:</span>
+<span>    &quot;&quot;&quot;Return a deterministic DAG order and reject missing or cyclic dependencies.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    by_name = {model.name: model for model in models}</span>
+<span>    if len(by_name) != len(models):</span>
+<span>        raise ValueError(&quot;model names must be unique&quot;)</span>
+<span>    for model in models:</span>
+<span>        missing = set(model.depends_on) - set(by_name) - set(source_names)</span>
+<span>        if missing:</span>
+<span>            raise ValueError(f&quot;{model.name} has missing dependencies: {sorted(missing)}&quot;)</span>
+<span> </span>
+<span>    remaining = set(by_name)</span>
+<span>    resolved = set(source_names)</span>
+<span>    ordered: list[ModelSpec] = []</span>
+<span>    while remaining:</span>
+<span>        ready = sorted(</span>
+<span>            name for name in remaining if set(by_name[name].depends_on).issubset(resolved)</span>
+<span>        )</span>
+<span>        if not ready:</span>
+<span>            raise ValueError(f&quot;model dependency cycle detected: {sorted(remaining)}&quot;)</span>
+<span>        for name in ready:</span>
+<span>            ordered.append(by_name[name])</span>
+<span>            remaining.remove(name)</span>
+<span>            resolved.add(name)</span>
+<span>    return tuple(ordered)</span>
+<span> </span>
+<span> </span>
+<span>def load_deterministic_sources(connection: AnalyticsConnection) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Validate producer fixtures, then rebuild three local raw tables.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    for contract in PRODUCER_CONTRACTS:</span>
+<span>        validate_producer_rows(contract, SOURCE_ROWS[contract.source_name])</span>
+<span> </span>
+<span>    connection.execute(</span>
+<span>        &quot;&quot;&quot;</span>
+<span>CREATE OR REPLACE TABLE raw_customers (</span>
+<span>    customer_id BIGINT,</span>
+<span>    full_name VARCHAR,</span>
+<span>    segment VARCHAR</span>
+<span>)</span>
+<span>&quot;&quot;&quot;</span>
+<span>    )</span>
+<span>    connection.executemany(</span>
+<span>        &quot;INSERT INTO raw_customers VALUES (?, ?, ?)&quot;,</span>
+<span>        RAW_CUSTOMERS,</span>
+<span>    )</span>
+<span>    connection.execute(</span>
+<span>        &quot;&quot;&quot;</span>
+<span>CREATE OR REPLACE TABLE raw_orders (</span>
+<span>    order_id BIGINT,</span>
+<span>    customer_id BIGINT,</span>
+<span>    order_date VARCHAR,</span>
+<span>    status VARCHAR</span>
+<span>)</span>
+<span>&quot;&quot;&quot;</span>
+<span>    )</span>
+<span>    connection.executemany(</span>
+<span>        &quot;INSERT INTO raw_orders VALUES (?, ?, ?, ?)&quot;,</span>
+<span>        RAW_ORDERS,</span>
+<span>    )</span>
+<span>    connection.execute(</span>
+<span>        &quot;&quot;&quot;</span>
+<span>CREATE OR REPLACE TABLE raw_order_items (</span>
+<span>    order_id BIGINT,</span>
+<span>    line_id BIGINT,</span>
+<span>    quantity INTEGER,</span>
+<span>    unit_price VARCHAR</span>
+<span>)</span>
+<span>&quot;&quot;&quot;</span>
+<span>    )</span>
+<span>    connection.executemany(</span>
+<span>        &quot;INSERT INTO raw_order_items VALUES (?, ?, ?, ?)&quot;,</span>
+<span>        RAW_ORDER_ITEMS,</span>
+<span>    )</span>
+<span> </span>
+<span> </span>
+<span>def build_models(</span>
+<span>    connection: AnalyticsConnection,</span>
+<span>    models: Sequence[ModelSpec],</span>
+<span>    *,</span>
+<span>    source_names: frozenset[str],</span>
+<span>) -&gt; tuple[str, ...]:</span>
+<span>    &quot;&quot;&quot;Rebuild trusted model specifications in deterministic DAG order.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    ordered = topological_order(models, source_names=source_names)</span>
+<span>    for model in ordered:</span>
+<span>        model_name = _trusted_identifier(model.name)</span>
+<span>        connection.execute(f&quot;CREATE OR REPLACE TABLE {model_name} AS\n{model.sql}&quot;)</span>
+<span>    return tuple(model.name for model in ordered)</span>
+<span> </span>
+<span> </span>
+<span>def validate_table_contract(</span>
+<span>    connection: AnalyticsConnection,</span>
+<span>    contract: TableContract,</span>
+<span>) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Compare actual column order and SQL types with the declared contract.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    model_name = _trusted_identifier(contract.model_name)</span>
+<span>    rows = connection.execute(f&quot;DESCRIBE {model_name}&quot;).fetchall()</span>
+<span>    actual = [(str(row[0]), str(row[1]).upper()) for row in rows]</span>
+<span>    expected_names = [column.name for column in contract.columns]</span>
+<span>    if [name for name, _ in actual] != expected_names:</span>
+<span>        raise ValueError(</span>
+<span>            f&quot;{contract.model_name} column drift: &quot;</span>
+<span>            f&quot;actual={[name for name, _ in actual]} expected={expected_names}&quot;</span>
+<span>        )</span>
+<span>    for column, (_, actual_type) in zip(contract.columns, actual, strict=True):</span>
+<span>        if not actual_type.startswith(column.sql_type_prefixes):</span>
+<span>            raise ValueError(</span>
+<span>                f&quot;{contract.model_name}.{column.name} type {actual_type!r} &quot;</span>
+<span>                f&quot;does not match {column.sql_type_prefixes}&quot;</span>
+<span>            )</span>
+<span> </span>
+<span> </span>
+<span>def run_data_tests(</span>
+<span>    connection: AnalyticsConnection,</span>
+<span>    tests: Sequence[DataTest],</span>
+<span>) -&gt; tuple[DataTestResult, ...]:</span>
+<span>    &quot;&quot;&quot;Count rows returned by each violation query; zero means pass.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    results: list[DataTestResult] = []</span>
+<span>    for test in tests:</span>
+<span>        violations = connection.execute(</span>
+<span>            f&quot;SELECT count(*) FROM ({test.violation_query}) AS violations&quot;</span>
+<span>        ).fetchone()</span>
+<span>        if violations is None:</span>
+<span>            raise ValueError(f&quot;data test {test.name} returned no count&quot;)</span>
+<span>        results.append(DataTestResult(test.name, int(cast(int, violations[0]))))</span>
+<span>    return tuple(results)</span>
+<span> </span>
+<span> </span>
+<span>def reconcile_mart(connection: AnalyticsConnection) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Prove mart totals and counts reconcile to intermediate order grain.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    row = connection.execute(</span>
+<span>        &quot;&quot;&quot;</span>
+<span>WITH detail AS (</span>
+<span>    SELECT</span>
+<span>        order_date,</span>
+<span>        sum(order_revenue) AS gross_revenue,</span>
+<span>        count(*) AS order_count,</span>
+<span>        count(DISTINCT customer_id) AS customer_count</span>
+<span>    FROM int_order_revenue</span>
+<span>    GROUP BY order_date</span>
+<span>),</span>
+<span>comparison AS (</span>
+<span>    SELECT</span>
+<span>        coalesce(d.order_date, m.order_date) AS order_date,</span>
+<span>        d.gross_revenue AS detail_revenue,</span>
+<span>        m.gross_revenue AS mart_revenue,</span>
+<span>        d.order_count AS detail_orders,</span>
+<span>        m.order_count AS mart_orders,</span>
+<span>        d.customer_count AS detail_customers,</span>
+<span>        m.customer_count AS mart_customers</span>
+<span>    FROM detail AS d</span>
+<span>    FULL OUTER JOIN mart_daily_revenue AS m USING (order_date)</span>
+<span>)</span>
+<span>SELECT count(*)</span>
+<span>FROM comparison</span>
+<span>WHERE detail_revenue IS DISTINCT FROM mart_revenue</span>
+<span>   OR detail_orders IS DISTINCT FROM mart_orders</span>
+<span>   OR detail_customers IS DISTINCT FROM mart_customers</span>
+<span>&quot;&quot;&quot;</span>
+<span>    ).fetchone()</span>
+<span>    if row is None or int(cast(int, row[0])) != 0:</span>
+<span>        raise AssertionError(&quot;mart reconciliation failed&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def mart_snapshot(</span>
+<span>    connection: AnalyticsConnection,</span>
+<span>) -&gt; tuple[tuple[object, ...], ...]:</span>
+<span>    rows = connection.execute(</span>
+<span>        &quot;&quot;&quot;</span>
+<span>SELECT order_date, gross_revenue, order_count, customer_count</span>
+<span>FROM mart_daily_revenue</span>
+<span>ORDER BY order_date</span>
+<span>&quot;&quot;&quot;</span>
+<span>    ).fetchall()</span>
+<span>    return tuple(tuple(row) for row in rows)</span>
+<span> </span>
+<span> </span>
+<span>def run_project(connection: AnalyticsConnection) -&gt; ProjectResult:</span>
+<span>    &quot;&quot;&quot;Load, rebuild, contract-check, test, reconcile, and snapshot the project.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    load_deterministic_sources(connection)</span>
+<span>    order = build_models(connection, MODELS, source_names=SOURCE_NAMES)</span>
+<span>    validate_table_contract(connection, MART_CONTRACT)</span>
+<span>    test_results = run_data_tests(connection, DATA_TESTS)</span>
+<span>    failed = [result for result in test_results if result.violation_count]</span>
+<span>    if failed:</span>
+<span>        names = &quot;, &quot;.join(result.name for result in failed)</span>
+<span>        raise AssertionError(f&quot;data tests failed: {names}&quot;)</span>
+<span>    reconcile_mart(connection)</span>
+<span>    return ProjectResult(order, test_results, mart_snapshot(connection))</span>
+<span> </span>
+<span> </span>
+<span>def open_memory_duckdb() -&gt; AnalyticsConnection:</span>
+<span>    &quot;&quot;&quot;Import the optional local engine only at the executable boundary.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    duckdb = import_module(&quot;duckdb&quot;)</span>
+<span>    return cast(AnalyticsConnection, duckdb.connect(database=&quot;:memory:&quot;))</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    connection = open_memory_duckdb()</span>
+<span>    try:</span>
+<span>        first = run_project(connection)</span>
+<span>        second = run_project(connection)</span>
+<span>    finally:</span>
+<span>        connection.close()</span>
+<span>    if first != second:</span>
+<span>        raise AssertionError(&quot;a clean rebuild changed the deterministic project result&quot;)</span>
+<span>    print(</span>
+<span>        &quot;Local analytics project: &quot;</span>
+<span>        f&quot;models={len(first.build_order)} &quot;</span>
+<span>        f&quot;tests={len(first.test_results)} &quot;</span>
+<span>        f&quot;mart_rows={len(first.mart_rows)} &quot;</span>
+<span>        &quot;idempotent=True&quot;</span>
+<span>    )</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="bridge-ai-01.html"><small>Previous lesson</small><strong>bridge-ai-01</strong><span>AI Application Engineering with Deterministic Test Doubles</span></a>
+        <span class="nav-card next disabled"><small>Next lesson</small><strong>Course complete</strong></span>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-analytics-01";
+    const LEARNER_PATH = "bridge/professional/lessons/bridge_analytics_01_local_project.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

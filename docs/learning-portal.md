@@ -9,11 +9,24 @@ by the command-line tools.
 
 | Mode | Start it | Progress location | Native launch buttons |
 | --- | --- | --- | --- |
-| Static/offline | Double-click `START_HERE.html` | This browser's local storage | No; browser links still open every artifact |
-| Private launcher | Run `scripts/learning_portal.py` | Ignored `.learning/progress.json` plus a browser copy | Yes, unless `--no-launches` is supplied |
+| Static/offline | Double-click `START_HERE.html` | This browser's local storage | No; use rendered reading pages |
+| Private launcher | Double-click `START_DS60.cmd` on Windows, or run `scripts/learning_portal.py` | Ignored `.learning/progress.json` plus a browser copy | Yes, unless `--no-launches` is supplied |
 
 The static file contains its styles, scripts, and catalog data. It does not
 load a font, analytics script, image, or API from the internet.
+
+Static mode is a reader and setup guide. Browsers cannot execute a `.py`,
+`.ipynb`, or `.sql` lesson safely just by opening its source. On Windows,
+`START_DS60.cmd` is therefore the recommended front door: it prepares and
+checks the environment before enabling the portal's fixed VS Code and
+JupyterLab actions.
+
+Setup, documentation, and incidental SQL links open generated pages under
+`reference-pages/`, not raw Markdown or SQL. In static mode, use the lesson
+reader's **Track completion on the course dashboard** link and mark the card
+on `START_HERE.html`. The per-lesson completion checkbox appears only in
+private launcher mode, where the dashboard, reader, CLI, and Codex can share
+the ignored progress file.
 
 ## Start private launcher mode
 
@@ -21,6 +34,7 @@ Complete setup first, then run:
 
 ```powershell
 # Windows PowerShell
+# Or simply double-click START_DS60.cmd, which performs readiness checks first.
 $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
     (Resolve-Path .\.venv\Scripts\python.exe).Path
 } else {
@@ -58,8 +72,12 @@ Every native action is mapped in course code; the browser never supplies a
 shell command or unrestricted filesystem path.
 
 - **Open repository in VS Code** opens only the repository root.
-- **Open in VS Code** on a lesson card resolves that stable catalog ID and
-  opens only its cataloged learner artifact.
+- **Open in VS Code** on a lesson reader resolves that stable catalog ID plus
+  its guide, learner, or indexed solution selector.
+- **Open exact notebook** starts JupyterLab with that cataloged `.ipynb`.
+- **Create/open guided SQL notebook** creates an ignored, editable notebook
+  and SQL copy for that stable SQL lesson, then starts JupyterLab with that
+  exact notebook. It never accepts a browser-supplied path or command.
 - **Launch Python JupyterLab** opens `python/ds-60day/notebooks`.
 - **Launch PostgreSQL notebook lab** opens
   `bridge/professional/notebooks`.
@@ -99,10 +117,12 @@ The private launcher:
 
 - binds only to `127.0.0.1`, never a LAN or public interface;
 - generates a new in-memory request token for each session;
-- requires the expected `Host`, token, and same origin for writes;
+- requires the exact loopback `Host` for every request, plus the session token
+  and same origin for API writes;
 - sends no cross-origin access headers;
-- blocks hidden directories, environment files, progress, caches, and common
-  credential/private-key names from file serving;
+- serves only `START_HERE.html`, generated lesson readers, and generated
+  reference pages; raw repository source, hidden directories, environment
+  files, progress, caches, and credential/private-key files are not exposed;
 - limits JSON request size;
 - allows only the fixed actions listed above.
 
@@ -117,16 +137,21 @@ Edit `scripts/build_course_guide.py`, never `START_HERE.html` directly:
 # Windows PowerShell
 & $CoursePython scripts\build_course_guide.py
 & $CoursePython scripts\build_course_guide.py --check
-& $CoursePython -m pytest tests\test_course_guide.py tests\test_portal.py
+& $CoursePython scripts\build_lesson_readers.py
+& $CoursePython scripts\build_lesson_readers.py --check
+& $CoursePython -m pytest tests\test_course_guide.py tests\test_lesson_reader.py tests\test_portal.py
 ```
 
 ```bash
 # macOS/Linux
 .venv/bin/python scripts/build_course_guide.py
 .venv/bin/python scripts/build_course_guide.py --check
-.venv/bin/python -m pytest tests/test_course_guide.py tests/test_portal.py
+.venv/bin/python scripts/build_lesson_readers.py
+.venv/bin/python scripts/build_lesson_readers.py --check
+.venv/bin/python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py
 ```
 
 Browser QA should cover desktop and narrow mobile layouts, static `file://`
 behavior, launcher mode, keyboard focus, filter/pagination behavior,
-progress export/import, console errors, and unexpected network requests.
+progress export/import, generated local-reference navigation, the mode-specific
+completion control, console errors, and unexpected network requests.

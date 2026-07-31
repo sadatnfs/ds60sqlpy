@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-59 · Final Capstone Part2 · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-59</p>
+        <h1>Final Capstone Part2</h1>
+        <p class="hero-copy">Applied analytics and capstones</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-58.html">sql-58</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day59_final_capstone_part2.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day59_final_capstone_part2.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day59_final_capstone_part2.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-59-final-capstone-part-2-stakeholder-analytics">Day 59 — Final Capstone, Part 2: Stakeholder Analytics<a class="heading-anchor" href="#guide--day-59-final-capstone-part-2-stakeholder-analytics" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-58.html#guide">Day 58 — capstone ingestion and data quality</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-59.html#learner">learner SQL</a> · <a href="sql-59.html#solution-1">solution reasoning</a> · <a href="sql-59.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Deliver stakeholder-specific metrics with documented grain, denominator, scope, and reconciliation.</li>
+<li>Pair performance recommendations with representative evidence and operational ownership.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>KPI contract:</strong> metric name, formula, grain, population, window, exclusions, and owner.</li>
+<li><strong>Funnel denominator:</strong> the eligible population used at each conversion step.</li>
+<li><strong>Scale hypothesis:</strong> a design expected to help at larger volume but still requiring representative validation.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Choose one KPI and write its contract before SQL. Build its lowest stable grain, add dimensions only after reconciliation, and return numerator/denominator beside any rate. Present the stakeholder table together with its control total and a limitation; repeat that evidence pattern for Finance and Marketing.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete these in the <a href="sql-59.html#learner">learner SQL</a>:</p>
+<ol>
+<li>State every LTV CTE&#x27;s grain and its grain transition.</li>
+<li>Add funnel conversion rates and retain buyers without events.</li>
+<li>Reconcile order totals, line revenue, and payments before KPI selection.</li>
+<li>Add direct attribution and reconcile purchases.</li>
+<li>Compare customer/date and date/customer index orders.</li>
+<li>Write a complete metric contract for one KPI.</li>
+<li>Publish product-pair support, confidence, and lift with a minimum count.</li>
+<li>Assemble named cross-domain control totals for stakeholder sign-off.</li>
+</ol>
+<p>Add a one-page metric dictionary and before/after evidence table.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can another analyst reproduce every KPI from its written contract?</li>
+<li>Are campaign counts, pair counts, and funnel rates prevented from being summed across non-additive rows?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-60.html#guide">Day 60 — end-to-end sign-off</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<p>Day 59 is a capstone checkpoint, not a pair of discrete exercises. It combines KPI definitions, performance evidence, stakeholder outputs, and scale planning.</p>
+<h4 id="guide--deliverable-1-kpi-suite">Deliverable 1 — KPI suite<a class="heading-anchor" href="#guide--deliverable-1-kpi-suite" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>LTV by signup cohort and customer segment, with customer count, average LTV, and total LTV.</li>
+<li>A 90-day customer-grain funnel for page view, add to cart, checkout, and purchase/order conversion, with explicit denominators.</li>
+<li>The top 20 distinct product pairs from order baskets, ranked by co-occurrence count (<code>together</code>), not by attributed pair revenue.</li>
+</ul>
+<h4 id="guide--deliverable-2-performance-evidence">Deliverable 2 — Performance evidence<a class="heading-anchor" href="#guide--deliverable-2-performance-evidence" aria-label="Link to this section">#</a></h4>
+<p>Create candidate indexes only inside the rollback-only experiment, then capture <code>EXPLAIN (ANALYZE, BUFFERS)</code> for the recent customer-revenue query. Save result reconciliation, timing, buffers, row estimates, and plan choice. The compact seed may correctly use a sequential scan.</p>
+<h4 id="guide--deliverable-3-stakeholder-outputs">Deliverable 3 — Stakeholder outputs<a class="heading-anchor" href="#guide--deliverable-3-stakeholder-outputs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Finance: current-year budget, actual expense, and variance by category.</li>
+<li>Marketing: campaign touches within seven days before each customer&#x27;s first order, counted as distinct assisted customers.</li>
+</ul>
+<p>The marketing definition differs from Day 48&#x27;s all-purchase event attribution. Multiple campaigns can assist one customer, so campaign rows are not additive.</p>
+<h4 id="guide--deliverable-4-large-scale-design-note">Deliverable 4 — Large-scale design note<a class="heading-anchor" href="#guide--deliverable-4-large-scale-design-note" aria-label="Link to this section">#</a></h4>
+<p>For a hypothetical 100M-row workload, identify candidate time partitions for orders/events, prove partition-key filters for pruning, describe local/partial indexes, and assign retention/maintenance ownership. Do not claim a benefit without a representative plan.</p>
+<h4 id="guide--sign-off-limits">Sign-off limits<a class="heading-anchor" href="#guide--sign-off-limits" aria-label="Link to this section">#</a></h4>
+<p>Record metric grain, time window, exclusions, reconciliation, and consumer for every KPI. All candidate DDL rolls back; production changes require a separate reviewed migration.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day59_final_capstone_part2.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day59_final_capstone_part2.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 59: Final Capstone - Integrated Data Challenge (Part 2)</span>
+<span>-- Focus: Complex business logic, performance requirements, stakeholder queries</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- 1. Business KPI Suite (multi-level calculations)</span>
+<span>-- a) LTV by cohort and segment</span>
+<span>WITH order_values AS (</span>
+<span>  SELECT o.customer_id, o.order_id,</span>
+<span>         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value,</span>
+<span>         o.order_date</span>
+<span>  FROM orders o</span>
+<span>  JOIN order_items oi ON oi.order_id = o.order_id</span>
+<span>  GROUP BY o.customer_id, o.order_id, o.order_date</span>
+<span>), ltv AS (</span>
+<span>  SELECT customer_id,</span>
+<span>         date_trunc(&#x27;month&#x27;, MIN(order_date))::date AS first_order_month,</span>
+<span>         SUM(order_value) AS ltv</span>
+<span>  FROM order_values</span>
+<span>  GROUP BY customer_id</span>
+<span>), cohort AS (</span>
+<span>  SELECT c.customer_id,</span>
+<span>         date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month,</span>
+<span>         COALESCE(c.segment,&#x27;standard&#x27;) AS segment</span>
+<span>  FROM customers c</span>
+<span>)</span>
+<span>SELECT cohort.segment,</span>
+<span>       cohort.cohort_month,</span>
+<span>       ROUND(AVG(ltv.ltv),2) AS avg_ltv,</span>
+<span>       COUNT(*) AS customers</span>
+<span>FROM ltv</span>
+<span>JOIN cohort ON cohort.customer_id = ltv.customer_id</span>
+<span>GROUP BY cohort.segment, cohort.cohort_month</span>
+<span>ORDER BY cohort.cohort_month DESC, avg_ltv DESC</span>
+<span>LIMIT 100;</span>
+<span> </span>
+<span>-- b) Conversion funnel from events -&gt; orders (last 90 days)</span>
+<span>WITH ev AS (</span>
+<span>  SELECT e.customer_id,</span>
+<span>         MAX(CASE WHEN e.event_type=&#x27;page_view&#x27;  THEN 1 ELSE 0 END) AS page_view,</span>
+<span>         MAX(CASE WHEN e.event_type=&#x27;add_to_cart&#x27; THEN 1 ELSE 0 END) AS add_to_cart,</span>
+<span>         MAX(CASE WHEN e.event_type=&#x27;checkout&#x27;   THEN 1 ELSE 0 END) AS checkout</span>
+<span>  FROM events e</span>
+<span>  WHERE e.event_time &gt;= now() - interval &#x27;90 days&#x27;</span>
+<span>  GROUP BY e.customer_id</span>
+<span>), buyers AS (</span>
+<span>  SELECT DISTINCT o.customer_id</span>
+<span>  FROM orders o</span>
+<span>  WHERE o.order_date &gt;= now() - interval &#x27;90 days&#x27;</span>
+<span>)</span>
+<span>SELECT </span>
+<span>  SUM(page_view)    AS viewers,</span>
+<span>  SUM(add_to_cart)  AS adders,</span>
+<span>  SUM(checkout)     AS checkouts,</span>
+<span>  (SELECT COUNT(*) FROM buyers) AS buyers</span>
+<span>FROM ev;</span>
+<span> </span>
+<span>-- c) Top product pairs by co-occurrence (market basket)</span>
+<span>WITH items AS (</span>
+<span>  SELECT order_id, product_id FROM order_items GROUP BY order_id, product_id</span>
+<span>), pairs AS (</span>
+<span>  SELECT a.product_id AS p1, b.product_id AS p2, COUNT(*) AS together</span>
+<span>  FROM items a</span>
+<span>  JOIN items b ON a.order_id = b.order_id AND a.product_id &lt; b.product_id</span>
+<span>  GROUP BY a.product_id, b.product_id</span>
+<span>)</span>
+<span>SELECT p1.name AS product_a, p2.name AS product_b, together</span>
+<span>FROM pairs</span>
+<span>JOIN products p1 ON p1.product_id = pairs.p1</span>
+<span>JOIN products p2 ON p2.product_id = pairs.p2</span>
+<span>ORDER BY together DESC</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>-- 2. Performance Aids (indexes/partitioning hints) - run EXPLAIN before/after</span>
+<span>-- Note: These DDLs are rolled back unless you COMMIT intentionally</span>
+<span>CREATE INDEX IF NOT EXISTS idx_orders_customer_date ON orders(customer_id, order_date);</span>
+<span>CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);</span>
+<span>CREATE INDEX IF NOT EXISTS idx_payments_order_date ON payments(order_id, payment_date);</span>
+<span> </span>
+<span>EXPLAIN ANALYZE</span>
+<span>SELECT o.customer_id, SUM(o.total_amount)</span>
+<span>FROM orders o</span>
+<span>WHERE o.order_date &gt;= now() - interval &#x27;180 days&#x27;</span>
+<span>GROUP BY o.customer_id</span>
+<span>ORDER BY SUM(o.total_amount) DESC</span>
+<span>LIMIT 50;</span>
+<span> </span>
+<span>-- 3. Stakeholder Views</span>
+<span>-- a) Finance: Budget vs Actual YTD by category</span>
+<span>WITH ytd_exp AS (</span>
+<span>  SELECT date_trunc(&#x27;year&#x27;, expense_date)::date AS yr,</span>
+<span>         category,</span>
+<span>         SUM(amount) AS actual</span>
+<span>  FROM expenses</span>
+<span>  WHERE expense_date &gt;= date_trunc(&#x27;year&#x27;, now())</span>
+<span>  GROUP BY 1,2</span>
+<span>), ytd_bud AS (</span>
+<span>  SELECT date_trunc(&#x27;year&#x27;, period)::date AS yr,</span>
+<span>         category,</span>
+<span>         SUM(amount) AS budget</span>
+<span>  FROM budgets</span>
+<span>  WHERE period &gt;= date_trunc(&#x27;year&#x27;, now())</span>
+<span>  GROUP BY 1,2</span>
+<span>)</span>
+<span>SELECT COALESCE(b.category, e.category) AS category,</span>
+<span>       COALESCE(b.yr, e.yr) AS year,</span>
+<span>       COALESCE(b.budget,0) AS budget_ytd,</span>
+<span>       COALESCE(e.actual,0) AS actual_ytd,</span>
+<span>       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0),2) AS variance</span>
+<span>FROM ytd_bud b</span>
+<span>FULL OUTER JOIN ytd_exp e ON e.yr=b.yr AND e.category=b.category</span>
+<span>ORDER BY category;</span>
+<span> </span>
+<span>-- b) Marketing: Campaign-assisted purchases (within 7 days)</span>
+<span>WITH first_purchase AS (</span>
+<span>  SELECT o.customer_id, MIN(o.order_date) AS first_buy</span>
+<span>  FROM orders o</span>
+<span>  GROUP BY o.customer_id</span>
+<span>), touch AS (</span>
+<span>  SELECT e.customer_id, e.event_time, COALESCE(e.metadata-&gt;&gt;&#x27;campaign&#x27;,&#x27;none&#x27;) AS campaign</span>
+<span>  FROM events e</span>
+<span>)</span>
+<span>SELECT t.campaign,</span>
+<span>       COUNT(DISTINCT t.customer_id) AS assisted_customers</span>
+<span>FROM touch t</span>
+<span>JOIN first_purchase fp ON fp.customer_id = t.customer_id</span>
+<span>WHERE t.event_time BETWEEN fp.first_buy - interval &#x27;7 days&#x27; AND fp.first_buy</span>
+<span>GROUP BY t.campaign</span>
+<span>ORDER BY assisted_customers DESC</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>-- 4. Large-scale considerations</span>
+<span>-- For 100M+ rows, favor partitioning by time on orders/events, and use partial indexes on recent partitions.</span>
+<span>-- Ensure queries constrain partition key (order_date, event_time) to enable pruning.</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- 1. Prediction: state the grain of every CTE in the LTV query and identify the</span>
+<span>--    exact step where order-grain values become customer-grain values.</span>
+<span>-- 2. Construction: turn the funnel counts into step-to-step and overall</span>
+<span>--    conversion rates while preserving customers who purchased without a</span>
+<span>--    recorded event.</span>
+<span>-- 3. Debugging: reconcile stored order totals, calculated line revenue, and</span>
+<span>--    payments before choosing which measure each stakeholder KPI should use.</span>
+<span>-- 4. Edge case: assign purchases with no qualifying campaign touch to a</span>
+<span>--    &#x27;(direct)&#x27; bucket and prove attribution counts reconcile to purchases.</span>
+<span>-- 5. Performance: compare the customer/date index with a date/customer index</span>
+<span>--    for the date-bounded aggregation; explain the leftmost-column tradeoff.</span>
+<span>-- 6. Explanation: write a metric contract for one KPI covering name, grain,</span>
+<span>--    numerator, denominator, time zone, NULL policy, exclusions, and owner.</span>
+<span>-- 7. Construction: produce a stakeholder-safe product-pair report with support,</span>
+<span>--    confidence, lift, minimum basket count, and deterministic ordering.</span>
+<span>-- 8. Sign-off: assemble one result set that reconciles the customer, finance,</span>
+<span>--    funnel, attribution, and market-basket outputs to named control totals.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day59_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day59_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-59-solution-integrated-stakeholder-analytics">Day 59 Solution — Integrated Stakeholder Analytics<a class="heading-anchor" href="#solution-1--day-59-solution-integrated-stakeholder-analytics" aria-label="Link to this section">#</a></h3>
+<p>Day 59 is a capstone checkpoint, not a pair of discrete exercises. Its deliverables are a reconciled KPI suite, performance evidence, stakeholder queries, and a large-scale design note. The canonical executable checkpoint is <a href="sql-59.html#solution-2"><code>day59_solutions.sql</code></a>.</p>
+<h4 id="solution-1--deliverable-1-business-kpi-suite">Deliverable 1 — Business KPI suite<a class="heading-anchor" href="#solution-1--deliverable-1-business-kpi-suite" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--ltv-by-signup-cohort-and-segment">LTV by signup cohort and segment<a class="heading-anchor" href="#solution-1--ltv-by-signup-cohort-and-segment" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH customer_ltv AS (
+  SELECT c.customer_id,
+         c.country,
+         COALESCE(c.segment, &#x27;standard&#x27;) AS segment,
+         date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month,
+         COALESCE(SUM(o.total_amount), 0) AS ltv
+  FROM customers c
+  LEFT JOIN orders o USING (customer_id)
+  GROUP BY c.customer_id, c.country, c.segment, date_trunc(&#x27;month&#x27;, c.created_at)
+)
+SELECT cohort_month,
+       segment,
+       COUNT(*) AS customers,
+       ROUND(AVG(ltv), 2) AS avg_ltv,
+       ROUND(SUM(ltv), 2) AS total_ltv
+FROM customer_ltv
+GROUP BY cohort_month, segment
+ORDER BY cohort_month DESC, total_ltv DESC;</code></pre>
+<p>Expected grain: one row per <code>(cohort_month, segment)</code>, including customers with zero orders.</p>
+<h5 id="solution-1--ninety-day-conversion-funnel">Ninety-day conversion funnel<a class="heading-anchor" href="#solution-1--ninety-day-conversion-funnel" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH activity AS (
+  SELECT c.customer_id,
+         BOOL_OR(e.event_type = &#x27;page_view&#x27;) AS viewed,
+         BOOL_OR(e.event_type = &#x27;add_to_cart&#x27;) AS added,
+         BOOL_OR(e.event_type = &#x27;checkout&#x27;) AS checked_out,
+         EXISTS (
+           SELECT 1
+           FROM orders o
+           WHERE o.customer_id = c.customer_id
+             AND o.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;
+         ) AS bought
+  FROM customers c
+  LEFT JOIN events e
+    ON e.customer_id = c.customer_id
+   AND e.event_time &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;
+  GROUP BY c.customer_id
+)
+SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
+       COUNT(*) FILTER (WHERE added) AS adders,
+       COUNT(*) FILTER (WHERE checked_out) AS checkouts,
+       COUNT(*) FILTER (WHERE bought) AS buyers,
+       ROUND(
+         COUNT(*) FILTER (WHERE bought)::numeric
+           / NULLIF(COUNT(*) FILTER (WHERE viewed), 0),
+         4
+       ) AS viewer_to_buyer_rate
+FROM activity;</code></pre>
+<p>Expected shape: one row. Every funnel stage is measured at customer grain, but the synthetic data does not enforce strict stage ordering.</p>
+<h5 id="solution-1--product-pair-affinity">Product-pair affinity<a class="heading-anchor" href="#solution-1--product-pair-affinity" aria-label="Link to this section">#</a></h5>
+<p>The learner script already supplies the runnable market-basket query. Its deliverable is the 20 most frequent distinct product pairs. Deduplicate <code>(order_id, product_id)</code> first and enforce <code>a.product_id &lt; b.product_id</code>; this prevents self-pairs and reversed duplicates. The metric is co-occurrence count, despite the starter comment saying “revenue.”</p>
+<h4 id="solution-1--deliverable-2-performance-evidence">Deliverable 2 — Performance evidence<a class="heading-anchor" href="#solution-1--deliverable-2-performance-evidence" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">BEGIN;
+SET search_path TO training, public;
+
+CREATE INDEX idx_orders_customer_date_day59_solution
+  ON orders(customer_id, order_date) INCLUDE (total_amount);
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT customer_id, SUM(total_amount) AS revenue
+FROM orders
+WHERE order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;180 days&#x27;
+GROUP BY customer_id
+ORDER BY revenue DESC
+LIMIT 50;
+
+ROLLBACK;</code></pre>
+<p>Save the actual plan, execution time, buffer counts, and result reconciliation. The compact seed may correctly use a sequential scan; index presence does not guarantee index use.</p>
+<h4 id="solution-1--deliverable-3-stakeholder-queries">Deliverable 3 — Stakeholder queries<a class="heading-anchor" href="#solution-1--deliverable-3-stakeholder-queries" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--finance-ytd-budget-versus-actual">Finance: YTD budget versus actual<a class="heading-anchor" href="#solution-1--finance-ytd-budget-versus-actual" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH actual AS (
+  SELECT category, SUM(amount) AS actual
+  FROM expenses
+  WHERE expense_date &gt;= date_trunc(&#x27;year&#x27;, CURRENT_DATE)
+  GROUP BY category
+), budget AS (
+  SELECT category, SUM(amount) AS budget
+  FROM budgets
+  WHERE period &gt;= date_trunc(&#x27;year&#x27;, CURRENT_DATE)
+  GROUP BY category
+)
+SELECT COALESCE(a.category, b.category) AS category,
+       ROUND(COALESCE(b.budget, 0), 2) AS budget,
+       ROUND(COALESCE(a.actual, 0), 2) AS actual,
+       ROUND(COALESCE(a.actual, 0) - COALESCE(b.budget, 0), 2) AS variance
+FROM actual a
+FULL OUTER JOIN budget b USING (category)
+ORDER BY category;</code></pre>
+<p>Expected grain: one row per category found in actuals or budget.</p>
+<h5 id="solution-1--marketing-campaign-assisted-purchases">Marketing: campaign-assisted purchases<a class="heading-anchor" href="#solution-1--marketing-campaign-assisted-purchases" aria-label="Link to this section">#</a></h5>
+<p>The learner query anchors on each customer&#x27;s first order and counts distinct customers with a campaign touch in the preceding seven days. Document that definition: it is first-purchase assistance, not all-purchase event attribution from Day 48. Multiple campaigns can assist one customer, so campaign rows are not additive.</p>
+<h4 id="solution-1--deliverable-4-large-scale-design-note">Deliverable 4 — Large-scale design note<a class="heading-anchor" href="#solution-1--deliverable-4-large-scale-design-note" aria-label="Link to this section">#</a></h4>
+<p>For a hypothetical 100M-row deployment, record:</p>
+<ul>
+<li>candidate range partition keys (<code>orders.order_date</code>, <code>events.event_time</code>);</li>
+<li>proof that critical predicates constrain those keys for pruning;</li>
+<li>local/partial indexes on hot recent partitions;</li>
+<li>retention and partition-maintenance ownership; and</li>
+<li>an observed representative-scale plan, not an assumed benefit.</li>
+</ul>
+<h4 id="solution-1--capstone-checkpoint-limits">Capstone checkpoint limits<a class="heading-anchor" href="#solution-1--capstone-checkpoint-limits" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Days 59–60 provide sign-off criteria rather than neatly isolated exercises.</li>
+<li>The current executable solution selects representative KPI, finance, and performance checks; the learner starter contains the product-pair and marketing queries that must also be discussed in the final write-up.</li>
+<li>All DDL in the solution transaction rolls back. Production changes require a separate reviewed migration.</li>
+</ul>
+<h4 id="solution-1--exercise-1-make-every-grain-transition-explicit">Exercise 1 — Make every grain transition explicit<a class="heading-anchor" href="#solution-1--exercise-1-make-every-grain-transition-explicit" aria-label="Link to this section">#</a></h4>
+<p>The executable <code>grain_map</code> states the key and row meaning for order values, customer LTV, and cohort/segment summary. A lower-grain join after aggregation would invalidate the metric.</p>
+<h4 id="solution-1--exercise-2-calculate-funnel-rates-with-a-stable-population">Exercise 2 — Calculate funnel rates with a stable population<a class="heading-anchor" href="#solution-1--exercise-2-calculate-funnel-rates-with-a-stable-population" aria-label="Link to this section">#</a></h4>
+<p>Start from all customers, left-join recent events, and use EXISTS for recent purchases. Buyers without a page-view stay visible. Each rate divides by the preceding stage with <code>NULLIF</code> protection.</p>
+<h4 id="solution-1--exercise-3-reconcile-candidate-money-measures">Exercise 3 — Reconcile candidate money measures<a class="heading-anchor" href="#solution-1--exercise-3-reconcile-candidate-money-measures" aria-label="Link to this section">#</a></h4>
+<p>Line values and payments each aggregate to <code>order_id</code> before joining orders. The answer retains stored total, calculated line total, paid amount, and both differences so stakeholders can choose a named measure.</p>
+<h4 id="solution-1--exercise-4-include-direct-attribution">Exercise 4 — Include direct attribution<a class="heading-anchor" href="#solution-1--exercise-4-include-direct-attribution" aria-label="Link to this section">#</a></h4>
+<p>Start from purchases and choose at most one latest qualifying touch with a LATERAL query. Missing touches become <code>(direct)</code>, so attribution counts reconcile to the purchase population.</p>
+<h4 id="solution-1--exercise-5-compare-index-column-order">Exercise 5 — Compare index column order<a class="heading-anchor" href="#solution-1--exercise-5-compare-index-column-order" aria-label="Link to this section">#</a></h4>
+<p><code>(customer_id, order_date)</code> supports one customer&#x27;s history; <code>(order_date, customer_id)</code> better anchors a global date-bound scan. EXPLAIN evidence is environment-specific and both indexes add write cost.</p>
+<h4 id="solution-1--exercise-6-publish-a-metric-contract">Exercise 6 — Publish a metric contract<a class="heading-anchor" href="#solution-1--exercise-6-publish-a-metric-contract" aria-label="Link to this section">#</a></h4>
+<p>The answer records metric name, grain, numerator, denominator, UTC window, NULL policy, exclusions, and owner as queryable values. This prevents silent semantic changes between teams.</p>
+<h4 id="solution-1--exercise-7-publish-defensible-basket-metrics">Exercise 7 — Publish defensible basket metrics<a class="heading-anchor" href="#solution-1--exercise-7-publish-defensible-basket-metrics" aria-label="Link to this section">#</a></h4>
+<p>Distinct baskets feed support, confidence, and lift. A minimum pair count limits noise, and product IDs resolve ordering ties deterministically.</p>
+<h4 id="solution-1--exercise-8-assemble-cross-domain-controls">Exercise 8 — Assemble cross-domain controls<a class="heading-anchor" href="#solution-1--exercise-8-assemble-cross-domain-controls" aria-label="Link to this section">#</a></h4>
+<p>Named counts and money totals provide a small sign-off surface for customer, order, line, and payment domains. Any non-equivalence must be explained by a declared metric definition rather than hidden.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day59_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day59_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 59 solution: integrated stakeholder analytics</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- A reconciled KPI suite at customer grain.</span>
+<span>WITH customer_ltv AS (</span>
+<span>  SELECT c.customer_id,</span>
+<span>         c.country,</span>
+<span>         COALESCE(c.segment, &#x27;standard&#x27;) AS segment,</span>
+<span>         date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month,</span>
+<span>         COALESCE(SUM(o.total_amount), 0) AS ltv</span>
+<span>  FROM customers c</span>
+<span>  LEFT JOIN orders o USING (customer_id)</span>
+<span>  GROUP BY c.customer_id, c.country, c.segment, date_trunc(&#x27;month&#x27;, c.created_at)</span>
+<span>)</span>
+<span>SELECT cohort_month,</span>
+<span>       segment,</span>
+<span>       COUNT(*) AS customers,</span>
+<span>       ROUND(AVG(ltv), 2) AS avg_ltv,</span>
+<span>       ROUND(SUM(ltv), 2) AS total_ltv</span>
+<span>FROM customer_ltv</span>
+<span>GROUP BY cohort_month, segment</span>
+<span>ORDER BY cohort_month DESC, total_ltv DESC;</span>
+<span> </span>
+<span>-- Conversion funnel with rates and a stable customer denominator.</span>
+<span>WITH activity AS (</span>
+<span>  SELECT c.customer_id,</span>
+<span>         BOOL_OR(e.event_type = &#x27;page_view&#x27;) AS viewed,</span>
+<span>         BOOL_OR(e.event_type = &#x27;add_to_cart&#x27;) AS added,</span>
+<span>         BOOL_OR(e.event_type = &#x27;checkout&#x27;) AS checked_out,</span>
+<span>         EXISTS (</span>
+<span>           SELECT 1</span>
+<span>           FROM orders o</span>
+<span>           WHERE o.customer_id = c.customer_id</span>
+<span>             AND o.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>         ) AS bought</span>
+<span>  FROM customers c</span>
+<span>  LEFT JOIN events e</span>
+<span>    ON e.customer_id = c.customer_id</span>
+<span>   AND e.event_time &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>  GROUP BY c.customer_id</span>
+<span>)</span>
+<span>SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,</span>
+<span>       COUNT(*) FILTER (WHERE added) AS adders,</span>
+<span>       COUNT(*) FILTER (WHERE checked_out) AS checkouts,</span>
+<span>       COUNT(*) FILTER (WHERE bought) AS buyers,</span>
+<span>       ROUND(</span>
+<span>         COUNT(*) FILTER (WHERE bought)::numeric</span>
+<span>           / NULLIF(COUNT(*) FILTER (WHERE viewed), 0),</span>
+<span>         4</span>
+<span>       ) AS viewer_to_buyer_rate</span>
+<span>FROM activity;</span>
+<span> </span>
+<span>-- Finance stakeholder view: YTD budget versus actual.</span>
+<span>WITH actual AS (</span>
+<span>  SELECT category, SUM(amount) AS actual</span>
+<span>  FROM expenses</span>
+<span>  WHERE expense_date &gt;= date_trunc(&#x27;year&#x27;, CURRENT_DATE)</span>
+<span>  GROUP BY category</span>
+<span>), budget AS (</span>
+<span>  SELECT category, SUM(amount) AS budget</span>
+<span>  FROM budgets</span>
+<span>  WHERE period &gt;= date_trunc(&#x27;year&#x27;, CURRENT_DATE)</span>
+<span>  GROUP BY category</span>
+<span>)</span>
+<span>SELECT COALESCE(a.category, b.category) AS category,</span>
+<span>       ROUND(COALESCE(b.budget, 0), 2) AS budget,</span>
+<span>       ROUND(COALESCE(a.actual, 0), 2) AS actual,</span>
+<span>       ROUND(COALESCE(a.actual, 0) - COALESCE(b.budget, 0), 2) AS variance</span>
+<span>FROM actual a</span>
+<span>FULL OUTER JOIN budget b USING (category)</span>
+<span>ORDER BY category;</span>
+<span> </span>
+<span>-- Performance evidence: add a candidate index and inspect the actual plan.</span>
+<span>CREATE INDEX idx_orders_customer_date_day59_solution</span>
+<span>  ON orders(customer_id, order_date) INCLUDE (total_amount);</span>
+<span> </span>
+<span>EXPLAIN (ANALYZE, BUFFERS)</span>
+<span>SELECT customer_id, SUM(total_amount) AS revenue</span>
+<span>FROM orders</span>
+<span>WHERE order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;180 days&#x27;</span>
+<span>GROUP BY customer_id</span>
+<span>ORDER BY revenue DESC</span>
+<span>LIMIT 50;</span>
+<span> </span>
+<span>-- Exercise 1: an executable grain map makes transitions reviewable. The LTV</span>
+<span>-- pipeline starts at order rows, aggregates to customer, then summarizes by</span>
+<span>-- cohort/segment; joining a lower grain after that would change the metric.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>  VALUES</span>
+<span>    (&#x27;order_values&#x27;, &#x27;one row per order&#x27;, &#x27;customer_id + order_id&#x27;),</span>
+<span>    (&#x27;customer_ltv&#x27;, &#x27;one row per customer&#x27;, &#x27;customer_id&#x27;),</span>
+<span>    (&#x27;cohort_segment_summary&#x27;, &#x27;one row per cohort/segment&#x27;,</span>
+<span>     &#x27;cohort_month + segment&#x27;)</span>
+<span>) AS grain_map(step_name, row_grain, key_columns);</span>
+<span> </span>
+<span>-- Exercise 2: start with every customer so buyers without matching event</span>
+<span>-- records remain visible. Each denominator is the preceding funnel population.</span>
+<span>WITH activity AS (</span>
+<span>  SELECT c.customer_id,</span>
+<span>         BOOL_OR(e.event_type = &#x27;page_view&#x27;) AS viewed,</span>
+<span>         BOOL_OR(e.event_type = &#x27;add_to_cart&#x27;) AS added,</span>
+<span>         BOOL_OR(e.event_type = &#x27;checkout&#x27;) AS checked_out,</span>
+<span>         EXISTS (</span>
+<span>           SELECT 1 FROM orders o</span>
+<span>           WHERE o.customer_id = c.customer_id</span>
+<span>             AND o.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>         ) AS bought</span>
+<span>  FROM customers c</span>
+<span>  LEFT JOIN events e</span>
+<span>    ON e.customer_id = c.customer_id</span>
+<span>   AND e.event_time &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>  GROUP BY c.customer_id</span>
+<span>), counts AS (</span>
+<span>  SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,</span>
+<span>         COUNT(*) FILTER (WHERE added) AS adders,</span>
+<span>         COUNT(*) FILTER (WHERE checked_out) AS checkouts,</span>
+<span>         COUNT(*) FILTER (WHERE bought) AS buyers,</span>
+<span>         COUNT(*) FILTER (WHERE bought AND NOT viewed) AS buyers_without_view</span>
+<span>  FROM activity</span>
+<span>)</span>
+<span>SELECT *,</span>
+<span>       ROUND(adders::numeric / NULLIF(viewers, 0), 4) AS view_to_add,</span>
+<span>       ROUND(checkouts::numeric / NULLIF(adders, 0), 4) AS add_to_checkout,</span>
+<span>       ROUND(buyers::numeric / NULLIF(checkouts, 0), 4) AS checkout_to_buy</span>
+<span>FROM counts;</span>
+<span> </span>
+<span>-- Exercise 3: reconcile candidate revenue measures at order grain before a</span>
+<span>-- stakeholder chooses one. Differences are evidence, not values to hide.</span>
+<span>WITH lines AS (</span>
+<span>  SELECT order_id,</span>
+<span>         SUM(quantity * unit_price * (1 - discount)) AS line_revenue</span>
+<span>  FROM order_items GROUP BY order_id</span>
+<span>), paid AS (</span>
+<span>  SELECT order_id, SUM(amount) AS paid_amount</span>
+<span>  FROM payments GROUP BY order_id</span>
+<span>)</span>
+<span>SELECT o.order_id,</span>
+<span>       o.total_amount AS stored_order_total,</span>
+<span>       l.line_revenue,</span>
+<span>       p.paid_amount,</span>
+<span>       o.total_amount - l.line_revenue AS header_minus_lines,</span>
+<span>       p.paid_amount - o.total_amount AS paid_minus_header</span>
+<span>FROM orders o</span>
+<span>LEFT JOIN lines l USING (order_id)</span>
+<span>LEFT JOIN paid p USING (order_id)</span>
+<span>ORDER BY o.order_id</span>
+<span>LIMIT 50;</span>
+<span> </span>
+<span>-- Exercise 4: each purchase gets the latest qualifying campaign or the direct</span>
+<span>-- bucket. Starting from orders guarantees the buckets reconcile to purchases.</span>
+<span>SELECT COALESCE(t.campaign, &#x27;(direct)&#x27;) AS attribution_bucket,</span>
+<span>       COUNT(*) AS purchases</span>
+<span>FROM orders o</span>
+<span>LEFT JOIN LATERAL (</span>
+<span>  SELECT e.metadata-&gt;&gt;&#x27;campaign&#x27; AS campaign</span>
+<span>  FROM events e</span>
+<span>  WHERE e.customer_id = o.customer_id</span>
+<span>    AND e.event_time &gt;= o.order_date - interval &#x27;7 days&#x27;</span>
+<span>    AND e.event_time &lt; o.order_date</span>
+<span>    AND e.metadata ? &#x27;campaign&#x27;</span>
+<span>  ORDER BY e.event_time DESC, e.event_id DESC</span>
+<span>  LIMIT 1</span>
+<span>) t ON true</span>
+<span>GROUP BY COALESCE(t.campaign, &#x27;(direct)&#x27;)</span>
+<span>ORDER BY purchases DESC, attribution_bucket;</span>
+<span> </span>
+<span>-- Exercise 5: the date-leading index matches the bounded-date scan, while the</span>
+<span>-- customer-leading index better supports one customer&#x27;s ordered history.</span>
+<span>CREATE INDEX idx_orders_date_customer_day59_solution</span>
+<span>  ON orders(order_date, customer_id) INCLUDE (total_amount);</span>
+<span>EXPLAIN (ANALYZE, BUFFERS)</span>
+<span>SELECT customer_id, SUM(total_amount) AS revenue</span>
+<span>FROM orders</span>
+<span>WHERE order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;180 days&#x27;</span>
+<span>GROUP BY customer_id;</span>
+<span> </span>
+<span>-- Exercise 6: a metric contract is data, not an undocumented assumption.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>  VALUES (</span>
+<span>    &#x27;viewer_to_buyer_rate&#x27;,</span>
+<span>    &#x27;one row for the 90-day reporting window&#x27;,</span>
+<span>    &#x27;distinct customers with an order&#x27;,</span>
+<span>    &#x27;distinct customers with a page_view&#x27;,</span>
+<span>    &#x27;UTC timestamps; trailing 90 days&#x27;,</span>
+<span>    &#x27;NULL when denominator is zero&#x27;,</span>
+<span>    &#x27;test/internal events excluded only when explicitly labeled&#x27;,</span>
+<span>    &#x27;analytics owner&#x27;</span>
+<span>  )</span>
+<span>) AS metric_contract(</span>
+<span>  metric_name, grain, numerator, denominator, time_window,</span>
+<span>  null_policy, exclusions, owner</span>
+<span>);</span>
+<span> </span>
+<span>-- Exercise 7: basket pairs use distinct product/order membership. Minimum</span>
+<span>-- together count controls noise; deterministic ties use product IDs.</span>
+<span>WITH baskets AS (</span>
+<span>  SELECT DISTINCT order_id, product_id FROM order_items</span>
+<span>), totals AS (</span>
+<span>  SELECT COUNT(DISTINCT order_id)::numeric AS all_baskets FROM baskets</span>
+<span>), product_baskets AS (</span>
+<span>  SELECT product_id, COUNT(*)::numeric AS baskets</span>
+<span>  FROM baskets GROUP BY product_id</span>
+<span>), pairs AS (</span>
+<span>  SELECT a.product_id AS product_a, b.product_id AS product_b,</span>
+<span>         COUNT(*)::numeric AS together</span>
+<span>  FROM baskets a JOIN baskets b</span>
+<span>    ON a.order_id = b.order_id AND a.product_id &lt; b.product_id</span>
+<span>  GROUP BY a.product_id, b.product_id</span>
+<span>)</span>
+<span>SELECT p.product_a, p.product_b, p.together,</span>
+<span>       ROUND(p.together / t.all_baskets, 4) AS support,</span>
+<span>       ROUND(p.together / a.baskets, 4) AS confidence_a_to_b,</span>
+<span>       ROUND((p.together * t.all_baskets)</span>
+<span>             / NULLIF(a.baskets * b.baskets, 0), 4) AS lift</span>
+<span>FROM pairs p CROSS JOIN totals t</span>
+<span>JOIN product_baskets a ON a.product_id = p.product_a</span>
+<span>JOIN product_baskets b ON b.product_id = p.product_b</span>
+<span>WHERE p.together &gt;= 2</span>
+<span>ORDER BY lift DESC, together DESC, product_a, product_b</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>-- Exercise 8: named controls make cross-domain sign-off machine-readable.</span>
+<span>SELECT &#x27;customers&#x27; AS control_name, COUNT(*)::numeric AS observed_value</span>
+<span>FROM customers</span>
+<span>UNION ALL</span>
+<span>SELECT &#x27;orders&#x27;, COUNT(*) FROM orders</span>
+<span>UNION ALL</span>
+<span>SELECT &#x27;stored_order_revenue&#x27;, ROUND(SUM(total_amount), 2) FROM orders</span>
+<span>UNION ALL</span>
+<span>SELECT &#x27;line_revenue&#x27;,</span>
+<span>       ROUND(SUM(quantity * unit_price * (1 - discount)), 2) FROM order_items</span>
+<span>UNION ALL</span>
+<span>SELECT &#x27;payments&#x27;, ROUND(SUM(amount), 2) FROM payments</span>
+<span>ORDER BY control_name;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-58.html"><small>Previous lesson</small><strong>sql-58</strong><span>Final Capstone Part1</span></a>
+        <a class="nav-card next" href="sql-60.html"><small>Next lesson</small><strong>sql-60</strong><span>Final Capstone Part3</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-59";
+    const LEARNER_PATH = "sql/postgres-60day/day59_final_capstone_part2.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

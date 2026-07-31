@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-55 · Project4 BI Part1 · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-55</p>
+        <h1>Project4 BI Part1</h1>
+        <p class="hero-copy">Applied analytics and capstones</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-54.html">sql-54</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day55_project4_bi_part1.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day55_project4_bi_part1.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day55_project4_bi_part1.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-55-complex-bi-project-part-1-drill-downs">Day 55 — Complex BI Project, Part 1: Drill-downs<a class="heading-anchor" href="#guide--day-55-complex-bi-project-part-1-drill-downs" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-54.html#guide">Day 54 — warehouse aggregates</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-55.html#learner">learner SQL</a> · <a href="sql-55.html#solution-1">solution reasoning</a> · <a href="sql-55.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Generate hierarchical subtotal levels with <code>ROLLUP</code> and distinguish them from all-combination <code>CUBE</code> output.</li>
+<li>Rank deterministic top products within several dimensions.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>ROLLUP:</strong> hierarchical grouping sets from detail through grand total.</li>
+<li><strong>CUBE:</strong> every grouping-key subset for the supplied dimensions.</li>
+<li><strong>GROUPING flag:</strong> an indicator separating generated subtotal <code>NULL</code>s from data <code>NULL</code>s.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Compare <code>ROLLUP(country, category)</code> with <code>CUBE(country, category)</code>. Both include detail, country subtotal, and grand total; <code>CUBE</code> also adds category-only subtotals. Use <code>GROUPING(country)</code> and <code>GROUPING(category)</code> to label each level, then reconcile the grand total with source line revenue.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete these in the <a href="sql-55.html#learner">learner SQL</a>:</p>
+<ol>
+<li>Replace <code>ROLLUP</code> with <code>CUBE</code> and compare row counts.</li>
+<li>Add status to an exact top-five drill-down.</li>
+<li>Predict <code>ROLLUP(country, category, month)</code> grouping sets.</li>
+<li>Label levels with PostgreSQL&#x27;s <code>GROUPING(country, category)</code> bit mask.</li>
+<li>Use deterministic <code>ROW_NUMBER</code> for exactly five results.</li>
+<li>Separate real unknown members from generated subtotals.</li>
+</ol>
+<p>Test one real NULL/unknown dimension value.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Is payment method reduced to one declared row per order before joining lines?</li>
+<li>Does top-five ranking partition by every requested dimension and break ties deterministically?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-56.html#guide">Day 56 — percentiles and CUBE</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--project-focus">Project focus<a class="heading-anchor" href="#guide--project-focus" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Generate hierarchical subtotals with <code>ROLLUP</code>.</li>
+<li>Compare hierarchical subtotal rows with all-combination <code>CUBE</code>.</li>
+<li>Rank top products within country, category, and order status.</li>
+</ul>
+<h4 id="guide--how-the-learner-script-uses-the-current-schema">How the learner script uses the current schema<a class="heading-anchor" href="#guide--how-the-learner-script-uses-the-current-schema" aria-label="Link to this section">#</a></h4>
+<p>The starter builds line revenue from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, chooses one primary payment method per order by greatest paid amount (method name breaks ties), and rolls up country, category, payment method, and month. Unpaid orders receive the <code>unpaid</code> label. <code>GROUPING(column)</code> distinguishes subtotal nulls from detail values.</p>
+<p>It separately ranks product revenue within <code>(country, category)</code>.</p>
+<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Replace a two-dimension <code>ROLLUP(country, category)</code> with <code>CUBE(country, category)</code> and compare row counts. Explain the category-only subtotal added by <code>CUBE</code>.</li>
+<li>Add <code>orders.status</code>, aggregate product revenue at <code>(country, category, status, product_id)</code>, and return the top five products within every such group.</li>
+</ol>
+<h4 id="guide--bi-reasoning">BI reasoning<a class="heading-anchor" href="#guide--bi-reasoning" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><code>ROLLUP(a, b)</code> returns <code>(a,b)</code>, <code>(a)</code>, and grand total.</li>
+<li><code>CUBE(a, b)</code> also returns the <code>(b)</code> subtotal.</li>
+<li>Use <code>GROUPING</code> flags when real dimension nulls are possible.</li>
+<li>Aggregate revenue before ranking; use <code>ROW_NUMBER</code> plus <code>product_id</code> for exactly five deterministic results.</li>
+</ul>
+<h4 id="guide--validation-and-limits">Validation and limits<a class="heading-anchor" href="#guide--validation-and-limits" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A raw payment join fans out split-payment orders. Keep the declared primary method policy—or document a different allocation—before using that dimension.</li>
+<li>Cube row counts grow rapidly with dimensions and distinct values.</li>
+<li>Reconcile grand-total cube revenue to source line revenue.</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day55_project4_bi_part1.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day55_project4_bi_part1.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 55: Project 4 - Complex BI (Part 1)</span>
+<span>-- Multi-dimensional analysis (drill-down capability)</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Use GROUPING SETS/ROLLUP/CUBE for flexible drilldowns.</span>
+<span>-- Dimensions: country, category, primary payment method, month.</span>
+<span>-- An order can have split payments, so first choose one reporting label:</span>
+<span>-- the method with the greatest paid amount (method name breaks ties).</span>
+<span>WITH payment_by_method AS (</span>
+<span>  SELECT order_id, method, SUM(amount) AS method_amount</span>
+<span>  FROM payments</span>
+<span>  GROUP BY order_id, method</span>
+<span>), primary_payment_method AS (</span>
+<span>  SELECT order_id, method</span>
+<span>  FROM (</span>
+<span>    SELECT order_id,</span>
+<span>           method,</span>
+<span>           ROW_NUMBER() OVER (</span>
+<span>             PARTITION BY order_id</span>
+<span>             ORDER BY method_amount DESC, method</span>
+<span>           ) AS method_rank</span>
+<span>    FROM payment_by_method</span>
+<span>  ) ranked_methods</span>
+<span>  WHERE method_rank = 1</span>
+<span>), line AS (</span>
+<span>  SELECT c.country,</span>
+<span>         p.category,</span>
+<span>         COALESCE(pm.method, &#x27;unpaid&#x27;) AS payment_method,</span>
+<span>         date_trunc(&#x27;month&#x27;, o.order_date)::date AS month,</span>
+<span>         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue,</span>
+<span>         oi.quantity AS qty</span>
+<span>  FROM orders o</span>
+<span>  JOIN customers c  ON c.customer_id = o.customer_id</span>
+<span>  JOIN order_items oi ON oi.order_id = o.order_id</span>
+<span>  JOIN products p   ON p.product_id = oi.product_id</span>
+<span>  LEFT JOIN primary_payment_method pm ON pm.order_id = o.order_id</span>
+<span>)</span>
+<span>SELECT country,</span>
+<span>       category,</span>
+<span>       payment_method,</span>
+<span>       month,</span>
+<span>       ROUND(SUM(revenue),2) AS revenue,</span>
+<span>       SUM(qty) AS units,</span>
+<span>       GROUPING(country)        AS g_country,</span>
+<span>       GROUPING(category)       AS g_category,</span>
+<span>       GROUPING(payment_method) AS g_method,</span>
+<span>       GROUPING(month)          AS g_month</span>
+<span>FROM line</span>
+<span>GROUP BY ROLLUP (country, category, payment_method, month)</span>
+<span>ORDER BY country NULLS FIRST, category NULLS FIRST, payment_method NULLS FIRST, month NULLS FIRST;</span>
+<span> </span>
+<span>-- Drill-down example: country -&gt; category -&gt; product (top-N per level)</span>
+<span>WITH prod_rev AS (</span>
+<span>  SELECT c.country, p.category, p.product_id, p.name,</span>
+<span>         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  JOIN customers c  ON c.customer_id = o.customer_id</span>
+<span>  JOIN order_items oi ON oi.order_id = o.order_id</span>
+<span>  JOIN products p   ON p.product_id = oi.product_id</span>
+<span>  GROUP BY c.country, p.category, p.product_id, p.name</span>
+<span>), ranked AS (</span>
+<span>  SELECT *,</span>
+<span>         RANK() OVER (PARTITION BY country, category ORDER BY revenue DESC) AS rnk</span>
+<span>  FROM prod_rev</span>
+<span>)</span>
+<span>SELECT * FROM ranked WHERE rnk &lt;= 5</span>
+<span>ORDER BY country, category, rnk;</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- 1. Replace ROLLUP with CUBE to get all subtotal combinations and compare row counts.</span>
+<span>-- 2. Add a dimension for order status and re-run the drill-down with top-5.</span>
+<span>-- 3. Prediction: list the grouping sets produced by ROLLUP(country, category,</span>
+<span>--    month) and contrast them with CUBE before running either query.</span>
+<span>-- 4. Construction: use PostgreSQL&#x27;s GROUPING(country, category) bit mask to</span>
+<span>--    assign stable detail/subtotal/grand-total labels without mistaking stored</span>
+<span>--    NULLs for subtotal markers.</span>
+<span>-- 5. Debugging: replace RANK with ROW_NUMBER plus a deterministic tie-breaker</span>
+<span>--    when the dashboard must show exactly five products per group.</span>
+<span>-- 6. Edge case: preserve a real &#x27;(unknown)&#x27; country member separately from the</span>
+<span>--    ALL-countries subtotal in both machine-readable and display columns.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day55_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day55_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-55-solutions-bi-drill-down-and-subtotals">Day 55 Solutions — BI Drill-down and Subtotals<a class="heading-anchor" href="#solution-1--day-55-solutions-bi-drill-down-and-subtotals" aria-label="Link to this section">#</a></h3>
+<p>The two exercises compare <code>ROLLUP</code> and <code>CUBE</code>, then add order status to a country/category/product top-five drill-down. See <a href="sql-55.html#solution-2"><code>day55_solutions.sql</code></a>.</p>
+<h4 id="solution-1--exercise-1-compare-row-counts">Exercise 1 — Compare row counts<a class="heading-anchor" href="#solution-1--exercise-1-compare-row-counts" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH line AS (
+  SELECT c.country,
+         p.category,
+         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
+  FROM orders o
+  JOIN customers c USING (customer_id)
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+), rollup_rows AS (
+  SELECT country, category, SUM(revenue) AS revenue
+  FROM line
+  GROUP BY ROLLUP (country, category)
+), cube_rows AS (
+  SELECT country, category, SUM(revenue) AS revenue
+  FROM line
+  GROUP BY CUBE (country, category)
+)
+SELECT (SELECT COUNT(*) FROM rollup_rows) AS rollup_row_count,
+       (SELECT COUNT(*) FROM cube_rows) AS cube_row_count;</code></pre>
+<p>Expected shape: one comparison row. <code>CUBE(country, category)</code> adds category-only subtotals that the hierarchical <code>ROLLUP(country, category)</code> omits, so its count is greater on this seed.</p>
+<h4 id="solution-1--exercise-2-status-aware-top-five">Exercise 2 — Status-aware top five<a class="heading-anchor" href="#solution-1--exercise-2-status-aware-top-five" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH line AS (
+  SELECT c.country,
+         p.category,
+         o.status,
+         p.product_id,
+         p.name,
+         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
+  FROM orders o
+  JOIN customers c USING (customer_id)
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+), product_revenue AS (
+  SELECT country,
+         category,
+         status,
+         product_id,
+         name,
+         SUM(revenue) AS revenue
+  FROM line
+  GROUP BY country, category, status, product_id, name
+), ranked AS (
+  SELECT *,
+         ROW_NUMBER() OVER (
+           PARTITION BY country, category, status
+           ORDER BY revenue DESC, product_id
+         ) AS product_rank
+  FROM product_revenue
+)
+SELECT country,
+       category,
+       status,
+       product_id,
+       name,
+       ROUND(revenue, 2) AS revenue,
+       product_rank
+FROM ranked
+WHERE product_rank &lt;= 5
+ORDER BY country, category, status, product_rank;</code></pre>
+<p>Expected grain: up to five rows per <code>(country, category, status)</code>.</p>
+<h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><code>CUBE</code> grows quickly: three dimensions produce up to eight grouping sets, before considering the number of distinct dimension values.</li>
+<li><code>NULL</code> can mean a subtotal or a real null dimension value. Include <code>GROUPING(...)</code> flags in user-facing subtotal reports when ambiguity exists.</li>
+<li>Aggregate product revenue before ranking.</li>
+<li><code>ROW_NUMBER</code> plus <code>product_id</code> yields exactly five deterministic rows when at least five products exist; <code>RANK</code> can return more because of ties.</li>
+</ul>
+<h4 id="solution-1--exercise-3-enumerate-rollup-levels">Exercise 3 — Enumerate ROLLUP levels<a class="heading-anchor" href="#solution-1--exercise-3-enumerate-rollup-levels" aria-label="Link to this section">#</a></h4>
+<p>PostgreSQL&#x27;s <code>GROUPING(country, category)</code> returns a bit mask: detail, country subtotal, and grand total have stable numeric identities.</p>
+<h4 id="solution-1--exercise-4-label-levels-from-the-bit-mask">Exercise 4 — Label levels from the bit mask<a class="heading-anchor" href="#solution-1--exercise-4-label-levels-from-the-bit-mask" aria-label="Link to this section">#</a></h4>
+<p>The display label is derived from that mask, not from <code>column IS NULL</code>. This keeps machine-readable level identity beside human-readable text.</p>
+<h4 id="solution-1--exercise-5-return-exactly-five-products">Exercise 5 — Return exactly five products<a class="heading-anchor" href="#solution-1--exercise-5-return-exactly-five-products" aria-label="Link to this section">#</a></h4>
+<p>Revenue aggregates before ranking. <code>ROW_NUMBER</code> with <code>product_id</code> as final key limits every partition deterministically even when revenue ties.</p>
+<h4 id="solution-1--exercise-6-preserve-unknown-versus-all">Exercise 6 — Preserve unknown versus ALL<a class="heading-anchor" href="#solution-1--exercise-6-preserve-unknown-versus-all" aria-label="Link to this section">#</a></h4>
+<p>The stored member label and generated-total flag are separate fields. A real NULL/unknown member retains flag zero; ALL has flag one.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day55_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day55_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 55 solutions: BI drill-down and subtotal design</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>WITH line AS (</span>
+<span>  SELECT c.country,</span>
+<span>         p.category,</span>
+<span>         o.status,</span>
+<span>         p.product_id,</span>
+<span>         p.name,</span>
+<span>         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  JOIN customers c USING (customer_id)</span>
+<span>  JOIN order_items oi USING (order_id)</span>
+<span>  JOIN products p USING (product_id)</span>
+<span>), rollup_rows AS (</span>
+<span>  SELECT country, category, SUM(revenue) AS revenue</span>
+<span>  FROM line</span>
+<span>  GROUP BY ROLLUP (country, category)</span>
+<span>), cube_rows AS (</span>
+<span>  SELECT country, category, SUM(revenue) AS revenue</span>
+<span>  FROM line</span>
+<span>  GROUP BY CUBE (country, category)</span>
+<span>)</span>
+<span>-- Exercise 1: CUBE adds category-only subtotals that ROLLUP omits.</span>
+<span>SELECT (SELECT COUNT(*) FROM rollup_rows) AS rollup_row_count,</span>
+<span>       (SELECT COUNT(*) FROM cube_rows) AS cube_row_count;</span>
+<span> </span>
+<span>WITH line AS (</span>
+<span>  SELECT c.country,</span>
+<span>         p.category,</span>
+<span>         o.status,</span>
+<span>         p.product_id,</span>
+<span>         p.name,</span>
+<span>         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  JOIN customers c USING (customer_id)</span>
+<span>  JOIN order_items oi USING (order_id)</span>
+<span>  JOIN products p USING (product_id)</span>
+<span>), product_revenue AS (</span>
+<span>  SELECT country,</span>
+<span>         category,</span>
+<span>         status,</span>
+<span>         product_id,</span>
+<span>         name,</span>
+<span>         SUM(revenue) AS revenue</span>
+<span>  FROM line</span>
+<span>  GROUP BY country, category, status, product_id, name</span>
+<span>), ranked AS (</span>
+<span>  SELECT *,</span>
+<span>         ROW_NUMBER() OVER (</span>
+<span>           PARTITION BY country, category, status</span>
+<span>           ORDER BY revenue DESC, product_id</span>
+<span>         ) AS product_rank</span>
+<span>  FROM product_revenue</span>
+<span>)</span>
+<span>-- Exercise 2: status-aware top-five drill-down.</span>
+<span>SELECT country,</span>
+<span>       category,</span>
+<span>       status,</span>
+<span>       product_id,</span>
+<span>       name,</span>
+<span>       ROUND(revenue, 2) AS revenue,</span>
+<span>       product_rank</span>
+<span>FROM ranked</span>
+<span>WHERE product_rank &lt;= 5</span>
+<span>ORDER BY country, category, status, product_rank;</span>
+<span> </span>
+<span>-- Exercise 3: GROUPING&#x27;s bit mask documents each ROLLUP level: detail (0),</span>
+<span>-- category subtotal within country (1), and grand total (3).</span>
+<span>WITH line AS (</span>
+<span>  SELECT c.country, p.category,</span>
+<span>         oi.quantity * oi.unit_price * (1 - oi.discount) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  JOIN customers c USING (customer_id)</span>
+<span>  JOIN order_items oi USING (order_id)</span>
+<span>  JOIN products p USING (product_id)</span>
+<span>)</span>
+<span>SELECT country, category, SUM(revenue) AS revenue,</span>
+<span>       GROUPING(country, category) AS grouping_mask</span>
+<span>FROM line</span>
+<span>GROUP BY ROLLUP (country, category)</span>
+<span>ORDER BY grouping_mask, country, category;</span>
+<span> </span>
+<span>-- Exercise 4: PostgreSQL&#x27;s GROUPING(args) returns the stable bit mask used as</span>
+<span>-- both machine-readable level ID and source for display labels.</span>
+<span>WITH line AS (</span>
+<span>  SELECT c.country, p.category,</span>
+<span>         oi.quantity * oi.unit_price * (1 - oi.discount) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  JOIN customers c USING (customer_id)</span>
+<span>  JOIN order_items oi USING (order_id)</span>
+<span>  JOIN products p USING (product_id)</span>
+<span>)</span>
+<span>SELECT GROUPING(country, category) AS level_id,</span>
+<span>       CASE GROUPING(country, category)</span>
+<span>         WHEN 0 THEN &#x27;country/category detail&#x27;</span>
+<span>         WHEN 1 THEN &#x27;country subtotal&#x27;</span>
+<span>         WHEN 3 THEN &#x27;grand total&#x27;</span>
+<span>       END AS level_name,</span>
+<span>       country, category, SUM(revenue) AS revenue</span>
+<span>FROM line</span>
+<span>GROUP BY ROLLUP (country, category)</span>
+<span>ORDER BY level_id, country, category;</span>
+<span> </span>
+<span>-- Exercise 5: ROW_NUMBER and product_id as the final sort key guarantee no more</span>
+<span>-- than five deterministic products per group even when revenue ties.</span>
+<span>WITH revenue AS (</span>
+<span>  SELECT c.country, p.product_id, p.name,</span>
+<span>         SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  JOIN customers c USING (customer_id)</span>
+<span>  JOIN order_items oi USING (order_id)</span>
+<span>  JOIN products p USING (product_id)</span>
+<span>  GROUP BY c.country, p.product_id, p.name</span>
+<span>), ranked AS (</span>
+<span>  SELECT *, ROW_NUMBER() OVER (</span>
+<span>    PARTITION BY country ORDER BY revenue DESC, product_id</span>
+<span>  ) AS position</span>
+<span>  FROM revenue</span>
+<span>)</span>
+<span>SELECT * FROM ranked WHERE position &lt;= 5 ORDER BY country, position;</span>
+<span> </span>
+<span>-- Exercise 6: grouping flag and stored-member label are separate columns, so</span>
+<span>-- a real unknown value can never masquerade as the ALL subtotal.</span>
+<span>SELECT CASE WHEN GROUPING(country) = 1 THEN &#x27;ALL&#x27;</span>
+<span>            ELSE COALESCE(country, &#x27;(unknown member)&#x27;) END AS display_country,</span>
+<span>       GROUPING(country) AS is_generated_total,</span>
+<span>       COUNT(*) AS customers</span>
+<span>FROM customers</span>
+<span>GROUP BY GROUPING SETS ((country), ())</span>
+<span>ORDER BY is_generated_total, display_country;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-54.html"><small>Previous lesson</small><strong>sql-54</strong><span>Project3 DWH Part3 Aggregations</span></a>
+        <a class="nav-card next" href="sql-56.html"><small>Next lesson</small><strong>sql-56</strong><span>Project4 BI Part2</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-55";
+    const LEARNER_PATH = "sql/postgres-60day/day55_project4_bi_part1.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

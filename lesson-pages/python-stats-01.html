@@ -1,0 +1,1293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-stats-01 · Resampling, Experiments, and Causal Boundaries · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-stats-01</p>
+        <h1>Resampling, Experiments, and Causal Boundaries</h1>
+        <p class="hero-copy">Advanced statistics and experimentation</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">210 minutes</span>
+          <span class="tag">data setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-32.html">python-32</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_stats_01_resampling_experiments.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_stats_01_resampling_experiments.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_stats_01_resampling_experiments.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_stats_01_resampling_experiments.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--resampling-experiments-and-causal-boundaries">Resampling, experiments, and causal boundaries<a class="heading-anchor" href="#guide--resampling-experiments-and-causal-boundaries" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-stats-01</code></p>
+<p><strong>Level:</strong> advanced</p>
+<p><strong>Estimated time:</strong> 240–300 minutes</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Catalog prerequisite:</strong> <code>python-32</code></li>
+<li>Python Days 1–32</li>
+<li>Means, variance, confidence intervals, hypothesis tests, and p-values</li>
+<li>SQL or pandas grouping is helpful but not required</li>
+</ul>
+<p>All calculations use the standard library and the tracked <a href="../python/professional/fixtures/data/experiment_outcomes.csv"><code>experiment_outcomes.csv</code></a>. Random resampling uses explicit local seeds.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>You will be able to:</p>
+<ol>
+<li>Compute and interpret an unstandardized and standardized effect.</li>
+<li>Build a seeded bootstrap interval for a difference in means.</li>
+<li>Run an exact or Monte Carlo permutation test.</li>
+<li>Estimate per-arm sample size from effect, alpha, and power.</li>
+<li>Apply Holm multiple-comparison adjustment.</li>
+<li>Check baseline allocation balance.</li>
+<li>Explain why unplanned sequential peeking raises false-positive risk.</li>
+<li>Write an A/B plan with assignment unit and primary metric.</li>
+<li>Bound causal claims by design, attrition, and implementation.</li>
+</ol>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Estimand:</strong> exact quantity the experiment seeks to estimate.</li>
+<li><strong>Effect size:</strong> magnitude of a difference, raw or standardized.</li>
+<li><strong>Bootstrap:</strong> resampling observed units with replacement.</li>
+<li><strong>Permutation test:</strong> comparing assignment rearrangements under a null.</li>
+<li><strong>Exchangeability:</strong> condition that makes a resampling scheme meaningful.</li>
+<li><strong>Power:</strong> probability of rejecting the null for a specified true effect.</li>
+<li><strong>Alpha:</strong> planned false-positive probability for a test family.</li>
+<li><strong>Family-wise error:</strong> probability of one or more false positives in a family.</li>
+<li><strong>Holm procedure:</strong> sequential p-value adjustment controlling family-wise error.</li>
+<li><strong>Assignment unit:</strong> entity randomized, such as user, account, or site.</li>
+<li><strong>Randomization check:</strong> pre-outcome check for major assignment imbalance or implementation failure.</li>
+<li><strong>Sequential peeking:</strong> repeatedly testing accumulating outcomes without a planned stopping rule.</li>
+<li><strong>Causal claim:</strong> claim about what assignment changed, requiring design assumptions beyond a small p-value.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Run the learner file and predict the treatment-minus-control mean difference.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_stats_01_resampling_experiments.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_stats_01_resampling_experiments.py</code></pre>
+<p>The fixture has eight completed units per arm, identical baseline score distributions, and treatment outcomes shifted upward by two. It is deliberately small enough for all <code>C(16, 8) = 12,870</code> assignments to be enumerated.</p>
+<p>The solution reports the estimate, standardized effect, bootstrap interval, exact permutation p-value, approximate sample plan, and adjusted p-values. None alone establishes that a real-world causal design was implemented.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--1-define-the-experiment-before-analysis">1. Define the experiment before analysis<a class="heading-anchor" href="#guide--1-define-the-experiment-before-analysis" aria-label="Link to this section">#</a></h5>
+<p>Write an <code>ExperimentPlan</code> containing:</p>
+<ul>
+<li>assignment unit,</li>
+<li>one primary metric and window,</li>
+<li>minimum sample per arm,</li>
+<li>alpha,</li>
+<li>intended analysis,</li>
+<li>planned stopping/looks, and</li>
+<li>missing-outcome handling.</li>
+</ul>
+<p>Do this before computing outcomes.</p>
+<h5 id="guide--2-complete-standardized-effect">2. Complete standardized effect<a class="heading-anchor" href="#guide--2-complete-standardized-effect" aria-label="Link to this section">#</a></h5>
+<p>Use the pooled sample standard deviation. Reject groups smaller than two and zero pooled variance. Explain raw units and standardized units side by side.</p>
+<h5 id="guide--3-bootstrap-the-difference">3. Bootstrap the difference<a class="heading-anchor" href="#guide--3-bootstrap-the-difference" aria-label="Link to this section">#</a></h5>
+<p>Resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints. Repeat with the same seed and verify equality. Change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.</p>
+<h5 id="guide--4-permute-assignments">4. Permute assignments<a class="heading-anchor" href="#guide--4-permute-assignments" aria-label="Link to this section">#</a></h5>
+<p>Pool outcomes and enumerate treatment-index combinations when feasible. Use a two-sided comparison to the observed absolute difference. For large data, use seeded Monte Carlo assignments and the plus-one p-value correction.</p>
+<p>State why permuting individual rows is invalid if assignment occurred by account or site.</p>
+<h5 id="guide--5-plan-sample-size">5. Plan sample size<a class="heading-anchor" href="#guide--5-plan-sample-size" aria-label="Link to this section">#</a></h5>
+<p>Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.</p>
+<h5 id="guide--6-control-a-comparison-family">6. Control a comparison family<a class="heading-anchor" href="#guide--6-control-a-comparison-family" aria-label="Link to this section">#</a></h5>
+<p>Complete <code>holm_adjust</code> for three p-values. Preserve original order and enforce monotonic adjusted values after sorting. Identify the family before viewing results; splitting an inconvenient family after analysis defeats control.</p>
+<h5 id="guide--7-check-assignment-and-attrition">7. Check assignment and attrition<a class="heading-anchor" href="#guide--7-check-assignment-and-attrition" aria-label="Link to this section">#</a></h5>
+<p>Compute baseline standardized difference by arm. Then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.</p>
+<h5 id="guide--8-simulate-peeking-policy">8. Simulate peeking policy<a class="heading-anchor" href="#guide--8-simulate-peeking-policy" aria-label="Link to this section">#</a></h5>
+<p>Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s simple Bonferroni per-look split illustrates the budget. Compare it with a single final look and research group-sequential designs before production use.</p>
+<h5 id="guide--9-bound-the-claim">9. Bound the claim<a class="heading-anchor" href="#guide--9-bound-the-claim" aria-label="Link to this section">#</a></h5>
+<p>Complete <code>claim_scope</code>. Randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions. Observational grouping, compromised randomization, or severe differential attrition returns an associational scope.</p>
+<h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
+<p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
+<h5 id="guide--exercise-10-bootstrap-clustered-assignments">Exercise 10 — bootstrap clustered assignments<a class="heading-anchor" href="#guide--exercise-10-bootstrap-clustered-assignments" aria-label="Link to this section">#</a></h5>
+<p>Extend the experiment fixture with multiple rows per account. Bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.</p>
+<p><strong>Progressive hint:</strong> Sample independent assignment units with replacement and carry all of each selected account&#x27;s observations into the resample.</p>
+<h5 id="guide--exercise-11-bootstrap-a-ratio-metric">Exercise 11 — bootstrap a ratio metric<a class="heading-anchor" href="#guide--exercise-11-bootstrap-a-ratio-metric" aria-label="Link to this section">#</a></h5>
+<p>Estimate treatment lift for revenue per active user, preserving each user&#x27;s numerator and denominator. Handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.</p>
+<p><strong>Progressive hint:</strong> Define the estimand first; the two ratio formulas answer different questions. Resample complete user records.</p>
+<h5 id="guide--exercise-12-apply-covariate-adjustment-without-leakage">Exercise 12 — apply covariate adjustment without leakage<a class="heading-anchor" href="#guide--exercise-12-apply-covariate-adjustment-without-leakage" aria-label="Link to this section">#</a></h5>
+<p>Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.</p>
+<p><strong>Progressive hint:</strong> The covariate must be measured before assignment and not affected by treatment. Center it with a documented analysis-sample mean.</p>
+<h5 id="guide--exercise-13-separate-intention-to-treat-from-treatment-on-treated">Exercise 13 — separate intention-to-treat from treatment-on-treated<a class="heading-anchor" href="#guide--exercise-13-separate-intention-to-treat-from-treatment-on-treated" aria-label="Link to this section">#</a></h5>
+<p>Simulate assigned treatment with imperfect compliance. Compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.</p>
+<p><strong>Progressive hint:</strong> Random assignment protects the assignment groups, not the self-selected compliance groups.</p>
+<h5 id="guide--exercise-14-perform-missing-outcome-sensitivity">Exercise 14 — perform missing-outcome sensitivity<a class="heading-anchor" href="#guide--exercise-14-perform-missing-outcome-sensitivity" aria-label="Link to this section">#</a></h5>
+<p>Create differential attrition by arm. Report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.</p>
+<p><strong>Progressive hint:</strong> Missing outcomes are not automatically zero or missing completely at random. Show how strong an assumption is needed to reverse the conclusion.</p>
+<h5 id="guide--exercise-15-simulate-sequential-false-positives">Exercise 15 — simulate sequential false positives<a class="heading-anchor" href="#guide--exercise-15-simulate-sequential-false-positives" aria-label="Link to this section">#</a></h5>
+<p>Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a clearly labeled exploratory monitor.</p>
+<p><strong>Progressive hint:</strong> Use a seeded outer simulation and record the first crossing. The simple split illustrates budgeting; it is not an optimized group-sequential design.</p>
+<h5 id="guide--exercise-16-pre-specify-heterogeneous-effects">Exercise 16 — pre-specify heterogeneous effects<a class="heading-anchor" href="#guide--exercise-16-pre-specify-heterogeneous-effects" aria-label="Link to this section">#</a></h5>
+<p>Choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family. Contrast this with mining many cuts for the largest lift.</p>
+<p><strong>Progressive hint:</strong> An interaction test addresses whether effects differ; significance in one subgroup and not another is not itself evidence of difference.</p>
+<h5 id="guide--exercise-17-run-clustered-randomization-inference">Exercise 17 — run clustered randomization inference<a class="heading-anchor" href="#guide--exercise-17-run-clustered-randomization-inference" aria-label="Link to this section">#</a></h5>
+<p>For a site-randomized experiment, permute site assignments while keeping all rows within a site together. Compare with invalid row-level permutation and state the sharp-null interpretation.</p>
+<p><strong>Progressive hint:</strong> Enumerate or sample assignments consistent with the original design, including treated-site count and any stratification.</p>
+<h5 id="guide--exercise-18-produce-an-auditable-analysis-packet">Exercise 18 — produce an auditable analysis packet<a class="heading-anchor" href="#guide--exercise-18-produce-an-auditable-analysis-packet" aria-label="Link to this section">#</a></h5>
+<p>Write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.</p>
+<p><strong>Progressive hint:</strong> Generate machine-readable values and prose from one result object. Keep random seeds and units visible; exclude raw sensitive rows.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Fixture mean difference equals 2.</li>
+<li>Baseline standardized difference equals 0.</li>
+<li>The seeded bootstrap repeats exactly and its interval excludes zero.</li>
+<li>Exact permutation enumerates 12,870 assignments.</li>
+<li>Approximate sample size for standardized effect 0.5 is 63 per arm.</li>
+<li>Holm-adjusted values for 0.01, 0.04, 0.03 are 0.03, 0.06, 0.06.</li>
+<li>Planned looks divide or otherwise control the error budget.</li>
+<li>The causal claim changes when randomization or attrition assumptions fail.</li>
+</ul>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
+.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_stats_01_resampling_experiments -v</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_stats_01_resampling_experiments -v</code></pre>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Bootstrap is said to remove bias:</strong> it quantifies uncertainty under its resampling assumptions; it does not repair confounding.</li>
+<li><strong>Rows are permuted despite clustered assignment:</strong> the randomization unit was ignored.</li>
+<li><strong>A standardized effect hides practical units:</strong> report both.</li>
+<li><strong>Power is computed after a nonsignificant result:</strong> planning and interpretation are being confused.</li>
+<li><strong>Twenty metrics use alpha 0.05 independently:</strong> the comparison family is uncontrolled.</li>
+<li><strong>The dashboard is checked daily:</strong> an ordinary fixed-horizon p-value is repeatedly peeked.</li>
+<li><strong>Randomized means automatically causal:</strong> interference, noncompliance, attrition, and outcome changes still matter.</li>
+<li><strong>A narrow observational interval is called causal:</strong> precision does not identify an intervention effect.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Carry the experiment plan into Python Days 35 and 45. Use <code>python-ml-01</code> to bind the resulting data snapshot, feature schema, evaluation evidence, and promoted artifact into a reproducible delivery record.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_stats_01_resampling_experiments.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_stats_01_resampling_experiments.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-stats-01 learner lab: resampling and experiment decisions.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Callable, Sequence</span>
+<span>from statistics import mean</span>
+<span>from typing import Literal</span>
+<span> </span>
+<span> </span>
+<span>def difference_in_means(control: Sequence[float], treatment: Sequence[float]) -&gt; float:</span>
+<span>    &quot;&quot;&quot;Worked example: treatment mean minus control mean.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if not control or not treatment:</span>
+<span>        raise ValueError(&quot;both groups need observations&quot;)</span>
+<span>    return mean(treatment) - mean(control)</span>
+<span> </span>
+<span> </span>
+<span>def standardized_mean_difference(</span>
+<span>    control: Sequence[float],</span>
+<span>    treatment: Sequence[float],</span>
+<span>) -&gt; float:</span>
+<span>    &quot;&quot;&quot;TODO: divide the mean difference by the pooled sample standard deviation.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete standardized_mean_difference&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def holm_adjust(p_values: Sequence[float]) -&gt; list[float]:</span>
+<span>    &quot;&quot;&quot;TODO: control family-wise error with Holm&#x27;s step-down procedure.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete holm_adjust&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def claim_scope(</span>
+<span>    *,</span>
+<span>    randomized: bool,</span>
+<span>    allocation_intact: bool,</span>
+<span>    severe_attrition: bool,</span>
+<span>) -&gt; Literal[&quot;causal&quot;, &quot;associational&quot;]:</span>
+<span>    &quot;&quot;&quot;TODO: permit a causal claim only when all design protections hold.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete claim_scope&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def self_check() -&gt; None:</span>
+<span>    control = [10.0, 11.0, 9.0]</span>
+<span>    treatment = [12.0, 13.0, 11.0]</span>
+<span>    print(&quot;Worked mean difference:&quot;, difference_in_means(control, treatment))</span>
+<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
+<span>        (&quot;effect size&quot;, lambda: standardized_mean_difference(control, treatment)),</span>
+<span>        (&quot;multiple comparisons&quot;, lambda: holm_adjust([0.01, 0.04, 0.03])),</span>
+<span>        (</span>
+<span>            &quot;claim boundary&quot;,</span>
+<span>            lambda: claim_scope(</span>
+<span>                randomized=True,</span>
+<span>                allocation_intact=True,</span>
+<span>                severe_attrition=False,</span>
+<span>            ),</span>
+<span>        ),</span>
+<span>    )</span>
+<span>    for label, call in checks:</span>
+<span>        try:</span>
+<span>            print(label, &quot;-&gt;&quot;, call())</span>
+<span>        except NotImplementedError:</span>
+<span>            print(&quot;TODO:&quot;, label)</span>
+<span> </span>
+<span> </span>
+<span># === Numbered professional practice ===</span>
+<span>#</span>
+<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
+<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
+<span># Full acceptance checks and progressive hints:</span>
+<span># companion-guides/py_stats_01_resampling_experiments.md</span>
+<span>#</span>
+<span># Exercise 1 — Define the experiment before analysis</span>
+<span># Prompt: Write an `ExperimentPlan` containing: - assignment unit, - one primary metric</span>
+<span># and window, - minimum sample per arm, - alpha, - intended analysis, - planned</span>
+<span># stopping/looks, and - missing-outcome handling. Do this before computing outcomes.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 2 — Complete standardized effect</span>
+<span># Prompt: Use the pooled sample standard deviation. Reject groups smaller than two and</span>
+<span># zero pooled variance. Explain raw units and standardized units side by side.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 3 — Bootstrap the difference</span>
+<span># Prompt: Resample each arm independently with replacement, compute 2,000 differences,</span>
+<span># sort them, and select percentile endpoints. Repeat with the same seed and verify</span>
+<span># equality. Change the seed and expect small endpoint variation, not a different</span>
+<span># conclusion guaranteed by design.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 4 — Permute assignments</span>
+<span># Prompt: Pool outcomes and enumerate treatment-index combinations when feasible. Use a</span>
+<span># two-sided comparison to the observed absolute difference. For large data, use seeded</span>
+<span># Monte Carlo assignments and the plus-one p-value correction. State why permuting</span>
+<span># individual rows is invalid if assignment occurred by account or site.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 5 — Plan sample size</span>
+<span># Prompt: Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain</span>
+<span># why variance uncertainty, clustering, attrition, noncompliance, and a binary metric</span>
+<span># require a more specific planner.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 6 — Control a comparison family</span>
+<span># Prompt: Complete `holm_adjust` for three p-values. Preserve original order and enforce</span>
+<span># monotonic adjusted values after sorting. Identify the family before viewing results;</span>
+<span># splitting an inconvenient family after analysis defeats control.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 7 — Check assignment and attrition</span>
+<span># Prompt: Compute baseline standardized difference by arm. Then remove outcomes</span>
+<span># selectively from one arm and explain how that affects causal credibility even if the</span>
+<span># remaining p-value is small.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 8 — Simulate peeking policy</span>
+<span># Prompt: Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s</span>
+<span># simple Bonferroni per-look split illustrates the budget. Compare it with a single final</span>
+<span># look and research group-sequential designs before production use.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 9 — Bound the claim</span>
+<span># Prompt: Complete `claim_scope`. Randomization, intact allocation, and no severe</span>
+<span># attrition permit a causal interpretation under additional assumptions. Observational</span>
+<span># grouping, compromised randomization, or severe differential attrition returns an</span>
+<span># associational scope.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 10 — bootstrap clustered assignments</span>
+<span># Prompt: Extend the experiment fixture with multiple rows per account. Bootstrap</span>
+<span># accounts—not rows—within each arm and compare interval width with the incorrect row</span>
+<span># bootstrap.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 11 — bootstrap a ratio metric</span>
+<span># Prompt: Estimate treatment lift for revenue per active user, preserving each user&#x27;s</span>
+<span># numerator and denominator. Handle a resample with zero denominator and compare ratio-of-</span>
+<span># sums with mean-of-user-ratios.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 12 — apply covariate adjustment without leakage</span>
+<span># Prompt: Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment</span>
+<span># coefficient without post-treatment information and compare unadjusted/adjusted variance</span>
+<span># and mean effect.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 13 — separate intention-to-treat from treatment-on-treated</span>
+<span># Prompt: Simulate assigned treatment with imperfect compliance. Compute the intention-to-</span>
+<span># treat effect by assignment and explain why comparing actual takers with non-takers is</span>
+<span># generally confounded.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 14 — perform missing-outcome sensitivity</span>
+<span># Prompt: Create differential attrition by arm. Report complete-case results and bounded</span>
+<span># best/worst-case outcomes under a declared feasible outcome range.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 15 — simulate sequential false positives</span>
+<span># Prompt: Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate</span>
+<span># ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a</span>
+<span># clearly labeled exploratory monitor.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 16 — pre-specify heterogeneous effects</span>
+<span># Prompt: Choose two domain-motivated subgroups before analysis, estimate effects with</span>
+<span># uncertainty and support, and adjust the planned comparison family. Contrast this with</span>
+<span># mining many cuts for the largest lift.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 17 — run clustered randomization inference</span>
+<span># Prompt: For a site-randomized experiment, permute site assignments while keeping all</span>
+<span># rows within a site together. Compare with invalid row-level permutation and state the</span>
+<span># sharp-null interpretation.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 18 — produce an auditable analysis packet</span>
+<span># Prompt: Write a deterministic JSON/Markdown packet containing plan hash, data</span>
+<span># fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval,</span>
+<span># adjusted p-values, claim scope, code version, and limitations.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># === End numbered professional practice ===</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    self_check()</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_stats_01_resampling_experiments_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_stats_01_resampling_experiments_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--resampling-and-experiments-solution-reasoning">Resampling and experiments solution reasoning<a class="heading-anchor" href="#solution-1--resampling-and-experiments-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Attempt <code>python-stats-01</code> before opening <a href="python-stats-01.html#solution-2"><code>py_stats_01_resampling_experiments_solution.py</code></a>.</p>
+<p>The bootstrap resamples each observed arm independently and reports a percentile interval for the difference in means. It quantifies sampling uncertainty under an exchangeability assumption; it does not repair biased assignment or missing outcomes. The permutation test pools outcomes under the sharp null, enumerates all assignments when feasible, and otherwise uses a seeded Monte Carlo estimate with a plus-one correction.</p>
+<p>Standardized mean difference communicates effect magnitude in standard deviation units. The Normal approximation gives a planning estimate, not a guaranteed achieved power; final plans should reflect the actual metric, variance, attrition, clustering, and test.</p>
+<p>Holm adjustment controls family-wise error while being less conservative than plain Bonferroni. Repeated unplanned peeking is another multiplicity problem; the simple per-look alpha split illustrates planning but is not a substitute for a designed group-sequential method.</p>
+<p>Randomization supports causal claims only when assignment was implemented, units did not interfere, outcome handling remained credible, and attrition did not destroy comparability. Observational differences remain associational even when bootstrap intervals are narrow.</p>
+<p>Edge cases include zero variance, tiny groups, a metric chosen after seeing results, assignment and analysis units that differ, cluster correlation, noncompliance, missing outcomes, many secondary metrics, and stopping early because an ordinary p-value crossed 0.05.</p>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Use this map after an honest attempt. The executable implementation remains <a href="python-stats-01.html#solution-2"><code>py_stats_01_resampling_experiments_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
+<h5 id="solution-1--exercise-1-define-the-experiment-before-analysis">Exercise 1 — Define the experiment before analysis<a class="heading-anchor" href="#solution-1--exercise-1-define-the-experiment-before-analysis" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Write an <code>ExperimentPlan</code> containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling. Do this before computing outcomes.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-2-complete-standardized-effect">Exercise 2 — Complete standardized effect<a class="heading-anchor" href="#solution-1--exercise-2-complete-standardized-effect" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Use the pooled sample standard deviation. Reject groups smaller than two and zero pooled variance. Explain raw units and standardized units side by side.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-3-bootstrap-the-difference">Exercise 3 — Bootstrap the difference<a class="heading-anchor" href="#solution-1--exercise-3-bootstrap-the-difference" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints. Repeat with the same seed and verify equality. Change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-4-permute-assignments">Exercise 4 — Permute assignments<a class="heading-anchor" href="#solution-1--exercise-4-permute-assignments" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Pool outcomes and enumerate treatment-index combinations when feasible. Use a two-sided comparison to the observed absolute difference. For large data, use seeded Monte Carlo assignments and the plus-one p-value correction. State why permuting individual rows is invalid if assignment occurred by account or site.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-5-plan-sample-size">Exercise 5 — Plan sample size<a class="heading-anchor" href="#solution-1--exercise-5-plan-sample-size" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-6-control-a-comparison-family">Exercise 6 — Control a comparison family<a class="heading-anchor" href="#solution-1--exercise-6-control-a-comparison-family" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Complete <code>holm_adjust</code> for three p-values. Preserve original order and enforce monotonic adjusted values after sorting. Identify the family before viewing results; splitting an inconvenient family after analysis defeats control.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-7-check-assignment-and-attrition">Exercise 7 — Check assignment and attrition<a class="heading-anchor" href="#solution-1--exercise-7-check-assignment-and-attrition" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Compute baseline standardized difference by arm. Then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-8-simulate-peeking-policy">Exercise 8 — Simulate peeking policy<a class="heading-anchor" href="#solution-1--exercise-8-simulate-peeking-policy" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s simple Bonferroni per-look split illustrates the budget. Compare it with a single final look and research group-sequential designs before production use.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-9-bound-the-claim">Exercise 9 — Bound the claim<a class="heading-anchor" href="#solution-1--exercise-9-bound-the-claim" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Complete <code>claim_scope</code>. Randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions. Observational grouping, compromised randomization, or severe differential attrition returns an associational scope.</p>
+<p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-10-bootstrap-clustered-assignments">Exercise 10 — bootstrap clustered assignments<a class="heading-anchor" href="#solution-1--exercise-10-bootstrap-clustered-assignments" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Extend the experiment fixture with multiple rows per account. Bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.</p>
+<p><strong>Reasoning path:</strong> Sample independent assignment units with replacement and carry all of each selected account&#x27;s observations into the resample.</p>
+<p>Build arm-specific lists of account IDs, resample those IDs, and reconstruct all rows belonging to each draw (including repeated accounts from replacement). Compute the metric at the original analysis unit. The row bootstrap usually acts as if correlated observations were independent and can understate uncertainty.</p>
+<p>If assignment was by site, site is the resampling unit. A small number of clusters needs specialized methods and candid limitations.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-11-bootstrap-a-ratio-metric">Exercise 11 — bootstrap a ratio metric<a class="heading-anchor" href="#solution-1--exercise-11-bootstrap-a-ratio-metric" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Estimate treatment lift for revenue per active user, preserving each user&#x27;s numerator and denominator. Handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.</p>
+<p><strong>Reasoning path:</strong> Define the estimand first; the two ratio formulas answer different questions. Resample complete user records.</p>
+<p>For population revenue per active user, compute total revenue divided by total active indicators within each resampled arm, then treatment minus/control or a relative lift as predeclared. Reject/record a zero denominator rather than inserting an arbitrary zero.</p>
+<p>Mean of individual ratios weights users equally and can be undefined or answer a different question. Report the exact formula and support with the interval.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-12-apply-covariate-adjustment-without-leakage">Exercise 12 — apply covariate adjustment without leakage<a class="heading-anchor" href="#solution-1--exercise-12-apply-covariate-adjustment-without-leakage" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.</p>
+<p><strong>Reasoning path:</strong> The covariate must be measured before assignment and not affected by treatment. Center it with a documented analysis-sample mean.</p>
+<p>Compute <code>theta = cov(outcome, premetric) / var(premetric)</code> using only allowed analysis data under the predeclared method, then adjust <code>outcome - theta * (premetric - mean_premetric)</code>. Randomization preserves the effect estimate while a predictive covariate can reduce variance.</p>
+<p>Check balance/missingness and report both estimates. Selecting the covariate or formula after seeing favorable effects creates another analysis degree of freedom.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-13-separate-intention-to-treat-from-treatment-on-treated">Exercise 13 — separate intention-to-treat from treatment-on-treated<a class="heading-anchor" href="#solution-1--exercise-13-separate-intention-to-treat-from-treatment-on-treated" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Simulate assigned treatment with imperfect compliance. Compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.</p>
+<p><strong>Reasoning path:</strong> Random assignment protects the assignment groups, not the self-selected compliance groups.</p>
+<p>Primary analysis groups outcomes by original randomized assignment regardless of uptake. This estimates the policy effect of offering treatment. Actual takers can differ in motivation, eligibility, or risk, so a naive treated comparison loses randomization.</p>
+<p>Instrumental-variable/complier effects require additional exclusion, monotonicity, and relevance assumptions; state them before making that extension.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-14-perform-missing-outcome-sensitivity">Exercise 14 — perform missing-outcome sensitivity<a class="heading-anchor" href="#solution-1--exercise-14-perform-missing-outcome-sensitivity" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Create differential attrition by arm. Report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.</p>
+<p><strong>Reasoning path:</strong> Missing outcomes are not automatically zero or missing completely at random. Show how strong an assumption is needed to reverse the conclusion.</p>
+<p>Start with assignment counts and observed-outcome rates by arm. Complete-case analysis describes observed units only. For bounded outcomes, impute favorable and unfavorable extremes to missing rows under transparent scenarios and recompute the effect.</p>
+<p>The resulting range is a sensitivity analysis, not a recovered truth. Severe differential attrition downgrades causal credibility even when observed p-values remain small.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-15-simulate-sequential-false-positives">Exercise 15 — simulate sequential false positives<a class="heading-anchor" href="#solution-1--exercise-15-simulate-sequential-false-positives" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a clearly labeled exploratory monitor.</p>
+<p><strong>Reasoning path:</strong> Use a seeded outer simulation and record the first crossing. The simple split illustrates budgeting; it is not an optimized group-sequential design.</p>
+<p>Generate null outcomes according to the planned arrival process, evaluate each look using only data available then, and estimate the fraction of simulations that ever cross. Multiple unadjusted opportunities exceed the nominal one-look error. Dividing alpha across planned looks is conservative but demonstrates control.</p>
+<p>Do not tune the simulation until a preferred policy wins. Production use requires a reviewed sequential design and operational stopping rules.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-16-pre-specify-heterogeneous-effects">Exercise 16 — pre-specify heterogeneous effects<a class="heading-anchor" href="#solution-1--exercise-16-pre-specify-heterogeneous-effects" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family. Contrast this with mining many cuts for the largest lift.</p>
+<p><strong>Reasoning path:</strong> An interaction test addresses whether effects differ; significance in one subgroup and not another is not itself evidence of difference.</p>
+<p>Record subgroup definitions and multiplicity family in the ExperimentPlan. Report each arm&#x27;s sample size and effect interval plus a direct interaction or difference-in-effects estimate. Sparse groups receive cautious or no claim.</p>
+<p>Data-mined segments are hypothesis generation and need independent confirmation. Avoid causal stories for a subgroup selected because its observed lift was largest.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-17-run-clustered-randomization-inference">Exercise 17 — run clustered randomization inference<a class="heading-anchor" href="#solution-1--exercise-17-run-clustered-randomization-inference" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> For a site-randomized experiment, permute site assignments while keeping all rows within a site together. Compare with invalid row-level permutation and state the sharp-null interpretation.</p>
+<p><strong>Reasoning path:</strong> Enumerate or sample assignments consistent with the original design, including treated-site count and any stratification.</p>
+<p>Compute the observed statistic from site assignments. Generate only legal site-level reallocations, reconstruct row outcomes under each assignment, and use the plus-one Monte Carlo correction when sampling. The p-value describes extremeness under the sharp null and assignment mechanism.</p>
+<p>Row permutation fabricates assignments that could never occur and overstates independent information. Few sites limit resolution and power.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-18-produce-an-auditable-analysis-packet">Exercise 18 — produce an auditable analysis packet<a class="heading-anchor" href="#solution-1--exercise-18-produce-an-auditable-analysis-packet" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.</p>
+<p><strong>Reasoning path:</strong> Generate machine-readable values and prose from one result object. Keep random seeds and units visible; exclude raw sensitive rows.</p>
+<p>Canonicalize the plan and dataset identity before analysis, then serialize finite numeric results with explicit metric units and denominators. The report links every claim to its design/evidence and labels exploratory analyses. Rerunning with identical inputs and seed should reproduce the packet.</p>
+<p>Hashes identify bytes but do not prove legal use or study quality. Preserve review ownership and any deviations from the pre-analysis plan.</p>
+<p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_stats_01_resampling_experiments_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_stats_01_resampling_experiments_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-stats-01 using deterministic local data.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import csv</span>
+<span>import itertools</span>
+<span>import math</span>
+<span>import random</span>
+<span>from collections.abc import Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from pathlib import Path</span>
+<span>from statistics import NormalDist, mean, stdev</span>
+<span>from typing import Literal, cast</span>
+<span> </span>
+<span>FIXTURE = Path(__file__).resolve().parents[1] / &quot;fixtures&quot; / &quot;data&quot; / (&quot;experiment_outcomes.csv&quot;)</span>
+<span>Variant = Literal[&quot;control&quot;, &quot;treatment&quot;]</span>
+<span>ClaimScope = Literal[&quot;causal&quot;, &quot;associational&quot;]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Observation:</span>
+<span>    participant_id: str</span>
+<span>    variant: Variant</span>
+<span>    pre_score: float</span>
+<span>    outcome: float</span>
+<span>    completed: bool</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Interval:</span>
+<span>    lower: float</span>
+<span>    estimate: float</span>
+<span>    upper: float</span>
+<span>    confidence: float</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class PermutationResult:</span>
+<span>    observed_difference: float</span>
+<span>    p_value: float</span>
+<span>    permutations: int</span>
+<span>    exact: bool</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ExperimentPlan:</span>
+<span>    assignment_unit: str</span>
+<span>    primary_metric: str</span>
+<span>    minimum_sample_per_arm: int</span>
+<span>    alpha: float = 0.05</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if not self.assignment_unit.strip() or not self.primary_metric.strip():</span>
+<span>            raise ValueError(&quot;assignment unit and primary metric are required&quot;)</span>
+<span>        if self.minimum_sample_per_arm &lt; 2:</span>
+<span>            raise ValueError(&quot;each arm needs at least two planned observations&quot;)</span>
+<span>        if not 0 &lt; self.alpha &lt; 1:</span>
+<span>            raise ValueError(&quot;alpha must be between zero and one&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def load_observations(path: Path = FIXTURE) -&gt; list[Observation]:</span>
+<span>    with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
+<span>        rows = list(csv.DictReader(handle))</span>
+<span>    observations: list[Observation] = []</span>
+<span>    for row in rows:</span>
+<span>        variant_text = row[&quot;variant&quot;]</span>
+<span>        if variant_text not in {&quot;control&quot;, &quot;treatment&quot;}:</span>
+<span>            raise ValueError(f&quot;unknown variant: {variant_text}&quot;)</span>
+<span>        variant = cast(Variant, variant_text)</span>
+<span>        completed = row[&quot;completed&quot;].lower()</span>
+<span>        if completed not in {&quot;true&quot;, &quot;false&quot;}:</span>
+<span>            raise ValueError(&quot;completed must be true or false&quot;)</span>
+<span>        observations.append(</span>
+<span>            Observation(</span>
+<span>                participant_id=row[&quot;participant_id&quot;],</span>
+<span>                variant=variant,</span>
+<span>                pre_score=float(row[&quot;pre_score&quot;]),</span>
+<span>                outcome=float(row[&quot;outcome&quot;]),</span>
+<span>                completed=completed == &quot;true&quot;,</span>
+<span>            )</span>
+<span>        )</span>
+<span>    return observations</span>
+<span> </span>
+<span> </span>
+<span>def split_outcomes(</span>
+<span>    observations: Sequence[Observation],</span>
+<span>) -&gt; tuple[list[float], list[float]]:</span>
+<span>    control = [</span>
+<span>        observation.outcome</span>
+<span>        for observation in observations</span>
+<span>        if observation.completed and observation.variant == &quot;control&quot;</span>
+<span>    ]</span>
+<span>    treatment = [</span>
+<span>        observation.outcome</span>
+<span>        for observation in observations</span>
+<span>        if observation.completed and observation.variant == &quot;treatment&quot;</span>
+<span>    ]</span>
+<span>    if len(control) &lt; 2 or len(treatment) &lt; 2:</span>
+<span>        raise ValueError(&quot;each completed group needs at least two observations&quot;)</span>
+<span>    return control, treatment</span>
+<span> </span>
+<span> </span>
+<span>def difference_in_means(control: Sequence[float], treatment: Sequence[float]) -&gt; float:</span>
+<span>    if not control or not treatment:</span>
+<span>        raise ValueError(&quot;both groups need observations&quot;)</span>
+<span>    return mean(treatment) - mean(control)</span>
+<span> </span>
+<span> </span>
+<span>def standardized_mean_difference(</span>
+<span>    control: Sequence[float],</span>
+<span>    treatment: Sequence[float],</span>
+<span>) -&gt; float:</span>
+<span>    if len(control) &lt; 2 or len(treatment) &lt; 2:</span>
+<span>        raise ValueError(&quot;effect size needs at least two observations per group&quot;)</span>
+<span>    pooled_variance = (</span>
+<span>        (len(control) - 1) * stdev(control) ** 2 + (len(treatment) - 1) * stdev(treatment) ** 2</span>
+<span>    ) / (len(control) + len(treatment) - 2)</span>
+<span>    if pooled_variance == 0:</span>
+<span>        raise ValueError(&quot;standardized effect is undefined at zero variance&quot;)</span>
+<span>    return difference_in_means(control, treatment) / math.sqrt(pooled_variance)</span>
+<span> </span>
+<span> </span>
+<span>def bootstrap_difference_interval(</span>
+<span>    control: Sequence[float],</span>
+<span>    treatment: Sequence[float],</span>
+<span>    *,</span>
+<span>    resamples: int = 2_000,</span>
+<span>    confidence: float = 0.95,</span>
+<span>    seed: int = 20260730,</span>
+<span>) -&gt; Interval:</span>
+<span>    if not control or not treatment:</span>
+<span>        raise ValueError(&quot;both groups need observations&quot;)</span>
+<span>    if resamples &lt; 100:</span>
+<span>        raise ValueError(&quot;use at least 100 bootstrap resamples&quot;)</span>
+<span>    if not 0 &lt; confidence &lt; 1:</span>
+<span>        raise ValueError(&quot;confidence must be between zero and one&quot;)</span>
+<span>    generator = random.Random(seed)</span>
+<span>    estimates: list[float] = []</span>
+<span>    for _ in range(resamples):</span>
+<span>        sampled_control = [generator.choice(control) for _ in control]</span>
+<span>        sampled_treatment = [generator.choice(treatment) for _ in treatment]</span>
+<span>        estimates.append(difference_in_means(sampled_control, sampled_treatment))</span>
+<span>    estimates.sort()</span>
+<span>    tail = (1.0 - confidence) / 2.0</span>
+<span>    lower_index = max(0, math.floor(tail * resamples))</span>
+<span>    upper_index = min(resamples - 1, math.ceil((1.0 - tail) * resamples) - 1)</span>
+<span>    return Interval(</span>
+<span>        lower=estimates[lower_index],</span>
+<span>        estimate=difference_in_means(control, treatment),</span>
+<span>        upper=estimates[upper_index],</span>
+<span>        confidence=confidence,</span>
+<span>    )</span>
+<span> </span>
+<span> </span>
+<span>def permutation_test(</span>
+<span>    control: Sequence[float],</span>
+<span>    treatment: Sequence[float],</span>
+<span>    *,</span>
+<span>    maximum_exact: int = 100_000,</span>
+<span>    monte_carlo_resamples: int = 10_000,</span>
+<span>    seed: int = 20260730,</span>
+<span>) -&gt; PermutationResult:</span>
+<span>    if not control or not treatment:</span>
+<span>        raise ValueError(&quot;both groups need observations&quot;)</span>
+<span>    pooled = tuple(control) + tuple(treatment)</span>
+<span>    treatment_size = len(treatment)</span>
+<span>    observed = difference_in_means(control, treatment)</span>
+<span>    combination_count = math.comb(len(pooled), treatment_size)</span>
+<span> </span>
+<span>    def permuted_difference(treatment_indices: set[int]) -&gt; float:</span>
+<span>        permuted_treatment = [</span>
+<span>            value for index, value in enumerate(pooled) if index in treatment_indices</span>
+<span>        ]</span>
+<span>        permuted_control = [</span>
+<span>            value for index, value in enumerate(pooled) if index not in treatment_indices</span>
+<span>        ]</span>
+<span>        return difference_in_means(permuted_control, permuted_treatment)</span>
+<span> </span>
+<span>    if combination_count &lt;= maximum_exact:</span>
+<span>        extreme = 0</span>
+<span>        total = 0</span>
+<span>        for indices in itertools.combinations(range(len(pooled)), treatment_size):</span>
+<span>            total += 1</span>
+<span>            if abs(permuted_difference(set(indices))) &gt;= abs(observed) - 1e-12:</span>
+<span>                extreme += 1</span>
+<span>        return PermutationResult(observed, extreme / total, total, True)</span>
+<span> </span>
+<span>    generator = random.Random(seed)</span>
+<span>    extreme = 0</span>
+<span>    shuffled_indices = list(range(len(pooled)))</span>
+<span>    for _ in range(monte_carlo_resamples):</span>
+<span>        generator.shuffle(shuffled_indices)</span>
+<span>        treatment_indices = set(shuffled_indices[:treatment_size])</span>
+<span>        if abs(permuted_difference(treatment_indices)) &gt;= abs(observed) - 1e-12:</span>
+<span>            extreme += 1</span>
+<span>    p_value = (extreme + 1) / (monte_carlo_resamples + 1)</span>
+<span>    return PermutationResult(observed, p_value, monte_carlo_resamples, False)</span>
+<span> </span>
+<span> </span>
+<span>def minimum_sample_per_arm(</span>
+<span>    standardized_effect: float,</span>
+<span>    *,</span>
+<span>    alpha: float = 0.05,</span>
+<span>    power: float = 0.80,</span>
+<span>) -&gt; int:</span>
+<span>    if standardized_effect &lt;= 0:</span>
+<span>        raise ValueError(&quot;standardized_effect must be positive&quot;)</span>
+<span>    if not 0 &lt; alpha &lt; 1 or not 0 &lt; power &lt; 1:</span>
+<span>        raise ValueError(&quot;alpha and power must be between zero and one&quot;)</span>
+<span>    normal = NormalDist()</span>
+<span>    z_alpha = normal.inv_cdf(1 - alpha / 2)</span>
+<span>    z_power = normal.inv_cdf(power)</span>
+<span>    approximate = 2 * ((z_alpha + z_power) / standardized_effect) ** 2</span>
+<span>    return math.ceil(approximate)</span>
+<span> </span>
+<span> </span>
+<span>def holm_adjust(p_values: Sequence[float]) -&gt; list[float]:</span>
+<span>    if any(not 0 &lt;= value &lt;= 1 for value in p_values):</span>
+<span>        raise ValueError(&quot;p-values must be between zero and one&quot;)</span>
+<span>    count = len(p_values)</span>
+<span>    ordered = sorted(enumerate(p_values), key=lambda item: item[1])</span>
+<span>    adjusted = [0.0] * count</span>
+<span>    running = 0.0</span>
+<span>    for rank, (original_index, value) in enumerate(ordered):</span>
+<span>        candidate = min(1.0, (count - rank) * value)</span>
+<span>        running = max(running, candidate)</span>
+<span>        adjusted[original_index] = running</span>
+<span>    return adjusted</span>
+<span> </span>
+<span> </span>
+<span>def standardized_balance_difference(</span>
+<span>    control: Sequence[float],</span>
+<span>    treatment: Sequence[float],</span>
+<span>) -&gt; float:</span>
+<span>    return standardized_mean_difference(control, treatment)</span>
+<span> </span>
+<span> </span>
+<span>def per_look_alpha(alpha: float, planned_looks: int) -&gt; float:</span>
+<span>    if not 0 &lt; alpha &lt; 1 or planned_looks &lt; 1:</span>
+<span>        raise ValueError(&quot;alpha and planned_looks must be valid&quot;)</span>
+<span>    return alpha / planned_looks</span>
+<span> </span>
+<span> </span>
+<span>def claim_scope(</span>
+<span>    *,</span>
+<span>    randomized: bool,</span>
+<span>    allocation_intact: bool,</span>
+<span>    severe_attrition: bool,</span>
+<span>) -&gt; ClaimScope:</span>
+<span>    if randomized and allocation_intact and not severe_attrition:</span>
+<span>        return &quot;causal&quot;</span>
+<span>    return &quot;associational&quot;</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    observations = load_observations()</span>
+<span>    control, treatment = split_outcomes(observations)</span>
+<span>    interval = bootstrap_difference_interval(control, treatment)</span>
+<span>    test = permutation_test(control, treatment)</span>
+<span>    print(&quot;difference:&quot;, difference_in_means(control, treatment))</span>
+<span>    print(&quot;standardized effect:&quot;, round(standardized_mean_difference(control, treatment), 3))</span>
+<span>    print(&quot;bootstrap interval:&quot;, interval)</span>
+<span>    print(&quot;permutation:&quot;, test)</span>
+<span>    print(&quot;sample per arm for d=0.5:&quot;, minimum_sample_per_arm(0.5))</span>
+<span>    print(&quot;Holm:&quot;, holm_adjust([0.01, 0.04, 0.03]))</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-lang-01.html"><small>Previous lesson</small><strong>python-lang-01</strong><span>Advanced Typing and the Python Data Model</span></a>
+        <a class="nav-card next" href="python-ml-01.html"><small>Next lesson</small><strong>python-ml-01</strong><span>Reproducible Data and Model Delivery</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-stats-01";
+    const LEARNER_PATH = "python/professional/lessons/py_stats_01_resampling_experiments.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-27 · Geospatial or Domain Visualization · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-27</p>
+        <h1>Geospatial or Domain Visualization</h1>
+        <p class="hero-copy">Data analysis and visualization</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">90 minutes</span>
+          <span class="tag">geo setup</span>
+          <span class="tag">optional-map-download</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-26.html">python-26</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-27-geospatial-or-domain-specific-visualization">Day 27 — Geospatial or Domain-Specific Visualization<a class="heading-anchor" href="#guide--day-27-geospatial-or-domain-specific-visualization" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Intermediate</p>
+<p>Geospatial work adds coordinate reference systems and map layers. The offline alternative uses NetworkX to visualize a domain relationship graph.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end of this lesson, you can:</p>
+<ul>
+<li>explain geometry columns and coordinate reference systems (CRS);</li>
+<li>build an offline GeoDataFrame from known coordinates;</li>
+<li>reproject data only when source CRS is known;</li>
+<li>distinguish data layers from network-fetched basemap tiles;</li>
+<li>create a deterministic network graph when map dependencies/data are absent.</li>
+</ul>
+<h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
+<p>Complete Day 26 (<code>python-26</code>). This optional lesson uses the <code>geo</code> dependency group (<code>geopandas</code>, <code>geodatasets</code>, <code>contextily</code>, and <code>networkx</code>).</p>
+<p>Install the advanced profile if those packages are not present.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
+<h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Geometry:</strong> point, line, or polygon associated with a row.</li>
+<li><strong>CRS:</strong> rules translating coordinates to locations on Earth.</li>
+<li><strong>EPSG code:</strong> identifier for a defined CRS, such as longitude/latitude <code>EPSG:4326</code>.</li>
+<li><strong>Projection:</strong> transformation from Earth&#x27;s surface to a planar map.</li>
+<li><strong>Basemap tile:</strong> background image usually fetched from a web service.</li>
+<li><strong>Graph:</strong> nodes connected by edges; a domain visualization, not necessarily geographic.</li>
+</ul>
+<p>Coordinates without a known CRS are numbers, not trustworthy locations.</p>
+<h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import geopandas as gpd
+import pandas as pd
+
+cities = pd.DataFrame(
+    {
+        &quot;city&quot;: [&quot;San Francisco&quot;, &quot;New York&quot;],
+        &quot;longitude&quot;: [-122.4194, -74.0060],
+        &quot;latitude&quot;: [37.7749, 40.7128],
+    }
+)
+points = gpd.GeoDataFrame(
+    cities,
+    geometry=gpd.points_from_xy(cities[&quot;longitude&quot;], cities[&quot;latitude&quot;]),
+    crs=&quot;EPSG:4326&quot;,
+)
+ax = points.plot(figsize=(7, 4), column=&quot;city&quot;, legend=True)
+ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;, ylabel=&quot;Latitude&quot;)</code></pre>
+<p>This example is deterministic and makes no network request. It shows points, not city boundaries.</p>
+<h4 id="guide--download-cache-note">Download/cache note<a class="heading-anchor" href="#guide--download-cache-note" aria-label="Link to this section">#</a></h4>
+<p>The notebook&#x27;s <code>geodatasets.get_path(...)</code> example downloads and caches Natural Earth data on first use. <code>contextily</code> basemaps also require tile-network access unless separately cached. Prime approved caches while online, use a local GeoJSON file, or choose the NetworkX exercise for fully offline work.</p>
+<h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Plot local city/country boundaries when a local or cached source is available. <strong>Hint:</strong> inspect <code>.crs</code>, geometry validity, and bounds before plotting; reproject data and basemap to a common CRS.</li>
+<li>Alternatively, visualize a domain graph with NetworkX. <strong>Hint:</strong> define what nodes/edges mean, use a fixed layout seed, and encode only a small number of meaningful attributes.</li>
+</ol>
+<h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.</p>
+<p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
+<ol>
+<li><strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs).</li>
+<li><strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters.</li>
+<li><strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds.</li>
+<li><strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS.</li>
+<li><strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer.</li>
+</ol>
+<p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Why is assigning a CRS different from reprojecting?</li>
+<li>Which CRS is appropriate for longitude/latitude input?</li>
+<li>Why can a basemap fail while local geometries still plot?</li>
+<li>What real-world concepts do the nodes and edges in your alternative mean?</li>
+</ul>
+<p>Expected behavior: layers align in a common CRS or the graph layout is repeatable, and offline/network requirements are explicit.</p>
+<h4 id="guide--common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#guide--common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Features appear in the wrong location:</strong> inspect CRS and coordinate order; longitude is x, latitude is y.</li>
+<li><strong>Layers do not align:</strong> reproject from correctly assigned source CRSs to one common CRS.</li>
+<li><strong>Basemap fails offline:</strong> omit the basemap; cached vector data can still be plotted.</li>
+<li><strong>Geo packages fail to import:</strong> rerun the advanced setup and verify the notebook uses the <code>.venv</code> kernel.</li>
+<li><strong>Network graph changes every run:</strong> supply a fixed seed to stochastic layout algorithms.</li>
+</ul>
+<h4 id="guide--continue">Continue<a class="heading-anchor" href="#guide--continue" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><a href="python-27.html#learner">Open the learner notebook</a></li>
+<li><a href="python-27.html#solution-1">Check the separate solution</a></li>
+<li><a href="python-28.html#guide">Next: Day 28 — Feature engineering</a></li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-27-geospatial-basics-geopandas-or-domain-specific-viz">Day 27 — Geospatial basics (GeoPandas) or domain-specific viz<a class="heading-anchor" href="#learner--cell-1--day-27-geospatial-basics-geopandas-or-domain-specific-viz" aria-label="Link to this section">#</a></h3>
+<p>Objectives:</p>
+<ul>
+<li>If GeoPandas available, plot simple geospatial data.</li>
+<li>Otherwise, pick a domain visualization (e.g., networkx). Note: GeoPandas may require system dependencies; code below is illustrative.</li>
+</ul></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># This optional example downloads and caches Natural Earth data on first use.</span>
+<span>try:</span>
+<span>    import geopandas as gpd</span>
+<span>    from geodatasets import get_path</span>
+<span> </span>
+<span>    world = gpd.read_file(get_path(&#x27;naturalearth.land&#x27;))</span>
+<span>    world.plot(figsize=(8, 6), edgecolor=&#x27;black&#x27;)</span>
+<span>except ImportError:</span>
+<span>    print(&#x27;Install the geo dependency group to run this optional example.&#x27;)</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Plot local city/country boundaries when a local or cached source is available. <strong>Hint:</strong> inspect <code>.crs</code>, geometry validity, and bounds before plotting; reproject data and basemap to a common CRS.</li>
+<li>Alternatively, visualize a domain graph with NetworkX. <strong>Hint:</strong> define what nodes/edges mean, use a fixed layout seed, and encode only a small number of meaningful attributes.</li>
+</ol>
+<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.</p>
+<p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
+<ol>
+<li><strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs).</li>
+<li><strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters.</li>
+<li><strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds.</li>
+<li><strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS.</li>
+<li><strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer.</li>
+</ol>
+<p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<span>#</span>
+<span># Predict first. Then write small code and assertions below each label.</span>
+<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<span> </span>
+<span># Practice 3 — Prediction</span>
+<span> </span>
+<span> </span>
+<span># Practice 4 — Tracing</span>
+<span> </span>
+<span> </span>
+<span># Practice 5 — Implementation</span>
+<span> </span>
+<span> </span>
+<span># Practice 6 — Debugging</span>
+<span> </span>
+<span> </span>
+<span># Practice 7 — Edge case and explanation</span>
+<span> </span></code></pre>
+</article></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day27_geospatial_or_domain_viz/day27_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day27_geospatial_or_domain_viz/day27_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-27-solutions-geospatial-or-domain-specific-visualization">Day 27 — Solutions: Geospatial or Domain-specific Visualization<a class="heading-anchor" href="#solution-1--day-27-solutions-geospatial-or-domain-specific-visualization" aria-label="Link to this section">#</a></h3>
+<p>Two tracks depending on environment: GeoPandas map or a domain visualization with networkx.</p>
+<p>Contents</p>
+<ul>
+<li>Exercise 1: Plot city/country boundaries (GeoPandas)</li>
+<li>Exercise 2: Alternative domain visualization (network graph)</li>
+</ul>
+<hr>
+<p>Track A — Geospatial (GeoPandas)</p>
+<pre><code class="language-python"># Requires: geopandas, contextily, geodatasets
+import contextily as cx
+import geopandas as gpd
+from geodatasets import get_path
+
+world = gpd.read_file(get_path(&#x27;naturalearth.land&#x27;)).to_crs(3857)
+ax = world.plot(figsize=(8, 6), alpha=0.6, edgecolor=&#x27;k&#x27;)
+cx.add_basemap(ax, source=cx.providers.OpenStreetMap.Mapnik)
+ax.set(title=&#x27;World basemap (Web Mercator)&#x27;)</code></pre>
+<p>Track B — Domain viz (NetworkX)</p>
+<pre><code class="language-python">import networkx as nx
+import matplotlib.pyplot as plt
+
+G = nx.Graph()
+G.add_edge(&#x27;ingest&#x27;,&#x27;clean&#x27;); G.add_edge(&#x27;clean&#x27;,&#x27;validate&#x27;); G.add_edge(&#x27;validate&#x27;,&#x27;model&#x27;)
+G.add_edge(&#x27;model&#x27;,&#x27;serve&#x27;); G.add_edge(&#x27;serve&#x27;,&#x27;monitor&#x27;)
+
+pos = nx.spring_layout(G, seed=42)
+plt.figure(figsize=(6,4))
+nx.draw(G, pos, with_labels=True, node_color=&#x27;lightblue&#x27;, node_size=1200)
+plt.title(&#x27;Pipeline Stages (Network Graph)&#x27;); plt.tight_layout(); plt.show()</code></pre>
+<p>Notes</p>
+<ul>
+<li>For maps, ensure CRS is consistent; reproject to 3857 for web tiles</li>
+<li><code>geodatasets</code> and contextily tiles download/cache data on first use</li>
+<li>For network graphs, layout algorithms (spring, kamada_kawai) affect readability</li>
+</ul>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Plot local city/country boundaries when a local or cached source is available. <strong>Hint:</strong> inspect <code>.crs</code>, geometry validity, and bounds before plotting; reproject data and basemap to a common CRS.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Alternatively, visualize a domain graph with NetworkX. <strong>Hint:</strong> define what nodes/edges mean, use a fixed layout seed, and encode only a small number of meaningful attributes.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters.</p>
+<p><strong>Reasoning checkpoint:</strong> Layers must use compatible coordinate reference systems (CRSs). The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location.</p>
+<p><strong>Reasoning checkpoint:</strong> Both numbers may fall in legal ranges, so semantic order matters. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks.</p>
+<p><strong>Reasoning checkpoint:</strong> Require west ≤ east, south ≤ north, and geographic bounds. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection.</p>
+<p><strong>Reasoning checkpoint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative.</p>
+<p><strong>Reasoning checkpoint:</strong> A missing basemap should not erase the analytical data layer. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
+<p>Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.</p>
+<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
+<h5 id="solution-1--practices-1-2-crs-and-coordinate-order">Practices 1–2 — CRS and coordinate order<a class="heading-anchor" href="#solution-1--practices-1-2-crs-and-coordinate-order" aria-label="Link to this section">#</a></h5>
+<p>Longitude/latitude data are commonly stored as <code>(x, y) = (longitude, latitude)</code>. Swapping them may still produce numbers inside valid ranges but a wrong place. Degrees and projected meters cannot be overlaid without reprojection.</p>
+<h5 id="solution-1--practices-3-5-validate-spatial-boundaries-and-degrade-gracefully">Practices 3–5 — Validate spatial boundaries and degrade gracefully<a class="heading-anchor" href="#solution-1--practices-3-5-validate-spatial-boundaries-and-degrade-gracefully" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class GeographicBounds:
+    west: float
+    south: float
+    east: float
+    north: float
+
+    def __post_init__(self) -&gt; None:
+        if not (-180 &lt;= self.west &lt;= self.east &lt;= 180):
+            raise ValueError(&quot;longitude bounds must satisfy -180 &lt;= west &lt;= east &lt;= 180&quot;)
+        if not (-90 &lt;= self.south &lt;= self.north &lt;= 90):
+            raise ValueError(&quot;latitude bounds must satisfy -90 &lt;= south &lt;= north &lt;= 90&quot;)
+
+    def contains(self, longitude: float, latitude: float) -&gt; bool:
+        return (
+            self.west &lt;= longitude &lt;= self.east
+            and self.south &lt;= latitude &lt;= self.north
+        )
+
+
+bounds = GeographicBounds(west=-125, south=32, east=-114, north=42)
+assert bounds.contains(longitude=-122.4, latitude=37.8)
+assert not bounds.contains(longitude=37.8, latitude=-122.4)</code></pre>
+<p>Before a GeoPandas operation, reject unknown CRSs and call <code>to_crs</code> so both layers match. Filter/report empty or invalid geometries rather than silently dropping them. If a cached basemap is unavailable, plot the local geometry alone; if no geometry dependency is installed, a deterministic NetworkX graph can teach domain topology without pretending it is a geographic map.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day27_geospatial_or_domain_viz/day27_solutions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day27_geospatial_or_domain_viz/day27_solutions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-27-solutions-geospatial-or-domain-visualization">Day 27 — Solutions: Geospatial or Domain Visualization<a class="heading-anchor" href="#solution-2--cell-1--day-27-solutions-geospatial-or-domain-visualization" aria-label="Link to this section">#</a></h3>
+<p>GeoPandas world map or NetworkX pipeline graph.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># GeoPandas track (requires geopandas, contextily, geodatasets)</span>
+<span># import contextily as cx</span>
+<span># import geopandas as gpd</span>
+<span># from geodatasets import get_path</span>
+<span># world = gpd.read_file(get_path(&#x27;naturalearth.land&#x27;)).to_crs(3857)</span>
+<span># ax = world.plot(figsize=(8,6), alpha=0.6, edgecolor=&#x27;k&#x27;)</span>
+<span># cx.add_basemap(ax, source=cx.providers.Stamen.TonerLite)</span>
+<span># ax.set(title=&#x27;World basemap (Web Mercator)&#x27;)</span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Domain viz track: network graph of pipeline stages</span>
+<span>import networkx as nx, matplotlib.pyplot as plt</span>
+<span>G = nx.Graph()</span>
+<span>G.add_edge(&#x27;ingest&#x27;,&#x27;clean&#x27;); G.add_edge(&#x27;clean&#x27;,&#x27;validate&#x27;); G.add_edge(&#x27;validate&#x27;,&#x27;model&#x27;)</span>
+<span>G.add_edge(&#x27;model&#x27;,&#x27;serve&#x27;); G.add_edge(&#x27;serve&#x27;,&#x27;monitor&#x27;)</span>
+<span>pos = nx.spring_layout(G, seed=42)</span>
+<span>plt.figure(figsize=(6,4))</span>
+<span>nx.draw(G, pos, with_labels=True, node_color=&#x27;lightblue&#x27;, node_size=1200)</span>
+<span>plt.title(&#x27;Pipeline Stages (Network Graph)&#x27;); plt.tight_layout(); plt.show()</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
+<h4 id="solution-2--cell-4--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-4--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
+<h5 id="solution-2--cell-4--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-4--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Plot local city/country boundaries when a local or cached source is available. <strong>Hint:</strong> inspect <code>.crs</code>, geometry validity, and bounds before plotting; reproject data and basemap to a common CRS.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-4--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-4--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Alternatively, visualize a domain graph with NetworkX. <strong>Hint:</strong> define what nodes/edges mean, use a fixed layout seed, and encode only a small number of meaningful attributes.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-4--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-2--cell-4--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters.</p>
+<p><strong>Reasoning checkpoint:</strong> Layers must use compatible coordinate reference systems (CRSs). The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-4--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-2--cell-4--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location.</p>
+<p><strong>Reasoning checkpoint:</strong> Both numbers may fall in legal ranges, so semantic order matters. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-4--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-2--cell-4--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks.</p>
+<p><strong>Reasoning checkpoint:</strong> Require west ≤ east, south ≤ north, and geographic bounds. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-4--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-2--cell-4--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection.</p>
+<p><strong>Reasoning checkpoint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-4--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-2--cell-4--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative.</p>
+<p><strong>Reasoning checkpoint:</strong> A missing basemap should not erase the analytical data layer. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h4 id="solution-2--cell-4--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-2--cell-4--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
+<p>Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.</p>
+<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
+<h5 id="solution-2--cell-4--practices-1-2-crs-and-coordinate-order">Practices 1–2 — CRS and coordinate order<a class="heading-anchor" href="#solution-2--cell-4--practices-1-2-crs-and-coordinate-order" aria-label="Link to this section">#</a></h5>
+<p>Longitude/latitude data are commonly stored as <code>(x, y) = (longitude, latitude)</code>. Swapping them may still produce numbers inside valid ranges but a wrong place. Degrees and projected meters cannot be overlaid without reprojection.</p>
+<h5 id="solution-2--cell-4--practices-3-5-validate-spatial-boundaries-and-degrade-gracefully">Practices 3–5 — Validate spatial boundaries and degrade gracefully<a class="heading-anchor" href="#solution-2--cell-4--practices-3-5-validate-spatial-boundaries-and-degrade-gracefully" aria-label="Link to this section">#</a></h5></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from dataclasses import dataclass</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class GeographicBounds:</span>
+<span>    west: float</span>
+<span>    south: float</span>
+<span>    east: float</span>
+<span>    north: float</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if not (-180 &lt;= self.west &lt;= self.east &lt;= 180):</span>
+<span>            raise ValueError(&quot;longitude bounds must satisfy -180 &lt;= west &lt;= east &lt;= 180&quot;)</span>
+<span>        if not (-90 &lt;= self.south &lt;= self.north &lt;= 90):</span>
+<span>            raise ValueError(&quot;latitude bounds must satisfy -90 &lt;= south &lt;= north &lt;= 90&quot;)</span>
+<span> </span>
+<span>    def contains(self, longitude: float, latitude: float) -&gt; bool:</span>
+<span>        return (</span>
+<span>            self.west &lt;= longitude &lt;= self.east</span>
+<span>            and self.south &lt;= latitude &lt;= self.north</span>
+<span>        )</span>
+<span> </span>
+<span> </span>
+<span>bounds = GeographicBounds(west=-125, south=32, east=-114, north=42)</span>
+<span>assert bounds.contains(longitude=-122.4, latitude=37.8)</span>
+<span>assert not bounds.contains(longitude=37.8, latitude=-122.4)</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Before a GeoPandas operation, reject unknown CRSs and call <code>to_crs</code> so both layers match. Filter/report empty or invalid geometries rather than silently dropping them. If a cached basemap is unavailable, plot the local geometry alone; if no geometry dependency is installed, a deterministic NetworkX graph can teach domain topology without pretending it is a geographic map.</p></article></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-26.html"><small>Previous lesson</small><strong>python-26</strong><span>Visualization Plotly Altair</span></a>
+        <a class="nav-card next" href="python-28.html"><small>Next lesson</small><strong>python-28</strong><span>Feature Engineering</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-27";
+    const LEARNER_PATH = "python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

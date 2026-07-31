@@ -1,0 +1,1405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-temporal-01 · Temporal and Domain Modelling · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-temporal-01</p>
+        <h1>Temporal and Domain Modelling</h1>
+        <p class="hero-copy">PostgreSQL specialization</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">210 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-found-01.html">sql-found-01</a> <a class="tag" href="sql-types-01.html">sql-types-01</a> <a class="tag" href="sql-prog-01.html">sql-prog-01</a> <a class="tag" href="sql-test-01.html">sql-test-01</a> <a class="tag" href="sql-39.html">sql-39</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_temporal_01_domain_modelling.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_temporal_01_domain_modelling.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_temporal_01_domain_modelling.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--sql-temporal-01-temporal-and-domain-modelling">SQL-TEMPORAL-01 — Temporal and Domain Modelling<a class="heading-anchor" href="#guide--sql-temporal-01-temporal-and-domain-modelling" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-found-01</code>, <code>sql-types-01</code>, <code>sql-prog-01</code>, <code>sql-test-01</code>, and <code>sql-39</code></li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01</a>, <a href="sql-types-01.html#guide">SQL-TYPES-01</a>, <a href="sql-prog-01.html#guide">SQL-PROG-01</a>, <a href="sql-test-01.html#guide">SQL-TEST-01</a>, ranges, triggers, and <a href="sql-39.html#guide">SQL Day 39 transaction/advisory-lock concepts</a>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-temporal-01.html#learner">learner SQL</a> · <a href="sql-temporal-01.html#solution-1">solution reasoning</a> · <a href="sql-temporal-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_temporal_01_domain_modelling.sql</code></pre>
+<p>The default is offline, fixed-time, and rollback-safe. It inspects but never enables <code>btree_gist</code>.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Distinguish valid and system time and query bitemporal state as-of two clocks.</li>
+<li>Enforce half-open non-overlap and compare built-in/advisory with exclusion constraints.</li>
+<li>Model an append-only correction ledger and produce legal-hold-aware retention eligibility without silently deleting evidence.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Valid time:</strong> when a fact is true in the modeled domain.</li>
+<li><strong>System time:</strong> when the database recorded/believed that version.</li>
+<li><strong>Bitemporal:</strong> tracks both valid and system intervals.</li>
+<li><strong>As-of query:</strong> asks state at a chosen valid and/or system instant.</li>
+<li><strong>Half-open interval:</strong> <code>[lower,upper)</code>, avoiding double membership at adjacent boundaries.</li>
+<li><strong>Exclusion constraint:</strong> prevents rows whose indexed operators conflict.</li>
+<li><strong>Ledger:</strong> append-only record where correction uses reversal/new entries.</li>
+<li><strong>Idempotency key:</strong> stable uniqueness key preventing duplicate append.</li>
+<li><strong>Retention class:</strong> approved minimum duration and policy basis.</li>
+<li><strong>Legal hold:</strong> policy override preventing eligible deletion.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>The term-version grain is one recorded version of one customer&#x27;s fact. A February-valid rate first enters the system March 1. On March 10, the old system period is closed and a corrected row begins. Querying valid February 15 as known March 5 returns 10; as known March 15 returns 12. History is appended/closed, not overwritten.</p>
+<p>Both periods use <code>[lower,upper)</code>. Adjacent valid terms ending/starting April 1 do not overlap. NULL upper system bound means currently believed. Production models must define clock source, time zone, late arrival, whether valid gaps are allowed, and who may correct history.</p>
+<p>Per-key exclusion normally uses <code>btree_gist</code>:</p>
+<pre><code class="language-sql">-- Optional, only after btree_gist is approved and installed:
+EXCLUDE USING gist (
+    customer_key WITH =,
+    valid_period WITH &amp;&amp;
+) WHERE (upper_inf(system_period))</code></pre>
+<p>The default does not enable the extension. Its trigger obtains a transaction advisory lock derived from customer key, then rejects overlaps among current system rows. The lock closes a common concurrent check-then-insert race, though hash collisions can serialize unrelated keys. Declarative exclusion is easier to inspect and harder to bypass; either design needs migration/concurrency tests.</p>
+<p>A global maintenance table demonstrates built-in range-only GiST exclusion. Adjacent windows succeed while overlap would fail.</p>
+<p>The change ledger rejects UPDATE/DELETE. A correction appends a reversal with unique idempotency key and reference to the original. Append-only does not prove truth or authorization; ownership, signing/tamper controls, reconciliations, and retention still matter.</p>
+<p>Retention rules are data with policy basis. The query produces candidates at a fixed review timestamp and excludes legal holds. It does not delete. Actual deletion/anonymization requires approved scope, referential impact, audit, backup-copy handling, dry run, and bounded recoverability.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete all twelve prompts. Begin with retroactive bitemporal correction, boundary tests, optional exclusion design, ledger reversal, held-retention workflow, and an explicit domain-assumption record; then cover civil time, three clocks, Type-2 joins, temporal parents, gaps/overlaps, and hold-aware archival. Add negative controls for overlap, mutation, duplicate idempotency, and held deletion.</p>
+<p>For every temporal answer, name the clock, zone, lower/upper inclusivity, late-arrival policy, overlap/gap rule, correction authority, and audit evidence:</p>
+<ol>
+<li><strong>Retroactive correction:</strong> compare valid-at/known-at answers before and after the recorded correction.</li>
+<li><strong>Range boundaries:</strong> test every upper endpoint and require at most one row.</li>
+<li><strong>Overlap enforcement:</strong> compare an optional exclusion constraint with the locking trigger fallback.</li>
+<li><strong>Ledger reversal:</strong> append rather than update and verify idempotency and reversal links.</li>
+<li><strong>Retention decision:</strong> preserve approver, reason, time, hold, and immutable audit without deleting fixtures.</li>
+<li><strong>Assumption register:</strong> document time, authority, lateness, gaps/overlaps, privacy/deletion, ledger meaning, and correction roles.</li>
+<li><strong>Civil time:</strong> test ambiguous/nonexistent DST times while retaining source zone and UTC instant.</li>
+<li><strong>Three clocks:</strong> separate event, ingestion, and processing time; define watermark, lateness, correction, and notification.</li>
+<li><strong>Type-2 join:</strong> use business/surrogate keys and half-open effective periods; require at most one match per fact.</li>
+<li><strong>Temporal parent:</strong> design period containment, concurrency protection, deferred checking, and repair.</li>
+<li><strong>Gap/overlap report:</strong> use deterministic window/multirange logic and define adjacency, duplicates, and empty periods.</li>
+<li><strong>Archival:</strong> plan partition detach, legal-hold exceptions, verification, protected storage, restore tests, and deletion proof.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can the same valid date return different facts at different system times?</li>
+<li>Does every adjacent upper boundary match at most one row?</li>
+<li>Is per-key overlap safe under concurrent writers?</li>
+<li>Is history corrected by append/close rather than overwrite?</li>
+<li>Are ledger idempotency and reversal references enforced?</li>
+<li>Is retention eligibility separate from destructive execution?</li>
+<li>Do legal hold and policy basis appear in evidence?</li>
+<li>Does rollback remove schema, triggers, locks, and fixture data?</li>
+</ul>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>One <code>updated_at</code> timestamp is not bitemporal history.</li>
+<li>Inclusive upper bounds double-count adjacent periods.</li>
+<li><code>LIMIT 1</code> hides overlapping history instead of enforcing it.</li>
+<li>A trigger overlap check without serialization races under concurrency.</li>
+<li>System time based on application clocks can arrive out of order.</li>
+<li>Append-only data can still contain false/unauthorized events.</li>
+<li>Retention automation without holds and backup policy can violate obligations.</li>
+<li>“Delete after N days” ignores referential, audit, replica, and backup copies.</li>
+<li>Range/exclusion indexes add write/lock cost that needs measurement.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Use <a href="sql-test-01.html#guide">SQL-TEST-01</a> to freeze boundary, overlap, correction, and retention contracts; use <a href="sql-repl-01.html#guide">SQL-REPL-01</a> to propagate immutable versioned events idempotently; and use <a href="sql-ops-02.html#guide">SQL-OPS-02</a> to rehearse recovery without erasing required historical evidence. This completes the shared PostgreSQL professional specialization path.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_temporal_01_domain_modelling.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_temporal_01_domain_modelling.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TEMPORAL-01: Temporal and domain modelling</span>
+<span>-- Target: PostgreSQL 16+</span>
+<span> </span>
+<span>\set ON_ERROR_STOP on</span>
+<span>\echo &#x27;SQL-TEMPORAL-01: disposable bitemporal, ledger, and retention lab&#x27;</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_temporal_lab;</span>
+<span> </span>
+<span>-- One row is one recorded version of one customer&#x27;s terms.</span>
+<span>CREATE TABLE pro_temporal_lab.customer_terms (</span>
+<span>    term_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    customer_key text NOT NULL,</span>
+<span>    valid_period daterange NOT NULL CHECK (</span>
+<span>        NOT isempty(valid_period)</span>
+<span>        AND lower_inc(valid_period)</span>
+<span>        AND NOT upper_inc(valid_period)</span>
+<span>    ),</span>
+<span>    system_period tstzrange NOT NULL CHECK (</span>
+<span>        NOT isempty(system_period)</span>
+<span>        AND lower_inc(system_period)</span>
+<span>        AND NOT upper_inc(system_period)</span>
+<span>    ),</span>
+<span>    monthly_rate numeric(10, 2) NOT NULL CHECK (monthly_rate &gt;= 0),</span>
+<span>    recorded_reason text NOT NULL CHECK (btrim(recorded_reason) &lt;&gt; &#x27;&#x27;)</span>
+<span>);</span>
+<span> </span>
+<span>-- Built-in fallback for per-customer current-valid overlap. The advisory lock</span>
+<span>-- serializes writers for one hashed customer key. An approved btree_gist</span>
+<span>-- extension can express equality+range overlap as a declarative exclusion</span>
+<span>-- constraint; this lesson never enables it.</span>
+<span>CREATE FUNCTION pro_temporal_lab.prevent_current_term_overlap()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>VOLATILE</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    IF upper_inf(NEW.system_period) THEN</span>
+<span>        PERFORM pg_advisory_xact_lock(</span>
+<span>            hashtextextended(NEW.customer_key, 0)</span>
+<span>        );</span>
+<span> </span>
+<span>        IF EXISTS (</span>
+<span>            SELECT 1</span>
+<span>            FROM pro_temporal_lab.customer_terms AS existing</span>
+<span>            WHERE existing.customer_key = NEW.customer_key</span>
+<span>              AND existing.term_version_id &lt;&gt; COALESCE(</span>
+<span>                  NEW.term_version_id,</span>
+<span>                  -1</span>
+<span>              )</span>
+<span>              AND upper_inf(existing.system_period)</span>
+<span>              AND existing.valid_period &amp;&amp; NEW.valid_period</span>
+<span>        ) THEN</span>
+<span>            RAISE EXCEPTION</span>
+<span>                &#x27;current valid periods overlap for customer %&#x27;,</span>
+<span>                NEW.customer_key</span>
+<span>                USING ERRCODE = &#x27;exclusion_violation&#x27;;</span>
+<span>        END IF;</span>
+<span>    END IF;</span>
+<span>    RETURN NEW;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER customer_terms_current_overlap</span>
+<span>BEFORE INSERT OR UPDATE ON pro_temporal_lab.customer_terms</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_temporal_lab.prevent_current_term_overlap();</span>
+<span> </span>
+<span>-- Initial fact as first recorded on March 1.</span>
+<span>INSERT INTO pro_temporal_lab.customer_terms (</span>
+<span>    customer_key,</span>
+<span>    valid_period,</span>
+<span>    system_period,</span>
+<span>    monthly_rate,</span>
+<span>    recorded_reason</span>
+<span>)</span>
+<span>VALUES (</span>
+<span>    &#x27;CUS-100&#x27;,</span>
+<span>    daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),</span>
+<span>    tstzrange(TIMESTAMPTZ &#x27;2026-03-01 00:00:00+00&#x27;, NULL, &#x27;[)&#x27;),</span>
+<span>    10.00,</span>
+<span>    &#x27;initial import&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>-- On March 10, correct what the system knows without rewriting history.</span>
+<span>UPDATE pro_temporal_lab.customer_terms AS ct</span>
+<span>SET system_period = tstzrange(</span>
+<span>        lower(ct.system_period),</span>
+<span>        TIMESTAMPTZ &#x27;2026-03-10 00:00:00+00&#x27;,</span>
+<span>        &#x27;[)&#x27;</span>
+<span>    )</span>
+<span>WHERE ct.customer_key = &#x27;CUS-100&#x27;</span>
+<span>  AND upper_inf(ct.system_period)</span>
+<span>  AND ct.valid_period</span>
+<span>      = daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.customer_terms (</span>
+<span>    customer_key,</span>
+<span>    valid_period,</span>
+<span>    system_period,</span>
+<span>    monthly_rate,</span>
+<span>    recorded_reason</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (</span>
+<span>        &#x27;CUS-100&#x27;,</span>
+<span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),</span>
+<span>        tstzrange(TIMESTAMPTZ &#x27;2026-03-10 00:00:00+00&#x27;, NULL, &#x27;[)&#x27;),</span>
+<span>        12.00,</span>
+<span>        &#x27;source correction received&#x27;</span>
+<span>    ),</span>
+<span>    (</span>
+<span>        &#x27;CUS-100&#x27;,</span>
+<span>        daterange(DATE &#x27;2026-04-01&#x27;, DATE &#x27;2026-07-01&#x27;, &#x27;[)&#x27;),</span>
+<span>        tstzrange(TIMESTAMPTZ &#x27;2026-03-10 00:00:00+00&#x27;, NULL, &#x27;[)&#x27;),</span>
+<span>        15.00,</span>
+<span>        &#x27;future approved terms&#x27;</span>
+<span>    );</span>
+<span> </span>
+<span>\echo &#x27;Bitemporal query: valid on date, as known at system timestamp&#x27;</span>
+<span>SELECT</span>
+<span>    ct.customer_key,</span>
+<span>    ct.valid_period,</span>
+<span>    ct.system_period,</span>
+<span>    ct.monthly_rate,</span>
+<span>    ct.recorded_reason</span>
+<span>FROM pro_temporal_lab.customer_terms AS ct</span>
+<span>WHERE ct.customer_key = &#x27;CUS-100&#x27;</span>
+<span>  AND ct.valid_period @&gt; DATE &#x27;2026-02-15&#x27;</span>
+<span>  AND ct.system_period @&gt; TIMESTAMPTZ &#x27;2026-03-05 12:00:00+00&#x27;</span>
+<span>ORDER BY ct.term_version_id;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    ct.customer_key,</span>
+<span>    ct.valid_period,</span>
+<span>    ct.system_period,</span>
+<span>    ct.monthly_rate,</span>
+<span>    ct.recorded_reason</span>
+<span>FROM pro_temporal_lab.customer_terms AS ct</span>
+<span>WHERE ct.customer_key = &#x27;CUS-100&#x27;</span>
+<span>  AND ct.valid_period @&gt; DATE &#x27;2026-02-15&#x27;</span>
+<span>  AND ct.system_period @&gt; TIMESTAMPTZ &#x27;2026-03-15 12:00:00+00&#x27;</span>
+<span>ORDER BY ct.term_version_id;</span>
+<span> </span>
+<span>DO $expected_overlap$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_temporal_lab.customer_terms (</span>
+<span>            customer_key,</span>
+<span>            valid_period,</span>
+<span>            system_period,</span>
+<span>            monthly_rate,</span>
+<span>            recorded_reason</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            &#x27;CUS-100&#x27;,</span>
+<span>            daterange(DATE &#x27;2026-03-15&#x27;, DATE &#x27;2026-05-01&#x27;, &#x27;[)&#x27;),</span>
+<span>            tstzrange(TIMESTAMPTZ &#x27;2026-03-20 00:00:00+00&#x27;, NULL, &#x27;[)&#x27;),</span>
+<span>            99.00,</span>
+<span>            &#x27;overlap negative control&#x27;</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;overlapping current term unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN exclusion_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected current-period rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$expected_overlap$;</span>
+<span> </span>
+<span>-- Built-in declarative exclusion for one global resource. Per-key equality plus</span>
+<span>-- range overlap normally uses the optional btree_gist extension.</span>
+<span>CREATE TABLE pro_temporal_lab.global_maintenance_windows (</span>
+<span>    window_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    window_period tstzrange NOT NULL CHECK (NOT isempty(window_period)),</span>
+<span>    reason text NOT NULL,</span>
+<span>    EXCLUDE USING gist (window_period WITH &amp;&amp;)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.global_maintenance_windows (</span>
+<span>    window_period, reason</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (</span>
+<span>        tstzrange(</span>
+<span>            TIMESTAMPTZ &#x27;2026-07-01 09:00:00+00&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-07-01 10:00:00+00&#x27;,</span>
+<span>            &#x27;[)&#x27;</span>
+<span>        ),</span>
+<span>        &#x27;planned maintenance&#x27;</span>
+<span>    ),</span>
+<span>    (</span>
+<span>        tstzrange(</span>
+<span>            TIMESTAMPTZ &#x27;2026-07-01 10:00:00+00&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-07-01 11:00:00+00&#x27;,</span>
+<span>            &#x27;[)&#x27;</span>
+<span>        ),</span>
+<span>        &#x27;adjacent non-overlapping window&#x27;</span>
+<span>    );</span>
+<span> </span>
+<span>SELECT</span>
+<span>    e.name,</span>
+<span>    e.default_version,</span>
+<span>    e.installed_version</span>
+<span>FROM pg_catalog.pg_available_extensions AS e</span>
+<span>WHERE e.name = &#x27;btree_gist&#x27;;</span>
+<span> </span>
+<span>-- Append-only domain ledger. Corrections are new reversal/correction entries.</span>
+<span>CREATE TABLE pro_temporal_lab.change_ledger (</span>
+<span>    ledger_entry_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    subject_key text NOT NULL,</span>
+<span>    event_kind text NOT NULL,</span>
+<span>    effective_at timestamptz NOT NULL,</span>
+<span>    recorded_at timestamptz NOT NULL,</span>
+<span>    payload jsonb NOT NULL CHECK (jsonb_typeof(payload) = &#x27;object&#x27;),</span>
+<span>    idempotency_key text NOT NULL UNIQUE,</span>
+<span>    reverses_entry_id bigint</span>
+<span>        REFERENCES pro_temporal_lab.change_ledger (ledger_entry_id)</span>
+<span>);</span>
+<span> </span>
+<span>CREATE FUNCTION pro_temporal_lab.reject_ledger_mutation()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    RAISE EXCEPTION &#x27;change ledger is append-only; write a reversal/correction&#x27;</span>
+<span>        USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER change_ledger_immutable</span>
+<span>BEFORE UPDATE OR DELETE ON pro_temporal_lab.change_ledger</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_temporal_lab.reject_ledger_mutation();</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.change_ledger (</span>
+<span>    subject_key,</span>
+<span>    event_kind,</span>
+<span>    effective_at,</span>
+<span>    recorded_at,</span>
+<span>    payload,</span>
+<span>    idempotency_key</span>
+<span>)</span>
+<span>VALUES (</span>
+<span>    &#x27;CUS-100&#x27;,</span>
+<span>    &#x27;credit.applied&#x27;,</span>
+<span>    TIMESTAMPTZ &#x27;2026-03-01 00:00:00+00&#x27;,</span>
+<span>    TIMESTAMPTZ &#x27;2026-03-01 00:01:00+00&#x27;,</span>
+<span>    &#x27;{&quot;amount&quot;:&quot;5.00&quot;,&quot;currency&quot;:&quot;USD&quot;}&#x27;,</span>
+<span>    &#x27;LEDGER-100&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.change_ledger (</span>
+<span>    subject_key,</span>
+<span>    event_kind,</span>
+<span>    effective_at,</span>
+<span>    recorded_at,</span>
+<span>    payload,</span>
+<span>    idempotency_key,</span>
+<span>    reverses_entry_id</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    l.subject_key,</span>
+<span>    &#x27;credit.reversed&#x27;,</span>
+<span>    TIMESTAMPTZ &#x27;2026-03-02 00:00:00+00&#x27;,</span>
+<span>    TIMESTAMPTZ &#x27;2026-03-02 00:01:00+00&#x27;,</span>
+<span>    &#x27;{&quot;amount&quot;:&quot;-5.00&quot;,&quot;currency&quot;:&quot;USD&quot;}&#x27;,</span>
+<span>    &#x27;LEDGER-101&#x27;,</span>
+<span>    l.ledger_entry_id</span>
+<span>FROM pro_temporal_lab.change_ledger AS l</span>
+<span>WHERE l.idempotency_key = &#x27;LEDGER-100&#x27;;</span>
+<span> </span>
+<span>DO $expected_immutability$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        UPDATE pro_temporal_lab.change_ledger</span>
+<span>        SET payload = &#x27;{&quot;amount&quot;:&quot;0.00&quot;,&quot;currency&quot;:&quot;USD&quot;}&#x27;</span>
+<span>        WHERE idempotency_key = &#x27;LEDGER-100&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;ledger mutation unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected append-only rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$expected_immutability$;</span>
+<span> </span>
+<span>CREATE TABLE pro_temporal_lab.retention_classes (</span>
+<span>    retention_class text PRIMARY KEY,</span>
+<span>    minimum_retention interval NOT NULL,</span>
+<span>    policy_basis text NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>CREATE TABLE pro_temporal_lab.retained_records (</span>
+<span>    record_key text PRIMARY KEY,</span>
+<span>    retention_class text NOT NULL</span>
+<span>        REFERENCES pro_temporal_lab.retention_classes (retention_class),</span>
+<span>    created_at timestamptz NOT NULL,</span>
+<span>    legal_hold boolean NOT NULL DEFAULT false,</span>
+<span>    deleted_at timestamptz</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.retention_classes</span>
+<span>VALUES</span>
+<span>    (&#x27;operational-30d&#x27;, INTERVAL &#x27;30 days&#x27;, &#x27;approved operational policy&#x27;),</span>
+<span>    (&#x27;audit-365d&#x27;, INTERVAL &#x27;365 days&#x27;, &#x27;approved audit policy&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.retained_records</span>
+<span>VALUES</span>
+<span>    (&#x27;REC-100&#x27;, &#x27;operational-30d&#x27;, TIMESTAMPTZ &#x27;2026-01-01 00:00:00+00&#x27;, false, NULL),</span>
+<span>    (&#x27;REC-101&#x27;, &#x27;operational-30d&#x27;, TIMESTAMPTZ &#x27;2026-01-01 00:00:00+00&#x27;, true, NULL),</span>
+<span>    (&#x27;REC-102&#x27;, &#x27;audit-365d&#x27;, TIMESTAMPTZ &#x27;2026-01-01 00:00:00+00&#x27;, false, NULL);</span>
+<span> </span>
+<span>\echo &#x27;Eligibility report only: policy approval precedes any deletion&#x27;</span>
+<span>SELECT</span>
+<span>    rr.record_key,</span>
+<span>    rr.retention_class,</span>
+<span>    rr.created_at,</span>
+<span>    rc.minimum_retention,</span>
+<span>    rr.legal_hold,</span>
+<span>    (</span>
+<span>        NOT rr.legal_hold</span>
+<span>        AND rr.deleted_at IS NULL</span>
+<span>        AND TIMESTAMPTZ &#x27;2026-03-15 00:00:00+00&#x27;</span>
+<span>            &gt;= rr.created_at + rc.minimum_retention</span>
+<span>    ) AS eligible_for_review</span>
+<span>FROM pro_temporal_lab.retained_records AS rr</span>
+<span>JOIN pro_temporal_lab.retention_classes AS rc</span>
+<span>  ON rc.retention_class = rr.retention_class</span>
+<span>ORDER BY rr.record_key;</span>
+<span> </span>
+<span>-- Exercises:</span>
+<span>--</span>
+<span>-- 1. Add a retroactive valid-time correction recorded April 1. Query the value</span>
+<span>--    valid February 15 as known March 15 versus as known April 2.</span>
+<span>-- 2. Test facts exactly at every valid/system upper boundary. Prove [lower,upper)</span>
+<span>--    gives at most one current match.</span>
+<span>-- 3. If btree_gist is already approved in an isolated environment, write (do</span>
+<span>--    not run here) an exclusion constraint for customer_key equality and current</span>
+<span>--    valid-period overlap. Compare it with the advisory-lock trigger fallback.</span>
+<span>-- 4. Add a correction ledger entry that reverses LEDGER-101 without updating</span>
+<span>--    history. Verify idempotency keys and reversal references.</span>
+<span>-- 5. Add a retention exception/hold release workflow with approver, reason,</span>
+<span>--    decision time, and immutable audit. Do not auto-delete fixture rows.</span>
+<span>-- 6. State domain assumptions: time zone, clock authority, late arrival,</span>
+<span>--    overlap/gap policy, deletion/anonymization, ledger meaning, and who may</span>
+<span>--    correct system history.</span>
+<span>-- 7. Model a local-time business rule across a daylight-saving transition.</span>
+<span>--    Store the source zone and UTC instant, test ambiguous/nonexistent local</span>
+<span>--    times, and explain why a bare timestamp or fixed UTC offset is insufficient.</span>
+<span>-- 8. Distinguish event time, ingestion time, and processing time for late data.</span>
+<span>--    Define a watermark and allowed lateness, then show how a late event changes</span>
+<span>--    a previously published aggregate and how the correction is communicated.</span>
+<span>-- 9. Implement a Type-2 dimension as-of join with surrogate key, business key,</span>
+<span>--    effective half-open range, current marker, and correction metadata. Prove</span>
+<span>--    every fact resolves to at most one dimension row.</span>
+<span>-- 10. Design temporal referential integrity when a child period must be</span>
+<span>--     contained by a parent period. Compare trigger/exclusion approaches,</span>
+<span>--     concurrency locking, deferred validation, and repair of historical gaps.</span>
+<span>-- 11. Produce a deterministic gap-and-overlap report per business key using</span>
+<span>--     lag/lead and multirange operations. Define whether adjacency is valid and</span>
+<span>--     fail on duplicate or empty periods.</span>
+<span>-- 12. Plan time-based partition archival without violating legal holds.</span>
+<span>--     Inventory cross-partition keys, indexes, detach/archive/verify steps,</span>
+<span>--     encryption and access, hold exceptions, restore tests, and deletion proof.</span>
+<span> </span>
+<span>DO $self_check$</span>
+<span>BEGIN</span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_temporal_lab.customer_terms AS ct</span>
+<span>        WHERE ct.customer_key = &#x27;CUS-100&#x27;</span>
+<span>          AND ct.valid_period @&gt; DATE &#x27;2026-02-15&#x27;</span>
+<span>          AND ct.system_period @&gt; TIMESTAMPTZ &#x27;2026-03-15 00:00:00+00&#x27;</span>
+<span>    ) &lt;&gt; 1 THEN</span>
+<span>        RAISE EXCEPTION &#x27;bitemporal as-of query is not single-valued&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF (SELECT COUNT(*) FROM pro_temporal_lab.change_ledger) &lt;&gt; 2 THEN</span>
+<span>        RAISE EXCEPTION &#x27;append-only ledger count drifted&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$self_check$;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span>\echo &#x27;SQL-TEMPORAL-01 complete: pro_temporal_lab was rolled back&#x27;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-temporal-01-solutions-temporal-and-domain-modelling">SQL-TEMPORAL-01 Solutions — Temporal and Domain Modelling<a class="heading-anchor" href="#solution-1--sql-temporal-01-solutions-temporal-and-domain-modelling" aria-label="Link to this section">#</a></h3>
+<p>Run:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql</code></pre>
+<p>The solution is fixed-time and rolls back.</p>
+<h4 id="solution-1--exercise-1-retroactive-correction">Exercise 1 — Retroactive correction<a class="heading-anchor" href="#solution-1--exercise-1-retroactive-correction" aria-label="Link to this section">#</a></h4>
+<p>Close the prior system period at April 1 and append a new version whose valid period still begins January 1. Valid February 15 as known March 15 returns the March version; the same valid date as known April 2 returns the April correction. This answers “what did we know then?” without rewriting knowledge history.</p>
+<h4 id="solution-1--exercise-2-boundaries">Exercise 2 — Boundaries<a class="heading-anchor" href="#solution-1--exercise-2-boundaries" aria-label="Link to this section">#</a></h4>
+<p>Test <code>lower</code>, just before upper, and exactly upper for both date and timestamp ranges. <code>[lower,upper)</code> includes lower and excludes upper, so adjacent versions can meet at one boundary without double matching. Assert match count at most one, not merely choose one with ORDER/LIMIT.</p>
+<h4 id="solution-1--exercise-3-exclusion-versus-fallback">Exercise 3 — Exclusion versus fallback<a class="heading-anchor" href="#solution-1--exercise-3-exclusion-versus-fallback" aria-label="Link to this section">#</a></h4>
+<p>With approved <code>btree_gist</code>, a partial GiST exclusion combines <code>customer_key WITH =</code> and <code>valid_period WITH &amp;&amp;</code> for current system rows. PostgreSQL enforces conflicts under concurrency. The fallback advisory-lock trigger qualifies the query and serializes one hashed key before checking; hash collisions reduce concurrency, and every write path/trigger enablement must remain controlled.</p>
+<h4 id="solution-1--exercise-4-reversal-chain">Exercise 4 — Reversal chain<a class="heading-anchor" href="#solution-1--exercise-4-reversal-chain" aria-label="Link to this section">#</a></h4>
+<p>Entries L-1 (+5), L-2 (-5 reversing L-1), and L-3 (+5 correcting/reversing L-2) sum to +5 without UPDATE. Unique idempotency keys prevent duplicate append and foreign keys preserve reversal references. Domain policy should prevent multiple unauthorized reversals of one entry if that is invalid.</p>
+<h4 id="solution-1--exercise-5-hold-decisions">Exercise 5 — Hold decisions<a class="heading-anchor" href="#solution-1--exercise-5-hold-decisions" aria-label="Link to this section">#</a></h4>
+<p>The decision log appends who, reason, action, and time. Current hold state is derived from the latest authorized decision. Deletion still requires retention age, no current hold, approval, dependency/backup review, and an immutable execution audit. The course solution records decisions but deletes nothing.</p>
+<h4 id="solution-1--exercise-6-domain-assumptions">Exercise 6 — Domain assumptions<a class="heading-anchor" href="#solution-1--exercise-6-domain-assumptions" aria-label="Link to this section">#</a></h4>
+<p>Record business time zone and clock authority; valid/system boundary convention; late-arrival/correction authority; allowed gaps/overlaps; customer identity; money/unit semantics; ledger reconciliation and reversal policy; retention/legal basis; hold ownership; deletion versus anonymization; and how replicas/backups honor erasure and audit duties.</p>
+<h4 id="solution-1--exercise-7-civil-time-and-daylight-saving">Exercise 7 — Civil time and daylight saving<a class="heading-anchor" href="#solution-1--exercise-7-civil-time-and-daylight-saving" aria-label="Link to this section">#</a></h4>
+<p>Store the authoritative instant as <code>timestamptz</code> and retain the IANA zone name used to interpret/display civil time. A fixed offset has no DST rules; a bare timestamp cannot identify which occurrence an ambiguous fall-back time means.</p>
+<p>Detect/reject nonexistent spring-forward times and require an explicit earlier/later-offset policy for ambiguous input. Test both transitions for the supported zone database/version.</p>
+<h4 id="solution-1--exercise-8-event-ingestion-and-processing-clocks">Exercise 8 — Event, ingestion, and processing clocks<a class="heading-anchor" href="#solution-1--exercise-8-event-ingestion-and-processing-clocks" aria-label="Link to this section">#</a></h4>
+<p>Event time is source occurrence, ingestion time is arrival, and processing time is computation. A watermark such as maximum observed event time minus allowed lateness closes windows only under a documented source/partition policy.</p>
+<p>Beyond-window data should be quarantined or applied as a versioned correction/retraction. Publish metric version, as-of/watermark, changed keys, and downstream recomputation/notification evidence.</p>
+<h4 id="solution-1--exercise-9-type-2-as-of-dimension-join">Exercise 9 — Type-2 as-of dimension join<a class="heading-anchor" href="#solution-1--exercise-9-type-2-as-of-dimension-join" aria-label="Link to this section">#</a></h4>
+<p>Give each version a surrogate key, stable business key, half-open effective range, and correction metadata. Join a fact where business keys match and the range contains fact time; persist the resolved surrogate when interpretation must never drift.</p>
+<p>Enforce/report no overlap and assert each fact has at most or exactly one match according to missing-dimension policy. A current flag must agree with range state.</p>
+<h4 id="solution-1--exercise-10-temporal-referential-integrity">Exercise 10 — Temporal referential integrity<a class="heading-anchor" href="#solution-1--exercise-10-temporal-referential-integrity" aria-label="Link to this section">#</a></h4>
+<p>The child period must be contained by an allowed parent period, not merely share a key. A trigger can lock a stable business-key namespace, query containment, and reject gaps under concurrency.</p>
+<p>Exclusion constraints prevent overlap but do not alone prove containment. Deferred/bulk loading needs an explicit validation and quarantine/repair gate; test parent shrink/delete and concurrent changes.</p>
+<h4 id="solution-1--exercise-11-gap-and-overlap-report">Exercise 11 — Gap and overlap report<a class="heading-anchor" href="#solution-1--exercise-11-gap-and-overlap-report" aria-label="Link to this section">#</a></h4>
+<p>Order nonempty periods by lower bound, upper bound, stable ID and compare each lower bound with the running maximum prior upper. Lower means overlap, greater means gap, equal means adjacency. Plain <code>lag(upper)</code> can miss overlap hidden by an earlier long interval.</p>
+<p>Multirange aggregation/subtraction can expose coverage compactly. Report duplicates/empty/inverted periods separately and define adjacency policy.</p>
+<h4 id="solution-1--exercise-12-partition-archive-under-hold">Exercise 12 — Partition archive under hold<a class="heading-anchor" href="#solution-1--exercise-12-partition-archive-under-hold" aria-label="Link to this section">#</a></h4>
+<p>Inventory retention and holds before detach. If one held row blocks an expirable partition, move/repartition only through audited review. Verify counts/checksums, dependencies, indexes, encryption/access, manifest, and test restore.</p>
+<p>Keep archive discoverable to authorized recovery/legal processes, propagate hold decisions to replicas/backups, and record deletion evidence. Partition age alone is not authorization to erase.</p>
+<h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Infinity/open bounds need explicit API serialization.</li>
+<li>Clock corrections and transaction timestamp versus wall clock differ.</li>
+<li>Backdated facts can change previously published metrics.</li>
+<li>Temporal indexes and history retention grow write/storage cost.</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TEMPORAL-01 executable solutions</span>
+<span>\set ON_ERROR_STOP on</span>
+<span>BEGIN;</span>
+<span>SET LOCAL search_path TO pg_catalog, public;</span>
+<span>CREATE SCHEMA pro_temporal_lab;</span>
+<span> </span>
+<span>CREATE TABLE pro_temporal_lab.facts (</span>
+<span>    fact_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    subject_key text NOT NULL,</span>
+<span>    valid_period daterange NOT NULL,</span>
+<span>    system_period tstzrange NOT NULL,</span>
+<span>    value text NOT NULL,</span>
+<span>    CHECK (NOT isempty(valid_period)),</span>
+<span>    CHECK (NOT isempty(system_period))</span>
+<span>);</span>
+<span> </span>
+<span>-- Initial and March correction.</span>
+<span>INSERT INTO pro_temporal_lab.facts (</span>
+<span>    subject_key, valid_period, system_period, value</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (</span>
+<span>        &#x27;SUB-1&#x27;,</span>
+<span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),</span>
+<span>        tstzrange(</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-01 00:00+00&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-10 00:00+00&#x27;,</span>
+<span>            &#x27;[)&#x27;</span>
+<span>        ),</span>
+<span>        &#x27;value-10&#x27;</span>
+<span>    ),</span>
+<span>    (</span>
+<span>        &#x27;SUB-1&#x27;,</span>
+<span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),</span>
+<span>        tstzrange(</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-10 00:00+00&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-04-01 00:00+00&#x27;,</span>
+<span>            &#x27;[)&#x27;</span>
+<span>        ),</span>
+<span>        &#x27;value-12&#x27;</span>
+<span>    ),</span>
+<span>    -- Exercise 1: retroactive correction recorded April 1.</span>
+<span>    (</span>
+<span>        &#x27;SUB-1&#x27;,</span>
+<span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),</span>
+<span>        tstzrange(TIMESTAMPTZ &#x27;2026-04-01 00:00+00&#x27;, NULL, &#x27;[)&#x27;),</span>
+<span>        &#x27;value-11&#x27;</span>
+<span>    );</span>
+<span> </span>
+<span>SELECT</span>
+<span>    query.system_as_of,</span>
+<span>    f.value</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (TIMESTAMPTZ &#x27;2026-03-15 00:00+00&#x27;),</span>
+<span>        (TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;)</span>
+<span>) AS query(system_as_of)</span>
+<span>JOIN pro_temporal_lab.facts AS f</span>
+<span>  ON f.subject_key = &#x27;SUB-1&#x27;</span>
+<span> AND f.valid_period @&gt; DATE &#x27;2026-02-15&#x27;</span>
+<span> AND f.system_period @&gt; query.system_as_of</span>
+<span>ORDER BY query.system_as_of;</span>
+<span> </span>
+<span>-- Exercise 4: immutable ledger and reversal of a reversal.</span>
+<span>CREATE TABLE pro_temporal_lab.ledger (</span>
+<span>    entry_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    idempotency_key text NOT NULL UNIQUE,</span>
+<span>    event_kind text NOT NULL,</span>
+<span>    amount numeric(12, 2) NOT NULL,</span>
+<span>    reverses_entry_id bigint REFERENCES pro_temporal_lab.ledger (entry_id)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.ledger (</span>
+<span>    idempotency_key, event_kind, amount</span>
+<span>)</span>
+<span>VALUES (&#x27;L-1&#x27;, &#x27;credit&#x27;, 5.00);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.ledger (</span>
+<span>    idempotency_key, event_kind, amount, reverses_entry_id</span>
+<span>)</span>
+<span>SELECT &#x27;L-2&#x27;, &#x27;credit.reversal&#x27;, -5.00, l.entry_id</span>
+<span>FROM pro_temporal_lab.ledger AS l</span>
+<span>WHERE l.idempotency_key = &#x27;L-1&#x27;;</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.ledger (</span>
+<span>    idempotency_key, event_kind, amount, reverses_entry_id</span>
+<span>)</span>
+<span>SELECT &#x27;L-3&#x27;, &#x27;reversal.corrected&#x27;, 5.00, l.entry_id</span>
+<span>FROM pro_temporal_lab.ledger AS l</span>
+<span>WHERE l.idempotency_key = &#x27;L-2&#x27;;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    l.entry_id,</span>
+<span>    l.idempotency_key,</span>
+<span>    l.event_kind,</span>
+<span>    l.amount,</span>
+<span>    l.reverses_entry_id</span>
+<span>FROM pro_temporal_lab.ledger AS l</span>
+<span>ORDER BY l.entry_id;</span>
+<span> </span>
+<span>-- Exercise 5: immutable decision log for hold release/review.</span>
+<span>CREATE TABLE pro_temporal_lab.retention_decisions (</span>
+<span>    decision_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    record_key text NOT NULL,</span>
+<span>    decision text NOT NULL CHECK (</span>
+<span>        decision IN (&#x27;hold_applied&#x27;, &#x27;hold_released&#x27;, &#x27;deletion_approved&#x27;)</span>
+<span>    ),</span>
+<span>    decided_by text NOT NULL,</span>
+<span>    reason text NOT NULL,</span>
+<span>    decided_at timestamptz NOT NULL,</span>
+<span>    UNIQUE (record_key, decision, decided_at)</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.retention_decisions (</span>
+<span>    record_key, decision, decided_by, reason, decided_at</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (</span>
+<span>        &#x27;REC-1&#x27;,</span>
+<span>        &#x27;hold_applied&#x27;,</span>
+<span>        &#x27;policy-reviewer&#x27;,</span>
+<span>        &#x27;active review&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-02-01 00:00+00&#x27;</span>
+<span>    ),</span>
+<span>    (</span>
+<span>        &#x27;REC-1&#x27;,</span>
+<span>        &#x27;hold_released&#x27;,</span>
+<span>        &#x27;policy-reviewer&#x27;,</span>
+<span>        &#x27;review completed&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-03-01 00:00+00&#x27;</span>
+<span>    );</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_temporal_lab.facts AS f</span>
+<span>        WHERE f.valid_period @&gt; DATE &#x27;2026-02-15&#x27;</span>
+<span>          AND f.system_period @&gt; TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;</span>
+<span>    ) &lt;&gt; 1 THEN</span>
+<span>        RAISE EXCEPTION &#x27;retroactive as-of result is not single-valued&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF (SELECT SUM(l.amount) FROM pro_temporal_lab.ledger AS l) &lt;&gt; 5.00 THEN</span>
+<span>        RAISE EXCEPTION &#x27;ledger reversal chain does not reconcile&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- Exercise 2: exactly at an upper bound, the old fact is excluded by [lower,</span>
+<span>-- upper); the next adjacent fact would become eligible.</span>
+<span>SELECT</span>
+<span>    probe.valid_on,</span>
+<span>    probe.known_at,</span>
+<span>    COUNT(f.fact_version_id) AS matching_versions</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (</span>
+<span>            DATE &#x27;2026-03-31&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            DATE &#x27;2026-04-01&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;</span>
+<span>        )</span>
+<span>) AS probe(valid_on, known_at)</span>
+<span>LEFT JOIN pro_temporal_lab.facts AS f</span>
+<span>  ON f.subject_key = &#x27;SUB-1&#x27;</span>
+<span> AND f.valid_period @&gt; probe.valid_on</span>
+<span> AND f.system_period @&gt; probe.known_at</span>
+<span>GROUP BY probe.valid_on, probe.known_at</span>
+<span>ORDER BY probe.valid_on;</span>
+<span> </span>
+<span>-- Exercise 3: an approved btree_gist exclusion constraint can reject current</span>
+<span>-- period overlap under concurrency. The fallback must lock one stable business</span>
+<span>-- key before checking; this core solution installs no extension.</span>
+<span> </span>
+<span>-- Exercise 6: domain assumptions include zone/clock authority, half-open bounds,</span>
+<span>-- lateness, overlap/gap, correction authority, identity, unit/ledger semantics,</span>
+<span>-- retention/hold/deletion, and replica/backup treatment.</span>
+<span> </span>
+<span>-- Exercise 7: retain both the authoritative instant and IANA source zone. These</span>
+<span>-- civil examples are deliberately visible so the application can reject or ask</span>
+<span>-- for disambiguation rather than accepting PostgreSQL&#x27;s default interpretation.</span>
+<span>SELECT</span>
+<span>    local_time,</span>
+<span>    zone_name,</span>
+<span>    local_time AT TIME ZONE zone_name AS interpreted_instant</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (</span>
+<span>            TIMESTAMP &#x27;2026-03-08 02:30:00&#x27;,</span>
+<span>            &#x27;America/Los_Angeles&#x27;::text</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            TIMESTAMP &#x27;2026-11-01 01:30:00&#x27;,</span>
+<span>            &#x27;America/Los_Angeles&#x27;::text</span>
+<span>        )</span>
+<span>) AS civil(local_time, zone_name)</span>
+<span>ORDER BY local_time;</span>
+<span> </span>
+<span>-- Exercise 8: keep all three clocks and derive a documented watermark from</span>
+<span>-- event time; data beyond it needs a correction/retraction policy.</span>
+<span>CREATE TABLE pro_temporal_lab.timed_events (</span>
+<span>    event_key text PRIMARY KEY,</span>
+<span>    event_at timestamptz NOT NULL,</span>
+<span>    ingested_at timestamptz NOT NULL,</span>
+<span>    processed_at timestamptz NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.timed_events</span>
+<span>VALUES</span>
+<span>    (</span>
+<span>        &#x27;EV-1&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-01 10:00+00&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-01 10:02+00&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-01 10:03+00&#x27;</span>
+<span>    ),</span>
+<span>    (</span>
+<span>        &#x27;EV-LATE&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-01 09:30+00&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-01 11:00+00&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-01 11:01+00&#x27;</span>
+<span>    );</span>
+<span> </span>
+<span>SELECT</span>
+<span>    max(e.event_at) AS maximum_event_time,</span>
+<span>    max(e.event_at) - INTERVAL &#x27;15 minutes&#x27; AS example_watermark,</span>
+<span>    max(e.ingested_at - e.event_at) AS maximum_arrival_delay</span>
+<span>FROM pro_temporal_lab.timed_events AS e;</span>
+<span> </span>
+<span>-- Exercise 9: Type-2 dimension join uses business key plus half-open effective</span>
+<span>-- containment and asserts at most one match.</span>
+<span>CREATE TABLE pro_temporal_lab.customer_dimension (</span>
+<span>    customer_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    customer_key text NOT NULL,</span>
+<span>    effective_period daterange NOT NULL,</span>
+<span>    segment text NOT NULL,</span>
+<span>    CHECK (NOT isempty(effective_period))</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.customer_dimension (</span>
+<span>    customer_key, effective_period, segment</span>
+<span>)</span>
+<span>VALUES</span>
+<span>    (</span>
+<span>        &#x27;CUS-1&#x27;,</span>
+<span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-02-01&#x27;, &#x27;[)&#x27;),</span>
+<span>        &#x27;starter&#x27;</span>
+<span>    ),</span>
+<span>    (</span>
+<span>        &#x27;CUS-1&#x27;,</span>
+<span>        daterange(DATE &#x27;2026-02-01&#x27;, NULL, &#x27;[)&#x27;),</span>
+<span>        &#x27;established&#x27;</span>
+<span>    );</span>
+<span> </span>
+<span>SELECT</span>
+<span>    order_fact.order_key,</span>
+<span>    order_fact.ordered_on,</span>
+<span>    d.customer_version_id,</span>
+<span>    d.segment</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;ORD-A&#x27;::text, &#x27;CUS-1&#x27;::text, DATE &#x27;2026-01-31&#x27;),</span>
+<span>        (&#x27;ORD-B&#x27;::text, &#x27;CUS-1&#x27;::text, DATE &#x27;2026-02-01&#x27;)</span>
+<span>) AS order_fact(order_key, customer_key, ordered_on)</span>
+<span>LEFT JOIN pro_temporal_lab.customer_dimension AS d</span>
+<span>  ON d.customer_key = order_fact.customer_key</span>
+<span> AND d.effective_period @&gt; order_fact.ordered_on</span>
+<span>ORDER BY order_fact.order_key;</span>
+<span> </span>
+<span>-- Exercise 10: temporal parent/child containment is a cross-row rule. A safe</span>
+<span>-- trigger locks one business-key namespace, checks containment, and validates</span>
+<span>-- parent shrink/delete and concurrent changes; exclusion alone is insufficient.</span>
+<span> </span>
+<span>-- Exercise 11: compare each lower bound with the running maximum *prior* upper</span>
+<span>-- bound so an earlier long interval is not hidden by a shorter immediate row.</span>
+<span>WITH periods(period_id, valid_period) AS (</span>
+<span>    VALUES</span>
+<span>        (1, daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-01-10&#x27;, &#x27;[)&#x27;)),</span>
+<span>        (2, daterange(DATE &#x27;2026-01-05&#x27;, DATE &#x27;2026-01-07&#x27;, &#x27;[)&#x27;)),</span>
+<span>        (3, daterange(DATE &#x27;2026-01-12&#x27;, DATE &#x27;2026-01-15&#x27;, &#x27;[)&#x27;))</span>
+<span>),</span>
+<span>with_prior AS (</span>
+<span>    SELECT</span>
+<span>        p.*,</span>
+<span>        max(upper(p.valid_period)) OVER (</span>
+<span>            ORDER BY lower(p.valid_period), upper(p.valid_period), p.period_id</span>
+<span>            ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING</span>
+<span>        ) AS prior_max_upper</span>
+<span>    FROM periods AS p</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    w.period_id,</span>
+<span>    w.valid_period,</span>
+<span>    CASE</span>
+<span>        WHEN w.prior_max_upper IS NULL THEN &#x27;first&#x27;</span>
+<span>        WHEN lower(w.valid_period) &lt; w.prior_max_upper THEN &#x27;overlap&#x27;</span>
+<span>        WHEN lower(w.valid_period) = w.prior_max_upper THEN &#x27;adjacent&#x27;</span>
+<span>        ELSE &#x27;gap&#x27;</span>
+<span>    END AS relationship_to_prior_coverage</span>
+<span>FROM with_prior AS w</span>
+<span>ORDER BY lower(w.valid_period), upper(w.valid_period), w.period_id;</span>
+<span> </span>
+<span>-- Exercise 12: archive only after hold-aware inventory, detach/move review,</span>
+<span>-- count/checksum/dependency verification, encrypted access-controlled storage,</span>
+<span>-- restore proof, propagated hold state, and immutable deletion evidence.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-repl-01.html"><small>Previous lesson</small><strong>sql-repl-01</strong><span>Replication, Change Data Capture, and High Availability</span></a>
+        <a class="nav-card next" href="bridge-01.html"><small>Next lesson</small><strong>bridge-01</strong><span>Config Logging CLI</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-temporal-01";
+    const LEARNER_PATH = "sql/professional/lessons/sql_temporal_01_domain_modelling.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

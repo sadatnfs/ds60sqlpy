@@ -2,11 +2,22 @@
 
 Codex can act as a tutor, reviewer, debugger, and study planner for this repository. It is optional: all course content and local execution should remain usable without Codex.
 
-Codex itself may require a network connection even when a lesson does not. “Offline course” and “online tutor” are separate capabilities.
+Codex itself may require a network connection even when a lesson does not.
+“Offline course” and “online tutor” are separate capabilities.
 
-Start with `START_HERE.html` for a completely static offline dashboard. After
-the repository environment exists, the private launcher mode gives the browser
-and Codex the same ignored progress file:
+## Choose the right front door
+
+| Situation | Start here | What it provides |
+| --- | --- | --- |
+| New or returning Windows learner | Double-click `START_DS60.cmd` | Discovers or prepares the repository environment, runs readiness checks, and opens the authenticated private portal |
+| macOS/Linux learner after setup | Run `scripts/learning_portal.py` with the repository interpreter | Opens the same private portal with exact VS Code and JupyterLab actions |
+| Source-only USB or no local server | Double-click [`START_HERE.html`](../START_HERE.html) | Fully static dashboard and rendered lesson readers; progress stays in that browser |
+
+The Windows launcher asks before a connected first setup. It never requests or
+stores a database credential and never resets PostgreSQL. Keep its terminal
+open while learning; `Ctrl+C` stops the private portal.
+
+Manual private-portal commands are:
 
 ```powershell
 # Windows PowerShell
@@ -23,10 +34,17 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 .venv/bin/python scripts/learning_portal.py
 ```
 
-The launcher binds only to `127.0.0.1`. It can open the repository, one
-cataloged lesson artifact, or the two documented JupyterLab folders; it cannot
-accept arbitrary commands or paths. Pass `--no-launches` if you only want
-file-backed progress.
+The private launcher binds only to `127.0.0.1`. It can open the repository,
+exact cataloged artifacts, exact notebook lessons, and catalog-restricted
+guided SQL notebooks; it cannot accept arbitrary commands or paths. Pass
+`--no-launches` if you want file-backed progress with every native process
+action disabled.
+
+Static mode remains useful without Python or a server, but a browser cannot
+safely execute Python, notebooks, or SQL. Its optional `vscode://` link is a
+best-effort handoff to a registered VS Code installation. If it does not work,
+open the repository in VS Code and use the catalog path printed on the lesson
+page.
 
 ## Start Codex in the repository root
 
@@ -38,6 +56,45 @@ Open the directory containing `README.md`. From there, Codex can discover:
 - The environment doctor and validation commands
 
 If Codex starts inside a nested lesson directory, tell it to work from the repository root.
+
+## Use one rendered lesson page
+
+Every **Start lesson** link opens
+`lesson-pages/<lesson-id>.html`, a deterministic page generated from the
+checked-in companion guide, learner artifact, and solutions. Markdown is
+rendered as HTML, notebook cells receive a read-only notebook view, and Python
+or SQL receives a readable source listing. The browser is for reading; edit
+and run the actual artifact in VS Code or JupyterLab.
+
+Setup, documentation, and other local Markdown/SQL links open generated
+`reference-pages/` HTML, so they remain readable instead of becoming raw text
+tabs. In static mode, return to `START_HERE.html` to mark completion; the
+lesson-page checkbox is reserved for private launcher mode, where progress can
+be synchronized safely.
+
+Use this sequence with Codex:
+
+1. Read the **Guide** tab and state the objective in your own words.
+2. Predict what the first example will do.
+3. Open the real **Learner artifact** and make an honest attempt.
+4. Ask for one progressive hint at a time.
+5. Open a **Solution** tab only after the attempt, then explain the difference.
+
+In private mode, the reader's buttons resolve only that stable lesson ID and
+its cataloged files. For a Python notebook, choose **Open this notebook in
+JupyterLab** or open it in VS Code and select `Python (ds60sqlpy)`. For a
+Python source lesson, open the exact `.py` file in VS Code and run it with the
+repository interpreter.
+
+For a normal SQL lesson, choose **Create/open guided SQL notebook**. The
+launcher creates an ignored notebook plus editable SQL copy under
+`.learning/sql/<lesson-id>/` and opens that exact notebook in JupyterLab. It
+preserves existing learner edits. The notebook runs the complete course script
+through a fixed, non-shell `psql -f` path so `psql` meta-commands continue to
+work; database preparation remains a separate, explicitly confirmed reset of
+only `advanced_sql_training`. Use `bridge-jupyter-01` instead when the learning
+objective is short JupySQL `%sql`/`%%sql` exploration. See
+[Guided SQL lesson notebooks](guided-sql-notebooks.md).
 
 ## Use the tutor skill
 
@@ -143,6 +200,9 @@ You decide whether progress is stored.
 
 - Keep private local notes under `.learning/`; the directory is ignored.
 - Ask before writing or changing a progress file.
+- Treat `.learning/sql/` as learner work. A generated SQL notebook and editable
+  SQL copy are preserved when reopened; do not delete them without first
+  saving anything worth keeping.
 - Do not put passwords, personal data, API keys, or proprietary datasets in prompts or notebooks.
 - Do not ask Codex to connect a course reset command to a workplace database.
 
@@ -170,6 +230,8 @@ when the repository environment is not activated.
 The portal's **Export progress** button creates a portable JSON backup. In
 static-file mode, import/export is also the deliberate bridge between browsers.
 Never commit either the `.learning/` directory or a personal progress export.
+Before making a source-only USB copy, export progress and separately preserve
+any `.learning/sql/` exercises you want to resume.
 
 ## Avoid answer leakage
 

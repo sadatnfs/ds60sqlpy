@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-45 · End to End Modeling Project · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-45</p>
+        <h1>End to End Modeling Project</h1>
+        <p class="hero-copy">Statistics and machine learning</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">105 minutes</span>
+          <span class="tag">data setup</span>
+          <span class="tag">first-run-seaborn-cache</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-44.html">python-44</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day45_end_to_end_modeling_project.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/ds-60day/companion-guides/day45_end_to_end_modeling_project.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day45_end_to_end_modeling_project.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-45-end-to-end-modeling-mini-project">Day 45 — End-to-End Modeling Mini-Project<a class="heading-anchor" href="#guide--day-45-end-to-end-modeling-mini-project" aria-label="Link to this section">#</a></h3>
+<p><strong>Lesson ID:</strong> <code>python-45</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> first-run Seaborn cache</p>
+<p>This checkpoint integrates data loading, leak-safe preprocessing, validation, evaluation, and a saved pipeline. The objective is reproducible evidence—not the highest possible score.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end of the project, you can:</p>
+<ul>
+<li>frame a binary-classification problem and declare an evaluation metric;</li>
+<li>preserve train/test boundaries through a <code>ColumnTransformer</code> and <code>Pipeline</code>;</li>
+<li>compare a simple baseline with cross-validation and a held-out result;</li>
+<li>save the complete preprocessing-plus-model artifact; and</li>
+<li>document limitations, reproduction steps, and a next experiment.</li>
+</ul>
+<h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Complete <code>python-44</code> and therefore <code>python-31</code> through <code>python-44</code>.</li>
+<li>Have a working <code>data</code> environment and a writable ignored <code>artifacts/</code> folder.</li>
+<li>Cache the Seaborn Titanic dataset while connected before an offline session.</li>
+</ul>
+<h4 id="guide--dataset-and-offline-contract">Dataset and offline contract<a class="heading-anchor" href="#guide--dataset-and-offline-contract" aria-label="Link to this section">#</a></h4>
+<p>The learner notebook calls <code>seaborn.load_dataset(&quot;titanic&quot;)</code>. That first call may download the small dataset and place it in Seaborn&#x27;s local cache. This one-time connected bootstrap is accepted. Once cached, the project can run offline on that machine.</p>
+<p>The separate reference solution uses scikit-learn&#x27;s package-bundled breast-cancer dataset to demonstrate the same engineering gates without a network dependency. It is intentionally a transferable reference, not a line-for-line Titanic answer.</p>
+<h4 id="guide--vocabulary-and-mental-models">Vocabulary and mental models<a class="heading-anchor" href="#guide--vocabulary-and-mental-models" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Definition</th>
+</tr></thead><tbody>
+<tr>
+<td>Baseline</td>
+<td>Simple reference that an added-complexity model must justify beating</td>
+</tr>
+<tr>
+<td>Holdout</td>
+<td>Data kept outside fitting and model selection for a final estimate</td>
+</tr>
+<tr>
+<td><code>ColumnTransformer</code></td>
+<td>Applies different preprocessing to named column groups</td>
+</tr>
+<tr>
+<td>Reproducibility</td>
+<td>Ability to rebuild results from declared code, data, versions, and seeds</td>
+</tr>
+<tr>
+<td>Artifact</td>
+<td>Saved output such as a fitted pipeline, metrics JSON, or plot</td>
+</tr>
+<tr>
+<td>Acceptance gate</td>
+<td>Explicit evidence required before calling a deliverable complete</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--project-gates-and-evidence">Project gates and evidence<a class="heading-anchor" href="#guide--project-gates-and-evidence" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Gate</th>
+<th>Required evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Problem</td>
+<td>Target, prediction unit, intended user, and cost of major error types</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>Columns, missingness, row exclusions, cache requirement, and leakage review</td>
+</tr>
+<tr>
+<td>Split</td>
+<td>Stratified train/holdout split with a fixed seed; holdout untouched during selection</td>
+</tr>
+<tr>
+<td>Baseline</td>
+<td>Named baseline and metric</td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td>Categories encoded with unknown handling; numeric features processed inside the pipeline</td>
+</tr>
+<tr>
+<td>Evaluation</td>
+<td>Cross-validation scores plus one held-out result and confusion/error analysis</td>
+</tr>
+<tr>
+<td>Reproducibility</td>
+<td>Dependency setup, random states, exact run order, and artifact paths</td>
+</tr>
+<tr>
+<td>Security/privacy</td>
+<td>No secrets or direct identifiers committed; trusted model artifact only</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--worked-pattern-one-deployable-unit">Worked pattern: one deployable unit<a class="heading-anchor" href="#guide--worked-pattern-one-deployable-unit" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">from sklearn.compose import ColumnTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+preprocess = ColumnTransformer(
+    [
+        (&quot;categorical&quot;, OneHotEncoder(handle_unknown=&quot;ignore&quot;), [&quot;sex&quot;, &quot;class&quot;]),
+        (&quot;numeric&quot;, StandardScaler(), [&quot;fare&quot;, &quot;age&quot;]),
+    ]
+)
+pipeline = make_pipeline(
+    preprocess,
+    LogisticRegression(max_iter=1_000),
+)</code></pre>
+<p>Fit and serialize this complete pipeline, not separately transformed arrays. A future input must pass through the exact fitted preprocessing.</p>
+<h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>The notebook&#x27;s project checklist is the exercise:</p>
+<ol>
+<li>Load the dataset and create train/validation/test boundaries.</li>
+<li>Preprocess with <code>ColumnTransformer</code>.</li>
+<li>Train a baseline model.</li>
+<li>Evaluate with appropriate metrics and cross-validation.</li>
+<li>Save the model and preprocessing together with <code>joblib</code>.</li>
+<li>Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.</li>
+<li>Optionally adapt the Day 44 FastAPI service.</li>
+</ol>
+<h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Start by writing the target, row unit, and split before feature engineering.</li>
+<li>Use <code>handle_unknown=&quot;ignore&quot;</code> for categorical inference and keep every fitted transformation inside the pipeline.</li>
+<li>Report the distribution of fold scores; do not tune against the holdout.</li>
+<li>Reload the saved artifact in a fresh cell and predict a small valid batch.</li>
+</ol>
+<h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Finish one reproducible modeling system rather than a notebook demo. Every data boundary, fitted transform, metric, artifact, and handoff claim needs evidence.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Data-contract gate:</strong> Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint. <strong>Progressive hint:</strong> Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.</li>
+<li><strong>Leakage audit:</strong> Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field. <strong>Progressive hint:</strong> Ask whether the value exists at prediction time and whether it was computed using future rows or target information.</li>
+<li><strong>Baseline ladder:</strong> Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results. <strong>Progressive hint:</strong> Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.</li>
+<li><strong>Operating-policy selection:</strong> Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it. <strong>Progressive hint:</strong> Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.</li>
+<li><strong>Error-slice analysis:</strong> Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values. <strong>Progressive hint:</strong> Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.</li>
+<li><strong>Artifact manifest:</strong> Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes. <strong>Progressive hint:</strong> JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.</li>
+<li><strong>Fresh-process acceptance:</strong> Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance. <strong>Progressive hint:</strong> Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.</li>
+</ol>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can a new category pass through the fitted pipeline?</li>
+<li>Can another learner reproduce the split and metric from the notebook alone?</li>
+<li>Did any preprocessing or threshold choice inspect holdout labels?</li>
+<li>Does the saved artifact include both preprocessing and prediction?</li>
+<li>What failure mode would prevent you from recommending deployment?</li>
+</ul>
+<h4 id="guide--pitfalls-diagnostics-and-tradeoffs">Pitfalls, diagnostics, and tradeoffs<a class="heading-anchor" href="#guide--pitfalls-diagnostics-and-tradeoffs" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Pitfall</th>
+<th>Evidence of the problem</th>
+<th>Response</th>
+</tr></thead><tbody>
+<tr>
+<td>Dropping missing rows without discussion</td>
+<td>Cohort changes silently</td>
+<td>Quantify removals and possible bias</td>
+</tr>
+<tr>
+<td>Calling accuracy “the metric”</td>
+<td>Error costs remain unstated</td>
+<td>Add ROC AUC and thresholded metrics with rationale</td>
+</tr>
+<tr>
+<td>Comparing many models on the holdout</td>
+<td>Score steadily improves through reuse</td>
+<td>Return selection to CV; reserve a fresh final set if possible</td>
+</tr>
+<tr>
+<td>Saving to an arbitrary working directory</td>
+<td>Artifact cannot be found/reproduced</td>
+<td>Use a documented ignored <code>artifacts/</code> path</td>
+</tr>
+<tr>
+<td>Loading an untrusted model file</td>
+<td>Code-execution risk</td>
+<td>Load only artifacts produced by this trusted workflow</td>
+</tr>
+</tbody></table></div>
+<p>This project demonstrates a responsible baseline. It does not establish production readiness, causal validity, fairness, or stability under future data.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Build in the <a href="python-45.html#learner">Day 45 learner notebook</a>.</li>
+<li>Use the differently-dataseted <a href="python-45.html#solution-1">Day 45 reference solution</a> only after producing your own evidence.</li>
+<li>Continue to <a href="python-46.html#guide">Day 46 — Deep Learning Overview</a>.</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/notebooks/day45_end_to_end_modeling_project.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day45_end_to_end_modeling_project.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-45-end-to-end-modeling-mini-project">Day 45 — End-to-end modeling mini-project<a class="heading-anchor" href="#learner--cell-1--day-45-end-to-end-modeling-mini-project" aria-label="Link to this section">#</a></h3>
+<p>Goal: deliver a reproducible pipeline from data → model → evaluation → saved artifacts.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--checklist">Checklist<a class="heading-anchor" href="#learner--cell-2--checklist" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Load dataset and split train/valid/test.</li>
+<li>Preprocess with ColumnTransformer.</li>
+<li>Train baseline model.</li>
+<li>Evaluate with appropriate metrics; cross-validate.</li>
+<li>Save model + preprocessing (joblib).</li>
+<li>Write a short README section in this notebook.</li>
+</ul></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
+<span> </span>
+<span>import joblib</span>
+<span>import pandas as pd</span>
+<span>import seaborn as sns</span>
+<span>from sklearn.model_selection import train_test_split, cross_val_score</span>
+<span>from sklearn.preprocessing import OneHotEncoder, StandardScaler</span>
+<span>from sklearn.compose import ColumnTransformer</span>
+<span>from sklearn.pipeline import Pipeline</span>
+<span>from sklearn.linear_model import LogisticRegression</span>
+<span>artifact_dir = Path(&#x27;artifacts/day45&#x27;)</span>
+<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
+<span>df = sns.load_dataset(&#x27;titanic&#x27;).dropna(subset=[&#x27;survived&#x27;,&#x27;sex&#x27;,&#x27;class&#x27;,&#x27;fare&#x27;,&#x27;age&#x27;])</span>
+<span>X = df[[&#x27;sex&#x27;,&#x27;class&#x27;,&#x27;fare&#x27;,&#x27;age&#x27;]]</span>
+<span>y = df[&#x27;survived&#x27;]</span>
+<span>pre = ColumnTransformer([(&#x27;cat&#x27;, OneHotEncoder(handle_unknown=&#x27;ignore&#x27;), [&#x27;sex&#x27;,&#x27;class&#x27;]),</span>
+<span>                           (&#x27;num&#x27;, StandardScaler(), [&#x27;fare&#x27;,&#x27;age&#x27;])])</span>
+<span>pipe = Pipeline([(&#x27;pre&#x27;, pre), (&#x27;clf&#x27;, LogisticRegression(max_iter=1000))])</span>
+<span>Xtr,Xte,ytr,yte = train_test_split(X,y, test_size=0.2, random_state=42, stratify=y)</span>
+<span>scores = cross_val_score(pipe, Xtr, ytr, cv=5, scoring=&#x27;roc_auc&#x27;)</span>
+<span>scores.mean()</span>
+<span>pipe.fit(Xtr,ytr); pipe.score(Xte,yte)</span>
+<span>joblib.dump(pipe, artifact_dir / &#x27;titanic_pipeline.joblib&#x27;)</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-4--deliverables">Deliverables<a class="heading-anchor" href="#learner--cell-4--deliverables" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>artifacts/day45/titanic_pipeline.joblib</li>
+<li>This notebook with metrics, rationale, and next steps.</li>
+<li>(Optional) a minimal FastAPI app for prediction.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-5--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-5--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>The notebook&#x27;s project checklist is the exercise:</p>
+<ol>
+<li>Load the dataset and create train/validation/test boundaries.</li>
+<li>Preprocess with <code>ColumnTransformer</code>.</li>
+<li>Train a baseline model.</li>
+<li>Evaluate with appropriate metrics and cross-validation.</li>
+<li>Save the model and preprocessing together with <code>joblib</code>.</li>
+<li>Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.</li>
+<li>Optionally adapt the Day 44 FastAPI service.</li>
+</ol>
+<h5 id="learner--cell-5--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-5--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Start by writing the target, row unit, and split before feature engineering.</li>
+<li>Use <code>handle_unknown=&quot;ignore&quot;</code> for categorical inference and keep every fitted transformation inside the pipeline.</li>
+<li>Report the distribution of fold scores; do not tune against the holdout.</li>
+<li>Reload the saved artifact in a fresh cell and predict a small valid batch.</li>
+</ol>
+<h5 id="learner--cell-5--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-5--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Finish one reproducible modeling system rather than a notebook demo. Every data boundary, fitted transform, metric, artifact, and handoff claim needs evidence.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Data-contract gate:</strong> Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint. <strong>Progressive hint:</strong> Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.</li>
+<li><strong>Leakage audit:</strong> Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field. <strong>Progressive hint:</strong> Ask whether the value exists at prediction time and whether it was computed using future rows or target information.</li>
+<li><strong>Baseline ladder:</strong> Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results. <strong>Progressive hint:</strong> Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.</li>
+<li><strong>Operating-policy selection:</strong> Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it. <strong>Progressive hint:</strong> Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.</li>
+<li><strong>Error-slice analysis:</strong> Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values. <strong>Progressive hint:</strong> Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.</li>
+<li><strong>Artifact manifest:</strong> Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes. <strong>Progressive hint:</strong> JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.</li>
+<li><strong>Fresh-process acceptance:</strong> Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance. <strong>Progressive hint:</strong> Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.</li>
+</ol>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<span>#</span>
+<span># Keep the official solution closed until you have attempted each task.</span>
+<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
+<span> </span>
+<span># Practice 8 — Data-contract gate</span>
+<span> </span>
+<span> </span>
+<span># Practice 9 — Leakage audit</span>
+<span> </span>
+<span> </span>
+<span># Practice 10 — Baseline ladder</span>
+<span> </span>
+<span> </span>
+<span># Practice 11 — Operating-policy selection</span>
+<span> </span>
+<span> </span>
+<span># Practice 12 — Error-slice analysis</span>
+<span> </span>
+<span> </span>
+<span># Practice 13 — Artifact manifest</span>
+<span> </span>
+<span> </span>
+<span># Practice 14 — Fresh-process acceptance</span>
+<span> </span></code></pre>
+</article></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day45_end_to_end_modeling_project/day45_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day45_end_to_end_modeling_project/day45_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-45-solutions-end-to-end-modeling-project">Day 45 — Solutions: End-to-End Modeling Project<a class="heading-anchor" href="#solution-1--day-45-solutions-end-to-end-modeling-project" aria-label="Link to this section">#</a></h3>
+<p>We deliver a reproducible baseline solution: clean data pipeline with validation and features, model training with CV/tuning, holdout evaluation with thresholding, saved artifacts, and a minimal FastAPI service.</p>
+<p>Contents</p>
+<ul>
+<li>Exercise 1: Define target/metric and acceptance criteria; build a Pipeline</li>
+<li>Exercise 2: Cross-validate and tune; evaluate on a holdout and pick threshold</li>
+<li>Exercise 3: Save model + artifacts; serve via FastAPI; write README instructions</li>
+</ul>
+<hr>
+<p>Exercise 1 — Problem framing and Pipeline</p>
+<pre><code class="language-python">from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+# Target/metric: binary classification; metric = ROC AUC, plus thresholded F1
+X, y = load_breast_cancer(return_X_y=True)
+Xtr, Xho, ytr, yho = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+
+pipe = Pipeline([
+    (&#x27;sc&#x27;, StandardScaler()),
+    (&#x27;lr&#x27;, LogisticRegression(max_iter=2000, solver=&#x27;lbfgs&#x27;))
+])</code></pre>
+<p>Notes</p>
+<ul>
+<li>Preprocessing belongs inside the Pipeline to avoid leakage</li>
+<li>Reproducibility: pin random_state and library versions</li>
+</ul>
+<hr>
+<p>Exercise 2 — CV/tuning and holdout evaluation</p>
+<pre><code class="language-python">from sklearn.model_selection import StratifiedKFold, GridSearchCV
+from sklearn.metrics import roc_auc_score, precision_recall_curve, average_precision_score
+import numpy as np
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+param_grid = {&#x27;lr__C&#x27;: [0.1, 1.0, 10.0]}
+search = GridSearchCV(pipe, param_grid, cv=cv, scoring=&#x27;roc_auc&#x27;, n_jobs=-1, refit=True)
+search.fit(Xtr, ytr)
+
+# Holdout metrics
+proba = search.predict_proba(Xho)[:, 1]
+roc = roc_auc_score(yho, proba)
+ap = average_precision_score(yho, proba)
+
+# Threshold via PR for F1 (example)
+prec, rec, th = precision_recall_curve(yho, proba)
+th = np.r_[0.0, th]
+f1s = 2 * prec * rec / (prec + rec + 1e-12)
+best_i = np.nanargmax(f1s)
+th_star, f1_star = float(th[best_i]), float(f1s[best_i])
+{&#x27;cv_best_params&#x27;: search.best_params_, &#x27;holdout_roc_auc&#x27;: float(roc), &#x27;holdout_ap&#x27;: float(ap), &#x27;best_threshold&#x27;: th_star, &#x27;best_f1&#x27;: f1_star}</code></pre>
+<p>Interpretation</p>
+<ul>
+<li>Report CV best params and holdout AUC/AP</li>
+<li>Pick an operating threshold based on PR/F1 or business constraints (precision/recall tradeoff)</li>
+</ul>
+<hr>
+<p>Exercise 3 — Save artifacts and serve via FastAPI</p>
+<pre><code class="language-python">import json
+from pathlib import Path
+
+import joblib
+
+# Save fitted search (contains the best estimator)
+artifact_dir = Path(&#x27;artifacts/day45&#x27;)
+artifact_dir.mkdir(parents=True, exist_ok=True)
+joblib.dump(search, artifact_dir / &#x27;model_search.joblib&#x27;)
+# Bundle threshold and metadata
+meta = {&#x27;threshold&#x27;: th_star, &#x27;params&#x27;: search.best_params_, &#x27;metric&#x27;: {&#x27;roc_auc&#x27;: float(roc), &#x27;ap&#x27;: float(ap)}}
+with (artifact_dir / &#x27;model_meta.json&#x27;).open(&#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as stream:
+    json.dump(meta, stream)
+
+# Minimal FastAPI app (artifacts/day45/app.py)
+app_source = &#x27;&#x27;&#x27;\
+from pathlib import Path
+import json
+import joblib
+import numpy as np
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+ARTIFACT_DIR = Path(__file__).resolve().parent
+app = FastAPI()
+search = joblib.load(ARTIFACT_DIR / &quot;model_search.joblib&quot;)
+with (ARTIFACT_DIR / &quot;model_meta.json&quot;).open(encoding=&quot;utf-8&quot;) as stream:
+    meta = json.load(stream)
+
+class Features(BaseModel):
+    x: list[float]
+
+@app.post(&quot;/predict&quot;)
+def predict(req: Features):
+    try:
+        X = np.array([req.x], dtype=float)
+        proba = float(search.predict_proba(X)[:, 1][0])
+        label = int(proba &gt;= meta[&quot;threshold&quot;])
+        return {&quot;proba&quot;: proba, &quot;label&quot;: label, &quot;threshold&quot;: meta[&quot;threshold&quot;]}
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+&#x27;&#x27;&#x27;
+(artifact_dir / &#x27;app.py&#x27;).write_text(app_source, encoding=&#x27;utf-8&#x27;)</code></pre>
+<p>Test locally</p>
+<pre><code class="language-bash">python -m uvicorn app:app --app-dir artifacts/day45 --reload
+curl -s -X POST http://127.0.0.1:8000/predict -H &#x27;Content-Type: application/json&#x27; -d &#x27;{&quot;x&quot;: [X_FEATURES_HERE]}&#x27;</code></pre>
+<p>Checklist for README.md</p>
+<ul>
+<li>Environment setup and dependencies (versions)</li>
+<li>Training command(s) and hyperparameters</li>
+<li>CV/holdout metrics and chosen threshold rationale</li>
+<li>How to serve the model (FastAPI) and sample requests</li>
+<li>Future work: monitoring, CI, Dockerfile, infra</li>
+</ul>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Load the dataset and create train/validation/test boundaries.</p>
+<p><strong>How to reason about it:</strong> Write the row unit, target, prediction time, and train/validation/test boundary before loading features. A stratified random split is valid only when entities and time do not require stronger separation.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Preprocess with <code>ColumnTransformer</code>.</p>
+<p><strong>How to reason about it:</strong> Use ColumnTransformer to keep all learned preprocessing inside the pipeline. Test missing, unseen-category, dtype, and column-order behavior with tiny synthetic rows.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Train a baseline model.</p>
+<p><strong>How to reason about it:</strong> A baseline establishes the minimum useful comparison and catches broken evaluation. Include a dummy predictor and one simple model before tuning.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Evaluate with appropriate metrics and cross-validation.</p>
+<p><strong>How to reason about it:</strong> Cross-validation belongs only to development data. Report fold spread, choose metrics before results, and reserve the holdout for one frozen candidate and threshold.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-5-original-lesson-practice">Exercise 5 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Save the model and preprocessing together with <code>joblib</code>.</p>
+<p><strong>How to reason about it:</strong> Serialize preprocessing and model together, under an ignored artifacts path. Record dependency/model/schema versions and validate reload parity in a fresh process.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-6-original-lesson-practice">Exercise 6 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-6-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.</p>
+<p><strong>How to reason about it:</strong> The README-style handoff must state exact commands, data origin, metric definitions, limitations, and output locations. A narrative without reproduction evidence is incomplete.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-7-original-lesson-practice">Exercise 7 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-7-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Optionally adapt the Day 44 FastAPI service.</p>
+<p><strong>How to reason about it:</strong> Serving is optional and should reuse the saved pipeline and schema rather than rebuilding preprocessing. Test the API boundary before adding network or container complexity.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-8-data-contract-gate">Exercise 8 — Data-contract gate<a class="heading-anchor" href="#solution-1--exercise-8-data-contract-gate" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint.</p>
+<p><strong>Reasoning before implementation:</strong> Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.</p>
+<p>The checks should fail with actionable field names and counts. Preserve the raw input, then create a validated copy for modeling. A row fingerprint must be stable across operating systems; canonicalize column order and serialization or hash the original immutable file.</p>
+<p>Record what was excluded and why. Quietly dropping invalid rows changes the training population and can make later metrics impossible to reproduce.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-9-leakage-audit">Exercise 9 — Leakage audit<a class="heading-anchor" href="#solution-1--exercise-9-leakage-audit" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field.</p>
+<p><strong>Reasoning before implementation:</strong> Ask whether the value exists at prediction time and whether it was computed using future rows or target information.</p>
+<p>Remove or quarantine post-outcome fields before model comparison, then show how metrics change. A dramatic decrease is evidence the earlier result was not deployable, not evidence that the corrected pipeline became worse.</p>
+<p>Version the audit beside the model. Feature names alone are insufficient: rolling aggregates and target encoders can leak through their time window or fit scope even when the raw field is available.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-10-baseline-ladder">Exercise 10 — Baseline ladder<a class="heading-anchor" href="#solution-1--exercise-10-baseline-ladder" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results.</p>
+<p><strong>Reasoning before implementation:</strong> Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.</p>
+<p>Keep preprocessing comparable and report mean, spread, and per-fold deltas. The dummy baseline validates class prevalence and metric direction. The simple baseline tests whether added complexity earns its maintenance cost.</p>
+<p>If the selected candidate misses the predeclared improvement, document that finding rather than optimizing the acceptance criterion after the fact.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-11-operating-policy-selection">Exercise 11 — Operating-policy selection<a class="heading-anchor" href="#solution-1--exercise-11-operating-policy-selection" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it.</p>
+<p><strong>Reasoning before implementation:</strong> Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.</p>
+<p>The best threshold is conditional on prevalence, costs, and capacity. Save it as model metadata rather than hard-coding <code>0.5</code> in serving code. On the final holdout, report performance at the frozen threshold without reopening the selection.</p>
+<p>Include sensitivity scenarios because costs and prevalence are estimates. Ranking metrics alone cannot define the operating point.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-12-error-slice-analysis">Exercise 12 — Error-slice analysis<a class="heading-anchor" href="#solution-1--exercise-12-error-slice-analysis" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values.</p>
+<p><strong>Reasoning before implementation:</strong> Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.</p>
+<p>Use stable row IDs and redacted fields for case review. Report denominators, confidence intervals or bootstrap ranges, and missing-label coverage. A slice with two examples cannot sustain a broad fairness claim.</p>
+<p>New features or threshold changes prompted by test errors return the project to development and require a new untouched evaluation set.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-13-artifact-manifest">Exercise 13 — Artifact manifest<a class="heading-anchor" href="#solution-1--exercise-13-artifact-manifest" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes.</p>
+<p><strong>Reasoning before implementation:</strong> JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.</p>
+<p>Use atomic writes where practical and fail if an existing version would be overwritten. Compute the artifact hash after serialization, then validate it before loading. Keep secrets and absolute developer paths out of metadata.</p>
+<p>The manifest makes the artifact reviewable but does not make pickle safe from untrusted sources. Provenance and access control remain required.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-14-fresh-process-acceptance">Exercise 14 — Fresh-process acceptance<a class="heading-anchor" href="#solution-1--exercise-14-fresh-process-acceptance" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance.</p>
+<p><strong>Reasoning before implementation:</strong> Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.</p>
+<p>Run the smoke test from the repository root on both the documented Windows and POSIX commands. Assert response shape, finite probabilities, class mapping, threshold behavior, and model/schema version.</p>
+<p>Reload parity catches missing custom classes, accidental preprocessing outside the pipeline, path assumptions, and serialization drift. Delete and rebuild the ignored test artifact to prove the workflow—not a stale file—creates it.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day45_end_to_end_modeling_project/day45_solutions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day45_end_to_end_modeling_project/day45_solutions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-45-solutions-end-to-end-modeling-project">Day 45 — Solutions: End-to-End Modeling Project<a class="heading-anchor" href="#solution-2--cell-1--day-45-solutions-end-to-end-modeling-project" aria-label="Link to this section">#</a></h3>
+<p>Pipeline + CV/tuning, holdout evaluation, save artifacts, serve via FastAPI.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import load_breast_cancer</span>
+<span>from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV</span>
+<span>from sklearn.pipeline import Pipeline</span>
+<span>from sklearn.preprocessing import StandardScaler</span>
+<span>from sklearn.linear_model import LogisticRegression</span>
+<span>from sklearn.metrics import roc_auc_score, precision_recall_curve, average_precision_score</span>
+<span>import json</span>
+<span>from pathlib import Path</span>
+<span> </span>
+<span>import joblib</span>
+<span>import numpy as np</span>
+<span> </span>
+<span>X, y = load_breast_cancer(return_X_y=True)</span>
+<span>Xtr, Xho, ytr, yho = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)</span>
+<span>pipe = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;lr&#x27;, LogisticRegression(max_iter=2000))])</span>
+<span>cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)</span>
+<span>param_grid = {&#x27;lr__C&#x27;: [0.1, 1.0, 10.0]}</span>
+<span>search = GridSearchCV(pipe, param_grid, cv=cv, scoring=&#x27;roc_auc&#x27;, n_jobs=-1, refit=True)</span>
+<span>search.fit(Xtr, ytr)</span>
+<span>proba = search.predict_proba(Xho)[:,1]</span>
+<span>roc = roc_auc_score(yho, proba); ap = average_precision_score(yho, proba)</span>
+<span>prec, rec, th = precision_recall_curve(yho, proba); th = np.r_[0.0, th]</span>
+<span>f1s = 2*prec*rec/(prec+rec+1e-12); i = np.nanargmax(f1s)</span>
+<span>th_star, f1_star = float(th[i]), float(f1s[i])</span>
+<span>meta = {&#x27;threshold&#x27;: th_star, &#x27;params&#x27;: search.best_params_, &#x27;metric&#x27;: {&#x27;roc_auc&#x27;: float(roc), &#x27;ap&#x27;: float(ap)}}</span>
+<span>artifact_dir = Path(&#x27;artifacts/day45&#x27;)</span>
+<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
+<span>joblib.dump(search, artifact_dir / &#x27;model_search.joblib&#x27;)</span>
+<span>with (artifact_dir / &#x27;model_meta.json&#x27;).open(&#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as stream:</span>
+<span>    json.dump(meta, stream)</span>
+<span>{&#x27;cv_best_params&#x27;: search.best_params_, &#x27;holdout_roc_auc&#x27;: float(roc), &#x27;holdout_ap&#x27;: float(ap), &#x27;best_threshold&#x27;: th_star, &#x27;best_f1&#x27;: f1_star}</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--minimal-fastapi-app-app-py">Minimal FastAPI app (app.py)<a class="heading-anchor" href="#solution-2--cell-3--minimal-fastapi-app-app-py" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>app_source = &#x27;&#x27;&#x27;\</span>
+<span>from pathlib import Path</span>
+<span>import json</span>
+<span>import joblib</span>
+<span>import numpy as np</span>
+<span>from fastapi import FastAPI, HTTPException</span>
+<span>from pydantic import BaseModel</span>
+<span> </span>
+<span>ARTIFACT_DIR = Path(__file__).resolve().parent</span>
+<span>app = FastAPI()</span>
+<span>search = joblib.load(ARTIFACT_DIR / &#x27;model_search.joblib&#x27;)</span>
+<span>with (ARTIFACT_DIR / &#x27;model_meta.json&#x27;).open(encoding=&#x27;utf-8&#x27;) as stream:</span>
+<span>    meta = json.load(stream)</span>
+<span> </span>
+<span>class Features(BaseModel):</span>
+<span>    x: list[float]</span>
+<span> </span>
+<span>@app.post(&#x27;/predict&#x27;)</span>
+<span>def predict(req: Features):</span>
+<span>    try:</span>
+<span>        X = np.array([req.x], dtype=float)</span>
+<span>        proba = float(search.predict_proba(X)[:,1][0])</span>
+<span>        label = int(proba &gt;= meta[&#x27;threshold&#x27;])</span>
+<span>        return {&#x27;proba&#x27;: proba, &#x27;label&#x27;: label, &#x27;threshold&#x27;: meta[&#x27;threshold&#x27;]}</span>
+<span>    except (TypeError, ValueError) as exc:</span>
+<span>        raise HTTPException(status_code=400, detail=str(exc)) from exc</span>
+<span>&#x27;&#x27;&#x27;</span>
+<span>app_path = artifact_dir / &#x27;app.py&#x27;</span>
+<span>app_path.write_text(app_source, encoding=&#x27;utf-8&#x27;)</span>
+<span>f&#x27;Wrote {app_path}&#x27;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><hr>
+<h4 id="solution-2--cell-5--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-5--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-2--cell-5--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Load the dataset and create train/validation/test boundaries.</p>
+<p><strong>How to reason about it:</strong> Write the row unit, target, prediction time, and train/validation/test boundary before loading features. A stratified random split is valid only when entities and time do not require stronger separation.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-5--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Preprocess with <code>ColumnTransformer</code>.</p>
+<p><strong>How to reason about it:</strong> Use ColumnTransformer to keep all learned preprocessing inside the pipeline. Test missing, unseen-category, dtype, and column-order behavior with tiny synthetic rows.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-5--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Train a baseline model.</p>
+<p><strong>How to reason about it:</strong> A baseline establishes the minimum useful comparison and catches broken evaluation. Include a dummy predictor and one simple model before tuning.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-5--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Evaluate with appropriate metrics and cross-validation.</p>
+<p><strong>How to reason about it:</strong> Cross-validation belongs only to development data. Report fold spread, choose metrics before results, and reserve the holdout for one frozen candidate and threshold.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-5--exercise-5-original-lesson-practice">Exercise 5 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Save the model and preprocessing together with <code>joblib</code>.</p>
+<p><strong>How to reason about it:</strong> Serialize preprocessing and model together, under an ignored artifacts path. Record dependency/model/schema versions and validate reload parity in a fresh process.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-5--exercise-6-original-lesson-practice">Exercise 6 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-6-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.</p>
+<p><strong>How to reason about it:</strong> The README-style handoff must state exact commands, data origin, metric definitions, limitations, and output locations. A narrative without reproduction evidence is incomplete.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-5--exercise-7-original-lesson-practice">Exercise 7 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-7-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Optionally adapt the Day 44 FastAPI service.</p>
+<p><strong>How to reason about it:</strong> Serving is optional and should reuse the saved pipeline and schema rather than rebuilding preprocessing. Test the API boundary before adding network or container complexity.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-5--exercise-8-data-contract-gate">Exercise 8 — Data-contract gate<a class="heading-anchor" href="#solution-2--cell-5--exercise-8-data-contract-gate" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint.</p>
+<p><strong>Reasoning before implementation:</strong> Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.</p>
+<p>The checks should fail with actionable field names and counts. Preserve the raw input, then create a validated copy for modeling. A row fingerprint must be stable across operating systems; canonicalize column order and serialization or hash the original immutable file.</p>
+<p>Record what was excluded and why. Quietly dropping invalid rows changes the training population and can make later metrics impossible to reproduce.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-5--exercise-9-leakage-audit">Exercise 9 — Leakage audit<a class="heading-anchor" href="#solution-2--cell-5--exercise-9-leakage-audit" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field.</p>
+<p><strong>Reasoning before implementation:</strong> Ask whether the value exists at prediction time and whether it was computed using future rows or target information.</p>
+<p>Remove or quarantine post-outcome fields before model comparison, then show how metrics change. A dramatic decrease is evidence the earlier result was not deployable, not evidence that the corrected pipeline became worse.</p>
+<p>Version the audit beside the model. Feature names alone are insufficient: rolling aggregates and target encoders can leak through their time window or fit scope even when the raw field is available.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-5--exercise-10-baseline-ladder">Exercise 10 — Baseline ladder<a class="heading-anchor" href="#solution-2--cell-5--exercise-10-baseline-ladder" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results.</p>
+<p><strong>Reasoning before implementation:</strong> Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.</p>
+<p>Keep preprocessing comparable and report mean, spread, and per-fold deltas. The dummy baseline validates class prevalence and metric direction. The simple baseline tests whether added complexity earns its maintenance cost.</p>
+<p>If the selected candidate misses the predeclared improvement, document that finding rather than optimizing the acceptance criterion after the fact.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-5--exercise-11-operating-policy-selection">Exercise 11 — Operating-policy selection<a class="heading-anchor" href="#solution-2--cell-5--exercise-11-operating-policy-selection" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it.</p>
+<p><strong>Reasoning before implementation:</strong> Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.</p>
+<p>The best threshold is conditional on prevalence, costs, and capacity. Save it as model metadata rather than hard-coding <code>0.5</code> in serving code. On the final holdout, report performance at the frozen threshold without reopening the selection.</p>
+<p>Include sensitivity scenarios because costs and prevalence are estimates. Ranking metrics alone cannot define the operating point.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-5--exercise-12-error-slice-analysis">Exercise 12 — Error-slice analysis<a class="heading-anchor" href="#solution-2--cell-5--exercise-12-error-slice-analysis" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values.</p>
+<p><strong>Reasoning before implementation:</strong> Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.</p>
+<p>Use stable row IDs and redacted fields for case review. Report denominators, confidence intervals or bootstrap ranges, and missing-label coverage. A slice with two examples cannot sustain a broad fairness claim.</p>
+<p>New features or threshold changes prompted by test errors return the project to development and require a new untouched evaluation set.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-5--exercise-13-artifact-manifest">Exercise 13 — Artifact manifest<a class="heading-anchor" href="#solution-2--cell-5--exercise-13-artifact-manifest" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes.</p>
+<p><strong>Reasoning before implementation:</strong> JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.</p>
+<p>Use atomic writes where practical and fail if an existing version would be overwritten. Compute the artifact hash after serialization, then validate it before loading. Keep secrets and absolute developer paths out of metadata.</p>
+<p>The manifest makes the artifact reviewable but does not make pickle safe from untrusted sources. Provenance and access control remain required.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-5--exercise-14-fresh-process-acceptance">Exercise 14 — Fresh-process acceptance<a class="heading-anchor" href="#solution-2--cell-5--exercise-14-fresh-process-acceptance" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance.</p>
+<p><strong>Reasoning before implementation:</strong> Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.</p>
+<p>Run the smoke test from the repository root on both the documented Windows and POSIX commands. Assert response shape, finite probabilities, class mapping, threshold behavior, and model/schema version.</p>
+<p>Reload parity catches missing custom classes, accidental preprocessing outside the pipeline, path assumptions, and serialization drift. Delete and rebuild the ignored test artifact to prove the workflow—not a stale file—creates it.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-44.html"><small>Previous lesson</small><strong>python-44</strong><span>Model Deployment FastAPI</span></a>
+        <a class="nav-card next" href="python-46.html"><small>Next lesson</small><strong>python-46</strong><span>Deep Learning Overview</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-45";
+    const LEARNER_PATH = "python/ds-60day/notebooks/day45_end_to_end_modeling_project.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>bridge-01 · Config Logging CLI · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">bridge · lesson bridge-01</p>
+        <h1>Config Logging CLI</h1>
+        <p class="hero-copy">Python and PostgreSQL engineering</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">105 minutes</span>
+          <span class="tag">bridge setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-15.html">python-15</a> <a class="tag" href="sql-15.html">sql-15</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/lessons/day01_config_logging_cli.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="bridge/lessons/day01_config_logging_cli.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>bridge/companion-guides/day01_config_logging_cli.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/companion-guides/day01_config_logging_cli.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--bridge-day-1-configuration-logging-and-typed-cli-boundaries">Bridge Day 1 — Configuration, logging, and typed CLI boundaries<a class="heading-anchor" href="#guide--bridge-day-1-configuration-logging-and-typed-cli-boundaries" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Intermediate <strong>Prerequisites:</strong> <a href="python-15.html#guide">Python Day 15</a> and <a href="sql-15.html#guide">SQL Day 15</a></p>
+<h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
+<p>Database programs fail early when configuration is ambiguous and fail dangerously when diagnostics reveal credentials. Today you will build one boundary that turns untrusted command-line strings and environment variables into a small, validated <code>Settings</code> object. Code inside the application can then rely on that object instead of repeatedly reading global process state.</p>
+<h4 id="guide--objectives">Objectives<a class="heading-anchor" href="#guide--objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, you can:</p>
+<ul>
+<li>define a typed configuration object with explicit optional fields;</li>
+<li>apply and test CLI-over-environment precedence;</li>
+<li>reject invalid log levels at the boundary;</li>
+<li>log a useful database label without revealing a password or query parameter;</li>
+<li>make CLI parsing testable without modifying <code>sys.argv</code>.</li>
+</ul>
+<h4 id="guide--vocabulary">Vocabulary<a class="heading-anchor" href="#guide--vocabulary" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>configuration boundary</td>
+<td>The small part of a program that converts external strings into validated internal values</td>
+</tr>
+<tr>
+<td>environment variable</td>
+<td>A named string supplied to a process by its operating system or shell</td>
+</tr>
+<tr>
+<td>precedence</td>
+<td>The documented rule for choosing between multiple configuration sources</td>
+</tr>
+<tr>
+<td>redaction</td>
+<td>Replacing sensitive content with a safe marker</td>
+</tr>
+<tr>
+<td>immutable</td>
+<td>An object whose fields cannot be reassigned after creation</td>
+</tr>
+<tr>
+<td>exit code</td>
+<td>An integer a program returns to its caller; zero conventionally means success</td>
+</tr>
+</tbody></table></div>
+<h4 id="guide--run-the-starter">Run the starter<a class="heading-anchor" href="#guide--run-the-starter" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+.\.venv\Scripts\python.exe bridge\lessons\day01_config_logging_cli.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+.venv/bin/python bridge/lessons/day01_config_logging_cli.py</code></pre>
+<p>The starter deliberately does not call unfinished functions.</p>
+<h4 id="guide--worked-example-validate-once">Worked example: validate once<a class="heading-anchor" href="#guide--worked-example-validate-once" aria-label="Link to this section">#</a></h4>
+<p>This smaller example shows the boundary pattern without solving the database configuration exercise:</p>
+<pre><code class="language-python">from collections.abc import Mapping
+
+
+def load_port(environ: Mapping[str, str]) -&gt; int:
+    raw = environ.get(&quot;APP_PORT&quot;, &quot;8000&quot;)
+    port = int(raw)
+    if not 1 &lt;= port &lt;= 65535:
+        raise ValueError(&quot;APP_PORT must be between 1 and 65535&quot;)
+    return port</code></pre>
+<p>Notice that the function accepts a <code>Mapping</code>, not <code>os.environ</code> directly. A test can pass a normal dictionary, and all callers receive an <code>int</code> or an exception.</p>
+<p>For this course, use these settings:</p>
+<ul>
+<li><code>DS60_DATABASE_URL</code>: optional until a live database step;</li>
+<li><code>DS60_LOG_LEVEL</code>: defaults to <code>INFO</code>;</li>
+<li>explicit CLI values override their environment equivalents;</li>
+<li><code>--dry-run</code> defaults to false and must never be inferred from a non-empty string such as <code>&quot;false&quot;</code>.</li>
+</ul>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Focus:</strong> Build one typed configuration boundary that combines environment and CLI input without leaking connection credentials.</li>
+<li><strong>Assumptions:</strong> CLI values override environment values; a missing database URL remains <code>None</code>; log levels are normalized to the five declared values.</li>
+<li><strong>Primary failure mode:</strong> Configuration objects and exception text can expose passwords just as easily as an explicit print statement.</li>
+<li><strong>Evidence loop:</strong> predict the boundary, implement the smallest change, verify success and failure with a deterministic fake, then explain which behavior still requires an explicitly enabled PostgreSQL integration test.</li>
+</ul>
+<ol>
+<li><strong>Implementation:</strong> Implement <code>load_settings()</code> with CLI-over-environment precedence, uppercase log-level normalization, and <code>None</code> for a missing URL.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Resolve each source once, then validate the final selected value at the boundary.</li>
+</ul>
+<ol>
+<li><strong>Security:</strong> Implement <code>redact_database_url()</code> so diagnostics retain scheme, user, host, port, and database but remove password, query, and fragment.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Parsing components is safer than replacing substrings in an opaque secret.</li>
+</ul>
+<ol>
+<li><strong>Implementation:</strong> Implement <code>build_parser()</code> with <code>--database-url</code>, <code>--log-level</code>, and <code>--dry-run</code> without reading global process state during parser construction.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Parser construction and argument parsing are separate responsibilities.</li>
+</ul>
+<ol>
+<li><strong>Integration:</strong> Implement <code>main(argv)</code> so it parses the supplied sequence, loads settings, configures logging, and emits only a safe summary.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> A testable CLI accepts an argument sequence instead of rewriting <code>sys.argv</code>.</li>
+</ul>
+<ol>
+<li><strong>Testing:</strong> Create a table-driven test matrix for defaults, CLI precedence, mixed-case levels, invalid levels, malformed URLs, credentials, and a missing URL.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Include both successful values and exact failure types; assert secrets are absent from all diagnostics.</li>
+</ul>
+<ol>
+<li><strong>Prediction:</strong> Predict the result when the environment says <code>WARNING</code>, the CLI supplies <code>debug</code>, <code>dry_run=True</code>, and no database URL exists; then verify it.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Apply precedence independently per setting rather than treating one source as an all-or-nothing bundle.</li>
+</ul>
+<ol>
+<li><strong>Debugging:</strong> Repair a redactor that catches parse errors but returns <code>f&#x27;invalid: {database_url}&#x27;</code> and explain why the exception path is still a leak.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Failure messages are an output boundary and need the same secrecy rule as normal logs.</li>
+</ul>
+<ol>
+<li><strong>Design:</strong> Add configuration provenance such as <code>cli</code>, <code>environment</code>, or <code>default</code> without storing or logging the selected secret value twice.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Metadata about a source can be safe even when the source value is not.</li>
+</ul>
+<ol>
+<li><strong>Security testing:</strong> Use a recording logger or <code>caplog</code> to prove that startup, success, and validation-failure paths contain no password, query token, or full URL.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Test the emitted boundary, not only the return value of the redaction helper.</li>
+</ul>
+<ol>
+<li><strong>Portability:</strong> Write equivalent Windows PowerShell and POSIX invocations that set environment values outside Python and pass CLI overrides through <code>argv</code>; identify what remains platform-neutral.</li>
+</ol>
+<ul>
+<li><strong>Progressive hint:</strong> Environment-setting syntax differs, but <code>argparse</code>, <code>Mapping</code>, and the Python entry point do not.</li>
+</ul>
+<h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
+<ul>
+<li>State the input/output and ownership boundary in one sentence.</li>
+<li>Show one normal case, one edge case, and one failure case.</li>
+<li>Inspect recorded calls rather than relying on plausible output.</li>
+<li>Confirm no credential, payload, or high-cardinality identifier was emitted.</li>
+</ul>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Does <code>load_settings({&quot;DS60_LOG_LEVEL&quot;: &quot;warning&quot;})</code> produce <code>WARNING</code>?</li>
+<li>Can a CLI value override the environment without mutating the mapping?</li>
+<li>Does any diagnostic output contain a password or <code>sslmode</code> query parameter?</li>
+<li>Does an invalid log level fail before any database connection is attempted?</li>
+<li>Can your tests run without setting real environment variables?</li>
+</ul>
+<p>Expected behavior: every accepted setting has a precise internal type, invalid levels raise a useful error, and redacted output contains no secret substring.</p>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Using <code>bool(raw_string)</code>:</strong> <code>bool(&quot;false&quot;)</code> is <code>True</code>. Let the CLI action create a Boolean.</li>
+<li><strong>Logging <code>settings</code>:</strong> dataclass representations include every field unless you deliberately exclude or redact it.</li>
+<li><strong>Silently accepting typos:</strong> treating <code>INF0</code> as <code>INFO</code> hides operator error.</li>
+<li><strong>Reading <code>os.environ</code> everywhere:</strong> global reads create order-dependent tests and unclear precedence.</li>
+<li><strong>Treating an absent URL as a startup error:</strong> offline exercises do not need a database; validate that requirement only at the live-DB boundary.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="bridge-02.html#guide">Day 2</a>, where Protocols and context managers isolate concrete database resources. After attempting the exercises, compare reasoning in <a href="bridge-01.html#solution-1">the Day 1 solution notes</a>.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/lessons/day01_config_logging_cli.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/lessons/day01_config_logging_cli.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Bridge Day 1: configuration, safe logging, and a typed CLI boundary.</span>
+<span> </span>
+<span>Prerequisites: Python Day 15 and SQL Day 15.</span>
+<span>Read ``bridge/companion-guides/day01_config_logging_cli.md`` before starting.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import argparse</span>
+<span>from collections.abc import Mapping, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from typing import Literal</span>
+<span> </span>
+<span>LESSON_ID = &quot;bridge-01&quot;</span>
+<span>PREREQUISITES = (&quot;python-15&quot;, &quot;sql-15&quot;)</span>
+<span>LEVEL = &quot;intermediate&quot;</span>
+<span> </span>
+<span>LogLevel = Literal[&quot;DEBUG&quot;, &quot;INFO&quot;, &quot;WARNING&quot;, &quot;ERROR&quot;, &quot;CRITICAL&quot;]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Settings:</span>
+<span>    database_url: str | None</span>
+<span>    log_level: LogLevel</span>
+<span>    dry_run: bool</span>
+<span> </span>
+<span> </span>
+<span>def load_settings(</span>
+<span>    environ: Mapping[str, str],</span>
+<span>    *,</span>
+<span>    database_url: str | None = None,</span>
+<span>    log_level: str | None = None,</span>
+<span>    dry_run: bool = False,</span>
+<span>) -&gt; Settings:</span>
+<span>    &quot;&quot;&quot;Core implementation: validate settings with CLI values taking precedence.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;load and validate the application settings&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def redact_database_url(database_url: str | None) -&gt; str:</span>
+<span>    &quot;&quot;&quot;Core implementation: return a diagnostic label that never exposes credentials.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;redact the connection string&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def build_parser() -&gt; argparse.ArgumentParser:</span>
+<span>    &quot;&quot;&quot;Core implementation: add database, log-level, and dry-run options.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;build the command-line parser&quot;)</span>
+<span> </span>
+<span> </span>
+<span># Exercises (answer-free)</span>
+<span># Focus: Build one typed configuration boundary that combines environment and CLI input without</span>
+<span>#    leaking connection credentials.</span>
+<span># Assumptions: CLI values override environment values; a missing database URL remains `None`;</span>
+<span>#    log levels are normalized to the five declared values.</span>
+<span># Failure to watch for: Configuration objects and exception text can expose passwords just as</span>
+<span>#    easily as an explicit print statement.</span>
+<span># Work in order: predict -&gt; implement -&gt; test -&gt; debug -&gt; extend. Keep official</span>
+<span># answers out of this starter and collect deterministic fake-backed evidence.</span>
+<span># 1. [Implementation] Implement `load_settings()` with CLI-over-environment precedence,</span>
+<span>#    uppercase log-level normalization, and `None` for a missing URL.</span>
+<span>#    Hint: Resolve each source once, then validate the final selected value at the boundary.</span>
+<span># 2. [Security] Implement `redact_database_url()` so diagnostics retain scheme, user, host,</span>
+<span>#    port, and database but remove password, query, and fragment.</span>
+<span>#    Hint: Parsing components is safer than replacing substrings in an opaque secret.</span>
+<span># 3. [Implementation] Implement `build_parser()` with `--database-url`, `--log-level`, and</span>
+<span>#    `--dry-run` without reading global process state during parser construction.</span>
+<span>#    Hint: Parser construction and argument parsing are separate responsibilities.</span>
+<span># 4. [Integration] Implement `main(argv)` so it parses the supplied sequence, loads settings,</span>
+<span>#    configures logging, and emits only a safe summary.</span>
+<span>#    Hint: A testable CLI accepts an argument sequence instead of rewriting `sys.argv`.</span>
+<span># 5. [Testing] Create a table-driven test matrix for defaults, CLI precedence, mixed-case</span>
+<span>#    levels, invalid levels, malformed URLs, credentials, and a missing URL.</span>
+<span>#    Hint: Include both successful values and exact failure types; assert secrets are absent</span>
+<span>#    from all diagnostics.</span>
+<span># 6. [Prediction] Predict the result when the environment says `WARNING`, the CLI supplies</span>
+<span>#    `debug`, `dry_run=True`, and no database URL exists; then verify it.</span>
+<span>#    Hint: Apply precedence independently per setting rather than treating one source as an</span>
+<span>#    all-or-nothing bundle.</span>
+<span># 7. [Debugging] Repair a redactor that catches parse errors but returns `f&#x27;invalid:</span>
+<span>#    {database_url}&#x27;` and explain why the exception path is still a leak.</span>
+<span>#    Hint: Failure messages are an output boundary and need the same secrecy rule as normal</span>
+<span>#    logs.</span>
+<span># 8. [Design] Add configuration provenance such as `cli`, `environment`, or `default` without</span>
+<span>#    storing or logging the selected secret value twice.</span>
+<span>#    Hint: Metadata about a source can be safe even when the source value is not.</span>
+<span># 9. [Security testing] Use a recording logger or `caplog` to prove that startup, success, and</span>
+<span>#    validation-failure paths contain no password, query token, or full URL.</span>
+<span>#    Hint: Test the emitted boundary, not only the return value of the redaction helper.</span>
+<span># 10. [Portability] Write equivalent Windows PowerShell and POSIX invocations that set</span>
+<span>#    environment values outside Python and pass CLI overrides through `argv`; identify what</span>
+<span>#    remains platform-neutral.</span>
+<span>#    Hint: Environment-setting syntax differs, but `argparse`, `Mapping`, and the Python entry</span>
+<span>#    point do not.</span>
+<span> </span>
+<span> </span>
+<span>def main(argv: Sequence[str] | None = None) -&gt; int:</span>
+<span>    &quot;&quot;&quot;Keep unfinished exercises out of the default execution path.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    del argv</span>
+<span>    print(&quot;Bridge Day 1 starter loaded.&quot;)</span>
+<span>    print(&quot;Complete load_settings(), redact_database_url(), and build_parser().&quot;)</span>
+<span>    print(&quot;Then add tests for precedence, validation, and secret redaction.&quot;)</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>bridge/solutions/day01_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day01_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--bridge-day-1-solution-notes">Bridge Day 1 — Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-1-solution-notes" aria-label="Link to this section">#</a></h3>
+<p>Use these notes after attempting the <a href="bridge-01.html#learner">learner file</a>. The executable reference is <a href="bridge-01.html#solution-2">day01_solution.py</a>.</p>
+<h4 id="solution-1--design">Design<a class="heading-anchor" href="#solution-1--design" aria-label="Link to this section">#</a></h4>
+<p>The reference turns external strings into one frozen <code>Settings</code> object. It accepts an environment <code>Mapping</code> and explicit keyword values, so precedence is visible and tests need not patch process-global state. <code>parse_log_level()</code> owns normalization and validation.</p>
+<p>The command-line parser is created by a function, and <code>main()</code> accepts an argument sequence. That makes the same boundary usable from a real process and a test.</p>
+<h4 id="solution-1--why-redaction-is-separate">Why redaction is separate<a class="heading-anchor" href="#solution-1--why-redaction-is-separate" aria-label="Link to this section">#</a></h4>
+<p>The full database URL is needed for connection but must not flow into logs. <code>redact_database_url()</code> uses URL components and removes the password, query, and fragment. Malformed and non-URL forms get a generic marker rather than a best effort echo. <code>settings_summary()</code> is an explicit allowlist of safe fields.</p>
+<h4 id="solution-1--tradeoffs">Tradeoffs<a class="heading-anchor" href="#solution-1--tradeoffs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A frozen dataclass is simple and dependency-free. A larger application might use a configuration library for nested settings and richer error reporting.</li>
+<li>The URL redactor targets the documented URL form. Libpq keyword/value DSNs receive a generic marker; correctly parsing and safely re-rendering them belongs in a driver-aware utility.</li>
+<li>Missing <code>DS60_DATABASE_URL</code> is allowed because the course runs offline. A live adapter should reject <code>None</code> at the point it opens a connection.</li>
+<li><code>logging.basicConfig()</code> is adequate for one CLI. A library should not configure global logging on import.</li>
+</ul>
+<h4 id="solution-1--edge-cases-worth-testing">Edge cases worth testing<a class="heading-anchor" href="#solution-1--edge-cases-worth-testing" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>whitespace and mixed-case log levels;</li>
+<li>URL-encoded usernames and IPv6 hosts;</li>
+<li>malformed ports;</li>
+<li>passwords and query parameters containing recognizable secret text;</li>
+<li>no database URL;</li>
+<li>CLI values overriding environment values.</li>
+</ul>
+<p>The important invariant is not the exact redacted string. It is that no secret substring can appear and malformed input is never reflected into output.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day01_solution.py</code>; use it only after an honest attempt.</p>
+<p><strong>Shared failure rule:</strong> Configuration objects and exception text can expose passwords just as easily as an explicit print statement.</p>
+<h5 id="solution-1--exercise-1-implementation">Exercise 1 — Implementation<a class="heading-anchor" href="#solution-1--exercise-1-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>load_settings()</code> with CLI-over-environment precedence, uppercase log-level normalization, and <code>None</code> for a missing URL.</p>
+<p><strong>Approach:</strong> Select the explicit argument when it is not <code>None</code>, otherwise read the matching environment key. Pass the chosen level through one normalizer and construct the frozen <code>Settings</code>; do not invent a placeholder URL.</p>
+<p><strong>Why this boundary matters:</strong> Resolve each source once, then validate the final selected value at the boundary.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-2-security">Exercise 2 — Security<a class="heading-anchor" href="#solution-1--exercise-2-security" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>redact_database_url()</code> so diagnostics retain scheme, user, host, port, and database but remove password, query, and fragment.</p>
+<p><strong>Approach:</strong> Use <code>urlsplit</code>, rebuild only approved components, replace any password with <code>***</code>, and omit query and fragment entirely. Malformed or non-URL input returns a fixed marker that contains none of the original text.</p>
+<p><strong>Why this boundary matters:</strong> Parsing components is safer than replacing substrings in an opaque secret.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-3-implementation">Exercise 3 — Implementation<a class="heading-anchor" href="#solution-1--exercise-3-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>build_parser()</code> with <code>--database-url</code>, <code>--log-level</code>, and <code>--dry-run</code> without reading global process state during parser construction.</p>
+<p><strong>Approach:</strong> Create an <code>ArgumentParser</code>, register three options, and return it. Keep defaults neutral so <code>load_settings()</code> can apply environment fallback after parsing.</p>
+<p><strong>Why this boundary matters:</strong> Parser construction and argument parsing are separate responsibilities.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-4-integration">Exercise 4 — Integration<a class="heading-anchor" href="#solution-1--exercise-4-integration" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>main(argv)</code> so it parses the supplied sequence, loads settings, configures logging, and emits only a safe summary.</p>
+<p><strong>Approach:</strong> Call <code>parse_args(argv)</code>, pass parsed values into <code>load_settings</code>, configure the selected level, and log a summary produced from redacted fields. Return a status code and never log <code>Settings</code> directly.</p>
+<p><strong>Why this boundary matters:</strong> A testable CLI accepts an argument sequence instead of rewriting <code>sys.argv</code>.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-5-testing">Exercise 5 — Testing<a class="heading-anchor" href="#solution-1--exercise-5-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Create a table-driven test matrix for defaults, CLI precedence, mixed-case levels, invalid levels, malformed URLs, credentials, and a missing URL.</p>
+<p><strong>Approach:</strong> Parameterize environment/CLI combinations and expected <code>Settings</code> or <code>ValueError</code>. For URL cases, assert the permitted label and separately assert that password, query, fragment, and malformed input never appear.</p>
+<p><strong>Why this boundary matters:</strong> Include both successful values and exact failure types; assert secrets are absent from all diagnostics.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-6-prediction">Exercise 6 — Prediction<a class="heading-anchor" href="#solution-1--exercise-6-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict the result when the environment says <code>WARNING</code>, the CLI supplies <code>debug</code>, <code>dry_run=True</code>, and no database URL exists; then verify it.</p>
+<p><strong>Approach:</strong> The result is <code>database_url=None</code>, <code>log_level=&#x27;DEBUG&#x27;</code>, and <code>dry_run=True</code>: the explicit level overrides only its environment counterpart, while the absent URL stays absent.</p>
+<p><strong>Why this boundary matters:</strong> Apply precedence independently per setting rather than treating one source as an all-or-nothing bundle.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-7-debugging">Exercise 7 — Debugging<a class="heading-anchor" href="#solution-1--exercise-7-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Repair a redactor that catches parse errors but returns <code>f&#x27;invalid: {database_url}&#x27;</code> and explain why the exception path is still a leak.</p>
+<p><strong>Approach:</strong> Replace the echoing branch with a constant such as <code>&lt;invalid-database-url&gt;</code>. A parser failure does not make the original string safe; it may still contain a credential or token.</p>
+<p><strong>Why this boundary matters:</strong> Failure messages are an output boundary and need the same secrecy rule as normal logs.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-8-design">Exercise 8 — Design<a class="heading-anchor" href="#solution-1--exercise-8-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add configuration provenance such as <code>cli</code>, <code>environment</code>, or <code>default</code> without storing or logging the selected secret value twice.</p>
+<p><strong>Approach:</strong> Track a small enum or literal beside each resolved setting, and expose provenance only through the safe summary. Keep the URL in one field and redact at presentation time rather than copying it into provenance records.</p>
+<p><strong>Why this boundary matters:</strong> Metadata about a source can be safe even when the source value is not.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-9-security-testing">Exercise 9 — Security testing<a class="heading-anchor" href="#solution-1--exercise-9-security-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Use a recording logger or <code>caplog</code> to prove that startup, success, and validation-failure paths contain no password, query token, or full URL.</p>
+<p><strong>Approach:</strong> Run the CLI with sentinel secret fragments, capture every log record, join messages and exception text, and assert each sentinel is absent. Also assert a useful safe database label is present on success.</p>
+<p><strong>Why this boundary matters:</strong> Test the emitted boundary, not only the return value of the redaction helper.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<h5 id="solution-1--exercise-10-portability">Exercise 10 — Portability<a class="heading-anchor" href="#solution-1--exercise-10-portability" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write equivalent Windows PowerShell and POSIX invocations that set environment values outside Python and pass CLI overrides through <code>argv</code>; identify what remains platform-neutral.</p>
+<p><strong>Approach:</strong> Use <code>$env:NAME = ...</code> in PowerShell and <code>export NAME=...</code> in a POSIX shell, then invoke the same <code>python -m ... --log-level ...</code> arguments. The parser and precedence tests stay platform-neutral because they use injected mappings and sequences.</p>
+<p><strong>Why this boundary matters:</strong> Environment-setting syntax differs, but <code>argparse</code>, <code>Mapping</code>, and the Python entry point do not.</p>
+<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>bridge/solutions/day01_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="bridge/solutions/day01_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Day 1 reference: safe configuration, logging, and a typed CLI boundary.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import argparse</span>
+<span>import logging</span>
+<span>from collections.abc import Mapping, Sequence</span>
+<span>from dataclasses import dataclass</span>
+<span>from typing import Literal, cast</span>
+<span>from urllib.parse import quote, urlsplit, urlunsplit</span>
+<span> </span>
+<span>LogLevel = Literal[&quot;DEBUG&quot;, &quot;INFO&quot;, &quot;WARNING&quot;, &quot;ERROR&quot;, &quot;CRITICAL&quot;]</span>
+<span>_LOG_LEVELS: frozenset[str] = frozenset({&quot;DEBUG&quot;, &quot;INFO&quot;, &quot;WARNING&quot;, &quot;ERROR&quot;, &quot;CRITICAL&quot;})</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Settings:</span>
+<span>    &quot;&quot;&quot;Validated settings at the application boundary.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    database_url: str | None</span>
+<span>    log_level: LogLevel</span>
+<span>    dry_run: bool</span>
+<span> </span>
+<span> </span>
+<span>def parse_log_level(raw: str) -&gt; LogLevel:</span>
+<span>    &quot;&quot;&quot;Normalize and validate a user-provided logging level.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    normalized = raw.strip().upper()</span>
+<span>    if normalized not in _LOG_LEVELS:</span>
+<span>        choices = &quot;, &quot;.join(sorted(_LOG_LEVELS))</span>
+<span>        raise ValueError(f&quot;invalid log level {raw!r}; choose one of: {choices}&quot;)</span>
+<span>    return cast(LogLevel, normalized)</span>
+<span> </span>
+<span> </span>
+<span>def load_settings(</span>
+<span>    environ: Mapping[str, str],</span>
+<span>    *,</span>
+<span>    database_url: str | None = None,</span>
+<span>    log_level: str | None = None,</span>
+<span>    dry_run: bool = False,</span>
+<span>) -&gt; Settings:</span>
+<span>    &quot;&quot;&quot;Load settings with explicit CLI values taking precedence over the environment.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    selected_url = database_url if database_url is not None else environ.get(&quot;DS60_DATABASE_URL&quot;)</span>
+<span>    selected_level = log_level if log_level is not None else environ.get(&quot;DS60_LOG_LEVEL&quot;, &quot;INFO&quot;)</span>
+<span>    return Settings(</span>
+<span>        database_url=selected_url,</span>
+<span>        log_level=parse_log_level(selected_level),</span>
+<span>        dry_run=dry_run,</span>
+<span>    )</span>
+<span> </span>
+<span> </span>
+<span>def redact_database_url(database_url: str | None) -&gt; str:</span>
+<span>    &quot;&quot;&quot;Return a useful connection label without credentials or query parameters.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    if not database_url:</span>
+<span>        return &quot;&lt;not configured&gt;&quot;</span>
+<span>    if &quot;://&quot; not in database_url:</span>
+<span>        return &quot;&lt;redacted database URL&gt;&quot;</span>
+<span> </span>
+<span>    try:</span>
+<span>        parsed = urlsplit(database_url)</span>
+<span>        hostname = parsed.hostname</span>
+<span>        port = parsed.port</span>
+<span>    except ValueError:</span>
+<span>        return &quot;&lt;redacted database URL&gt;&quot;</span>
+<span> </span>
+<span>    if not parsed.scheme or not hostname:</span>
+<span>        return &quot;&lt;redacted database URL&gt;&quot;</span>
+<span> </span>
+<span>    host = f&quot;[{hostname}]&quot; if &quot;:&quot; in hostname else hostname</span>
+<span>    user = f&quot;{quote(parsed.username, safe=&#x27;&#x27;)}:***@&quot; if parsed.username else &quot;&quot;</span>
+<span>    port_text = f&quot;:{port}&quot; if port is not None else &quot;&quot;</span>
+<span>    return urlunsplit((parsed.scheme, f&quot;{user}{host}{port_text}&quot;, parsed.path, &quot;&quot;, &quot;&quot;))</span>
+<span> </span>
+<span> </span>
+<span>def configure_logging(level: LogLevel) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Configure one concise process-wide log format.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    logging.basicConfig(</span>
+<span>        level=getattr(logging, level),</span>
+<span>        format=&quot;%(asctime)s %(levelname)s %(name)s %(message)s&quot;,</span>
+<span>    )</span>
+<span> </span>
+<span> </span>
+<span>def settings_summary(settings: Settings) -&gt; dict[str, str | bool]:</span>
+<span>    &quot;&quot;&quot;Build a log-safe diagnostic summary.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    return {</span>
+<span>        &quot;database&quot;: redact_database_url(settings.database_url),</span>
+<span>        &quot;log_level&quot;: settings.log_level,</span>
+<span>        &quot;dry_run&quot;: settings.dry_run,</span>
+<span>    }</span>
+<span> </span>
+<span> </span>
+<span>def build_parser() -&gt; argparse.ArgumentParser:</span>
+<span>    &quot;&quot;&quot;Create the CLI parser without reading global process state.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    parser = argparse.ArgumentParser(description=&quot;Inspect bridge configuration safely.&quot;)</span>
+<span>    parser.add_argument(&quot;--database-url&quot;, help=&quot;Overrides DS60_DATABASE_URL for this run.&quot;)</span>
+<span>    parser.add_argument(&quot;--log-level&quot;, help=&quot;Overrides DS60_LOG_LEVEL.&quot;)</span>
+<span>    parser.add_argument(&quot;--dry-run&quot;, action=&quot;store_true&quot;, help=&quot;Do not perform writes.&quot;)</span>
+<span>    return parser</span>
+<span> </span>
+<span> </span>
+<span>def main(argv: Sequence[str] | None = None) -&gt; int:</span>
+<span>    &quot;&quot;&quot;Parse the CLI, validate configuration, and report only safe fields.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    import os</span>
+<span> </span>
+<span>    args = build_parser().parse_args(argv)</span>
+<span>    try:</span>
+<span>        settings = load_settings(</span>
+<span>            os.environ,</span>
+<span>            database_url=args.database_url,</span>
+<span>            log_level=args.log_level,</span>
+<span>            dry_run=args.dry_run,</span>
+<span>        )</span>
+<span>    except ValueError as exc:</span>
+<span>        build_parser().error(str(exc))</span>
+<span> </span>
+<span>    configure_logging(settings.log_level)</span>
+<span>    logging.getLogger(__name__).info(&quot;configuration=%s&quot;, settings_summary(settings))</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-temporal-01.html"><small>Previous lesson</small><strong>sql-temporal-01</strong><span>Temporal and Domain Modelling</span></a>
+        <a class="nav-card next" href="bridge-02.html"><small>Next lesson</small><strong>bridge-02</strong><span>Protocols Context Decorators</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "bridge-01";
+    const LEARNER_PATH = "bridge/lessons/day01_config_logging_cli.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-29 · Pattern Matching · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-29</p>
+        <h1>Pattern Matching</h1>
+        <p class="hero-copy">Windows, CTEs, and advanced querying</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">90 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-28.html">sql-28</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day29_pattern_matching.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day29_pattern_matching.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day29_pattern_matching.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-29-pattern-matching-like-ilike-similar-to-and-regular-expressions-companion-guide">Day 29 — Pattern Matching: LIKE/ILIKE, SIMILAR TO, and Regular Expressions (Companion Guide)<a class="heading-anchor" href="#guide--day-29-pattern-matching-like-ilike-similar-to-and-regular-expressions-companion-guide" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Intermediate</li>
+<li><strong>Prerequisites:</strong> <a href="sql-28.html#guide">Day 28 — JSONB and XML</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-29.html#learner">learner SQL</a> · <a href="sql-29.html#solution-1">solution reasoning</a> · <a href="sql-29.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Select the simplest matching operator that expresses a search or validation.</li>
+<li>Anchor validation patterns and reason about index support.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Wildcard:</strong> <code>%</code> or <code>_</code> in a <code>LIKE</code> pattern.</li>
+<li><strong>Anchor:</strong> <code>^</code> or <code>$</code>, which binds a regular expression to a string boundary.</li>
+<li><strong>Sargable predicate:</strong> a search condition an index can support directly.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Compare <code>email ~ &#x27;customer1[0-9]{2}&#x27;</code> with the anchored <code>email ~ &#x27;^customer1[0-9]{2}@example\\.com$&#x27;</code>. Add surrounding text to a test value and show why an unanchored validation can accept only a matching substring.</p>
+<h4 id="guide--practice-assumptions-and-review-method">Practice assumptions and review method<a class="heading-anchor" href="#guide--practice-assumptions-and-review-method" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Focus:</strong> Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.</li>
+<li><strong>Assumptions:</strong> PostgreSQL <code>LIKE</code> is case-sensitive, <code>ILIKE</code> is case-insensitive, and POSIX regex operators use <code>~</code>/<code>~*</code>. Collation can affect text behavior.</li>
+<li><strong>Failure to watch for:</strong> Leading wildcards can prevent ordinary b-tree use; unanchored or overly broad regex patterns can match more text than intended.</li>
+<li><strong>Review loop:</strong> predict the row grain and NULL/order behavior, run the query, inspect a bounded sample, and reconcile counts or totals before accepting the result.</li>
+</ul>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.</p>
+<p>Attempt each prompt in a scratch SQL file before opening the solution. For every result, write its row grain and expected shape first.</p>
+<ol>
+<li><strong>Query writing:</strong> Find customer names beginning with <code>Customer 1</code> case-insensitively. <strong>Progressive hint:</strong> <code>ILIKE &#x27;Customer 1%&#x27;</code> uses <code>%</code> for any suffix. <strong>Expected shape:</strong> Matching customer rows in stable ID order.</li>
+<li><strong>Query writing:</strong> Find emails that match the course&#x27;s simple lowercase example.com pattern. <strong>Progressive hint:</strong> Anchor both ends and escape the literal dot in the POSIX regex. <strong>Expected shape:</strong> Only matching non-null email rows.</li>
+<li><strong>Query writing:</strong> Return event paths under <code>/p/</code> using JSON extraction and an anchored pattern. <strong>Progressive hint:</strong> Extract path text, then anchor the literal prefix. <strong>Expected shape:</strong> Events whose path begins <code>/p/</code>.</li>
+<li><strong>Prediction:</strong> Match literal percent and underscore characters in sample text and contrast them with wildcard behavior. <strong>Progressive hint:</strong> Declare an escape character and prefix each literal wildcard. <strong>Expected shape:</strong> Only the two rows containing the requested literal symbols.</li>
+<li><strong>Debugging:</strong> Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly. <strong>Progressive hint:</strong> First assert the anchored grammar, then use <code>substring(... FROM regex)</code>. <strong>Expected shape:</strong> One row per valid course customer name.</li>
+<li><strong>Extension:</strong> Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns. <strong>Progressive hint:</strong> Handle NULL first, then most specific anchored pattern, then a bounded general pattern. <strong>Expected shape:</strong> One row per customer with one classification.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Is the pattern a substring search or a whole-value validation?</li>
+<li>Could a leading wildcard or function-wrapped column prevent ordinary B-tree index use?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-30.html#guide">Day 30 — Phase 2 project</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<p>Learning objectives</p>
+<ul>
+<li>Use LIKE/ILIKE for simple wildcard matching and understand index implications</li>
+<li>Apply SIMILAR TO and POSIX regular expressions (~, ~<em>, !~, !~</em>) for complex patterns</li>
+<li>Build robust text filters, validators, and extractors; know when to use trigram/FTS</li>
+</ul>
+<p>Why this matters User inputs, product codes, and free text require flexible matching. Good patterns minimize false matches and run fast on large tables.</p>
+<p>Core concepts and deep dive</p>
+<ul>
+<li>LIKE/ILIKE</li>
+<li>% any-length wildcard; _ single char; ILIKE is case-insensitive (Postgres extension)</li>
+<li>Index use: prefix patterns (foo%) can use btree indexes; leading wildcard (%foo) cannot; consider pg_trgm or re-architecture</li>
+<li>SIMILAR TO</li>
+<li>SQL standard regex-like; less commonly used in Postgres; prefer POSIX regex operators</li>
+<li>POSIX regex operators</li>
+<li>~ match case-sensitive; ~* case-insensitive; !~ negation; supports anchors ^$, character classes, quantifiers</li>
+<li>SUBSTRING(str FROM &#x27;regex&#x27;) to extract; REGEXP_REPLACE for cleanup</li>
+<li>Performance aids</li>
+<li>pg_trgm extension + GIN index for ILIKE/regex with wildcards on large text columns</li>
+<li>Functional indexes on LOWER(col) to support case-insensitive equality</li>
+<li>Validation vs search</li>
+<li>Validation uses ^...$ anchored patterns; search may be substring (no anchors)</li>
+</ul>
+<p>Patterns</p>
+<ul>
+<li>Email-like validation: email ~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</li>
+<li>Domain filters: LOWER(email) LIKE &#x27;%@example.com&#x27;</li>
+<li>Product-name matching: <code>name ~ &#x27;^Product [0-9]{2,3}$&#x27;</code></li>
+</ul>
+<p>Pitfalls</p>
+<ul>
+<li>Unanchored regex in validation allows partial matches; use anchors</li>
+<li>Locale issues in case-folding; consider citext for equality semantics</li>
+<li>Regex backtracking on catastrophic patterns; keep patterns simple and specific</li>
+</ul>
+<p>Current practice map</p>
+<ul>
+<li>The authoritative six prompts, progressive hints, and expected shapes are maintained in <strong>Exercises</strong> above. They map one-for-one to both solution companions; older short exercise lists were removed to prevent prompt drift.</li>
+</ul>
+<p>Further reading</p>
+<ul>
+<li>Pattern matching: https://www.postgresql.org/docs/current/functions-matching.html</li>
+<li>pg_trgm: https://www.postgresql.org/docs/current/pgtrgm.html</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day29_pattern_matching.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day29_pattern_matching.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 29: Advanced Filtering &amp; Pattern Matching</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Study contract</span>
+<span>-- Focus: Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.</span>
+<span>-- Assumptions: PostgreSQL `LIKE` is case-sensitive, `ILIKE` is case-insensitive, and POSIX regex operators use `~`/`~*`. Collation can affect text behavior.</span>
+<span>-- Pitfall: Leading wildcards can prevent ordinary b-tree use; unanchored or overly broad regex patterns can match more text than intended.</span>
+<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
+<span> </span>
+<span>-- LIKE/ILIKE patterns</span>
+<span>SELECT customer_id, full_name, email</span>
+<span>FROM customers</span>
+<span>WHERE email ILIKE &#x27;%@example.com&#x27; ESCAPE &#x27;\&#x27;</span>
+<span>  AND full_name ILIKE &#x27;customer %&#x27; ESCAPE &#x27;\&#x27;</span>
+<span>ORDER BY customer_id</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>-- Regex with ~ and ~*</span>
+<span>SELECT product_id, name, category</span>
+<span>FROM products</span>
+<span>WHERE name ~ &#x27;^Product [0-9]{2,3}$&#x27;</span>
+<span>ORDER BY product_id</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>-- Full-text search (basic)</span>
+<span>-- Ensure textsearch configs are available (Postgres built-in)</span>
+<span>SELECT p.product_id, p.name</span>
+<span>FROM products p</span>
+<span>WHERE to_tsvector(&#x27;english&#x27;, p.name || &#x27; &#x27; || p.category)</span>
+<span>      @@ to_tsquery(&#x27;english&#x27;, &#x27;electronics | sports&#x27;)</span>
+<span>ORDER BY p.product_id;</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
+<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
+<span>-- 1. [Query writing] Find customer names beginning with `Customer 1` case-insensitively.</span>
+<span>--    Hint: `ILIKE &#x27;Customer 1%&#x27;` uses `%` for any suffix.</span>
+<span>-- 2. [Query writing] Find emails that match the course&#x27;s simple lowercase example.com pattern.</span>
+<span>--    Hint: Anchor both ends and escape the literal dot in the POSIX regex.</span>
+<span>-- 3. [Query writing] Return event paths under `/p/` using JSON extraction and an anchored pattern.</span>
+<span>--    Hint: Extract path text, then anchor the literal prefix.</span>
+<span>-- 4. [Prediction] Match literal percent and underscore characters in sample text and contrast them with wildcard behavior.</span>
+<span>--    Hint: Declare an escape character and prefix each literal wildcard.</span>
+<span>-- 5. [Debugging] Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.</span>
+<span>--    Hint: First assert the anchored grammar, then use `substring(... FROM regex)`.</span>
+<span>-- 6. [Extension] Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.</span>
+<span>--    Hint: Handle NULL first, then most specific anchored pattern, then a bounded general pattern.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day29_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day29_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-29-solutions-pattern-matching-like-ilike-similar-to-and-regular-expressions">Day 29 solutions — Pattern Matching: LIKE/ILIKE, SIMILAR TO, and Regular Expressions<a class="heading-anchor" href="#solution-1--day-29-solutions-pattern-matching-like-ilike-similar-to-and-regular-expressions" aria-label="Link to this section">#</a></h3>
+<p>These answers align one-for-one with <a href="sql-29.html#learner">day29_pattern_matching.sql</a>. Run only against the disposable <code>advanced_sql_training</code> database. The executable companion wraps every answer in <code>BEGIN</code>/<code>ROLLBACK</code>. The snippets below assume the lesson&#x27;s <code>SET search_path TO training, public;</code> statement. Run the complete executable companion when you want a self-contained check.</p>
+<h4 id="solution-1--reading-contract">Reading contract<a class="heading-anchor" href="#solution-1--reading-contract" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Focus:</strong> Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.</li>
+<li><strong>Assumptions:</strong> PostgreSQL <code>LIKE</code> is case-sensitive, <code>ILIKE</code> is case-insensitive, and POSIX regex operators use <code>~</code>/<code>~*</code>. Collation can affect text behavior.</li>
+<li><strong>Primary pitfall:</strong> Leading wildcards can prevent ordinary b-tree use; unanchored or overly broad regex patterns can match more text than intended.</li>
+<li><strong>Safety:</strong> all writes are bounded and rollback-protected; read-only queries still use deterministic ordering whenever row order is claimed.</li>
+</ul>
+<h4 id="solution-1--exercise-1-query-writing">Exercise 1 — Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Find customer names beginning with <code>Customer 1</code> case-insensitively.</p>
+<p><strong>Reasoning:</strong> <code>ILIKE &#x27;Customer 1%&#x27;</code> uses <code>%</code> for any suffix.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre><code class="language-sql">SELECT c.customer_id,
+       c.full_name
+FROM customers AS c
+WHERE c.full_name ILIKE &#x27;Customer 1%&#x27;
+ORDER BY c.customer_id;</code></pre>
+<p><strong>Expected shape:</strong> Matching customer rows in stable ID order.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Find emails that match the course&#x27;s simple lowercase example.com pattern.</p>
+<p><strong>Reasoning:</strong> Anchor both ends and escape the literal dot in the POSIX regex.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre><code class="language-sql">SELECT c.customer_id,
+       c.email
+FROM customers AS c
+WHERE c.email ~ &#x27;^customer[0-9]+@example[.]com$&#x27;
+ORDER BY c.customer_id;</code></pre>
+<p><strong>Expected shape:</strong> Only matching non-null email rows.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Return event paths under <code>/p/</code> using JSON extraction and an anchored pattern.</p>
+<p><strong>Reasoning:</strong> Extract path text, then anchor the literal prefix.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre><code class="language-sql">SELECT e.event_id,
+       e.metadata -&gt;&gt; &#x27;path&#x27; AS path
+FROM events AS e
+WHERE e.metadata -&gt;&gt; &#x27;path&#x27; LIKE &#x27;/p/%&#x27;
+ORDER BY e.event_id;</code></pre>
+<p><strong>Expected shape:</strong> Events whose path begins <code>/p/</code>.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Match literal percent and underscore characters in sample text and contrast them with wildcard behavior.</p>
+<p><strong>Reasoning:</strong> Declare an escape character and prefix each literal wildcard.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>VALUES</code>: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</li>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre><code class="language-sql">SELECT value
+FROM (VALUES (&#x27;100%&#x27;), (&#x27;a_b&#x27;), (&#x27;plain&#x27;)) AS sample(value)
+WHERE value LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27;
+   OR value LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;
+ORDER BY value;</code></pre>
+<p><strong>Expected shape:</strong> Only the two rows containing the requested literal symbols.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-5-debugging">Exercise 5 — Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.</p>
+<p><strong>Reasoning:</strong> First assert the anchored grammar, then use <code>substring(... FROM regex)</code>.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre><code class="language-sql">SELECT c.customer_id,
+       substring(c.full_name FROM &#x27;^Customer ([0-9]+)$&#x27;)::integer AS name_number
+FROM customers AS c
+WHERE c.full_name ~ &#x27;^Customer [0-9]+$&#x27;
+ORDER BY c.customer_id;</code></pre>
+<p><strong>Expected shape:</strong> One row per valid course customer name.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.</p>
+<p><strong>Reasoning:</strong> Handle NULL first, then most specific anchored pattern, then a bounded general pattern.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>CASE</code>: encodes ordered business conditions; the first true branch wins and <code>ELSE</code> defines the remainder.</li>
+<li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre><code class="language-sql">SELECT c.customer_id,
+       c.email,
+       CASE
+         WHEN c.email IS NULL THEN &#x27;missing&#x27;
+         WHEN c.email ~* &#x27;^[a-z0-9._%+-]+@example[.]com$&#x27; THEN &#x27;course_example&#x27;
+         WHEN c.email ~* &#x27;^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$&#x27; THEN &#x27;other_valid_looking&#x27;
+         ELSE &#x27;malformed&#x27;
+       END AS email_class
+FROM customers AS c
+ORDER BY c.customer_id;</code></pre>
+<p><strong>Expected shape:</strong> One row per customer with one classification.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--final-self-check">Final self-check<a class="heading-anchor" href="#solution-1--final-self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can you explain the logical grain before and after every aggregation?</li>
+<li>Are missing values preserved or converted only by an explicit rule?</li>
+<li>Does every ordered result have a deterministic final tie-breaker?</li>
+<li>Are money and time assumptions visible beside the calculation?</li>
+<li>Does the complete executable solution finish with <code>ROLLBACK</code>?</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day29_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day29_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 29 executable solutions</span>
+<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
+<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
+<span> </span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Shared teaching contract</span>
+<span>-- Focus: Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.</span>
+<span>-- Assumptions: PostgreSQL `LIKE` is case-sensitive, `ILIKE` is case-insensitive, and POSIX regex operators use `~`/`~*`. Collation can affect text behavior.</span>
+<span>-- Pitfall: Leading wildcards can prevent ordinary b-tree use; unanchored or overly broad regex patterns can match more text than intended.</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 1: Query writing</span>
+<span>-- Prompt: Find customer names beginning with `Customer 1` case-insensitively.</span>
+<span>-- Why: `ILIKE &#x27;Customer 1%&#x27;` uses `%` for any suffix.</span>
+<span>-- Expected: Matching customer rows in stable ID order.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>SELECT c.customer_id,</span>
+<span>       c.full_name</span>
+<span>FROM customers AS c</span>
+<span>WHERE c.full_name ILIKE &#x27;Customer 1%&#x27;</span>
+<span>ORDER BY c.customer_id;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 2: Query writing</span>
+<span>-- Prompt: Find emails that match the course&#x27;s simple lowercase example.com pattern.</span>
+<span>-- Why: Anchor both ends and escape the literal dot in the POSIX regex.</span>
+<span>-- Expected: Only matching non-null email rows.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>SELECT c.customer_id,</span>
+<span>       c.email</span>
+<span>FROM customers AS c</span>
+<span>WHERE c.email ~ &#x27;^customer[0-9]+@example[.]com$&#x27;</span>
+<span>ORDER BY c.customer_id;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 3: Query writing</span>
+<span>-- Prompt: Return event paths under `/p/` using JSON extraction and an anchored pattern.</span>
+<span>-- Why: Extract path text, then anchor the literal prefix.</span>
+<span>-- Expected: Events whose path begins `/p/`.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>SELECT e.event_id,</span>
+<span>       e.metadata -&gt;&gt; &#x27;path&#x27; AS path</span>
+<span>FROM events AS e</span>
+<span>WHERE e.metadata -&gt;&gt; &#x27;path&#x27; LIKE &#x27;/p/%&#x27;</span>
+<span>ORDER BY e.event_id;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 4: Prediction</span>
+<span>-- Prompt: Match literal percent and underscore characters in sample text and contrast them with wildcard behavior.</span>
+<span>-- Why: Declare an escape character and prefix each literal wildcard.</span>
+<span>-- Expected: Only the two rows containing the requested literal symbols.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>SELECT value</span>
+<span>FROM (VALUES (&#x27;100%&#x27;), (&#x27;a_b&#x27;), (&#x27;plain&#x27;)) AS sample(value)</span>
+<span>WHERE value LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27;</span>
+<span>   OR value LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;</span>
+<span>ORDER BY value;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 5: Debugging</span>
+<span>-- Prompt: Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.</span>
+<span>-- Why: First assert the anchored grammar, then use `substring(... FROM regex)`.</span>
+<span>-- Expected: One row per valid course customer name.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>SELECT c.customer_id,</span>
+<span>       substring(c.full_name FROM &#x27;^Customer ([0-9]+)$&#x27;)::integer AS name_number</span>
+<span>FROM customers AS c</span>
+<span>WHERE c.full_name ~ &#x27;^Customer [0-9]+$&#x27;</span>
+<span>ORDER BY c.customer_id;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 6: Extension</span>
+<span>-- Prompt: Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.</span>
+<span>-- Why: Handle NULL first, then most specific anchored pattern, then a bounded general pattern.</span>
+<span>-- Expected: One row per customer with one classification.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.</span>
+<span>-- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>SELECT c.customer_id,</span>
+<span>       c.email,</span>
+<span>       CASE</span>
+<span>         WHEN c.email IS NULL THEN &#x27;missing&#x27;</span>
+<span>         WHEN c.email ~* &#x27;^[a-z0-9._%+-]+@example[.]com$&#x27; THEN &#x27;course_example&#x27;</span>
+<span>         WHEN c.email ~* &#x27;^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$&#x27; THEN &#x27;other_valid_looking&#x27;</span>
+<span>         ELSE &#x27;malformed&#x27;</span>
+<span>       END AS email_class</span>
+<span>FROM customers AS c</span>
+<span>ORDER BY c.customer_id;</span>
+<span> </span>
+<span>-- No course answer persists changes or temporary objects.</span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-28.html"><small>Previous lesson</small><strong>sql-28</strong><span>JSON XML</span></a>
+        <a class="nav-card next" href="sql-30.html"><small>Next lesson</small><strong>sql-30</strong><span>Phase2 Project</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-29";
+    const LEARNER_PATH = "sql/postgres-60day/day29_pattern_matching.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

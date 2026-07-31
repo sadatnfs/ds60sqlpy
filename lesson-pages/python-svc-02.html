@@ -1,0 +1,1443 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-svc-02 · Service Hardening and Observability · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-svc-02</p>
+        <h1>Service Hardening and Observability</h1>
+        <p class="hero-copy">Professional Python engineering</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">210 minutes</span>
+          <span class="tag">production setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-55.html">python-55</a> <a class="tag" href="bridge-08.html">bridge-08</a> <a class="tag" href="python-svc-01.html">python-svc-01</a> <a class="tag" href="python-ml-01.html">python-ml-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_svc_02_hardening_observability.py</code>.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_svc_02_hardening_observability.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_svc_02_hardening_observability.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_svc_02_hardening_observability.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--service-hardening-and-observability">Service hardening and observability<a class="heading-anchor" href="#guide--service-hardening-and-observability" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-svc-02</code></p>
+<p><strong>Level:</strong> advanced</p>
+<p><strong>Estimated time:</strong> 240–300 minutes</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Catalog prerequisites:</strong> <code>python-55</code>, <code>bridge-08</code>, <code>python-svc-01</code>, and <code>python-ml-01</code></li>
+<li>Python Days 44, 54, and 55</li>
+<li>Bridge Day 8</li>
+<li><code>python-svc-01</code> retry/identity boundaries</li>
+<li><code>python-ml-01</code> trusted manifest and artifact concepts</li>
+</ul>
+<p>This is a deterministic local policy lab. It does not start a server or claim to be an Internet-ready deployment.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>You will be able to:</p>
+<ol>
+<li>Validate concurrency and rate configuration before startup.</li>
+<li>Distinguish process health from traffic readiness.</li>
+<li>Keep request IDs in structured logs without logging credentials.</li>
+<li>Emit low-cardinality counters and duration observations.</li>
+<li>Bound concurrent work without waiting indefinitely.</li>
+<li>Apply a testable token-bucket policy with an injected clock.</li>
+<li>Separate authentication from role authorization.</li>
+<li>Verify a JSON artifact hash before trusting content.</li>
+<li>Run a local dependency incident drill and inspect evidence.</li>
+<li>State what an Internet-facing deployment still requires.</li>
+</ol>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Health/liveness:</strong> whether a process is running and can answer diagnostics.</li>
+<li><strong>Readiness:</strong> whether the instance should receive new work.</li>
+<li><strong>Draining:</strong> refusing new work while finishing or stopping existing work.</li>
+<li><strong>Structured log:</strong> named event plus bounded machine-readable fields.</li>
+<li><strong>Metric cardinality:</strong> number of distinct label combinations; request/user IDs are dangerous metric labels.</li>
+<li><strong>Saturation:</strong> all permitted concurrent capacity is in use.</li>
+<li><strong>Bulkhead:</strong> isolation that limits one workload&#x27;s resource consumption.</li>
+<li><strong>Token bucket:</strong> capacity that is consumed by requests and refilled over time.</li>
+<li><strong>Authentication:</strong> establishing identity.</li>
+<li><strong>Authorization:</strong> allowing an identified principal to perform an action.</li>
+<li><strong>Trusted artifact:</strong> content whose identity and format were verified before use.</li>
+<li><strong>Incident drill:</strong> controlled failure used to prove detection and response.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>The learner file asks three policy questions: role authorization, readiness, and redaction.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_svc_02_hardening_observability.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_svc_02_hardening_observability.py</code></pre>
+<p>The reference service has injected boundaries:</p>
+<pre><code class="language-text">request -&gt; readiness probes
+        -&gt; Authenticator -&gt; Principal -&gt; role authorization
+        -&gt; TokenBucket(Clock)
+        -&gt; ConcurrencyGate
+        -&gt; injected work
+        -&gt; StructuredLog + Metrics
+
+startup -&gt; SHA-256 verification -&gt; constrained JSON artifact</code></pre>
+<p>Its main function serves one local request, flips a dependency probe, and shows readiness fail while health stays available.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--1-validate-startup-configuration">1. Validate startup configuration<a class="heading-anchor" href="#guide--1-validate-startup-configuration" aria-label="Link to this section">#</a></h5>
+<p>Parse maximum concurrency, rate capacity, and refill rate. Reject zero, negative, blank, or nonnumeric values before constructing the service. Keep credential retrieval outside dataclass representations and logs.</p>
+<h5 id="guide--2-complete-health-readiness-policy">2. Complete health/readiness policy<a class="heading-anchor" href="#guide--2-complete-health-readiness-policy" aria-label="Link to this section">#</a></h5>
+<p>Health remains true for a running process. Readiness requires at least one configured dependency, all probes ready, verified artifact, and no draining state. Return named reasons so an operator can diagnose 503 without exposing secrets.</p>
+<p>Do not make a liveness endpoint perform slow dependency calls; repeated restarts can amplify an external outage.</p>
+<h5 id="guide--3-design-structured-events">3. Design structured events<a class="heading-anchor" href="#guide--3-design-structured-events" aria-label="Link to this section">#</a></h5>
+<p>Emit request started/completed/failed/rejected with request ID, action, bounded reason, and error type. Redact token, authorization, password, secret, and API key fields case-insensitively. Do not log request bodies by default.</p>
+<h5 id="guide--4-design-metrics">4. Design metrics<a class="heading-anchor" href="#guide--4-design-metrics" aria-label="Link to this section">#</a></h5>
+<p>Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes. Observe duration values. Do not put user, token, request ID, or arbitrary URL into metric labels.</p>
+<h5 id="guide--5-bound-concurrency">5. Bound concurrency<a class="heading-anchor" href="#guide--5-bound-concurrency" aria-label="Link to this section">#</a></h5>
+<p>Acquire a <code>BoundedSemaphore</code> without blocking. Return a lease that always releases in <code><strong>exit</strong></code>, including exceptions. With capacity one, hold a lease and verify a second attempt returns busy immediately.</p>
+<h5 id="guide--6-rate-limit-with-injected-time">6. Rate limit with injected time<a class="heading-anchor" href="#guide--6-rate-limit-with-injected-time" aria-label="Link to this section">#</a></h5>
+<p>Consume two tokens, reject the third request, advance a fake clock one second, and accept one refill. State that this in-process bucket is not sufficient across multiple service instances.</p>
+<h5 id="guide--7-separate-authentication-and-authorization">7. Separate authentication and authorization<a class="heading-anchor" href="#guide--7-separate-authentication-and-authorization" aria-label="Link to this section">#</a></h5>
+<p>The local static authenticator maps placeholder test tokens to principals. Readers may predict; operators may predict and reload. Prove unknown identity returns 401 while an authenticated but unauthorized action returns 403.</p>
+<p>Production identity requires a reviewed provider, token verification/expiry, key rotation, transport security, and audit policy.</p>
+<h5 id="guide--8-trust-an-artifact-narrowly">8. Trust an artifact narrowly<a class="heading-anchor" href="#guide--8-trust-an-artifact-narrowly" aria-label="Link to this section">#</a></h5>
+<p>Compute expected SHA-256 before startup, verify exact bytes, then parse a flat JSON object. Tamper with the file and confirm verification fails. Do not use pickle for untrusted service artifacts.</p>
+<h5 id="guide--9-run-the-incident-drill">9. Run the incident drill<a class="heading-anchor" href="#guide--9-run-the-incident-drill" aria-label="Link to this section">#</a></h5>
+<p>Set a dependency probe false:</p>
+<ol>
+<li>readiness reports its name,</li>
+<li>health remains true,</li>
+<li>new work receives 503,</li>
+<li>the not-ready metric increments, and</li>
+<li>a request-rejected log carries the request ID and bounded reason.</li>
+</ol>
+<p>Then restore the dependency and confirm readiness recovers.</p>
+<h5 id="guide--10-draw-the-internet-facing-boundary">10. Draw the Internet-facing boundary<a class="heading-anchor" href="#guide--10-draw-the-internet-facing-boundary" aria-label="Link to this section">#</a></h5>
+<p>List what this local example does not supply: TLS termination, real identity, secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy, artifact distribution, deployment rollback, and on-call response.</p>
+<h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
+<p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
+<h5 id="guide--exercise-11-drain-and-shut-down-gracefully">Exercise 11 — drain and shut down gracefully<a class="heading-anchor" href="#guide--exercise-11-drain-and-shut-down-gracefully" aria-label="Link to this section">#</a></h5>
+<p>Add a draining transition that makes readiness false, rejects new work, allows active leases a bounded grace period, and records unfinished requests before shutdown. Make repeated drain calls idempotent.</p>
+<p><strong>Progressive hint:</strong> Stop admission before waiting. Track active work through the existing concurrency gate and use an injected clock/event for deterministic tests.</p>
+<h5 id="guide--exercise-12-add-a-dependency-circuit-breaker">Exercise 12 — add a dependency circuit breaker<a class="heading-anchor" href="#guide--exercise-12-add-a-dependency-circuit-breaker" aria-label="Link to this section">#</a></h5>
+<p>Wrap one dependency probe/call in a closed/open/half-open breaker with injected time. Define which failures count, one bounded probe, readiness interaction, and recovery metrics.</p>
+<p><strong>Progressive hint:</strong> The breaker protects request work; readiness may report degraded dependency state without performing the expensive call on every probe.</p>
+<h5 id="guide--exercise-13-define-distributed-limiting-semantics">Exercise 13 — define distributed limiting semantics<a class="heading-anchor" href="#guide--exercise-13-define-distributed-limiting-semantics" aria-label="Link to this section">#</a></h5>
+<p>Explain how the local token bucket behaves with four service processes, then design a shared limiter contract covering atomicity, key, window/token semantics, timeout, fail-open/closed choice, and privacy.</p>
+<p><strong>Progressive hint:</strong> Four independent buckets multiply effective capacity. A shared backend becomes another dependency with its own failure policy.</p>
+<h5 id="guide--exercise-14-bound-telemetry-backpressure">Exercise 14 — bound telemetry backpressure<a class="heading-anchor" href="#guide--exercise-14-bound-telemetry-backpressure" aria-label="Link to this section">#</a></h5>
+<p>Make the log/metric exporter slow or unavailable. Define a bounded queue, drop/coalesce policy, priority for security events, and counters that reveal lost telemetry without blocking request handling indefinitely.</p>
+<p><strong>Progressive hint:</strong> Telemetry is work and memory. Producers need a nonblocking or bounded-time contract, and the service needs visibility into dropped events.</p>
+<h5 id="guide--exercise-15-propagate-trace-context-safely">Exercise 15 — propagate trace context safely<a class="heading-anchor" href="#guide--exercise-15-propagate-trace-context-safely" aria-label="Link to this section">#</a></h5>
+<p>Accept or create a request/trace ID, validate its bounded format, carry it through local logs and an outbound fake client, and prove malformed or attacker-sized IDs are replaced rather than reflected.</p>
+<p><strong>Progressive hint:</strong> Correlation identifiers are untrusted input. Keep them out of metric labels and separate from authentication identity.</p>
+<h5 id="guide--exercise-16-rehearse-credential-rotation">Exercise 16 — rehearse credential rotation<a class="heading-anchor" href="#guide--exercise-16-rehearse-credential-rotation" aria-label="Link to this section">#</a></h5>
+<p>Model a credential provider accepting active and previous key versions during a bounded overlap. Rotate, verify new requests use the active key, expire the old key, and ensure neither value reaches repr/log/metrics.</p>
+<p><strong>Progressive hint:</strong> Reference credentials by version/opaque handle. Inject provider and clock; never hard-code lesson secrets.</p>
+<h5 id="guide--exercise-17-compose-dependency-timeout-budgets">Exercise 17 — compose dependency timeout budgets<a class="heading-anchor" href="#guide--exercise-17-compose-dependency-timeout-budgets" aria-label="Link to this section">#</a></h5>
+<p>For a 750 ms request budget calling two dependencies, allocate local queue, dependency, retry, parsing, and response budgets. Propagate a monotonic deadline and stop work when useful completion is impossible.</p>
+<p><strong>Progressive hint:</strong> Nested calls cannot each assume the full caller timeout. Reserve cleanup/response time and record which budget exhausted.</p>
+<h5 id="guide--exercise-18-run-a-fault-injection-matrix">Exercise 18 — run a fault-injection matrix<a class="heading-anchor" href="#guide--exercise-18-run-a-fault-injection-matrix" aria-label="Link to this section">#</a></h5>
+<p>Inject dependency false/exception/latency, artifact tampering, auth outage, limiter saturation, log-export failure, handler exception, and drain. For each, predict status, readiness/health, cleanup, log, and metric evidence.</p>
+<p><strong>Progressive hint:</strong> Faults are local fakes, not destructive infrastructure tests. Assert invariants and recovery after each isolated scenario.</p>
+<h5 id="guide--exercise-19-define-an-slo-and-error-budget">Exercise 19 — define an SLO and error budget<a class="heading-anchor" href="#guide--exercise-19-define-an-slo-and-error-budget" aria-label="Link to this section">#</a></h5>
+<p>Define one availability and one latency SLI over eligible requests, target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action. Use generated local events to compute a small example.</p>
+<p><strong>Progressive hint:</strong> SLIs need exact numerator/denominator and route/outcome policy. Avoid user/request IDs or arbitrary URLs as labels.</p>
+<h5 id="guide--exercise-20-audit-privacy-retention-and-cardinality">Exercise 20 — audit privacy, retention, and cardinality<a class="heading-anchor" href="#guide--exercise-20-audit-privacy-retention-and-cardinality" aria-label="Link to this section">#</a></h5>
+<p>Inventory every log field, metric label, trace attribute, and local artifact. Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and owner; then test representative forbidden values.</p>
+<p><strong>Progressive hint:</strong> Use allowlists for structured fields and labels. Counts/opaque IDs often replace raw values; request bodies remain excluded by default.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Unsafe configuration fails before handling requests.</li>
+<li>Health and readiness diverge during dependency failure.</li>
+<li>Logs retain request IDs but not tokens.</li>
+<li>Metrics avoid high-cardinality identities.</li>
+<li>A saturated gate returns immediately and always releases.</li>
+<li>Rate behavior is deterministic under a fake clock.</li>
+<li>401 and 403 represent distinct identity/policy failures.</li>
+<li>Artifact tampering fails before parsing.</li>
+<li>Incident evidence includes readiness reason, 503, log, and metric.</li>
+<li>The lab is described as local policy, not Internet-ready security.</li>
+</ul>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
+.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_svc_02_hardening_observability -v</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_svc_02_hardening_observability -v</code></pre>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Liveness depends on every external service:</strong> an outage causes restart loops.</li>
+<li><strong>Readiness says only false:</strong> operators receive no bounded reason.</li>
+<li><strong>Request or user IDs become metric labels:</strong> cardinality grows without bound.</li>
+<li><strong>A semaphore waits forever:</strong> overload consumes all workers and deadlines.</li>
+<li><strong>Rate limiting trusts wall-clock sleeps in tests:</strong> the clock seam is missing.</li>
+<li><strong>Authentication equals authorization:</strong> any valid identity can perform every action.</li>
+<li><strong>Tokens appear in logs or repr:</strong> redaction happened too late.</li>
+<li><strong>Hash verification follows deserialization:</strong> unsafe loading already ran.</li>
+<li><strong>One-process limits are called distributed protection:</strong> deployment topology was ignored.</li>
+<li><strong>A FastAPI development server is called hardened:</strong> TLS, identity, secrets, telemetry, deployment, and operations remain unresolved.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Wrap these policies in a thin FastAPI adapter from Day 44, preserving injected tests. Combine with <code>python-svc-01</code> for outbound reliability and Bridge Day 8 for database readiness, transaction, and deployment behavior.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_svc_02_hardening_observability.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_svc_02_hardening_observability.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-svc-02 learner lab: service hardening and observability.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>from collections.abc import Callable, Mapping, Sequence</span>
+<span>from typing import Literal</span>
+<span> </span>
+<span>Role = Literal[&quot;reader&quot;, &quot;operator&quot;]</span>
+<span> </span>
+<span> </span>
+<span>def is_authorized(role: Role, action: str) -&gt; bool:</span>
+<span>    &quot;&quot;&quot;TODO: readers may predict; operators may predict and reload.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete is_authorized&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def readiness(</span>
+<span>    dependency_checks: Sequence[bool],</span>
+<span>    *,</span>
+<span>    artifact_verified: bool,</span>
+<span>    draining: bool,</span>
+<span>) -&gt; bool:</span>
+<span>    &quot;&quot;&quot;TODO: ready only when all dependencies and the artifact are safe.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete readiness&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def redact_fields(fields: Mapping[str, str]) -&gt; dict[str, str]:</span>
+<span>    &quot;&quot;&quot;TODO: redact token, authorization, password, and secret keys.&quot;&quot;&quot;</span>
+<span> </span>
+<span>    raise NotImplementedError(&quot;complete redact_fields&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def self_check() -&gt; None:</span>
+<span>    print(&quot;Worked health rule: a running process may be healthy but not ready.&quot;)</span>
+<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
+<span>        (&quot;authorization&quot;, lambda: is_authorized(&quot;reader&quot;, &quot;predict&quot;)),</span>
+<span>        (</span>
+<span>            &quot;readiness&quot;,</span>
+<span>            lambda: readiness([True, True], artifact_verified=True, draining=False),</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            &quot;redaction&quot;,</span>
+<span>            lambda: redact_fields({&quot;request_id&quot;: &quot;r1&quot;, &quot;token&quot;: &quot;local-value&quot;}),</span>
+<span>        ),</span>
+<span>    )</span>
+<span>    for label, call in checks:</span>
+<span>        try:</span>
+<span>            print(label, &quot;-&gt;&quot;, call())</span>
+<span>        except NotImplementedError:</span>
+<span>            print(&quot;TODO:&quot;, label)</span>
+<span> </span>
+<span> </span>
+<span># === Numbered professional practice ===</span>
+<span>#</span>
+<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
+<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
+<span># Full acceptance checks and progressive hints:</span>
+<span># companion-guides/py_svc_02_hardening_observability.md</span>
+<span>#</span>
+<span># Exercise 1 — Validate startup configuration</span>
+<span># Prompt: Parse maximum concurrency, rate capacity, and refill rate. Reject zero,</span>
+<span># negative, blank, or nonnumeric values before constructing the service. Keep credential</span>
+<span># retrieval outside dataclass representations and logs.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 2 — Complete health/readiness policy</span>
+<span># Prompt: Health remains true for a running process. Readiness requires at least one</span>
+<span># configured dependency, all probes ready, verified artifact, and no draining state.</span>
+<span># Return named reasons so an operator can diagnose 503 without exposing secrets. Do not</span>
+<span># make a liveness endpoint perform slow dependency calls; repeated restarts can amplify an</span>
+<span># external outage.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 3 — Design structured events</span>
+<span># Prompt: Emit request started/completed/failed/rejected with request ID, action, bounded</span>
+<span># reason, and error type. Redact token, authorization, password, secret, and API key</span>
+<span># fields case-insensitively. Do not log request bodies by default.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 4 — Design metrics</span>
+<span># Prompt: Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and</span>
+<span># not-ready outcomes. Observe duration values. Do not put user, token, request ID, or</span>
+<span># arbitrary URL into metric labels.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 5 — Bound concurrency</span>
+<span># Prompt: Acquire a `BoundedSemaphore` without blocking. Return a lease that always</span>
+<span># releases in `__exit__`, including exceptions. With capacity one, hold a lease and verify</span>
+<span># a second attempt returns busy immediately.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 6 — Rate limit with injected time</span>
+<span># Prompt: Consume two tokens, reject the third request, advance a fake clock one second,</span>
+<span># and accept one refill. State that this in-process bucket is not sufficient across</span>
+<span># multiple service instances.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 7 — Separate authentication and authorization</span>
+<span># Prompt: The local static authenticator maps placeholder test tokens to principals.</span>
+<span># Readers may predict; operators may predict and reload. Prove unknown identity returns</span>
+<span># 401 while an authenticated but unauthorized action returns 403. Production identity</span>
+<span># requires a reviewed provider, token verification/expiry, key rotation, transport</span>
+<span># security, and audit policy.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 8 — Trust an artifact narrowly</span>
+<span># Prompt: Compute expected SHA-256 before startup, verify exact bytes, then parse a flat</span>
+<span># JSON object. Tamper with the file and confirm verification fails. Do not use pickle for</span>
+<span># untrusted service artifacts.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 9 — Run the incident drill</span>
+<span># Prompt: Set a dependency probe false: 1. readiness reports its name, 2. health remains</span>
+<span># true, 3. new work receives 503, 4. the not-ready metric increments, and 5. a request-</span>
+<span># rejected log carries the request ID and bounded reason. Then restore the dependency and</span>
+<span># confirm readiness recovers.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 10 — Draw the Internet-facing boundary</span>
+<span># Prompt: List what this local example does not supply: TLS termination, real identity,</span>
+<span># secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse</span>
+<span># controls, autoscaling, durable telemetry, retention/privacy policy, artifact</span>
+<span># distribution, deployment rollback, and on-call response. Classify which boundary owns</span>
+<span># each omitted control and which local test evidence cannot validate it.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 11 — drain and shut down gracefully</span>
+<span># Prompt: Add a draining transition that makes readiness false, rejects new work, allows</span>
+<span># active leases a bounded grace period, and records unfinished requests before shutdown.</span>
+<span># Make repeated drain calls idempotent.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 12 — add a dependency circuit breaker</span>
+<span># Prompt: Wrap one dependency probe/call in a closed/open/half-open breaker with injected</span>
+<span># time. Define which failures count, one bounded probe, readiness interaction, and</span>
+<span># recovery metrics.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 13 — define distributed limiting semantics</span>
+<span># Prompt: Explain how the local token bucket behaves with four service processes, then</span>
+<span># design a shared limiter contract covering atomicity, key, window/token semantics,</span>
+<span># timeout, fail-open/closed choice, and privacy.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 14 — bound telemetry backpressure</span>
+<span># Prompt: Make the log/metric exporter slow or unavailable. Define a bounded queue,</span>
+<span># drop/coalesce policy, priority for security events, and counters that reveal lost</span>
+<span># telemetry without blocking request handling indefinitely.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 15 — propagate trace context safely</span>
+<span># Prompt: Accept or create a request/trace ID, validate its bounded format, carry it</span>
+<span># through local logs and an outbound fake client, and prove malformed or attacker-sized</span>
+<span># IDs are replaced rather than reflected.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 16 — rehearse credential rotation</span>
+<span># Prompt: Model a credential provider accepting active and previous key versions during a</span>
+<span># bounded overlap. Rotate, verify new requests use the active key, expire the old key, and</span>
+<span># ensure neither value reaches repr/log/metrics.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 17 — compose dependency timeout budgets</span>
+<span># Prompt: For a 750 ms request budget calling two dependencies, allocate local queue,</span>
+<span># dependency, retry, parsing, and response budgets. Propagate a monotonic deadline and</span>
+<span># stop work when useful completion is impossible.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 18 — run a fault-injection matrix</span>
+<span># Prompt: Inject dependency false/exception/latency, artifact tampering, auth outage,</span>
+<span># limiter saturation, log-export failure, handler exception, and drain. For each, predict</span>
+<span># status, readiness/health, cleanup, log, and metric evidence.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 19 — define an SLO and error budget</span>
+<span># Prompt: Define one availability and one latency SLI over eligible requests,</span>
+<span># target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action.</span>
+<span># Use generated local events to compute a small example.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># Exercise 20 — audit privacy, retention, and cardinality</span>
+<span># Prompt: Inventory every log field, metric label, trace attribute, and local artifact.</span>
+<span># Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and</span>
+<span># owner; then test representative forbidden values.</span>
+<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span>#</span>
+<span># === End numbered professional practice ===</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    self_check()</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_svc_02_hardening_observability_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_svc_02_hardening_observability_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--service-hardening-and-observability-solution-reasoning">Service hardening and observability solution reasoning<a class="heading-anchor" href="#solution-1--service-hardening-and-observability-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Attempt <code>python-svc-02</code> before opening <a href="python-svc-02.html#solution-2"><code>py_svc_02_hardening_observability_solution.py</code></a>.</p>
+<p>Health answers whether the process can answer diagnostics; readiness answers whether it should receive new work. A failed dependency, unverified artifact, or draining state makes readiness false while health can remain true for investigation and graceful shutdown.</p>
+<p>Authentication establishes identity; authorization checks that identity&#x27;s role for one action. The local static authenticator is an injected test double, not a production credential system. Tokens never enter logs. Structured events carry request IDs and bounded fields; metrics use low-cardinality names rather than user or request IDs as labels.</p>
+<p>The token bucket has an injected clock, and the concurrency gate rejects excess work immediately. Those controls protect one process. Internet-facing systems also need shared/distributed limits, queue budgets, upstream timeouts, TLS, secret rotation, network policy, and abuse monitoring.</p>
+<p>Artifact bytes are hashed before JSON is trusted. The loader deliberately rejects pickle and nested arbitrary objects. The incident drill turns a dependency probe false, observes readiness fail, verifies new work receives 503, and checks logs and metrics retain enough context.</p>
+<p>Edge cases include double lease release, clock movement, rate keys with unbounded cardinality, health checks that perform expensive dependency calls, logs containing request bodies, metrics labeled by user, authorization policy drift, artifact replacement after verification, and a readiness dependency that flaps.</p>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Use this map after an honest attempt. The executable implementation remains <a href="python-svc-02.html#solution-2"><code>py_svc_02_hardening_observability_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
+<h5 id="solution-1--exercise-1-validate-startup-configuration">Exercise 1 — Validate startup configuration<a class="heading-anchor" href="#solution-1--exercise-1-validate-startup-configuration" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Parse maximum concurrency, rate capacity, and refill rate. Reject zero, negative, blank, or nonnumeric values before constructing the service. Keep credential retrieval outside dataclass representations and logs.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-2-complete-health-readiness-policy">Exercise 2 — Complete health/readiness policy<a class="heading-anchor" href="#solution-1--exercise-2-complete-health-readiness-policy" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Health remains true for a running process. Readiness requires at least one configured dependency, all probes ready, verified artifact, and no draining state. Return named reasons so an operator can diagnose 503 without exposing secrets. Do not make a liveness endpoint perform slow dependency calls; repeated restarts can amplify an external outage.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-3-design-structured-events">Exercise 3 — Design structured events<a class="heading-anchor" href="#solution-1--exercise-3-design-structured-events" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Emit request started/completed/failed/rejected with request ID, action, bounded reason, and error type. Redact token, authorization, password, secret, and API key fields case-insensitively. Do not log request bodies by default.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-4-design-metrics">Exercise 4 — Design metrics<a class="heading-anchor" href="#solution-1--exercise-4-design-metrics" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes. Observe duration values. Do not put user, token, request ID, or arbitrary URL into metric labels.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-5-bound-concurrency">Exercise 5 — Bound concurrency<a class="heading-anchor" href="#solution-1--exercise-5-bound-concurrency" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Acquire a <code>BoundedSemaphore</code> without blocking. Return a lease that always releases in <code><strong>exit</strong></code>, including exceptions. With capacity one, hold a lease and verify a second attempt returns busy immediately.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-6-rate-limit-with-injected-time">Exercise 6 — Rate limit with injected time<a class="heading-anchor" href="#solution-1--exercise-6-rate-limit-with-injected-time" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Consume two tokens, reject the third request, advance a fake clock one second, and accept one refill. State that this in-process bucket is not sufficient across multiple service instances.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-7-separate-authentication-and-authorization">Exercise 7 — Separate authentication and authorization<a class="heading-anchor" href="#solution-1--exercise-7-separate-authentication-and-authorization" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> The local static authenticator maps placeholder test tokens to principals. Readers may predict; operators may predict and reload. Prove unknown identity returns 401 while an authenticated but unauthorized action returns 403. Production identity requires a reviewed provider, token verification/expiry, key rotation, transport security, and audit policy.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-8-trust-an-artifact-narrowly">Exercise 8 — Trust an artifact narrowly<a class="heading-anchor" href="#solution-1--exercise-8-trust-an-artifact-narrowly" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Compute expected SHA-256 before startup, verify exact bytes, then parse a flat JSON object. Tamper with the file and confirm verification fails. Do not use pickle for untrusted service artifacts.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-9-run-the-incident-drill">Exercise 9 — Run the incident drill<a class="heading-anchor" href="#solution-1--exercise-9-run-the-incident-drill" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Set a dependency probe false: 1. readiness reports its name, 2. health remains true, 3. new work receives 503, 4. the not-ready metric increments, and 5. a request-rejected log carries the request ID and bounded reason. Then restore the dependency and confirm readiness recovers.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-10-draw-the-internet-facing-boundary">Exercise 10 — Draw the Internet-facing boundary<a class="heading-anchor" href="#solution-1--exercise-10-draw-the-internet-facing-boundary" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> List what this local example does not supply: TLS termination, real identity, secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy, artifact distribution, deployment rollback, and on-call response.</p>
+<p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-11-drain-and-shut-down-gracefully">Exercise 11 — drain and shut down gracefully<a class="heading-anchor" href="#solution-1--exercise-11-drain-and-shut-down-gracefully" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Add a draining transition that makes readiness false, rejects new work, allows active leases a bounded grace period, and records unfinished requests before shutdown. Make repeated drain calls idempotent.</p>
+<p><strong>Reasoning path:</strong> Stop admission before waiting. Track active work through the existing concurrency gate and use an injected clock/event for deterministic tests.</p>
+<p>Set draining atomically, publish readiness false, and reject new handlers with a bounded retryable response. Wait for active count to reach zero until the configured deadline, then record remaining count and follow the documented force/exit policy. Health can remain true during drain for diagnostics.</p>
+<p>Do not release another request&#x27;s lease or wait forever. Tests control worker completion explicitly and assert telemetry contains request counts, not bodies.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-12-add-a-dependency-circuit-breaker">Exercise 12 — add a dependency circuit breaker<a class="heading-anchor" href="#solution-1--exercise-12-add-a-dependency-circuit-breaker" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Wrap one dependency probe/call in a closed/open/half-open breaker with injected time. Define which failures count, one bounded probe, readiness interaction, and recovery metrics.</p>
+<p><strong>Reasoning path:</strong> The breaker protects request work; readiness may report degraded dependency state without performing the expensive call on every probe.</p>
+<p>Count configured dependency timeouts/failures across requests. When open, reject quickly until cooldown; then allow one half-open probe. Success resets, failure reopens. Concurrency ownership prevents a herd of probes.</p>
+<p>Keep liveness independent. Whether readiness becomes false depends on whether the dependency is required for all service actions; encode that policy explicitly rather than coupling it to breaker implementation.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-13-define-distributed-limiting-semantics">Exercise 13 — define distributed limiting semantics<a class="heading-anchor" href="#solution-1--exercise-13-define-distributed-limiting-semantics" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Explain how the local token bucket behaves with four service processes, then design a shared limiter contract covering atomicity, key, window/token semantics, timeout, fail-open/closed choice, and privacy.</p>
+<p><strong>Reasoning path:</strong> Four independent buckets multiply effective capacity. A shared backend becomes another dependency with its own failure policy.</p>
+<p>Choose the limiting identity (tenant/API key/action) without placing raw credentials in storage or metrics. Require an atomic consume operation and return allowed, remaining, and retry-after. Bound backend latency and state whether unavailable limiting blocks security-sensitive actions or degrades.</p>
+<p>Document approximation and clock ownership for distributed algorithms. Local concurrency limits still protect each process even with a shared rate policy.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-14-bound-telemetry-backpressure">Exercise 14 — bound telemetry backpressure<a class="heading-anchor" href="#solution-1--exercise-14-bound-telemetry-backpressure" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Make the log/metric exporter slow or unavailable. Define a bounded queue, drop/coalesce policy, priority for security events, and counters that reveal lost telemetry without blocking request handling indefinitely.</p>
+<p><strong>Reasoning path:</strong> Telemetry is work and memory. Producers need a nonblocking or bounded-time contract, and the service needs visibility into dropped events.</p>
+<p>Use a bounded queue with an owned exporter worker. Low-priority repetitive events may be sampled/coalesced; security/audit events follow the reviewed durability path. On saturation, increment a local low-cardinality dropped count and emit a bounded fallback signal without recursion.</p>
+<p>Never enqueue request bodies or tokens. Shutdown drains within a deadline and reports unsent counts rather than hanging forever.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-15-propagate-trace-context-safely">Exercise 15 — propagate trace context safely<a class="heading-anchor" href="#solution-1--exercise-15-propagate-trace-context-safely" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Accept or create a request/trace ID, validate its bounded format, carry it through local logs and an outbound fake client, and prove malformed or attacker-sized IDs are replaced rather than reflected.</p>
+<p><strong>Reasoning path:</strong> Correlation identifiers are untrusted input. Keep them out of metric labels and separate from authentication identity.</p>
+<p>Allow a conservative length/character format, generate a local opaque ID on invalid input, and include it as one structured log field plus outbound diagnostic header where policy permits. Child operations derive or record span IDs without exposing credentials.</p>
+<p>Metrics aggregate by bounded route/outcome, never request ID. Logging systems must escape values so an ID cannot inject fake lines or fields.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-16-rehearse-credential-rotation">Exercise 16 — rehearse credential rotation<a class="heading-anchor" href="#solution-1--exercise-16-rehearse-credential-rotation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Model a credential provider accepting active and previous key versions during a bounded overlap. Rotate, verify new requests use the active key, expire the old key, and ensure neither value reaches repr/log/metrics.</p>
+<p><strong>Reasoning path:</strong> Reference credentials by version/opaque handle. Inject provider and clock; never hard-code lesson secrets.</p>
+<p>The service obtains current material at use time or through an explicitly refreshable cache. During overlap, verification can accept both versions while issuance uses only active. After deadline, old verification fails and the event trail records version IDs and actor—not secret bytes.</p>
+<p>Rotation failure has a rollback/escalation policy. Tests use placeholder tokens and scan captured diagnostics for their absence.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-17-compose-dependency-timeout-budgets">Exercise 17 — compose dependency timeout budgets<a class="heading-anchor" href="#solution-1--exercise-17-compose-dependency-timeout-budgets" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> For a 750 ms request budget calling two dependencies, allocate local queue, dependency, retry, parsing, and response budgets. Propagate a monotonic deadline and stop work when useful completion is impossible.</p>
+<p><strong>Reasoning path:</strong> Nested calls cannot each assume the full caller timeout. Reserve cleanup/response time and record which budget exhausted.</p>
+<p>Create the deadline once at request admission. Before each dependency call or retry, derive a timeout from remaining budget and that dependency&#x27;s cap. Avoid starting a second call when only cleanup/response reserve remains. Cancellation releases concurrency leases in <code>finally</code>.</p>
+<p>Return a typed bounded failure and metric category such as dependency-timeout without logging payloads. Fixed clocks make the policy deterministic in tests.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-18-run-a-fault-injection-matrix">Exercise 18 — run a fault-injection matrix<a class="heading-anchor" href="#solution-1--exercise-18-run-a-fault-injection-matrix" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Inject dependency false/exception/latency, artifact tampering, auth outage, limiter saturation, log-export failure, handler exception, and drain. For each, predict status, readiness/health, cleanup, log, and metric evidence.</p>
+<p><strong>Reasoning path:</strong> Faults are local fakes, not destructive infrastructure tests. Assert invariants and recovery after each isolated scenario.</p>
+<p>Build a table of fault, expected external response, state transition, active lease count, event type, and metric delta. Reset fixtures between cases. Health stays responsive unless the process itself cannot serve diagnostics; readiness reflects required dependency/artifact/drain policy.</p>
+<p>The matrix exposes missing observability and failure coupling. It does not claim production chaos readiness without deployed-system validation.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-19-define-an-slo-and-error-budget">Exercise 19 — define an SLO and error budget<a class="heading-anchor" href="#solution-1--exercise-19-define-an-slo-and-error-budget" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Define one availability and one latency SLI over eligible requests, target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action. Use generated local events to compute a small example.</p>
+<p><strong>Reasoning path:</strong> SLIs need exact numerator/denominator and route/outcome policy. Avoid user/request IDs or arbitrary URLs as labels.</p>
+<p>For example, availability is successful eligible requests divided by eligible requests, with client validation failures handled by a declared policy. Latency uses a percentile/distribution for successful eligible work. Calculate consumed bad-event budget over the window and compare short/long burn evidence.</p>
+<p>Targets are product policy, not universal constants. Missing telemetry and low volume are reported, not silently treated as success.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<h5 id="solution-1--exercise-20-audit-privacy-retention-and-cardinality">Exercise 20 — audit privacy, retention, and cardinality<a class="heading-anchor" href="#solution-1--exercise-20-audit-privacy-retention-and-cardinality" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt recap:</strong> Inventory every log field, metric label, trace attribute, and local artifact. Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and owner; then test representative forbidden values.</p>
+<p><strong>Reasoning path:</strong> Use allowlists for structured fields and labels. Counts/opaque IDs often replace raw values; request bodies remain excluded by default.</p>
+<p>Fail tests if placeholder token, password, API key, email, or body text appears in captured telemetry. Enforce bounded route/action/error enums for metric labels and measure series count under adversarial IDs. Document retention and deletion behavior for local files/exporters.</p>
+<p>Redaction is defense in depth, not permission to collect unnecessary data. Remove fields without a justified operational purpose.</p>
+<p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_svc_02_hardening_observability_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_svc_02_hardening_observability_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-svc-02.</span>
+<span> </span>
+<span>This is a local policy model, not an Internet-facing server. All dependencies,</span>
+<span>identity, time, work, and artifact files are injected or temporary.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span>import hashlib</span>
+<span>import json</span>
+<span>import tempfile</span>
+<span>import threading</span>
+<span>from collections.abc import Callable, Mapping, Sequence</span>
+<span>from dataclasses import dataclass, field</span>
+<span>from pathlib import Path</span>
+<span>from types import TracebackType</span>
+<span>from typing import Literal, Protocol, TypeAlias</span>
+<span> </span>
+<span>Role = Literal[&quot;reader&quot;, &quot;operator&quot;]</span>
+<span>JsonScalar: TypeAlias = str | int | float | bool | None</span>
+<span> </span>
+<span> </span>
+<span>class Clock(Protocol):</span>
+<span>    def now(self) -&gt; float:</span>
+<span>        &quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>class DependencyProbe(Protocol):</span>
+<span>    def ready(self) -&gt; bool:</span>
+<span>        &quot;&quot;&quot;Return whether the dependency can serve new work.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>class Authenticator(Protocol):</span>
+<span>    def authenticate(self, token: str) -&gt; Principal | None:</span>
+<span>        &quot;&quot;&quot;Resolve a credential without logging it.&quot;&quot;&quot;</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ServiceConfig:</span>
+<span>    max_concurrency: int</span>
+<span>    rate_capacity: int</span>
+<span>    refill_per_second: float</span>
+<span> </span>
+<span>    @classmethod</span>
+<span>    def from_mapping(cls, values: Mapping[str, str]) -&gt; ServiceConfig:</span>
+<span>        try:</span>
+<span>            max_concurrency = int(values.get(&quot;MAX_CONCURRENCY&quot;, &quot;4&quot;))</span>
+<span>            rate_capacity = int(values.get(&quot;RATE_CAPACITY&quot;, &quot;10&quot;))</span>
+<span>            refill_per_second = float(values.get(&quot;REFILL_PER_SECOND&quot;, &quot;2&quot;))</span>
+<span>        except ValueError as exc:</span>
+<span>            raise ValueError(&quot;service limits must be numeric&quot;) from exc</span>
+<span>        if max_concurrency &lt; 1 or rate_capacity &lt; 1 or refill_per_second &lt;= 0:</span>
+<span>            raise ValueError(&quot;service limits must be positive&quot;)</span>
+<span>        return cls(max_concurrency, rate_capacity, refill_per_second)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Principal:</span>
+<span>    subject: str</span>
+<span>    role: Role</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class StaticAuthenticator:</span>
+<span>    identities: Mapping[str, Principal] = field(repr=False)</span>
+<span> </span>
+<span>    def authenticate(self, token: str) -&gt; Principal | None:</span>
+<span>        return self.identities.get(token)</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class FixedProbe:</span>
+<span>    value: bool</span>
+<span> </span>
+<span>    def ready(self) -&gt; bool:</span>
+<span>        return self.value</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class Status:</span>
+<span>    ok: bool</span>
+<span>    reasons: tuple[str, ...] = ()</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class LogEvent:</span>
+<span>    event: str</span>
+<span>    request_id: str</span>
+<span>    fields: tuple[tuple[str, str], ...]</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class StructuredLog:</span>
+<span>    events: list[LogEvent] = field(default_factory=list)</span>
+<span> </span>
+<span>    def emit(</span>
+<span>        self,</span>
+<span>        event: str,</span>
+<span>        request_id: str,</span>
+<span>        fields: Mapping[str, str],</span>
+<span>    ) -&gt; None:</span>
+<span>        self.events.append(</span>
+<span>            LogEvent(</span>
+<span>                event,</span>
+<span>                request_id,</span>
+<span>                tuple(sorted(redact_fields(fields).items())),</span>
+<span>            )</span>
+<span>        )</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class Metrics:</span>
+<span>    counters: dict[str, int] = field(default_factory=dict)</span>
+<span>    durations: dict[str, list[float]] = field(default_factory=dict)</span>
+<span> </span>
+<span>    def increment(self, name: str) -&gt; None:</span>
+<span>        self.counters[name] = self.counters.get(name, 0) + 1</span>
+<span> </span>
+<span>    def observe(self, name: str, value: float) -&gt; None:</span>
+<span>        if value &lt; 0:</span>
+<span>            raise ValueError(&quot;duration must be non-negative&quot;)</span>
+<span>        self.durations.setdefault(name, []).append(value)</span>
+<span> </span>
+<span>    def snapshot(self) -&gt; dict[str, int | tuple[float, ...]]:</span>
+<span>        result: dict[str, int | tuple[float, ...]] = dict(self.counters)</span>
+<span>        result.update({name: tuple(values) for name, values in self.durations.items()})</span>
+<span>        return result</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class FixedClock:</span>
+<span>    value: float</span>
+<span> </span>
+<span>    def now(self) -&gt; float:</span>
+<span>        return self.value</span>
+<span> </span>
+<span>    def advance(self, seconds: float) -&gt; None:</span>
+<span>        if seconds &lt; 0:</span>
+<span>            raise ValueError(&quot;clock cannot move backward&quot;)</span>
+<span>        self.value += seconds</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class TokenBucket:</span>
+<span>    capacity: int</span>
+<span>    refill_per_second: float</span>
+<span>    clock: Clock</span>
+<span>    _state: dict[str, tuple[float, float]] = field(default_factory=dict)</span>
+<span> </span>
+<span>    def allow(self, subject: str) -&gt; bool:</span>
+<span>        if not subject:</span>
+<span>            raise ValueError(&quot;rate-limit subject must not be blank&quot;)</span>
+<span>        now = self.clock.now()</span>
+<span>        tokens, previous = self._state.get(subject, (float(self.capacity), now))</span>
+<span>        tokens = min(</span>
+<span>            float(self.capacity),</span>
+<span>            tokens + max(0.0, now - previous) * self.refill_per_second,</span>
+<span>        )</span>
+<span>        if tokens &lt; 1.0:</span>
+<span>            self._state[subject] = (tokens, now)</span>
+<span>            return False</span>
+<span>        self._state[subject] = (tokens - 1.0, now)</span>
+<span>        return True</span>
+<span> </span>
+<span> </span>
+<span>class ConcurrencyLease:</span>
+<span>    def __init__(self, gate: ConcurrencyGate) -&gt; None:</span>
+<span>        self._gate = gate</span>
+<span>        self._released = False</span>
+<span> </span>
+<span>    def __enter__(self) -&gt; ConcurrencyLease:</span>
+<span>        return self</span>
+<span> </span>
+<span>    def __exit__(</span>
+<span>        self,</span>
+<span>        exception_type: type[BaseException] | None,</span>
+<span>        exception: BaseException | None,</span>
+<span>        traceback: TracebackType | None,</span>
+<span>    ) -&gt; Literal[False]:</span>
+<span>        if not self._released:</span>
+<span>            self._released = True</span>
+<span>            self._gate.release()</span>
+<span>        return False</span>
+<span> </span>
+<span> </span>
+<span>class ConcurrencyGate:</span>
+<span>    def __init__(self, capacity: int) -&gt; None:</span>
+<span>        if capacity &lt; 1:</span>
+<span>            raise ValueError(&quot;capacity must be positive&quot;)</span>
+<span>        self._semaphore = threading.BoundedSemaphore(capacity)</span>
+<span>        self._lock = threading.Lock()</span>
+<span>        self._active = 0</span>
+<span>        self._peak = 0</span>
+<span> </span>
+<span>    @property</span>
+<span>    def active(self) -&gt; int:</span>
+<span>        with self._lock:</span>
+<span>            return self._active</span>
+<span> </span>
+<span>    @property</span>
+<span>    def peak(self) -&gt; int:</span>
+<span>        with self._lock:</span>
+<span>            return self._peak</span>
+<span> </span>
+<span>    def try_acquire(self) -&gt; ConcurrencyLease | None:</span>
+<span>        if not self._semaphore.acquire(blocking=False):</span>
+<span>            return None</span>
+<span>        with self._lock:</span>
+<span>            self._active += 1</span>
+<span>            self._peak = max(self._peak, self._active)</span>
+<span>        return ConcurrencyLease(self)</span>
+<span> </span>
+<span>    def release(self) -&gt; None:</span>
+<span>        with self._lock:</span>
+<span>            if self._active &lt; 1:</span>
+<span>                raise RuntimeError(&quot;concurrency lease released twice&quot;)</span>
+<span>            self._active -= 1</span>
+<span>        self._semaphore.release()</span>
+<span> </span>
+<span> </span>
+<span>def is_authorized(role: Role, action: str) -&gt; bool:</span>
+<span>    permissions: dict[Role, frozenset[str]] = {</span>
+<span>        &quot;reader&quot;: frozenset({&quot;predict&quot;}),</span>
+<span>        &quot;operator&quot;: frozenset({&quot;predict&quot;, &quot;reload&quot;}),</span>
+<span>    }</span>
+<span>    return action in permissions[role]</span>
+<span> </span>
+<span> </span>
+<span>def readiness(</span>
+<span>    dependency_checks: Sequence[bool],</span>
+<span>    *,</span>
+<span>    artifact_verified: bool,</span>
+<span>    draining: bool,</span>
+<span>) -&gt; bool:</span>
+<span>    return bool(dependency_checks) and all(dependency_checks) and artifact_verified and not draining</span>
+<span> </span>
+<span> </span>
+<span>def redact_fields(fields: Mapping[str, str]) -&gt; dict[str, str]:</span>
+<span>    sensitive = {&quot;token&quot;, &quot;authorization&quot;, &quot;password&quot;, &quot;secret&quot;, &quot;api_key&quot;}</span>
+<span>    return {</span>
+<span>        key: &quot;&lt;redacted&gt;&quot; if key.lower() in sensitive else value for key, value in fields.items()</span>
+<span>    }</span>
+<span> </span>
+<span> </span>
+<span>def sha256_file(path: Path) -&gt; str:</span>
+<span>    return hashlib.sha256(path.read_bytes()).hexdigest()</span>
+<span> </span>
+<span> </span>
+<span>def load_trusted_json(path: Path, expected_sha256: str) -&gt; dict[str, JsonScalar]:</span>
+<span>    if len(expected_sha256) != 64 or sha256_file(path) != expected_sha256:</span>
+<span>        raise ValueError(&quot;artifact hash verification failed&quot;)</span>
+<span>    raw = json.loads(path.read_text(encoding=&quot;utf-8&quot;))</span>
+<span>    if not isinstance(raw, dict) or not all(</span>
+<span>        isinstance(key, str) and (value is None or isinstance(value, str | int | float | bool))</span>
+<span>        for key, value in raw.items()</span>
+<span>    ):</span>
+<span>        raise ValueError(&quot;trusted artifact must be a flat JSON object&quot;)</span>
+<span>    return raw</span>
+<span> </span>
+<span> </span>
+<span>@dataclass(frozen=True)</span>
+<span>class ServiceResponse:</span>
+<span>    status: int</span>
+<span>    message: str</span>
+<span> </span>
+<span> </span>
+<span>@dataclass</span>
+<span>class HardenedService:</span>
+<span>    dependencies: Mapping[str, DependencyProbe]</span>
+<span>    artifact_verified: bool</span>
+<span>    authenticator: Authenticator</span>
+<span>    rate_limiter: TokenBucket</span>
+<span>    gate: ConcurrencyGate</span>
+<span>    log: StructuredLog</span>
+<span>    metrics: Metrics</span>
+<span>    clock: Clock</span>
+<span>    draining: bool = False</span>
+<span> </span>
+<span>    def health(self) -&gt; Status:</span>
+<span>        return Status(True)</span>
+<span> </span>
+<span>    def ready(self) -&gt; Status:</span>
+<span>        reasons = [] if self.dependencies else [&quot;dependency:none_configured&quot;]</span>
+<span>        reasons.extend(</span>
+<span>            f&quot;dependency:{name}&quot; for name, probe in self.dependencies.items() if not probe.ready()</span>
+<span>        )</span>
+<span>        if not self.artifact_verified:</span>
+<span>            reasons.append(&quot;artifact:not_verified&quot;)</span>
+<span>        if self.draining:</span>
+<span>            reasons.append(&quot;service:draining&quot;)</span>
+<span>        return Status(not reasons, tuple(sorted(reasons)))</span>
+<span> </span>
+<span>    def handle(</span>
+<span>        self,</span>
+<span>        *,</span>
+<span>        request_id: str,</span>
+<span>        token: str,</span>
+<span>        action: str,</span>
+<span>        work: Callable[[], str],</span>
+<span>    ) -&gt; ServiceResponse:</span>
+<span>        if not request_id.strip():</span>
+<span>            return ServiceResponse(400, &quot;request ID required&quot;)</span>
+<span>        ready = self.ready()</span>
+<span>        if not ready.ok:</span>
+<span>            self.metrics.increment(&quot;requests_not_ready&quot;)</span>
+<span>            self.log.emit(</span>
+<span>                &quot;request_rejected&quot;,</span>
+<span>                request_id,</span>
+<span>                {&quot;reason&quot;: &quot;,&quot;.join(ready.reasons)},</span>
+<span>            )</span>
+<span>            return ServiceResponse(503, &quot;not ready&quot;)</span>
+<span>        principal = self.authenticator.authenticate(token)</span>
+<span>        if principal is None:</span>
+<span>            self.metrics.increment(&quot;requests_unauthenticated&quot;)</span>
+<span>            return ServiceResponse(401, &quot;authentication required&quot;)</span>
+<span>        if not is_authorized(principal.role, action):</span>
+<span>            self.metrics.increment(&quot;requests_forbidden&quot;)</span>
+<span>            return ServiceResponse(403, &quot;forbidden&quot;)</span>
+<span>        if not self.rate_limiter.allow(principal.subject):</span>
+<span>            self.metrics.increment(&quot;requests_rate_limited&quot;)</span>
+<span>            return ServiceResponse(429, &quot;rate limited&quot;)</span>
+<span>        lease = self.gate.try_acquire()</span>
+<span>        if lease is None:</span>
+<span>            self.metrics.increment(&quot;requests_saturated&quot;)</span>
+<span>            return ServiceResponse(503, &quot;busy&quot;)</span>
+<span> </span>
+<span>        started = self.clock.now()</span>
+<span>        with lease:</span>
+<span>            self.log.emit(</span>
+<span>                &quot;request_started&quot;,</span>
+<span>                request_id,</span>
+<span>                {&quot;action&quot;: action, &quot;subject&quot;: principal.subject},</span>
+<span>            )</span>
+<span>            try:</span>
+<span>                message = work()</span>
+<span>            except Exception as exc:</span>
+<span>                self.metrics.increment(&quot;requests_failed&quot;)</span>
+<span>                self.log.emit(</span>
+<span>                    &quot;request_failed&quot;,</span>
+<span>                    request_id,</span>
+<span>                    {&quot;error_type&quot;: type(exc).__name__},</span>
+<span>                )</span>
+<span>                return ServiceResponse(500, &quot;internal error&quot;)</span>
+<span>            finally:</span>
+<span>                self.metrics.observe(&quot;request_duration_seconds&quot;, self.clock.now() - started)</span>
+<span>        self.metrics.increment(&quot;requests_succeeded&quot;)</span>
+<span>        self.log.emit(&quot;request_completed&quot;, request_id, {&quot;action&quot;: action})</span>
+<span>        return ServiceResponse(200, message)</span>
+<span> </span>
+<span> </span>
+<span>def main() -&gt; int:</span>
+<span>    with tempfile.TemporaryDirectory(prefix=&quot;ds60-service-drill-&quot;) as directory:</span>
+<span>        artifact = Path(directory) / &quot;model.json&quot;</span>
+<span>        artifact.write_text(&#x27;{&quot;format&quot;:&quot;local-json-v1&quot;,&quot;version&quot;:1}&#x27;, encoding=&quot;utf-8&quot;)</span>
+<span>        load_trusted_json(artifact, sha256_file(artifact))</span>
+<span> </span>
+<span>        clock = FixedClock(10.0)</span>
+<span>        dependency = FixedProbe(True)</span>
+<span>        service = HardenedService(</span>
+<span>            dependencies={&quot;model-store&quot;: dependency},</span>
+<span>            artifact_verified=True,</span>
+<span>            authenticator=StaticAuthenticator({&quot;local-reader&quot;: Principal(&quot;learner&quot;, &quot;reader&quot;)}),</span>
+<span>            rate_limiter=TokenBucket(2, 1.0, clock),</span>
+<span>            gate=ConcurrencyGate(1),</span>
+<span>            log=StructuredLog(),</span>
+<span>            metrics=Metrics(),</span>
+<span>            clock=clock,</span>
+<span>        )</span>
+<span>        print(</span>
+<span>            &quot;normal request:&quot;,</span>
+<span>            service.handle(</span>
+<span>                request_id=&quot;request-1&quot;,</span>
+<span>                token=&quot;local-reader&quot;,</span>
+<span>                action=&quot;predict&quot;,</span>
+<span>                work=lambda: &quot;prediction-local&quot;,</span>
+<span>            ),</span>
+<span>        )</span>
+<span>        dependency.value = False</span>
+<span>        print(&quot;incident readiness:&quot;, service.ready())</span>
+<span>        print(&quot;health stays process-level:&quot;, service.health())</span>
+<span>        print(&quot;metrics:&quot;, service.metrics.snapshot())</span>
+<span>    return 0</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raise SystemExit(main())</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-ml-01.html"><small>Previous lesson</small><strong>python-ml-01</strong><span>Reproducible Data and Model Delivery</span></a>
+        <a class="nav-card next" href="python-perf-01.html"><small>Next lesson</small><strong>python-perf-01</strong><span>Measurement-First Performance Engineering</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-svc-02";
+    const LEARNER_PATH = "python/professional/lessons/py_svc_02_hardening_observability.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,22 @@
 # ds60sqlpy project overview
 
 - Purpose: a self-paced, beginner-friendly Python/data-science, PostgreSQL, and Python/PostgreSQL engineering curriculum that works on Windows, macOS, and Linux. The historical day count is an ordering aid, not a deadline.
-- Learner entry points: `README.md` and generated `START_HERE.html`; human navigation: `docs/curriculum-map.md`; generated machine inventory: `curriculum/catalog.json`. `scripts/learning_portal.py` optionally serves the guide on loopback, synchronizes ignored `.learning/progress.json`, and exposes only allowlisted VS Code/Jupyter actions. Regenerate the catalog with `.venv/bin/python scripts/build_catalog.py` on macOS/Linux. On Windows, use the interpreter printed by the bootstrap: `.venv\Scripts\python.exe` for standard `venv` or `.venv\python.exe` for a conda prefix.
+- Learner entry points: `README.md`, generated `START_HERE.html`, and one
+  deterministic rendered page per catalog lesson under `lesson-pages/`;
+  human navigation: `docs/curriculum-map.md`; generated machine inventory:
+  `curriculum/catalog.json`. Linked non-catalog Markdown/SQL sources render
+  under `reference-pages/`, so generated navigation never opens raw local
+  source. Static pages are self-contained/read-only and usable over `file://`;
+  static completion stays on `START_HERE.html`.
+  `scripts/learning_portal.py` optionally serves the pages on loopback,
+  synchronizes ignored `.learning/progress.json`, reveals the lesson-level
+  completion control, and exposes only catalog-resolved VS Code/Jupyter
+  actions.
+- Windows front door: double-click `START_DS60.cmd`. Its PowerShell 5.1
+  orchestrator discovers or prepares either supported `.venv` layout, checks
+  VS Code/PostgreSQL/Jupyter/kernel readiness, runs the doctor, and opens the
+  private portal. Connected setup requires acknowledgement; diagnostics are
+  read-only.
 - Python track: 60 learner notebooks, 60 companion guides, 60 Markdown
   solutions, and 60 runnable solution notebooks under `python/ds-60day/`, plus
   10 named professional modules under `python/professional/`. All 120 core
@@ -21,7 +36,22 @@
   migration delivery, local AI application engineering, and analytics
   engineering. Starters remain runnable without a database; fake-backed tests
   validate the solution contracts.
-- Course tooling: importable package under `src/ds60sqlpy/`; source-checkout CLI `python scripts/course.py` provides doctor, catalog, validation, progress, portal, and PostgreSQL runners. `scripts/audit_practice.py` enforces each lesson surface's `max(6, 2 x immutable baseline)` practice target, and `scripts/build_course_guide.py` is the only source for `START_HERE.html`. `bridge/scripts/validate_bridge.py` adds bridge-specific checks.
+- Course tooling: importable package under `src/ds60sqlpy/`; source-checkout
+  CLI `python scripts/course.py` provides doctor, catalog, validation,
+  progress, portal, and PostgreSQL runners. `scripts/audit_practice.py`
+  enforces each lesson surface's `max(6, 2 x immutable baseline)` practice
+  target. `scripts/build_course_guide.py` is the only source for
+  `START_HERE.html`; `src/ds60sqlpy/lesson_reader.py` and
+  `scripts/build_lesson_readers.py` own the tracked `lesson-pages/` and
+  `reference-pages/` output. `bridge/scripts/validate_bridge.py` adds
+  bridge-specific checks.
+- Guided SQL flow: a SQL reader's private action calls the catalog-restricted
+  generator in `src/ds60sqlpy/sql_notebook.py`, creates an editable notebook
+  and SQL copy beneath ignored `.learning/sql/<lesson-id>/`, and launches that
+  exact notebook. It preserves existing work, uses fixed non-shell `psql -f`,
+  accepts only `advanced_sql_training`, and separates explicit database reset
+  confirmation from lesson execution. The checked-in `bridge-jupyter-01`
+  notebook remains the separate JupySQL-magics lesson.
 - Notebook maintenance: `scripts/normalize_notebooks.py`, `scripts/build_solution_notebooks.py`, and `scripts/validate_notebooks.py` are deterministic and idempotent. Generated Day 46-60 solution notebooks come from their Markdown sources.
 - Cross-platform setup: `scripts/setup.ps1` on Windows and `scripts/setup.sh` on macOS/Linux create the ignored local `.venv` and register `Python (ds60sqlpy)`. Optional-dependency profiles live in `pyproject.toml`; convenience aliases live under `requirements/`; `uv.lock` is the reviewed cross-platform resolution.
 - Agent guidance: root `AGENTS.md`, nested track guidance, and `.agents/skills/guide-ds60sqlpy-learning/` support hint-first Codex tutoring, learner-machine-aware setup, assessment, and opt-in local progress.

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Curriculum gap backlog · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Curriculum gap backlog</h1>
+      <p class="source-path">Generated from <code>docs/curriculum-gap-backlog.md</code></p>
+    </header>
+    <article class="document"><h2 id="curriculum-gap-backlog">Curriculum gap backlog<a class="heading-anchor" href="#curriculum-gap-backlog" aria-label="Link to this section">#</a></h2>
+<p><strong>Status:</strong> implemented; all 25 audited gaps have runnable learner and solution artifacts. <strong>Reviewed:</strong> 2026-07-30 <strong>Audience:</strong> curriculum maintainers, learners choosing an advanced path, and Codex agents planning future changes.</p>
+<p>DS60 now has 70 Python/data-science lessons, 72 PostgreSQL lessons, and a 12-lesson Python/PostgreSQL engineering bridge. This backlog records the <em>dedicated, executable learning experiences</em> identified by the 2026-07 audit and the implementation state of each one. A term mentioned in a guide does not count as coverage unless a learner can practise it, check the result, and review a separate solution.</p>
+<p>This is a finite planning backlog, not a claim that any repository can teach literally every feature of Python, PostgreSQL, and their ecosystems. The core course remains beginner-friendly and offline after the documented bootstrap. Specializations stay opt-in.</p>
+<h3 id="how-to-use-this-backlog">How to use this backlog<a class="heading-anchor" href="#how-to-use-this-backlog" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>[x] means implemented with artifacts, catalog entries, navigation, and validation. A reopened item should return to [ ] and explain the regression or missing evidence.</li>
+<li><strong>P0</strong> closes a material professional-skill gap and should be implemented before expanding into more optional topics.</li>
+<li><strong>P1</strong> is a worthwhile advanced extension after P0.</li>
+<li><strong>P2</strong> is a specialization, not a prerequisite for course completion.</li>
+<li>“Revise” means strengthen the named lesson(s) instead of creating duplicate content. “New” means a separately navigable lesson or tightly scoped mini-module is warranted.</li>
+</ul>
+<p>Do not renumber existing Days 1–60. A future implementer should select stable catalog IDs and place additions at clear checkpoints, as described in <a href="curriculum-map.md.html#adding-lessons-beyond-60">the curriculum map</a>.</p>
+<h3 id="implementation-verification-status">Implementation verification status<a class="heading-anchor" href="#implementation-verification-status" aria-label="Link to this section">#</a></h3>
+<p>The checked backlog and the repository-wide practice-enrichment gate answer different questions. The checklist records whether each audited topic has a dedicated runnable learning experience; it does not, by itself, prove that every historical lesson has doubled practice on every learner, guide, and solution surface.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Gate</th>
+<th>2026-07-30 state</th>
+<th>Evidence and boundary</th>
+</tr></thead><tbody>
+<tr>
+<td>25 audited curriculum gaps</td>
+<td><strong>Implemented</strong></td>
+<td>Every P0, P1, and P2 item below has a stable catalog entry, learner artifact, companion guide, and separate solution.</td>
+</tr>
+<tr>
+<td>Catalog and navigation</td>
+<td><strong>Implemented</strong></td>
+<td><code>curriculum/catalog.json</code> contains 154 lessons: 70 Python, 72 SQL, and 12 bridge. The 26 named modules comprise the 25 audited gaps plus the requested <code>bridge-jupyter-01</code> module.</td>
+</tr>
+<tr>
+<td>Windows discovery bootstrap</td>
+<td><strong>Implemented; platform verification remains explicit</strong></td>
+<td><code>scripts/bootstrap_windows.ps1</code> discovers supported Anaconda/Python and PostgreSQL installations even when they are absent from <code>PATH</code>, creates <code>.venv</code>, installs notebook/kernel dependencies, and avoids database or credential operations. Native PowerShell execution is still a Windows validation result, not something inferred from a macOS/Linux review.</td>
+</tr>
+<tr>
+<td>PostgreSQL and notebook workflow</td>
+<td><strong>Implemented and locally live-validated</strong></td>
+<td>On 2026-07-30, PostgreSQL 16.14 executed all 72 learner SQL scripts, all 72 executable solution scripts, and 18/18 PostgreSQL notebook code cells, including 9 live database cells. <code>bridge-jupyter-01</code> uses JupySQL, an SQLAlchemy engine with the Psycopg 3 dialect, and the disposable course database. This evidence applies to the validated local environment; another machine must still prove its own service state, role, port, and authentication.</td>
+</tr>
+<tr>
+<td>Portable portal</td>
+<td><strong>Implemented; generated-output drift is gated</strong></td>
+<td><code>START_HERE.html</code> and private launcher mode derive lesson paths and prerequisites from the generated catalog. <code>python scripts/build_course_guide.py --check</code> must pass after catalog or lesson changes.</td>
+</tr>
+<tr>
+<td>Exercise doubling</td>
+<td><strong>Complete</strong></td>
+<td><code>python scripts/audit_practice.py</code> passes all 154 lessons across learner, guide, and solution surfaces. The generated <code>docs/practice-coverage.md</code> records the immutable-baseline comparison, and repository validation resolves its links.</td>
+</tr>
+</tbody></table></div>
+<p>These boundaries are deliberate: “implemented,” “structure validated,” “executed on Windows,” and “connected to live PostgreSQL” are separate claims. See <a href="validation.md.html">Validation</a> for the commands and evidence labels.</p>
+<h3 id="evidence-and-non-duplication-notes">Evidence and non-duplication notes<a class="heading-anchor" href="#evidence-and-non-duplication-notes" aria-label="Link to this section">#</a></h3>
+<p>The current course is stronger than a title-only audit suggests:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Existing coverage</th>
+<th>Consequence for this backlog</th>
+</tr></thead><tbody>
+<tr>
+<td>Python Day 10 teaches parametrization, pytest.raises, and tmp_path; Bridge Day 5 adds database fakes and rollback fixtures.</td>
+<td>A testing extension must start with fixture design, isolation boundaries, and property-based testing—not repeat assertions.</td>
+</tr>
+<tr>
+<td>Bridge Day 7 uses asyncio TaskGroup, cancellation, and bounded database concurrency.</td>
+<td>A Python concurrency lesson must cover the choice among async I/O, threads, and processes, plus queues and Windows process-start behavior.</td>
+</tr>
+<tr>
+<td>Python Day 18 explicitly identifies Parquet as engine-dependent; Days 52–56 cover Dask, MLflow, and orchestration.</td>
+<td>A new data-engine lesson should teach the local Parquet/Arrow/DuckDB boundary, not another pandas introduction.</td>
+</tr>
+<tr>
+<td>Python Day 44 creates a local FastAPI service but explicitly defers authentication, rate limiting, TLS, secrets, audit logs, and rollback.</td>
+<td>Client reliability and service hardening remain valid gaps.</td>
+</tr>
+<tr>
+<td>SQL Day 28 teaches JSON/JSONB basics and Day 29 includes a small full-text-search exercise.</td>
+<td>A dedicated PostgreSQL types/search lesson can go beyond an isolated prompt.</td>
+</tr>
+<tr>
+<td>SQL Days 32–33 teach B-tree, composite, covering, and partial indexes; Day 39 covers SKIP LOCKED and advisory locks.</td>
+<td>Index maintenance/type selection and queue-operation patterns need only extension work, not a restart.</td>
+</tr>
+<tr>
+<td>SQL Day 43 teaches logical COPY and client-side copy staging and explicitly excludes production PITR; Day 44 safely reads pg_stat_activity and optional pg_stat_statements.</td>
+<td>Disaster recovery and deeper operations can be added without weakening the existing safe defaults.</td>
+</tr>
+</tbody></table></div>
+<p>The external references below helped calibrate the scope. They are design references, not a requirement that learners browse while studying:</p>
+<ul>
+<li><a href="https://docs.python.org/3/library/concurrency.html">Python concurrency overview</a> and <a href="https://docs.python.org/3/library/asyncio-task.html">structured asyncio tasks</a> distinguish CPU-bound, I/O-bound, cooperative, and preemptive work.</li>
+<li>The <a href="https://packaging.python.org/en/latest/tutorials/packaging-projects/">Python Packaging User Guide</a> defines a practical pyproject.toml/build/distribution workflow.</li>
+<li>PostgreSQL’s <a href="https://www.postgresql.org/docs/18/ddl.html">data-definition chapter</a> groups constraints, privileges, row security, schemas, and table changes; its <a href="https://www.postgresql.org/docs/18/ddl-constraints.html">constraints section</a> makes clear why integrity belongs in the schema.</li>
+<li>PostgreSQL documents <a href="https://www.postgresql.org/docs/18/xproc.html">routines</a>, <a href="https://www.postgresql.org/docs/18/indexes-types.html">index types</a>, <a href="https://www.postgresql.org/docs/current/datatype-json.html">JSON types</a>, <a href="https://www.postgresql.org/docs/current/datatype-textsearch.html">full-text-search types</a>, <a href="https://www.postgresql.org/docs/18/sql-copy.html">COPY</a>, and <a href="https://www.postgresql.org/docs/18/continuous-archiving.html">point-in-time recovery</a>.</li>
+</ul>
+<h3 id="p0-implemented-professional-foundations">P0 — implemented professional foundations<a class="heading-anchor" href="#p0-implemented-professional-foundations" aria-label="Link to this section">#</a></h3>
+<h4 id="python-and-data-engineering">Python and data engineering<a class="heading-anchor" href="#python-and-data-engineering" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>[x] <strong>PY-PRO-01 — Package engineering and local release workflow</strong> <em>(new; after Python Day 15)</em></li>
+</ul>
+<p>Teach a src layout; the project, build-system, and tool tables in pyproject.toml; dependency groups and environment markers; console-script entry points; wheels versus source distributions; and a clean local install/test. Keep publishing to a public package index out of the default exercise. The existing modules, tooling, and capstone lessons mention parts of this workflow but do not take a learner from source tree to a verified artifact.</p>
+<p><strong>Done when:</strong> an offline fixture project builds a wheel, installs into a fresh local target, exposes a command, and proves that its installed import rather than the working tree is used.</p>
+<ul>
+<li>[x] <strong>PY-PRO-02 — Concurrency and parallelism decision lab</strong> <em>(new; after Python Day 15 and before/alongside Bridge Day 7)</em></li>
+</ul>
+<p>Teach the distinction between concurrency and parallelism; I/O-bound versus CPU-bound work; asyncio, ThreadPoolExecutor, and ProcessPoolExecutor; cancellation, timeout, backpressure, queues, shared-state hazards, and failure propagation. Include Windows spawn and main-guard behaviour. Reuse Bridge Day 7 only as the database-specific follow-on.</p>
+<p><strong>Done when:</strong> deterministic local workloads demonstrate why the wrong model is slower or unsafe, bounded work never exceeds its declared limit, and cancellation cleans up without hanging a notebook or PowerShell session.</p>
+<ul>
+<li>[x] <strong>PY-DATA-01 — Columnar data, Arrow, and embedded analytical SQL</strong> <em>(new; after Python Day 23 or Day 30)</em></li>
+</ul>
+<p>Teach CSV versus Parquet trade-offs, schema and null preservation, partition-aware layout, and a small local DuckDB query over Parquet. Explain predicate/column pushdown as an observed plan or measured result, not magic. PyArrow/DuckDB must be an explicit optional profile with a deterministic small local fixture and a pandas-only fallback.</p>
+<p><strong>Done when:</strong> a learner writes and reads Parquet locally, validates a schema round trip, queries it with SQL without a server, and can say when CSV is the more portable choice.</p>
+<ul>
+<li>[x] <strong>PY-SVC-01 — Reliable HTTP clients and external-service boundaries</strong> <em>(new; after Python Day 15; pairs with Bridge Days 3–4)</em></li>
+</ul>
+<p>Teach timeouts, status/error classification, pagination, retry eligibility, exponential backoff with jitter, rate limits, idempotency keys, request correlation IDs, and safe authentication configuration. The entire exercise should use a local fake server or injected transport; no public API key or network account is needed.</p>
+<p><strong>Done when:</strong> tests prove that only safe failures retry, pagination stops, secrets never appear in logs, and a timeout/error reports enough context for diagnosis without exposing credentials.</p>
+<h4 id="postgresql-foundations-and-application-safety">PostgreSQL foundations and application safety<a class="heading-anchor" href="#postgresql-foundations-and-application-safety" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>[x] <strong>SQL-FOUND-01 — Relational design, DDL, and integrity constraints</strong> <em>(new foundation module before SQL Day 1)</em></li>
+</ul>
+<p>The SQL track starts with querying a supplied schema. Add an intentional schema-design lesson covering table grain, cardinality, keys, NOT NULL, CHECK, UNIQUE, primary and foreign keys, defaults, identities/generated columns, NULL semantics, and normalization versus deliberate denormalization. Use a small domain that learners model from requirements before they query it.</p>
+<p><strong>Done when:</strong> a learner can create a normalized schema, load valid rows, predict and observe constraint failures, and explain why a constraint rather than application code protects a stated invariant.</p>
+<ul>
+<li>[x] <strong>SQL-FOUND-02 — Versioned schema migrations and safe evolution</strong> <em>(new; after SQL-FOUND-01 and before advanced operations)</em></li>
+</ul>
+<p>Teach immutable ordered migrations, migration metadata, idempotent seed boundaries, expand–migrate–contract changes, data backfills, compatibility, transactional DDL limits, and forward fixes versus unsafe rollback. The existing capstones correctly warn about reviewed migrations but do not give a learner a controlled migration workflow.</p>
+<p><strong>Done when:</strong> a clean disposable database upgrades through multiple migrations, verification queries prove its final version and invariants, and a simulated application remains compatible during an additive change.</p>
+<ul>
+<li>[x] <strong>SQL-SEC-01 — Schemas, roles, privileges, and row-level security</strong> <em>(new advanced module; after SQL-FOUND-01 and SQL Day 39)</em></li>
+</ul>
+<p>Teach role ownership, GRANT/REVOKE, schema USAGE and search_path, default privileges, least privilege, security-invoker/definer boundaries, and row-level-security policy tests. A learner must see both an allowed and a denied action. The default course database should remain disposable; a capability check and read-only explanation are required where local PostgreSQL does not allow role administration.</p>
+<p><strong>Done when:</strong> two disposable roles demonstrably see different permitted rows/actions, policies are tested as those roles, and the guide explains why table owners and superusers are special cases.</p>
+<h3 id="p1-implemented-advanced-extensions">P1 — implemented advanced extensions<a class="heading-anchor" href="#p1-implemented-advanced-extensions" aria-label="Link to this section">#</a></h3>
+<h4 id="python">Python<a class="heading-anchor" href="#python" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>[x] <strong>PY-TEST-01 — Test architecture, doubles, and generative testing</strong> <em>(new; after Python Day 10 and Bridge Day 5)</em></li>
+</ul>
+<p>Add fixture scope/lifetime, monkeypatch for environment and clock seams, mock-versus-fake choice, contract tests at I/O boundaries, property-based testing, and failure shrinking. Use only local fixtures and explicit seeds where randomness is not the subject.</p>
+<ul>
+<li>[x] <strong>PY-LANG-01 — Advanced typing and the Python data model</strong> <em>(new elective core; after Python Day 12 and Bridge Day 2)</em></li>
+</ul>
+<p>Cover generics, Protocol, TypedDict, overloads, variance at a practical level, iterator/context-manager protocols, descriptors, MRO, and the limits of runtime versus static contracts. Keep metaclasses as a bounded survey, not a default design pattern.</p>
+<ul>
+<li>[x] <strong>PY-STATS-01 — Resampling, experiments, and causal boundaries</strong> <em>(new; after Python Day 32)</em></li>
+</ul>
+<p>Build bootstrap and permutation intervals/tests, effect sizes, power/sample planning, multiple-comparison control, A/B-test design, randomization checks, sequential-peeking risk, and the difference between experimental and observational claims. Existing Day 32 warns about several of these risks; this addition makes the decisions executable.</p>
+<ul>
+<li>[x] <strong>PY-ML-01 — Reproducible data/model delivery</strong> <em>(revise Days 53–55 or add a cumulative lab)</em></li>
+</ul>
+<p>Strengthen artifact lineage with data snapshot identifiers/content hashes, environment and feature-schema compatibility, model registry stages, promotion/rollback evidence, and a small compatibility test. This should extend local MLflow and container material rather than require a cloud account.</p>
+<ul>
+<li>[x] <strong>PY-SVC-02 — Service hardening and observability</strong> <em>(cumulative lab after Python Day 55 and Bridge Day 8)</em></li>
+</ul>
+<p>Cover health/readiness semantics, structured logs, request IDs, metrics, bounded concurrency, configuration validation, trusted artifact loading, authentication/authorization design, rate-limit policy, and a local incident drill. It should explicitly distinguish a local development example from an Internet-facing deployment.</p>
+<h4 id="postgresql">PostgreSQL<a class="heading-anchor" href="#postgresql" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>[x] <strong>SQL-PROG-01 — Functions, procedures, and triggers</strong> <em>(new; after SQL-FOUND-02)</em></li>
+</ul>
+<p>Teach when declarative constraints or application code are safer; SQL and PL/pgSQL routines; routine volatility/security attributes; row versus statement triggers; auditing; transition tables; and trigger tests. Include the difference between a query function and a procedure’s transaction behaviour. Avoid dynamic SQL unless identifiers are validated and quoted.</p>
+<ul>
+<li>[x] <strong>SQL-TYPES-01 — PostgreSQL-native types and searchable documents</strong> <em>(new; after SQL Day 29)</em></li>
+</ul>
+<p>Deepen arrays, ranges/multiranges, domains, enums, UUIDs, JSONB/jsonpath, tsvector/tsquery, ranking, and GIN/trigram trade-offs. Day 28 and a Day 29 prompt are prerequisites; this module should concentrate on modelling and measured query behavior, not duplicate basic JSON extraction.</p>
+<ul>
+<li>[x] <strong>SQL-OPS-01 — Index types, statistics, and maintenance lifecycle</strong> <em>(new; after SQL Day 35)</em></li>
+</ul>
+<p>Extend B-tree coverage with GIN, GiST, SP-GiST, and BRIN selection; expression and operator-class compatibility; ANALYZE, extended statistics, VACUUM/autovacuum, bloat, visibility, plan regression, and index maintenance cost. All interventions must run only against the disposable course database.</p>
+<ul>
+<li>[x] <strong>SQL-OPS-02 — Backup, restore, and recovery rehearsals</strong> <em>(new; after SQL Day 43)</em></li>
+</ul>
+<p>Add pg_dump/pg_restore formats and restore verification before introducing physical base backups, WAL archiving, point-in-time recovery, retention, RPO, RTO, and recovery drills. The default runnable path can remain a logical restore; PITR should be a documented optional Compose-only lab with clear disk/time requirements.</p>
+<ul>
+<li>[x] <strong>SQL-TEST-01 — SQL tests, migration checks, and data contracts</strong> <em>(new; after SQL-FOUND-02 and SQL Day 42)</em></li>
+</ul>
+<p>Teach repeatable test schemas, rollback isolation, invariant and reconciliation queries, migration regression tests, fixture ownership, and contract checks between a producer and table. Use the course’s 00_verify.sql approach as a starting point; do not require a third-party test framework.</p>
+<ul>
+<li>[x] <strong>SQL-ANALYTICS-01 — Reusable analytical-query patterns lab</strong> <em>(new practice pack after SQL Day 30)</em></li>
+</ul>
+<p>Practise gaps-and-islands, sessionization, funnel steps, as-of joins, attribution windows, cohort retention, deduplication, and slowly changing facts with explicit grain and time-zone assumptions. The window/CTE lessons provide the syntax; this lab develops pattern recognition and validation.</p>
+<h4 id="cross-track">Cross-track<a class="heading-anchor" href="#cross-track" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>[x] <strong>BRIDGE-OPS-01 — Database migration delivery and application observability</strong> <em>(new cumulative bridge lab)</em></li>
+</ul>
+<p>Combine a versioned schema migration, Psycopg parameter safety, transactional retry policy, structured logs/metrics, health checks, and an evidence-based rollback/forward-fix decision. It should exercise a local Compose database and fake-backed unit tests so the learner sees the connection between Python release practices and PostgreSQL change safety.</p>
+<h3 id="p2-implemented-opt-in-specialization-lanes">P2 — implemented opt-in specialization lanes<a class="heading-anchor" href="#p2-implemented-opt-in-specialization-lanes" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>[x] <strong>AI application engineering:</strong> embeddings, retrieval, structured output, evaluation datasets, prompt-injection/data-leakage boundaries, cost/latency, and deterministic local test doubles. Do not make a hosted model account a default requirement.</li>
+<li>[x] <strong>Analytics engineering:</strong> semantic models, lineage, data contracts, and a local dbt-style project. Keep it separate from portable SQL fundamentals.</li>
+<li>[x] <strong>PostgreSQL extensions and spatial/vector data:</strong> pg_trgm, citext, pgcrypto, PostGIS, pgvector, and foreign data wrappers. Use a dedicated disposable image/profile and document extension version support.</li>
+<li>[x] <strong>Replication, change data capture, and high availability:</strong> physical and logical replication, publications/subscriptions, replication slots/WAL retention, failover concepts, and consumer idempotency. This is operational specialization work, not a laptop-default prerequisite.</li>
+<li>[x] <strong>Temporal and domain modelling:</strong> bitemporal facts, range exclusion constraints, ledger/audit patterns, and policy-driven retention. Tie each example to a concrete domain rather than presenting it as universal design.</li>
+<li>[x] <strong>Performance-intensive Python:</strong> memory profiling, vectorization versus loops, process-transfer costs, native extensions/FFI boundaries, and a measurement-first optimization case study. Day 11 remains the prerequisite.</li>
+</ul>
+<h3 id="completed-implementation-order">Completed implementation order<a class="heading-anchor" href="#completed-implementation-order" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Make unseen foundations visible:</strong> SQL-FOUND-01, SQL-FOUND-02, and PY-PRO-01. These give learners a schema and a package they can own before more sophisticated projects.</li>
+<li><strong>Make local systems reliable:</strong> PY-SVC-01, PY-PRO-02, and PY-DATA-01. Each can run using deterministic local services/files after bootstrap.</li>
+<li><strong>Teach database responsibility:</strong> SQL-SEC-01, SQL-PROG-01, SQL-TYPES-01, SQL-OPS-01, and SQL-TEST-01.</li>
+<li><strong>Add cumulative professional practice:</strong> PY-TEST-01, PY-STATS-01, PY-ML-01, PY-SVC-02, SQL-OPS-02, SQL-ANALYTICS-01, and BRIDGE-OPS-01.</li>
+<li><strong>Offer P2 lanes only after the shared core remains easy to navigate.</strong></li>
+</ol>
+<p>All five waves are now represented by stable catalog entries. The implementation also added <code>bridge-jupyter-01</code>, a focused PostgreSQL-in-Jupyter module requested during delivery. See <a href="professional-paths.md.html">professional paths</a> for the artifact-by-artifact index and exact prerequisite routes.</p>
+<h3 id="maintenance-rules-for-every-backlog-item">Maintenance rules for every backlog item<a class="heading-anchor" href="#maintenance-rules-for-every-backlog-item" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Decide whether the item is a new stable catalog ID, a revision to an existing lesson, or a multi-session project before creating artifacts.</li>
+<li>Follow <a href="content-authoring.md.html">content authoring</a>: guide, learner artifact, separate solution, prerequisites, exercises, self-check, diagnostics, and explicit dependency/network metadata must agree.</li>
+<li>Supply Windows PowerShell and macOS/Linux commands whenever they differ.</li>
+<li>Default execution must work offline after the documented bootstrap. Optional engines, images, models, and admin privileges need a local fallback or a clear capability boundary.</li>
+<li>Run dangerous database work only against the disposable course database. Do not grant broad privileges, change local server configuration, or enable extensions merely to make a lesson pass.</li>
+<li>Do not use live credentials, public service keys, private data, or hidden caches in examples or validation fixtures.</li>
+<li>Regenerate the catalog and run the repository validation described in <a href="../AGENTS.md.html">AGENTS.md</a> before marking an item done.</li>
+</ul>
+<h3 id="implementation-decision-record">Implementation decision record<a class="heading-anchor" href="#implementation-decision-record" aria-label="Link to this section">#</a></h3>
+<p>The course was deliberately <strong>not</strong> renumbered into a “90-day” linear sequence. A small relational-foundations path now precedes SQL Day 1, while named professional and advanced modules sit at relevant checkpoints. Learners can choose a Python/data, SQL/database, or integrated engineering path without being forced through every specialization.</p>
+<p>Future changes should preserve the stable IDs, executable separation between learner and solution artifacts, offline default, and explicit capability boundaries established by this implementation.</p></article>
+  </main>
+</body>
+</html>

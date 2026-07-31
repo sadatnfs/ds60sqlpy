@@ -15,6 +15,7 @@ from ds60sqlpy.checks import CheckResult, run_checks
 from ds60sqlpy.doctor import Diagnostic, diagnose
 from ds60sqlpy.portal import serve_portal
 from ds60sqlpy.progress import ProgressStore
+from ds60sqlpy.sql_notebook import SqlNotebookError, generate_sql_notebook
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
 
 STATUS_MARK = {"pass": "PASS", "warn": "WARN", "fail": "FAIL"}
@@ -34,7 +35,7 @@ def _catalog_rows(catalog: Catalog, track: Track | None) -> list[dict[str, Any]]
 
 
 def _cmd_doctor(args: argparse.Namespace, catalog: Catalog) -> int:
-    diagnostics = diagnose(catalog)
+    diagnostics = diagnose(catalog, check_database=not args.no_database)
     for diagnostic in diagnostics:
         _print_diagnostic(diagnostic)
     counts = Counter(item.status for item in diagnostics)
@@ -132,6 +133,25 @@ def _cmd_portal(args: argparse.Namespace, catalog: Catalog) -> int:
 
 
 def _cmd_sql(args: argparse.Namespace, catalog: Catalog) -> int:
+    if args.sql_action == "notebook":
+        try:
+            workspace = generate_sql_notebook(
+                catalog,
+                args.lesson_id,
+                args.artifact,
+                args.solution_index,
+            )
+        except SqlNotebookError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        print(f"Guided notebook: {workspace.notebook_path}")
+        print(f"Editable SQL:    {workspace.sql_path}")
+        print(
+            "Open the notebook through the course portal or start JupyterLab "
+            "from the repository root."
+        )
+        return 0
+
     try:
         runner = SqlRunner(catalog, args.database, quiet=args.quiet)
     except SqlRunnerError as exc:
@@ -217,6 +237,11 @@ def _parser() -> argparse.ArgumentParser:
 
     doctor_parser = subparsers.add_parser("doctor", help="Check local tools and packages.")
     doctor_parser.add_argument("--strict", action="store_true", help="Fail on warnings.")
+    doctor_parser.add_argument(
+        "--no-database",
+        action="store_true",
+        help="Keep diagnostics entirely local; do not check course-database reachability.",
+    )
 
     catalog_parser = subparsers.add_parser("catalog", help="List cataloged lessons.")
     catalog_parser.add_argument("--track", choices=("python", "sql", "bridge"))
@@ -281,6 +306,26 @@ def _parser() -> argparse.ArgumentParser:
     run_id_parser.add_argument(
         "lesson_id",
         help="For example: sql-found-01, sql-18, or sql-ops-01",
+    )
+    notebook_parser = sql_subparsers.add_parser(
+        "notebook",
+        help="Create a private guided notebook and editable SQL copy.",
+    )
+    notebook_parser.add_argument(
+        "lesson_id",
+        help="A cataloged SQL ID, for example sql-01 or sql-ops-01.",
+    )
+    notebook_parser.add_argument(
+        "--artifact",
+        choices=("lesson", "solution"),
+        default="lesson",
+        help="Generate the learner lesson or executable SQL solution.",
+    )
+    notebook_parser.add_argument(
+        "--solution-index",
+        type=int,
+        default=1,
+        help="One-based executable solution number (default: 1).",
     )
     all_parser = sql_subparsers.add_parser("all", help="Run all SQL lessons sequentially.")
     all_parser.add_argument(

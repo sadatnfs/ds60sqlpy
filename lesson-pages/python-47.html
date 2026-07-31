@@ -1,0 +1,1196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-47 · PyTorch Basics NN Training Loop · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-47</p>
+        <h1>PyTorch Basics NN Training Loop</h1>
+        <p class="hero-copy">Production, advanced topics, and capstone</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">deep-learning setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-46.html">python-46</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day47_pytorch_basics_nn_training_loop.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+          
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/ds-60day/companion-guides/day47_pytorch_basics_nn_training_loop.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day47_pytorch_basics_nn_training_loop.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-47-pytorch-tensors-modules-and-training-loops">Day 47 — PyTorch Tensors, Modules, and Training Loops<a class="heading-anchor" href="#guide--day-47-pytorch-tensors-modules-and-training-loops" aria-label="Link to this section">#</a></h3>
+<p><strong>Lesson ID:</strong> <code>python-47</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>deep-learning</code> · <strong>Network:</strong> offline</p>
+<p>Day 46 exposed the core update sequence. Today you make the training procedure more realistic with minibatches, explicit training/evaluation modes, and validation-aware extensions.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end of the lesson, you can:</p>
+<ul>
+<li>convert NumPy feature arrays and labels to correctly typed tensors;</li>
+<li>build a classification MLP that returns logits;</li>
+<li>use <code>TensorDataset</code> and <code>DataLoader</code> for minibatches;</li>
+<li>switch correctly between <code>model.train()</code> and <code>model.eval()</code>; and</li>
+<li>reason about dropout, early stopping, schedulers, and optional mixed precision.</li>
+</ul>
+<h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Complete <code>python-46</code> (deep learning overview).</li>
+<li>Know stratified splitting and scaling from <code>python-34</code>–<code>python-35</code>.</li>
+<li>Use CPU by default; CUDA-specific acceleration is optional.</li>
+</ul>
+<h4 id="guide--vocabulary-and-mental-models">Vocabulary and mental models<a class="heading-anchor" href="#guide--vocabulary-and-mental-models" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Definition</th>
+</tr></thead><tbody>
+<tr>
+<td>Logit</td>
+<td>Unnormalized class score produced before softmax</td>
+</tr>
+<tr>
+<td>Batch</td>
+<td>Subset processed in one forward/backward update</td>
+</tr>
+<tr>
+<td><code>DataLoader</code></td>
+<td>Iterator that batches and optionally shuffles a dataset</td>
+</tr>
+<tr>
+<td>Training mode</td>
+<td>Enables training behavior such as dropout</td>
+</tr>
+<tr>
+<td>Evaluation mode</td>
+<td>Disables training-only behavior such as dropout</td>
+</tr>
+<tr>
+<td>Dropout</td>
+<td>Randomly zeros activations during training as regularization</td>
+</tr>
+<tr>
+<td>Early stopping</td>
+<td>Stops after validation performance fails to improve</td>
+</tr>
+<tr>
+<td>Learning-rate scheduler</td>
+<td>Changes the optimizer&#x27;s rate over time</td>
+</tr>
+</tbody></table></div>
+<p><code>CrossEntropyLoss</code> expects logits shaped <code>(batch, classes)</code> and integer class labels with dtype <code>torch.long</code>. Do not apply softmax before this loss.</p>
+<h4 id="guide--worked-example-one-minibatch-safe-epoch">Worked example: one minibatch-safe epoch<a class="heading-anchor" href="#guide--worked-example-one-minibatch-safe-epoch" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import torch
+
+
+def train_one_epoch(
+    model: torch.nn.Module,
+    loader: torch.utils.data.DataLoader,
+    optimizer: torch.optim.Optimizer,
+    loss_fn: torch.nn.Module,
+) -&gt; float:
+    model.train()
+    total_loss = 0.0
+    total_rows = 0
+
+    for features, labels in loader:
+        optimizer.zero_grad()
+        logits = model(features)
+        loss = loss_fn(logits, labels)
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item() * len(features)
+        total_rows += len(features)
+
+    return total_loss / total_rows</code></pre>
+<p>Average by row rather than by batch so a smaller final batch does not receive the same weight as every full batch. Evaluation should use <code>model.eval()</code> and <code>torch.inference_mode()</code>.</p>
+<p>The learner notebook scales before splitting for compactness. In your exercise, improve the boundary: split first, fit <code>StandardScaler</code> only on training features, then transform train and test separately.</p>
+<h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Add dropout to the MLP and compare results.</li>
+<li>Implement a small minibatch training loop with <code>DataLoader</code>.</li>
+</ol>
+<h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Place <code>Dropout(p=...)</code> after an activation. Compare multiple seeded runs or validation curves, because one final accuracy is noisy.</li>
+<li>Wrap float32 features and long labels in a <code>TensorDataset</code>; shuffle only the training loader. Move <code>zero_grad</code>, forward, loss, backward, and step inside the batch loop.</li>
+</ol>
+<p>The separate solution proceeds to early stopping, <code>StepLR</code>, and CUDA mixed precision. Mixed precision is an optional GPU optimization; the code path must remain correct on CPU.</p>
+<h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Build a training loop whose dtype, shape, mode, randomness, and checkpoint state can be inspected and resumed on CPU without hidden notebook state.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Shape and dtype contract:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape. <strong>Progressive hint:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</li>
+<li><strong>Validation implementation:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph. <strong>Progressive hint:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</li>
+<li><strong>DataLoader reproducibility:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes. <strong>Progressive hint:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</li>
+<li><strong>Portable checkpoint:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object. <strong>Progressive hint:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</li>
+</ol>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Why are class labels <code>long</code> while input features are <code>float32</code>?</li>
+<li>What changes when <code>model.eval()</code> is omitted from a model with dropout?</li>
+<li>Why should the validation loader not shuffle for correctness or debugging?</li>
+<li>Where should a scheduler step occur, and why does the scheduler type matter?</li>
+</ul>
+<p>Expected behavior: logits have two columns, validation accuracy is between 0 and 1, and minibatch loss generally decreases. Dropout is not guaranteed to improve one small run.</p>
+<h4 id="guide--pitfalls-diagnostics-and-tradeoffs">Pitfalls, diagnostics, and tradeoffs<a class="heading-anchor" href="#guide--pitfalls-diagnostics-and-tradeoffs" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Response</th>
+</tr></thead><tbody>
+<tr>
+<td>Target dtype error</td>
+<td>Labels are float tensors</td>
+<td>Convert labels with <code>dtype=torch.long</code></td>
+</tr>
+<tr>
+<td>Evaluation changes every call</td>
+<td>Model left in training mode</td>
+<td>Call <code>model.eval()</code> and use inference mode</td>
+</tr>
+<tr>
+<td>Memory grows during evaluation</td>
+<td>Graphs are still recorded</td>
+<td>Use <code>torch.inference_mode()</code></td>
+</tr>
+<tr>
+<td>Scaling leaks test distribution</td>
+<td>Scaler fit before split</td>
+<td>Fit preprocessing on training data only</td>
+</tr>
+<tr>
+<td>Windows worker process errors</td>
+<td>Notebook multiprocessing behavior</td>
+<td>Begin with <code>num_workers=0</code>; use a main guard in scripts</td>
+</tr>
+</tbody></table></div>
+<p>Larger batches improve hardware throughput but use more memory and change optimization dynamics. Smaller batches add gradient noise and more updates.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Work in the <a href="python-47.html#learner">Day 47 learner notebook</a>.</li>
+<li>Then consult the <a href="python-47.html#solution-1">Day 47 solution</a>.</li>
+<li>Continue to <a href="python-48.html#guide">Day 48 — Transfer Learning</a>.</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/notebooks/day47_pytorch_basics_nn_training_loop.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day47_pytorch_basics_nn_training_loop.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-47-pytorch-basics-tensors-autograd-simple-nn">Day 47 — PyTorch basics: tensors, autograd, simple NN<a class="heading-anchor" href="#learner--cell-1--day-47-pytorch-basics-tensors-autograd-simple-nn" aria-label="Link to this section">#</a></h3>
+<p>Objectives:</p>
+<ul>
+<li>Build an MLP.</li>
+<li>Training/validation split.</li>
+<li>Evaluate accuracy. Using sklearn make_classification for simplicity.</li>
+</ul></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import torch, torch.nn as nn, torch.optim as optim</span>
+<span>from sklearn.datasets import make_classification</span>
+<span>from sklearn.model_selection import train_test_split</span>
+<span>from sklearn.preprocessing import StandardScaler</span>
+<span>import numpy as np</span>
+<span>X,y = make_classification(n_samples=2000, n_features=20, n_informative=10, random_state=42)</span>
+<span>sc = StandardScaler(); X = sc.fit_transform(X).astype(np.float32)</span>
+<span>Xtr,Xte,ytr,yte = train_test_split(X,y, test_size=0.2, random_state=42, stratify=y)</span>
+<span>Xtr, Xte = torch.from_numpy(Xtr), torch.from_numpy(Xte)</span>
+<span>ytr, yte = torch.from_numpy(ytr).long(), torch.from_numpy(yte).long()</span>
+<span>model = nn.Sequential(nn.Linear(20,64), nn.ReLU(), nn.Linear(64,2))</span>
+<span>opt = optim.Adam(model.parameters(), lr=1e-3)</span>
+<span>loss_fn = nn.CrossEntropyLoss()</span>
+<span>for epoch in range(50):</span>
+<span>    opt.zero_grad(); out = model(Xtr); loss = loss_fn(out, ytr); loss.backward(); opt.step()</span>
+<span>pred = model(Xte).argmax(1); acc = (pred==yte).float().mean().item(); acc</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Add dropout to the MLP and compare results.</li>
+<li>Implement a small minibatch training loop with <code>DataLoader</code>.</li>
+</ol>
+<h5 id="learner--cell-3--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-3--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Place <code>Dropout(p=...)</code> after an activation. Compare multiple seeded runs or validation curves, because one final accuracy is noisy.</li>
+<li>Wrap float32 features and long labels in a <code>TensorDataset</code>; shuffle only the training loader. Move <code>zero_grad</code>, forward, loss, backward, and step inside the batch loop.</li>
+</ol>
+<p>The separate solution proceeds to early stopping, <code>StepLR</code>, and CUDA mixed precision. Mixed precision is an optional GPU optimization; the code path must remain correct on CPU.</p>
+<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Build a training loop whose dtype, shape, mode, randomness, and checkpoint state can be inspected and resumed on CPU without hidden notebook state.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Shape and dtype contract:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape. <strong>Progressive hint:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</li>
+<li><strong>Validation implementation:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph. <strong>Progressive hint:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</li>
+<li><strong>DataLoader reproducibility:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes. <strong>Progressive hint:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</li>
+<li><strong>Portable checkpoint:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object. <strong>Progressive hint:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</li>
+</ol>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<span>#</span>
+<span># Keep the official solution closed until you have attempted each task.</span>
+<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
+<span> </span>
+<span># Practice 3 — Shape and dtype contract</span>
+<span> </span>
+<span> </span>
+<span># Practice 4 — Validation implementation</span>
+<span> </span>
+<span> </span>
+<span># Practice 5 — DataLoader reproducibility</span>
+<span> </span>
+<span> </span>
+<span># Practice 6 — Portable checkpoint</span>
+<span> </span></code></pre>
+</article></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-47-solutions-pytorch-basics-modules-and-the-training-loop">Day 47 — Solutions: PyTorch Basics, Modules, and the Training Loop<a class="heading-anchor" href="#solution-1--day-47-solutions-pytorch-basics-modules-and-the-training-loop" aria-label="Link to this section">#</a></h3>
+<p>We build a minimal, correct training loop; add early stopping; add a LR scheduler; and enable mixed precision training. After each code block you’ll find a line‑by‑line explanation.</p>
+<p>Contents</p>
+<ul>
+<li>Exercise 1: Implement early stopping on validation loss</li>
+<li>Exercise 2: Add StepLR and compare convergence</li>
+<li>Exercise 3: Add mixed precision with torch.cuda.amp</li>
+</ul>
+<hr>
+<p>Setup</p>
+<pre><code class="language-python"># 1) Imports
+import torch, torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 2) Device and reproducibility
+torch.manual_seed(0)
+np.random.seed(0)
+device = torch.device(&#x27;cuda&#x27; if torch.cuda.is_available() else &#x27;cpu&#x27;)
+
+# 3) Data: simple classification problem
+X, y = make_classification(n_samples=5000, n_features=20, n_informative=10,
+                           class_sep=1.0, random_state=0)
+Xtr, Xva, ytr, yva = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
+tr_ds = TensorDataset(torch.tensor(Xtr, dtype=torch.float32), torch.tensor(ytr, dtype=torch.long))
+va_ds = TensorDataset(torch.tensor(Xva, dtype=torch.float32), torch.tensor(yva, dtype=torch.long))
+tr_dl = DataLoader(tr_ds, batch_size=128, shuffle=True)
+va_dl = DataLoader(va_ds, batch_size=256)
+
+# 4) Model
+class MLP(nn.Module):
+    def __init__(self, inp, hid, out):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(inp, hid), nn.ReLU(),
+            nn.Linear(hid, hid), nn.ReLU(),
+            nn.Linear(hid, out)
+        )
+    def forward(self, x):
+        return self.net(x)
+
+model = MLP(20, 128, 2).to(device)
+loss_fn = nn.CrossEntropyLoss()
+opt = torch.optim.Adam(model.parameters(), lr=1e-3)</code></pre>
+<p>Explanation</p>
+<ul>
+<li>make_classification: tabular signal that’s easy to learn but nontrivial</li>
+<li>Dataloaders: larger batch for eval since no backprop; faster</li>
+<li>MLP: two hidden layers with ReLU, final logits of shape [B, 2]</li>
+<li>CrossEntropyLoss expects logits and Long labels 0..C-1</li>
+</ul>
+<hr>
+<p>Exercise 1 — Early stopping on validation loss</p>
+<pre><code class="language-python">class EarlyStopper:
+    def __init__(self, patience=10, min_delta=0.0):
+        self.patience, self.min_delta = patience, min_delta
+        self.best = float(&#x27;inf&#x27;); self.bad = 0
+    def step(self, metric):
+        if metric &lt; self.best - self.min_delta:
+            self.best = metric; self.bad = 0; return False  # keep training
+        self.bad += 1
+        return self.bad &gt;= self.patience  # True =&gt; stop
+
+def train_one_epoch(model, dl, opt, loss_fn):
+    model.train(); total=0; correct=0; loss_sum=0.0
+    for xb, yb in dl:
+        xb, yb = xb.to(device), yb.to(device)
+        opt.zero_grad(); logits = model(xb)
+        loss = loss_fn(logits, yb); loss.backward(); opt.step()
+        loss_sum += loss.item()*xb.size(0)
+        correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)
+    return loss_sum/total, correct/total
+
+@torch.no_grad()
+def evaluate(model, dl, loss_fn):
+    model.eval(); total=0; correct=0; loss_sum=0.0
+    for xb, yb in dl:
+        xb, yb = xb.to(device), yb.to(device)
+        logits = model(xb); loss = loss_fn(logits, yb)
+        loss_sum += loss.item()*xb.size(0)
+        correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)
+    return loss_sum/total, correct/total
+
+# Training loop with early stopping
+stopper = EarlyStopper(patience=8, min_delta=1e-4)
+hist = {&#x27;tr_loss&#x27;:[], &#x27;va_loss&#x27;:[], &#x27;va_acc&#x27;:[]}
+for epoch in range(200):
+    tr_loss, _ = train_one_epoch(model, tr_dl, opt, loss_fn)
+    va_loss, va_acc = evaluate(model, va_dl, loss_fn)
+    hist[&#x27;tr_loss&#x27;].append(tr_loss); hist[&#x27;va_loss&#x27;].append(va_loss); hist[&#x27;va_acc&#x27;].append(va_acc)
+    if stopper.step(va_loss):
+        print(f&quot;Early stopped at epoch {epoch}&quot;); break
+
+plt.plot(hist[&#x27;tr_loss&#x27;], label=&#x27;train&#x27;); plt.plot(hist[&#x27;va_loss&#x27;], label=&#x27;valid&#x27;)
+plt.yscale(&#x27;log&#x27;); plt.legend(); plt.title(&#x27;Loss&#x27;); plt.show()
+print(f&quot;Best val acc: {max(hist[&#x27;va_acc&#x27;]):.3f}&quot;)</code></pre>
+<p>Line‑by‑line</p>
+<ul>
+<li>EarlyStopper tracks best validation loss; stops after patience epochs without improvement ≥ min_delta</li>
+<li>train_one_epoch: zero grads → forward → loss.backward → opt.step; accumulate loss and accuracy</li>
+<li>evaluate: model.eval and no_grad disable dropout/bn updates and grads</li>
+<li>Loop: record metrics, check stopper; plot to verify no overfitting after stop</li>
+</ul>
+<hr>
+<p>Exercise 2 — StepLR scheduler</p>
+<pre><code class="language-python"># Reset model and optimizer for a fair comparison
+model2 = MLP(20, 128, 2).to(device)
+opt2 = torch.optim.SGD(model2.parameters(), lr=0.1, momentum=0.9)
+sched = torch.optim.lr_scheduler.StepLR(opt2, step_size=20, gamma=0.1)
+
+tr2, va2 = [], []
+for epoch in range(60):
+    tr_loss, _ = train_one_epoch(model2, tr_dl, opt2, loss_fn)
+    va_loss, _ = evaluate(model2, va_dl, loss_fn)
+    tr2.append(tr_loss); va2.append(va_loss)
+    sched.step()
+
+plt.plot(va2, label=&#x27;SGD+StepLR val loss&#x27;); plt.yscale(&#x27;log&#x27;); plt.legend(); plt.show()
+print(&#x27;Final LR:&#x27;, sched.get_last_lr()[0])</code></pre>
+<p>Explanation</p>
+<ul>
+<li>SGD benefits from higher initial LR, then LR decay to refine</li>
+<li>StepLR reduces LR by gamma every step_size epochs; observe loss drops after LR steps</li>
+</ul>
+<hr>
+<p>Exercise 3 — Mixed precision training</p>
+<pre><code class="language-python">scaler = torch.cuda.amp.GradScaler(enabled=(device.type==&#x27;cuda&#x27;))
+model3 = MLP(20, 128, 2).to(device)
+opt3 = torch.optim.Adam(model3.parameters(), lr=1e-3)
+
+tr3 = []
+for epoch in range(20):
+    model3.train(); loss_sum=0.0; n=0
+    for xb, yb in tr_dl:
+        xb, yb = xb.to(device), yb.to(device)
+        opt3.zero_grad()
+        with torch.cuda.amp.autocast(enabled=(device.type==&#x27;cuda&#x27;)):
+            logits = model3(xb)
+            loss = loss_fn(logits, yb)
+        scaler.scale(loss).backward()
+        scaler.step(opt3)
+        scaler.update()
+        loss_sum += loss.item()*xb.size(0); n += xb.size(0)
+    tr3.append(loss_sum/n)
+
+plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x27;); plt.show()</code></pre>
+<p>Line‑by‑line</p>
+<ul>
+<li>GradScaler and autocast enable float16 math on CUDA with safe dynamic loss scaling</li>
+<li>scaler.scale(loss).backward and scaler.step handle underflow/overflow automatically</li>
+<li>On CPU, enabled=False makes this a no‑op; code still runs</li>
+</ul>
+<hr>
+<h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add dropout to the MLP and compare results.</p>
+<p><strong>How to reason about it:</strong> Dropout is active only in training mode and its effect is noisy. Compare seeded runs or validation curves, and place it deliberately after an activation rather than assuming one final score proves benefit.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement a small minibatch training loop with <code>DataLoader</code>.</p>
+<p><strong>How to reason about it:</strong> A minibatch loop keeps zero-grad, forward, loss, backward, and step inside the batch iteration. Shuffle training only, use float features and class-index long targets, and aggregate epoch metrics by support.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-1--exercise-3-shape-and-dtype-contract">Exercise 3 — Shape and dtype contract<a class="heading-anchor" href="#solution-1--exercise-3-shape-and-dtype-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.</p>
+<p><strong>Reasoning before implementation:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</p>
+<pre><code class="language-python">def validate_classification_batch(features, targets, logits, class_count):
+    assert features.ndim == 2 and features.is_floating_point()
+    assert targets.ndim == 1 and targets.dtype == torch.long
+    assert logits.shape == (features.shape[0], class_count)
+    assert torch.isfinite(logits).all()</code></pre>
+<p>One-hot targets require a different explicit contract. Avoid <code>squeeze()</code> without a dimension because a batch of size one can lose its batch axis.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-4-validation-implementation">Exercise 4 — Validation implementation<a class="heading-anchor" href="#solution-1--exercise-4-validation-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph.</p>
+<p><strong>Reasoning before implementation:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</p>
+<p>Save mode before validation so a reusable helper does not unexpectedly alter its caller. Sum loss times batch size and correct predictions, divide by the total, and raise for an empty loader.</p>
+<p><code>torch.inference_mode()</code> is an even stronger evaluation context when its restrictions fit. Keep all returned values as plain Python numbers so the history does not retain tensors or device memory.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-5-dataloader-reproducibility">Exercise 5 — DataLoader reproducibility<a class="heading-anchor" href="#solution-1--exercise-5-dataloader-reproducibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes.</p>
+<p><strong>Reasoning before implementation:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</p>
+<p>Use a generator created specifically for the training loader so other random draws do not silently advance its state. With multiple workers, seed each worker&#x27;s Python/NumPy operations and keep transforms deterministic for the comparison.</p>
+<p>Exact reproducibility can vary across devices and algorithms. Record device, PyTorch version, deterministic settings, and seed; also test that conclusions hold across more than one seed.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-1--exercise-6-portable-checkpoint">Exercise 6 — Portable checkpoint<a class="heading-anchor" href="#solution-1--exercise-6-portable-checkpoint" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object.</p>
+<p><strong>Reasoning before implementation:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</p>
+<p>State dictionaries are less coupled to source-module paths than pickling a whole model object. Validate configuration and tensor shapes before loading, then set the intended mode explicitly.</p>
+<p>Checkpoint files are still loaded through PyTorch serialization and should be treated as trusted artifacts. Save RNG state as well when exact mid-run resume is a requirement.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-47-solutions-pytorch-basics-modules-and-the-training-loop">Day 47 — Solutions: PyTorch Basics, Modules, and the Training Loop<a class="heading-anchor" href="#solution-2--cell-1--day-47-solutions-pytorch-basics-modules-and-the-training-loop" aria-label="Link to this section">#</a></h3>
+<p>We build a minimal, correct training loop; add early stopping; add a LR scheduler; and enable mixed precision training. After each code block you’ll find a line‑by‑line explanation.</p>
+<p>Contents</p>
+<ul>
+<li>Exercise 1: Implement early stopping on validation loss</li>
+<li>Exercise 2: Add StepLR and compare convergence</li>
+<li>Exercise 3: Add mixed precision with torch.cuda.amp</li>
+</ul>
+<hr>
+<p>Setup</p>
+<blockquote><p>Generated from <code>python/ds-60day/solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># 1) Imports</span>
+<span>import torch, torch.nn as nn</span>
+<span>from torch.utils.data import DataLoader, TensorDataset</span>
+<span>from sklearn.datasets import make_classification</span>
+<span>from sklearn.model_selection import train_test_split</span>
+<span>import numpy as np</span>
+<span>import matplotlib.pyplot as plt</span>
+<span> </span>
+<span># 2) Device and reproducibility</span>
+<span>torch.manual_seed(0)</span>
+<span>np.random.seed(0)</span>
+<span>device = torch.device(&#x27;cuda&#x27; if torch.cuda.is_available() else &#x27;cpu&#x27;)</span>
+<span> </span>
+<span># 3) Data: simple classification problem</span>
+<span>X, y = make_classification(n_samples=5000, n_features=20, n_informative=10,</span>
+<span>                           class_sep=1.0, random_state=0)</span>
+<span>Xtr, Xva, ytr, yva = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)</span>
+<span>tr_ds = TensorDataset(torch.tensor(Xtr, dtype=torch.float32), torch.tensor(ytr, dtype=torch.long))</span>
+<span>va_ds = TensorDataset(torch.tensor(Xva, dtype=torch.float32), torch.tensor(yva, dtype=torch.long))</span>
+<span>tr_dl = DataLoader(tr_ds, batch_size=128, shuffle=True)</span>
+<span>va_dl = DataLoader(va_ds, batch_size=256)</span>
+<span> </span>
+<span># 4) Model</span>
+<span>class MLP(nn.Module):</span>
+<span>    def __init__(self, inp, hid, out):</span>
+<span>        super().__init__()</span>
+<span>        self.net = nn.Sequential(</span>
+<span>            nn.Linear(inp, hid), nn.ReLU(),</span>
+<span>            nn.Linear(hid, hid), nn.ReLU(),</span>
+<span>            nn.Linear(hid, out)</span>
+<span>        )</span>
+<span>    def forward(self, x):</span>
+<span>        return self.net(x)</span>
+<span> </span>
+<span>model = MLP(20, 128, 2).to(device)</span>
+<span>loss_fn = nn.CrossEntropyLoss()</span>
+<span>opt = torch.optim.Adam(model.parameters(), lr=1e-3)</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Explanation</p>
+<ul>
+<li>make_classification: tabular signal that’s easy to learn but nontrivial</li>
+<li>Dataloaders: larger batch for eval since no backprop; faster</li>
+<li>MLP: two hidden layers with ReLU, final logits of shape [B, 2]</li>
+<li>CrossEntropyLoss expects logits and Long labels 0..C-1</li>
+</ul>
+<hr>
+<p>Exercise 1 — Early stopping on validation loss</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>class EarlyStopper:</span>
+<span>    def __init__(self, patience=10, min_delta=0.0):</span>
+<span>        self.patience, self.min_delta = patience, min_delta</span>
+<span>        self.best = float(&#x27;inf&#x27;); self.bad = 0</span>
+<span>    def step(self, metric):</span>
+<span>        if metric &lt; self.best - self.min_delta:</span>
+<span>            self.best = metric; self.bad = 0; return False  # keep training</span>
+<span>        self.bad += 1</span>
+<span>        return self.bad &gt;= self.patience  # True =&gt; stop</span>
+<span> </span>
+<span>def train_one_epoch(model, dl, opt, loss_fn):</span>
+<span>    model.train(); total=0; correct=0; loss_sum=0.0</span>
+<span>    for xb, yb in dl:</span>
+<span>        xb, yb = xb.to(device), yb.to(device)</span>
+<span>        opt.zero_grad(); logits = model(xb)</span>
+<span>        loss = loss_fn(logits, yb); loss.backward(); opt.step()</span>
+<span>        loss_sum += loss.item()*xb.size(0)</span>
+<span>        correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)</span>
+<span>    return loss_sum/total, correct/total</span>
+<span> </span>
+<span>@torch.no_grad()</span>
+<span>def evaluate(model, dl, loss_fn):</span>
+<span>    model.eval(); total=0; correct=0; loss_sum=0.0</span>
+<span>    for xb, yb in dl:</span>
+<span>        xb, yb = xb.to(device), yb.to(device)</span>
+<span>        logits = model(xb); loss = loss_fn(logits, yb)</span>
+<span>        loss_sum += loss.item()*xb.size(0)</span>
+<span>        correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)</span>
+<span>    return loss_sum/total, correct/total</span>
+<span> </span>
+<span># Training loop with early stopping</span>
+<span>stopper = EarlyStopper(patience=8, min_delta=1e-4)</span>
+<span>hist = {&#x27;tr_loss&#x27;:[], &#x27;va_loss&#x27;:[], &#x27;va_acc&#x27;:[]}</span>
+<span>for epoch in range(200):</span>
+<span>    tr_loss, _ = train_one_epoch(model, tr_dl, opt, loss_fn)</span>
+<span>    va_loss, va_acc = evaluate(model, va_dl, loss_fn)</span>
+<span>    hist[&#x27;tr_loss&#x27;].append(tr_loss); hist[&#x27;va_loss&#x27;].append(va_loss); hist[&#x27;va_acc&#x27;].append(va_acc)</span>
+<span>    if stopper.step(va_loss):</span>
+<span>        print(f&quot;Early stopped at epoch {epoch}&quot;); break</span>
+<span> </span>
+<span>plt.plot(hist[&#x27;tr_loss&#x27;], label=&#x27;train&#x27;); plt.plot(hist[&#x27;va_loss&#x27;], label=&#x27;valid&#x27;)</span>
+<span>plt.yscale(&#x27;log&#x27;); plt.legend(); plt.title(&#x27;Loss&#x27;); plt.show()</span>
+<span>print(f&quot;Best val acc: {max(hist[&#x27;va_acc&#x27;]):.3f}&quot;)</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Line‑by‑line</p>
+<ul>
+<li>EarlyStopper tracks best validation loss; stops after patience epochs without improvement ≥ min_delta</li>
+<li>train_one_epoch: zero grads → forward → loss.backward → opt.step; accumulate loss and accuracy</li>
+<li>evaluate: model.eval and no_grad disable dropout/bn updates and grads</li>
+<li>Loop: record metrics, check stopper; plot to verify no overfitting after stop</li>
+</ul>
+<hr>
+<p>Exercise 2 — StepLR scheduler</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Reset model and optimizer for a fair comparison</span>
+<span>model2 = MLP(20, 128, 2).to(device)</span>
+<span>opt2 = torch.optim.SGD(model2.parameters(), lr=0.1, momentum=0.9)</span>
+<span>sched = torch.optim.lr_scheduler.StepLR(opt2, step_size=20, gamma=0.1)</span>
+<span> </span>
+<span>tr2, va2 = [], []</span>
+<span>for epoch in range(60):</span>
+<span>    tr_loss, _ = train_one_epoch(model2, tr_dl, opt2, loss_fn)</span>
+<span>    va_loss, _ = evaluate(model2, va_dl, loss_fn)</span>
+<span>    tr2.append(tr_loss); va2.append(va_loss)</span>
+<span>    sched.step()</span>
+<span> </span>
+<span>plt.plot(va2, label=&#x27;SGD+StepLR val loss&#x27;); plt.yscale(&#x27;log&#x27;); plt.legend(); plt.show()</span>
+<span>print(&#x27;Final LR:&#x27;, sched.get_last_lr()[0])</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>Explanation</p>
+<ul>
+<li>SGD benefits from higher initial LR, then LR decay to refine</li>
+<li>StepLR reduces LR by gamma every step_size epochs; observe loss drops after LR steps</li>
+</ul>
+<hr>
+<p>Exercise 3 — Mixed precision training</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>scaler = torch.cuda.amp.GradScaler(enabled=(device.type==&#x27;cuda&#x27;))</span>
+<span>model3 = MLP(20, 128, 2).to(device)</span>
+<span>opt3 = torch.optim.Adam(model3.parameters(), lr=1e-3)</span>
+<span> </span>
+<span>tr3 = []</span>
+<span>for epoch in range(20):</span>
+<span>    model3.train(); loss_sum=0.0; n=0</span>
+<span>    for xb, yb in tr_dl:</span>
+<span>        xb, yb = xb.to(device), yb.to(device)</span>
+<span>        opt3.zero_grad()</span>
+<span>        with torch.cuda.amp.autocast(enabled=(device.type==&#x27;cuda&#x27;)):</span>
+<span>            logits = model3(xb)</span>
+<span>            loss = loss_fn(logits, yb)</span>
+<span>        scaler.scale(loss).backward()</span>
+<span>        scaler.step(opt3)</span>
+<span>        scaler.update()</span>
+<span>        loss_sum += loss.item()*xb.size(0); n += xb.size(0)</span>
+<span>    tr3.append(loss_sum/n)</span>
+<span> </span>
+<span>plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x27;); plt.show()</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p>Line‑by‑line</p>
+<ul>
+<li>GradScaler and autocast enable float16 math on CUDA with safe dynamic loss scaling</li>
+<li>scaler.scale(loss).backward and scaler.step handle underflow/overflow automatically</li>
+<li>On CPU, enabled=False makes this a no‑op; code still runs</li>
+</ul>
+<hr>
+<h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add dropout to the MLP and compare results.</p>
+<p><strong>How to reason about it:</strong> Dropout is active only in training mode and its effect is noisy. Compare seeded runs or validation curves, and place it deliberately after an activation rather than assuming one final score proves benefit.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement a small minibatch training loop with <code>DataLoader</code>.</p>
+<p><strong>How to reason about it:</strong> A minibatch loop keeps zero-grad, forward, loss, backward, and step inside the batch iteration. Shuffle training only, use float features and class-index long targets, and aggregate epoch metrics by support.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-9--exercise-3-shape-and-dtype-contract">Exercise 3 — Shape and dtype contract<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-shape-and-dtype-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.</p>
+<p><strong>Reasoning before implementation:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>def validate_classification_batch(features, targets, logits, class_count):</span>
+<span>    assert features.ndim == 2 and features.is_floating_point()</span>
+<span>    assert targets.ndim == 1 and targets.dtype == torch.long</span>
+<span>    assert logits.shape == (features.shape[0], class_count)</span>
+<span>    assert torch.isfinite(logits).all()</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p>One-hot targets require a different explicit contract. Avoid <code>squeeze()</code> without a dimension because a batch of size one can lose its batch axis.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-11--exercise-4-validation-implementation">Exercise 4 — Validation implementation<a class="heading-anchor" href="#solution-2--cell-11--exercise-4-validation-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph.</p>
+<p><strong>Reasoning before implementation:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</p>
+<p>Save mode before validation so a reusable helper does not unexpectedly alter its caller. Sum loss times batch size and correct predictions, divide by the total, and raise for an empty loader.</p>
+<p><code>torch.inference_mode()</code> is an even stronger evaluation context when its restrictions fit. Keep all returned values as plain Python numbers so the history does not retain tensors or device memory.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-11--exercise-5-dataloader-reproducibility">Exercise 5 — DataLoader reproducibility<a class="heading-anchor" href="#solution-2--cell-11--exercise-5-dataloader-reproducibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes.</p>
+<p><strong>Reasoning before implementation:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</p>
+<p>Use a generator created specifically for the training loader so other random draws do not silently advance its state. With multiple workers, seed each worker&#x27;s Python/NumPy operations and keep transforms deterministic for the comparison.</p>
+<p>Exact reproducibility can vary across devices and algorithms. Record device, PyTorch version, deterministic settings, and seed; also test that conclusions hold across more than one seed.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-11--exercise-6-portable-checkpoint">Exercise 6 — Portable checkpoint<a class="heading-anchor" href="#solution-2--cell-11--exercise-6-portable-checkpoint" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object.</p>
+<p><strong>Reasoning before implementation:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</p>
+<p>State dictionaries are less coupled to source-module paths than pickling a whole model object. Validate configuration and tensor shapes before loading, then set the intended mode explicitly.</p>
+<p>Checkpoint files are still loaded through PyTorch serialization and should be treated as trusted artifacts. Save RNG state as well when exact mid-run resume is a requirement.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-46.html"><small>Previous lesson</small><strong>python-46</strong><span>Deep Learning Overview</span></a>
+        <a class="nav-card next" href="python-48.html"><small>Next lesson</small><strong>python-48</strong><span>Transfer Learning CNN</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-47";
+    const LEARNER_PATH = "python/ds-60day/notebooks/day47_pytorch_basics_nn_training_loop.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

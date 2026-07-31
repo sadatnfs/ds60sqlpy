@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-60 · Final Capstone Part3 · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-60</p>
+        <h1>Final Capstone Part3</h1>
+        <p class="hero-copy">Applied analytics and capstones</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-59.html">sql-59</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day60_final_capstone_part3.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day60_final_capstone_part3.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day60_final_capstone_part3.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-60-final-capstone-part-3-end-to-end-sign-off">Day 60 — Final Capstone, Part 3: End-to-End Sign-off<a class="heading-anchor" href="#guide--day-60-final-capstone-part-3-end-to-end-sign-off" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-59.html#guide">Day 59 — stakeholder analytics</a> and completed evidence from the full SQL track</li>
+<li><strong>Artifacts:</strong> <a href="sql-60.html#learner">learner SQL</a> · <a href="sql-60.html#solution-1">solution reasoning</a> · <a href="sql-60.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Apply explicit acceptance criteria to data quality, business metrics, performance evidence, and documentation.</li>
+<li>Produce a handoff that separates verified results, limitations, and future production work.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Acceptance criterion:</strong> an observable condition required for sign-off.</li>
+<li><strong>Evidence bundle:</strong> reproducible query, environment, output, reconciliation, and interpretation.</li>
+<li><strong>Handoff:</strong> documentation that lets another person operate, verify, and extend the work safely.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with <code>SUM(orders.total_amount)</code>, capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete these in the <a href="sql-60.html#learner">learner SQL</a>:</p>
+<ol>
+<li>Classify snapshot-independent versus clock-dependent outputs.</li>
+<li>Build a named, severity-aware sign-off check result.</li>
+<li>Remove repeated <code>LAG</code> calls while preserving first-month NULL growth.</li>
+<li>Mark an incomplete current month separately.</li>
+<li>Capture and document before/after JSON plan evidence.</li>
+<li>Produce a release checklist covering operations and known limits.</li>
+<li>Map metric lineage from source tables through validation.</li>
+<li>Reconcile every dashboard subtotal to a simple control.</li>
+<li>Test empty, one-row, NULL-heavy, and duplicate-key fixtures.</li>
+<li>Return <code>PASS</code>/<code>FAIL</code>/<code>NOT_RUN</code> for every acceptance criterion.</li>
+</ol>
+<p>Link every sign-off claim to executable evidence.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Does every sign-off claim have reproducible evidence and a named limitation or owner where applicable?</li>
+<li>Are tutorial views and indexes still rollback-only unless a separate reviewed migration explicitly persists them?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Review any weak SQL areas, then combine both languages in the <a href="../reference-pages/bridge/README.md.html">Python and PostgreSQL engineering bridge</a>. The bridge expects at least Python Day 15 and SQL Day 15.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<p>Day 60 defines acceptance criteria rather than discrete exercises. The final submission connects reusable DQ checks, business views, stakeholder outputs, performance evidence, and a written handoff.</p>
+<h4 id="guide--deliverable-1-data-quality">Deliverable 1 — Data quality<a class="heading-anchor" href="#guide--deliverable-1-data-quality" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><code>v_dq_customers</code>: total rows plus invalid email, country, and name counts.</li>
+<li><code>v_dq_orders</code>: total rows plus negative totals and missing customers.</li>
+<li>Document every nonzero result with remediation, owner, and severity.</li>
+</ul>
+<h4 id="guide--deliverable-2-core-business-views">Deliverable 2 — Core business views<a class="heading-anchor" href="#guide--deliverable-2-core-business-views" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Customer LTV at one row per customer, retaining zero-order customers.</li>
+<li>Monthly order revenue with previous month and safely divided month-over-month growth.</li>
+<li>Reconcile summed customer LTV to summed <code>orders.total_amount</code>; expected difference on the seed is zero.</li>
+</ul>
+<h4 id="guide--deliverable-3-stakeholder-outputs">Deliverable 3 — Stakeholder outputs<a class="heading-anchor" href="#guide--deliverable-3-stakeholder-outputs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Finance: current-year budget versus actual by month/category.</li>
+<li>Marketing: active customers by signup cohort and lifecycle month 0–6. A true retention rate also needs the cohort-size denominator from Day 47.</li>
+<li>Operations: an actual plan for recent units by product category.</li>
+</ul>
+<h4 id="guide--deliverable-4-performance-sign-off">Deliverable 4 — Performance sign-off<a class="heading-anchor" href="#guide--deliverable-4-performance-sign-off" aria-label="Link to this section">#</a></h4>
+<p>Capture before/after <code>EXPLAIN (ANALYZE, BUFFERS)</code> for critical queries and record dataset size, PostgreSQL version, indexes, timing, buffers, correctness check, and decision. The requested under-10-second goal applies to the measured learner machine/dataset; the compact seed does not prove production-scale performance.</p>
+<h4 id="guide--deliverable-5-written-handoff">Deliverable 5 — Written handoff<a class="heading-anchor" href="#guide--deliverable-5-written-handoff" aria-label="Link to this section">#</a></h4>
+<p>Document DQ exceptions, model grain, join rationale, KPI definitions, reconciliation, freshness-versus-speed tradeoffs, known limitations, and next steps. Evidence must support every sign-off claim.</p>
+<h4 id="guide--state-and-safety">State and safety<a class="heading-anchor" href="#guide--state-and-safety" aria-label="Link to this section">#</a></h4>
+<p>The learner file ends with <code>ROLLBACK</code>; its views and indexes do not persist. Replace it with <code>COMMIT</code> only as a deliberate reviewed migration. Days 59–60 are capstone criteria/checkpoints, so measured evidence and documentation are part of the deliverable, not optional stretch work.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day60_final_capstone_part3.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day60_final_capstone_part3.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 60: Final Capstone - Integrated Data Challenge (Part 3)</span>
+<span>-- Focus: End-to-end solution: DQ -&gt; Transform -&gt; Analytics -&gt; Performance sign-off</span>
+<span>-- Success Criteria:</span>
+<span>--  - All critical queries complete &lt; 10s on your dataset</span>
+<span>--  - DQ checks pass with documented exceptions</span>
+<span>--  - Clear documentation of choices and optimizations</span>
+<span> </span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- 1. DQ Summary Views (re-usable) ------------------------------------------</span>
+<span>CREATE OR REPLACE VIEW v_dq_customers AS</span>
+<span>SELECT COUNT(*) AS total,</span>
+<span>       SUM(CASE WHEN email IS NULL OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27; THEN 1 ELSE 0 END) AS invalid_email,</span>
+<span>       SUM(CASE WHEN country IS NULL OR country !~ &#x27;^[A-Z]{2}$&#x27; THEN 1 ELSE 0 END) AS invalid_country,</span>
+<span>       SUM(CASE WHEN full_name IS NULL OR btrim(full_name) = &#x27;&#x27; THEN 1 ELSE 0 END) AS invalid_name</span>
+<span>FROM customers;</span>
+<span> </span>
+<span>CREATE OR REPLACE VIEW v_dq_orders AS</span>
+<span>SELECT COUNT(*) AS total,</span>
+<span>       SUM(CASE WHEN total_amount &lt; 0 THEN 1 ELSE 0 END) AS negative_amounts,</span>
+<span>       SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) AS missing_customer</span>
+<span>FROM orders;</span>
+<span> </span>
+<span>SELECT * FROM v_dq_customers;</span>
+<span>SELECT * FROM v_dq_orders;</span>
+<span> </span>
+<span>-- 2. Core Business Views ----------------------------------------------------</span>
+<span>-- Lifetime value per customer</span>
+<span>CREATE OR REPLACE VIEW v_customer_ltv AS</span>
+<span>WITH line AS (</span>
+<span>  SELECT o.customer_id, SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value</span>
+<span>  FROM orders o JOIN order_items oi ON oi.order_id = o.order_id</span>
+<span>  GROUP BY o.customer_id, o.order_id</span>
+<span>)</span>
+<span>SELECT customer_id, ROUND(SUM(order_value),2) AS ltv</span>
+<span>FROM line</span>
+<span>GROUP BY customer_id;</span>
+<span> </span>
+<span>-- Monthly revenue and MoM growth</span>
+<span>CREATE OR REPLACE VIEW v_monthly_revenue AS</span>
+<span>WITH m AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, o.order_date)::date AS month,</span>
+<span>         SUM(o.total_amount) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  GROUP BY 1</span>
+<span>)</span>
+<span>SELECT m.month,</span>
+<span>       m.revenue,</span>
+<span>       LAG(m.revenue) OVER (ORDER BY m.month) AS prev_month,</span>
+<span>       ROUND((m.revenue - COALESCE(LAG(m.revenue) OVER (ORDER BY m.month),0)) / NULLIF(LAG(m.revenue) OVER (ORDER BY m.month),0), 4) AS mom_growth</span>
+<span>FROM m;</span>
+<span> </span>
+<span>-- 3. Stakeholder-ready Queries ---------------------------------------------</span>
+<span>-- Finance: Budget vs Actual by month/category (YTD)</span>
+<span>WITH exp AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month, category, SUM(amount) AS actual</span>
+<span>  FROM expenses WHERE expense_date &gt;= date_trunc(&#x27;year&#x27;, now()) GROUP BY 1,2</span>
+<span>), bud AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, period)::date AS month, category, SUM(amount) AS budget</span>
+<span>  FROM budgets WHERE period &gt;= date_trunc(&#x27;year&#x27;, now()) GROUP BY 1,2</span>
+<span>)</span>
+<span>SELECT COALESCE(b.category, e.category) AS category,</span>
+<span>       COALESCE(b.month, e.month) AS month,</span>
+<span>       COALESCE(b.budget,0) AS budget,</span>
+<span>       COALESCE(e.actual,0) AS actual,</span>
+<span>       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0),2) AS variance</span>
+<span>FROM bud b FULL OUTER JOIN exp e ON e.month=b.month AND e.category=b.category</span>
+<span>ORDER BY month DESC, category</span>
+<span>LIMIT 120;</span>
+<span> </span>
+<span>-- Marketing: Cohort retention for last 6 cohorts</span>
+<span>WITH orders_m AS (</span>
+<span>  SELECT o.customer_id, date_trunc(&#x27;month&#x27;, o.order_date)::date AS order_month FROM orders o GROUP BY 1,2</span>
+<span>), cohorts AS (</span>
+<span>  SELECT c.customer_id, date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month FROM customers c</span>
+<span>), retention AS (</span>
+<span>  SELECT co.cohort_month, om.order_month,</span>
+<span>         (</span>
+<span>           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12</span>
+<span>           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))</span>
+<span>         )::int AS month_offset,</span>
+<span>         COUNT(DISTINCT om.customer_id) AS active_customers</span>
+<span>  FROM orders_m om JOIN cohorts co ON co.customer_id = om.customer_id</span>
+<span>  GROUP BY co.cohort_month, om.order_month</span>
+<span>)</span>
+<span>SELECT * FROM retention WHERE month_offset BETWEEN 0 AND 6 ORDER BY cohort_month DESC, month_offset;</span>
+<span> </span>
+<span>-- Operations: Top slow queries to optimize (use EXPLAIN ANALYZE in-session)</span>
+<span>EXPLAIN</span>
+<span>SELECT p.category, SUM(oi.quantity) AS qty</span>
+<span>FROM order_items oi</span>
+<span>JOIN products p ON p.product_id = oi.product_id</span>
+<span>JOIN orders o   ON o.order_id = oi.order_id</span>
+<span>WHERE o.order_date &gt;= now() - interval &#x27;180 days&#x27;</span>
+<span>GROUP BY p.category</span>
+<span>ORDER BY qty DESC;</span>
+<span> </span>
+<span>-- 4. Performance Checklist ---------------------------------------------------</span>
+<span>-- Indexes helpful for above queries (will be rolled back unless COMMIT)</span>
+<span>CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(order_date);</span>
+<span>CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);</span>
+<span>CREATE INDEX IF NOT EXISTS idx_oi_order ON order_items(order_id);</span>
+<span>CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);</span>
+<span>CREATE INDEX IF NOT EXISTS idx_expenses_month ON expenses(expense_date);</span>
+<span>CREATE INDEX IF NOT EXISTS idx_budgets_period ON budgets(period);</span>
+<span> </span>
+<span>-- Validate plan improvements quickly</span>
+<span>EXPLAIN ANALYZE SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 12;</span>
+<span> </span>
+<span>-- 5. Documentation Hints ----------------------------------------------------</span>
+<span>-- Include in your write-up:</span>
+<span>--  - Data quality findings (from v_dq_*) and remediation steps</span>
+<span>--  - Core model entities used and rationale (customers/orders/items/events/etc.)</span>
+<span>--  - Queries and indexes that moved the needle, with before/after EXPLAIN metrics</span>
+<span>--  - Any compromises (freshness vs speed, materialized views, partitioning)</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- 1. Prediction: identify which views are snapshot-independent and which use</span>
+<span>--    CURRENT_DATE/now(), then explain the reproducibility consequence.</span>
+<span>-- 2. Construction: build a single sign-off query whose rows are named checks</span>
+<span>--    with observed_value, expected_value, pass, severity, and remediation.</span>
+<span>-- 3. Debugging: remove repeated LAG expressions from v_monthly_revenue by using</span>
+<span>--    a second CTE, while preserving the first month&#x27;s NULL growth rate.</span>
+<span>-- 4. Edge case: represent an incomplete current month separately so it is not</span>
+<span>--    compared directly with a complete prior month.</span>
+<span>-- 5. Performance: capture before/after plans in JSON and document plan shape,</span>
+<span>--    estimates, actual rows, buffers, and timing without promising universal gains.</span>
+<span>-- 6. Explanation: produce a release checklist covering rollback, ownership,</span>
+<span>--    permissions, refresh cadence, monitoring, data contracts, and known limits.</span>
+<span>-- 7. Construction: create a lineage table that maps each published metric to</span>
+<span>--    its source tables, transformation grain, and validation query.</span>
+<span>-- 8. Debugging: prove every dashboard subtotal reconciles to a simpler control</span>
+<span>--    query before approving any performance optimization.</span>
+<span>-- 9. Edge case: test empty, one-row, NULL-heavy, and duplicate-key fixtures and</span>
+<span>--    record which assumptions prevent each from reaching production.</span>
+<span>-- 10. Final sign-off: return PASS/FAIL/NOT_RUN for every acceptance criterion;</span>
+<span>--     prose alone must never turn an unexecuted check into PASS.</span>
+<span> </span>
+<span>-- When ready to persist created views/indexes, replace ROLLBACK with COMMIT.</span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day60_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day60_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-60-solution-end-to-end-capstone-sign-off">Day 60 Solution — End-to-End Capstone Sign-off<a class="heading-anchor" href="#solution-1--day-60-solution-end-to-end-capstone-sign-off" aria-label="Link to this section">#</a></h3>
+<p>Day 60 has acceptance criteria, not discrete exercises. The final submission must connect data quality, transformation, analytics, performance evidence, and documented tradeoffs. The executable reference is <a href="sql-60.html#solution-2"><code>day60_solutions.sql</code></a>.</p>
+<h4 id="solution-1--success-criteria">Success criteria<a class="heading-anchor" href="#solution-1--success-criteria" aria-label="Link to this section">#</a></h4>
+<p>Sign off only when:</p>
+<ol>
+<li>critical queries complete in under 10 seconds <strong>on the learner&#x27;s measured dataset and machine</strong>;</li>
+<li>data-quality checks pass or every exception has an owner and explanation;</li>
+<li>business totals reconcile across views and source tables; and</li>
+<li>the write-up records grain, assumptions, before/after plans, compromises, known limits, and next steps.</li>
+</ol>
+<p>The compact seed makes the 10-second target easy; it does not prove production-scale performance.</p>
+<h4 id="solution-1--deliverable-1-reusable-dq-views">Deliverable 1 — Reusable DQ views<a class="heading-anchor" href="#solution-1--deliverable-1-reusable-dq-views" aria-label="Link to this section">#</a></h4>
+<p>The learner creates <code>v_dq_customers</code> and <code>v_dq_orders</code>. The reference solution uses a suffixed customer view so it cannot collide with a learner&#x27;s view:</p>
+<pre><code class="language-sql">BEGIN;
+SET search_path TO training, public;
+
+CREATE VIEW v_dq_customers_solution AS
+SELECT COUNT(*) AS total_rows,
+       COUNT(*) FILTER (
+         WHERE email IS NULL
+            OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;
+       ) AS invalid_email,
+       COUNT(*) FILTER (WHERE country !~ &#x27;^[A-Z]{2}$&#x27;) AS invalid_country,
+       COUNT(*) FILTER (WHERE trim(full_name) = &#x27;&#x27;) AS invalid_name
+FROM customers;
+
+SELECT * FROM v_dq_customers_solution;
+
+SELECT COUNT(*) AS total_rows,
+       COUNT(*) FILTER (WHERE total_amount &lt; 0) AS negative_amounts,
+       COUNT(*) FILTER (WHERE customer_id IS NULL) AS missing_customer
+FROM orders;
+
+ROLLBACK;</code></pre>
+<p>Expected shape: one customer summary row and one order summary row. The course seed should report zero failures.</p>
+<h4 id="solution-1--deliverable-2-core-business-views-and-reconciliation">Deliverable 2 — Core business views and reconciliation<a class="heading-anchor" href="#solution-1--deliverable-2-core-business-views-and-reconciliation" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">BEGIN;
+SET search_path TO training, public;
+
+CREATE VIEW v_customer_ltv_solution AS
+SELECT c.customer_id,
+       c.country,
+       COALESCE(SUM(o.total_amount), 0)::numeric(14,2) AS ltv
+FROM customers c
+LEFT JOIN orders o USING (customer_id)
+GROUP BY c.customer_id, c.country;
+
+CREATE VIEW v_monthly_revenue_solution AS
+WITH monthly AS (
+  SELECT date_trunc(&#x27;month&#x27;, order_date)::date AS month,
+         SUM(total_amount) AS revenue
+  FROM orders
+  GROUP BY date_trunc(&#x27;month&#x27;, order_date)
+)
+SELECT month,
+       revenue,
+       LAG(revenue) OVER (ORDER BY month) AS previous_month,
+       ROUND(
+         (revenue - LAG(revenue) OVER (ORDER BY month))
+           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0),
+         4
+       ) AS month_over_month_growth
+FROM monthly;
+
+SELECT (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)
+         AS customer_ltv_total,
+       (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS order_total,
+       (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)
+         - (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS difference;
+
+ROLLBACK;</code></pre>
+<p>Expected reconciliation: <code>difference = 0.00</code>. The monthly view has one row per represented order month; it does not manufacture missing months.</p>
+<h4 id="solution-1--deliverable-3-stakeholder-ready-outputs">Deliverable 3 — Stakeholder-ready outputs<a class="heading-anchor" href="#solution-1--deliverable-3-stakeholder-ready-outputs" aria-label="Link to this section">#</a></h4>
+<p>The learner file contains three runnable outputs:</p>
+<ul>
+<li>Finance: YTD actual, budget, and variance at <code>(month, category)</code> grain.</li>
+<li>Marketing: active customers by signup cohort and lifecycle month 0–6. A full retention rate additionally needs the cohort-size denominator from Day 47.</li>
+<li>Operations: an <code>EXPLAIN</code> of recent units by product category.</li>
+</ul>
+<p>For each output, record the consumer, business definition, result grain, freshness expectation, and at least one reconciliation or sanity check.</p>
+<h4 id="solution-1--deliverable-4-performance-sign-off">Deliverable 4 — Performance sign-off<a class="heading-anchor" href="#solution-1--deliverable-4-performance-sign-off" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">BEGIN;
+SET search_path TO training, public;
+
+CREATE INDEX idx_orders_date_day60_solution ON orders(order_date);
+CREATE INDEX idx_orders_customer_day60_solution ON orders(customer_id);
+CREATE INDEX idx_order_items_order_day60_solution ON order_items(order_id);
+CREATE INDEX idx_expenses_date_day60_solution ON expenses(expense_date);
+CREATE INDEX idx_budgets_period_day60_solution ON budgets(period);
+
+CREATE VIEW v_monthly_revenue_solution AS
+WITH monthly AS (
+  SELECT date_trunc(&#x27;month&#x27;, order_date)::date AS month,
+         SUM(total_amount) AS revenue
+  FROM orders
+  GROUP BY date_trunc(&#x27;month&#x27;, order_date)
+)
+SELECT month,
+       revenue,
+       LAG(revenue) OVER (ORDER BY month) AS previous_month,
+       ROUND(
+         (revenue - LAG(revenue) OVER (ORDER BY month))
+           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0),
+         4
+       ) AS month_over_month_growth
+FROM monthly;
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT *
+FROM v_monthly_revenue_solution
+ORDER BY month DESC
+LIMIT 12;
+
+ROLLBACK;</code></pre>
+<p>Capture actual execution time and buffers before and after candidate indexes. The transaction rolls back both views and indexes.</p>
+<h4 id="solution-1--deliverable-5-written-sign-off">Deliverable 5 — Written sign-off<a class="heading-anchor" href="#solution-1--deliverable-5-written-sign-off" aria-label="Link to this section">#</a></h4>
+<p>The final write-up must cover:</p>
+<ul>
+<li>DQ exceptions and remediation;</li>
+<li>source entities, analytical grain, and join rationale;</li>
+<li>KPI definitions and reconciliation evidence;</li>
+<li>before/after <code>EXPLAIN (ANALYZE, BUFFERS)</code> evidence;</li>
+<li>freshness versus performance tradeoffs;</li>
+<li>known limitations and next steps; and</li>
+<li>whether the learner-file success criteria were met on the measured setup.</li>
+</ul>
+<p>Do not replace evidence with “an index should help.” A complete capstone records the query, dataset size, environment, plan, timing, correctness check, and decision.</p>
+<h4 id="solution-1--safety-and-state-assumptions">Safety and state assumptions<a class="heading-anchor" href="#solution-1--safety-and-state-assumptions" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Both learner and solution files end with <code>ROLLBACK</code>; replace it with <code>COMMIT</code> only in a deliberate migration after reviewing object names and ownership.</li>
+<li><code>CREATE VIEW</code> without <code>OR REPLACE</code> is intentional in the reference transaction and expects a clean course setup.</li>
+<li>Days 59–60 are sign-off checkpoints, so some deliverables are documentation and measured evidence rather than new SQL exercises.</li>
+</ul>
+<h4 id="solution-1--exercise-1-identify-clock-dependence">Exercise 1 — Identify clock dependence<a class="heading-anchor" href="#solution-1--exercise-1-identify-clock-dependence" aria-label="Link to this section">#</a></h4>
+<p>Snapshot summaries depend only on table state. Trailing/current-period reports also depend on the clock and need a bound <code>as_of_date</code> for reproducible review.</p>
+<h4 id="solution-1--exercise-2-return-executable-sign-off-checks">Exercise 2 — Return executable sign-off checks<a class="heading-anchor" href="#solution-1--exercise-2-return-executable-sign-off-checks" aria-label="Link to this section">#</a></h4>
+<p>Each check contains observed/expected values, computed pass status, severity, and remediation. A typed label cannot substitute for the equality expression.</p>
+<h4 id="solution-1--exercise-3-calculate-lag-once">Exercise 3 — Calculate LAG once<a class="heading-anchor" href="#solution-1--exercise-3-calculate-lag-once" aria-label="Link to this section">#</a></h4>
+<p><code>monthly</code> establishes grain; <code>with_previous</code> computes LAG one time; the outer query calculates growth. The first month remains NULL because it has no valid comparison.</p>
+<h4 id="solution-1--exercise-4-flag-an-incomplete-month">Exercise 4 — Flag an incomplete month<a class="heading-anchor" href="#solution-1--exercise-4-flag-an-incomplete-month" aria-label="Link to this section">#</a></h4>
+<p>The current calendar month is marked explicitly. Production evaluation should bind an as-of date and avoid comparing a partial period with a complete one.</p>
+<h4 id="solution-1--exercise-5-retain-structured-plan-evidence">Exercise 5 — Retain structured plan evidence<a class="heading-anchor" href="#solution-1--exercise-5-retain-structured-plan-evidence" aria-label="Link to this section">#</a></h4>
+<p><code>EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)</code> captures plan shape, estimates, actual rows, buffer activity, and timing. Evidence applies only to the tested server, data volume, parameters, and cache state.</p>
+<h4 id="solution-1--exercise-6-complete-the-operational-release-checklist">Exercise 6 — Complete the operational release checklist<a class="heading-anchor" href="#solution-1--exercise-6-complete-the-operational-release-checklist" aria-label="Link to this section">#</a></h4>
+<p>Rollback, ownership, privileges, refresh, monitoring, contracts, and limits all have named owners/evidence. Query correctness alone is not production readiness.</p>
+<h4 id="solution-1--exercise-7-publish-lineage">Exercise 7 — Publish lineage<a class="heading-anchor" href="#solution-1--exercise-7-publish-lineage" aria-label="Link to this section">#</a></h4>
+<p>Every published metric maps to sources, transformation grain, and a validation query. This gives Codex and human maintainers a compact impact-analysis trail.</p>
+<h4 id="solution-1--exercise-8-reconcile-dashboard-totals">Exercise 8 — Reconcile dashboard totals<a class="heading-anchor" href="#solution-1--exercise-8-reconcile-dashboard-totals" aria-label="Link to this section">#</a></h4>
+<p>Monthly-view revenue is summed and compared with the simplest order total. Nonzero difference blocks sign-off before any optimization is accepted.</p>
+<h4 id="solution-1--exercise-9-test-edge-fixtures">Exercise 9 — Test edge fixtures<a class="heading-anchor" href="#solution-1--exercise-9-test-edge-fixtures" aria-label="Link to this section">#</a></h4>
+<p>The in-query fixture represents NULL, one-row-like, and duplicate-key cases without changing course data. Counts expose assumptions that production constraints or quarantine rules must enforce.</p>
+<h4 id="solution-1--exercise-10-distinguish-fail-from-notrun">Exercise 10 — Distinguish FAIL from NOT_RUN<a class="heading-anchor" href="#solution-1--exercise-10-distinguish-fail-from-notrun" aria-label="Link to this section">#</a></h4>
+<p>Executed checks compare observed and expected values. An unexecuted Windows CI bootstrap remains <code>NOT_RUN</code>; prose or confidence must never upgrade it to PASS.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day60_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day60_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 60 solution: end-to-end sign-off</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>CREATE VIEW v_dq_customers_solution AS</span>
+<span>SELECT COUNT(*) AS total_rows,</span>
+<span>       COUNT(*) FILTER (</span>
+<span>         WHERE email IS NULL</span>
+<span>            OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span>
+<span>       ) AS invalid_email,</span>
+<span>       COUNT(*) FILTER (WHERE country !~ &#x27;^[A-Z]{2}$&#x27;) AS invalid_country,</span>
+<span>       COUNT(*) FILTER (WHERE trim(full_name) = &#x27;&#x27;) AS invalid_name</span>
+<span>FROM customers;</span>
+<span> </span>
+<span>CREATE VIEW v_customer_ltv_solution AS</span>
+<span>SELECT c.customer_id,</span>
+<span>       c.country,</span>
+<span>       COALESCE(SUM(o.total_amount), 0)::numeric(14,2) AS ltv</span>
+<span>FROM customers c</span>
+<span>LEFT JOIN orders o USING (customer_id)</span>
+<span>GROUP BY c.customer_id, c.country;</span>
+<span> </span>
+<span>CREATE VIEW v_monthly_revenue_solution AS</span>
+<span>WITH monthly AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, order_date)::date AS month,</span>
+<span>         SUM(total_amount) AS revenue</span>
+<span>  FROM orders</span>
+<span>  GROUP BY date_trunc(&#x27;month&#x27;, order_date)</span>
+<span>)</span>
+<span>SELECT month,</span>
+<span>       revenue,</span>
+<span>       LAG(revenue) OVER (ORDER BY month) AS previous_month,</span>
+<span>       ROUND(</span>
+<span>         (revenue - LAG(revenue) OVER (ORDER BY month))</span>
+<span>           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0),</span>
+<span>         4</span>
+<span>       ) AS month_over_month_growth</span>
+<span>FROM monthly;</span>
+<span> </span>
+<span>-- DQ sign-off and business-view reconciliation.</span>
+<span>SELECT * FROM v_dq_customers_solution;</span>
+<span> </span>
+<span>SELECT (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)</span>
+<span>         AS customer_ltv_total,</span>
+<span>       (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS order_total,</span>
+<span>       (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)</span>
+<span>         - (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS difference;</span>
+<span> </span>
+<span>-- Candidate production indexes remain rolled back in this tutorial answer.</span>
+<span>CREATE INDEX idx_orders_date_day60_solution ON orders(order_date);</span>
+<span>CREATE INDEX idx_orders_customer_day60_solution ON orders(customer_id);</span>
+<span>CREATE INDEX idx_order_items_order_day60_solution ON order_items(order_id);</span>
+<span>CREATE INDEX idx_expenses_date_day60_solution ON expenses(expense_date);</span>
+<span>CREATE INDEX idx_budgets_period_day60_solution ON budgets(period);</span>
+<span> </span>
+<span>EXPLAIN (ANALYZE, BUFFERS)</span>
+<span>SELECT *</span>
+<span>FROM v_monthly_revenue_solution</span>
+<span>ORDER BY month DESC</span>
+<span>LIMIT 12;</span>
+<span> </span>
+<span>-- The written capstone should record these sign-off items and measured values.</span>
+<span>SELECT item</span>
+<span>FROM (</span>
+<span>  VALUES</span>
+<span>    (&#x27;DQ exceptions and remediation&#x27;),</span>
+<span>    (&#x27;model grain and join rationale&#x27;),</span>
+<span>    (&#x27;before/after EXPLAIN evidence&#x27;),</span>
+<span>    (&#x27;freshness versus performance tradeoffs&#x27;),</span>
+<span>    (&#x27;known limitations and next steps&#x27;)</span>
+<span>) AS checklist(item);</span>
+<span> </span>
+<span>-- Exercise 1: clock-dependent queries need an as-of value for reproducibility.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>  VALUES</span>
+<span>    (&#x27;v_dq_customers_solution&#x27;, &#x27;snapshot-independent&#x27;),</span>
+<span>    (&#x27;v_customer_ltv_solution&#x27;, &#x27;snapshot-independent&#x27;),</span>
+<span>    (&#x27;trailing/current-period reports&#x27;, &#x27;clock-dependent: bind as_of_date&#x27;)</span>
+<span>) AS reproducibility(object_name, clock_contract);</span>
+<span> </span>
+<span>-- Exercise 2: every sign-off row carries observed/expected values, severity, and</span>
+<span>-- remediation. PASS is computed, never typed by hand.</span>
+<span>WITH checks AS (</span>
+<span>  SELECT &#x27;invalid_customer_emails&#x27; AS check_name,</span>
+<span>         invalid_email::numeric AS observed_value,</span>
+<span>         0::numeric AS expected_value,</span>
+<span>         &#x27;critical&#x27; AS severity,</span>
+<span>         &#x27;quarantine invalid customer records&#x27; AS remediation</span>
+<span>  FROM v_dq_customers_solution</span>
+<span>  UNION ALL</span>
+<span>  SELECT &#x27;ltv_reconciles_to_orders&#x27;,</span>
+<span>         ABS(</span>
+<span>           (SELECT SUM(ltv) FROM v_customer_ltv_solution)</span>
+<span>           - (SELECT SUM(total_amount) FROM orders)</span>
+<span>         ),</span>
+<span>         0, &#x27;critical&#x27;, &#x27;repair customer-grain join or revenue definition&#x27;</span>
+<span>)</span>
+<span>SELECT *, observed_value = expected_value AS pass</span>
+<span>FROM checks</span>
+<span>ORDER BY severity, check_name;</span>
+<span> </span>
+<span>-- Exercise 3: compute LAG once in `with_previous`, then use that named value.</span>
+<span>-- The first month intentionally retains NULL growth because no comparison exists.</span>
+<span>CREATE VIEW v_monthly_revenue_refactored_solution AS</span>
+<span>WITH monthly AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, order_date)::date AS month,</span>
+<span>         SUM(total_amount) AS revenue</span>
+<span>  FROM orders</span>
+<span>  GROUP BY date_trunc(&#x27;month&#x27;, order_date)</span>
+<span>), with_previous AS (</span>
+<span>  SELECT month, revenue,</span>
+<span>         LAG(revenue) OVER (ORDER BY month) AS previous_month</span>
+<span>  FROM monthly</span>
+<span>)</span>
+<span>SELECT month, revenue, previous_month,</span>
+<span>       ROUND((revenue - previous_month) / NULLIF(previous_month, 0), 4)</span>
+<span>         AS month_over_month_growth</span>
+<span>FROM with_previous;</span>
+<span>SELECT * FROM v_monthly_revenue_refactored_solution ORDER BY month;</span>
+<span> </span>
+<span>-- Exercise 4: flag the open calendar month instead of comparing it as if it</span>
+<span>-- were complete. A production report should bind an explicit as-of date.</span>
+<span>SELECT month, revenue,</span>
+<span>       month = date_trunc(&#x27;month&#x27;, CURRENT_DATE)::date AS is_incomplete_month</span>
+<span>FROM v_monthly_revenue_refactored_solution</span>
+<span>ORDER BY month DESC;</span>
+<span> </span>
+<span>-- Exercise 5: structured plan evidence records estimates, actuals, buffers, and</span>
+<span>-- timing. Results remain specific to this server, seed, and cache state.</span>
+<span>EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)</span>
+<span>SELECT * FROM v_monthly_revenue_refactored_solution</span>
+<span>ORDER BY month DESC</span>
+<span>LIMIT 12;</span>
+<span> </span>
+<span>-- Exercise 6: ownership and operations are part of release readiness.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>  VALUES</span>
+<span>    (&#x27;rollback plan&#x27;, &#x27;documented&#x27;, &#x27;release owner&#x27;),</span>
+<span>    (&#x27;object ownership/privileges&#x27;, &#x27;review required&#x27;, &#x27;database owner&#x27;),</span>
+<span>    (&#x27;refresh cadence&#x27;, &#x27;not applicable to ordinary views&#x27;, &#x27;analytics owner&#x27;),</span>
+<span>    (&#x27;monitoring and alerts&#x27;, &#x27;review required&#x27;, &#x27;operations&#x27;),</span>
+<span>    (&#x27;data contracts&#x27;, &#x27;executable checks above&#x27;, &#x27;data owner&#x27;),</span>
+<span>    (&#x27;known limits&#x27;, &#x27;synthetic seed and local plans&#x27;, &#x27;analytics owner&#x27;)</span>
+<span>) AS release_check(item, evidence, owner);</span>
+<span> </span>
+<span>-- Exercise 7: lineage states source, transformation grain, and its validation.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>  VALUES</span>
+<span>    (&#x27;customer_ltv&#x27;, &#x27;customers + orders&#x27;, &#x27;customer&#x27;,</span>
+<span>     &#x27;SUM(ltv) = SUM(orders.total_amount)&#x27;),</span>
+<span>    (&#x27;monthly_revenue&#x27;, &#x27;orders&#x27;, &#x27;calendar month&#x27;,</span>
+<span>     &#x27;SUM(month revenue) = SUM(order totals)&#x27;),</span>
+<span>    (&#x27;customer_dq&#x27;, &#x27;customers&#x27;, &#x27;one snapshot summary&#x27;,</span>
+<span>     &#x27;invalid counts are zero or approved exceptions&#x27;)</span>
+<span>) AS lineage(metric_name, source_tables, transformation_grain, validation_query);</span>
+<span> </span>
+<span>-- Exercise 8: dashboard monthly revenue must equal the simpler source control.</span>
+<span>SELECT (SELECT ROUND(SUM(revenue), 2)</span>
+<span>        FROM v_monthly_revenue_refactored_solution) AS dashboard_total,</span>
+<span>       (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS source_total,</span>
+<span>       (SELECT ROUND(SUM(revenue), 2)</span>
+<span>        FROM v_monthly_revenue_refactored_solution)</span>
+<span>       - (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS difference;</span>
+<span> </span>
+<span>-- Exercise 9: explicit miniature fixtures make boundary assumptions reviewable</span>
+<span>-- without corrupting the canonical training data.</span>
+<span>WITH edge_fixture(id, email, amount) AS (</span>
+<span>  VALUES (1, NULL::text, NULL::numeric),</span>
+<span>         (2, &#x27;DUP@example.com&#x27;, 10),</span>
+<span>         (2, &#x27;dup@example.com&#x27;, 10)</span>
+<span>)</span>
+<span>SELECT COUNT(*) AS fixture_rows,</span>
+<span>       COUNT(*) FILTER (WHERE email IS NULL) AS null_email_rows,</span>
+<span>       COUNT(*) - COUNT(DISTINCT id) AS duplicate_key_rows,</span>
+<span>       COUNT(amount) AS nonnull_amount_rows</span>
+<span>FROM edge_fixture;</span>
+<span> </span>
+<span>-- Exercise 10: NOT_RUN is distinct from FAIL. Only executed evidence can PASS.</span>
+<span>SELECT criterion,</span>
+<span>       CASE</span>
+<span>         WHEN executed AND observed = expected THEN &#x27;PASS&#x27;</span>
+<span>         WHEN executed THEN &#x27;FAIL&#x27;</span>
+<span>         ELSE &#x27;NOT_RUN&#x27;</span>
+<span>       END AS result</span>
+<span>FROM (</span>
+<span>  VALUES</span>
+<span>    (&#x27;customer DQ&#x27;, true,</span>
+<span>     (SELECT invalid_email::numeric FROM v_dq_customers_solution), 0::numeric),</span>
+<span>    (&#x27;LTV reconciliation&#x27;, true,</span>
+<span>     ABS((SELECT SUM(ltv) FROM v_customer_ltv_solution)</span>
+<span>         - (SELECT SUM(total_amount) FROM orders)), 0::numeric),</span>
+<span>    (&#x27;Windows CI bootstrap&#x27;, false, NULL::numeric, NULL::numeric)</span>
+<span>) AS acceptance(criterion, executed, observed, expected)</span>
+<span>ORDER BY criterion;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-59.html"><small>Previous lesson</small><strong>sql-59</strong><span>Final Capstone Part2</span></a>
+        <a class="nav-card next" href="sql-sec-01.html"><small>Next lesson</small><strong>sql-sec-01</strong><span>Schemas, Roles, Privileges, and Row-Level Security</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-60";
+    const LEARNER_PATH = "sql/postgres-60day/day60_final_capstone_part3.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

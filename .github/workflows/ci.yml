@@ -14,6 +14,11 @@ jobs:
   core:
     name: Core checks (${{ matrix.os }}, Python ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
+    env:
+      # .python-version is the learner default. CI must instead exercise the
+      # interpreter selected by each matrix leg.
+      UV_PYTHON: ${{ matrix.python-version }}
+      DS60_EXPECTED_PYTHON: ${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
@@ -46,6 +51,13 @@ jobs:
         run: >-
           uv sync --frozen --extra notebooks --extra data --extra bridge
           --extra quality --extra professional --extra sql-notebooks
+      - name: Verify the matrix interpreter
+        run: >-
+          uv run --no-sync python -c
+          "import os, sys;
+          expected = tuple(map(int, os.environ['DS60_EXPECTED_PYTHON'].split('.')));
+          actual = sys.version_info[:2];
+          assert actual == expected, f'Expected Python {expected}, got {actual}'"
       - name: Regenerate catalog
         run: uv run --no-sync python scripts/build_catalog.py
       - name: Check catalog drift
@@ -56,6 +68,8 @@ jobs:
         run: git diff --exit-code -- docs/practice-coverage.md
       - name: Check generated learning portal drift
         run: uv run --no-sync python scripts/build_course_guide.py --check
+      - name: Check generated lesson reader drift
+        run: uv run --no-sync python scripts/build_lesson_readers.py --check
       - name: Lint
         run: uv run --no-sync ruff check src scripts tests bridge python/professional
       - name: Check formatting
@@ -77,6 +91,14 @@ jobs:
         run: >-
           uv run --no-sync python -m ipykernel install --user
           --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+      - name: Exercise guided Windows startup diagnostics
+        if: matrix.os == 'windows-latest' && matrix.python-version == '3.12'
+        shell: pwsh
+        run: |
+          uv run --no-sync python -m ipykernel install --user `
+            --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+          .\scripts\start_ds60.ps1 `
+            -DiagnosticsOnly -NonInteractive -SkipPostgreSql
       - name: Offline notebook smoke execution
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         run: uv run --no-sync python scripts/validate_notebooks.py --smoke

@@ -10,7 +10,7 @@ import shutil
 import subprocess
 import sys
 import webbrowser
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path, PurePosixPath
@@ -18,7 +18,13 @@ from typing import Any, cast
 from urllib.parse import unquote, urlsplit
 
 from ds60sqlpy.catalog import Catalog, Lesson
+from ds60sqlpy.doctor import diagnose
 from ds60sqlpy.progress import ProgressStore
+from ds60sqlpy.sql_notebook import (
+    SqlArtifactKind,
+    SqlNotebookError,
+    generate_sql_notebook,
+)
 
 MAX_REQUEST_BYTES = 64 * 1024
 BLOCKED_PARTS = {
@@ -74,21 +80,69 @@ class PortalLauncher:
         *,
         lesson_id: str | None = None,
         artifact: str = "lesson",
+        solution_index: int = 0,
     ) -> tuple[str, ...]:
         """Build an allowlisted command without executing it."""
 
         if action == "open-repo":
             return (self._code_executable(), str(self.catalog.repo_root))
-        if action == "open-lesson":
+        if action in {"open-lesson", "open-artifact"}:
             if lesson_id is None:
                 raise PortalError("Choose a lesson before opening it in VS Code.")
             lesson = self.catalog.get(lesson_id)
-            target = self._lesson_artifact(lesson, artifact)
-            return (self._code_executable(), "-g", str(target))
+            target = self._lesson_artifact(
+                lesson,
+                artifact,
+                solution_index=solution_index,
+            )
+            return (
+                self._code_executable(),
+                "--reuse-window",
+                str(self.catalog.repo_root),
+                "--goto",
+                str(target),
+            )
+        if action == "jupyter-lesson":
+            if lesson_id is None:
+                raise PortalError("Choose a notebook lesson before launching JupyterLab.")
+            lesson = self.catalog.get(lesson_id)
+            target = self._lesson_artifact(
+                lesson,
+                artifact,
+                solution_index=solution_index,
+            )
+            if target.suffix.lower() != ".ipynb":
+                raise PortalError(
+                    f"{lesson.id} uses {target.suffix or 'a non-notebook artifact'}; "
+                    "open it in VS Code instead."
+                )
+            return (*self._python_command(), "-m", "jupyterlab", str(target))
         if action == "jupyter-python":
             target = self.catalog.repo_root / "python" / "ds-60day" / "notebooks"
             return (*self._python_command(), "-m", "jupyterlab", str(target))
         if action == "jupyter-sql":
+            if lesson_id is not None:
+                if artifact not in {"lesson", "solution"}:
+                    raise PortalError(
+                        "Guided SQL notebooks support only lesson or solution artifacts."
+                    )
+                if solution_index < 1:
+                    raise PortalError("Guided SQL notebooks use a one-based solution index.")
+                try:
+                    workspace = generate_sql_notebook(
+                        self.catalog,
+                        lesson_id,
+                        cast(SqlArtifactKind, artifact),
+                        solution_index,
+                    )
+                except SqlNotebookError as exc:
+                    raise PortalError(str(exc)) from exc
+                return (
+                    *self._python_command(),
+                    "-m",
+                    "jupyterlab",
+                    str(workspace.notebook_path),
+                )
             target = self.catalog.repo_root / "bridge" / "professional" / "notebooks"
             return (*self._python_command(), "-m", "jupyterlab", str(target))
         raise PortalError(f"Unsupported portal action: {action}")
@@ -99,12 +153,18 @@ class PortalLauncher:
         *,
         lesson_id: str | None = None,
         artifact: str = "lesson",
+        solution_index: int = 0,
     ) -> Launch:
         """Launch one allowlisted action and return its process metadata."""
 
         if not self.enabled:
             raise PortalError("Native launches are disabled for this portal session.")
-        command = self.command(action, lesson_id=lesson_id, artifact=artifact)
+        command = self.command(
+            action,
+            lesson_id=lesson_id,
+            artifact=artifact,
+            solution_index=solution_index,
+        )
         kwargs: dict[str, Any] = {
             "cwd": self.catalog.repo_root,
             "stdin": subprocess.DEVNULL,
@@ -119,7 +179,13 @@ class PortalLauncher:
             raise PortalError(f"Could not launch {action}: {exc}") from exc
         return Launch(action=action, command=command, process_id=process.pid)
 
-    def _lesson_artifact(self, lesson: Lesson, artifact: str) -> Path:
+    def _lesson_artifact(
+        self,
+        lesson: Lesson,
+        artifact: str,
+        *,
+        solution_index: int = 0,
+    ) -> Path:
         paths = {
             "lesson": lesson.lesson_path,
             "guide": lesson.guide_path,
@@ -127,7 +193,12 @@ class PortalLauncher:
         if artifact == "solution":
             if not lesson.solution_paths:
                 raise PortalError(f"{lesson.id} has no cataloged solution artifact.")
-            relative = lesson.solution_paths[0]
+            if not 0 <= solution_index < len(lesson.solution_paths):
+                raise PortalError(
+                    f"{lesson.id} has {len(lesson.solution_paths)} solution artifact(s); "
+                    f"solution index {solution_index} is unavailable."
+                )
+            relative = lesson.solution_paths[solution_index]
         else:
             try:
                 relative = paths[artifact]
@@ -141,6 +212,7 @@ class PortalLauncher:
     def _python_command(self) -> tuple[str, ...]:
         candidates = (
             self.catalog.repo_root / ".venv" / "Scripts" / "python.exe",
+            self.catalog.repo_root / ".venv" / "python.exe",
             self.catalog.repo_root / ".venv" / "bin" / "python",
         )
         for candidate in candidates:
@@ -165,7 +237,13 @@ class PortalLauncher:
             for variable in ("LOCALAPPDATA", "ProgramFiles", "ProgramFiles(x86)"):
                 root = os.environ.get(variable)
                 if root:
-                    candidates.append(Path(root) / "Microsoft VS Code" / "bin" / "code.cmd")
+                    candidates.extend(
+                        (
+                            Path(root) / "Programs" / "Microsoft VS Code" / "Code.exe",
+                            Path(root) / "Microsoft VS Code" / "Code.exe",
+                            Path(root) / "Microsoft VS Code" / "bin" / "code.cmd",
+                        )
+                    )
         for candidate in candidates:
             if candidate.is_file():
                 return str(candidate)
@@ -216,10 +294,14 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         """Serve the guide, status API, or a safe repository artifact."""
 
+        if self.headers.get("Host") != self.portal.expected_host:
+            self._send_error(HTTPStatus.BAD_REQUEST, "Unexpected Host header.")
+            return
         path = urlsplit(self.path).path
         if path == "/api/status":
             if not self._authorized_api_request(require_origin=False):
                 return
+            diagnostics = [asdict(item) for item in diagnose(self.portal.catalog)]
             self._send_json(
                 {
                     "mode": "launcher",
@@ -228,6 +310,7 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
                     ],
                     "progress_path": ".learning/progress.json",
                     "launches_enabled": self.portal.launcher.enabled,
+                    "diagnostics": diagnostics,
                 }
             )
             return
@@ -318,16 +401,24 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
         action = payload.get("action")
         lesson_id = payload.get("lesson_id")
         artifact = payload.get("artifact", "lesson")
+        solution_index = payload.get("solution_index", 0)
         if not isinstance(action, str):
             raise PortalError("Launch request needs an action.")
         if lesson_id is not None and not isinstance(lesson_id, str):
             raise PortalError("lesson_id must be a string.")
         if not isinstance(artifact, str):
             raise PortalError("artifact must be a string.")
+        if (
+            not isinstance(solution_index, int)
+            or isinstance(solution_index, bool)
+            or solution_index < 0
+        ):
+            raise PortalError("solution_index must be a non-negative integer.")
         launch = self.portal.launcher.launch(
             action,
             lesson_id=lesson_id,
             artifact=artifact,
+            solution_index=solution_index,
         )
         self._send_json(
             {
@@ -377,6 +468,19 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
         ):
             self._send_error(HTTPStatus.NOT_FOUND, "Repository artifact not found.")
             return
+        lesson_page = (
+            len(relative.parts) == 2
+            and relative.parts[0] == "lesson-pages"
+            and relative.suffix.lower() == ".html"
+        )
+        reference_page = (
+            len(relative.parts) >= 2
+            and relative.parts[0] == "reference-pages"
+            and relative.suffix.lower() == ".html"
+        )
+        if not lesson_page and not reference_page:
+            self._send_error(HTTPStatus.NOT_FOUND, "Repository artifact not found.")
+            return
         target = (self.portal.repo_root / Path(*relative.parts)).resolve()
         if (
             not target.is_relative_to(self.portal.repo_root)
@@ -391,6 +495,18 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
         except OSError as exc:
             self._send_error(HTTPStatus.NOT_FOUND, str(exc))
             return
+        if (
+            target.suffix.lower() == ".html"
+            and target.parent.name == "lesson-pages"
+            and b'const SERVER_TOKEN = "";' in encoded
+        ):
+            document = encoded.decode("utf-8")
+            document = document.replace(
+                'const SERVER_TOKEN = "";',
+                f"const SERVER_TOKEN = {json.dumps(self.portal.token)};",
+                1,
+            )
+            encoded = document.encode("utf-8")
         content_type = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
         self.send_response(HTTPStatus.OK)
         self._security_headers(content_type, len(encoded))

@@ -5,6 +5,12 @@ the normal Python kernel with JupySQL. JupySQL supplies IPython line and cell
 magics such as `%sql` and `%%sql`; PostgreSQL still runs in the local
 `advanced_sql_training` database.
 
+For a normal SQL course lesson or solution, open its
+[generated guided notebook](../guided-sql-notebooks.md) from the learning
+portal. Those notebooks run the complete cataloged script through `psql`
+because many course files use `psql` meta-commands that are not valid JupySQL
+cells. Use this page for the dedicated lesson about interactive SQL magics.
+
 This is an interactive learning workflow. Application code should continue to
 use explicit Psycopg or SQLAlchemy boundaries, tests, and transaction
 ownership.
@@ -49,9 +55,10 @@ For a smaller targeted installation after normal setup:
 .venv/bin/python -m pip install -e ".[sql-notebooks]"
 ```
 
-The profile installs JupySQL, SQLAlchemy, and Psycopg 3. Do not put `%pip`
-installation cells into a lesson notebook: they hide which interpreter was
-modified and cannot work during offline study.
+The profile installs JupySQL, pandas for `.DataFrame()` result conversion,
+SQLAlchemy, and Psycopg 3. Do not put `%pip` installation cells into a lesson
+notebook: they hide which interpreter was modified and cannot work during
+offline study.
 
 ## 2. Prepare only the disposable database
 

@@ -5,15 +5,13 @@
 DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.
 
 > [!TIP]
-> Double-click [START_HERE.html](START_HERE.html) for the offline, guided course
-> portal. It walks through machine setup, learning paths, the study loop, all
-> 154 cataloged lessons, browser-local progress, and a copy-ready Codex tutoring
-> prompt. It contains no external scripts, fonts, analytics, or network calls.
-> After setup, use the environment-specific launcher command in
-> [Quick start](#3-see-what-is-ready) for the enhanced private localhost mode:
-> progress is synchronized to ignored
-> `.learning/progress.json`, and explicit buttons can open only cataloged
-> VS Code files or the two course JupyterLab folders.
+> **On Windows, double-click `START_DS60.cmd`.** It checks the machine, guides
+> the connected first setup when `.venv` is absent or incomplete, runs the
+> course doctor, and opens the private portal that can launch cataloged
+> artifacts in VS Code or JupyterLab. On macOS/Linux—or before setup—double-click
+> [START_HERE.html](START_HERE.html) for the static offline guide. Static browser
+> mode can render lesson pages, but a browser cannot execute Python or SQL;
+> use the private launcher for runnable actions.
 
 The repository is designed for:
 
@@ -69,6 +67,8 @@ Follow the guide for your operating system:
 Windows PowerShell:
 
 ```powershell
+# Easiest guided route: double-click START_DS60.cmd in File Explorer.
+#
 # Recommended on a new Windows machine, including when Anaconda or PostgreSQL
 # is installed but not on PATH:
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
@@ -93,6 +93,12 @@ reuse it for the commands below. See the
 Use the smaller historical `scripts\setup.ps1` only when a supported Python is
 already discoverable and you specifically want its standard-`venv`
 `.venv\Scripts\python.exe` layout; do not run it over a conda-prefix `.venv`.
+
+`START_DS60.cmd` is the day-to-day Windows entry point; the PowerShell command
+above is the lower-level setup tool. The launcher reuses a ready environment
+without reinstalling packages. Before its first download it clearly labels the
+connected setup and asks you to type `SETUP`. It never asks for a database
+credential and never creates, drops, or resets database data.
 
 macOS or Linux:
 

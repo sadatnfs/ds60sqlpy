@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-50 · Project2 Finance Part2 · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-50</p>
+        <h1>Project2 Finance Part2</h1>
+        <p class="hero-copy">Applied analytics and capstones</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-49.html">sql-49</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day50_project2_finance_part2.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day50_project2_finance_part2.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day50_project2_finance_part2.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-50-finance-operations-project-part-2-budget-variance">Day 50 — Finance/Operations Project, Part 2: Budget Variance<a class="heading-anchor" href="#guide--day-50-finance-operations-project-part-2-budget-variance" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-49.html#guide">Day 49 — revenue forecasting</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-50.html#learner">learner SQL</a> · <a href="sql-50.html#solution-1">solution reasoning</a> · <a href="sql-50.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Align actual and budget values without discarding one-sided periods.</li>
+<li>Calculate absolute and percentage variance and pivot controlled categories.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Variance:</strong> actual minus budget under this course&#x27;s declared convention.</li>
+<li><strong>Budget-only row:</strong> a period/category with budget but no represented actual.</li>
+<li><strong>Static pivot:</strong> fixed output columns for a controlled category domain.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Aggregate actuals and budgets independently at <code>(month, category)</code>, full-join those stable relations, and retain both raw values. Derive absolute variance and guard percentage variance with <code>NULLIF(budget, 0)</code>; only then pivot the five known categories.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete these in the <a href="sql-50.html#learner">learner SQL</a>:</p>
+<ol>
+<li>Calculate YoY variance and flag &gt;15% overspend.</li>
+<li>Pivot monthly category variance.</li>
+<li>Define absent-budget policy before using <code>COALESCE</code>.</li>
+<li>Add category YTD actual, budget, variance, and variance percentage.</li>
+<li>Normalize joined keys before applying windows.</li>
+<li>Label unbudgeted spend separately from ordinary overspend.</li>
+</ol>
+<p>Test actual-only, budget-only, and zero-budget toy rows.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Are missing and zero values kept semantically distinct?</li>
+<li>Does every pivot row reconcile with the long-form variance rows?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-51.html#guide">Day 51 — cash flow</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--project-focus">Project focus<a class="heading-anchor" href="#guide--project-focus" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Align monthly actual expenses with monthly budgets.</li>
+<li>Add year-over-year and greater-than-15% overspend indicators.</li>
+<li>Pivot known expense categories into report columns.</li>
+</ul>
+<h4 id="guide--how-the-learner-script-uses-the-current-schema">How the learner script uses the current schema<a class="heading-anchor" href="#guide--how-the-learner-script-uses-the-current-schema" aria-label="Link to this section">#</a></h4>
+<p>Actuals come from <code>expenses(expense_date, category, amount)</code>. Budgets come from <code>budgets(period, category, amount)</code>, where <code>period</code> is the first day of a month. The starter uses a full outer join so months/categories present on only one side remain visible, then demonstrates rolling three-row totals.</p>
+<p>The setup categories are <code>COGS</code>, <code>Marketing</code>, <code>Payroll</code>, <code>Infrastructure</code>, and <code>G&amp;A</code>.</p>
+<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Add prior-year actual and year-over-year percentage by category, plus <code>actual &gt; budget * 1.15</code> as the requested overspend flag.</li>
+<li>Return one row per month with actual-minus-budget variance columns for the five known categories.</li>
+</ol>
+<h4 id="guide--metric-semantics">Metric semantics<a class="heading-anchor" href="#guide--metric-semantics" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Variance is <code>actual - budget</code>; positive means overspend.</li>
+<li>Percentage variance uses budget as denominator and must guard zero budgets.</li>
+<li>A 12-row <code>LAG</code> assumes every category has a complete monthly series. Build a month/category spine when gaps are possible.</li>
+<li>A static pivot is appropriate only while the category set is controlled.</li>
+</ul>
+<h4 id="guide--validation-and-limits">Validation and limits<a class="heading-anchor" href="#guide--validation-and-limits" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Preserve actual-only and budget-only rows before deciding how to display missing values.</li>
+<li>Reconcile each pivot row to the long-form monthly variance.</li>
+<li>Do not silently label a missing budget as zero-percent variance.</li>
+<li>Report both absolute currency variance and percentage; either alone can mislead.</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day50_project2_finance_part2.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day50_project2_finance_part2.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 50: Project 2 - Financial/Operational Analysis (Part 2)</span>
+<span>-- Expense categorization, variance analysis vs budget</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Monthly actual expenses by category</span>
+<span>WITH monthly_exp AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month,</span>
+<span>         category,</span>
+<span>         SUM(amount) AS actual</span>
+<span>  FROM expenses</span>
+<span>  GROUP BY 1,2</span>
+<span>), monthly_budget AS (</span>
+<span>  SELECT period AS month,</span>
+<span>         category,</span>
+<span>         SUM(amount) AS budget</span>
+<span>  FROM budgets</span>
+<span>  GROUP BY 1,2</span>
+<span>)</span>
+<span>SELECT coalesce(b.category, e.category) AS category,</span>
+<span>       coalesce(b.month, e.month) AS month,</span>
+<span>       COALESCE(b.budget, 0) AS budget,</span>
+<span>       COALESCE(e.actual, 0) AS actual,</span>
+<span>       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0), 2) AS variance,</span>
+<span>       ROUND((COALESCE(e.actual,0) - COALESCE(b.budget,0)) / NULLIF(b.budget,0), 4) AS variance_pct</span>
+<span>FROM monthly_budget b</span>
+<span>FULL OUTER JOIN monthly_exp e</span>
+<span>  ON e.month = b.month AND e.category = b.category</span>
+<span>ORDER BY month DESC, category</span>
+<span>LIMIT 100;</span>
+<span> </span>
+<span>-- Rolling 3-month actuals and budget</span>
+<span>WITH monthly AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month,</span>
+<span>         category,</span>
+<span>         SUM(amount) AS actual</span>
+<span>  FROM expenses</span>
+<span>  GROUP BY 1,2</span>
+<span>), bud AS (</span>
+<span>  SELECT period AS month, category, SUM(amount) AS budget</span>
+<span>  FROM budgets</span>
+<span>  GROUP BY 1,2</span>
+<span>), joined AS (</span>
+<span>  SELECT coalesce(b.category, m.category) AS category,</span>
+<span>         coalesce(b.month, m.month) AS month,</span>
+<span>         COALESCE(b.budget, 0) AS budget,</span>
+<span>         COALESCE(m.actual, 0) AS actual</span>
+<span>  FROM bud b FULL JOIN monthly m ON m.month = b.month AND m.category = b.category</span>
+<span>)</span>
+<span>SELECT category,</span>
+<span>       month,</span>
+<span>       SUM(actual) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS actual_ma3,</span>
+<span>       SUM(budget) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS budget_ma3</span>
+<span>FROM joined</span>
+<span>ORDER BY month DESC, category</span>
+<span>LIMIT 100;</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- 1. Compute YoY variance and highlight categories with &gt;15% overspend.</span>
+<span>-- 2. Build a report pivoting categories as columns and months as rows with variance.</span>
+<span>-- 3. Prediction: decide whether an absent budget row means zero budget or</span>
+<span>--    unknown budget, and show how that policy changes COALESCE and variance.</span>
+<span>-- 4. Construction: add YTD actual, budget, absolute variance, and variance</span>
+<span>--    percentage per category using window frames.</span>
+<span>-- 5. Debugging: repair a FULL JOIN whose month/category keys are coalesced only</span>
+<span>--    in SELECT but not consistently reused in later windows.</span>
+<span>-- 6. Edge case: label new categories with actual spend but no budget separately</span>
+<span>--    from overspend so stakeholders do not confuse missing plans with zero plans.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day50_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day50_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-50-solutions-expense-and-budget-variance">Day 50 Solutions — Expense and Budget Variance<a class="heading-anchor" href="#solution-1--day-50-solutions-expense-and-budget-variance" aria-label="Link to this section">#</a></h3>
+<p>This day adds year-over-year context, a greater-than-15% overspend flag, and a static monthly pivot using the categories present in the course seed. See <a href="sql-50.html#solution-2"><code>day50_solutions.sql</code></a>.</p>
+<h4 id="solution-1--exercise-1-yoy-and-budget-variance">Exercise 1 — YoY and budget variance<a class="heading-anchor" href="#solution-1--exercise-1-yoy-and-budget-variance" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH actual AS (
+  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month,
+         category,
+         SUM(amount) AS actual
+  FROM expenses
+  GROUP BY date_trunc(&#x27;month&#x27;, expense_date), category
+), budget AS (
+  SELECT period AS month, category, SUM(amount) AS budget
+  FROM budgets
+  GROUP BY period, category
+), joined AS (
+  SELECT COALESCE(a.month, b.month) AS month,
+         COALESCE(a.category, b.category) AS category,
+         COALESCE(a.actual, 0) AS actual,
+         COALESCE(b.budget, 0) AS budget
+  FROM actual a
+  FULL OUTER JOIN budget b USING (month, category)
+), compared AS (
+  SELECT *,
+         LAG(actual, 12) OVER (
+           PARTITION BY category ORDER BY month
+         ) AS prior_year_actual
+  FROM joined
+)
+SELECT month,
+       category,
+       ROUND(actual, 2) AS actual,
+       ROUND(prior_year_actual, 2) AS prior_year_actual,
+       ROUND((actual - prior_year_actual) / NULLIF(prior_year_actual, 0), 4)
+         AS year_over_year_variance_pct,
+       ROUND((actual - budget) / NULLIF(budget, 0), 4) AS budget_variance_pct,
+       actual &gt; budget * 1.15 AS overspent_by_more_than_15_pct
+FROM compared
+ORDER BY month DESC, category;</code></pre>
+<p>Expected grain: one row per month and category, including periods found on only one side of the actual/budget comparison.</p>
+<h4 id="solution-1--exercise-2-monthly-variance-pivot">Exercise 2 — Monthly variance pivot<a class="heading-anchor" href="#solution-1--exercise-2-monthly-variance-pivot" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH actual AS (
+  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month,
+         category,
+         SUM(amount) AS actual
+  FROM expenses
+  GROUP BY date_trunc(&#x27;month&#x27;, expense_date), category
+), variance AS (
+  SELECT b.period AS month,
+         b.category,
+         COALESCE(a.actual, 0) - b.amount AS variance
+  FROM budgets b
+  LEFT JOIN actual a
+    ON a.month = b.period
+   AND a.category = b.category
+)
+SELECT month,
+       ROUND(SUM(variance) FILTER (WHERE category = &#x27;COGS&#x27;), 2) AS cogs,
+       ROUND(SUM(variance) FILTER (WHERE category = &#x27;Marketing&#x27;), 2) AS marketing,
+       ROUND(SUM(variance) FILTER (WHERE category = &#x27;Payroll&#x27;), 2) AS payroll,
+       ROUND(SUM(variance) FILTER (WHERE category = &#x27;Infrastructure&#x27;), 2)
+         AS infrastructure,
+       ROUND(SUM(variance) FILTER (WHERE category = &#x27;G&amp;A&#x27;), 2) AS general_admin
+FROM variance
+GROUP BY month
+ORDER BY month DESC;</code></pre>
+<p>Expected shape: one row per budget month and one variance column per known category.</p>
+<h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Positive variance means actual spending exceeded budget because the formula is <code>actual - budget</code>.</li>
+<li><code>LAG(..., 12)</code> assumes every category has one row for every month. Build a category/month spine when periods can be missing.</li>
+<li>The pivot is intentionally static. New categories require a new column or a long-form BI result.</li>
+<li>Treat zero or absent budgets explicitly; <code>NULL</code> percentage is safer than a fabricated infinite or zero rate.</li>
+</ul>
+<h4 id="solution-1--exercise-3-preserve-missing-budget-meaning">Exercise 3 — Preserve missing-budget meaning<a class="heading-anchor" href="#solution-1--exercise-3-preserve-missing-budget-meaning" aria-label="Link to this section">#</a></h4>
+<p>The FULL JOIN retains actual-only and budget-only rows. Status is assigned before display-time <code>COALESCE</code>, so missing planning data is not relabeled zero.</p>
+<h4 id="solution-1--exercise-4-calculate-ytd-windows">Exercise 4 — Calculate YTD windows<a class="heading-anchor" href="#solution-1--exercise-4-calculate-ytd-windows" aria-label="Link to this section">#</a></h4>
+<p>The <code>monthly</code> CTE first establishes canonical coalesced keys. Windows then partition by category and calendar year and order by month.</p>
+<h4 id="solution-1--exercise-5-normalize-joined-keys-once">Exercise 5 — Normalize joined keys once<a class="heading-anchor" href="#solution-1--exercise-5-normalize-joined-keys-once" aria-label="Link to this section">#</a></h4>
+<p>Every later expression references <code>monthly.month</code> and <code>monthly.category</code>, avoiding inconsistent use of nullable columns from one join side.</p>
+<h4 id="solution-1--exercise-6-separate-unbudgeted-spend">Exercise 6 — Separate unbudgeted spend<a class="heading-anchor" href="#solution-1--exercise-6-separate-unbudgeted-spend" aria-label="Link to this section">#</a></h4>
+<p>The CASE checks missing and zero budgets before normal overspend. This prevents an absent plan from becoming an ordinary variance percentage.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day50_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day50_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 50 solutions: expense and budget variance</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>WITH actual AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month,</span>
+<span>         category,</span>
+<span>         SUM(amount) AS actual</span>
+<span>  FROM expenses</span>
+<span>  GROUP BY date_trunc(&#x27;month&#x27;, expense_date), category</span>
+<span>), budget AS (</span>
+<span>  SELECT period AS month, category, SUM(amount) AS budget</span>
+<span>  FROM budgets</span>
+<span>  GROUP BY period, category</span>
+<span>), joined AS (</span>
+<span>  SELECT COALESCE(a.month, b.month) AS month,</span>
+<span>         COALESCE(a.category, b.category) AS category,</span>
+<span>         COALESCE(a.actual, 0) AS actual,</span>
+<span>         COALESCE(b.budget, 0) AS budget</span>
+<span>  FROM actual a</span>
+<span>  FULL OUTER JOIN budget b USING (month, category)</span>
+<span>), compared AS (</span>
+<span>  SELECT *,</span>
+<span>         LAG(actual, 12) OVER (</span>
+<span>           PARTITION BY category ORDER BY month</span>
+<span>         ) AS prior_year_actual</span>
+<span>  FROM joined</span>
+<span>)</span>
+<span>-- Exercise 1: year-over-year change plus the requested &gt;15% budget flag.</span>
+<span>SELECT month,</span>
+<span>       category,</span>
+<span>       ROUND(actual, 2) AS actual,</span>
+<span>       ROUND(prior_year_actual, 2) AS prior_year_actual,</span>
+<span>       ROUND((actual - prior_year_actual) / NULLIF(prior_year_actual, 0), 4)</span>
+<span>         AS year_over_year_variance_pct,</span>
+<span>       ROUND((actual - budget) / NULLIF(budget, 0), 4) AS budget_variance_pct,</span>
+<span>       actual &gt; budget * 1.15 AS overspent_by_more_than_15_pct</span>
+<span>FROM compared</span>
+<span>ORDER BY month DESC, category;</span>
+<span> </span>
+<span>-- Exercise 2: pivot monthly actual-minus-budget variance by category.</span>
+<span>WITH actual AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month,</span>
+<span>         category,</span>
+<span>         SUM(amount) AS actual</span>
+<span>  FROM expenses</span>
+<span>  GROUP BY date_trunc(&#x27;month&#x27;, expense_date), category</span>
+<span>), variance AS (</span>
+<span>  SELECT b.period AS month,</span>
+<span>         b.category,</span>
+<span>         COALESCE(a.actual, 0) - b.amount AS variance</span>
+<span>  FROM budgets b</span>
+<span>  LEFT JOIN actual a</span>
+<span>    ON a.month = b.period</span>
+<span>   AND a.category = b.category</span>
+<span>)</span>
+<span>SELECT month,</span>
+<span>       ROUND(SUM(variance) FILTER (WHERE category = &#x27;COGS&#x27;), 2) AS cogs,</span>
+<span>       ROUND(SUM(variance) FILTER (WHERE category = &#x27;Marketing&#x27;), 2) AS marketing,</span>
+<span>       ROUND(SUM(variance) FILTER (WHERE category = &#x27;Payroll&#x27;), 2) AS payroll,</span>
+<span>       ROUND(SUM(variance) FILTER (WHERE category = &#x27;Infrastructure&#x27;), 2)</span>
+<span>         AS infrastructure,</span>
+<span>       ROUND(SUM(variance) FILTER (WHERE category = &#x27;G&amp;A&#x27;), 2) AS general_admin</span>
+<span>FROM variance</span>
+<span>GROUP BY month</span>
+<span>ORDER BY month DESC;</span>
+<span> </span>
+<span>-- Exercise 3: preserve missingness before display. A NULL budget is unknown,</span>
+<span>-- not automatically a policy-approved zero.</span>
+<span>WITH actual AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month, category,</span>
+<span>         SUM(amount) AS actual</span>
+<span>  FROM expenses GROUP BY 1, 2</span>
+<span>), budget AS (</span>
+<span>  SELECT period AS month, category, SUM(amount) AS budget</span>
+<span>  FROM budgets GROUP BY 1, 2</span>
+<span>)</span>
+<span>SELECT COALESCE(a.month, b.month) AS month,</span>
+<span>       COALESCE(a.category, b.category) AS category,</span>
+<span>       a.actual, b.budget,</span>
+<span>       CASE WHEN b.category IS NULL THEN &#x27;missing budget&#x27;</span>
+<span>            WHEN a.category IS NULL THEN &#x27;no actual&#x27;</span>
+<span>            ELSE &#x27;comparable&#x27; END AS comparison_status</span>
+<span>FROM actual a</span>
+<span>FULL JOIN budget b USING (month, category)</span>
+<span>ORDER BY month DESC, category;</span>
+<span> </span>
+<span>-- Exercise 4: first normalize joined keys/values, then apply YTD windows to the</span>
+<span>-- single canonical month/category columns.</span>
+<span>WITH monthly AS (</span>
+<span>  SELECT COALESCE(a.month, b.month) AS month,</span>
+<span>         COALESCE(a.category, b.category) AS category,</span>
+<span>         a.actual, b.budget</span>
+<span>  FROM (</span>
+<span>    SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month, category,</span>
+<span>           SUM(amount) AS actual</span>
+<span>    FROM expenses GROUP BY 1, 2</span>
+<span>  ) a</span>
+<span>  FULL JOIN (</span>
+<span>    SELECT period AS month, category, SUM(amount) AS budget</span>
+<span>    FROM budgets GROUP BY 1, 2</span>
+<span>  ) b USING (month, category)</span>
+<span>)</span>
+<span>SELECT month, category,</span>
+<span>       SUM(actual) OVER (PARTITION BY category, EXTRACT(year FROM month)</span>
+<span>                         ORDER BY month) AS actual_ytd,</span>
+<span>       SUM(budget) OVER (PARTITION BY category, EXTRACT(year FROM month)</span>
+<span>                         ORDER BY month) AS budget_ytd,</span>
+<span>       SUM(actual - budget) OVER (</span>
+<span>         PARTITION BY category, EXTRACT(year FROM month) ORDER BY month</span>
+<span>       ) AS variance_ytd</span>
+<span>FROM monthly</span>
+<span>ORDER BY month DESC, category;</span>
+<span> </span>
+<span>-- Exercise 5 is embodied by the canonical `monthly` CTE above: every later</span>
+<span>-- window references its coalesced keys, never one nullable join side.</span>
+<span> </span>
+<span>-- Exercise 6: classify missing plans before applying an overspend threshold.</span>
+<span>WITH totals AS (</span>
+<span>  SELECT e.category, SUM(e.amount) AS actual, SUM(b.amount) AS budget</span>
+<span>  FROM expenses e</span>
+<span>  FULL JOIN budgets b</span>
+<span>    ON b.category = e.category</span>
+<span>   AND b.period = date_trunc(&#x27;month&#x27;, e.expense_date)::date</span>
+<span>  GROUP BY e.category</span>
+<span>)</span>
+<span>SELECT category, actual, budget,</span>
+<span>       CASE WHEN budget IS NULL THEN &#x27;unbudgeted spend&#x27;</span>
+<span>            WHEN budget = 0 THEN &#x27;zero budget&#x27;</span>
+<span>            WHEN actual &gt; budget THEN &#x27;overspend&#x27;</span>
+<span>            ELSE &#x27;within budget&#x27; END AS status</span>
+<span>FROM totals</span>
+<span>ORDER BY category;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-49.html"><small>Previous lesson</small><strong>sql-49</strong><span>Project2 Finance Part1</span></a>
+        <a class="nav-card next" href="sql-51.html"><small>Next lesson</small><strong>sql-51</strong><span>Project2 Finance Part3</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-50";
+    const LEARNER_PATH = "sql/postgres-60day/day50_project2_finance_part2.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Curriculum map · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Curriculum map</h1>
+      <p class="source-path">Generated from <code>docs/curriculum-map.md</code></p>
+    </header>
+    <article class="document"><h2 id="curriculum-map">Curriculum map<a class="heading-anchor" href="#curriculum-map" aria-label="Link to this section">#</a></h2>
+<p>DS60 contains two substantial 60-lesson cores, an eight-lesson engineering bridge, and 26 named foundation, professional, and specialization modules. The day number is an ordering key, not a promise that every learner should finish in that many calendar days.</p>
+<p>Use the repository environment directly so navigation does not depend on an activated shell:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe scripts\course.py catalog</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python scripts/course.py catalog</code></pre>
+<p>for the checked-in generated inventory in <code>curriculum/catalog.json</code>. The index is built from lesson artifact filenames plus metadata rules in <code>src/ds60sqlpy/catalog_builder.py</code>; do not edit the JSON by hand.</p>
+<h3 id="choose-a-path">Choose a path<a class="heading-anchor" href="#choose-a-path" aria-label="Link to this section">#</a></h3>
+<h4 id="new-to-programming-and-databases">New to programming and databases<a class="heading-anchor" href="#new-to-programming-and-databases" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Complete Python Days 1–15.</li>
+<li>Complete <code>sql-found-01</code> and <code>sql-found-02</code>, then begin SQL Days 1–15.</li>
+<li>Continue Python Days 16–30.</li>
+<li>Continue SQL Days 16–30.</li>
+<li>Add the engineering bridge after Python Day 15 and SQL Day 15 when you want application-oriented integration practice.</li>
+<li>Choose advanced data science, advanced SQL, or alternate both.</li>
+</ol>
+<h4 id="comfortable-with-another-programming-language">Comfortable with another programming language<a class="heading-anchor" href="#comfortable-with-another-programming-language" aria-label="Link to this section">#</a></h4>
+<p>Review Python Days 1–9, then focus on testing, tooling, data work, and projects. Complete the two SQL foundations before Day 1 unless you can already design constraints and explain a versioned migration workflow.</p>
+<h4 id="comfortable-with-sql">Comfortable with SQL<a class="heading-anchor" href="#comfortable-with-sql" aria-label="Link to this section">#</a></h4>
+<p>Use the SQL companion guides and project lessons as a diagnostic. Do not skip PostgreSQL setup, transaction behavior, or query-plan lessons merely because SELECT syntax is familiar.</p>
+<h4 id="focused-on-data-science">Focused on data science<a class="heading-anchor" href="#focused-on-data-science" aria-label="Link to this section">#</a></h4>
+<p>Follow the Python track in order through Day 45. Days 46–60 introduce larger optional dependencies and production topics; inspect the catalog and environment doctor before installing heavy extras.</p>
+<h4 id="focused-on-data-or-backend-engineering">Focused on data or backend engineering<a class="heading-anchor" href="#focused-on-data-or-backend-engineering" aria-label="Link to this section">#</a></h4>
+<p>Complete Python Days 1–15 and SQL Days 1–15, then follow the <a href="../bridge/README.md.html">engineering bridge</a>. Continue the main tracks alongside it when a bridge lesson identifies a deeper Python or PostgreSQL prerequisite. Use the <a href="professional-paths.md.html">professional paths</a> after the shared bridge.</p>
+<h3 id="python-and-data-science-track">Python and data-science track<a class="heading-anchor" href="#python-and-data-science-track" aria-label="Link to this section">#</a></h3>
+<p>Primary plan: <a href="../python/PYTHON_TRAINING.md.html">python/PYTHON_TRAINING.md</a> Track guide: <a href="../python/ds-60day/README.md.html">python/ds-60day/README.md</a></p>
+<div class="table-wrap"><table><thead><tr>
+<th>Range</th>
+<th>Phase</th>
+<th>Main outcomes</th>
+</tr></thead><tbody>
+<tr>
+<td>Days 1–15</td>
+<td>Core Python and engineering habits</td>
+<td>Syntax, functions, collections, files, modules, tests, debugging, OOP, tooling, and a CLI project</td>
+</tr>
+<tr>
+<td>Days 16–30</td>
+<td>Data manipulation and visualization</td>
+<td>NumPy, pandas, pipelines, EDA, visualization, feature engineering, validation, and a preprocessing project</td>
+</tr>
+<tr>
+<td>Days 31–45</td>
+<td>Statistics and machine learning</td>
+<td>Probability, inference, linear algebra, scikit-learn, evaluation, model families, interpretation, deployment, and an end-to-end project</td>
+</tr>
+<tr>
+<td>Days 46–60</td>
+<td>Advanced and production topics</td>
+<td>Deep learning, NLP, forecasting, scale, MLOps, monitoring, containers, orchestration, ethics, refactoring, and a capstone</td>
+</tr>
+</tbody></table></div>
+<p>Artifacts currently present:</p>
+<ul>
+<li>Learner notebooks: Days 1–60</li>
+<li>Companion guides: Days 1–60</li>
+<li>Markdown solutions: Days 1–60</li>
+<li>Solution notebooks: Days 1–60</li>
+<li>Named professional learner modules: 10, each with a guide and two solution artifacts</li>
+</ul>
+<p>The track is a practical Python-for-data-science curriculum. It does not replace the complete Python language reference, and some advanced topics are surveys rather than mastery in one session.</p>
+<h3 id="postgresql-track">PostgreSQL track<a class="heading-anchor" href="#postgresql-track" aria-label="Link to this section">#</a></h3>
+<p>Primary plan: <a href="../sql/ADVANCED_SQL_60DAY_PLAN.md.html">sql/ADVANCED_SQL_60DAY_PLAN.md</a> Track guide: <a href="../sql/postgres-60day/README.md.html">sql/postgres-60day/README.md</a></p>
+<div class="table-wrap"><table><thead><tr>
+<th>Range</th>
+<th>Phase</th>
+<th>Main outcomes</th>
+</tr></thead><tbody>
+<tr>
+<td>Days 1–15</td>
+<td>Relational querying</td>
+<td>SELECT, filtering, aggregation, joins, set operations, subqueries, DML, CASE, functions, and a report project</td>
+</tr>
+<tr>
+<td>Days 16–30</td>
+<td>Analytical SQL</td>
+<td>Window functions, CTEs, recursion, pivots, JSON/XML, patterns, and a project</td>
+</tr>
+<tr>
+<td>Days 31–45</td>
+<td>Performance and operations</td>
+<td>Plans, indexes, optimization, partitioning, transactions, locks, data quality, backup concepts, monitoring, and an optimization project</td>
+</tr>
+<tr>
+<td>Days 46–60</td>
+<td>Applied projects</td>
+<td>E-commerce, finance, data warehousing, BI, and a final integrated capstone</td>
+</tr>
+</tbody></table></div>
+<p>Artifacts currently present:</p>
+<ul>
+<li>Lesson scripts: Days 1–60</li>
+<li>Companion guides: Days 1–60</li>
+<li>Markdown solutions: Days 1–60</li>
+<li>Executable solution SQL: Days 1–60</li>
+<li>Relational foundations: 2 named modules before Day 1</li>
+<li>Professional and specialization SQL: 10 named modules after the shared core</li>
+</ul>
+<p>Runnable material and the maintained high-level plan both target PostgreSQL 16 or newer.</p>
+<h3 id="python-postgresql-engineering-bridge">Python + PostgreSQL engineering bridge<a class="heading-anchor" href="#python-postgresql-engineering-bridge" aria-label="Link to this section">#</a></h3>
+<p>Track guide: <a href="../bridge/README.md.html">bridge/README.md</a></p>
+<div class="table-wrap"><table><thead><tr>
+<th>Day</th>
+<th>Main outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>1</td>
+<td>Typed configuration, structured logging, and command-line boundaries</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Protocols, context managers, and decorators for testable infrastructure</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Safe Psycopg 3 parameters, rows, and dynamic identifiers</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Transaction boundaries, idempotency, retry classification, and backoff</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Database tests, fixtures, fakes, and integration-test boundaries</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Bounded bulk ETL with validation and reject accounting</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Async database work with bounded concurrency and cancellation safety</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Production capstone with observability, security, and recovery evidence</td>
+</tr>
+</tbody></table></div>
+<p>Bridge Day 1 requires <code>python-15</code> and <code>sql-15</code>; later bridge lessons are sequential. Every lesson includes a learner <code>.py</code> file, companion guide, executable reference solution, and reasoning guide. Default tests use fakes and run offline. Optional live PostgreSQL work uses <code>DS60_DATABASE_URL</code> and the disposable course database.</p>
+<p>Four named bridge modules add PostgreSQL notebook magics, migration delivery and observability, AI application boundaries, and analytics engineering.</p>
+<h3 id="artifact-roles">Artifact roles<a class="heading-anchor" href="#artifact-roles" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Plan:</strong> broad learning sequence and goals</li>
+<li><strong>Companion guide:</strong> concepts, mental models, pitfalls, and preparation</li>
+<li><strong>Learner notebook or SQL file:</strong> examples and exercises</li>
+<li><strong>Bridge learner module:</strong> application-engineering exercises with testable boundaries and optional live integration</li>
+<li><strong>Named professional module:</strong> a stable-ID foundation, cumulative lab, or elective that does not renumber an established day</li>
+<li><strong>Solution:</strong> worked reasoning after an honest attempt</li>
+<li><strong>Generated catalog:</strong> machine-readable mapping of artifact names plus authoring metadata such as prerequisites, dependency groups, network behavior, and solution availability</li>
+</ul>
+<p>Do not infer that a solution format exists because another format exists. Ask the catalog.</p>
+<h3 id="pacing">Pacing<a class="heading-anchor" href="#pacing" aria-label="Link to this section">#</a></h3>
+<p>A useful lesson rhythm is:</p>
+<ol>
+<li>10–20 minutes: recall prerequisites and read</li>
+<li>20–40 minutes: predict and run examples</li>
+<li>30–60 minutes: exercises</li>
+<li>10 minutes: self-check and notes</li>
+</ol>
+<p>Project lessons often need multiple sessions. Heavy machine-learning setup may need a separate connected preparation session.</p>
+<h3 id="readiness-checkpoints">Readiness checkpoints<a class="heading-anchor" href="#readiness-checkpoints" aria-label="Link to this section">#</a></h3>
+<p>Before moving from a phase:</p>
+<ul>
+<li>Explain the phase’s core ideas without copying definitions.</li>
+<li>Recreate one small example from a blank file.</li>
+<li>Complete the phase project or an equivalent.</li>
+<li>Review failed exercises after a delay.</li>
+<li>Run the relevant local validation.</li>
+</ul>
+<p>Use Codex for a diagnostic quiz with <a href="learning-with-codex.md.html">Learning with Codex</a>, or create your own retrieval questions.</p>
+<h3 id="adding-lessons-beyond-60">Adding lessons beyond 60<a class="heading-anchor" href="#adding-lessons-beyond-60" aria-label="Link to this section">#</a></h3>
+<p>The repository may grow beyond the historical numbering. New material should close a documented gap, declare prerequisites, and receive a stable catalog ID. Do not renumber established lessons merely to preserve a marketing total.</p>
+<p>See <a href="content-authoring.md.html">Content authoring</a>.</p>
+<p>For the audited gap record and implementation criteria, see the <a href="curriculum-gap-backlog.md.html">curriculum gap backlog</a>.</p>
+<p>The implemented named modules and recommended lanes are in <a href="professional-paths.md.html">Professional and specialization paths</a>.</p></article>
+  </main>
+</body>
+</html>

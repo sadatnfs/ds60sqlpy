@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import platform
 import shutil
 import subprocess
@@ -11,6 +12,12 @@ from dataclasses import dataclass
 from typing import Literal
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.sql_notebook import (
+    SqlNotebookError,
+    course_psql_environment,
+    validate_course_database_target,
+)
+from ds60sqlpy.sql_runner import DEFAULT_DATABASE_URL
 
 Status = Literal["pass", "warn", "fail"]
 
@@ -39,8 +46,70 @@ def _version(command: list[str], timeout: float = 4.0) -> str | None:
     return output[0] if result.returncode == 0 and output else None
 
 
-def diagnose(catalog: Catalog) -> tuple[Diagnostic, ...]:
-    """Inspect the local machine without changing it."""
+def _course_database_diagnostic(psql: str) -> Diagnostic:
+    """Check the disposable course database without prompting or changing it."""
+
+    database_url = os.environ.get("DS60_DATABASE_URL") or DEFAULT_DATABASE_URL
+    try:
+        database_target = validate_course_database_target(database_url)
+    except SqlNotebookError:
+        return Diagnostic(
+            "warn",
+            "Course database",
+            "connection setting is not the disposable advanced_sql_training database; "
+            "the database was not contacted",
+        )
+    environment = course_psql_environment(
+        database_target,
+        application_name="ds60sqlpy-doctor",
+        connect_timeout=5,
+    )
+    try:
+        result = subprocess.run(
+            [
+                psql,
+                "-X",
+                "-w",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "--tuples-only",
+                "--no-align",
+                "--command",
+                "SELECT current_database();",
+            ],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            check=False,
+            env=environment,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        result = None
+    if result and result.returncode == 0 and result.stdout.strip() == "advanced_sql_training":
+        return Diagnostic(
+            "pass",
+            "Course database",
+            "advanced_sql_training is reachable",
+        )
+    return Diagnostic(
+        "warn",
+        "Course database",
+        "not reachable without prompting; complete the SQL setup guide before SQL lessons",
+    )
+
+
+def diagnose(
+    catalog: Catalog,
+    *,
+    check_database: bool = True,
+) -> tuple[Diagnostic, ...]:
+    """Inspect the local machine without changing it.
+
+    ``check_database=False`` keeps setup/bootstrap diagnostics entirely local.
+    The default performs one bounded, read-only reachability query, but only
+    when the configured target is the disposable course database.
+    """
 
     diagnostics: list[Diagnostic] = []
     current = sys.version_info[:2]
@@ -91,6 +160,10 @@ def diagnose(catalog: Catalog) -> tuple[Diagnostic, ...]:
         version = _version([executable, "--version"])
         diagnostics.append(Diagnostic("pass", executable, version or path))
 
+    psql = shutil.which("psql")
+    if psql and check_database:
+        diagnostics.append(_course_database_diagnostic(psql))
+
     if shutil.which("docker"):
         server = _version(["docker", "info", "--format", "{{.ServerVersion}}"])
         diagnostics.append(
@@ -102,12 +175,18 @@ def diagnose(catalog: Catalog) -> tuple[Diagnostic, ...]:
         )
 
     core_imports = (
+        "IPython",
+        "ipykernel",
         "jupyterlab",
+        "notebook",
         "numpy",
         "pandas",
         "sklearn",
         "matplotlib",
         "seaborn",
+        "sql",
+        "sqlalchemy",
+        "psycopg",
     )
     for module in core_imports:
         available = importlib.util.find_spec(module) is not None

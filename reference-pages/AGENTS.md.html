@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Repository guidance for agents · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Repository guidance for agents</h1>
+      <p class="source-path">Generated from <code>AGENTS.md</code></p>
+    </header>
+    <article class="document"><h2 id="repository-guidance-for-agents">Repository guidance for agents<a class="heading-anchor" href="#repository-guidance-for-agents" aria-label="Link to this section">#</a></h2>
+<h3 id="mission">Mission<a class="heading-anchor" href="#mission" aria-label="Link to this section">#</a></h3>
+<p>Maintain a beginner-friendly, offline-after-bootstrap Python/data-science, PostgreSQL, and application-engineering curriculum that runs on Windows, macOS, and Linux. Accuracy and reproducibility matter more than preserving the historical “60-day” shape.</p>
+<h3 id="start-here">Start here<a class="heading-anchor" href="#start-here" aria-label="Link to this section">#</a></h3>
+<ol>
+<li>Run <code>git status --short --branch</code>; preserve unrelated work.</li>
+<li>Read <a href="README.md.html">README.md</a> and <code>curriculum/catalog.json</code>.</li>
+<li>Read the closest nested <code>AGENTS.md</code> for files under <code>python/</code>, <code>sql/</code>, or <code>bridge/</code>.</li>
+<li>Run commands from the repository root.</li>
+<li>Use <code>python scripts/course.py doctor</code> before diagnosing environment failures.</li>
+</ol>
+<h3 id="sources-of-truth">Sources of truth<a class="heading-anchor" href="#sources-of-truth" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Lesson artifacts and <code>src/ds60sqlpy/catalog_builder.py</code>: inputs for lesson identity, ordering, prerequisites, dependency groups, network behavior, and artifact availability</li>
+<li><code>curriculum/catalog.json</code>: checked-in generated index consumed by tools; regenerate it rather than editing it by hand</li>
+<li><code>README.md</code>: learner entry point</li>
+<li><code>docs/setup/</code>: operating-system setup</li>
+<li><code>docs/content-authoring.md</code>: lesson contract</li>
+<li><code>docs/validation.md</code>: verification policy</li>
+<li><code>curriculum/practice_baseline.json</code> and <code>scripts/audit_practice.py</code>: immutable pre-enrichment counts and the per-surface exercise-doubling gate</li>
+<li><code>scripts/build_course_guide.py</code>: source for generated <code>START_HERE.html</code>; never hand-edit the HTML</li>
+<li><code>src/ds60sqlpy/lesson_reader.py</code> and <code>scripts/build_lesson_readers.py</code>: sources for generated <code>lesson-pages/&lt;lesson-id&gt;.html</code> and linked <code>reference-pages/&lt;source&gt;.html</code>; never hand-edit those readers</li>
+<li><code>src/ds60sqlpy/sql_notebook.py</code> and <code>scripts/build_sql_lesson_notebook.py</code>: catalog-restricted generator and runner for learner-local SQL notebooks under <code>.learning/sql/</code>; never check generated workspaces into Git</li>
+<li><code>START_DS60.cmd</code> and <code>scripts/start_ds60.ps1</code>: Windows learner entry point; keep it path-safe, PowerShell 5.1-compatible, and aligned with <code>scripts/bootstrap_windows.ps1</code></li>
+<li><code>src/ds60sqlpy/portal.py</code>: optional loopback launcher and shared <code>.learning/progress.json</code> boundary</li>
+<li><code>docs/curriculum-gap-backlog.md</code>: implemented gap record and maintenance rules</li>
+<li><code>.agents/skills/guide-ds60sqlpy-learning/</code>: Codex tutoring workflow</li>
+<li><code>bridge/README.md</code> and <code>bridge/AGENTS.md</code>: the integration track&#x27;s learning and engineering contracts</li>
+<li><code>python/professional/</code>, <code>sql/professional/</code>, and <code>bridge/professional/</code>: named modules that extend the stable Days 1–60 without renumbering them</li>
+</ul>
+<p>Do not hand-maintain a second lesson inventory when it can be derived from the generated catalog.</p>
+<h3 id="supported-baseline">Supported baseline<a class="heading-anchor" href="#supported-baseline" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Python 3.11-3.12; 3.12 is the canonical and recommended version</li>
+<li>PostgreSQL 16+; canonical automation uses PostgreSQL 17</li>
+<li>VS Code as the documented editor</li>
+<li>JupySQL with SQLAlchemy&#x27;s explicit Psycopg 3 dialect for the optional PostgreSQL-in-Jupyter lesson</li>
+<li>One connected bootstrap, then offline study</li>
+</ul>
+<p>Use <code>python -m pip</code>, repository-relative paths, and <code>pathlib</code>. Never add a developer-specific absolute path.</p>
+<h3 id="learner-experience">Learner experience<a class="heading-anchor" href="#learner-experience" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Assume no prior programming or database experience unless the learner says otherwise.</li>
+<li>Explain new terms before relying on them.</li>
+<li>Ask the learner to predict behavior and attempt exercises.</li>
+<li>Give progressive hints before opening or reproducing official solutions.</li>
+<li>Use the sequence <strong>guide → prediction → learner attempt → progressive hints → solution comparison</strong>. Opening a file or checking a box is not evidence of mastery.</li>
+<li>Treat every rendered lesson page as a readable, read-only preview. Send learners to the cataloged file in VS Code or JupyterLab, or to the generated <code>.learning/sql/</code> working copy, when they need to execute or edit code.</li>
+<li>Do not overwrite learner work.</li>
+<li>Keep solutions separate from learner artifacts.</li>
+<li>Do not silently skip failures or hide exceptions that teach an important concept.</li>
+</ul>
+<h3 id="cross-platform-and-offline-rules">Cross-platform and offline rules<a class="heading-anchor" href="#cross-platform-and-offline-rules" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Shared prose must include valid Windows PowerShell and POSIX variants when commands differ.</li>
+<li>Do not use Bash syntax in a PowerShell block.</li>
+<li>On Windows, use the interpreter printed by <code>bootstrap_windows.ps1</code> so activation policy is not a blocker. A standard environment uses <code>.\.venv\Scripts\python.exe</code>; the conda-prefix fallback uses <code>.\.venv\python.exe</code>. When the layout is not known, test those two paths in that order rather than assuming one.</li>
+<li>Windows startup must keep <code>-DiagnosticsOnly -NonInteractive</code> read-only and require explicit acknowledgement before a noninteractive connected setup. It may rediscover tools and change only its process-local <code>PATH</code>; never add credentials or an automatic database reset.</li>
+<li>PostgreSQL notebooks read only <code>DS60_DATABASE_URL</code>, pass an engine object to <code>%sql</code>, hide connection display, bind values, and tag live/non-Python magic cells for notebook-aware validation. Never put <code>%pip</code> or a password in a lesson notebook.</li>
+<li>Default lesson execution must work offline after setup.</li>
+<li>First-run Seaborn downloads are accepted but must be disclosed and cacheable.</li>
+<li>Pretrained model downloads and optional web resources must be explicit, tagged, and accompanied by a local fallback where practical.</li>
+<li>Never add an undocumented network dependency.</li>
+<li>A static <code>file://</code> page may render course content and offer a best-effort registered VS Code URL, but it cannot safely start local programs. Keep native actions in the authenticated private launcher and never regress to opening raw Markdown, notebooks, Python, or SQL as the browser lesson view.</li>
+<li>User-facing local Markdown and SQL links from the dashboard, lesson readers, and rendered references must resolve to generated HTML rather than raw browser source. In static mode, record completion on <code>START_HERE.html</code>; only authenticated loopback readers expose their own completion checkbox.</li>
+<li>Guided SQL notebooks must be derived from a stable catalog ID, write only beneath ignored <code>.learning/sql/</code>, preserve an existing learner notebook and SQL copy, run complete course scripts through fixed non-shell <code>psql -f</code> commands, reject line-start or inline changes to cataloged <code>psql</code> meta-commands, and require an explicit reset confirmation before preparing the disposable course schema.</li>
+<li>Every automated course SQL path, including doctor and <code>SqlRunner</code>, must validate the exact local disposable <code>advanced_sql_training</code> target, reject remote/multi-host and routing/service URL or environment overrides, and pass a password-bearing target through the child environment rather than the process argument list.</li>
+</ul>
+<h3 id="content-changes">Content changes<a class="heading-anchor" href="#content-changes" aria-label="Link to this section">#</a></h3>
+<p>For each lesson change:</p>
+<ol>
+<li>Confirm prerequisites and level.</li>
+<li>Keep guide, learner artifact, solution, catalog inputs, generated index, and navigation aligned. Named professional guides must spell out every direct catalog prerequisite with its exact backticked stable ID.</li>
+<li>Use deterministic examples unless randomness is the topic.</li>
+<li>Declare every direct dependency.</li>
+<li>Include a self-check or expected behavior.</li>
+<li>Update documentation when commands or behavior change.</li>
+<li>Meet the audited practice target on the learner, guide, and every explanatory-solution artifact: at least <code>max(6, 2 × baseline)</code>, using distinct prompts rather than relabeled answer steps.</li>
+<li>Regenerate both navigation layers after artifact or catalog changes: <code>START_HERE.html</code> and every affected <code>lesson-pages/&lt;lesson-id&gt;.html</code>.</li>
+</ol>
+<p>Do not expand the curriculum merely to increase lesson count. Add content only when it closes a documented learning gap.</p>
+<h3 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h3>
+<p>Use the narrowest relevant check during iteration, then run:</p>
+<pre><code class="language-text">python scripts/course.py doctor
+python scripts/course.py catalog
+python scripts/course.py validate
+python scripts/audit_practice.py
+python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
+python scripts/scan_secrets.py --history
+python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py</code></pre>
+<p>SQL commands must use:</p>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 ...</code></pre>
+<p>Definition of done:</p>
+<ul>
+<li>A regenerated catalog has no drift and its paths agree.</li>
+<li>Notebook and JSON structure is valid.</li>
+<li>SQL-magic notebooks receive structural validation offline and an explicitly reported live execution check against only the disposable course database.</li>
+<li>Relevant runnable examples execute.</li>
+<li>SQL is tested against a clean disposable database.</li>
+<li>Bridge modules pass fake-backed tests; optional live checks use only the disposable course database.</li>
+<li>Internal links resolve.</li>
+<li>Offline behavior is preserved.</li>
+<li>Windows and POSIX instructions remain valid.</li>
+<li>Generated artifacts, caches, credentials, and unrelated diffs are absent.</li>
+</ul>
+<p>Portal changes must retain both delivery modes. <code>START_HERE.html</code> remains self-contained and useful over <code>file://</code>; launcher mode binds only to <code>127.0.0.1</code>, authenticates mutations with an in-memory session token, permits no cross-origin writes, requires the exact Host on every request, serves only generated guide/lesson/reference HTML, and maps explicit clicks to a fixed VS Code/Jupyter action allowlist. Never add arbitrary shell text, arbitrary path launch, remote binding, CORS, or a credential to the portal. <code>--no-launches</code> must continue to provide file-backed progress without native process actions.</p>
+<p>If a heavy or external prerequisite prevents a check, report the exact unverified surface.</p>
+<h3 id="safety">Safety<a class="heading-anchor" href="#safety" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Treat <code>sql/postgres-60day/00_setup.sql</code> as a destructive reset of the disposable <code>training</code> schema.</li>
+<li>Never point course reset commands at a production or shared database.</li>
+<li>Do not commit secrets, <code>.env</code> files, model caches, notebook checkpoints, or learner-local progress.</li>
+<li>Treat ignored learner state as private, not disposable. Do not remove <code>.learning/progress.json</code>, <code>.learning/sql/</code>, <code>artifacts/</code>, or <code>mlruns/</code> without confirming what the learner wants to preserve.</li>
+<li>Avoid destructive Git commands and broad cleanup.</li>
+</ul>
+<h3 id="serena-and-repository-tools">Serena and repository tools<a class="heading-anchor" href="#serena-and-repository-tools" aria-label="Link to this section">#</a></h3>
+<p>Activate the Serena project and check onboarding when Serena is available. Use semantic tools for importable Python code, but remember:</p>
+<ul>
+<li>Notebooks are JSON documents; validate them with notebook-aware tools.</li>
+<li>SQL is not covered by the configured language servers; search with <code>rg</code> and prove behavior with PostgreSQL.</li>
+<li>Markdown/YAML indexing helps navigation but does not replace link or schema validation.</li>
+</ul>
+<p>Keep durable truth in checked-in artifacts, authoring metadata, docs, and the regenerated catalog—not only in generated Serena memories.</p>
+<h3 id="scope-boundaries">Scope boundaries<a class="heading-anchor" href="#scope-boundaries" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><code>python/AGENTS.md</code> governs Python, notebooks, companion guides, and Python solutions.</li>
+<li><code>sql/AGENTS.md</code> governs PostgreSQL scripts, guides, and SQL solutions.</li>
+<li><code>bridge/AGENTS.md</code> governs Python/PostgreSQL integration lessons and tests.</li>
+<li><a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a> contains the human contribution workflow.</li>
+</ul></article>
+  </main>
+</body>
+</html>

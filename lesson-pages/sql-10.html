@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-10 · DML with Subqueries · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-10</p>
+        <h1>DML with Subqueries</h1>
+        <p class="hero-copy">SQL foundations and query building</p>
+        <div class="meta">
+          <span class="tag">foundation</span>
+          <span class="tag">75 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-09.html">sql-09</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day10_dml_with_subqueries.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-10-dml-with-subqueries-insert-update-delete-upsert-companion-guide">Day 10 — DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT (Companion Guide)<a class="heading-anchor" href="#guide--day-10-dml-with-subqueries-insert-update-delete-upsert-companion-guide" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Foundation (beginner)</li>
+<li><strong>Prerequisites:</strong> <a href="sql-09.html#guide">Day 09 — correlated subqueries and EXISTS</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-10.html#learner">learner SQL</a> · <a href="sql-10.html#solution-1">solution reasoning</a> · <a href="sql-10.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Modify a precisely selected row set and inspect affected rows with <code>RETURNING</code>.</li>
+<li>Make repeated loads safe with a declared conflict key and update policy.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>DML:</strong> data manipulation language—<code>INSERT</code>, <code>UPDATE</code>, and <code>DELETE</code>.</li>
+<li><strong>Upsert:</strong> insert a row or resolve a uniqueness conflict through a declared alternative action.</li>
+<li><strong>Idempotent:</strong> safe to repeat without accumulating unintended changes.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Run the candidate-selection <code>SELECT</code> before the matching <code>UPDATE</code>. Compare its keys with <code>UPDATE ... RETURNING</code>, verify the affected count, and leave the course transaction at <code>ROLLBACK</code>. This preview/modify/reconcile pattern is safer than starting with an unbounded write.</p>
+<h4 id="guide--practice-assumptions-and-review-method">Practice assumptions and review method<a class="heading-anchor" href="#guide--practice-assumptions-and-review-method" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Focus:</strong> Modify only reviewed row sets, inspect writes with <code>RETURNING</code>, and make repeat behavior explicit through constraints and rollback-safe tests.</li>
+<li><strong>Assumptions:</strong> Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.</li>
+<li><strong>Failure to watch for:</strong> Never run an unbounded <code>UPDATE</code> or <code>DELETE</code>; preview candidate keys and do not treat <code>ON CONFLICT</code> as safe without naming its unique key.</li>
+<li><strong>Review loop:</strong> predict the row grain and NULL/order behavior, run the query, inspect a bounded sample, and reconcile counts or totals before accepting the result.</li>
+</ul>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Modify only reviewed row sets, inspect writes with <code>RETURNING</code>, and make repeat behavior explicit through constraints and rollback-safe tests.</p>
+<p>Attempt each prompt in a scratch SQL file before opening the solution. For every result, write its row grain and expected shape first.</p>
+<ol>
+<li><strong>Query writing:</strong> Materialize category net revenue into a temporary table with <code>INSERT ... SELECT</code>. <strong>Progressive hint:</strong> Declare the temporary schema and aggregate source rows before inserting. <strong>Expected shape:</strong> One temporary row per product category.</li>
+<li><strong>Query writing:</strong> Give Sales and Engineering employees a 5% demonstration raise and return affected rows. <strong>Progressive hint:</strong> Select departments by key, round exact numeric salary, and inspect <code>RETURNING</code>. <strong>Expected shape:</strong> Affected employee rows only; no change persists.</li>
+<li><strong>Query writing:</strong> Delete orders older than one year only when no payment exists, returning candidate keys. <strong>Progressive hint:</strong> Use correlated <code>NOT EXISTS</code>; foreign-key cascades remain rollback-protected. <strong>Expected shape:</strong> Deleted-candidate order rows, then fully restored state.</li>
+<li><strong>Prediction:</strong> Run an upsert twice against a temporary key-value table and prove only one row exists for the key. <strong>Progressive hint:</strong> A primary key supplies the conflict target; the second statement updates rather than inserts. <strong>Expected shape:</strong> One row for <code>source_a</code> with the second value.</li>
+<li><strong>Debugging:</strong> Preview and update a bounded product set while reconciling selected and returned key counts. <strong>Progressive hint:</strong> Store candidate keys in a temporary table and update only through that reviewed set. <strong>Expected shape:</strong> One summary row with equal candidate and updated counts.</li>
+<li><strong>Extension:</strong> Stage product prices and update only rows whose incoming price is nonnegative and actually differs. <strong>Progressive hint:</strong> Use <code>UPDATE ... FROM</code>, validate the stage predicate, and compare with <code>IS DISTINCT FROM</code>. <strong>Expected shape:</strong> Returned rows only for valid changed products.</li>
+</ol>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Is every write bounded by reviewed keys or a deliberate predicate?</li>
+<li>Can you name the unique constraint that makes each <code>ON CONFLICT</code> clause valid?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-11.html#guide">Day 11 — CASE expressions</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<p>Learning objectives</p>
+<ul>
+<li>INSERT ... SELECT to populate tables from queries</li>
+<li>UPDATE ... FROM and DELETE using subqueries</li>
+<li>Use ON CONFLICT for idempotent upserts</li>
+</ul>
+<p>Core concepts and deep dive</p>
+<ul>
+<li>INSERT INTO table(cols) SELECT ... FROM ... WHERE ...; carry all required columns, handle default values.</li>
+<li>UPDATE t SET col=expr FROM other WHERE t.id=other.id; mind ambiguity with JOINs.</li>
+<li>DELETE FROM t USING other WHERE t.id=other.id; or use WHERE EXISTS (...) pattern.</li>
+<li>Upsert: INSERT ... ON CONFLICT (key) DO UPDATE SET ...; choose conflict target (PK/unique) and update columns carefully.</li>
+</ul>
+<p>Walkthrough of the learner script</p>
+<ul>
+<li><code>CREATE TEMP TABLE ... AS SELECT</code> materializes category revenue for the current session.</li>
+<li><code>UPDATE employees</code> gives a demonstration raise to Sales and Engineering, with <code>RETURNING</code> exposing affected rows.</li>
+<li><code>DELETE FROM orders</code> removes only old orders for which no payment exists.</li>
+<li>The enclosing <code>BEGIN</code>/<code>ROLLBACK</code> makes all demonstrations non-persistent.</li>
+</ul>
+<p>Pitfalls</p>
+<ul>
+<li>Multi-row subqueries in scalar contexts; ensure uniqueness or add LIMIT 1.</li>
+<li>Upserts racing under concurrency; consider locking or version columns.</li>
+</ul>
+<p>Current practice map</p>
+<ul>
+<li>The authoritative six prompts, progressive hints, and expected shapes are maintained in <strong>Exercises</strong> above. They map one-for-one to both solution companions; older short exercise lists were removed to prevent prompt drift.</li>
+</ul>
+<p>Further reading</p>
+<ul>
+<li>INSERT: https://www.postgresql.org/docs/current/sql-insert.html</li>
+<li>UPDATE: https://www.postgresql.org/docs/current/sql-update.html</li>
+<li>UPSERT: https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT</li>
+</ul></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day10_dml_with_subqueries.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day10_dml_with_subqueries.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 10: INSERT/UPDATE/DELETE with Subqueries (safe via ROLLBACK)</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Study contract</span>
+<span>-- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.</span>
+<span>-- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.</span>
+<span>-- Pitfall: Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.</span>
+<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
+<span> </span>
+<span>-- Example: Insert promotional budget rollups into a temp table</span>
+<span>CREATE TEMP TABLE tmp_category_revenue AS</span>
+<span>SELECT p.category, ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2) AS revenue</span>
+<span>FROM order_items oi</span>
+<span>JOIN products p ON p.product_id = oi.product_id</span>
+<span>GROUP BY p.category;</span>
+<span> </span>
+<span>SELECT category, revenue</span>
+<span>FROM tmp_category_revenue</span>
+<span>ORDER BY revenue DESC, category;</span>
+<span> </span>
+<span>-- Example: Update salaries by department performance (demo only).</span>
+<span>-- Capture RETURNING in a data-modifying CTE so the evidence can be sorted.</span>
+<span>WITH changed AS (</span>
+<span>  UPDATE employees AS e</span>
+<span>  SET salary = e.salary * 1.05</span>
+<span>  WHERE e.department_id IN (</span>
+<span>    SELECT d.department_id</span>
+<span>    FROM departments AS d</span>
+<span>    WHERE d.name IN (&#x27;Sales&#x27;,&#x27;Engineering&#x27;)</span>
+<span>  )</span>
+<span>  RETURNING e.employee_id, e.department_id, e.salary</span>
+<span>)</span>
+<span>SELECT employee_id, department_id, salary</span>
+<span>FROM changed</span>
+<span>ORDER BY employee_id;</span>
+<span> </span>
+<span>-- Example: Delete unpaid old orders (demo only)</span>
+<span>WITH deleted AS (</span>
+<span>  DELETE FROM orders AS o</span>
+<span>  WHERE o.order_date &lt; now() - interval &#x27;365 days&#x27;</span>
+<span>    AND NOT EXISTS (</span>
+<span>      SELECT 1</span>
+<span>      FROM payments AS p</span>
+<span>      WHERE p.order_id = o.order_id</span>
+<span>    )</span>
+<span>  RETURNING o.order_id</span>
+<span>)</span>
+<span>SELECT order_id</span>
+<span>FROM deleted</span>
+<span>ORDER BY order_id;</span>
+<span> </span>
+<span>-- All changes will be rolled back below</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
+<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
+<span>-- 1. [Query writing] Materialize category net revenue into a temporary table with `INSERT ... SELECT`.</span>
+<span>--    Hint: Declare the temporary schema and aggregate source rows before inserting.</span>
+<span>-- 2. [Query writing] Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</span>
+<span>--    Hint: Select departments by key, round exact numeric salary, and inspect `RETURNING`.</span>
+<span>-- 3. [Query writing] Delete orders older than one year only when no payment exists, returning candidate keys.</span>
+<span>--    Hint: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.</span>
+<span>-- 4. [Prediction] Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</span>
+<span>--    Hint: A primary key supplies the conflict target; the second statement updates rather than inserts.</span>
+<span>-- 5. [Debugging] Preview and update a bounded product set while reconciling selected and returned key counts.</span>
+<span>--    Hint: Store candidate keys in a temporary table and update only through that reviewed set.</span>
+<span>-- 6. [Extension] Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</span>
+<span>--    Hint: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day10_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day10_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-10-solutions-dml-with-subqueries-insert-update-delete-upsert">Day 10 solutions — DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT<a class="heading-anchor" href="#solution-1--day-10-solutions-dml-with-subqueries-insert-update-delete-upsert" aria-label="Link to this section">#</a></h3>
+<p>These answers align one-for-one with <a href="sql-10.html#learner">day10_dml_with_subqueries.sql</a>. Run only against the disposable <code>advanced_sql_training</code> database. The executable companion wraps every answer in <code>BEGIN</code>/<code>ROLLBACK</code>. The snippets below assume the lesson&#x27;s <code>SET search_path TO training, public;</code> statement. Run the complete executable companion when you want a self-contained check.</p>
+<h4 id="solution-1--reading-contract">Reading contract<a class="heading-anchor" href="#solution-1--reading-contract" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Focus:</strong> Modify only reviewed row sets, inspect writes with <code>RETURNING</code>, and make repeat behavior explicit through constraints and rollback-safe tests.</li>
+<li><strong>Assumptions:</strong> Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.</li>
+<li><strong>Primary pitfall:</strong> Never run an unbounded <code>UPDATE</code> or <code>DELETE</code>; preview candidate keys and do not treat <code>ON CONFLICT</code> as safe without naming its unique key.</li>
+<li><strong>Safety:</strong> all writes are bounded and rollback-protected; read-only queries still use deterministic ordering whenever row order is claimed.</li>
+</ul>
+<h4 id="solution-1--exercise-1-query-writing">Exercise 1 — Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Materialize category net revenue into a temporary table with <code>INSERT ... SELECT</code>.</p>
+<p><strong>Reasoning:</strong> Declare the temporary schema and aggregate source rows before inserting.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>CREATE TEMP</code>: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</li>
+<li><code>INSERT INTO</code>: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</li>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
+<li><code>GROUP BY</code>: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+<li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
+</ul>
+<pre><code class="language-sql">SAVEPOINT exercise_1;
+CREATE TEMP TABLE exercise_category_revenue (
+  category text PRIMARY KEY,
+  revenue numeric NOT NULL
+) ON COMMIT DROP;
+INSERT INTO exercise_category_revenue (category, revenue)
+SELECT p.category,
+       SUM(oi.unit_price * oi.quantity * (1 - oi.discount))
+FROM order_items AS oi
+JOIN products AS p
+  ON p.product_id = oi.product_id
+GROUP BY p.category;
+SELECT category, ROUND(revenue, 2) AS revenue
+FROM exercise_category_revenue
+ORDER BY revenue DESC, category;
+ROLLBACK TO SAVEPOINT exercise_1;</code></pre>
+<p><strong>Expected shape:</strong> One temporary row per product category.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</p>
+<p><strong>Reasoning:</strong> Select departments by key, round exact numeric salary, and inspect <code>RETURNING</code>.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>UPDATE</code>: changes only the target rows selected by its predicate; preview that population before executing.</li>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li><code>RETURNING</code>: shows the rows changed by DML, providing immediate evidence of the affected population.</li>
+<li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
+</ul>
+<pre><code class="language-sql">SAVEPOINT exercise_2;
+UPDATE employees AS e
+SET salary = ROUND(e.salary * 1.05, 2)
+WHERE e.department_id IN (
+  SELECT d.department_id
+  FROM departments AS d
+  WHERE d.name IN (&#x27;Sales&#x27;, &#x27;Engineering&#x27;)
+)
+RETURNING e.employee_id, e.full_name, e.salary;
+ROLLBACK TO SAVEPOINT exercise_2;</code></pre>
+<p><strong>Expected shape:</strong> Affected employee rows only; no change persists.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Delete orders older than one year only when no payment exists, returning candidate keys.</p>
+<p><strong>Reasoning:</strong> Use correlated <code>NOT EXISTS</code>; foreign-key cascades remain rollback-protected.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>DELETE FROM</code>: removes only the predicate-matched rows; the lesson&#x27;s transaction wrapper makes the example reversible.</li>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li><code>RETURNING</code>: shows the rows changed by DML, providing immediate evidence of the affected population.</li>
+<li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
+</ul>
+<pre><code class="language-sql">SAVEPOINT exercise_3;
+DELETE FROM orders AS o
+WHERE o.order_date &lt; CURRENT_TIMESTAMP - INTERVAL &#x27;1 year&#x27;
+  AND NOT EXISTS (
+    SELECT 1
+    FROM payments AS p
+    WHERE p.order_id = o.order_id
+  )
+RETURNING o.order_id, o.customer_id, o.order_date;
+ROLLBACK TO SAVEPOINT exercise_3;</code></pre>
+<p><strong>Expected shape:</strong> Deleted-candidate order rows, then fully restored state.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</p>
+<p><strong>Reasoning:</strong> A primary key supplies the conflict target; the second statement updates rather than inserts.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>CREATE TEMP</code>: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</li>
+<li><code>INSERT INTO</code>: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</li>
+<li><code>UPDATE</code>: changes only the target rows selected by its predicate; preview that population before executing.</li>
+<li><code>VALUES</code>: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</li>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+<li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
+</ul>
+<pre><code class="language-sql">SAVEPOINT exercise_4;
+CREATE TEMP TABLE exercise_feed (
+  source_key text PRIMARY KEY,
+  source_value numeric NOT NULL
+) ON COMMIT DROP;
+INSERT INTO exercise_feed (source_key, source_value)
+VALUES (&#x27;source_a&#x27;, 10)
+ON CONFLICT (source_key)
+DO UPDATE SET source_value = EXCLUDED.source_value;
+INSERT INTO exercise_feed (source_key, source_value)
+VALUES (&#x27;source_a&#x27;, 12)
+ON CONFLICT (source_key)
+DO UPDATE SET source_value = EXCLUDED.source_value;
+SELECT source_key, source_value
+FROM exercise_feed
+ORDER BY source_key;
+ROLLBACK TO SAVEPOINT exercise_4;</code></pre>
+<p><strong>Expected shape:</strong> One row for <code>source_a</code> with the second value.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-5-debugging">Exercise 5 — Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Preview and update a bounded product set while reconciling selected and returned key counts.</p>
+<p><strong>Reasoning:</strong> Store candidate keys in a temporary table and update only through that reviewed set.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>WITH</code>: names an intermediate relation so its grain can be checked before later joins or aggregation.</li>
+<li><code>CREATE TEMP</code>: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</li>
+<li><code>UPDATE</code>: changes only the target rows selected by its predicate; preview that population before executing.</li>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+<li><code>LIMIT</code>: is applied after ordering and is meaningful only when the query first defines which rows come first.</li>
+<li><code>RETURNING</code>: shows the rows changed by DML, providing immediate evidence of the affected population.</li>
+<li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
+</ul>
+<pre><code class="language-sql">SAVEPOINT exercise_5;
+CREATE TEMP TABLE exercise_product_candidates ON COMMIT DROP AS
+SELECT p.product_id
+FROM products AS p
+WHERE p.category = &#x27;Books&#x27;
+ORDER BY p.product_id
+LIMIT 5;
+WITH updated AS (
+  UPDATE products AS p
+  SET price = ROUND(p.price * 0.99, 2)
+  WHERE p.product_id IN (
+    SELECT candidate.product_id
+    FROM exercise_product_candidates AS candidate
+  )
+  RETURNING p.product_id
+)
+SELECT (SELECT COUNT(*) FROM exercise_product_candidates) AS candidate_count,
+       COUNT(*) AS updated_count
+FROM updated;
+ROLLBACK TO SAVEPOINT exercise_5;</code></pre>
+<p><strong>Expected shape:</strong> One summary row with equal candidate and updated counts.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</p>
+<p><strong>Reasoning:</strong> Use <code>UPDATE ... FROM</code>, validate the stage predicate, and compare with <code>IS DISTINCT FROM</code>.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>CREATE TEMP</code>: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</li>
+<li><code>INSERT INTO</code>: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</li>
+<li><code>UPDATE</code>: changes only the target rows selected by its predicate; preview that population before executing.</li>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+<li><code>LIMIT</code>: is applied after ordering and is meaningful only when the query first defines which rows come first.</li>
+<li><code>RETURNING</code>: shows the rows changed by DML, providing immediate evidence of the affected population.</li>
+<li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
+</ul>
+<pre><code class="language-sql">SAVEPOINT exercise_6;
+CREATE TEMP TABLE exercise_price_stage (
+  product_id integer PRIMARY KEY,
+  new_price numeric
+) ON COMMIT DROP;
+INSERT INTO exercise_price_stage (product_id, new_price)
+SELECT p.product_id,
+       ROUND(p.price * 1.01, 2)
+FROM products AS p
+ORDER BY p.product_id
+LIMIT 3;
+UPDATE products AS p
+SET price = stage.new_price
+FROM exercise_price_stage AS stage
+WHERE stage.product_id = p.product_id
+  AND stage.new_price &gt;= 0
+  AND p.price IS DISTINCT FROM stage.new_price
+RETURNING p.product_id, p.price;
+ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
+<p><strong>Expected shape:</strong> Returned rows only for valid changed products.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h4 id="solution-1--final-self-check">Final self-check<a class="heading-anchor" href="#solution-1--final-self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can you explain the logical grain before and after every aggregation?</li>
+<li>Are missing values preserved or converted only by an explicit rule?</li>
+<li>Does every ordered result have a deterministic final tie-breaker?</li>
+<li>Are money and time assumptions visible beside the calculation?</li>
+<li>Does the complete executable solution finish with <code>ROLLBACK</code>?</li>
+</ul></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day10_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day10_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 10 executable solutions</span>
+<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
+<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
+<span> </span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Shared teaching contract</span>
+<span>-- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.</span>
+<span>-- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.</span>
+<span>-- Pitfall: Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 1: Query writing</span>
+<span>-- Prompt: Materialize category net revenue into a temporary table with `INSERT ... SELECT`.</span>
+<span>-- Why: Declare the temporary schema and aggregate source rows before inserting.</span>
+<span>-- Expected: One temporary row per product category.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span>
+<span>-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
+<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
+<span>SAVEPOINT exercise_1;</span>
+<span>CREATE TEMP TABLE exercise_category_revenue (</span>
+<span>  category text PRIMARY KEY,</span>
+<span>  revenue numeric NOT NULL</span>
+<span>) ON COMMIT DROP;</span>
+<span>INSERT INTO exercise_category_revenue (category, revenue)</span>
+<span>SELECT p.category,</span>
+<span>       SUM(oi.unit_price * oi.quantity * (1 - oi.discount))</span>
+<span>FROM order_items AS oi</span>
+<span>JOIN products AS p</span>
+<span>  ON p.product_id = oi.product_id</span>
+<span>GROUP BY p.category;</span>
+<span>SELECT category, ROUND(revenue, 2) AS revenue</span>
+<span>FROM exercise_category_revenue</span>
+<span>ORDER BY revenue DESC, category;</span>
+<span>ROLLBACK TO SAVEPOINT exercise_1;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 2: Query writing</span>
+<span>-- Prompt: Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</span>
+<span>-- Why: Select departments by key, round exact numeric salary, and inspect `RETURNING`.</span>
+<span>-- Expected: Affected employee rows only; no change persists.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span>
+<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
+<span>SAVEPOINT exercise_2;</span>
+<span>UPDATE employees AS e</span>
+<span>SET salary = ROUND(e.salary * 1.05, 2)</span>
+<span>WHERE e.department_id IN (</span>
+<span>  SELECT d.department_id</span>
+<span>  FROM departments AS d</span>
+<span>  WHERE d.name IN (&#x27;Sales&#x27;, &#x27;Engineering&#x27;)</span>
+<span>)</span>
+<span>RETURNING e.employee_id, e.full_name, e.salary;</span>
+<span>ROLLBACK TO SAVEPOINT exercise_2;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 3: Query writing</span>
+<span>-- Prompt: Delete orders older than one year only when no payment exists, returning candidate keys.</span>
+<span>-- Why: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.</span>
+<span>-- Expected: Deleted-candidate order rows, then fully restored state.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `DELETE FROM`: removes only the predicate-matched rows; the lesson&#x27;s transaction wrapper makes the example reversible.</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span>
+<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
+<span>SAVEPOINT exercise_3;</span>
+<span>DELETE FROM orders AS o</span>
+<span>WHERE o.order_date &lt; CURRENT_TIMESTAMP - INTERVAL &#x27;1 year&#x27;</span>
+<span>  AND NOT EXISTS (</span>
+<span>    SELECT 1</span>
+<span>    FROM payments AS p</span>
+<span>    WHERE p.order_id = o.order_id</span>
+<span>  )</span>
+<span>RETURNING o.order_id, o.customer_id, o.order_date;</span>
+<span>ROLLBACK TO SAVEPOINT exercise_3;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 4: Prediction</span>
+<span>-- Prompt: Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</span>
+<span>-- Why: A primary key supplies the conflict target; the second statement updates rather than inserts.</span>
+<span>-- Expected: One row for `source_a` with the second value.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span>
+<span>-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span>
+<span>-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span>
+<span>-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
+<span>SAVEPOINT exercise_4;</span>
+<span>CREATE TEMP TABLE exercise_feed (</span>
+<span>  source_key text PRIMARY KEY,</span>
+<span>  source_value numeric NOT NULL</span>
+<span>) ON COMMIT DROP;</span>
+<span>INSERT INTO exercise_feed (source_key, source_value)</span>
+<span>VALUES (&#x27;source_a&#x27;, 10)</span>
+<span>ON CONFLICT (source_key)</span>
+<span>DO UPDATE SET source_value = EXCLUDED.source_value;</span>
+<span>INSERT INTO exercise_feed (source_key, source_value)</span>
+<span>VALUES (&#x27;source_a&#x27;, 12)</span>
+<span>ON CONFLICT (source_key)</span>
+<span>DO UPDATE SET source_value = EXCLUDED.source_value;</span>
+<span>SELECT source_key, source_value</span>
+<span>FROM exercise_feed</span>
+<span>ORDER BY source_key;</span>
+<span>ROLLBACK TO SAVEPOINT exercise_4;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 5: Debugging</span>
+<span>-- Prompt: Preview and update a bounded product set while reconciling selected and returned key counts.</span>
+<span>-- Why: Store candidate keys in a temporary table and update only through that reviewed set.</span>
+<span>-- Expected: One summary row with equal candidate and updated counts.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
+<span>-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span>
+<span>-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>-- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.</span>
+<span>-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span>
+<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
+<span>SAVEPOINT exercise_5;</span>
+<span>CREATE TEMP TABLE exercise_product_candidates ON COMMIT DROP AS</span>
+<span>SELECT p.product_id</span>
+<span>FROM products AS p</span>
+<span>WHERE p.category = &#x27;Books&#x27;</span>
+<span>ORDER BY p.product_id</span>
+<span>LIMIT 5;</span>
+<span>WITH updated AS (</span>
+<span>  UPDATE products AS p</span>
+<span>  SET price = ROUND(p.price * 0.99, 2)</span>
+<span>  WHERE p.product_id IN (</span>
+<span>    SELECT candidate.product_id</span>
+<span>    FROM exercise_product_candidates AS candidate</span>
+<span>  )</span>
+<span>  RETURNING p.product_id</span>
+<span>)</span>
+<span>SELECT (SELECT COUNT(*) FROM exercise_product_candidates) AS candidate_count,</span>
+<span>       COUNT(*) AS updated_count</span>
+<span>FROM updated;</span>
+<span>ROLLBACK TO SAVEPOINT exercise_5;</span>
+<span> </span>
+<span>-- ---------------------------------------------------------------------------</span>
+<span>-- Exercise 6: Extension</span>
+<span>-- Prompt: Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</span>
+<span>-- Why: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.</span>
+<span>-- Expected: Returned rows only for valid changed products.</span>
+<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
+<span>-- treating the output as evidence.</span>
+<span>-- Clause-by-clause reading:</span>
+<span>-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span>
+<span>-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span>
+<span>-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span>
+<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
+<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
+<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
+<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
+<span>-- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.</span>
+<span>-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span>
+<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
+<span>SAVEPOINT exercise_6;</span>
+<span>CREATE TEMP TABLE exercise_price_stage (</span>
+<span>  product_id integer PRIMARY KEY,</span>
+<span>  new_price numeric</span>
+<span>) ON COMMIT DROP;</span>
+<span>INSERT INTO exercise_price_stage (product_id, new_price)</span>
+<span>SELECT p.product_id,</span>
+<span>       ROUND(p.price * 1.01, 2)</span>
+<span>FROM products AS p</span>
+<span>ORDER BY p.product_id</span>
+<span>LIMIT 3;</span>
+<span>UPDATE products AS p</span>
+<span>SET price = stage.new_price</span>
+<span>FROM exercise_price_stage AS stage</span>
+<span>WHERE stage.product_id = p.product_id</span>
+<span>  AND stage.new_price &gt;= 0</span>
+<span>  AND p.price IS DISTINCT FROM stage.new_price</span>
+<span>RETURNING p.product_id, p.price;</span>
+<span>ROLLBACK TO SAVEPOINT exercise_6;</span>
+<span> </span>
+<span>-- No course answer persists changes or temporary objects.</span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-09.html"><small>Previous lesson</small><strong>sql-09</strong><span>Correlated Subqueries</span></a>
+        <a class="nav-card next" href="sql-11.html"><small>Next lesson</small><strong>sql-11</strong><span>Case Expressions</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-10";
+    const LEARNER_PATH = "sql/postgres-60day/day10_dml_with_subqueries.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

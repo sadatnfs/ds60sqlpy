@@ -19,6 +19,7 @@ def _request(
     method: str = "GET",
     payload: dict[str, object] | None = None,
     origin: str | None = None,
+    host: str | None = None,
 ) -> tuple[int, str]:
     data = None if payload is None else json.dumps(payload).encode()
     headers = {}
@@ -28,6 +29,8 @@ def _request(
         headers["Content-Type"] = "application/json"
     if origin is not None:
         headers["Origin"] = origin
+    if host is not None:
+        headers["Host"] = host
     request = Request(url, data=data, headers=headers, method=method)
     with urlopen(request, timeout=3) as response:  # noqa: S310 - loopback test server
         return response.status, response.read().decode()
@@ -50,9 +53,22 @@ def test_portal_serves_injected_guide_and_persists_progress(tmp_path: Path) -> N
         assert 'const SERVER_TOKEN = "test-token";' in guide
         assert 'const SERVER_TOKEN = "";' not in guide
 
+        status, reader = _request(f"{server.url}lesson-pages/sql-01.html")
+        assert status == 200
+        assert 'const SERVER_TOKEN = "test-token";' in reader
+        assert 'const SERVER_TOKEN = "";' not in reader
+        assert 'action: "jupyter-sql"' in reader
+
+        status, reference = _request(f"{server.url}reference-pages/docs/setup/windows.md.html")
+        assert status == 200
+        assert "<title>Windows setup · DS60 reference</title>" in reference
+        assert "Back to lessons" in reference
+
         status, raw = _request(f"{server.url}api/status", token=server.token)
         assert status == 200
-        assert json.loads(raw)["completed"] == []
+        status_payload = json.loads(raw)
+        assert status_payload["completed"] == []
+        assert any(item["name"] == "Python" for item in status_payload["diagnostics"])
 
         status, raw = _request(
             f"{server.url}api/progress",
@@ -107,6 +123,14 @@ def test_portal_rejects_cross_origin_and_hidden_files(tmp_path: Path) -> None:
         with pytest.raises(HTTPError) as windows_hidden_file:
             _request(f"{server.url}folder%5C..%5C.git%5Cconfig")
         assert windows_hidden_file.value.code == 404
+
+        with pytest.raises(HTTPError) as rebinding:
+            _request(server.url, host="attacker.example")
+        assert rebinding.value.code == 400
+
+        with pytest.raises(HTTPError) as raw_source:
+            _request(f"{server.url}README.md")
+        assert raw_source.value.code == 404
     finally:
         server.shutdown()
         server.server_close()
@@ -122,6 +146,15 @@ def test_launcher_builds_only_cataloged_commands(
     learner_path = catalog.resolve(catalog.get("python-01").lesson_path)
     learner_path.parent.mkdir(parents=True)
     learner_path.touch()
+    guide_path = catalog.resolve(catalog.get("python-01").guide_path)
+    guide_path.parent.mkdir(parents=True, exist_ok=True)
+    guide_path.touch()
+    solution_paths = tuple(
+        catalog.resolve(path) for path in catalog.get("python-01").solution_paths
+    )
+    for solution_path in solution_paths:
+        solution_path.parent.mkdir(parents=True, exist_ok=True)
+        solution_path.touch()
     python = tmp_path / ".venv" / "bin" / "python"
     python.parent.mkdir(parents=True)
     python.touch()
@@ -131,7 +164,26 @@ def test_launcher_builds_only_cataloged_commands(
     assert launcher.command("open-repo") == ("code", str(tmp_path))
     assert launcher.command("open-lesson", lesson_id="python-01") == (
         "code",
-        "-g",
+        "--reuse-window",
+        str(tmp_path),
+        "--goto",
+        str(learner_path),
+    )
+    assert launcher.command(
+        "open-artifact",
+        lesson_id="python-01",
+        artifact="guide",
+    )[-1] == str(guide_path)
+    assert launcher.command(
+        "open-artifact",
+        lesson_id="python-01",
+        artifact="solution",
+        solution_index=1,
+    )[-1] == str(solution_paths[1])
+    assert launcher.command("jupyter-lesson", lesson_id="python-01") == (
+        str(python),
+        "-m",
+        "jupyterlab",
         str(learner_path),
     )
     assert launcher.command("jupyter-python")[:4] == (
@@ -144,3 +196,70 @@ def test_launcher_builds_only_cataloged_commands(
         launcher.command("shell")
     with pytest.raises(KeyError, match="Unknown lesson"):
         launcher.command("open-lesson", lesson_id="does-not-exist")
+    with pytest.raises(PortalError, match="solution index"):
+        launcher.command(
+            "open-artifact",
+            lesson_id="python-01",
+            artifact="solution",
+            solution_index=99,
+        )
+
+
+def test_launcher_supports_conda_prefix_and_rejects_non_notebook_jupyter(
+    tmp_path: Path,
+) -> None:
+    source_catalog = Catalog.load()
+    catalog = Catalog(tmp_path, tuple(source_catalog))
+    conda_python = tmp_path / ".venv" / "python.exe"
+    conda_python.parent.mkdir(parents=True)
+    conda_python.touch()
+    sql_path = catalog.resolve(catalog.get("sql-01").lesson_path)
+    sql_path.parent.mkdir(parents=True)
+    sql_path.touch()
+    launcher = PortalLauncher(catalog)
+
+    assert launcher.command("jupyter-python")[0] == str(conda_python)
+    with pytest.raises(PortalError, match="open it in VS Code instead"):
+        launcher.command("jupyter-lesson", lesson_id="sql-01")
+
+
+def test_launcher_generates_cataloged_sql_notebook_before_jupyter(
+    tmp_path: Path,
+) -> None:
+    source_catalog = Catalog.load()
+    catalog = Catalog(tmp_path, tuple(source_catalog))
+    lesson = catalog.get("sql-01")
+    for relative in (lesson.lesson_path, lesson.guide_path):
+        path = catalog.resolve(relative)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            "SELECT 1;\n" if path.suffix == ".sql" else "# SQL lesson\n",
+            encoding="utf-8",
+        )
+    python = tmp_path / ".venv" / "Scripts" / "python.exe"
+    python.parent.mkdir(parents=True)
+    python.touch()
+
+    command = PortalLauncher(catalog).command(
+        "jupyter-sql",
+        lesson_id="sql-01",
+        artifact="lesson",
+        solution_index=1,
+    )
+
+    notebook = tmp_path / ".learning" / "sql" / "sql-01" / "lesson" / "guided.ipynb"
+    sql_copy = notebook.parent / "workspace" / lesson.lesson_path
+    assert command == (
+        str(python),
+        "-m",
+        "jupyterlab",
+        str(notebook),
+    )
+    assert notebook.is_file()
+    assert sql_copy.read_text(encoding="utf-8") == "SELECT 1;\n"
+    with pytest.raises(PortalError, match="one-based"):
+        PortalLauncher(catalog).command(
+            "jupyter-sql",
+            lesson_id="sql-01",
+            solution_index=0,
+        )

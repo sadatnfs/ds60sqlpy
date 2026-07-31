@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-40 · Analytic Functions Advanced · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-40</p>
+        <h1>Analytic Functions Advanced</h1>
+        <p class="hero-copy">Performance, transactions, and operations</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">105 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-39.html">sql-39</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
+          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
+          <p class="static-help">
+            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
+          </p>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day40_analytic_functions_advanced.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+        </div>
+      </section>
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+      
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day40_analytic_functions_advanced.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day40_analytic_functions_advanced.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><h3 id="guide--day-40-advanced-analytic-functions">Day 40 — Advanced Analytic Functions<a class="heading-anchor" href="#guide--day-40-advanced-analytic-functions" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-39.html#guide">Day 39 — locks and deadlocks</a> plus the window-function sequence from Days 16–22</li>
+<li><strong>Artifacts:</strong> <a href="sql-40.html#learner">learner SQL</a> · <a href="sql-40.html#solution-1">solution reasoning</a> · <a href="sql-40.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Calculate rolling dispersion, ordered-set percentiles, shares, and z-scores at explicit grains.</li>
+<li>State the limits of small or sparse statistical windows.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Ordered-set aggregate:</strong> an aggregate whose calculation uses <code>WITHIN GROUP (ORDER BY ...)</code>.</li>
+<li><strong>Z-score:</strong> distance from a mean measured in standard deviations.</li>
+<li><strong>Interpolation:</strong> estimating a percentile between observed values.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Aggregate to one row per observed order date, calculate a 15-observation mean and standard deviation, then derive <code>(revenue - avg15) / NULLIF(sd15, 0)</code>. Keep the observation count beside the score so early, undersized windows are visible.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Complete these in the <a href="sql-40.html#learner">learner SQL</a>:</p>
+<ol>
+<li>Calculate a trailing daily-revenue z-score.</li>
+<li>Calculate category order-total P50/P90.</li>
+<li>Predict <code>percentile_disc</code> versus <code>percentile_cont</code> on four values.</li>
+<li>Calculate monthly category revenue share and deterministic rank.</li>
+<li>Repair a forecasting frame that includes the current row.</li>
+<li>Preserve NULL z-scores for a constant series.</li>
+</ol>
+<p>Verify that the undefined constant-series z-score remains <code>NULL</code>.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Is the named “day” window actually calendar-dense or only observation-based?</li>
+<li>Do percentile and share inputs use one stable, non-duplicated grain?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-41.html#guide">Day 41 — complex aggregations</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--what-you-will-learn">What you will learn<a class="heading-anchor" href="#guide--what-you-will-learn" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Compute rolling mean, standard deviation, and variance with explicit frames.</li>
+<li>Use ordered-set aggregates for percentiles.</li>
+<li>Calculate a ratio to a window total and a rolling z-score.</li>
+</ul>
+<h4 id="guide--how-the-learner-script-uses-the-current-schema">How the learner script uses the current schema<a class="heading-anchor" href="#guide--how-the-learner-script-uses-the-current-schema" aria-label="Link to this section">#</a></h4>
+<p>The script aggregates <code>orders.total_amount</code> by order day, then applies a 15-observation window (<code>14 PRECEDING</code> plus the current row). It calculates monthly p50/p90/p99 order totals and category revenue share from <code>order_items</code> and <code>products</code>.</p>
+<p><code>ROWS</code> counts result rows, not elapsed calendar days. Because the daily series does not build a calendar spine, the “15-day” names in the script are more precisely 15 observed order dates.</p>
+<h4 id="guide--statistical-concepts">Statistical concepts<a class="heading-anchor" href="#guide--statistical-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A rolling z-score is <code>(revenue - avg15) / sd15</code>; use <code>NULLIF(sd15, 0)</code>.</li>
+<li><code>PERCENTILE_CONT</code> interpolates between ordered values and may return a value not present in the data.</li>
+<li>A share is <code>value / SUM(value) OVER (...)</code>; calculate at one stable grain.</li>
+<li>Small windows make tail percentiles and standard deviation noisy.</li>
+</ul>
+<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Add the daily-revenue z-score using the same trailing 15-observation mean and sample standard deviation.</li>
+<li>For every product category, compute p50 and p90 of the order value attributable to that category: first aggregate net line revenue at <code>(category, order_id)</code> grain, then calculate category percentiles.</li>
+</ol>
+<h4 id="guide--pitfalls-and-validation">Pitfalls and validation<a class="heading-anchor" href="#guide--pitfalls-and-validation" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Do not repeat the whole <code>orders.total_amount</code> once per category in a multi-category order; use category-attributable line revenue.</li>
+<li>Cast ordered-set results to numeric before PostgreSQL&#x27;s two-argument <code>ROUND</code>.</li>
+<li>Undefined zero-dispersion z-scores should remain <code>NULL</code>, not be asserted as normal.</li>
+<li>Validate that category revenue shares sum to one, allowing for rounding.</li>
+</ul>
+<h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
+<p>Prompts 3–6 distinguish continuous interpolation, observed-value percentiles, partitioned shares, leakage-free windows, and undefined dispersion. For <code>(10,20,100,200)</code>, <code>percentile_disc(0.5)</code> returns an observed middle choice, while <code>percentile_cont(0.5)</code> interpolates between the two central values.</p>
+<p>Monthly category share partitions by month; ranking should add a stable category tie-break. A forecasting window ends at <code>1 PRECEDING</code>, and a constant series uses <code>NULLIF(sd, 0)</code> so “undefined” is not mislabeled as a score of zero.</p></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day40_analytic_functions_advanced.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day40_analytic_functions_advanced.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+              
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 40: Analytic Functions - Advanced (statistics and distributions)</span>
+<span>BEGIN;</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Statistical aggregates over windows</span>
+<span>WITH daily AS (</span>
+<span>  SELECT date_trunc(&#x27;day&#x27;, o.order_date) AS d,</span>
+<span>         SUM(o.total_amount) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  GROUP BY 1</span>
+<span>)</span>
+<span>SELECT d,</span>
+<span>       revenue,</span>
+<span>       ROUND(AVG(revenue)  OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW),2) AS ma15,</span>
+<span>       ROUND(STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW),2) AS sd15,</span>
+<span>       ROUND(VAR_POP(revenue)      OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW),2) AS var15</span>
+<span>FROM daily</span>
+<span>ORDER BY d DESC</span>
+<span>LIMIT 60;</span>
+<span> </span>
+<span>-- Percentiles using PERCENTILE_CONT (continuous) within month</span>
+<span>WITH monthly AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, o.order_date) AS m,</span>
+<span>         o.total_amount AS amt</span>
+<span>  FROM orders o</span>
+<span>)</span>
+<span>SELECT m,</span>
+<span>       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amt) AS p50,</span>
+<span>       PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY amt) AS p90,</span>
+<span>       PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY amt) AS p99</span>
+<span>FROM monthly</span>
+<span>GROUP BY m</span>
+<span>ORDER BY m DESC</span>
+<span>LIMIT 12;</span>
+<span> </span>
+<span>-- Ratio to total (ratio_to_report equivalent)</span>
+<span>WITH cat AS (</span>
+<span>  SELECT p.category, SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue</span>
+<span>  FROM order_items oi JOIN products p ON p.product_id = oi.product_id</span>
+<span>  GROUP BY p.category</span>
+<span>)</span>
+<span>SELECT category,</span>
+<span>       ROUND(revenue,2) AS revenue,</span>
+<span>       ROUND(revenue / NULLIF(SUM(revenue) OVER (),0), 4) AS share_of_total</span>
+<span>FROM cat</span>
+<span>ORDER BY revenue DESC;</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- 1. Compute z-score for daily revenue: (rev - avg15)/sd15.</span>
+<span>-- 2. For each category, compute P50 and P90 of order totals.</span>
+<span>-- 3. Prediction: compare percentile_disc(0.5) with percentile_cont(0.5) for</span>
+<span>--    the values (10, 20, 100, 200). Predict both medians before running.</span>
+<span>-- 4. Construction: calculate each category&#x27;s revenue share within its month,</span>
+<span>--    with a deterministic rank for equal revenue.</span>
+<span>-- 5. Debugging: repair a rolling average that includes the current row when the</span>
+<span>--    intended forecast must use only prior observations.</span>
+<span>-- 6. Edge case: compute a z-score for a constant three-row series and preserve</span>
+<span>--    NULL when standard deviation is zero.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+      
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day40_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day40_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-40-solutions-advanced-analytic-functions">Day 40 — Solutions: Advanced Analytic Functions<a class="heading-anchor" href="#solution-1--day-40-solutions-advanced-analytic-functions" aria-label="Link to this section">#</a></h3>
+<p>This day combines statistical aggregates with windows and ordered-set aggregates. The answers define the input grain before computing statistics.</p>
+<h4 id="solution-1--exercise-1-fifteen-row-rolling-z-score-for-daily-revenue">Exercise 1 — Fifteen-row rolling z-score for daily revenue<a class="heading-anchor" href="#solution-1--exercise-1-fifteen-row-rolling-z-score-for-daily-revenue" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH daily AS (
+  SELECT date_trunc(&#x27;day&#x27;, order_date)::date AS order_day,
+         SUM(total_amount) AS revenue
+  FROM orders
+  GROUP BY date_trunc(&#x27;day&#x27;, order_date)
+), rolling AS (
+  SELECT order_day,
+         revenue,
+         AVG(revenue) OVER (
+           ORDER BY order_day
+           ROWS BETWEEN 14 PRECEDING AND CURRENT ROW
+         ) AS avg15,
+         STDDEV_SAMP(revenue) OVER (
+           ORDER BY order_day
+           ROWS BETWEEN 14 PRECEDING AND CURRENT ROW
+         ) AS sd15
+  FROM daily
+)
+SELECT order_day,
+       ROUND(revenue, 2) AS revenue,
+       ROUND(avg15, 2) AS avg15,
+       ROUND(sd15, 2) AS sd15,
+       ROUND(
+         (revenue - avg15) / NULLIF(sd15, 0),
+         4
+       ) AS z_score
+FROM rolling
+ORDER BY order_day;</code></pre>
+<p>Expected shape: one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it. The first row has no sample standard deviation, and any zero-standard-deviation frame yields <code>NULL</code>.</p>
+<p>Assumption: “15-day” in the learner example means 15 observed daily rows. To model 15 consecutive calendar days, first join revenue to a dense date series and decide whether missing days mean zero or unknown.</p>
+<h4 id="solution-1--exercise-2-category-p50-and-p90-of-order-values">Exercise 2 — Category P50 and P90 of order values<a class="heading-anchor" href="#solution-1--exercise-2-category-p50-and-p90-of-order-values" aria-label="Link to this section">#</a></h4>
+<p>An order can contain several categories. This answer defines an “order total within a category” as the sum of that category&#x27;s net lines in that order; using the whole order total for every category would double-count mixed orders.</p>
+<pre><code class="language-sql">SET search_path TO training, public;
+
+WITH category_order_values AS (
+  SELECT p.category,
+         oi.order_id,
+         SUM(
+           oi.unit_price * oi.quantity * (1 - oi.discount)
+         ) AS category_order_value
+  FROM order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  GROUP BY p.category, oi.order_id
+)
+SELECT category,
+       ROUND(
+         PERCENTILE_CONT(0.5) WITHIN GROUP (
+           ORDER BY category_order_value
+         )::numeric,
+         2
+       ) AS p50_order_value,
+       ROUND(
+         PERCENTILE_CONT(0.9) WITHIN GROUP (
+           ORDER BY category_order_value
+         )::numeric,
+         2
+       ) AS p90_order_value,
+       COUNT(*) AS category_orders
+FROM category_order_values
+GROUP BY category
+ORDER BY category;</code></pre>
+<p>Expected shape: one row per sold category. <code>PERCENTILE_CONT</code> can interpolate between observed values, so a percentile need not equal an actual order value.</p>
+<h4 id="solution-1--pitfalls">Pitfalls<a class="heading-anchor" href="#solution-1--pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><code>STDDEV_SAMP</code> is <code>NULL</code> for a one-row frame. <code>NULLIF(sd15, 0)</code> also protects constant frames from division by zero.</li>
+<li>A <code>ROWS</code> frame counts rows, not elapsed time.</li>
+<li>Ordered-set aggregates such as <code>PERCENTILE_CONT</code> use <code>WITHIN GROUP</code>; they are not written with <code>OVER</code> in this grouped query.</li>
+<li>Define the analytical grain before calculating a percentile. Line-level and order-level percentiles answer different questions.</li>
+</ul>
+<h4 id="solution-1--exercise-3-compare-discrete-and-continuous-medians">Exercise 3 — Compare discrete and continuous medians<a class="heading-anchor" href="#solution-1--exercise-3-compare-discrete-and-continuous-medians" aria-label="Link to this section">#</a></h4>
+<p>For four values, the discrete median chooses an observed central value while the continuous median interpolates. The runnable <code>VALUES</code> fixture makes the difference deterministic.</p>
+<h4 id="solution-1--exercise-4-share-and-rank-within-month">Exercise 4 — Share and rank within month<a class="heading-anchor" href="#solution-1--exercise-4-share-and-rank-within-month" aria-label="Link to this section">#</a></h4>
+<p>Revenue is first aggregated to month/category grain. The denominator window partitions by month, and <code>ROW_NUMBER</code> adds category as a deterministic tie-break.</p>
+<h4 id="solution-1--exercise-5-remove-forecast-leakage">Exercise 5 — Remove forecast leakage<a class="heading-anchor" href="#solution-1--exercise-5-remove-forecast-leakage" aria-label="Link to this section">#</a></h4>
+<p>The corrected frame is <code>7 PRECEDING</code> through <code>1 PRECEDING</code>. Ending at the current row would let the target actual influence its own forecast.</p>
+<h4 id="solution-1--exercise-6-preserve-undefined-dispersion">Exercise 6 — Preserve undefined dispersion<a class="heading-anchor" href="#solution-1--exercise-6-preserve-undefined-dispersion" aria-label="Link to this section">#</a></h4>
+<p>The constant fixture has standard deviation zero. <code>NULLIF(sd, 0)</code> returns NULL for every z-score, accurately distinguishing undefined from normal.</p></div>
+      </section>
+    
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+        
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day40_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day40_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 40 solutions: advanced analytics</span>
+<span>SET search_path TO training, public;</span>
+<span> </span>
+<span>-- Exercise 1: trailing 15-observation z-score for daily revenue.</span>
+<span>WITH daily AS (</span>
+<span>  SELECT order_date::date AS day,</span>
+<span>         SUM(total_amount) AS revenue</span>
+<span>  FROM orders</span>
+<span>  GROUP BY order_date::date</span>
+<span>), stats AS (</span>
+<span>  SELECT day,</span>
+<span>         revenue,</span>
+<span>         AVG(revenue) OVER (</span>
+<span>           ORDER BY day ROWS BETWEEN 14 PRECEDING AND CURRENT ROW</span>
+<span>         ) AS avg15,</span>
+<span>         STDDEV_SAMP(revenue) OVER (</span>
+<span>           ORDER BY day ROWS BETWEEN 14 PRECEDING AND CURRENT ROW</span>
+<span>         ) AS sd15</span>
+<span>  FROM daily</span>
+<span>)</span>
+<span>SELECT day,</span>
+<span>       ROUND(revenue, 2) AS revenue,</span>
+<span>       ROUND(avg15, 2) AS avg15,</span>
+<span>       ROUND(sd15, 2) AS sd15,</span>
+<span>       ROUND(((revenue - avg15) / NULLIF(sd15, 0))::numeric, 3) AS z_score</span>
+<span>FROM stats</span>
+<span>ORDER BY day DESC;</span>
+<span> </span>
+<span>-- Exercise 2: category-level distribution of order value attributable to it.</span>
+<span>WITH category_orders AS (</span>
+<span>  SELECT p.category,</span>
+<span>         oi.order_id,</span>
+<span>         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS category_order_total</span>
+<span>  FROM order_items oi</span>
+<span>  JOIN products p USING (product_id)</span>
+<span>  GROUP BY p.category, oi.order_id</span>
+<span>)</span>
+<span>SELECT category,</span>
+<span>       ROUND(</span>
+<span>         percentile_cont(0.50) WITHIN GROUP (ORDER BY category_order_total)::numeric,</span>
+<span>         2</span>
+<span>       ) AS p50_order_total,</span>
+<span>       ROUND(</span>
+<span>         percentile_cont(0.90) WITHIN GROUP (ORDER BY category_order_total)::numeric,</span>
+<span>         2</span>
+<span>       ) AS p90_order_total</span>
+<span>FROM category_orders</span>
+<span>GROUP BY category</span>
+<span>ORDER BY category;</span>
+<span> </span>
+<span>-- Exercise 3: discrete chooses an observed input; continuous interpolates.</span>
+<span>WITH values(value) AS (VALUES (10::numeric), (20), (100), (200))</span>
+<span>SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY value) AS discrete_median,</span>
+<span>       percentile_cont(0.5) WITHIN GROUP (ORDER BY value) AS continuous_median</span>
+<span>FROM values;</span>
+<span> </span>
+<span>-- Exercise 4: first aggregate at month/category grain; the window denominator</span>
+<span>-- then sums only peer category rows within that month.</span>
+<span>WITH category_month AS (</span>
+<span>  SELECT date_trunc(&#x27;month&#x27;, o.order_date)::date AS month,</span>
+<span>         p.category,</span>
+<span>         SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS revenue</span>
+<span>  FROM orders o</span>
+<span>  JOIN order_items oi USING (order_id)</span>
+<span>  JOIN products p USING (product_id)</span>
+<span>  GROUP BY date_trunc(&#x27;month&#x27;, o.order_date), p.category</span>
+<span>)</span>
+<span>SELECT month,</span>
+<span>       category,</span>
+<span>       ROUND(revenue, 2) AS revenue,</span>
+<span>       ROUND(revenue / NULLIF(SUM(revenue) OVER (PARTITION BY month), 0), 4)</span>
+<span>         AS month_share,</span>
+<span>       ROW_NUMBER() OVER (</span>
+<span>         PARTITION BY month ORDER BY revenue DESC, category</span>
+<span>       ) AS category_rank</span>
+<span>FROM category_month</span>
+<span>ORDER BY month DESC, category_rank;</span>
+<span> </span>
+<span>-- Exercise 5: CURRENT ROW would leak the target actual into its forecast.</span>
+<span>WITH daily AS (</span>
+<span>  SELECT order_date::date AS day, SUM(total_amount) AS revenue</span>
+<span>  FROM orders GROUP BY order_date::date</span>
+<span>)</span>
+<span>SELECT day,</span>
+<span>       revenue,</span>
+<span>       AVG(revenue) OVER (</span>
+<span>         ORDER BY day ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING</span>
+<span>       ) AS prior_seven_forecast</span>
+<span>FROM daily</span>
+<span>ORDER BY day DESC</span>
+<span>LIMIT 20;</span>
+<span> </span>
+<span>-- Exercise 6: NULLIF preserves “undefined” when all values are identical.</span>
+<span>WITH constant(value) AS (VALUES (5::numeric), (5), (5)), moments AS (</span>
+<span>  SELECT value, AVG(value) OVER () AS mean_value,</span>
+<span>         STDDEV_SAMP(value) OVER () AS sd_value</span>
+<span>  FROM constant</span>
+<span>)</span>
+<span>SELECT value, (value - mean_value) / NULLIF(sd_value, 0) AS z_score</span>
+<span>FROM moments;</span>
+<span> </span></code></pre></div>
+      </section>
+    
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-39.html"><small>Previous lesson</small><strong>sql-39</strong><span>Locks Deadlocks</span></a>
+        <a class="nav-card next" href="sql-41.html"><small>Next lesson</small><strong>sql-41</strong><span>Complex Aggregations</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-40";
+    const LEARNER_PATH = "sql/postgres-60day/day40_analytic_functions_advanced.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
