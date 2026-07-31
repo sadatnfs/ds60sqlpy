@@ -48,38 +48,38 @@ ORDER BY cohort_month DESC;
 
 -- Exercises
 -- 1. Create LTV segments (gold/silver/bronze) based on thresholds and analyze by country.
---    Inputs: Use only the declared lesson objects (orders, order_items, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-46 Exercise 1, read from `customers`, and `orders`. Build the answer toward `country`, `ltv_segment`, `customers`, `avg_ltv`, and `total_ltv`; keep `country`, and `ltv_segment` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-46 Exercise 1, expected output: one row per `(country, ltv_segment)`. The final columns are `country`, `ltv_segment`, `customers`, `avg_ltv`, and `total_ltv`. The final order is `country, avg_ltv DESC`.
+--    Verify: For sql-46 Exercise 1, independently aggregate `customers`, and `orders` by `country`, and `ltv_segment`; require one output row for every distinct `country`, and `ltv_segment` tuple and compare `customers`, `avg_ltv`, and `total_ltv` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `customers`, `avg_ltv`, and `total_ltv` for the existing `country`, and `ltv_segment` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-46 Exercise 1, run `lifetime`, and `segmented` one at a time. Record each CTE's row count and `country`, and `ltv_segment` uniqueness before the next stage uses it.
 -- 2. Compute revenue per cohort month at month offsets 0..12.
---    Inputs: Use only the declared lesson objects (orders, order_items, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-46 Exercise 2, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, and `revenue`; keep `cohort_month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-46 Exercise 2, expected output: one row per cohort and lifecycle month. The final columns are `cohort_month`, `month_offset`, and `revenue`. The final order is `cohort_month DESC, month_offset`.
+--    Verify: For sql-46 Exercise 2, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, and `revenue` values match those staged rows without unintended fanout or loss. Add one row for which `(month_offset BETWEEN 0 AND 12)` is true and one for which it is false; verify only the matching `cohort_month` value is returned.
+--    Hint ladder, rung 1: For sql-46 Exercise 2, run `cohorts`, `monthly_customer`, and `cohort_revenue` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
 -- 3. Prediction: compare NTILE(4) with fixed monetary thresholds. Explain why a
 --    customer's label can change under NTILE when unrelated customers arrive.
---    Inputs: Use only the declared lesson objects (orders, order_items, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-46 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`, `ltv`, `population_quartile`, and `fixed_segment`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-46 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `ltv`, `population_quartile`, and `fixed_segment`. The final order is `ltv DESC, customer_id`.
+--    Verify: For sql-46 Exercise 3, choose one complete partition from `customers`, and `orders`; hand-calculate its first, middle, and final window values for `ltv`, `population_quartile`, and `fixed_segment`, then verify output keys remain `customer_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+--    Hint ladder, rung 1: For sql-46 Exercise 3, run `lifetime` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
 -- 4. Construction: calculate customer LTV, order count, average order value, and
 --    days since last order in one customer-grain result.
---    Inputs: Use only the declared lesson objects (orders, order_items, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-46 Exercise 4, read from `orders`, and `customers`. Build the answer toward `customer_id`, `order_count`, `ltv`, `average_order_value`, and `days_since_last_order`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-46 Exercise 4, expected output: one row per `customer_id`. The final columns are `customer_id`, `order_count`, `ltv`, `average_order_value`, and `days_since_last_order`. The final order is `ltv DESC, c.customer_id`.
+--    Verify: For sql-46 Exercise 4, project `customer_id` plus the raw source columns from `orders`, and `customers` at each join stage; record row count and distinct `customer_id`, then assert the final `customer_id`, `order_count`, `ltv`, `average_order_value`, and `days_since_last_order` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-46 Exercise 4, run `behavior` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
 -- 5. Debugging: repair an LTV query that joins payments and order_items at raw
 --    grain and therefore multiplies revenue.
---    Inputs: Use only the declared lesson objects (orders, order_items, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-46 Exercise 5, read from `orders`, and `order_items`. Build the answer toward `customer_id`, and `line_ltv`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-46 Exercise 5, expected output: one row per order before it becomes customer LTV. The final columns are `customer_id`, and `line_ltv`. The final order is `line_ltv DESC, customer_id`.
+--    Verify: For sql-46 Exercise 5, independently aggregate `orders`, and `order_items` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `line_ltv` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `line_ltv` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-46 Exercise 5, run `order_value` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
 -- 6. Edge case: retain customers with no orders, assign zero LTV, and explain
 --    where COALESCE belongs so the LEFT JOIN remains outer.
---    Inputs: Use only the declared lesson objects (orders, order_items, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-46 Exercise 6, read from `customers`, and `orders`. Build the answer toward `customer_id`, `ltv`, and `activity_status`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-46 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_id`, `ltv`, and `activity_status`. The final order is `c.customer_id`.
+--    Verify: For sql-46 Exercise 6, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `ltv`, and `activity_status` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `ltv`, and `activity_status` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-46 Exercise 6, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
 
 ROLLBACK;

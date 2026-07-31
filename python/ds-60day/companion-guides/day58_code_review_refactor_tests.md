@@ -45,12 +45,10 @@ Passing one does not imply the others pass.
 ```python
 from dataclasses import dataclass
 
-
 @dataclass(frozen=True)
 class Metrics:
     rows: int
     positive_rate: float
-
 
 def summarize_labels(labels: list[int]) -> Metrics:
     """Return count and positive rate for nonempty binary labels."""
@@ -221,31 +219,15 @@ except ValueError as exc:
 
 1. Move at least two notebook functions into a `src/` package and add tests.
 
-**Verify:** For task `Move at least two notebook functions into a src/ package and add tests`, demonstrate the concrete requirement “1. Move at least two notebook functions into a src/ package and add tests” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 1 — behavior-preserving refactoring, seams, tests, and compatibility review — import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
 
 2. Add type hints and docstrings, then run mypy.
 
-**Verify:** For task `Add type hints and docstrings, then run mypy`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
+**Verify:** Practice 2 — behavior-preserving refactoring, seams, tests, and compatibility review — run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
 
 3. Write a short maintainer guide in the project root.
 
-**Verify:** For task `Write a short maintainer guide in the project root`, demonstrate the concrete requirement “3. Write a short maintainer guide in the project root” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Practice 3 — behavior-preserving refactoring, seams, tests, and compatibility review — write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
 
 ### Progressive hints
 
@@ -270,39 +252,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Characterization testing:** Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change.
    **Progressive hint:** Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.
 
-**Verify:** For task `Characterization testing: Before refactoring a legacy notebook function, capture current beha...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
-
+**Verify:** Characterization testing — save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.
 
 5. **Risk-based review:** Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.
    **Progressive hint:** Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.
 
-**Verify:** For task `Risk-based review: Review a data-loading-to-prediction change using a checklist for security,...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Risk-based review — complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.
 
 6. **Compatibility change:** Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan.
    **Progressive hint:** Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.
 
-**Verify:** For task `Compatibility change: Rename a public function parameter without breaking callers. Implement...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
+**Verify:** Compatibility change — assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -348,10 +311,12 @@ Emphasize behavior-preserving refactoring, seams, tests, and compatibility revie
 - guide: `python/ds-60day/companion-guides/day58_code_review_refactor_tests.md`
 - learner artifact: `python/ds-60day/notebooks/day58_code_review_refactor_tests.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-57`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

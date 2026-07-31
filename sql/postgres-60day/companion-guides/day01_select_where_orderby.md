@@ -3,11 +3,10 @@
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** Complete
-  [SQL-FOUND-02 — versioned migrations](../../professional/companion-guides/sql_found_02_versioned_migrations.md)
-  and the [SQL track setup](../README.md), reset the disposable
-  `advanced_sql_training` database, and know how to run a `.sql` file with
-  `psql`.
+- **Catalog prerequisites:** none. This is the first SQL lesson.
+- **Environment prerequisite:** follow the [SQL track setup](../README.md) so
+  the disposable `advanced_sql_training` database and guided notebook runner
+  are ready. You do not need to know DDL or migrations yet.
 - **Artifacts:** [learner SQL](../day01_select_where_orderby.sql) ·
   [solution reasoning](../solutions/day01_solutions.md) ·
   [executable solution](../solutions/day01_solutions.sql)
@@ -110,15 +109,13 @@ SELECT customer_id, full_name, country, created_at
 FROM customers
 WHERE country IN ('US','CA')
 -- `customer_id` makes ties on the timestamp deterministic before LIMIT.
-ORDER BY created_at DESC, customer_id
+ORDER BY created_at DESC, customer_id DESC
 LIMIT 10;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; At most 20 rows; one row per order, newest first.
+**How to read it:** Example 1: Start with `customers` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `customer_id`, `full_name`, `country`, and `created_at`. `ORDER BY` determines presentation order and the final `LIMIT 10` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one row per `customer_id`, and `country`, capped at 10 rows with columns `customer_id`, `full_name`, `country`, and `created_at` from `customers`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -135,11 +132,9 @@ ORDER BY gross_margin DESC, price DESC, product_id
 LIMIT 15;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; At most 20 rows; one row per order, newest first.
+**How to read it:** Example 2: Start with `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `product_id`, `name`, `price`, `cost`, and `gross_margin`. `ORDER BY` determines presentation order and the final `LIMIT 15` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one row per `product_id`, capped at 15 rows with columns `product_id`, `name`, `price`, `cost`, and `gross_margin` from `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -180,28 +175,34 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** List the 20 newest orders with customer ID and total amount.
    **Progressive hint:** Sort by `order_date DESC` and add `order_id DESC` as a unique tie-breaker before applying `LIMIT`.
-   **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: List the 20 newest orders with customer ID and total amount” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `o`, `id`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 1, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-01 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-01 Exercise 1, expected output: At most 20 rows; one row per order, newest first. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+   **Verify:** For sql-01 Exercise 1, assert the result has at most 20 rows, no duplicate `order_id`, and no adjacent pair out of `(order_date DESC, order_id DESC)` order. Check that each projected `customer_id`, `total_amount`, and `order_date` matches the same `orders.order_id` source row. Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
 2. **Query writing:** Find the 10 most expensive products created in the last 90 days.
    **Progressive hint:** Filter the timestamp directly, then sort by price and a stable product key.
-   **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Find the 10 most expensive products created in the last 90 days” at one row per product or product grouping requested. Named evidence columns/objects: `evidence`, `p`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 2, prove uniqueness at one row per product or product grouping requested; reconcile the result's row count and any count/sum/amount with a simpler control over `products`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-01 Exercise 2, read from `products`. Build the answer toward `product_id`, `name`, `price`, and `created_at`; keep `product_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-01 Exercise 2, expected output: At most 10 product rows; every row is in the 90-day window. The final columns are `product_id`, `name`, `price`, and `created_at`. The final order is `p.price DESC, p.product_id`.
+   **Verify:** For sql-01 Exercise 2, assert no more than 10 rows, no duplicate `product_id`, and no adjacent pair that violates `p.price DESC, p.product_id`. Rejoin the returned keys to `products` to confirm `product_id`, `name`, `price`, and `created_at` came from the same source rows. Tie two rows on `p.price DESC` and give them different `p.product_id` values; verify `p.price DESC, p.product_id` chooses a stable first/last row.
 3. **Query writing:** Show customers from GB or DE created in the last year, newest first.
    **Progressive hint:** Use `IN` for the country set, combine the time condition with `AND`, and break timestamp ties.
-   **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Show customers from GB or DE created in the last year, newest first” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `c`, `gb`, `de`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 3, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-01 Exercise 3, read from `customers`. Build the answer toward `customer_id`, `full_name`, `country`, and `created_at`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-01 Exercise 3, expected output: Only GB/DE customers from the declared window. The final columns are `customer_id`, `full_name`, `country`, and `created_at`. The final order is `c.created_at DESC, c.customer_id`.
+   **Verify:** For sql-01 Exercise 3, run an anti-check that counts rows where NOT ((c.country IN ('GB', 'DE') AND c.created_at >= CURRENT_TIMESTAMP - INTERVAL '1 year')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, `country`, and `created_at` against `customers`. Give two rows the same `c.created_at DESC` value and different `c.customer_id` values; verify `c.created_at DESC, c.customer_id` produces the intended rank and display order.
 4. **Prediction:** Predict which rows survive `email = NULL`, then write a query that counts missing and present emails correctly.
    **Progressive hint:** Comparisons with `NULL` are unknown; use `IS NULL` and `IS NOT NULL`.
-   **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Predict which rows survive email = NULL, then write a query that counts missing and present emails correctly”. Show both compared result shapes at one summary row per grouping key explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `missing_email_count`, `present_email_count`, `customer_count`, `c`.
-   **Verify:** For Exercise 4, run the two forms over the identical rows in `customers`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-01 Exercise 4, read from `customers`. Build the answer toward `missing_email_count`, `present_email_count`, and `customer_count`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-01 Exercise 4, expected output: Exactly one summary row with counts whose sum equals all customers. The final columns are `missing_email_count`, `present_email_count`, and `customer_count`.
+   **Verify:** For sql-01 Exercise 4, assert exactly one row. Independently run `SELECT COUNT(*) FROM customers`; verify `missing_email_count + present_email_count = customer_count` and that `customer_count` equals the independent count. Repeat with `NULL` in `email` and state whether the row is kept, rejected, or classified.
 5. **Debugging:** Repair a top-price query that uses `LIMIT 10` without `ORDER BY` and explain why the original is nondeterministic.
    **Progressive hint:** Define the business ranking first; use a unique final key for tied prices.
-   **Expected result/shape:** Exercise 5 needs the plan evidence for “Debugging: Repair a top-price query that uses LIMIT 10 without ORDER BY and explain why the original is nondeterministic”: one plan tree per compared query with node type, estimated rows, actual rows/loops when ANALYZE is used, and buffers or predicate details requested by the prompt. The underlying query must still return one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `p`, `limit`.
-   **Verify:** For Exercise 5, hold SQL text, parameters, seed data, and settings constant except for the intended change; compare result keys/counts from `products` before interpreting scan/join nodes, estimates, actual rows, loops, and buffers.
+   **Inputs/evidence:** For sql-01 Exercise 5, read from `products`. Build the answer toward `product_id`, `name`, and `price`; keep `product_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-01 Exercise 5, expected output: At most 10 rows, highest prices first, stable across repeated runs on unchanged data. The final columns are `product_id`, `name`, and `price`. The final order is `p.price DESC, p.product_id`.
+   **Verify:** For sql-01 Exercise 5, assert no more than 10 rows, no duplicate `product_id`, and no adjacent pair that violates `p.price DESC, p.product_id`. Rejoin the returned keys to `products` to confirm `product_id`, `name`, and `price` came from the same source rows. Give two rows the same `p.price DESC` value and different `p.product_id` values; verify `p.price DESC, p.product_id` produces the intended rank and display order.
 6. **Extension:** Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than `OFFSET`.
    **Progressive hint:** Use the last `(order_date, order_id)` pair from page one and compare row values in the same descending order.
-   **Expected result/shape:** Exercise 6 must make “Extension: Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than OFFSET” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `o`, `fp`, `cursor`, `offset`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `o`, `fp`, `cursor`, `offset`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-01 Exercise 6, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-01 Exercise 6, expected output: Up to 10 rows strictly after the first page with no overlap. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+   **Verify:** For sql-01 Exercise 6, assert no more than 10 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_date DESC, o.order_id DESC`. Rejoin the returned keys to `orders` to confirm `order_id`, `customer_id`, `total_amount`, and `order_date` came from the same source rows. Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
 
 ## Common mistakes and how to recover
 
@@ -284,7 +285,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-01 — Select Where Orderby.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I am a complete beginner with no prior SQL lessons. This lesson has no direct catalog prerequisite. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
 - Answer-free learner SQL: sql/postgres-60day/day01_select_where_orderby.sql
 

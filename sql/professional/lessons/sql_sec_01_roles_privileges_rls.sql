@@ -348,46 +348,89 @@ SELECT COALESCE(
         -- 1. Explain why schema USAGE without table SELECT is insufficient, and
         --    why table SELECT without schema USAGE is also insufficient. Extend
         --    the has_*_privilege query to prove both layers.
+        --    Inputs: For sql-sec-01 Exercise 1, complete the two-layer reads written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+        --    Expected result/shape: For sql-sec-01 Exercise 1, expected output: a completed the two-layer reads written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`.
+        --    Verify: For sql-sec-01 Exercise 1, check the two-layer reads written analysis against `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 1, check the two-layer reads written analysis against `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`.
         --
         -- 2. Add a NOLOGIN ds60_sec_auditor role. Grant only schema USAGE and
         --    SELECT, then add a SELECT policy that permits both tenants. Prove it
         --    sees all current documents but cannot INSERT, UPDATE, or DELETE.
+        --    Inputs: For sql-sec-01 Exercise 2, change only `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` rows.
+        --    Expected result/shape: For sql-sec-01 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `usage`.
+        --    Verify: For sql-sec-01 Exercise 2, inspect `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` for `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 2, inspect `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` for `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
         --
         -- 3. Verify that a table created by ds60_sec_owner after ALTER DEFAULT
         --    PRIVILEGES automatically grants SELECT to tenant roles. Explain why
         --    a table created by a different owner would not inherit that rule.
+        --    Inputs: For sql-sec-01 Exercise 3, read from `ds60_sec_owner`. Compute `ds60_sec_auditor` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+        --    Expected result/shape: For sql-sec-01 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `ds60_sec_auditor`.
+        --    Verify: For sql-sec-01 Exercise 3, evaluate each of `row_count` in a separate control `SELECT` over `ds60_sec_owner`; require one final row and compare every value. Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 3, select `ds60_sec_auditor` from `ds60_sec_owner` before adding derived columns.
         --
         -- 4. Review owner_document_count(text). List the controls that make a
         --    SECURITY DEFINER routine safer, and explain why granting an
         --    arbitrary-tenant parameter to ordinary tenant roles would cross the
         --    row-security boundary.
+        --    Inputs: For sql-sec-01 Exercise 4, complete the definer boundary written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+        --    Expected result/shape: For sql-sec-01 Exercise 4, expected output: a completed the definer boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `document_count_for_tenant`, `search_path`, and `current_user`.
+        --    Verify: For sql-sec-01 Exercise 4, check the definer boundary written analysis against `document_count_for_tenant`, `search_path`, and `current_user`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 4, check the definer boundary written analysis against `document_count_for_tenant`, `search_path`, and `current_user`.
         --
         -- 5. Explain the RLS bypass behavior for a table owner, a superuser, and
         --    a role with BYPASSRLS. When can FORCE ROW LEVEL SECURITY subject an
         --    ordinary table owner to policies, and who still bypasses them?
+        --    Inputs: For sql-sec-01 Exercise 5, complete the rls bypass written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+        --    Expected result/shape: For sql-sec-01 Exercise 5, expected output: a completed the rls bypass written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `bypassrls`.
+        --    Verify: For sql-sec-01 Exercise 5, check the rls bypass written analysis against `bypassrls`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 5, check the rls bypass written analysis against `bypassrls`.
         --
         -- 6. Build an effective-access inventory for every course role across
         --    schema, table, column, sequence, and routine privileges. Include
         --    inherited membership and PUBLIC; do not mistake ACL text for the
         --    final answer.
+        --    Inputs: For sql-sec-01 Exercise 6, complete the effective access written analysis and support its claims with read-only evidence from `pg_auth_members`. Mark unverified assumptions explicitly.
+        --    Expected result/shape: For sql-sec-01 Exercise 6, expected output: a completed the effective access written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `has__privilege`, `aclexplode`, `insert`, and `usage`.
+        --    Verify: For sql-sec-01 Exercise 6, check the effective access written analysis against `has__privilege`, `aclexplode`, `insert`, and `usage`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 6, check the effective access written analysis against `has__privilege`, `aclexplode`, `insert`, and `usage`.
         --
         -- 7. Demonstrate SESSION_USER versus CURRENT_USER before, during, and
         --    after SET ROLE, then explain their values inside a SECURITY DEFINER
         --    routine. Which identity should an audit record preserve?
+        --    Inputs: For sql-sec-01 Exercise 7, complete the identity context written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+        --    Expected result/shape: For sql-sec-01 Exercise 7, expected output: a completed the identity context written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `session_user`, and `current_user`.
+        --    Verify: For sql-sec-01 Exercise 7, check the identity context written analysis against `session_user`, and `current_user`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 7, check the identity context written analysis against `session_user`, and `current_user`.
         --
         -- 8. Add negative tests for NULL, mixed-case, and unknown tenant
         --    identifiers. Prove the policy fails closed and explain why a
         --    session setting used for tenancy must be validated and reset.
+        --    Inputs: For sql-sec-01 Exercise 8, complete the fail-closed tenancy written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+        --    Expected result/shape: For sql-sec-01 Exercise 8, expected output: a completed the fail-closed tenancy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+        --    Verify: For sql-sec-01 Exercise 8, check the fail-closed tenancy written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 8, check the fail-closed tenancy written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
         --
         -- 9. Create a narrow writer role in a scratch transaction. Grant only
         --    the columns and identity-sequence privileges needed for INSERT,
         --    prove RETURNING does not leak forbidden columns, and prove UPDATE
         --    and DELETE remain denied.
+        --    Inputs: For sql-sec-01 Exercise 9, complete the narrow writer written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+        --    Expected result/shape: For sql-sec-01 Exercise 9, expected output: a completed the narrow writer written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `usage`, `insert`, and `returning`.
+        --    Verify: For sql-sec-01 Exercise 9, check the narrow writer written analysis against `usage`, `insert`, and `returning`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 9, check the narrow writer written analysis against `usage`, `insert`, and `returning`.
         --
         -- 10. Write an offboarding and incident-revocation runbook. Cover login
         --     revocation, active sessions, memberships, owned objects, default
         --     privileges, dependent grants, verification, and recoverable audit
         --     evidence; do not execute destructive cluster-wide commands here.
+        --    Inputs: For sql-sec-01 Exercise 10, complete the revocation runbook written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+        --    `pg_catalog.pg_roles`, `pg_catalog.pg_auth_members`, and
+        --    `information_schema.role_table_grants`; keep `rolname`,
+        --    `member`, `roleid`, and the grantor/grantee identity visible.
+        --    Expected result/shape: For sql-sec-01 Exercise 10, expected output: a completed the revocation runbook written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+        --    Verify: For sql-sec-01 Exercise 10, check the revocation runbook written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+        --    Hint ladder, rung 1: For sql-sec-01 Exercise 10, check the revocation runbook written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
 
         ROLLBACK;
         \echo 'SQL-SEC-01 complete: roles and pro_security_lab were rolled back'

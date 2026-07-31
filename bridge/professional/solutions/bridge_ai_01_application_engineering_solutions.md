@@ -88,6 +88,25 @@ separately authorized integration suite covering network failure, timeouts,
 rate limits, usage accounting, model-version drift, provider data policy, and
 adversarial behavior.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+The local similarity boundary is deterministic and requires no model service:
+
+```python
+from bridge.professional.solutions.bridge_ai_01_application_engineering_solution import (
+    cosine_similarity,
+)
+
+assert cosine_similarity((1.0, 0.0), (1.0, 0.0)) == 1.0
+assert cosine_similarity((1.0, 0.0), (0.0, 1.0)) == 0.0
+```
+
+Separate tests should prove unauthorized document text never reaches the
+recording embedding double.
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs map one-for-one to the answer-free learner artifact and
@@ -106,9 +125,7 @@ token budgets.
 
 **Why:** Fail at construction so invalid state cannot cross later boundaries.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Parameterize every dataclass with blank IDs/text, empty audiences, non-positive bounds, non-finite scores/latency, and inconsistent budgets; assert exact construction failures and one fully valid object per type.
 
 ### Exercise 2 — Math
 
@@ -120,9 +137,7 @@ tolerance.
 
 **Why:** Validate shape and norms before division.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Assert identical vectors score `1.0`, orthogonal vectors `0.0`, mismatched/empty dimensions and zero norms raise `ValueError`, and near-equal comparisons use the declared tolerance.
 
 ### Exercise 3 — Authorization testing
 
@@ -134,9 +149,7 @@ forbidden document text/IDs are absent from every recorded embed call.
 
 **Why:** Call history is the evidence that prohibited text never crossed the adapter.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Record embedding inputs for a mixed document set; assert the query and only authorized, non-sensitive, non-quarantined documents are embedded and forbidden text/IDs never cross the call boundary.
 
 ### Exercise 4 — Ranking
 
@@ -149,9 +162,7 @@ context budget is reached, and return an immutable tuple in that order.
 **Why:** Use a stable document ID tie-breaker and apply the character budget without splitting
 trust rules.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Give equal-score documents in reversed input order; assert ranking uses ascending document ID, returns at most `top_k`, and total selected excerpt characters never exceed the policy limit.
 
 ### Exercise 5 — Prompt boundary
 
@@ -163,9 +174,7 @@ only allowlisted fields, and never concatenate retrieved text into instruction p
 
 **Why:** Separate system instructions, user query, and retrieved data structurally.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Parse each serialized context line as JSON; assert exact approved ID/text fields plus the `untrusted_document_data` label, deterministic order, bounded excerpts, and no unauthorized field.
 
 ### Exercise 6 — Schema validation
 
@@ -178,9 +187,7 @@ abstention.
 
 **Why:** Parsing JSON is only the first step; validate exact shape and semantics.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Parameterize missing/extra fields, wrong types, duplicate/unknown citations, and inconsistent abstention; assert all raise `UnsafeModelOutput` while one exact valid object is accepted unchanged.
 
 ### Exercise 7 — Adversarial testing
 
@@ -192,9 +199,7 @@ parser, and assert a closed failure before constructing `AssistantRun`.
 
 **Why:** Citations are authorization claims and must be a subset of retrieved evidence.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Return a citation ID absent from retrieved hits; assert parsing/orchestration raises `UnsafeModelOutput`, produces no accepted answer, and records the invalid model call once.
 
 ### Exercise 8 — Leakage
 
@@ -206,9 +211,7 @@ capture all logs to show neither raw response nor marker is emitted.
 
 **Why:** Leakage inspection occurs after parsing but before return/logging.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Return a configured private marker; assert the run fails closed, the marker is absent from logs and returned objects, and only a bounded error class/outcome is observable.
 
 ### Exercise 9 — Budgets
 
@@ -220,9 +223,7 @@ safe error and prove no later adapter/effect runs after a preflight failure.
 
 **Why:** Each limit is independent evidence and needs its own failure case.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Trigger estimated-input, reported-input, output, cost-unit, and latency limits one at a time; assert each raises `BudgetExceeded` at its named gate and unaffected limits still pass.
 
 ### Exercise 10 — Evaluation
 
@@ -235,9 +236,7 @@ pass rate.
 
 **Why:** Expected citations and forbidden fragments make safety assertions inspectable.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Run grounded, abstention, injection-document, and unauthorized-private cases; compare exact citations/abstention, zero forbidden fragments, expected adapter calls, and per-case budget outcome.
 
 ### Exercise 11 — Evidence limits
 
@@ -251,9 +250,7 @@ adversarial coverage, or production authorization configuration.
 **Why:** A controlled harness proves orchestration, not provider behavior or real-world
 robustness.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Provide a two-column claim table: deterministic doubles prove orchestration/call order/schema gates; provider reliability, real model quality, billing, privacy policy, and adversarial robustness remain unproved.
 
 ### Exercise 12 — Prompt injection
 
@@ -266,9 +263,7 @@ blocked-fragment checks.
 
 **Why:** The model double should attempt the attack so downstream validation is exercised.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Insert an instruction-attack document and configure the model to follow it if seen; assert the document is quarantined or serialized only as data and allowed citations/output policy cannot expand.
 
 ### Exercise 13 — Text normalization
 
@@ -281,9 +276,7 @@ forms explicitly.
 
 **Why:** Normalization can close bypasses but can also merge distinct content.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Test whitespace-only IDs, composed/decomposed Unicode, and case/normalization variants of blocked markers; document which normalize to equality and which remain distinct without altering source meaning.
 
 ### Exercise 14 — Numeric determinism
 
@@ -295,9 +288,7 @@ always use document ID as final deterministic ordering evidence.
 
 **Why:** Do not rely on platform-specific incidental sort order.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Rank equal and epsilon-different scores under the declared tolerance; assert deterministic ID tie-breaking and identical order across repeated runs.
 
 ### Exercise 15 — Token estimation
 
@@ -309,9 +300,7 @@ margin; after generation, enforce the model response's actual token counts indep
 
 **Why:** Preflight should fail early on obvious excess and leave headroom.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** For representative strings, record the conservative estimated token count and headroom; assert obvious oversize input fails preflight and actual adapter usage remains the authoritative post-call value.
 
 ### Exercise 16 — Adapter failure
 
@@ -323,9 +312,7 @@ pure orchestration; schema, authorization, leakage, and budget failures escape i
 
 **Why:** Offline doubles can model exception classes and call order.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Configure timeout/transient/permanent/unsafe-output exceptions; assert only the explicitly retryable adapter class is retried within its bound and permanent or unsafe failures have one call.
 
 ### Exercise 17 — Abstention
 
@@ -337,9 +324,7 @@ generation, or raise a defined no-evidence result; assert zero model calls.
 
 **Why:** No evidence is a deterministic pre-model decision.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Use a query with no authorized hit; assert an abstaining `AssistantRun` is returned (or the declared abstention path), citations are empty, and text-model call count is zero.
 
 ### Exercise 18 — Observability
 
@@ -352,9 +337,7 @@ content channel.
 
 **Why:** Use bounded stage/outcome/error-class metadata only.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Capture logs and metrics for pass/failure; assert only bounded stage/outcome/error-class/count fields appear and query, context, embeddings, raw output, document IDs, and credentials are absent.
 
 ### Exercise 19 — Metric edge cases
 
@@ -367,9 +350,7 @@ denominators.
 
 **Why:** Denominators and conventions belong in the metric contract.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Evaluate an empty case set and a case with zero expected citations; assert documented finite metric values with no division error or NaN and retain the denominator in results.
 
 ### Exercise 20 — Regression gates
 
@@ -381,9 +362,7 @@ case IDs/reasons in bounded test output so one regression cannot be averaged awa
 
 **Why:** Aggregate gates complement, not replace, case-level evidence.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Apply explicit citation-recall, abstention, leakage-zero, and budget thresholds; assert one failing case remains visible even if aggregate averages would otherwise pass.
 
 ### Exercise 21 — Real adapter boundary
 
@@ -396,9 +375,7 @@ as provider-specific evidence.
 
 **Why:** Network, cost, and data authorization require an explicit opt-in gate.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Specify an opt-in environment flag, external credential source, bounded dataset/cost/time, adapter version record, and cleanup; assert the normal test command cannot import/call the hosted adapter.
 
 ### Exercise 22 — Threat model
 
@@ -410,6 +387,4 @@ Explicitly state that deterministic local tests cannot establish absence of unkn
 
 **Why:** Controls reduce specific risks; they do not make a universal safety claim.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Produce residual-risk rows for retrieval poisoning, embedding inversion, memorization, authorization drift, and evaluator blind spots, each with owner, current control, detection evidence, and next action.

@@ -39,6 +39,27 @@ Tests measure maximum active operations and resource events with
 `asyncio.run()`, fakes, and `asyncio.sleep(0)`. They require neither a network
 nor an async test plugin.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+The concurrency helper works with a local coroutine and preserves input order:
+
+```python
+import asyncio
+
+from bridge.solutions.day07_solution import map_bounded
+
+
+async def double(value: int) -> int:
+    await asyncio.sleep(0)
+    return value * 2
+
+
+assert asyncio.run(map_bounded([3, 1, 2], double, limit=2)) == [6, 2, 4]
+```
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs align one-for-one with the learner and guide. The executable
@@ -57,9 +78,7 @@ rollback on failure, re-raise, and await close in `finally`.
 **Why this boundary matters:** Mirror the synchronous state machine with awaited lifecycle
 calls.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert async success events are `acquire, body, commit, close`; failure events are `acquire, body, rollback, close`; all lifecycle calls are awaited and the body error escapes.
 
 ### Exercise 2 — Concurrency
 
@@ -73,9 +92,7 @@ exits.
 **Why this boundary matters:** Associate each task with its original index rather than
 append-on-completion order.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert limits below one raise `ValueError`; with limit two, peak active operations is at most two and returned results remain in input order.
 
 ### Exercise 3 — Testing
 
@@ -88,9 +105,7 @@ zero.
 
 **Why this boundary matters:** Increment before an await point and decrement in `finally`.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Use an active-counter fake guarded by `try/finally`; for limits one, two, and four, assert the recorded peak never exceeds the requested limit and returns to zero.
 
 ### Exercise 4 — Ordering
 
@@ -102,9 +117,7 @@ one-for-one to the original sequence. Indexed storage makes scheduling irrelevan
 
 **Why this boundary matters:** Choose a completion schedule that visibly differs from the input.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Give later inputs shorter completion waits; assert completion log differs from input order while the returned list still matches input order.
 
 ### Exercise 5 — Async SQL
 
@@ -117,9 +130,7 @@ rows to an ID/name mapping, and never interpolate IDs into SQL.
 **Why this boundary matters:** The parameter sequence is a one-element tuple containing the
 list.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inspect one awaited cursor call: SQL contains `customer_id = ANY(%s)`, parameters equal `([id1, id2],)`, and fetched rows map to the expected ID-to-name dictionary.
 
 ### Exercise 6 — Validation
 
@@ -132,9 +143,7 @@ IDs first and raise before execute if any value is non-positive.
 **Why this boundary matters:** Validate the complete collection before the first database
 effect.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert an empty ID sequence returns `{}` with zero cursor calls and any zero/negative ID raises `ValueError` before execute.
 
 ### Exercise 7 — Scale design
 
@@ -148,9 +157,7 @@ active work and task creation.
 **Why this boundary matters:** Separate active-operation bounds from task-count and memory
 bounds.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** For one million inputs, calculate one-million-task semaphore memory versus a fixed worker count; diagram producer, bounded queue, workers, sentinel shutdown, and result policy.
 
 ### Exercise 8 — Cancellation
 
@@ -163,9 +170,7 @@ Cleanup completes (subject to shielding policy), then the original cancellation 
 **Why this boundary matters:** Never translate `CancelledError` into an empty or successful
 result.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Cancel inside the managed body; assert awaited rollback and close finish before `CancelledError` reaches the parent.
 
 ### Exercise 9 — Failure analysis
 
@@ -179,9 +184,7 @@ context.
 **Why this boundary matters:** Structured concurrency cancels siblings and reports grouped
 failures.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Synchronize two child failures, catch the resulting `ExceptionGroup`, and assert both configured exception types are inspectable after sibling cancellation cleanup.
 
 ### Exercise 10 — Empty work
 
@@ -193,9 +196,7 @@ calls and no event loop resources should leak.
 **Why this boundary matters:** An empty collection is a successful no-op, not an invalid
 concurrency request.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Call `map_bounded([], operation, limit=1)`; assert result `[]` and operation call count zero.
 
 ### Exercise 11 — Duplicates
 
@@ -209,9 +210,7 @@ naturally has one value per ID.
 **Why this boundary matters:** Input-order promises and dictionary outputs have different
 duplicate semantics.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Document one duplicate-ID policy and test `[2, 2, 3]` against it, including exact query parameters and returned keys/order.
 
 ### Exercise 12 — Architecture
 
@@ -225,9 +224,7 @@ results for ordering.
 **Why this boundary matters:** Choose based on workload scale rather than treating one pattern
 as universally superior.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Provide a comparison table with task count, peak memory, fairness, cancellation path, ordering policy, and implementation complexity for semaphore and worker-queue designs.
 
 ### Exercise 13 — Database ownership
 
@@ -241,9 +238,7 @@ aligned with the concurrency limit.
 **Why this boundary matters:** Driver concurrency guarantees and transaction scope determine the
 safe choice.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Record resource IDs under concurrent work; assert each worker owns a pool-acquired connection/cursor and no unsafe cursor is entered concurrently.
 
 ### Exercise 14 — Deterministic testing
 
@@ -256,6 +251,4 @@ inspect active counts while blocked, and avoid thresholds tied to machine speed.
 **Why this boundary matters:** Coordinate state transitions directly instead of hoping a
 scheduler runs in time.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Coordinate workers with `Event`/barrier objects, assert peak and order from recorded state, and remove pass/fail dependence on elapsed wall-clock sleep duration.

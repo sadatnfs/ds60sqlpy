@@ -102,18 +102,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: Return customers who have at least one delivered order” at one row at least one delivered order grain. Named evidence columns/objects: `evidence`, `c`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 1, prove uniqueness at one row at least one delivered order grain; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 1: Query writing Prompt: Return customers who have at least one delivered order. Why: EXISTS expresses the yes/no question without multiplying customer rows. Expected: One row per qualifying customer. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-09 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-09 Exercise 1, expected output: One row per qualifying customer. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
+- **Independent verification:** For sql-09 Exercise 1, run an anti-check that counts rows where NOT ((EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.status = 'delivered' ))); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`, and `orders`. Add one row for which `(EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.status = 'delivered' ))` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+- **Intermediate relation check:** For sql-09 Exercise 1, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
+- **Clause check:** For sql-09 Exercise 1, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `customer_id`, and finish with `customer_id`, and `full_name` ordered by `c.customer_id`.
+- **Alternative/trade-off:** For sql-09 Exercise 1, the chosen form is justified by this lesson-specific rationale: `EXISTS` expresses the yes/no question without multiplying customer rows. Evaluate another form against the concrete expected result (One row per qualifying customer) and the verification above.
+- **Edge case:** Add one row for which `(EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.status = 'delivered' ))` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
 ## Exercise 2 — Query writing
 
@@ -149,18 +144,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Return products that have never been sold” at one row per product or product grouping requested. Named evidence columns/objects: `evidence`, `p`, `oi`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 2, prove uniqueness at one row per product or product grouping requested; reconcile the result's row count and any count/sum/amount with a simpler control over `products`, `order_items`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 2: Query writing Prompt: Return products that have never been sold. Why: NOT EXISTS correlates on product ID and is not confused by NULL membership. Expected: One row per unsold product. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-09 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, and `category`; keep `product_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-09 Exercise 2, expected output: One row per unsold product. The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.
+- **Independent verification:** For sql-09 Exercise 2, run an anti-check that counts rows where NOT ((NOT EXISTS ( SELECT 1 FROM order_items AS oi WHERE oi.product_id = p.product_id ))); require unique `product_id` where the expected grain is one row per key and confirm the projected `product_id`, `name`, and `category` against `products`, and `order_items`. Add one row for which `(NOT EXISTS ( SELECT 1 FROM order_items AS oi WHERE oi.product_id = p.product_id ))` is true and one for which it is false; verify only the matching `product_id` value is returned.
+- **Intermediate relation check:** For sql-09 Exercise 2, inspect the source keys that survive `WHERE`; then check `p.product_id` before applying the row cap.
+- **Clause check:** For sql-09 Exercise 2, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, and `order_items`, preserve one row per `product_id`, and finish with `product_id`, `name`, and `category` ordered by `p.product_id`.
+- **Alternative/trade-off:** For sql-09 Exercise 2, the chosen form is justified by this lesson-specific rationale: `NOT EXISTS` correlates on product ID and is not confused by NULL membership. Evaluate another form against the concrete expected result (One row per unsold product) and the verification above.
+- **Edge case:** Add one row for which `(NOT EXISTS ( SELECT 1 FROM order_items AS oi WHERE oi.product_id = p.product_id ))` is true and one for which it is false; verify only the matching `product_id` value is returned.
 
 ## Exercise 3 — Query writing
 
@@ -196,18 +186,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Return each customer's orders that are above that customer's average order total” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `o`, `peer`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 3, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 3: Query writing Prompt: Return each customer's orders that are above that customer's average order total. Why: Correlate the average to the current order's customer, not to the current order ID. Expected: Order rows above their own customer average. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-09 Exercise 3, read from `orders`. Build the answer toward `order_id`, `customer_id`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-09 Exercise 3, expected output: Order rows above their own customer average. The final columns are `order_id`, `customer_id`, and `total_amount`. The final order is `o.customer_id, o.total_amount DESC, o.order_id`.
+- **Independent verification:** For sql-09 Exercise 3, run an anti-check that counts rows where NOT ((o.total_amount > ( SELECT AVG(peer.total_amount) FROM orders AS peer WHERE peer.customer_id = o.customer_id ))); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, and `total_amount` against `orders`. Add one row for which `(o.total_amount > ( SELECT AVG(peer.total_amount) FROM orders AS peer WHERE peer.customer_id = o.customer_id ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
+- **Intermediate relation check:** For sql-09 Exercise 3, inspect the source keys that survive `WHERE`; then check `o.customer_id, o.total_amount DESC, o.order_id` before applying the row cap.
+- **Clause check:** For sql-09 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, and `total_amount` ordered by `o.customer_id, o.total_amount DESC, o.order_id`.
+- **Alternative/trade-off:** For sql-09 Exercise 3, the chosen form is justified by this lesson-specific rationale: Correlate the average to the current order's customer, not to the current order ID. Evaluate another form against the concrete expected result (Order rows above their own customer average) and the verification above.
+- **Edge case:** Add one row for which `(o.total_amount > ( SELECT AVG(peer.total_amount) FROM orders AS peer WHERE peer.customer_id = o.customer_id ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
 ## Exercise 4 — Prediction
 
@@ -242,18 +227,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 4 needs the plan evidence for “Prediction: Explain and avoid the NOT IN plus NULL trap by finding customers without orders using NOT EXISTS”: one plan tree per compared query with node type, estimated rows, actual rows/loops when ANALYZE is used, and buffers or predicate details requested by the prompt. The underlying query must still return one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `c`, `o`, `not`, `exists`.
-- **Independent verification:** For Exercise 4, hold SQL text, parameters, seed data, and settings constant except for the intended change; compare result keys/counts from `customers`, `orders` before interpreting scan/join nodes, estimates, actual rows, loops, and buffers. The executable solution's check is: Exercise 4: Prediction Prompt: Explain and avoid the NOT IN plus NULL trap by finding customers without orders using NOT EXISTS. Why: Correlate on the customer key; a matching row alone determines exclusion. Expected: One row per customer with no order. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-09 Exercise 4, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-09 Exercise 4, expected output: One row per customer with no order. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
+- **Independent verification:** For sql-09 Exercise 4, run an anti-check that counts rows where NOT ((NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id ))); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`, and `orders`. Repeat with `NULL` in `customer_id`, and `full_name` and state whether the row is kept, rejected, or classified.
+- **Intermediate relation check:** For sql-09 Exercise 4, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
+- **Clause check:** For sql-09 Exercise 4, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `customer_id`, and finish with `customer_id`, and `full_name` ordered by `c.customer_id`.
+- **Alternative/trade-off:** For sql-09 Exercise 4, the chosen form is justified by this lesson-specific rationale: Correlate on the customer key; a matching row alone determines exclusion. Evaluate another form against the concrete expected result (One row per customer with no order) and the verification above.
+- **Edge case:** Repeat with `NULL` in `customer_id`, and `full_name` and state whether the row is kept, rejected, or classified.
 
 ## Exercise 5 — Debugging
 
@@ -292,18 +272,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Return only each customer's most recent order without an arbitrary LIMIT 1” at one row at that timestamp grain. Named evidence columns/objects: `evidence`, `o`, `candidate`, `limit`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 5, prove uniqueness at one row at that timestamp grain; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 5: Debugging Prompt: Return only each customer's most recent order without an arbitrary LIMIT 1. Why: Compare to the correlated MAX(orderdate) and break timestamp ties with the maximum ID at that timestamp. Expected: At most one deterministic order per customer. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic. - LIMIT: is applied after ordering and is meaningful only when the query first defines which rows come first.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-09 Exercise 5, read from `orders`. Build the answer toward `order_id`, `customer_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-09 Exercise 5, expected output: At most one deterministic order per customer. The final columns are `order_id`, `customer_id`, and `order_date`. The final order is `o.customer_id`.
+- **Independent verification:** For sql-09 Exercise 5, run an anti-check that counts rows where NOT ((o.order_id = ( SELECT candidate.order_id FROM orders AS candidate WHERE candidate.customer_id = o.customer_id ORDER BY candidate.order_date DESC, candidate.order_id DESC LIMIT 1 ))); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, and `order_date` against `orders`. Add one row for which `(o.order_id = ( SELECT candidate.order_id FROM orders AS candidate WHERE candidate.customer_id = o.customer_id ORDER BY candidate.order_date DESC, candidate.order_id DESC LIMIT 1 ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
+- **Intermediate relation check:** For sql-09 Exercise 5, inspect the source keys that survive `WHERE`; then check `o.customer_id` before applying the row cap.
+- **Clause check:** For sql-09 Exercise 5, the solution actually uses `FROM`, `WHERE`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, and `order_date` ordered by `o.customer_id`.
+- **Alternative/trade-off:** For sql-09 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compare to the correlated `MAX(order_date)` and break timestamp ties with the maximum ID at that timestamp. Evaluate another form against the concrete expected result (At most one deterministic order per customer) and the verification above.
+- **Edge case:** Add one row for which `(o.order_id = ( SELECT candidate.order_id FROM orders AS candidate WHERE candidate.customer_id = o.customer_id ORDER BY candidate.order_date DESC, candidate.order_id DESC LIMIT 1 ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
 ## Exercise 6 — Extension
 
@@ -347,18 +322,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 6 must make “Extension: Return customers for whom every order has at least one payment, excluding customers with no orders” observable through the exact DDL/DML command tag plus one row at least one payment, excluding customers with no orders grain; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `c`, `any_order`, `o`, `p`.
-- **Independent verification:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `c`, `any_order`, `o`, `p`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 6: Extension Prompt: Return customers for whom every order has at least one payment, excluding customers with no orders. Why: Require an order to exist, then prove no order lacks a payment using double NOT EXISTS. Expected: One row per customer satisfying the universal condition. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-09 Exercise 6, read from `customers`, `orders`, and `payments`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-09 Exercise 6, expected output: One row per customer satisfying the universal condition. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
+- **Independent verification:** For sql-09 Exercise 6, run an anti-check that counts rows where NOT ((EXISTS ( SELECT 1 FROM orders AS any_order WHERE any_order.customer_id = c.customer_id ) AND NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND NOT EXISTS ( SELECT 1 FROM payments AS p WHERE p.order_id = o.order_)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`, `orders`, and `payments`. Add one row for which `(EXISTS ( SELECT 1 FROM orders AS any_order WHERE any_order.customer_id = c.customer_id ) AND NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND NOT EXISTS ( SELECT 1 FROM payments AS p WHERE p.order_id = o.order_)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+- **Intermediate relation check:** For sql-09 Exercise 6, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
+- **Clause check:** For sql-09 Exercise 6, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, `orders`, and `payments`, preserve one row per `customer_id`, and finish with `customer_id`, and `full_name` ordered by `c.customer_id`.
+- **Alternative/trade-off:** For sql-09 Exercise 6, the chosen form is justified by this lesson-specific rationale: Require an order to exist, then prove no order lacks a payment using double `NOT EXISTS`. Evaluate another form against the concrete expected result (One row per customer satisfying the universal condition) and the verification above.
+- **Edge case:** Add one row for which `(EXISTS ( SELECT 1 FROM orders AS any_order WHERE any_order.customer_id = c.customer_id ) AND NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND NOT EXISTS ( SELECT 1 FROM payments AS p WHERE p.order_id = o.order_)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
 ## Final self-check
 

@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**objects that keep related state and behavior together**.
+These worked answers demonstrate **objects that keep related state and behavior together**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 A class defines how a family of objects is constructed and behaves; an
 instance is one concrete object. Instance attributes hold per-object
@@ -29,291 +28,171 @@ by each instance.
 - **invariant:** a condition that must remain true for a valid object.
 - **dataclass:** a class whose record-oriented methods are generated from fields.
 
-### Reference pattern 1 — Model a validated record with a computed method
+### How to compare an answer
 
-Keep line-item state and its subtotal behavior together.
+For this lesson's **objects that keep related state and behavior together** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
 
-```python
-from dataclasses import dataclass
+## Exercises 1–2 — Worked answers
 
-@dataclass
-class LineItem:
-    name: str
-    unit_price: float
-    quantity: int = 1
+### Exercise 1 — worked answer
 
-    def __post_init__(self) -> None:
-        if self.unit_price < 0 or self.quantity < 0:
-            raise ValueError("price and quantity must be non-negative")
+**Learner contract:** Create a `BankAccount` class with owner and private-by-convention balance state plus `deposit`, `withdraw`, and `balance` behavior. **Contract:** deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise `ValueError` without changing state. **Verify:** assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus `ValueError` after a zero deposit and an overdraw.
 
-    def subtotal(self) -> float:
-        return self.unit_price * self.quantity
-
-item = LineItem("notebook", 4.5, 3)
-(item, item.subtotal())
-```
-
-**Expected observation:** `LineItem(name='notebook', unit_price=4.5, quantity=3)` and `13.5`. Construction enforces the invariant.
-
-### Reference pattern 2 — Show that fields belong to each instance
-
-Mutating one instance should not alter another independent record.
+**Reasoning:** Implement this exact contract as written: Create a `BankAccount` class with owner and private-by-convention balance state plus `deposit`, `withdraw`, and `balance` behavior. Contract: deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise `ValueError` without changing state. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus `ValueError` after a zero deposit and an overdraw. That connects the answer to objects that keep related state and behavior together.
 
 ```python
-first = LineItem("pen", 1.5, 2)
-second = LineItem("pen", 1.5, 2)
-first.quantity = 5
-(first.quantity, second.quantity, first == second)
+class BankAccount:
+    def __init__(self, owner: str, opening_balance: float = 0.0) -> None:
+        if not owner.strip():
+            raise ValueError("owner must not be blank")
+        if opening_balance < 0:
+            raise ValueError("opening balance must be non-negative")
+        self.owner = owner.strip()
+        self._balance = float(opening_balance)
+
+    @property
+    def balance(self) -> float:
+        return self._balance
+
+    def deposit(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("deposit must be positive")
+        self._balance += amount
+
+    def withdraw(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("withdrawal must be positive")
+        if amount > self._balance:
+            raise ValueError("insufficient funds")
+        self._balance -= amount
+
+
+account = BankAccount("Ada", 10.0)
+account.deposit(5.0)
+assert account.balance == 15.0
+account.withdraw(4.0)
+assert account.balance == 11.0
+
+for invalid_operation in (
+    lambda: account.deposit(0),
+    lambda: account.withdraw(12.0),
+):
+    before = account.balance
+    try:
+        invalid_operation()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid operation should raise ValueError")
+    assert account.balance == before
 ```
 
-**Expected observation:** `(5, 2, False)`. Each instance owns its quantity; dataclass equality compares current field values.
+`_balance` communicates internal state by convention. The property
+allows read access while all mutation passes through validated methods.
 
-## Exercise-by-exercise reasoning map
+**Verification evidence:** assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus `ValueError` after a zero deposit and an overdraw.
 
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
-
-**Learner contract:** Create a `BankAccount` class with owner and private-by-convention balance state plus `deposit`, `withdraw`, and `balance` behavior. **Contract:** deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise `ValueError` without changing state. **Verify:** trace a new account through one deposit, one withdrawal, and two rejected boundary cases.
-
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the objects that keep related state and behavior together model is visible.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.
-
-**Edge case:** Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy.
-
-**Solution evidence to inspect:** trace a new account through one deposit, one withdrawal, and two rejected boundary cases.
-
-### Exercise 2 — reasoning, alternatives, and proof
+### Exercise 2 — worked answer
 
 **Learner contract:** Convert a plain product record to `@dataclass Product(name: str, price: float, quantity: int = 0)`. Add `__post_init__` validation and a `stock_value()` method. **Expected behavior:** `Product('tea', 4.0, 3).stock_value() == 12.0`; negative values raise. **Constraint:** use `field(default_factory=...)` if you add any mutable collection field. **Verify:** Assert `stock_value()` is `12.0`, equality uses field values, and separate negative-price and negative-quantity constructions raise.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies objects that keep related state and behavior together.
+**Reasoning:** Implement this exact contract as written: Convert a plain product record to `@dataclass Product(name: str, price: float, quantity: int = 0)`. Add `__post_init__` validation and a `stock_value()` method. Expected behavior: `Product('tea', 4.0, 3).stock_value() == 12.0`; negative values raise. Constraint: use `field(default_factory=...)` if you add any mutable collection field. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert `stock_value()` is `12.0`, equality uses field values, and separate negative-price and negative-quantity constructions raise. That connects the answer to objects that keep related state and behavior together.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+from dataclasses import dataclass
 
-**Alternative:** A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.
 
-**Edge case:** Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy.
+@dataclass
+class Product:
+    name: str
+    price: float
+    quantity: int = 0
 
-**Solution evidence to inspect:** Assert `stock_value()` is `12.0`, equality uses field values, and separate negative-price and negative-quantity constructions raise.
+    def __post_init__(self) -> None:
+        if not self.name.strip():
+            raise ValueError("name must not be blank")
+        if self.price < 0:
+            raise ValueError("price must be non-negative")
+        if self.quantity < 0:
+            raise ValueError("quantity must be non-negative")
 
-### Exercise 3 — reasoning, alternatives, and proof
+    def stock_value(self) -> float:
+        return self.price * self.quantity
+
+
+tea = Product("tea", 4.0, 3)
+assert tea.stock_value() == 12.0
+assert Product("cup", 2.5).quantity == 0
+
+for arguments in (("tea", -0.01, 1), ("tea", 4.0, -1)):
+    try:
+        Product(*arguments)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"invalid product should fail: {arguments!r}")
+```
+
+No collection field is needed here. If one is added later, use
+`field(default_factory=list)` so instances do not share one mutable
+default.
+
+**Verification evidence:** Assert `stock_value()` is `12.0`, equality uses field values, and separate negative-price and negative-quantity constructions raise.
+
+## Exercises 3–7 — Expanded mastery answers
+
+### Exercise 3 — answer contract
 
 **Learner contract:** **Prediction:** Predict how a class attribute shared by instances differs from an instance attribute assigned through `self`. **Progressive hint:** Class lookup is shared until an instance shadows the name. **Verify:** Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.
 
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying objects that keep related state and behavior together.
+**Reasoning:** Predict this named state change before running it: Prediction: Predict how a class attribute shared by instances differs from an instance attribute assigned through `self`. Progressive hint: Class lookup is shared until an instance shadows the name. Then compare the prediction with this proof target: Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly. This makes objects that keep related state and behavior together observable instead of relying on intuition.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.
 
-**Alternative:** A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.
-
-**Edge case:** Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy.
-
-**Solution evidence to inspect:** Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.
-
-### Exercise 4 — reasoning, alternatives, and proof
+### Exercise 4 — answer contract
 
 **Learner contract:** **Tracing:** Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using `is`. **Progressive hint:** Value equality and identity answer different questions. **Verify:** Assert two equal-field dataclass values satisfy `==` but not `is`; mutate or replace a field and confirm equality changes as expected.
 
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the objects that keep related state and behavior together model is visible.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using `is`. Progressive hint: Value equality and identity answer different questions. Record the named value, shape, label, or iterator position needed to establish: Assert two equal-field dataclass values satisfy `==` but not `is`; mutate or replace a field and confirm equality changes as expected. The trace exposes objects that keep related state and behavior together directly.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert two equal-field dataclass values satisfy `==` but not `is`; mutate or replace a field and confirm equality changes as expected.
 
-**Alternative:** A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.
-
-**Edge case:** Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy.
-
-**Solution evidence to inspect:** Assert two equal-field dataclass values satisfy `==` but not `is`; mutate or replace a field and confirm equality changes as expected.
-
-### Exercise 5 — reasoning, alternatives, and proof
+### Exercise 5 — answer contract
 
 **Learner contract:** **Implementation:** Create immutable `OrderLine` and `Order` dataclasses whose total sums quantity × unit price and applies a validated fractional discount. **Progressive hint:** Validate non-negative values in `__post_init__`. **Verify:** Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies objects that keep related state and behavior together.
+**Reasoning:** Implement this exact contract as written: Implementation: Create immutable `OrderLine` and `Order` dataclasses whose total sums quantity × unit price and applies a validated fractional discount. Progressive hint: Validate non-negative values in `__post_init__`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail. That connects the answer to objects that keep related state and behavior together.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.
 
-**Alternative:** A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.
-
-**Edge case:** Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy.
-
-**Solution evidence to inspect:** Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.
-
-### Exercise 6 — reasoning, alternatives, and proof
+### Exercise 6 — answer contract
 
 **Learner contract:** **Debugging:** Repair a dataclass field declared as `items: list[str] = []`. **Progressive hint:** Use `field(default_factory=list)` to create one list per instance. **Verify:** Create two default instances, mutate one `items` list, and assert the other remains empty and the list objects are not identical.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in objects that keep related state and behavior together.
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a dataclass field declared as `items: list[str] = []`. Progressive hint: Use `field(default_factory=list)` to create one list per instance. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Create two default instances, mutate one `items` list, and assert the other remains empty and the list objects are not identical. The diagnosis depends on objects that keep related state and behavior together.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Create two default instances, mutate one `items` list, and assert the other remains empty and the list objects are not identical.
 
-**Alternative:** A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.
-
-**Edge case:** Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy.
-
-**Solution evidence to inspect:** Create two default instances, mutate one `items` list, and assert the other remains empty and the list objects are not identical.
-
-### Exercise 7 — reasoning, alternatives, and proof
+### Exercise 7 — answer contract
 
 **Learner contract:** **Edge case and explanation:** Decide whether a discount policy should be a subclass of `Order` or a composed callable; justify the dependency direction. **Progressive hint:** A replaceable rule is usually behavior the order uses, not a kind of order. **Verify:** Swap two discount callables without changing `Order`; assert totals follow each policy and explain why composition preserves the dependency direction.
 
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from objects that keep related state and behavior together.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Decide whether a discount policy should be a subclass of `Order` or a composed callable; justify the dependency direction. Progressive hint: A replaceable rule is usually behavior the order uses, not a kind of order. Values below, at, and above the named boundary must produce the evidence Swap two discount callables without changing `Order`; assert totals follow each policy and explain why composition preserves the dependency direction. Those cases show how objects that keep related state and behavior together behaves at its edge.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.
-
-**Edge case:** Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy.
-
-**Solution evidence to inspect:** Swap two discount callables without changing `Order`; assert totals follow each policy and explain why composition preserves the dependency direction.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-We model Orders with dataclasses, compute totals with discounts, and add rich representations and equality.
-
-Contents
-- Exercise 1: Order model with total and discounts
-- Exercise 2: __repr__/__str__ and equality checks
-
----
-
-Exercise 1 — Order model
-```python
-from __future__ import annotations
-from dataclasses import dataclass
-from datetime import date
-from typing import Iterable
-
-@dataclass(frozen=True)
-class OrderItem:
-    sku: str
-    price: float
-    qty: int
-    discount: float = 0.0  # per-item absolute discount
-
-    def total(self) -> float:
-        # price*qty minus discount*qty, not dropping below 0
-        gross = self.price * self.qty
-        net = max(gross - self.discount * self.qty, 0.0)
-        return round(net, 2)
-
-
-@dataclass
-class Order:
-    id: int
-    customer: str
-    placed: date
-    items: list[OrderItem]
-    percent_off: float = 0.0  # order-level percent discount (0..1)
-
-    def subtotal(self) -> float:
-        return round(sum(it.total() for it in self.items), 2)
-
-    def total(self) -> float:
-        sub = self.subtotal()
-        total = sub * (1.0 - self.percent_off)
-        return round(total, 2)
-
-# Demo
-order = Order(
-    id=1, customer="Ada", placed=date(2025,1,1),
-    items=[OrderItem("A", 10.0, 2, discount=1.0), OrderItem("B", 5.0, 1)] ,
-    percent_off=0.10,
-)
-print(order.subtotal(), order.total())  #  (10*2-1*2)+5 = 23 -> 20.7
-```
-Line-by-line
-- OrderItem is frozen (immutable) so it can be safely used in sets/dicts.
-- total clamps at zero to prevent negative totals when discounts exceed price.
-- Order applies an additional percent discount at the order level.
-
-Validation (optional): use __post_init__ to validate fields.
-```python
-@dataclass(frozen=True)
-class OrderItem:
-    sku: str
-    price: float
-    qty: int
-    discount: float = 0.0
-    def __post_init__(self):
-        if self.price < 0 or self.qty < 0 or self.discount < 0:
-            raise ValueError("price/qty/discount must be non-negative")
-```
-
----
-
-Exercise 2 — __repr__/__str__ and equality
-Dataclasses generate nice __repr__ and equality by default. Customize __str__ for user-friendly printing.
-
-```python
-@dataclass
-class Order:
-    id: int
-    customer: str
-    placed: date
-    items: list[OrderItem]
-    percent_off: float = 0.0
-
-    def __str__(self) -> str:
-        return f"Order #{self.id} for {self.customer} on {self.placed:%Y-%m-%d}: total=${self.total():.2f}"
-
-# Equality demo
-o1 = Order(1, "Ada", date(2025,1,1), [OrderItem("A", 10.0, 1)])
-o2 = Order(1, "Ada", date(2025,1,1), [OrderItem("A", 10.0, 1)])
-assert o1 == o2                # dataclass compares field-by-field
-print(str(o1))
-```
-Notes
-- dataclass eq=True by default; set order=True if you want ordering comparisons.
-- For performance and memory, consider slots=True on large models.
-
----
+**Evidence to locate in the grouped implementation:** Swap two discount callables without changing `Order`; assert totals follow each policy and explain why composition preserves the dependency direction.
 
 ## Expanded mastery lab solutions
 
 Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Shared state, equality, and identity
+### Shared implementation for Exercises 3–4 — Shared state, equality, and identity
 
 Class attributes are found through the class and shared by default; assigning
 `self.name` creates/updates an instance attribute. Dataclasses compare declared
 fields by default, so equal values can still be distinct objects.
 
-### Practices 3–5 — Validated value objects and composition
+### Shared implementation for Exercises 5–7 — Validated value objects and composition
 
 ```python
 from dataclasses import dataclass, field

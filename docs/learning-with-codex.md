@@ -80,13 +80,14 @@ Use this sequence with Codex:
 4. Ask for one progressive hint at a time.
 5. Open a **Solution** tab only after the attempt, then explain the difference.
 
-Every Python and SQL companion guide ends with
+Every Python, SQL, and bridge companion guide ends with
 **Ask Codex about this lesson**. That block is not a generic “explain this”
 prompt: it carries the stable lesson ID, exact guide and learner paths,
 prerequisite boundary, topic-specific goals, safe run boundary, no-solutions
 rule, evidence loop, and mastery condition. The rendered reader presents the
-same contract in a dedicated copy panel. Prefer that lesson prompt over
-rewriting file paths and context by hand.
+same contract in a dedicated copy panel, and the `START_HERE.html` lesson
+selector embeds that exact guide-authored prompt as well. Prefer that lesson
+prompt over rewriting file paths and context by hand.
 
 The prompt is intentionally last. Read the definitions, examples, expected
 observations, exercises, and troubleshooting first. If the lesson itself does
@@ -134,8 +135,9 @@ transaction boundary.
 ```
 
 ```text
-Use $guide-ds60sqlpy-learning to start sql-found-01 before SQL Day 1. Make me
-state the grain and invariants before I write DDL.
+Use $guide-ds60sqlpy-learning to start SQL Day 1 as a complete beginner. Teach
+table, row, column, result set, row grain, SELECT, WHERE, and deterministic
+ORDER BY before asking me to write a query.
 ```
 
 ```text

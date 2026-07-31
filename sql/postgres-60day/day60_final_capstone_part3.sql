@@ -135,64 +135,64 @@ EXPLAIN ANALYZE SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 12;
 -- Exercises
 -- 1. Prediction: identify which views are snapshot-independent and which use
 --    CURRENT_DATE/now(), then explain the reproducibility consequence.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-60 Exercise 1, read from the inline `VALUES` fixture. Build the answer toward `object_name`, and `clock_contract`; keep `object_name` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-60 Exercise 1, expected output: one row per `object_name`. The final columns are `object_name`, and `clock_contract`.
+--    Verify: For sql-60 Exercise 1, reselect the returned keys directly from the source; require unique `object_name` where the expected grain is one row per key and confirm the projected `object_name`, and `clock_contract` against the inline `VALUES` fixture. Add one source row with a new `object_name`; verify the result gains exactly one row carrying that `object_name` value.
+--    Hint ladder, rung 1: For sql-60 Exercise 1, select `object_name` from the inline `VALUES` fixture before adding derived columns.
 -- 2. Construction: build a single sign-off query whose rows are named checks
 --    with observed_value, expected_value, pass, severity, and remediation.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-60 Exercise 2, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-60 Exercise 2, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`. The final order is `severity, check_name`.
+--    Verify: For sql-60 Exercise 2, project `order_id` plus the raw source columns from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-60 Exercise 2, run `checks` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 -- 3. Debugging: remove repeated LAG expressions from v_monthly_revenue by using
 --    a second CTE, while preserving the first month's NULL growth rate.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-60 Exercise 3, read from `orders`, and `v_monthly_revenue_refactored_solution`. Build the answer toward `month`, `revenue`, `previous_month`, and `month_over_month_growth`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-60 Exercise 3, expected output: one row per `month`. The final columns are `month`, `revenue`, `previous_month`, and `month_over_month_growth`. The final order is `month`.
+--    Verify: For sql-60 Exercise 3, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month`, `revenue`, `previous_month`, and `month_over_month_growth` against `orders`, and `v_monthly_revenue_refactored_solution`. Repeat with `NULL` in `LAG` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-60 Exercise 3, run `monthly`, and `with_previous` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
 -- 4. Edge case: represent an incomplete current month separately so it is not
 --    compared directly with a complete prior month.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-60 Exercise 4, read from `v_monthly_revenue_refactored_solution`. Build the answer toward `month`, `revenue`, and `is_incomplete_month`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-60 Exercise 4, expected output: one row per `month`. The final columns are `month`, `revenue`, and `is_incomplete_month`. The final order is `month DESC`.
+--    Verify: For sql-60 Exercise 4, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month`, `revenue`, and `is_incomplete_month` against `v_monthly_revenue_refactored_solution`. Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
+--    Hint ladder, rung 1: For sql-60 Exercise 4, check `month DESC` before applying the row cap.
 -- 5. Performance: capture before/after plans in JSON and document plan shape,
 --    estimates, actual rows, buffers, and timing without promising universal gains.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-60 Exercise 5, run the underlying read-only query over `v_monthly_revenue_refactored_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-60 Exercise 5, expected output: at most 12 rows keyed by `plan_node`. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`. The final order is `month DESC`.
+--    Verify: For sql-60 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-60 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows.
 -- 6. Explanation: produce a release checklist covering rollback, ownership,
 --    permissions, refresh cadence, monitoring, data contracts, and known limits.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-60 Exercise 6, read from the inline `VALUES` fixture. Build the answer toward `item`, `evidence`, and `owner`; keep `evidence` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-60 Exercise 6, expected output: one row per `evidence`. The final columns are `item`, `evidence`, and `owner`.
+--    Verify: For sql-60 Exercise 6, reselect the returned keys directly from the source; require unique `evidence` where the expected grain is one row per key and confirm the projected `item`, `evidence`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `evidence`; verify the result gains exactly one row carrying that `evidence` value.
+--    Hint ladder, rung 1: For sql-60 Exercise 6, select `evidence` from the inline `VALUES` fixture before adding derived columns.
 -- 7. Construction: create a lineage table that maps each published metric to
 --    its source tables, transformation grain, and validation query.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-60 Exercise 7, read from the inline `VALUES` fixture. Build the answer toward `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`; keep `metric_name` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-60 Exercise 7, expected output: one row per `metric_name`. The final columns are `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`.
+--    Verify: For sql-60 Exercise 7, reselect the returned keys directly from the source; require unique `metric_name` where the expected grain is one row per key and confirm the projected `metric_name`, `source_tables`, `transformation_grain`, and `validation_query` against the inline `VALUES` fixture. Add one source row with a new `metric_name`; verify the result gains exactly one row carrying that `metric_name` value.
+--    Hint ladder, rung 1: For sql-60 Exercise 7, select `metric_name` from the inline `VALUES` fixture before adding derived columns.
 -- 8. Debugging: prove every dashboard subtotal reconciles to a simpler control
 --    query before approving any performance optimization.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-60 Exercise 8, read from `v_monthly_revenue_refactored_solution`, and `orders`. Compute `dashboard_total`, `source_total`, and `difference` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-60 Exercise 8, expected output: exactly one aggregate summary row. The final columns are `dashboard_total`, `source_total`, and `difference`.
+--    Verify: For sql-60 Exercise 8, evaluate each of `dashboard_total`, and `source_total` in a separate control `SELECT` over `v_monthly_revenue_refactored_solution`, and `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-60 Exercise 8, select `order_id` from `v_monthly_revenue_refactored_solution`, and `orders` before adding derived columns.
 -- 9. Edge case: test empty, one-row, NULL-heavy, and duplicate-key fixtures and
 --    record which assumptions prevent each from reaching production.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-60 Exercise 9, read from `edge_fixture`. Build the answer toward `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`; keep `fixture_rows` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-60 Exercise 9, expected output: one row per `fixture_rows`. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
+--    Verify: For sql-60 Exercise 9, reselect the returned keys directly from the source; require unique `fixture_rows` where the expected grain is one row per key and confirm the projected `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows` against `edge_fixture`. Repeat with `NULL` in `fixture_rows`, and `null_email_rows` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-60 Exercise 9, inspect the source keys that survive `WHERE`.
 -- 10. Final sign-off: return PASS/FAIL/NOT_RUN for every acceptance criterion;
 --     prose alone must never turn an unexecuted check into PASS.
 
 -- When ready to persist created views/indexes, replace ROLLBACK with COMMIT.
---    Inputs: Use only the declared lesson objects (customers, orders, order_items, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-60 Exercise 10, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `criterion`, and `result`; keep `order_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-60 Exercise 10, expected output: one row per `order_id`. The final columns are `criterion`, and `result`. The final order is `criterion`.
+--    Verify: For sql-60 Exercise 10, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `criterion`, and `result` against `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-60 Exercise 10, check `criterion` before applying the row cap.
 ROLLBACK;

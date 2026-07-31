@@ -35,8 +35,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-18/day18_lag_lead.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-18/lesson/workspace/sql/postgres-60day/day18_lag_lead.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -69,8 +69,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Offset, Default value, Calendar spine. Its worked SQL reads or creates `orders`.
+on screen are not automatically stored. The key vocabulary for this lesson is Offset, Default value, Calendar spine. Its worked SQL reads or creates `orders`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -80,7 +79,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: At monthly grain, place revenue beside LAG(revenue) OVER (ORDER BY month). The first row has no predecessor and returns NULL. If a month is absent, the previous row is not necessarily the previous calendar month, so build a month spine before interpreting the difference as month-over-month.
+The worked walkthrough's lesson-specific task is: At monthly grain, place revenue beside LAG(revenue) OVER (ORDER BY month). The first row has no predecessor and returns NULL. If a month is absent, the previous row is not necessarily the previous calendar month, so build a month spine before interpreting the difference as month-over-month.
 The expected contract is that One row per order; first customer order has NULL previous timestamp. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
@@ -122,11 +121,9 @@ ORDER BY customer_id, order_date, order_id
 LIMIT 100;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per order; first customer order has NULL previous timestamp.
+**How to read it:** Example 1: Start with `orders` in `FROM`/`JOIN`; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `customer_id`, `order_id`, `order_date`, `total_amount`, `prev_order_amount`, `delta_from_prev`, and `next_order_amount`. `ORDER BY` determines presentation order and the final `LIMIT 100` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one row per `customer_id`, and `order_id`, capped at 100 rows with columns `customer_id`, `order_id`, `order_date`, `total_amount`, `prev_order_amount`, and `delta_from_prev` from `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -155,11 +152,9 @@ ORDER BY month_utc DESC
 LIMIT 36;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per order; first customer order has NULL previous timestamp.
+**How to read it:** Example 2: Start with `orders` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `month_utc`, `revenue`, `revenue_prev_year`, and `yoy_growth`. `ORDER BY` determines presentation order and the final `LIMIT 36` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one grouped row per `month_utc`, capped at 36 rows with columns `month_utc`, `revenue`, `revenue_prev_year`, and `yoy_growth` from `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -198,28 +193,49 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Show each order with the previous order timestamp for that customer.
    **Progressive hint:** Partition by customer and order by timestamp plus ID.
-   **Expected shape:** One row per order; first customer order has NULL previous timestamp.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-18 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `previous_order_date`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-18 Exercise 1, expected output: One row per order; first customer order has NULL previous timestamp. The final columns are `order_id`, `customer_id`, `order_date`, and `previous_order_date`. The final order is `o.customer_id, o.order_date, o.order_id`.
+   **Verify:** For sql-18 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, and `previous_order_date`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 2. **Query writing:** Calculate days since each customer's previous order.
    **Progressive hint:** Compute lag in a CTE, subtract timestamps, and preserve NULL for first orders.
-   **Expected shape:** One row per order with nullable interval/days.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-18 Exercise 2, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, `previous_order_date`, and `days_since_previous`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-18 Exercise 2, expected output: One row per order with nullable interval/days. The final columns are `order_id`, `customer_id`, `order_date`, `previous_order_date`, and `days_since_previous`. The final order is `customer_id, order_date, order_id`.
+   **Verify:** For sql-18 Exercise 2, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `order_date`, `previous_order_date`, and `days_since_previous` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 3. **Query writing:** Show each promotion with the next promotion start date for the same product.
    **Progressive hint:** Partition by product and define a stable chronological order.
-   **Expected shape:** One row per promotion; last product promotion has NULL next date.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-18 Exercise 3, read from `promotions`. Build the answer toward `promotion_id`, `product_id`, `start_date`, and `next_promotion_start`; keep `promotion_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-18 Exercise 3, expected output: One row per promotion; last product promotion has NULL next date. The final columns are `promotion_id`, `product_id`, `start_date`, and `next_promotion_start`. The final order is `pr.product_id, pr.start_date, pr.promotion_id`.
+   **Verify:** For sql-18 Exercise 3, choose one complete partition from `promotions`; hand-calculate its first, middle, and final window values for `product_id`, `start_date`, and `next_promotion_start`, then verify output keys remain `promotion_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 4. **Prediction:** Identify first rows in each customer partition using a NULL lag without replacing it with a fake date.
    **Progressive hint:** NULL means there is no prior observation; preserve that semantic state.
-   **Expected shape:** One row per customer's first order.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-18 Exercise 4, read from `orders`. Build the answer toward `order_id`, `customer_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-18 Exercise 4, expected output: One row per customer's first order. The final columns are `order_id`, `customer_id`, and `order_date`. The final order is `customer_id`.
+   **Verify:** For sql-18 Exercise 4, run an anti-check that counts rows where NOT ((previous_order_id IS NULL)); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, and `order_date` against `orders`. Repeat with `NULL` in `order_id`, and `customer_id` and state whether the row is kept, rejected, or classified.
 5. **Debugging:** Compute month-over-month stored-revenue change after aggregating to month grain.
    **Progressive hint:** Aggregate first; applying lag to raw orders would compare adjacent orders rather than months.
-   **Expected shape:** One row per month with nullable first change.
-   **Verify:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
+   **Inputs/evidence:** For sql-18 Exercise 5, read from `orders`. Build the answer toward `month_start`, `revenue`, `previous_revenue`, and `revenue_change`; keep `month` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-18 Exercise 5, expected output: One row per month with nullable first change. The final columns are `month_start`, `revenue`, `previous_revenue`, and `revenue_change`. The final order is `month_start`.
+   **Verify:** For sql-18 Exercise 5, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month_start`, `revenue`, `previous_revenue`, and `revenue_change` against `orders`. Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
 6. **Extension:** Compare each product price with the next higher price in its category.
    **Progressive hint:** Use ascending price order and product ID to define adjacency; equal prices remain separate rows.
-   **Expected shape:** One row per product with nullable next price.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-18 Exercise 6, read from `products`. Build the answer toward `product_id`, `category`, `price`, and `next_price`; keep `product_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-18 Exercise 6, expected output: One row per product with nullable next price. The final columns are `product_id`, `category`, `price`, and `next_price`. The final order is `p.category, p.price, p.product_id`.
+   **Verify:** For sql-18 Exercise 6, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `category`, `price`, and `next_price`, then verify output keys remain `product_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+
+## Common mistakes and how to recover
+
+- **Lesson-specific semantic mistake:** Omitting a partition compares unrelated entities; ordering only by a nonunique timestamp makes adjacency ambiguous.
+- **Unexpected row count:** display keys before aggregates, count rows after
+  each join/filter stage, and find the first stage whose grain differs from the
+  contract. Do not hide fanout with `DISTINCT`.
+- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
+  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
+  predicate placement and empty-input aggregate behavior.
+- **Unstable top/first/last output:** add `ORDER BY` with a unique final
+  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
+- **`psql` stops on an error:** fix the first error shown by
+  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
+  complete file. A later successful statement does not validate a partial run.
 
 ## Self-check
 
@@ -272,11 +288,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-18 — Lag Lead.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisite: `sql-17`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day18_lag_lead.md
 - Answer-free learner SQL: sql/postgres-60day/day18_lag_lead.sql
 
-The lesson concepts include Offset, Default value, Calendar spine. First define those terms in plain
+Key terms to teach in context: Offset, Default value, Calendar spine. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -287,11 +303,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-18/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

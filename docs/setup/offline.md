@@ -25,7 +25,7 @@ Run these while connected before relying on the corresponding lessons offline:
 | Seaborn sample datasets | Several data-analysis lessons | Accepted first-run download; Seaborn reuses its local cache afterward |
 | Python packages and platform wheels | Course environment | Installed once by the setup script |
 | PostgreSQL or PostgreSQL container image | SQL track | Runs locally after installation or image pull |
-| JupySQL, pandas, SQLAlchemy, and Psycopg wheels | PostgreSQL notebook bridge | Installed by advanced setup; queries stay local afterward |
+| JupySQL, pandas, SQLAlchemy, and Psycopg wheels | PostgreSQL notebook bridge | Installed by Windows `Core` bootstrap or macOS/Linux advanced setup; queries stay local afterward |
 | torchvision pretrained weights | Transfer-learning lesson | Must already be cached, or use the lesson’s non-pretrained fallback |
 | Hugging Face model/tokenizer | NLP lesson | Must already be cached, or use the local fallback |
 | spaCy language model | NLP lesson | Must be installed while connected, or use `spacy.blank(...)` where the lesson permits |
@@ -43,10 +43,18 @@ External “further reading” links are optional and do not form part of the of
 Windows:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
-.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe scripts\course.py catalog
-.\.venv\Scripts\python.exe scripts\course.py validate
+# Recommended: double-click START_DS60.cmd and approve the connected setup.
+# Manual equivalent:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+& .\scripts\bootstrap_windows.ps1
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\course.py doctor
+& $CoursePython scripts\course.py catalog
+& $CoursePython scripts\course.py validate
 ```
 
 macOS/Linux:
@@ -67,8 +75,13 @@ Disconnect from the network or disable Wi-Fi and start a fresh terminal.
 Windows:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe scripts\course.py validate
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\course.py doctor
+& $CoursePython scripts\course.py validate
 ```
 
 macOS/Linux:

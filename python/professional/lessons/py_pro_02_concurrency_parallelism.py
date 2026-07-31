@@ -7,22 +7,20 @@ Professional learner deep dive (python-pro-02)
 ------------------------------------------------
 
 Mental model:
-Concurrency overlaps work; parallelism executes work simultaneously.
-`asyncio` is effective when many operations spend time awaiting
-nonblocking I/O. Threads can overlap blocking I/O behind a synchronous
-API. Processes bypass the Global Interpreter Lock for CPU-bound Python
-work but require serialization, startup, and platform-safe entry
-points.
-
-Unlimited fan-out converts latency into memory, connection, and rate
-pressure. A production design needs admission bounds, result/error
-accounting, cancellation cleanup, timeouts, ordering semantics, and
-measurement against a sequential baseline.
+Concurrency overlaps work; parallelism executes work simultaneously. `asyncio` is effective when
+many operations spend time awaiting nonblocking I/O. Threads can overlap blocking I/O behind a
+synchronous API. Processes bypass the Global Interpreter Lock for CPU-bound Python work but
+require serialization, startup, and platform-safe entry points.  Unlimited fan-out converts
+latency into memory, connection, and rate pressure. A production design needs admission bounds,
+result/error accounting, cancellation cleanup, timeouts, ordering semantics, and measurement
+against a sequential baseline.
 
 API/boundary anatomy:
-* workload classification: identifies CPU time, blocking/nonblocking I/O, data transfer, and external capacity before selecting a primitive.
+* workload classification: identifies CPU time, blocking/nonblocking I/O, data transfer, and
+  external capacity before selecting a primitive.
 * semaphore/worker queue: bounds active and queued work rather than creating one task per input.
-* structured result: associates each input with success/failure/cancellation so no work disappears.
+* structured result: associates each input with success/failure/cancellation so no work
+  disappears.
 
 Micro-example A — state the execution choice from the blocking behavior::
 
@@ -34,21 +32,22 @@ Micro-example A — state the execution choice from the blocking behavior::
         if waits_blocking:
             return "threads"
         return "processes-or-native-vectorization"
-    
+
     assert choose_execution(waits_nonblocking=True) == "asyncio"
     assert choose_execution(cpu_python=True) == "processes-or-native-vectorization"
 
-Expected: The decision follows where time is spent, not a belief that one primitive is universally faster.
+Expected: The decision follows where time is spent, not a belief that one primitive is
+          universally faster.
 
 Micro-example B — prove an async concurrency ceiling::
 
     import asyncio
-    
+
     async def demo():
         gate = asyncio.Semaphore(2)
         active = 0
         peak = 0
-    
+
         async def work(value):
             nonlocal active, peak
             async with gate:
@@ -57,17 +56,20 @@ Micro-example B — prove an async concurrency ceiling::
                 await asyncio.sleep(0)
                 active -= 1
                 return value * 2
-    
+
         results = await asyncio.gather(*(work(i) for i in range(6)))
         return results, peak
-    
+
     results, peak = asyncio.run(demo())
     print(results, peak)
     assert results == [0, 2, 4, 6, 8, 10] and peak == 2
 
-Expected: All inputs are accounted for while no more than two operations enter the protected section.
+Expected: All inputs are accounted for while no more than two operations enter the protected
+          section.
 
-Debugging rule: Measure sequential and candidate paths, record active/queued counts, per-item results, timeout/cancellation cleanup, serialization size, and platform start method.
+Debugging rule: Measure sequential and candidate paths, record active/queued counts, per-item
+                results, timeout/cancellation cleanup, serialization size, and platform start
+                method.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

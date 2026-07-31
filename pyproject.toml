@@ -83,8 +83,16 @@ sql-notebooks = [
   "sqlalchemy>=2.0.36",
 ]
 deep-learning = [
-  "torch>=2.3",
-  "torchvision>=0.18",
+  # PyTorch stopped publishing Intel macOS wheels after 2.2. The Apple
+  # Silicon pin retains a macOS 13-compatible wheel; newer releases require
+  # macOS 14. Windows and Linux continue to use the current compatible pair.
+  "numpy>=1.26.4,<2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+  "torch==2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+  "torch==2.11.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+  "torch>=2.3; sys_platform != 'darwin'",
+  "torchvision==0.17.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+  "torchvision==0.26.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+  "torchvision>=0.18; sys_platform != 'darwin'",
 ]
 nlp = [
   "accelerate>=1.0",

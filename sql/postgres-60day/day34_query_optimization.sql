@@ -46,38 +46,38 @@ GROUP BY p.category;
 
 -- Exercises
 -- 1. Replace subqueries with joins and compare plans.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-34 Exercise 1, run the underlying read-only query over `orders`, `order_items`, and `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-34 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, and `order_date`.
+--    Verify: For sql-34 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-34 Exercise 1, start with the first relation in `orders`, `order_items`, and `products`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
 -- 2. Limit rows as early as possible and compare performance.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-34 Exercise 2, run the underlying read-only query over `orders`, `customers`, and `top_orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-34 Exercise 2, expected output: at most 100 rows keyed by `order_id`. The final columns are `order_id`, `order_date`, and `country`. The final order is `t.order_date DESC, t.order_id DESC`.
+--    Verify: For sql-34 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-34 Exercise 2, start with the first relation in `orders`, `customers`, and `top_orders`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
 -- 3. Prediction: compare a MATERIALIZED CTE with NOT MATERIALIZED for a recent
 --    orders query. Predict which version permits more planner reordering.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-34 Exercise 3, run the underlying read-only query over `orders`, `recent`, and `customers` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-34 Exercise 3, expected output: one row per `order_id`. The final columns are `materialized`.
+--    Verify: For sql-34 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-34 Exercise 3, start with the first relation in `orders`, `recent`, and `customers`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
 -- 4. Construction: pre-aggregate order_items to one row per order before
 --    joining orders and customers; verify that totals match the direct join.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-34 Exercise 4, read from `order_items`, `orders`, and `customers`. Build the answer toward `country`, and `units`; keep `country` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-34 Exercise 4, expected output: one row per order before customer/country joins. The final columns are `country`, and `units`. The final order is `c.country`.
+--    Verify: For sql-34 Exercise 4, independently aggregate `order_items`, `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `units` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `units` for the existing `country` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-34 Exercise 4, run `item_totals` one at a time. Record each CTE's row count and `country` uniqueness before the next stage uses it.
 -- 5. Debugging: repair a query that joins orders and payments before
 --    order_items and therefore multiplies both payment and line-item amounts.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-34 Exercise 5, read from `payments`, `order_items`, and `orders`. Build the answer toward `order_id`, `paid_amount`, and `line_revenue`; keep `order_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-34 Exercise 5, expected output: at most 20 rows keyed by `order_id`. The final columns are `order_id`, `paid_amount`, and `line_revenue`. The final order is `o.order_id`.
+--    Verify: For sql-34 Exercise 5, assert no more than 20 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `payments`, `order_items`, and `orders` to confirm `order_id`, `paid_amount`, and `line_revenue` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_id`.
+--    Hint ladder, rung 1: For sql-34 Exercise 5, run `paid`, and `sold` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 -- 6. Edge case: replace NOT IN with NOT EXISTS for an anti-join and explain how
 --    a NULL in the subquery changes NOT IN semantics.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-34 Exercise 6, read from `customers`, and `orders`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-34 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_id`. The final order is `c.customer_id`.
+--    Verify: For sql-34 Exercise 6, run an anti-check that counts rows where NOT ((NOT EXISTS ( SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id ))); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Repeat with `NULL` in `customer_id` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-34 Exercise 6, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
 
 ROLLBACK;

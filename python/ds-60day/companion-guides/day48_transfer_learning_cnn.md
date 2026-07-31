@@ -195,31 +195,15 @@ assert transformed.shape == image.shape
 
 1. Load a small image folder with `ImageFolder` and `DataLoader`.
 
-**Verify:** For task `Load a small image folder with ImageFolder and DataLoader`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
+**Verify:** Practice 1 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
 
 2. Train only the classifier head for a few epochs.
 
-**Verify:** For task `Train only the classifier head for a few epochs`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Practice 2 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
 
 3. Unfreeze the final ResNet block and fine-tune it with a lower learning rate.
 
-**Verify:** For task `Unfreeze the final ResNet block and fine-tune it with a lower learning rate`, demonstrate the concrete requirement “3. Unfreeze the final ResNet block and fine-tune it with a lower learning rate” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Practice 3 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
 
 ### Progressive hints
 
@@ -244,39 +228,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Transform mismatch diagnosis:** Compare predictions when validation images use the training transform with random crop/flip versus a deterministic validation transform. Explain the metric instability.
    **Progressive hint:** Augmentation belongs to training. Validation should apply deterministic resize/crop and the normalization expected by the selected weights.
 
-**Verify:** For task `Transform mismatch diagnosis: Compare predictions when validation images use the training tra...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Transform mismatch diagnosis — evaluate the same validation images repeatedly under random training transforms and deterministic validation transforms; print prediction variance and metric samples, and assert the deterministic path is repeatable.
 
 5. **Frozen-state edge case:** Freeze a pretrained backbone containing BatchNorm. Explain the difference between `requires_grad=False` and putting frozen modules in evaluation mode.
    **Progressive hint:** requires_grad controls parameter gradients; train/eval controls BatchNorm running statistics and Dropout behavior.
 
-**Verify:** For task `Frozen-state edge case: Freeze a pretrained backbone containing BatchNorm. Explain the differ...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Frozen-state edge case — print every requires_grad flag and BatchNorm training flag/running-stat checksum before/after an epoch; assert frozen weights do not change and document whether frozen BatchNorm statistics remain fixed.
 
 6. **Offline fallback design:** Make the lesson runnable when pretrained weights are not cached. Detect cache availability, offer an explicit connected preload step, and provide a tiny randomly initialized CNN smoke path.
    **Progressive hint:** Never trigger an undocumented download. Report whether results use pretrained or random weights because their learning goals differ.
 
-**Verify:** For task `Offline fallback design: Make the lesson runnable when pretrained weights are not cached. Det...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Offline fallback design — print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -322,10 +287,12 @@ Emphasize offline-safe transfer learning, frozen parameters, and cautious fine-t
 - guide: `python/ds-60day/companion-guides/day48_transfer_learning_cnn.md`
 - learner artifact: `python/ds-60day/notebooks/day48_transfer_learning_cnn.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-47`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

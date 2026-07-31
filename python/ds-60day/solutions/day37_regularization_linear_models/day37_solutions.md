@@ -22,7 +22,7 @@ X, y = load_diabetes(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
 ```
 
-Exercise 1 — Alpha sweep
+Worked reference for Exercise 1 — Alpha sweep
 ```python
 alphas = np.logspace(-3, 2, 10)  # 0.001..100
 ridge_scores, lasso_scores = [], []
@@ -43,7 +43,7 @@ Notes
 
 ---
 
-Exercise 2 — Coefficients and sparsity
+Worked reference for Exercise 2 — Coefficients and sparsity
 ```python
 best_ridge = Pipeline([('sc', StandardScaler()), ('m', Ridge(alpha=1.0))]).fit(Xtr, ytr)
 best_lasso = Pipeline([('sc', StandardScaler()), ('m', Lasso(alpha=0.01, max_iter=20000))]).fit(Xtr, ytr)
@@ -60,7 +60,7 @@ Interpretation
 
 ---
 
-Exercise 3 — ElasticNet
+Worked reference for Exercise 3 — ElasticNet
 ```python
 enet = Pipeline([('sc', StandardScaler()), ('m', ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=20000))])
 s = cross_val_score(enet, X, y, cv=5).mean()
@@ -109,7 +109,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Sweep `alpha` values and plot validation scores for Ridge and Lasso.
 
@@ -119,16 +119,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Sweep alpha values and plot validation scores for Ridge and Lasso`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — regularization strength, coefficient shrinkage, sparsity, and stability — evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Inspect fitted coefficients and compare their sparsity. The separate solution also demonstrates Elastic Net as a useful extension.
 
@@ -138,14 +131,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Inspect fitted coefficients and compare their sparsity. The separate solution also demonstrat...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
-
+**Verify:** Practice 2 — regularization strength, coefficient shrinkage, sparsity, and stability — print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
 
 ### Exercise 3 — Prediction
 
@@ -166,14 +152,7 @@ rather than assuming every implementation uses the same objective.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Prediction — print Ridge coefficients, intercept, and training error for alpha near 0, 1, and 1e6; verify slopes shrink toward zero, the unpenalized intercept remains free, and training error does not improve as the penalty dominates.
 
 ### Exercise 4 — Elastic Net implementation
 
@@ -212,14 +191,7 @@ than presenting zeros as automatic feature discovery.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Build a scaled ElasticNetCV pipeline, state what alpha and l1ratio control, and inspect both...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Elastic Net implementation — print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.
 
 ### Exercise 5 — Scaling bug
 
@@ -241,14 +213,7 @@ their standardized unit.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Exp...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Scaling bug — fit the same Lasso problem before/after scaling, print feature scales and original-unit coefficients, and show the scaled pipeline removes unit-dependent penalty unfairness while producing finite validation metrics.
 
 ### Exercise 6 — Stability investigation
 
@@ -269,4 +234,4 @@ importance.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Create two highly correlated predictors, refit Lasso across several bootstrap samples, and co...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+**Verify:** Stability investigation — over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.

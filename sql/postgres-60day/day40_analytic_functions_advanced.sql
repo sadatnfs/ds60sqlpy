@@ -64,38 +64,38 @@ ORDER BY revenue DESC;
 
 -- Exercises
 -- 1. Compute z-score for daily revenue: (rev - avg15)/sd15.
---    Inputs: Use only the declared lesson objects (orders, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-40 Exercise 1, read from `orders`. Compute `order_day`, `revenue`, `avg15`, `sd15`, and `z_score` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-40 Exercise 1, expected output: one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it. The final columns are `order_day`, `revenue`, `avg15`, `sd15`, and `z_score`. The final order is `order_day`.
+--    Verify: For sql-40 Exercise 1, evaluate each of `order_day`, `revenue`, `sd15`, and `z_score` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
+--    Hint ladder, rung 1: For sql-40 Exercise 1, run `daily`, and `rolling` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
 -- 2. For each category, compute P50 and P90 of order totals.
---    Inputs: Use only the declared lesson objects (orders, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-40 Exercise 2, read from `order_items`, and `products`. Compute `category`, `p50_order_value`, `p90_order_value`, and `category_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-40 Exercise 2, expected output: one row per sold category. `PERCENTILE_CONT` can interpolate between observed values, so a percentile need not equal an actual order value. The final columns are `category`, `p50_order_value`, `p90_order_value`, and `category_orders`. The final order is `category`.
+--    Verify: For sql-40 Exercise 2, evaluate each of `p50_order_value`, `p90_order_value`, and `category_orders` in a separate control `SELECT` over `order_items`, and `products`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `p50_order_value`, `p90_order_value`, and `category_orders` for the existing `category` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-40 Exercise 2, run `category_order_values` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
 -- 3. Prediction: compare percentile_disc(0.5) with percentile_cont(0.5) for
 --    the values (10, 20, 100, 200). Predict both medians before running.
---    Inputs: Use only the declared lesson objects (orders, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-40 Exercise 3, read from the inline `VALUES` fixture. Build the answer toward `discrete_median`, and `continuous_median`; keep `discrete_median` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-40 Exercise 3, expected output: one row per `discrete_median`. The final columns are `discrete_median`, and `continuous_median`.
+--    Verify: For sql-40 Exercise 3, reselect the returned keys directly from the source; require unique `discrete_median` where the expected grain is one row per key and confirm the projected `discrete_median`, and `continuous_median` against the inline `VALUES` fixture. Add one source row with a new `discrete_median`; verify the result gains exactly one row carrying that `discrete_median` value.
+--    Hint ladder, rung 1: For sql-40 Exercise 3, select `discrete_median` from the inline `VALUES` fixture before adding derived columns.
 -- 4. Construction: calculate each category's revenue share within its month,
 --    with a deterministic rank for equal revenue.
---    Inputs: Use only the declared lesson objects (orders, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-40 Exercise 4, read from `orders`, `order_items`, and `products`. Build the answer toward `month`, `category`, `revenue`, `month_share`, and `category_rank`; keep `month`, and `category` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-40 Exercise 4, expected output: one row per `month`, and `category`. The final columns are `month`, `category`, `revenue`, `month_share`, and `category_rank`. The final order is `month DESC, category_rank`.
+--    Verify: For sql-40 Exercise 4, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, `month_share`, and `category_rank`, then verify output keys remain `month`, and `category`. Give two rows the same `month DESC` value and different `category_rank` values; verify `month DESC, category_rank` produces the intended rank and display order.
+--    Hint ladder, rung 1: For sql-40 Exercise 4, run `category_month` one at a time. Record each CTE's row count and `month`, and `category` uniqueness before the next stage uses it.
 -- 5. Debugging: repair a rolling average that includes the current row when the
 --    intended forecast must use only prior observations.
---    Inputs: Use only the declared lesson objects (orders, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-40 Exercise 5, read from `orders`. Build the answer toward `day`, `revenue`, and `prior_seven_forecast`; keep `day` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-40 Exercise 5, expected output: at most 20 rows keyed by `day`. The final columns are `day`, `revenue`, and `prior_seven_forecast`. The final order is `day DESC`.
+--    Verify: For sql-40 Exercise 5, assert no more than 20 rows, no duplicate `day`, and no adjacent pair that violates `day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, and `prior_seven_forecast` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.
+--    Hint ladder, rung 1: For sql-40 Exercise 5, run `daily` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
 -- 6. Edge case: compute a z-score for a constant three-row series and preserve
 --    NULL when standard deviation is zero.
---    Inputs: Use only the declared lesson objects (orders, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-40 Exercise 6, read from `constant`. Build the answer toward `value`, and `z_score`; keep `value` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-40 Exercise 6, expected output: one row per `value`. The final columns are `value`, and `z_score`.
+--    Verify: For sql-40 Exercise 6, reselect the returned keys directly from the source; require unique `value` where the expected grain is one row per key and confirm the projected `value`, and `z_score` against `constant`. Repeat with `NULL` in `value`, and `z_score` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-40 Exercise 6, run `moments` one at a time. Record each CTE's row count and `value` uniqueness before the next stage uses it.
 
 ROLLBACK;

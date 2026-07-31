@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 18 (`python-18`): typed, cleaned DataFrames and missing-value rules.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -290,7 +286,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-19`
-(Day 19 — GroupBy, Aggregation, Pivoting, and Melting). I am a complete beginner. Emphasize split-apply-combine, grouped summaries, and reshaping.
+(Day 19 — GroupBy, Aggregation, Pivoting, and Melting). Direct catalog prerequisites: `python-18`.
+I have completed the direct prerequisites: `python-18`. Emphasize split-apply-combine, grouped summaries, and reshaping.
 Read `python/ds-60day/companion-guides/day19_pandas_groupby_pivot.md` and use the learner notebook
 `python/ds-60day/notebooks/day19_pandas_groupby_pivot.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

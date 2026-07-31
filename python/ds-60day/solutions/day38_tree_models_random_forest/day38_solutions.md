@@ -21,7 +21,7 @@ X, y = load_breast_cancer(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
 ```
 
-Exercise 1 — Depth vs accuracy
+Worked reference for Exercise 1 — Depth vs accuracy
 ```python
 depths = [1, 2, 3, 4, 6, 8, None]
 accs = []
@@ -36,19 +36,19 @@ Interpretation
 
 Random forest baseline
 ```python
-rf = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=-1, random_state=42)
+rf = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, random_state=42)
 rf.fit(Xtr, ytr)
 rf_acc = rf.score(Xte, yte)
 rf_acc
 ```
 
-Exercise 2 — Feature importances (impurity vs permutation)
+Worked reference for Exercise 2 — Feature importances (impurity vs permutation)
 ```python
 # Impurity-based (built-in)
 impurity_imp = rf.feature_importances_
 
 # Permutation-based (on held-out data)
-perm = permutation_importance(rf, Xte, yte, n_repeats=10, random_state=42, n_jobs=-1)
+perm = permutation_importance(rf, Xte, yte, n_repeats=10, random_state=42, n_jobs=1)
 perm_imp = perm.importances_mean
 
 # Compare top features
@@ -66,6 +66,8 @@ Takeaways
 - Control overfitting via max_depth/min_samples_leaf and validate choices
 
 ---
+
+**Portable worker default:** These reference runs use `n_jobs=1` so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming `n_jobs=1` is faster.
 
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
@@ -104,7 +106,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Plot tree depth versus accuracy.
 
@@ -114,16 +116,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Plot tree depth versus accuracy`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Practice 1 — tree splits, ensemble variance reduction, and held-out importance — for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Inspect feature importances and discuss their reliability.
 
@@ -133,14 +128,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Inspect feature importances and discuss their reliability`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Practice 2 — tree splits, ensemble variance reduction, and held-out importance — report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
 
 ### Exercise 3 — Pruning implementation
 
@@ -161,14 +149,7 @@ alpha grid provides the cleanest evaluation.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Use a decision tree's cost-complexity pruning path to evaluate candidate ccpalpha values with...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Pruning implementation — print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.
 
 ### Exercise 4 — Out-of-bag reasoning
 
@@ -188,14 +169,7 @@ average them into one reassuring number; investigate the boundary mismatch.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Enable oobscore=True in a RandomForestClassifier and compare the out-of-bag estimate with hel...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
-
-
+**Verify:** Out-of-bag reasoning — print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.
 
 ### Exercise 5 — Imbalance debugging
 
@@ -214,14 +188,7 @@ oversample or compute weights using the final holdout labels.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision,...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Imbalance debugging — on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.
 
 ### Exercise 6 — Correlated-importance edge case
 
@@ -242,4 +209,4 @@ intervened upon.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Duplicate one informative feature, refit the forest, and observe how impurity and single-feat...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+**Verify:** Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.

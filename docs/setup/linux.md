@@ -22,7 +22,7 @@ If your distribution does not provide Python 3.12, use a current vendor package 
 ## 2. Clone and open the repository
 
 ```bash
-git clone <repository-url> ds60sqlpy
+git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
 cd ds60sqlpy
 code .
 test -f README.md
@@ -100,6 +100,17 @@ Docker-based automation uses PostgreSQL 17 and avoids host authentication differ
 
 ## 5. Start learning
 
+For the guided dashboard, file-backed progress, and exact VS Code/Jupyter
+lesson actions, start the private loopback portal and keep its terminal open:
+
+```bash
+.venv/bin/python scripts/learning_portal.py
+```
+
+The browser page clearly identifies private launcher mode. If you instead open
+`START_HERE.html` directly, it is a read-only course navigator; it cannot start
+local programs.
+
 Python:
 
 ```bash
@@ -111,6 +122,11 @@ SQL:
 ```bash
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
 ```
+
+In private launcher mode, the recommended SQL route is to open the Day 1
+reader and choose **Create/open guided SQL notebook**. That creates a preserved,
+ignored working copy under `.learning/sql/sql-01/` and runs the complete script
+through a fixed `psql -f` path.
 
 For `%sql` and `%%sql` in the course kernel, continue with
 [PostgreSQL in Jupyter](jupyter-postgresql.md).

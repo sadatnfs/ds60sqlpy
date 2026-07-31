@@ -224,31 +224,15 @@ assert all(results.values())
 
 1. Write the problem statement and success metric in the notebook.
 
-**Verify:** For task `Write the problem statement and success metric in the notebook`, demonstrate the concrete requirement “1. Write the problem statement and success metric in the notebook” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 1 — capstone scope, decision framing, data contracts, and early stop rules — write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
 
 2. Create the project skeleton.
 
-**Verify:** For task `Create the project skeleton`, demonstrate the concrete requirement “2. Create the project skeleton” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 2 — capstone scope, decision framing, data contracts, and early stop rules — create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
 
 3. Build a baseline and record metrics.
 
-**Verify:** For task `Build a baseline and record metrics`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** Practice 3 — capstone scope, decision framing, data contracts, and early stop rules — save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
 
 ### Progressive hints
 
@@ -272,39 +256,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Scope and stop rules:** Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum baseline value.
    **Progressive hint:** Time-box discovery and name the evidence that triggers pivot, pause, or stop. Do not make deployment the default capstone requirement.
 
-**Verify:** For task `Scope and stop rules: Write must-have, should-have, and out-of-scope lists plus kill criteria...`, demonstrate the concrete requirement “4. Scope and stop rules: Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum base” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Scope and stop rules — deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.
 
 5. **Capstone data contract:** Create a versioned schema and quality report for your chosen local dataset, including source/license, row unit, target, types, ranges, missingness, duplicates, split keys, and fingerprint.
    **Progressive hint:** Use a tiny valid fixture and deliberately invalid fixture to test the validator.
 
-**Verify:** For task `Capstone data contract: Create a versioned schema and quality report for your chosen local da...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Capstone data contract — validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.
 
 6. **Decision log:** Record at least five project decisions with date, question, alternatives, evidence, chosen action, consequences, and revisit trigger.
    **Progressive hint:** Include split/metric/baseline choices, not only model hyperparameters. Link each result to a reproducible command or notebook cell.
 
-**Verify:** For task `Decision log: Record at least five project decisions with date, question, alternatives, evide...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
+**Verify:** Decision log — record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -346,10 +311,12 @@ Emphasize capstone scope, decision framing, data contracts, and early stop rules
 - guide: `python/ds-60day/companion-guides/day59_capstone_kickoff.md`
 - learner artifact: `python/ds-60day/notebooks/day59_capstone_kickoff.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-58`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

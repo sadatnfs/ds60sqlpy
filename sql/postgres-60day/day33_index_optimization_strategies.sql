@@ -50,39 +50,39 @@ WHERE oi.order_id IN (
 
 -- Exercises
 -- 1. Add a composite index for (category, created_at) on products and test.
---    Inputs: Use only the declared lesson objects (orders, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-33 Exercise 1, run the underlying read-only query over `products`, `training.idx_products_category_created_solution`, and `idx_products_category_created_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-33 Exercise 1, expected output: one row per `product_id`. The final columns are `product_id`, `name`, and `created_at`. The final order is `created_at DESC`.
+--    Verify: For sql-33 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-33 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `product_id` rows.
 -- 2. Create a partial index for high-value orders (total_amount > 1000) and test.
---    Inputs: Use only the declared lesson objects (orders, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-33 Exercise 2, run the underlying read-only query over `orders`, `training.idx_orders_high_value_solution`, and `idx_orders_high_value_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-33 Exercise 2, expected output: one row per `order_id`. The final columns are `order_id`, `total_amount`, and `order_date`. The final order is `total_amount DESC`.
+--    Verify: For sql-33 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-33 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
 -- 3. Prediction: test the composite product index with created_at alone. Explain
 --    why the leftmost category column affects how useful the index can be.
---    Inputs: Use only the declared lesson objects (orders, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-33 Exercise 3, run the underlying read-only query over `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-33 Exercise 3, expected output: one row per `product_id`. The final columns are `product_id`, and `created_at`.
+--    Verify: For sql-33 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-33 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `product_id` rows.
 -- 4. Construction: build an INCLUDE index for a customer order-history query
 --    that returns order_id, order_date, status, and total_amount.
---    Inputs: Use only the declared lesson objects (orders, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-33 Exercise 4, run the underlying read-only query over `orders`, and `idx_orders_history_cover_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-33 Exercise 4, expected output: one row per `order_id`. The final columns are `order_id`, `order_date`, `status`, and `total_amount`. The final order is `order_date DESC`.
+--    Verify: For sql-33 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-33 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
 -- 5. Debugging: write a query whose WHERE clause does not imply the partial
 --    index predicate. Compare it with a query that does and explain eligibility
 --    separately from the planner's final cost choice.
---    Inputs: Use only the declared lesson objects (orders, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-33 Exercise 5, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-33 Exercise 5, expected output: one row per `order_id`. The final columns are `order_id`.
+--    Verify: For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
 -- 6. Edge case: query a nullable column (customers.segment) with IS NULL and
 --    discuss whether a partial index for only NULL rows would be worthwhile.
---    Inputs: Use only the declared lesson objects (orders, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-33 Exercise 6, run the underlying read-only query over `customers`, `idx_customers_null_segment_solution`, and `customers.segment` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-33 Exercise 6, expected output: one row per `customer_id`. The final columns are `all_customers`, and `null_segments`.
+--    Verify: For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.
 
 ROLLBACK;

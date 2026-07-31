@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 10 (`python-10`): tests, exceptions, importable utilities.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -201,10 +197,8 @@ import timeit
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-
 def unique_count(values: list[int]) -> int:
     return len(set(values))
-
 
 values = list(range(1_000))
 logger.info("benchmarking unique_count count=%d", len(values))
@@ -223,7 +217,7 @@ result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
 1. Start from a supplied failing function and use `breakpoint()` or the VS Code debugger to pause immediately before the wrong value is produced. **Evidence:** record the call arguments, two relevant local variables, and the branch taken. **Constraint:** do not change logic until you can state one falsifiable hypothesis.
-   **Verify:** after the fix, rerun the original failing input and one nearby passing input.
+   **Verify:** record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.
 
 2. Add module-level logging with `logging.getLogger(__name__)` and emit useful DEBUG/INFO/WARNING events for a small processing function. **Constraints:** use lazy `%s`/`%d` formatting, do not call `basicConfig` inside reusable library logic, and log counts/identifiers rather than sensitive record contents.
    **Verify:** demonstrate that changing the configured level changes visibility without changing the returned value.
@@ -295,7 +289,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-11`
-(Day 11 — Debugging, Logging, and Profiling). I am a complete beginner. Emphasize evidence-driven debugging, useful logs, and measurement before optimization.
+(Day 11 — Debugging, Logging, and Profiling). Direct catalog prerequisites: `python-10`.
+I have completed the direct prerequisites: `python-10`. Emphasize evidence-driven debugging, useful logs, and measurement before optimization.
 Read `python/ds-60day/companion-guides/day11_debug_logging_profiling.md` and use the learner notebook
 `python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

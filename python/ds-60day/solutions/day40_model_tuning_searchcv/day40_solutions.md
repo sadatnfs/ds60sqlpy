@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Exercise 1 — GridSearchCV + Pipeline (SVC)
+Worked reference for Exercise 1 — GridSearchCV + Pipeline (SVC)
 ```python
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.pipeline import Pipeline
@@ -31,7 +31,7 @@ param_grid = {
 }
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
-search = GridSearchCV(pipe, param_grid, cv=cv, scoring='roc_auc', n_jobs=-1, refit=True)
+search = GridSearchCV(pipe, param_grid, cv=cv, scoring='roc_auc', n_jobs=1, refit=True)
 search.fit(X, y)
 search.best_params_, search.best_score_
 ```
@@ -42,7 +42,7 @@ Line-by-line
 
 ---
 
-Exercise 2 — RandomizedSearchCV
+Worked reference for Exercise 2 — RandomizedSearchCV
 ```python
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import loguniform
@@ -54,7 +54,7 @@ param_dist = {
 }
 
 rand = RandomizedSearchCV(pipe, param_distributions=param_dist, n_iter=20,
-                          cv=cv, scoring='roc_auc', n_jobs=-1, random_state=0, refit=True)
+                          cv=cv, scoring='roc_auc', n_jobs=1, random_state=0, refit=True)
 rand.fit(X, y)
 rand.best_params_, rand.best_score_
 ```
@@ -64,7 +64,7 @@ Notes
 
 ---
 
-Exercise 3 — Nested CV (sketch)
+Worked reference for Exercise 3 — Nested CV (sketch)
 ```python
 from sklearn.model_selection import cross_val_score
 
@@ -72,8 +72,8 @@ from sklearn.model_selection import cross_val_score
 inner = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
 outer = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
 
-inner_search = GridSearchCV(pipe, param_grid, cv=inner, scoring='roc_auc', n_jobs=-1)
-outer_scores = cross_val_score(inner_search, X, y, cv=outer, scoring='roc_auc', n_jobs=-1)
+inner_search = GridSearchCV(pipe, param_grid, cv=inner, scoring='roc_auc', n_jobs=1)
+outer_scores = cross_val_score(inner_search, X, y, cv=outer, scoring='roc_auc', n_jobs=1)
 {'outer_auc_mean': outer_scores.mean(), 'outer_auc_std': outer_scores.std()}
 ```
 Takeaways
@@ -82,6 +82,8 @@ Takeaways
 - Pick metrics aligned with the problem and validate on held-out data
 
 ---
+
+**Portable worker default:** These reference runs use `n_jobs=1` so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming `n_jobs=1` is faster.
 
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
@@ -120,7 +122,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Use `RandomizedSearchCV` with a wider parameter space.
 
@@ -130,16 +132,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Use RandomizedSearchCV with a wider parameter space`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+**Verify:** Practice 1 — hyperparameter search spaces, fit budgets, and nested evaluation — declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Implement nested cross-validation and compare its result with the non-nested search score.
 
@@ -149,14 +144,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Implement nested cross-validation and compare its result with the non-nested search score`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Practice 2 — hyperparameter search spaces, fit budgets, and nested evaluation — print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
 
 ### Exercise 3 — Search-budget calculation
 
@@ -176,14 +164,7 @@ pilot before launching the full budget, especially on Windows laptops.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candida...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Search-budget calculation — show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.
 
 ### Exercise 4 — Multi-metric selection
 
@@ -224,14 +205,7 @@ looks best after the run.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refi...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Multi-metric selection — configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.
 
 ### Exercise 5 — Results-table diagnosis
 
@@ -251,14 +225,7 @@ as evidence instead of retaining only `best_params_`.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Turn cvresults into a tidy table containing parameters, mean and standard deviation of train/...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Results-table diagnosis — emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.
 
 ### Exercise 6 — Reproducibility debugging
 
@@ -279,4 +246,4 @@ partition.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `A randomized search produces different winners on repeated runs. List every random source and...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Reproducibility debugging — run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.

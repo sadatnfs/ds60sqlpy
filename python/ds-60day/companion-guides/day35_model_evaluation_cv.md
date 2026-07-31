@@ -203,31 +203,15 @@ print("all validation groups were unseen during training")
 
 1. Evaluate the pipeline with `accuracy`, `f1`, and `roc_auc`.
 
-**Verify:** For task `Evaluate the pipeline with accuracy, f1, and rocauc`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 1 — metrics, resampling design, and honest generalization estimates — on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores—not hard labels—for ROC AUC.
 
 2. Compare the variability from 5-fold and 10-fold cross-validation.
 
-**Verify:** For task `Compare the variability from 5-fold and 10-fold cross-validation`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Practice 2 — metrics, resampling design, and honest generalization estimates — use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.
 
 3. Explain leakage risks and how placing preprocessing in a pipeline helps.
 
-**Verify:** For task `Explain leakage risks and how placing preprocessing in a pipeline helps`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Practice 3 — metrics, resampling design, and honest generalization estimates — show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
 
 ### Progressive hints
 
@@ -248,39 +232,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Threshold analysis:** Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged.
    **Progressive hint:** A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.
 
-**Verify:** For task `Threshold analysis: Using one fixed validation score vector, compare confusion matrices at th...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Threshold analysis — for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.
 
 5. **Grouped resampling:** Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.
    **Progressive hint:** Use `StratifiedGroupKFold` when both label balance and entity separation matter; assert that train and validation group sets are disjoint.
 
-**Verify:** For task `Grouped resampling: Design cross-validation for repeated measurements from the same patient o...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Grouped resampling — print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.
 
 6. **Selection-bias debugging:** Explain why reporting `GridSearchCV.best_score_` as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model.
    **Progressive hint:** The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.
 
-**Verify:** For task `Selection-bias debugging: Explain why reporting GridSearchCV.bestscore as final performance i...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
+**Verify:** Selection-bias debugging — print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model's out-of-fold predictions do not evaluate the selection procedure.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -327,10 +292,12 @@ Emphasize metrics, resampling design, and honest generalization estimates. Use e
 - guide: `python/ds-60day/companion-guides/day35_model_evaluation_cv.md`
 - learner artifact: `python/ds-60day/notebooks/day35_model_evaluation_cv.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-34`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

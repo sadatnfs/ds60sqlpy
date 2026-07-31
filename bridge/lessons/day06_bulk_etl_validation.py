@@ -83,44 +83,78 @@ def load_sales(cursor: BulkCursor, sales: Sequence[Sale]) -> int:
 # 1. [Validation] Implement `parse_sale()` for non-blank source ID, positive integer customer
 #    ID, finite positive amount, and ISO date without mutating input.
 #    Hint: Convert each field explicitly and translate only expected conversion failures.
+#    Verify: Parse one valid mapping and compare exact typed fields; assert blank source ID,
+#    non-positive/non-integer customer ID, non-finite/non-positive amount, and bad ISO date
+#    raise `RowValidationError`, and the input mapping is unchanged.
 # 2. [Money] Quantize accepted amounts to two decimals and document the chosen rounding rule.
 #    Hint: Quantization is a domain decision, not merely display formatting.
+#    Verify: Check amounts with more than two places and a halfway value; assert the exact
+#    two-place `Decimal` results under the documented rounding mode, not merely formatted
+#    strings.
 # 3. [Partitioning] Implement `partition_rows()` so accepted sales and rejected source
 #    IDs/reasons retain input order without storing full raw rows.
 #    Hint: Catch only `RowValidationError` from the conversion boundary.
+#    Verify: Feed valid-invalid-valid rows; assert accepted sales and rejection `(source_id,
+#    reason)` records preserve input order and no rejected object stores the complete raw
+#    mapping.
 # 4. [Batching] Implement `batches()` with positive-size validation and tests for empty, exact,
 #    and remainder cases.
 #    Hint: Slice deterministic tuples from the original sequence.
+#    Verify: Assert `batches([], 2) == []`, exact division has no empty tail, a remainder
+#    becomes the last tuple, and sizes `0`/negative raise `ValueError`.
 # 5. [Bulk SQL] Implement a parameterized `executemany()` upsert into `pg_temp.bridge_sales`
 #    with no values in SQL text.
 #    Hint: Convert typed sales to one parameter tuple per row.
+#    Verify: Inspect one `executemany` call: SQL contains placeholders and the upsert clause,
+#    every sale value exists only in parameter rows, and empty input makes no driver call.
 # 6. [Accounting] Track accepted, rejected, submitted, inserted, and updated counts separately
 #    and state what `executemany()` cannot cheaply distinguish.
 #    Hint: Do not infer business outcomes from submitted row count.
+#    Verify: For a mixed fixture, report separate accepted, rejected, and submitted counts;
+#    label inserted/updated as unknown unless returned/reconciled database evidence
+#    distinguishes them.
 # 7. [Extension] Design the Psycopg COPY variant using typed `write_row()` calls and a staging
 #    table instead of hand-built delimited text.
 #    Hint: COPY handles transport; a later set-based statement owns merge semantics.
+#    Verify: Provide a COPY design that calls typed `write_row` into a staging table, validates
+#    staging rows, and performs one set-based merge without constructing delimited text.
 # 8. [Edge cases] Test NaN, infinities, zero, negatives, whitespace IDs, leading-zero customer
 #    IDs, and invalid dates.
 #    Hint: Classify each rejection at the field boundary and keep its reason safe.
+#    Verify: Parameterize `NaN`, both infinities, zero, negative amount, blank ID, leading-zero
+#    customer ID, and invalid dates; compare exact acceptance or `RowValidationError` outcome.
 # 9. [Idempotency] Choose a policy for duplicate `source_id` values within one input batch and
 #    test it before database submission.
 #    Hint: Database upsert resolves persisted conflicts but may hide contradictory source rows.
+#    Verify: Choose reject-first, reject-all, or deterministic-last-wins for duplicate
+#    `source_id`; assert the chosen result is decided before `executemany` and documented in
+#    counts.
 # 10. [Scale design] Compare materializing all accepted rows with a streaming validator and
 #    identify where bounded memory changes APIs.
 #    Hint: A tuple return is convenient for lessons but not for unlimited sources.
+#    Verify: Compare peak retained rows for materialized and streaming designs; the streaming
+#    API must emit bounded batches/rejections without requiring the entire input sequence.
 # 11. [Capacity] Select batch size from parameter count, row width, memory, and transaction
 #    duration rather than a universal constant.
 #    Hint: Measure the real adapter and keep a safe configurable default.
+#    Verify: Show a batch-size calculation using parameter count, row width, memory budget, and
+#    transaction-duration target; assert the selected size stays below every stated limit.
 # 12. [Transaction failure] Specify behavior when `executemany()` fails halfway and identify
 #    which layer owns rollback and retry.
 #    Hint: Submission count is not committed count.
+#    Verify: Inject a mid-load driver failure; assert the transaction owner rolls back the
+#    complete unit, the loader does not claim partial success, and retry starts from a defined
+#    boundary.
 # 13. [Observability] Create a bounded rejection taxonomy and metrics that do not use source IDs
 #    or raw reasons as tags.
 #    Hint: Metric labels must come from a fixed vocabulary.
+#    Verify: Inspect metrics for a fixed rejection-reason enum and bounded outcome tags; assert
+#    no source ID, raw reason text, or complete rejected row appears as a tag.
 # 14. [Reconciliation] Design a replay test that loads the same accepted sales twice and
 #    reconciles source IDs and total amount.
 #    Hint: Idempotency is proven by stable final state, not by absence of exceptions.
+#    Verify: Load the accepted fixture twice under the declared upsert policy; reconcile the
+#    same source-ID set and exact total amount after both runs with no duplicate logical sale.
 
 
 def main() -> int:

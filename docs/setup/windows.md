@@ -90,7 +90,7 @@ found, open VS Code from the Start menu and use **File → Open Folder** instead
 Choose a normal user-owned folder. Paths containing spaces are supported.
 
 ```powershell
-git clone <repository-url> ds60sqlpy
+git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
 Set-Location .\ds60sqlpy
 code .
 ```

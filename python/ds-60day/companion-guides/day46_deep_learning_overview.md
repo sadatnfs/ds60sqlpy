@@ -196,31 +196,15 @@ assert (first, accumulated, cleared) == (4.0, 8.0, 0.0)
 
 1. Plot the loss over epochs.
 
-**Verify:** For task `Plot the loss over epochs`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check.
-
-
-
-
-
+**Verify:** Practice 1 — tensors, computation graphs, gradients, and the optimizer cycle — save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
 
 2. Replace SGD with Adam and compare convergence.
 
-**Verify:** For task `Replace SGD with Adam and compare convergence`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 2 — tensors, computation graphs, gradients, and the optimizer cycle — from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
 
 3. Add one hidden layer and a ReLU activation.
 
-**Verify:** For task `Add one hidden layer and a ReLU activation`, demonstrate the concrete requirement “3. Add one hidden layer and a ReLU activation” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Practice 3 — tensors, computation graphs, gradients, and the optimizer cycle — assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
 
 ### Progressive hints
 
@@ -245,39 +229,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Autograd tracing:** For one scalar regression batch, annotate every line from `zero_grad()` through `step()`: which tensors receive gradients, when are they accumulated, and when do parameters change?
    **Progressive hint:** Gradients accumulate in parameter `.grad` fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.
 
-**Verify:** For task `Autograd tracing: For one scalar regression batch, annotate every line from zerograd() throug...`, demonstrate the concrete requirement “4. Autograd tracing: For one scalar regression batch, annotate every line from zero grad through step : which tensors receive gradients, when are they accumulated, and when do para” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Autograd tracing — print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.
 
 5. **Mode debugging:** Build a model with Dropout and BatchNorm, then compare repeated predictions in `train()` and `eval()` modes. Explain why `torch.no_grad()` is related but not interchangeable.
    **Progressive hint:** Mode changes module behavior; no_grad disables graph recording. Validation usually needs both `model.eval()` and `with torch.no_grad()`.
 
-**Verify:** For task `Mode debugging: Build a model with Dropout and BatchNorm, then compare repeated predictions i...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Mode debugging — for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.
 
 6. **Loss-aggregation edge case:** Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.
    **Progressive hint:** Multiply each mean batch loss by batch size, sum, then divide by the number of examples.
 
-**Verify:** For task `Loss-aggregation edge case: Compare averaging per-batch losses with a sample-weighted epoch l...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Loss-aggregation edge case — with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -324,10 +289,12 @@ Emphasize tensors, computation graphs, gradients, and the optimizer cycle. Use e
 - guide: `python/ds-60day/companion-guides/day46_deep_learning_overview.md`
 - learner artifact: `python/ds-60day/notebooks/day46_deep_learning_overview.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-45`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

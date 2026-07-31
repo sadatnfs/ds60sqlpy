@@ -87,18 +87,13 @@ different bytes.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 1 must make “Manifest: return versions 1–5 once and in order with stable metadata” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `sm`, `api`, `sr`, `pro_migration_lab.service_requests`.
-- **Independent verification:** For Exercise 1, inspect the relevant `pg_catalog` or `information_schema` rows for `sm`, `api`, `sr`, `pro_migration_lab.service_requests`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 1: deterministic metadata manifest.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-found-02 Exercise 1, read from `pro_migration_lab.schema_migrations`. Build the answer toward `migration_id`, `migration_name`, and `content_tag`; keep `migration_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-found-02 Exercise 1, expected output: one row per `migration_id`. The final columns are `migration_id`, `migration_name`, and `content_tag`. The final order is `sm.migration_id`.
+- **Independent verification:** For sql-found-02 Exercise 1, run an anti-check that counts rows where NOT ((sm.migration_id BETWEEN 1 AND 5)); require unique `migration_id` where the expected grain is one row per key and confirm the projected `migration_id`, `migration_name`, and `content_tag` against `pro_migration_lab.schema_migrations`. Add one row for which `(sm.migration_id BETWEEN 1 AND 5)` is true and one for which it is false; verify only the matching `migration_id` value is returned.
+- **Intermediate relation check:** For sql-found-02 Exercise 1, inspect the source keys that survive `WHERE`; then check `sm.migration_id` before applying the row cap.
+- **Clause check:** For sql-found-02 Exercise 1, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pro_migration_lab.schema_migrations`, preserve one row per `migration_id`, and finish with `migration_id`, `migration_name`, and `content_tag` ordered by `sm.migration_id`.
+- **Alternative/trade-off:** For sql-found-02 Exercise 1, the chosen form is justified by this lesson-specific rationale: The manifest must order by version explicitly: The solution also compares `array_agg(. Evaluate another form against the concrete expected result (one row per `migration_id`) and the verification above.
+- **Edge case:** Add one row for which `(sm.migration_id BETWEEN 1 AND 5)` is true and one for which it is false; verify only the matching `migration_id` value is returned.
 
 ## Exercise 2 — Compatibility and deployment order
 
@@ -122,18 +117,13 @@ evidence. The tiny fixture proves logic, not production timing.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 2 must make “Compatibility: explain the version-2 view and order schema, reader, writer, backfill, validation, and contract deployments” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement.
-- **Independent verification:** For Exercise 2, inspect the relevant `pg_catalog` or `information_schema` rows for `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, `pro_migration_lab.service_requests_api`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 2: compatibility is demonstrated above: the stable API query still has its original interface while migrations 6-8 evolve only storage.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-found-02 Exercise 2, complete the compatibility written analysis and support its claims with read-only evidence from `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-found-02 Exercise 2, expected output: a completed the compatibility written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `urgency_label`, and `priority_code`.
+- **Independent verification:** For sql-found-02 Exercise 2, check the compatibility written analysis against `urgency_label`, and `priority_code`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-found-02 Exercise 2, check the compatibility written analysis against `urgency_label`, and `priority_code`.
+- **Clause check:** For sql-found-02 Exercise 2, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-found-02 Exercise 2, the chosen form is justified by this lesson-specific rationale: At version 2, old storage remains in `urgency_label`, the new `priority_code` is nullable, and the view returns `COALESCE(priority_code, urgency_label)`. Evaluate another form against the concrete expected result (a completed the compatibility written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 3 — Versions 6–8
 
@@ -154,18 +144,13 @@ inserted last in each transaction so a failed body cannot advertise success.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Forward series: design versions 6–8 for assignedteam as separate expand, backfill, and contract steps” at one result row per key or group explicitly named in the prompt. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 3, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, `pro_migration_lab.service_requests_api`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-found-02 Exercise 3, complete the forward series written analysis and support its claims with read-only evidence from `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-found-02 Exercise 3, expected output: a completed the forward series written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `assigned_team`, `high`, `critical`, `response`, and `general`.
+- **Independent verification:** For sql-found-02 Exercise 3, check the forward series written analysis against `assigned_team`, `high`, `critical`, `response`, and `general`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-found-02 Exercise 3, check the forward series written analysis against `assigned_team`, `high`, `critical`, `response`, and `general`.
+- **Clause check:** For sql-found-02 Exercise 3, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-found-02 Exercise 3, the chosen form is justified by this lesson-specific rationale: The solution uses three separate transactions: - Version 6 adds nullable `assigned_team`. Evaluate another form against the concrete expected result (a completed the forward series written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 4 — Boundaries and recovery
 
@@ -189,18 +174,13 @@ is an evidence-based incident decision, not a filename convention.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 4 needs a labeled transaction/session transcript that demonstrates “Runner boundaries: identify nontransactional operations and explain why lossy changes do not have universal “down” migrations”. Capture statement order, affected keys/counts, lock or snapshot state, and the expected SQLSTATE when an error is part of the exercise; finish with no open lesson transaction or leftover shared fixture. Named evidence columns/objects: `CONCURRENTLY`.
-- **Independent verification:** For Exercise 4, replay the written Session A/Session B order against `advanced_sql_training`, compare the observed values/SQLSTATE with the prediction, then query/drop the disposable fixture and confirm neither session retains a transaction or lock. The executable solution's check is: Exercise 4: CREATE DATABASE, VACUUM, and CREATE INDEX CONCURRENTLY need a runner-managed nontransactional boundary. Lossy recovery is a restore or forward-fix decision, not an automatic down-file convention.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-found-02 Exercise 4, change only `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_class` rows.
+- **Expected result/shape:** For sql-found-02 Exercise 4, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `vacuum`, and `update`.
+- **Independent verification:** For sql-found-02 Exercise 4, inspect `pg_catalog.pg_class` for `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+- **Intermediate relation check:** For sql-found-02 Exercise 4, inspect `pg_catalog.pg_class` for `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
+- **Clause check:** For sql-found-02 Exercise 4, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-found-02 Exercise 4, the chosen form is justified by this lesson-specific rationale: Examples that require an explicit nontransactional boundary include: - `CREATE DATABASE` - `VACUUM` - `CREATE INDEX CONCURRENTLY` A capable runner marks and executes such a step deliberately; it does not wrap e. Evaluate another form against the concrete expected result (the requested DDL command tag plus catalog rows and one accepted and one rejected behavior) and the verification above.
+- **Edge case:** Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 
 ## Exercise 5 — Retry after uncertain completion
 
@@ -217,18 +197,13 @@ error.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Interrupted retry: make version 6 recoverable after an uncertain client disconnect, while detecting rather than concealing incompatible drift” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `sm`, `manifest_matches`, `c`, `schema_matches`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 5, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `pro_migration_lab.schema_migrations`, `information_schema.columns`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 5: classify retry state before doing anything. Only (manifest present + exact observed contract) is safely "already applied"; every partial or incompatible state must stop for investigation.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-found-02 Exercise 5, read from `pro_migration_lab.schema_migrations`, and `information_schema.columns`. Compute `manifest_matches`, and `schema_matches` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-found-02 Exercise 5, expected output: exactly one aggregate summary row. The final columns are `manifest_matches`, and `schema_matches`.
+- **Independent verification:** For sql-found-02 Exercise 5, evaluate each of `manifest_matches`, and `schema_matches` in a separate control `SELECT` over `pro_migration_lab.schema_migrations`, and `information_schema.columns`; require one final row and compare every value. Add one source row with a new `version`; verify the result gains exactly one row carrying that `version` value.
+- **Intermediate relation check:** For sql-found-02 Exercise 5, inspect the source keys that survive `WHERE`.
+- **Clause check:** For sql-found-02 Exercise 5, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `pro_migration_lab.schema_migrations`, and `information_schema.columns`, preserve exactly one summary row, and finish with `manifest_matches`, and `schema_matches`.
+- **Alternative/trade-off:** For sql-found-02 Exercise 5, the chosen form is justified by this lesson-specific rationale: Serialize the runner, begin a transaction, lock/read the manifest row, and compare both recorded checksum and observed schema precondition. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
+- **Edge case:** Add one source row with a new `version`; verify the result gains exactly one row carrying that `version` value.
 
 ## Exercise 6 — Low-lock index and constraint rollout
 
@@ -244,18 +219,13 @@ abort thresholds, and postcondition queries.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 6 needs a labeled transaction/session transcript that demonstrates “Low-lock rollout: mark boundaries and evidence for concurrent index creation and NOT VALID/VALIDATE CONSTRAINT”. Capture statement order, affected keys/counts, lock or snapshot state, and the expected SQLSTATE when an error is part of the exercise; finish with no open lesson transaction or leftover shared fixture. Named evidence columns/objects: `not`, `valid`, `validate`, `constraint`, `CONCURRENTLY`.
-- **Independent verification:** For Exercise 6, replay the written Session A/Session B order against `advanced_sql_training`, compare the observed values/SQLSTATE with the prediction, then query/drop the disposable fixture and confirm neither session retains a transaction or lock. The executable solution's check is: Exercise 6: these reviewed templates are intentionally not executed in this fixture because CREATE INDEX CONCURRENTLY cannot run in a transaction: CREATE INDEX CONCURRENTLY servicerequeststeamidx ON promigrationlab.servicerequests (assignedteam); A low-lock CHECK rollout uses ADD ... NOT VALID, remediation, and a separate VALIDATE CONSTRAINT step with timeouts and monitoring.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** An alternative physical/object design is valid only if catalog inspection and valid/invalid behavior prove the same invariant.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-found-02 Exercise 6, change only `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_constraint` rows.
+- **Expected result/shape:** For sql-found-02 Exercise 6, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `object_name`, `catalog_definition`, `accepted_case`, and `rejected_sqlstate`.
+- **Independent verification:** For sql-found-02 Exercise 6, inspect `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_constraint` for `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+- **Intermediate relation check:** For sql-found-02 Exercise 6, inspect `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_constraint` for `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
+- **Clause check:** For sql-found-02 Exercise 6, the solution actually uses `WITH`. Read only those operations: begin at `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`, preserve one row per `version`, and finish with `object_name`, `catalog_definition`, `accepted_case`, and `rejected_sqlstate`.
+- **Alternative/trade-off:** For sql-found-02 Exercise 6, the chosen form is justified by this lesson-specific rationale: `CREATE INDEX CONCURRENTLY` must run outside a transaction block and can leave an invalid index after interruption. Evaluate another form against the concrete expected result (the requested DDL command tag plus catalog rows and one accepted and one rejected behavior) and the verification above.
+- **Edge case:** Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 
 ## Exercise 7 — Semantic drift report
 
@@ -271,18 +241,13 @@ contract unless they are deliberately contractual.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 7 needs the plan evidence for “Drift report: compare expected and observed columns, constraints, and indexes; label missing, unexpected, and changed objects deterministically”: one plan tree per compared query with node type, estimated rows, actual rows/loops when ANALYZE is used, and buffers or predicate details requested by the prompt. The underlying query must still return one catalog/behavior check per object or invariant. Named evidence columns/objects: `c`, `column_name`, `drift_status`, `e`, `o`.
-- **Independent verification:** For Exercise 7, hold SQL text, parameters, seed data, and settings constant except for the intended change; compare result keys/counts from `information_schema.columns` before interpreting scan/join nodes, estimates, actual rows, loops, and buffers. The executable solution's check is: Exercise 7: a compact expected-versus-observed column drift report. Production contracts should extend this pattern to defaults, constraints, and indexes.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-found-02 Exercise 7, read from `information_schema.columns`, `expected`, and `pg_get_expr`. Build the answer toward `column_name`; keep `column_name` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-found-02 Exercise 7, expected output: one row per `column_name`. The final columns are `column_name`. The final order is `column_name`.
+- **Independent verification:** For sql-found-02 Exercise 7, project `column_name` plus the raw source columns from `information_schema.columns`, `expected`, and `pg_get_expr` at each join stage; record row count and distinct `column_name`, then assert the final `column_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `column_name`; verify the result gains exactly one row carrying that `column_name` value.
+- **Intermediate relation check:** For sql-found-02 Exercise 7, run `observed` one at a time. Record each CTE's row count and `column_name` uniqueness before the next stage uses it.
+- **Clause check:** For sql-found-02 Exercise 7, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `information_schema.columns`, `expected`, and `pg_get_expr`, preserve one row per `column_name`, and finish with `column_name` ordered by `column_name`.
+- **Alternative/trade-off:** For sql-found-02 Exercise 7, the chosen form is justified by this lesson-specific rationale: Build expected rows with stable identities such as `(schema, table, column, ordinal)` and compare them to catalog-derived observed rows using full joins or `EXCEPT` in both directions. Evaluate another form against the concrete expected result (one row per `column_name`) and the verification above.
+- **Edge case:** Add one source row with a new `column_name`; verify the result gains exactly one row carrying that `column_name` value.
 
 ## Exercise 8 — Phase-specific recovery
 
@@ -298,18 +263,13 @@ occurred unless their data path is explicitly reversible and verified.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 8 returns a table-shaped answer to “Failed deployment: write phase-specific compatibility, pause, restore, reconciliation, and decision evidence for recovery” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `recovery`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 8, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, `pro_migration_lab.service_requests_api`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 8: recovery is phase-specific; this deterministic matrix is a runbook skeleton, not permission to mutate a real environment.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-found-02 Exercise 8, use the inline `VALUES` fixture in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+- **Expected result/shape:** For sql-found-02 Exercise 8, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`. The final order is `phase`.
+- **Independent verification:** For sql-found-02 Exercise 8, restore into an isolated target and reconcile the inline `VALUES` fixture using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+- **Intermediate relation check:** For sql-found-02 Exercise 8, restore into an isolated target and reconcile the inline `VALUES` fixture using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
+- **Clause check:** For sql-found-02 Exercise 8, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `artifact_name` and `restored_object`, and finish with `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status` ordered by `phase`.
+- **Alternative/trade-off:** For sql-found-02 Exercise 8, the chosen form is justified by this lesson-specific rationale: During expand, old code should still work; recovery may be a forward fix while the additive object remains. Evaluate another form against the concrete expected result (a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record) and the verification above.
+- **Edge case:** Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
 
 ## Edge cases and alternatives
 

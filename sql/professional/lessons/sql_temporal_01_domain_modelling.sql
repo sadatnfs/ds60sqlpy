@@ -352,77 +352,77 @@ ORDER BY rr.record_key;
 --
 -- 1. Add a retroactive valid-time correction recorded April 1. Query the value
 --    valid February 15 as known March 15 versus as known April 2.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-temporal-01 Exercise 1, complete the retroactive correction written analysis and support its claims with read-only evidence from `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-temporal-01 Exercise 1, expected output: a completed the retroactive correction written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Verify: For sql-temporal-01 Exercise 1, check the retroactive correction written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 1, check the retroactive correction written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
 -- 2. Test facts exactly at every valid/system upper boundary. Prove [lower,upper)
 --    gives at most one current match.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-temporal-01 Exercise 2, read from `pro_temporal_lab.facts`. Build the answer toward `valid_on`, `known_at`, and `matching_versions`; keep `valid_on`, and `known_at` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-temporal-01 Exercise 2, expected output: one row per `valid_on`, and `known_at`. The final columns are `valid_on`, `known_at`, and `matching_versions`. The final order is `probe.valid_on`.
+--    Verify: For sql-temporal-01 Exercise 2, independently aggregate `pro_temporal_lab.facts` by `valid_on`, and `known_at`; require one output row for every distinct `valid_on`, and `known_at` tuple and compare `matching_versions` tuple by tuple. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 2, start with the first relation in `pro_temporal_lab.facts`; after each join, record total rows and distinct `valid_on`, and `known_at` so the exact fanout or loss is visible.
 -- 3. If btree_gist is already approved in an isolated environment, write (do
 --    not run here) an exclusion constraint for customer_key equality and current
 --    valid-period overlap. Compare it with the advisory-lock trigger fallback.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-temporal-01 Exercise 3, complete the overlap enforcement written analysis and support its claims with read-only evidence from `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-temporal-01 Exercise 3, expected output: a completed the overlap enforcement written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `btree_gist`, `customer_key`, and `valid_period`.
+--    Verify: For sql-temporal-01 Exercise 3, check the overlap enforcement written analysis against `btree_gist`, `customer_key`, and `valid_period`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 3, check the overlap enforcement written analysis against `btree_gist`, `customer_key`, and `valid_period`.
 -- 4. Add a correction ledger entry that reverses LEDGER-101 without updating
 --    history. Verify idempotency keys and reversal references.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-temporal-01 Exercise 4, read the target keys from `pro_temporal_lab.ledger` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+--    Expected result/shape: For sql-temporal-01 Exercise 4, expected output: the command tag and an independently counted set of affected `entry_id` values. The final columns are `entry_id`. The final order is `l.entry_id`.
+--    Verify: For sql-temporal-01 Exercise 4, materialize the intended `entry_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_temporal_lab.ledger` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `entry_id` values in both cases.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 4, materialize the intended `entry_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_temporal_lab.ledger` again and prove rollback or idempotent retry.
 -- 5. Add a retention exception/hold release workflow with approver, reason,
 --    decision time, and immutable audit. Do not auto-delete fixture rows.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-temporal-01 Exercise 5, read the target keys from `pro_temporal_lab.retention_decisions`, `pro_temporal_lab.facts`, and `pro_temporal_lab.ledger` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+--    Expected result/shape: For sql-temporal-01 Exercise 5, expected output: the command tag and an independently counted set of affected `affected_row_count` values. The final columns are `affected_row_count`, and `command_tag`.
+--    Verify: For sql-temporal-01 Exercise 5, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_temporal_lab.retention_decisions`, `pro_temporal_lab.facts`, and `pro_temporal_lab.ledger` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 5, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_temporal_lab.retention_decisions`, `pro_temporal_lab.facts`, and `pro_temporal_lab.ledger` again and prove rollback or idempotent retry.
 -- 6. State domain assumptions: time zone, clock authority, late arrival,
 --    overlap/gap policy, deletion/anonymization, ledger meaning, and who may
 --    correct system history.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-temporal-01 Exercise 6, complete the assumption register written analysis and support its claims with read-only evidence from `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-temporal-01 Exercise 6, expected output: a completed the assumption register written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Verify: For sql-temporal-01 Exercise 6, check the assumption register written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 6, check the assumption register written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
 -- 7. Model a local-time business rule across a daylight-saving transition.
 --    Store the source zone and UTC instant, test ambiguous/nonexistent local
 --    times, and explain why a bare timestamp or fixed UTC offset is insufficient.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-temporal-01 Exercise 7, read from the inline `VALUES` fixture. Build the answer toward `local_time`, `zone_name`, and `interpreted_instant`; keep `zone_name` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-temporal-01 Exercise 7, expected output: one row per `zone_name`. The final columns are `local_time`, `zone_name`, and `interpreted_instant`. The final order is `local_time`.
+--    Verify: For sql-temporal-01 Exercise 7, reselect the returned keys directly from the source; require unique `zone_name` where the expected grain is one row per key and confirm the projected `local_time`, `zone_name`, and `interpreted_instant` against the inline `VALUES` fixture. Add one source row with a new `zone_name`; verify the result gains exactly one row carrying that `zone_name` value.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 7, check `local_time` before applying the row cap.
 -- 8. Distinguish event time, ingestion time, and processing time for late data.
 --    Define a watermark and allowed lateness, then show how a late event changes
 --    a previously published aggregate and how the correction is communicated.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-temporal-01 Exercise 8, read from `pro_temporal_lab.timed_events`. Build the answer toward `maximum_event_time`, `example_watermark`, and `maximum_arrival_delay`; keep `example_watermark` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-temporal-01 Exercise 8, expected output: one row per `example_watermark`. The final columns are `maximum_event_time`, `example_watermark`, and `maximum_arrival_delay`.
+--    Verify: For sql-temporal-01 Exercise 8, reselect the returned keys directly from the source; require unique `example_watermark` where the expected grain is one row per key and confirm the projected `maximum_event_time`, `example_watermark`, and `maximum_arrival_delay` against `pro_temporal_lab.timed_events`. Add one source row with a new `example_watermark`; verify the result gains exactly one row carrying that `example_watermark` value.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 8, select `example_watermark` from `pro_temporal_lab.timed_events` before adding derived columns.
 -- 9. Implement a Type-2 dimension as-of join with surrogate key, business key,
 --    effective half-open range, current marker, and correction metadata. Prove
 --    every fact resolves to at most one dimension row.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-temporal-01 Exercise 9, read from `pro_temporal_lab.customer_dimension`. Build the answer toward `order_key`, `ordered_on`, `customer_version_id`, and `segment`; keep `customer_version_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-temporal-01 Exercise 9, expected output: one row per `customer_version_id`. The final columns are `order_key`, `ordered_on`, `customer_version_id`, and `segment`. The final order is `order_fact.order_key`.
+--    Verify: For sql-temporal-01 Exercise 9, project `customer_version_id` plus the raw source columns from `pro_temporal_lab.customer_dimension` at each join stage; record row count and distinct `customer_version_id`, then assert the final `order_key`, `ordered_on`, `customer_version_id`, and `segment` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 9, start with the first relation in `pro_temporal_lab.customer_dimension`; after each join, record total rows and distinct `customer_version_id` so the exact fanout or loss is visible.
 -- 10. Design temporal referential integrity when a child period must be
 --     contained by a parent period. Compare trigger/exclusion approaches,
 --     concurrency locking, deferred validation, and repair of historical gaps.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-temporal-01 Exercise 10, complete the temporal parent written analysis and support its claims with read-only evidence from `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-temporal-01 Exercise 10, expected output: a completed the temporal parent written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Verify: For sql-temporal-01 Exercise 10, check the temporal parent written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 10, check the temporal parent written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
 -- 11. Produce a deterministic gap-and-overlap report per business key using
 --     lag/lead and multirange operations. Define whether adjacency is valid and
 --     fail on duplicate or empty periods.
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-temporal-01 Exercise 11, read from `periods`. Build the answer toward `period_id`, `valid_period`, and `relationship_to_prior_coverage`; keep `period_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-temporal-01 Exercise 11, expected output: one row per `period_id`. The final columns are `period_id`, `valid_period`, and `relationship_to_prior_coverage`. The final order is `lower(w.valid_period), upper(w.valid_period), w.period_id`.
+--    Verify: For sql-temporal-01 Exercise 11, reselect the returned keys directly from the source; require unique `period_id` where the expected grain is one row per key and confirm the projected `period_id`, `valid_period`, and `relationship_to_prior_coverage` against `periods`. Add duplicate source candidates for `period_id`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 11, run `with_prior` one at a time. Record each CTE's row count and `period_id` uniqueness before the next stage uses it.
 -- 12. Plan time-based partition archival without violating legal holds.
 --     Inventory cross-partition keys, indexes, detach/archive/verify steps,
 --     encryption and access, hold exceptions, restore tests, and deletion proof.
@@ -444,10 +444,10 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: Use only the declared lesson objects (pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-temporal-01 Exercise 12, use `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+--    Expected result/shape: For sql-temporal-01 Exercise 12, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
+--    Verify: For sql-temporal-01 Exercise 12, restore into an isolated target and reconcile `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+--    Hint ladder, rung 1: For sql-temporal-01 Exercise 12, restore into an isolated target and reconcile `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
 
 ROLLBACK;
 \echo 'SQL-TEMPORAL-01 complete: pro_temporal_lab was rolled back'

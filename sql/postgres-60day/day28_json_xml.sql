@@ -61,33 +61,39 @@ LIMIT 20;
 -- Keep answers in your own scratch file; this learner script remains answer-free.
 -- 1. [Query writing] Extract customer acquisition channel and referrer from JSONB attributes.
 --    Hint: `->>` returns text and naturally yields NULL for a missing key.
---    Inputs: Use only the declared lesson objects (events, xml_docs) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-28 Exercise 1, read from `customers`. Build the answer toward `customer_id`, `channel`, and `referrer`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-28 Exercise 1, expected output: One row per customer. The final columns are `customer_id`, `channel`, and `referrer`. The final order is `c.customer_id`.
+--    Verify: For sql-28 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `channel`, and `referrer` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-28 Exercise 1, check `c.customer_id` before applying the row cap.
 -- 2. [Query writing] Find mobile-channel customers using JSONB containment.
 --    Hint: `@>` tests whether the left JSONB contains the declared object.
---    Inputs: Use only the declared lesson objects (events, xml_docs) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-28 Exercise 2, read from `customers`. Build the answer toward `customer_id`, `full_name`, and `attributes`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-28 Exercise 2, expected output: Customer rows whose channel is mobile. The final columns are `customer_id`, `full_name`, and `attributes`. The final order is `c.customer_id`.
+--    Verify: For sql-28 Exercise 2, run an anti-check that counts rows where NOT ((c.attributes @> '{"channel": "mobile"}'::jsonb)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `attributes` against `customers`. Add one row for which `(c.attributes @> '{"channel": "mobile"}'::jsonb)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+--    Hint ladder, rung 1: For sql-28 Exercise 2, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
 -- 3. [Query writing] Count event rows with missing device metadata separately from present values.
 --    Hint: Use `?` to test key existence rather than comparing extracted text to NULL.
---    Inputs: Use only the declared lesson objects (events, xml_docs) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-28 Exercise 3, read from `events`. Build the answer toward `has_device_key`, `missing_device_key`, and `all_events`; keep `has_device_key` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-28 Exercise 3, expected output: One summary row. The final columns are `has_device_key`, `missing_device_key`, and `all_events`.
+--    Verify: For sql-28 Exercise 3, reselect the returned keys directly from the source; require unique `has_device_key` where the expected grain is one row per key and confirm the projected `has_device_key`, `missing_device_key`, and `all_events` against `events`. Add one source row with a new `has_device_key`; verify the result gains exactly one row carrying that `has_device_key` value.
+--    Hint ladder, rung 1: For sql-28 Exercise 3, inspect the source keys that survive `WHERE`.
 -- 4. [Prediction] Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
 --    Hint: JSON objects are mappings; do not treat key order as a semantic contract.
---    Inputs: Use only the declared lesson objects (events, xml_docs) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Inputs: For sql-28 Exercise 4, read from `events`. Build the answer toward `customer_id`, and `counts_by_type`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-28 Exercise 4, expected output: One row per customer with events. The final columns are `customer_id`, and `counts_by_type`. The final order is `customer_id`.
+--    Verify: For sql-28 Exercise 4, independently aggregate `events` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `counts_by_type` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `counts_by_type` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-28 Exercise 4, run `event_counts` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
 -- 5. [Debugging] Extract order ID and status text from XML documents without assuming XPath returns a scalar.
 --    Hint: Index the XML array returned by `xpath`, cast through text, and strip element markup with `string(...)` XPath.
---    Inputs: Use only the declared lesson objects (events, xml_docs) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
+--    Inputs: For sql-28 Exercise 5, read from `xml_docs`. Build the answer toward `doc_id`, `order_id`, and `order_status`; keep `doc_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-28 Exercise 5, expected output: One row per XML document. The final columns are `doc_id`, `order_id`, and `order_status`. The final order is `xd.doc_id`.
+--    Verify: For sql-28 Exercise 5, reselect the returned keys directly from the source; require unique `doc_id` where the expected grain is one row per key and confirm the projected `doc_id`, `order_id`, and `order_status` against `xml_docs`. Add one source row with a new `doc_id`; verify the result gains exactly one row carrying that `doc_id` value.
+--    Hint ladder, rung 1: For sql-28 Exercise 5, check `xd.doc_id` before applying the row cap.
 -- 6. [Extension] Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
 --    Hint: Validate extracted text with a numeric regex before casting.
---    Inputs: Use only the declared lesson objects (events, xml_docs) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-28 Exercise 6, read from `payloads`. Build the answer toward `payload`, and `safe_amount`; keep `payload` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-28 Exercise 6, expected output: One row per sample payload. The final columns are `payload`, and `safe_amount`.
+--    Verify: For sql-28 Exercise 6, reselect the returned keys directly from the source; require unique `payload` where the expected grain is one row per key and confirm the projected `payload`, and `safe_amount` against `payloads`. Repeat with `NULL` in `payload`, and `safe_amount` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-28 Exercise 6, select `payload` from `payloads` before adding derived columns.
 
 ROLLBACK;

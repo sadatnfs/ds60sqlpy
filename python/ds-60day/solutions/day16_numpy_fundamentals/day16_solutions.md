@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting**.
+These worked answers demonstrate **NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 A NumPy array is a rectangular, usually homogeneous block of values.
 Its `shape` states the length of each dimension, its `ndim` counts
@@ -28,244 +27,134 @@ still be semantically wrong; always state what each axis represents.
 - **vectorization:** expressing elementwise work as array operations.
 - **broadcasting:** NumPy's rule for combining compatible unequal shapes.
 
-### Reference pattern 1 — Inspect shape before calculating
+### How to compare an answer
 
-Give each dimension a meaning and compare axis reductions.
+For this lesson's **NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
 
-```python
-import numpy as np
+## Exercises 1–3 — Worked answers
 
-scores = np.array([[8, 6, 10], [4, 9, 8]])
-{
-    "shape": scores.shape,
-    "per_column": scores.mean(axis=0).tolist(),
-    "per_row": scores.mean(axis=1).tolist(),
-}
-```
-
-**Expected observation:** `{'shape': (2, 3), 'per_column': [6.0, 7.5, 9.0], 'per_row': [8.0, 7.0]}`.
-
-### Reference pattern 2 — Center every column through broadcasting
-
-A length-three vector applies to the three columns of every row.
-
-```python
-column_means = scores.mean(axis=0)
-centered = scores - column_means
-(centered.tolist(), centered.mean(axis=0).round(10).tolist())
-```
-
-**Expected observation:** The centered rows are displayed and every column mean is `[0.0, 0.0, 0.0]` up to floating-point precision.
-
-## Exercise-by-exercise reasoning map
-
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
+### Exercise 1 — worked answer
 
 **Learner contract:** Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. **Expected behavior:** shapes are `(3, 4)`, `(3,)`, `(4,)`, and `(3,)` for the original and three results. **Constraint:** use vectorized reductions with explicit axes, not Python loops. **Verify:** assert both shapes and exact values.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
+**Reasoning:** Implement this exact contract as written: Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. Expected behavior: shapes are `(3, 4)`, `(3,)`, `(4,)`, and `(3,)` for the original and three results. Constraint: use vectorized reductions with explicit axes, not Python loops. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert both shapes and exact values. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.
-
-**Edge case:** Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.
-
-**Solution evidence to inspect:** assert both shapes and exact values.
-
-### Exercise 2 — reasoning, alternatives, and proof
-
-**Learner contract:** Generate two deterministic arrays with `np.random.default_rng(42)`, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. **Constraints:** write the shape equation before `@` and do not use the legacy global random state. **Verify:** rerunning from a fresh kernel produces identical arrays and results.
-
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.
-
-**Edge case:** Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.
-
-**Solution evidence to inspect:** rerunning from a fresh kernel produces identical arrays and results.
-
-### Exercise 3 — reasoning, alternatives, and proof
-
-**Learner contract:** Demonstrate broadcasting by standardizing each column of a small 2-D array. **Expected behavior:** each standardized column has mean approximately 0 and standard deviation approximately 1. **Constraints:** keep means/stds as `(columns,)`, reject zero-standard-deviation columns, and assert the final shape equals the input shape. **Verify:** Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.
-
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.
-
-**Edge case:** Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.
-
-**Solution evidence to inspect:** Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.
-
-### Exercise 4 — reasoning, alternatives, and proof
-
-**Learner contract:** **Prediction:** Predict the shape and values of a `(2, 3)` array plus a `(3,)` array, then explain broadcasting alignment. **Progressive hint:** Broadcasting compares dimensions from the right. **Verify:** Assert the `(2, 3) + (3,)` result shape and exact values; write which right-aligned dimension proves the broadcast is valid.
-
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.
-
-**Edge case:** Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.
-
-**Solution evidence to inspect:** Assert the `(2, 3) + (3,)` result shape and exact values; write which right-aligned dimension proves the broadcast is valid.
-
-### Exercise 5 — reasoning, alternatives, and proof
-
-**Learner contract:** **Tracing:** Trace `array.sum(axis=0)` and `array.sum(axis=1)` by naming which dimension is removed and what each output element represents. **Progressive hint:** The named axis is the dimension reduced. **Verify:** Calculate both reductions by hand and assert `axis=0` removes rows into one value per column while `axis=1` removes columns into one per row.
-
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting model is visible.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.
-
-**Edge case:** Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.
-
-**Solution evidence to inspect:** Calculate both reductions by hand and assert `axis=0` removes rows into one value per column while `axis=1` removes columns into one per row.
-
-### Exercise 6 — reasoning, alternatives, and proof
-
-**Learner contract:** **Implementation:** Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. **Progressive hint:** Replace a zero standard deviation with a safe denominator. **Verify:** Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.
-
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.
-
-**Edge case:** Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.
-
-**Solution evidence to inspect:** Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.
-
-### Exercise 7 — reasoning, alternatives, and proof
-
-**Learner contract:** **Debugging:** Repair code that mutates an original array through a slice when an independent working array was intended. **Progressive hint:** Use `.copy()` at the ownership boundary. **Verify:** Record `np.shares_memory` before repair, mutate the working slice, and assert `.copy()` keeps the original array unchanged.
-
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.
-
-**Edge case:** Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.
-
-**Solution evidence to inspect:** Record `np.shares_memory` before repair, mutate the working slice, and assert `.copy()` keeps the original array unchanged.
-
-### Exercise 8 — reasoning, alternatives, and proof
-
-**Learner contract:** **Edge case and explanation:** Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. **Progressive hint:** The array dtype, not Python's unbounded integer behavior, controls storage. **Verify:** Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python's expected integer.
-
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.
-
-**Edge case:** Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.
-
-**Solution evidence to inspect:** Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python's expected integer.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-We compute row-wise means without Python loops, normalize columns with broadcasting, and demonstrate view vs copy.
-
-Contents
-- Exercise 1: Row-wise means (no Python loops)
-- Exercise 2: Column-wise 0–1 normalization with broadcasting
-- Exercise 3: View vs copy demo
-
----
-
-Exercise 1 — Row-wise means
 ```python
 import numpy as np
 
-A = np.arange(12).reshape(3, 4)
-row_means = A.mean(axis=1)           # shape (3,)
-assert np.allclose(row_means, np.array([1.5, 5.5, 9.5]))
+array = np.arange(12).reshape(3, 4)
+row_sums = array.sum(axis=1)
+column_means = array.mean(axis=0)
+row_maximums = array.max(axis=1)
+
+assert array.shape == (3, 4)
+assert row_sums.tolist() == [6, 22, 38]
+assert column_means.tolist() == [4.0, 5.0, 6.0, 7.0]
+assert row_maximums.tolist() == [3, 7, 11]
 ```
-Why: mean with axis=1 reduces columns, giving one mean per row.
 
----
+**Verification evidence:** assert both shapes and exact values.
 
-Exercise 2 — Normalize each column to [0, 1]
+### Exercise 2 — worked answer
+
+**Learner contract:** Generate two deterministic arrays with `np.random.default_rng(42)`, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. **Constraints:** write the shape equation before `@` and do not use the legacy global random state. **Verify:** rerunning from a fresh kernel produces identical arrays and results.
+
+**Reasoning:** Implement this exact contract as written: Generate two deterministic arrays with `np.random.default_rng(42)`, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. Constraints: write the shape equation before `@` and do not use the legacy global random state. Keep the prompt's named data and constraints visible in the code, then establish this specific result: rerunning from a fresh kernel produces identical arrays and results. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
+
 ```python
-X = np.array([[1.0, 10.0], [3.0, 5.0], [5.0, 0.0]])
-mins = X.min(axis=0)                 # shape (2,)
-ranges = X.max(axis=0) - mins        # shape (2,)
-X_norm = (X - mins) / ranges         # broadcasting subtracts mins row-wise
+import numpy as np
+
+rng = np.random.default_rng(42)
+left = rng.integers(0, 10, size=(2, 3))
+right = rng.integers(0, 10, size=(2, 3))
+matrix = rng.integers(0, 5, size=(3, 2))
+
+assert (left + right).shape == (2, 3)
+assert (left * right).shape == (2, 3)
+assert (left @ matrix).shape == (2, 2)
+selected = left[left >= 5]
+assert selected.ndim == 1
 ```
-Notes
-- Broadcasting aligns shapes right-to-left; (3,2) minus (2,) works.
-- Beware division by zero when a column is constant; guard with `np.where(ranges==0, 1, ranges)`.
 
----
+Recreating the generator with seed 42 reproduces the fixture.
 
-Exercise 3 — View vs copy
+**Verification evidence:** rerunning from a fresh kernel produces identical arrays and results.
+
+### Exercise 3 — worked answer
+
+**Learner contract:** Demonstrate broadcasting by standardizing each column of a small 2-D array. **Expected behavior:** each standardized column has mean approximately 0 and standard deviation approximately 1. **Constraints:** keep means/stds as `(columns,)`, reject zero-standard-deviation columns, and assert the final shape equals the input shape. **Verify:** Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.
+
+**Reasoning:** Implement this exact contract as written: Demonstrate broadcasting by standardizing each column of a small 2-D array. Expected behavior: each standardized column has mean approximately 0 and standard deviation approximately 1. Constraints: keep means/stds as `(columns,)`, reject zero-standard-deviation columns, and assert the final shape equals the input shape. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
+
 ```python
-Z = np.arange(12).reshape(3,4)
-sub = Z[:, 1:3]      # view (shares memory)
-sub[:] = -1          # writes into original
-assert (Z[:, 1:3] == -1).all()
+import numpy as np
 
-# Safe copy when isolating
-Z2 = Z[:, 1:3].copy()
-Z2[:] = 99
-assert not (Z[:, 1:3] == 99).any()
+
+def standardize_columns(values: np.ndarray) -> np.ndarray:
+    means = values.mean(axis=0)
+    standard_deviations = values.std(axis=0)
+    if np.any(standard_deviations == 0):
+        raise ValueError("every column must vary")
+    return (values - means) / standard_deviations
+
+
+values = np.array([[1.0, 10.0], [2.0, 20.0], [3.0, 30.0]])
+standardized = standardize_columns(values)
+assert standardized.shape == values.shape
+assert np.allclose(standardized.mean(axis=0), 0)
+assert np.allclose(standardized.std(axis=0), 1)
 ```
-Takeaway
-- Slices are usually views; use .copy() when you intend independence.
 
----
+**Verification evidence:** Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.
+
+## Exercises 4–8 — Expanded mastery answers
+
+### Exercise 4 — answer contract
+
+**Learner contract:** **Prediction:** Predict the shape and values of a `(2, 3)` array plus a `(3,)` array, then explain broadcasting alignment. **Progressive hint:** Broadcasting compares dimensions from the right. **Verify:** Assert the `(2, 3) + (3,)` result shape and exact values; write which right-aligned dimension proves the broadcast is valid.
+
+**Reasoning:** Predict this named state change before running it: Prediction: Predict the shape and values of a `(2, 3)` array plus a `(3,)` array, then explain broadcasting alignment. Progressive hint: Broadcasting compares dimensions from the right. Then compare the prediction with this proof target: Assert the `(2, 3) + (3,)` result shape and exact values; write which right-aligned dimension proves the broadcast is valid. This makes NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting observable instead of relying on intuition.
+
+**Evidence to locate in the grouped implementation:** Assert the `(2, 3) + (3,)` result shape and exact values; write which right-aligned dimension proves the broadcast is valid.
+
+### Exercise 5 — answer contract
+
+**Learner contract:** **Tracing:** Trace `array.sum(axis=0)` and `array.sum(axis=1)` by naming which dimension is removed and what each output element represents. **Progressive hint:** The named axis is the dimension reduced. **Verify:** Calculate both reductions by hand and assert `axis=0` removes rows into one value per column while `axis=1` removes columns into one per row.
+
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace `array.sum(axis=0)` and `array.sum(axis=1)` by naming which dimension is removed and what each output element represents. Progressive hint: The named axis is the dimension reduced. Record the named value, shape, label, or iterator position needed to establish: Calculate both reductions by hand and assert `axis=0` removes rows into one value per column while `axis=1` removes columns into one per row. The trace exposes NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting directly.
+
+**Evidence to locate in the grouped implementation:** Calculate both reductions by hand and assert `axis=0` removes rows into one value per column while `axis=1` removes columns into one per row.
+
+### Exercise 6 — answer contract
+
+**Learner contract:** **Implementation:** Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. **Progressive hint:** Replace a zero standard deviation with a safe denominator. **Verify:** Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.
+
+**Reasoning:** Implement this exact contract as written: Implementation: Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. Progressive hint: Replace a zero standard deviation with a safe denominator. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
+
+**Evidence to locate in the grouped implementation:** Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.
+
+### Exercise 7 — answer contract
+
+**Learner contract:** **Debugging:** Repair code that mutates an original array through a slice when an independent working array was intended. **Progressive hint:** Use `.copy()` at the ownership boundary. **Verify:** Record `np.shares_memory` before repair, mutate the working slice, and assert `.copy()` keeps the original array unchanged.
+
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair code that mutates an original array through a slice when an independent working array was intended. Progressive hint: Use `.copy()` at the ownership boundary. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Record `np.shares_memory` before repair, mutate the working slice, and assert `.copy()` keeps the original array unchanged. The diagnosis depends on NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
+
+**Evidence to locate in the grouped implementation:** Record `np.shares_memory` before repair, mutate the working slice, and assert `.copy()` keeps the original array unchanged.
+
+### Exercise 8 — answer contract
+
+**Learner contract:** **Edge case and explanation:** Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. **Progressive hint:** The array dtype, not Python's unbounded integer behavior, controls storage. **Verify:** Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python's expected integer.
+
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. Progressive hint: The array dtype, not Python's unbounded integer behavior, controls storage. Values below, at, and above the named boundary must produce the evidence Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python's expected integer. Those cases show how NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting behaves at its edge.
+
+**Evidence to locate in the grouped implementation:** Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python's expected integer.
 
 ## Expanded mastery lab solutions
 
 Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Shape and axes
+### Shared implementation for Exercises 4–5 — Shape and axes
 
 ```python
 import numpy as np
@@ -277,7 +166,7 @@ assert matrix.sum(axis=0).tolist() == [11, 22, 33]  # Reduce rows.
 assert matrix.sum(axis=1).tolist() == [6, 60]       # Reduce columns.
 ```
 
-### Practices 3–5 — Stable standardization, copies, and dtype choice
+### Shared implementation for Exercises 6–8 — Stable standardization, copies, and dtype choice
 
 ```python
 def standardize_columns(values: np.ndarray) -> np.ndarray:

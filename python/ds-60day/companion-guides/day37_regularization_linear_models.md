@@ -197,24 +197,13 @@ for alpha in (0.1, 1.0, 10.0):
 
 1. Sweep `alpha` values and plot validation scores for Ridge and Lasso.
 
-**Verify:** For task `Sweep alpha values and plot validation scores for Ridge and Lasso`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check.
-
-
-
-
-
+**Verify:** Practice 1 — regularization strength, coefficient shrinkage, sparsity, and stability — evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
 
 2. Inspect fitted coefficients and compare their sparsity.
 
 The separate solution also demonstrates Elastic Net as a useful extension.
 
-**Verify:** For task `Inspect fitted coefficients and compare their sparsity`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Practice 2 — regularization strength, coefficient shrinkage, sparsity, and stability — print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
 
 ### Progressive hints
 
@@ -233,50 +222,25 @@ attempt, and record the evidence that would prove your result correct.
 3. **Prediction:** Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept.
    **Progressive hint:** Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.
 
-**Verify:** For task `Prediction: Predict the coefficient and training-error behavior of Ridge as alpha moves from...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Prediction — print Ridge coefficients, intercept, and training error for alpha near 0, 1, and 1e6; verify slopes shrink toward zero, the unpenalized intercept remains free, and training error does not improve as the penalty dominates.
 
 4. **Elastic Net implementation:** Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity.
    **Progressive hint:** Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.
 
-**Verify:** For task `Elastic Net implementation: Build a scaled ElasticNetCV pipeline, state what alpha and l1rati...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** Elastic Net implementation — print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.
 
 5. **Scaling bug:** Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison.
    **Progressive hint:** The L1 penalty operates on coefficient magnitude; rescaling a feature changes the coefficient needed for the same prediction.
 
-**Verify:** For task `Scaling bug: Fit Lasso to one feature measured in dollars and another measured in millions of...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Scaling bug — fit the same Lasso problem before/after scaling, print feature scales and original-unit coefficients, and show the scaled pipeline removes unit-dependent penalty unfairness while producing finite validation metrics.
 
 6. **Stability investigation:** Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions.
    **Progressive hint:** Lasso may alternate which correlated feature receives weight; Ridge often distributes weight while predictions remain similar.
 
-**Verify:** For task `Stability investigation: Create two highly correlated predictors, refit Lasso across several...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Stability investigation — over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -322,10 +286,12 @@ Emphasize regularization strength, coefficient shrinkage, sparsity, and stabilit
 - guide: `python/ds-60day/companion-guides/day37_regularization_linear_models.md`
 - learner artifact: `python/ds-60day/notebooks/day37_regularization_linear_models.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-36`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

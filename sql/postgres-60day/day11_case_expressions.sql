@@ -52,39 +52,39 @@ ORDER BY qty_30d DESC, p.category;
 -- Keep answers in your own scratch file; this learner script remains answer-free.
 -- 1. [Query writing] Classify orders as small, medium, or large by total amount.
 --    Hint: Validate boundaries and place the highest threshold first.
---    Inputs: Use `orders` plus only the small disposable fixture explicitly requested by Exercise 1; keep the same filters/time window for its control query.
---    Expected result/shape: Exercise 1 returns a table-shaped answer to “Query writing: Classify orders as small, medium, or large by total amount” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `small`, `evidence`, `order_size`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
---    Verify: For Exercise 1, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
---    Hint ladder, rung 1: Start with the guide's first rung: Validate boundaries and place the highest threshold first.
+--    Inputs: For sql-11 Exercise 1, read from `orders`. Compute `order_id`, `total_amount`, and `order_size` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-11 Exercise 1, expected output: One row per order with exactly one size label. The final columns are `order_id`, `total_amount`, and `order_size`. The final order is `o.order_id`.
+--    Verify: For sql-11 Exercise 1, evaluate each of `total_amount`, and `order_size` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-11 Exercise 1, check `o.order_id` before applying the row cap.
 -- 2. [Query writing] Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation.
 --    Hint: Each `COUNT(*) FILTER` or `SUM(CASE...)` should state its denominator.
---    Inputs: Use `orders` plus only the small disposable fixture explicitly requested by Exercise 2; keep the same filters/time window for its control query.
---    Expected result/shape: Exercise 2 returns a table-shaped answer to “Query writing: Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation” at one summary row per grouping key explicitly named in the prompt. Named evidence columns/objects: `evidence`, `paid_like`, `open_orders`, `returned_orders`, `all_orders`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
---    Verify: For Exercise 2, prove uniqueness at one summary row per grouping key explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
---    Hint ladder, rung 1: Start with the guide's first rung: Each COUNT() FILTER or SUM(CASE...) should state its denominator.
+--    Inputs: For sql-11 Exercise 2, read from `orders`. Compute `paid_like`, `open_orders`, `returned_orders`, and `all_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-11 Exercise 2, expected output: One summary row. The final columns are `paid_like`, `open_orders`, `returned_orders`, and `all_orders`.
+--    Verify: For sql-11 Exercise 2, evaluate each of `open_orders`, `returned_orders`, and `all_orders` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-11 Exercise 2, count the input rows from `orders`, then run each aggregate `FILTER` predicate as its own count before combining the values into the one-row summary.
 -- 3. [Query writing] Label missing customer segments separately from known segment values.
 --    Hint: Test `IS NULL` before comparing text values.
---    Inputs: Use `customers` plus only the small disposable fixture explicitly requested by Exercise 3; keep the same filters/time window for its control query.
---    Expected result/shape: Exercise 3 returns a table-shaped answer to “Query writing: Label missing customer segments separately from known segment values” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `segment_group`, `c`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
---    Verify: For Exercise 3, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
---    Hint ladder, rung 1: Start with the guide's first rung: Test IS NULL before comparing text values.
+--    Inputs: For sql-11 Exercise 3, read from `customers`. Compute `customer_id`, `segment`, and `segment_group` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-11 Exercise 3, expected output: One row per customer with an explicit segment label. The final columns are `customer_id`, `segment`, and `segment_group`. The final order is `c.customer_id`.
+--    Verify: For sql-11 Exercise 3, evaluate each of `segment`, and `segment_group` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-11 Exercise 3, check `c.customer_id` before applying the row cap.
 -- 4. [Prediction] Predict the label for 500 when `>= 100` appears before `>= 500`, then repair the branch order.
 --    Hint: First-match wins, so specific/high thresholds must precede broader/lower ones.
---    Inputs: Use `orders`, `order_items`, `products` plus only the small disposable fixture explicitly requested by Exercise 4; keep the same filters/time window for its control query.
---    Expected result/shape: Exercise 4 requires a written prediction and the observed result for “Prediction: Predict the label for 500 when >= 100 appears before >= 500, then repair the branch order”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `corrected_label`, `sample`.
---    Verify: For Exercise 4, run the two forms over the identical rows in `orders`, `order_items`, `products`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
---    Hint ladder, rung 1: Start with the guide's first rung: First-match wins, so specific/high thresholds must precede broader/lower ones.
+--    Inputs: For sql-11 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `amount`, and `corrected_label`; keep `corrected_label` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-11 Exercise 4, expected output: A value of 500 is labeled high. The final columns are `amount`, and `corrected_label`. The final order is `amount`.
+--    Verify: For sql-11 Exercise 4, reselect the returned keys directly from the source; require unique `corrected_label` where the expected grain is one row per key and confirm the projected `amount`, and `corrected_label` against the inline `VALUES` fixture. Add one source row with a new `corrected_label`; verify the result gains exactly one row carrying that `corrected_label` value.
+--    Hint ladder, rung 1: For sql-11 Exercise 4, check `amount` before applying the row cap.
 -- 5. [Debugging] Replace a CASE expression that returns mixed numeric and text types with one consistent output type.
 --    Hint: All result branches must resolve to a compatible PostgreSQL type.
---    Inputs: Use `orders`, `order_items`, `products` plus only the small disposable fixture explicitly requested by Exercise 5; keep the same filters/time window for its control query.
---    Expected result/shape: Exercise 5 returns a table-shaped answer to “Debugging: Replace a CASE expression that returns mixed numeric and text types with one consistent output type” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `value_state`, `sample`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
---    Verify: For Exercise 5, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `order_items`, `products`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
---    Hint ladder, rung 1: Start with the guide's first rung: All result branches must resolve to a compatible PostgreSQL type.
+--    Inputs: For sql-11 Exercise 5, read from the inline `VALUES` fixture. Build the answer toward `value`, and `value_state`; keep `value` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-11 Exercise 5, expected output: Three rows with text labels. The final columns are `value`, and `value_state`. The final order is `value NULLS FIRST`.
+--    Verify: For sql-11 Exercise 5, reselect the returned keys directly from the source; require unique `value` where the expected grain is one row per key and confirm the projected `value`, and `value_state` against the inline `VALUES` fixture. Add one source row with a new `value`; verify the result gains exactly one row carrying that `value` value.
+--    Hint ladder, rung 1: For sql-11 Exercise 5, check `value NULLS FIRST` before applying the row cap.
 -- 6. [Extension] Create payment-method display labels and preserve unknown future methods with an explicit fallback.
 --    Hint: A simple CASE fits equality mapping; `ELSE` prevents silent NULL labels.
---    Inputs: Use `payments` plus only the small disposable fixture explicitly requested by Exercise 6; keep the same filters/time window for its control query.
---    Expected result/shape: Exercise 6 must make “Extension: Create payment-method display labels and preserve unknown future methods with an explicit fallback” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `method_label`, `payment_count`, `p`.
---    Verify: For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `method_label`, `payment_count`, `p`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
---    Hint ladder, rung 1: Start with the guide's first rung: A simple CASE fits equality mapping; ELSE prevents silent NULL labels.
+--    Inputs: For sql-11 Exercise 6, read from `payments`. Compute `method`, `method_label`, and `payment_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-11 Exercise 6, expected output: One row per payment method and display label. The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
+--    Verify: For sql-11 Exercise 6, evaluate each of `payment_count` in a separate control `SELECT` over `payments`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `payment_count` for the existing `method` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-11 Exercise 6, confirm the groups are `method`; then check `p.method` before applying the row cap.
 
 ROLLBACK;

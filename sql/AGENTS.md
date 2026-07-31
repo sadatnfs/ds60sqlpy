@@ -24,8 +24,11 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 - Multi-part projects need an idempotent fixture or explicit, validated persistence instructions.
 - Days 52–54 are the declared stateful warehouse sequence: Day 52 resets and commits the course-owned `dwh` schema, then Days 53 and 54 run in order.
 - Superuser-only operations must be optional and labeled.
-- The two `sql-found-*` modules precede SQL Day 1. Other named modules under
-  `sql/professional/` extend the track without renumbering established days.
+- `sql-found-01` follows SQL Day 15 and is the direct prerequisite for Day 16.
+  `sql-found-02` follows Day 39 and precedes schema-evolution and operational
+  modules. Other named modules under `sql/professional/` extend the track
+  without renumbering established days; a new SQL learner still starts at
+  `sql-01`.
 - Role administration, extensions, physical recovery, and replication need a
   capability check plus a useful default path when the local server cannot
   perform the optional operation.
@@ -52,6 +55,10 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 - Explain every new clause and the query's logical row-shaping sequence. Worked
   examples must state the starting row grain, expected columns/rows, NULL and
   ordering assumptions, and what evidence proves the query behaved correctly.
+- In every exercise contract, name the actual identity columns for the outer
+  row grain and list projected columns explicitly. Do not use `*`, unnamed-key
+  placeholders, a measure as a supposed unique identity, or a nested
+  window/subquery clause as the final `ORDER BY`.
 - Markdown solutions must explain each clause or statement, intermediate row
   shape, tempting wrong approaches, verification queries, and rollback or
   persistence behavior instead of only displaying a final query.

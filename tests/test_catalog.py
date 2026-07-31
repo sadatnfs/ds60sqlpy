@@ -29,12 +29,17 @@ def test_bridge_starts_after_python_and_sql_foundations() -> None:
     assert catalog.by_day("bridge", 2).prerequisites == ("bridge-01",)
 
 
-def test_sql_track_starts_with_relational_foundations() -> None:
+def test_sql_track_starts_with_querying_before_relational_engineering() -> None:
     catalog = Catalog.load()
+    sql_ids = [lesson.id for lesson in catalog.lessons("sql")]
 
-    assert catalog.by_day("sql", -1).prerequisites == ()
-    assert catalog.by_day("sql", 0).prerequisites == ("sql-found-01",)
-    assert catalog.by_day("sql", 1).prerequisites == ("sql-found-02",)
+    assert catalog.by_day("sql", 1).prerequisites == ()
+    assert catalog.by_day("sql", -1).prerequisites == ("sql-15",)
+    assert catalog.by_day("sql", 16).prerequisites == ("sql-found-01",)
+    assert catalog.by_day("sql", 0).prerequisites == ("sql-found-01", "sql-39")
+    assert catalog.by_day("sql", 40).prerequisites == ("sql-found-02",)
+    assert sql_ids.index("sql-15") < sql_ids.index("sql-found-01") < sql_ids.index("sql-16")
+    assert sql_ids.index("sql-39") < sql_ids.index("sql-found-02") < sql_ids.index("sql-40")
 
 
 def test_catalog_paths_stay_inside_repository() -> None:

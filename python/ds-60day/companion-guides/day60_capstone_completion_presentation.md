@@ -103,7 +103,6 @@ Use roughly this story:
 
 7. **Recommendation:** what should happen next and what evidence is still needed.
 
-
 ### Presentation quality criteria
 
 - Every chart has a title, units, population, time scope, and readable labels.
@@ -248,50 +247,24 @@ The notebook's final checklist is the exercise:
 
 1. Finalize the data and training/evaluation pipeline.
 
-**Verify:** For task `Finalize the data and training/evaluation pipeline`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Practice 1 — release evidence, cold-start reproducibility, presentation claims, and handoff — from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.
 
 2. Produce a results notebook and README with exact reproduction steps.
 
-**Verify:** For task `Produce a results notebook and README with exact reproduction steps`, demonstrate the concrete requirement “2. Produce a results notebook and README with exact reproduction steps” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 2 — release evidence, cold-start reproducibility, presentation claims, and handoff — have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.
 
 3. Save artifacts under an ignored `artifacts/` path and retain dependency
    metadata/lock.
 
-**Verify:** For task `Save artifacts under an ignored artifacts/ path and retain dependency`, verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
+**Verify:** Practice 3 — release evidence, cold-start reproducibility, presentation claims, and handoff — write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.
 
 4. Prepare presentation-ready visuals and the short story above.
 
-**Verify:** For task `Prepare presentation-ready visuals and the short story above`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check.
-
-
-
-
-
+**Verify:** Practice 4 — release evidence, cold-start reproducibility, presentation claims, and handoff — export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.
 
 5. Write three takeaways and one open question.
 
-**Verify:** For task `Write three takeaways and one open question`, demonstrate the concrete requirement “5. Write three takeaways and one open question” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Practice 5 — release evidence, cold-start reproducibility, presentation claims, and handoff — write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.
 
 ### Progressive hints
 
@@ -313,61 +286,30 @@ attempt, and record the evidence that would prove your result correct.
 6. **Cold-start reproduction:** Clone/copy the project into a fresh temporary directory, follow only the README on Windows or POSIX, and log every ambiguity, manual step, network access, output, and elapsed stage.
    **Progressive hint:** Use a clean environment and no notebook state. Verify the documented offline path after the one connected bootstrap.
 
-**Verify:** For task `Cold-start reproduction: Clone/copy the project into a fresh temporary directory, follow only...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance.
-
-
-
-
-
-
+**Verify:** Cold-start reproduction — from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.
 
 7. **Claim-to-evidence matrix:** Create a table mapping every headline claim to metric/visual, dataset and split, sample size, uncertainty, reproduction command, limitation, and owner.
    **Progressive hint:** Remove or soften claims with no direct evidence. Distinguish predictive association, operational estimate, and causal conclusion.
 
-**Verify:** For task `Claim-to-evidence matrix: Create a table mapping every headline claim to metric/visual, datas...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
-
+**Verify:** Claim-to-evidence matrix — for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.
 
 8. **Failure-tolerant demo:** Prepare and rehearse a five-minute demo with a preflight check, time budget, local fixtures, screenshots/static fallback, and recovery from one intentionally broken dependency or service.
    **Progressive hint:** The core result must not depend on live internet. Demonstrate the reproducible workflow, not a fragile sequence of manual notebook cells.
 
-**Verify:** For task `Failure-tolerant demo: Prepare and rehearse a five-minute demo with a preflight check, time b...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Failure-tolerant demo — record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.
 
 9. **Operational handoff:** Write an ownership and maintenance section covering artifact/data refresh, dependency updates, monitoring, incident contact, rollback, known limitations, and end-of-life criteria.
    **Progressive hint:** Name roles and cadences, not personal credentials. Connect each maintenance action to a test or acceptance gate.
 
-**Verify:** For task `Operational handoff: Write an ownership and maintenance section covering artifact/data refres...`, verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch; then test representative forbidden values and prove they are absent from returned data, repr, logs, metrics, and generated artifacts.
-
-
-
-
-
-
+**Verify:** Operational handoff — name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.
 
 10. **Retrospective and next experiment:** Write a retrospective with what changed your belief, strongest and weakest evidence, one discarded path, remaining risk, and one bounded next experiment with a predeclared decision rule.
    **Progressive hint:** The next experiment should resolve the highest-value uncertainty, not simply try a more complex model.
 
-**Verify:** For task `Retrospective and next experiment: Write a retrospective with what changed your belief, stron...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Retrospective and next experiment — write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment's population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -415,10 +357,12 @@ Emphasize release evidence, cold-start reproducibility, presentation claims, and
 - guide: `python/ds-60day/companion-guides/day60_capstone_completion_presentation.md`
 - learner artifact: `python/ds-60day/notebooks/day60_capstone_completion_presentation.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-59`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

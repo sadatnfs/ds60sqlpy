@@ -198,22 +198,11 @@ print({"noise_importance": importance.importances_mean[-1],
 
 1. Plot tree depth versus accuracy.
 
-**Verify:** For task `Plot tree depth versus accuracy`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 1 — tree splits, ensemble variance reduction, and held-out importance — for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
 
 2. Inspect feature importances and discuss their reliability.
 
-**Verify:** For task `Inspect feature importances and discuss their reliability`, demonstrate the concrete requirement “2. Inspect feature importances and discuss their reliability” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Practice 2 — tree splits, ensemble variance reduction, and held-out importance — report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
 
 ### Progressive hints
 
@@ -233,50 +222,25 @@ attempt, and record the evidence that would prove your result correct.
 3. **Pruning implementation:** Use a decision tree's cost-complexity pruning path to evaluate candidate `ccp_alpha` values with cross-validation. Freeze the chosen value before final holdout evaluation.
    **Progressive hint:** The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.
 
-**Verify:** For task `Pruning implementation: Use a decision tree's cost-complexity pruning path to evaluate candid...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Pruning implementation — print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.
 
 4. **Out-of-bag reasoning:** Enable `oob_score=True` in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.
    **Progressive hint:** Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.
 
-**Verify:** For task `Out-of-bag reasoning: Enable oobscore=True in a RandomForestClassifier and compare the out-of...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
-
+**Verify:** Out-of-bag reasoning — print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.
 
 5. **Imbalance debugging:** Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test `class_weight='balanced'`.
    **Progressive hint:** A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.
 
-**Verify:** For task `Imbalance debugging: Train a tree on a 98:2 dataset, compare accuracy with minority recall an...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Imbalance debugging — on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.
 
 6. **Correlated-importance edge case:** Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.
    **Progressive hint:** The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.
 
-**Verify:** For task `Correlated-importance edge case: Duplicate one informative feature, refit the forest, and obs...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -323,10 +287,12 @@ Emphasize tree splits, ensemble variance reduction, and held-out importance. Use
 - guide: `python/ds-60day/companion-guides/day38_tree_models_random_forest.md`
 - learner artifact: `python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-37`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

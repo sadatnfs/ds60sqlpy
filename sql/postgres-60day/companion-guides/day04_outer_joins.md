@@ -101,11 +101,9 @@ ORDER BY orders ASC, c.customer_id
 LIMIT 25;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per customer; zero is visible.
+**How to read it:** Example 1: Start with `customers`, and `orders` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `customer_id`, `full_name`, and `orders`. `ORDER BY` determines presentation order and the final `LIMIT 25` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one grouped row per `customer_id`, capped at 25 rows with columns `customer_id`, `full_name`, and `orders` from `customers`, and `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -118,11 +116,9 @@ ORDER BY sold_qty ASC, p.product_id
 LIMIT 25;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per customer; zero is visible.
+**How to read it:** Example 2: Start with `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `product_id`, `name`, and `sold_qty`. `ORDER BY` determines presentation order and the final `LIMIT 25` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one grouped row per `product_id`, capped at 25 rows with columns `product_id`, `name`, and `sold_qty` from `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -161,28 +157,34 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** List every customer with order count, including customers with zero orders.
    **Progressive hint:** Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`.
-   **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: List every customer with order count, including customers with zero orders” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `order_count`, `c`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 1, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-04 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `order_count`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-04 Exercise 1, expected output: One row per customer; zero is visible. The final columns are `customer_id`, `full_name`, and `order_count`. The final order is `order_count DESC, c.customer_id`.
+   **Verify:** For sql-04 Exercise 1, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
 2. **Query writing:** Find products that have never appeared in an order item.
    **Progressive hint:** Left join and retain rows where the right-side primary key is NULL.
-   **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Find products that have never appeared in an order item” at one row per product or product grouping requested. Named evidence columns/objects: `evidence`, `p`, `oi`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 2, prove uniqueness at one row per product or product grouping requested; reconcile the result's row count and any count/sum/amount with a simpler control over `products`, `order_items`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-04 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, and `category`; keep `product_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-04 Exercise 2, expected output: One row per unsold product. The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.
+   **Verify:** For sql-04 Exercise 2, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `product_id`, `name`, and `category` values match those staged rows without unintended fanout or loss. Add one row for which `(oi.order_item_id IS NULL)` is true and one for which it is false; verify only the matching `product_id` value is returned.
 3. **Query writing:** Compare monthly budgets and expenses by category with a full outer join.
    **Progressive hint:** Aggregate each side to the same category/month grain before joining; preserve keys from either side.
-   **Expected result/shape:** Exercise 3 requires a written prediction and the observed result for “Query writing: Compare monthly budgets and expenses by category with a full outer join”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `actual_amount`, `e`, `budget_amount`, `b`, `category`, `bm`, `em`.
-   **Verify:** For Exercise 3, run the two forms over the identical rows in `expenses`, `budgets`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-04 Exercise 3, read from `expenses`, and `budgets`. Build the answer toward `category`, `period`, `budget_amount`, and `actual_amount`; keep `category` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-04 Exercise 3, expected output: One row per category/month present in either source. The final columns are `category`, `period`, `budget_amount`, and `actual_amount`. The final order is `period, category`.
+   **Verify:** For sql-04 Exercise 3, project `category` plus the raw source columns from `expenses`, and `budgets` at each join stage; record row count and distinct `category`, then assert the final `category`, `period`, `budget_amount`, and `actual_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
 4. **Prediction:** Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.
    **Progressive hint:** Place `o.status = 'delivered'` in `ON`; `WHERE` would remove NULL-extended customers.
-   **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Preserve every customer while counting only delivered orders; compare a status predicate in ON with the same predicate in WHERE”. Show both compared result shapes at one row per customer or the customer grouping key named by the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `delivered_orders`, `c`, `o`.
-   **Verify:** For Exercise 4, run the two forms over the identical rows in `customers`, `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-04 Exercise 4, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `delivered_orders`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-04 Exercise 4, expected output: One row per customer, including zero delivered orders. The final columns are `customer_id`, `full_name`, and `delivered_orders`. The final order is `delivered_orders DESC, c.customer_id`.
+   **Verify:** For sql-04 Exercise 4, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `delivered_orders` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `delivered_orders` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
 5. **Debugging:** Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.
    **Progressive hint:** Count a non-nullable right-side key that becomes NULL for an unmatched row.
-   **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Repair COUNT() in a left-join order count so customers without orders report zero rather than one” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `order_count`, `c`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 5, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-04 Exercise 5, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `order_count`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-04 Exercise 5, expected output: One row per customer with correct zero counts. The final columns are `customer_id`, and `order_count`. The final order is `c.customer_id`.
+   **Verify:** For sql-04 Exercise 5, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
 6. **Extension:** Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.
    **Progressive hint:** Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero.
-   **Expected result/shape:** Exercise 6 must make “Extension: Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys” observable through the exact DDL/DML command tag plus one row per product or product grouping requested; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `matched`, `evidence`, `matched_products`, `unsold_products`, `orphan_item_product_ids`, `p`, `oi`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `matched`, `evidence`, `matched_products`, `unsold_products`, `orphan_item_product_ids`, `p`, `oi`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-04 Exercise 6, read from `products`, and `order_items`. Build the answer toward `matched_products`, `unsold_products`, and `orphan_item_product_ids`; keep `product_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-04 Exercise 6, expected output: One summary row with three mutually interpretable counts. The final columns are `matched_products`, `unsold_products`, and `orphan_item_product_ids`.
+   **Verify:** For sql-04 Exercise 6, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `matched_products`, `unsold_products`, and `orphan_item_product_ids` values match those staged rows without unintended fanout or loss. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
 
 ## Common mistakes and how to recover
 
@@ -257,7 +259,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-04 — Outer Joins.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisite: `sql-03`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day04_outer_joins.md
 - Answer-free learner SQL: sql/postgres-60day/day04_outer_joins.sql
 

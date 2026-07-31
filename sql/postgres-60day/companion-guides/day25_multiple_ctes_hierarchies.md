@@ -35,8 +35,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-25/day25_multiple_ctes_hierarchies.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-25/lesson/workspace/sql/postgres-60day/day25_multiple_ctes_hierarchies.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -69,8 +69,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-CTE pipeline, Hierarchy enrichment, Stage invariant. Its worked SQL reads or creates `employees`, `departments`.
+on screen are not automatically stored. The key vocabulary for this lesson is CTE pipeline, Hierarchy enrichment, Stage invariant. Its worked SQL reads or creates `employees`, `departments`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -80,7 +79,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: Build the employee hierarchy separately and validate (employeeid, depth). Build department aggregates separately at one row per department. Join them only after both grains are stable, so a department measure is not accidentally re-aggregated across hierarchy paths.
+The worked walkthrough's lesson-specific task is: Build the employee hierarchy separately and validate (employeeid, depth). Build department aggregates separately at one row per department. Join them only after both grains are stable, so a department measure is not accidentally re-aggregated across hierarchy paths.
 The expected contract is that One row per hierarchy depth. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
@@ -133,11 +132,9 @@ LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
 ORDER BY reachable_headcount DESC, d.department_id;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per hierarchy depth.
+**How to read it:** Example 1: Start with `employees`, `base_org`, and `departments` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; append branches with `UNION ALL` (duplicates are retained). The final `SELECT` displays `department_id`, `department`, `reachable_headcount`, `avg_salary`, and `deepest_level`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one grouped row per `department_id` with columns `department_id`, `department`, `reachable_headcount`, `avg_salary`, and `deepest_level` from `employees`, `base_org`, and `departments`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -185,9 +182,7 @@ ORDER BY reachable_headcount DESC, d.department_id;
 
 **How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `department_id` key set and row count over `employees`, `base_org`, and `departments`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
 
 ## Learning objectives
 
@@ -228,28 +223,49 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Build a root-based organization CTE and report headcount and payroll by depth.
    **Progressive hint:** Assign depth during recursion, then aggregate employee rows once.
-   **Expected shape:** One row per hierarchy depth.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-25 Exercise 1, read from `employees`, and `organization`. Build the answer toward `depth`, `headcount`, and `payroll`; keep `depth` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-25 Exercise 1, expected output: One row per hierarchy depth. The final columns are `depth`, `headcount`, and `payroll`. The final order is `depth`.
+   **Verify:** For sql-25 Exercise 1, independently aggregate `employees`, and `organization` by `depth`; require one output row for every distinct `depth` tuple and compare `headcount`, and `payroll` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, and `payroll` for the existing `depth` tuple and verify the new tuple appears exactly once.
 2. **Query writing:** Report each manager's direct-report count and payroll.
    **Progressive hint:** Direct-team grain needs one self join, not full recursive descendants.
-   **Expected shape:** One row per manager with at least one direct report.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-25 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`; keep `employee_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-25 Exercise 2, expected output: One row per manager with at least one direct report. The final columns are `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`. The final order is `dt.direct_reports DESC, manager.employee_id`.
+   **Verify:** For sql-25 Exercise 2, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 3. **Query writing:** Identify hierarchy roots and leaves in one report.
    **Progressive hint:** Create root and leaf CTEs at employee grain, then union compatible labeled rows.
-   **Expected shape:** One labeled row per root or leaf employee.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-25 Exercise 3, read from `employees`. Build the answer toward `node_type`, `employee_id`, and `full_name`; keep `employee_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-25 Exercise 3, expected output: One labeled row per root or leaf employee. The final columns are `node_type`, `employee_id`, and `full_name`. The final order is `node_type, employee_id`.
+   **Verify:** For sql-25 Exercise 3, reselect the returned keys directly from the source; require unique `employee_id` where the expected grain is one row per key and confirm the projected `node_type`, `employee_id`, and `full_name` against `employees`. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 4. **Prediction:** Count employees reachable from roots and compare with total employees.
    **Progressive hint:** A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema.
-   **Expected shape:** One row with zero unreachable employees.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-25 Exercise 4, read from `employees`, and `organization`. Build the answer toward `all_employees`, `reachable_employees`, and `unreachable_employees`; keep `employee_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-25 Exercise 4, expected output: One row with zero unreachable employees. The final columns are `all_employees`, `reachable_employees`, and `unreachable_employees`.
+   **Verify:** For sql-25 Exercise 4, project `employee_id` plus the raw source columns from `employees`, and `organization` at each join stage; record row count and distinct `employee_id`, then assert the final `all_employees`, `reachable_employees`, and `unreachable_employees` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 5. **Debugging:** Calculate full-subtree report counts per manager without counting the manager as their own report.
    **Progressive hint:** Seed direct edges and recurse descendants while carrying the original manager.
-   **Expected shape:** One row per manager with descendant count.
-   **Verify:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
+   **Inputs/evidence:** For sql-25 Exercise 5, read from `employees`, and `descendants`. Build the answer toward `manager_id`, and `all_descendant_reports`; keep `manager_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-25 Exercise 5, expected output: One row per manager with descendant count. The final columns are `manager_id`, and `all_descendant_reports`. The final order is `all_descendant_reports DESC, manager_id`.
+   **Verify:** For sql-25 Exercise 5, independently aggregate `employees`, and `descendants` by `manager_id`; require one output row for every distinct `manager_id` tuple and compare `all_descendant_reports` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `all_descendant_reports` for the existing `manager_id` tuple and verify the new tuple appears exactly once.
 6. **Extension:** Report department headcount split between managers and nonmanagers.
    **Progressive hint:** First derive the manager ID set, then conditionally aggregate employees once.
-   **Expected shape:** One row per department.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-25 Exercise 6, read from `employees`, and `departments`. Build the answer toward `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`; keep `department_id`, and `name` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-25 Exercise 6, expected output: One row per department. The final columns are `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`. The final order is `d.department_id`.
+   **Verify:** For sql-25 Exercise 6, independently aggregate `employees`, and `departments` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `headcount`, `managers`, and `nonmanagers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, `managers`, and `nonmanagers` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
+
+## Common mistakes and how to recover
+
+- **Lesson-specific semantic mistake:** Joining ancestor-descendant pairs to employee facts can count one employee multiple times; state whether output is direct-team or full-subtree grain.
+- **Unexpected row count:** display keys before aggregates, count rows after
+  each join/filter stage, and find the first stage whose grain differs from the
+  contract. Do not hide fanout with `DISTINCT`.
+- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
+  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
+  predicate placement and empty-input aggregate behavior.
+- **Unstable top/first/last output:** add `ORDER BY` with a unique final
+  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
+- **`psql` stops on an error:** fix the first error shown by
+  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
+  complete file. A later successful statement does not validate a partial run.
 
 ## Self-check
 
@@ -302,11 +318,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-25 — Multiple CTEs Hierarchies.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisite: `sql-24`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day25_multiple_ctes_hierarchies.md
 - Answer-free learner SQL: sql/postgres-60day/day25_multiple_ctes_hierarchies.sql
 
-The lesson concepts include CTE pipeline, Hierarchy enrichment, Stage invariant. First define those terms in plain
+Key terms to teach in context: CTE pipeline, Hierarchy enrichment, Stage invariant. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -317,11 +333,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-25/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

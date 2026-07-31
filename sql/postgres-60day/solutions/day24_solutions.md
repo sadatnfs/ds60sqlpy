@@ -119,18 +119,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per ancestor-descendant pair.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-24 Exercise 1, read from `employees`, and `reports`. Build the answer toward `manager_id`, `report_id`, `depth`, and `path`; keep `manager_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-24 Exercise 1, expected output: One row per ancestor-descendant pair. The final columns are `manager_id`, `report_id`, `depth`, and `path`. The final order is `manager_id, depth, report_id`.
+- **Independent verification:** For sql-24 Exercise 1, project `manager_id` plus the raw source columns from `employees`, and `reports` at each join stage; record row count and distinct `manager_id`, then assert the final `manager_id`, `report_id`, `depth`, and `path` values match those staged rows without unintended fanout or loss. Add one source row with a new `manager_id`; verify the result gains exactly one row carrying that `manager_id` value.
+- **Intermediate relation check:** For sql-24 Exercise 1, start with the first relation in `employees`, and `reports`; after each join, record total rows and distinct `manager_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-24 Exercise 1, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, and `reports`, preserve one row per `manager_id`, and finish with `manager_id`, `report_id`, `depth`, and `path` ordered by `manager_id, depth, report_id`.
+- **Alternative/trade-off:** For sql-24 Exercise 1, the chosen form is justified by this lesson-specific rationale: Seed every direct edge, carry the original manager, and reject IDs already in the path. Evaluate another form against the concrete expected result (One row per ancestor-descendant pair) and the verification above.
+- **Edge case:** Add one source row with a new `manager_id`; verify the result gains exactly one row carrying that `manager_id` value.
 
 ## Exercise 2 — Query writing
 
@@ -167,18 +162,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exactly one row with 5050.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-24 Exercise 2, read from `numbers`. Compute `sum_1_to_100` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-24 Exercise 2, expected output: Exactly one row with 5050. The final columns are `sum_1_to_100`.
+- **Independent verification:** For sql-24 Exercise 2, evaluate each of `sum_1_to_100` in a separate control `SELECT` over `numbers`; require one final row and compare every value. Force the final predicate to match zero rows and record `sum_1_to_100`; distinguish `COUNT` zero from nullable `SUM` or `AVG` results.
+- **Intermediate relation check:** For sql-24 Exercise 2, inspect the source keys that survive `WHERE`.
+- **Clause check:** For sql-24 Exercise 2, the solution actually uses `WITH`, `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `numbers`, preserve exactly one summary row, and finish with `sum_1_to_100`.
+- **Alternative/trade-off:** For sql-24 Exercise 2, the chosen form is justified by this lesson-specific rationale: Anchor at 1 and stop producing rows after 100. Evaluate another form against the concrete expected result (Exactly one row with 5050) and the verification above.
+- **Edge case:** Force the final predicate to match zero rows and record `sum_1_to_100`; distinguish `COUNT` zero from nullable `SUM` or `AVG` results.
 
 ## Exercise 3 — Query writing
 
@@ -217,18 +207,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exactly 12 chronological month rows.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-24 Exercise 3, read from `months`. Build the answer toward `month_start`; keep `month_start` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-24 Exercise 3, expected output: Exactly 12 chronological month rows. The final columns are `month_start`. The final order is `month_start`.
+- **Independent verification:** For sql-24 Exercise 3, reselect the returned keys directly from the source; require unique `month_start` where the expected grain is one row per key and confirm the projected `month_start` against `months`. Tie two rows on `month_start` and give them different `month_start` values; verify `month_start` chooses a stable first/last row.
+- **Intermediate relation check:** For sql-24 Exercise 3, inspect the source keys that survive `WHERE`; then check `month_start` before applying the row cap.
+- **Clause check:** For sql-24 Exercise 3, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `months`, preserve one row per `month_start`, and finish with `month_start` ordered by `month_start`.
+- **Alternative/trade-off:** For sql-24 Exercise 3, the chosen form is justified by this lesson-specific rationale: Carry a counter as an explicit termination condition. Evaluate another form against the concrete expected result (Exactly 12 chronological month rows) and the verification above.
+- **Edge case:** Tie two rows on `month_start` and give them different `month_start` values; verify `month_start` chooses a stable first/last row.
 
 ## Exercise 4 — Prediction
 
@@ -273,18 +258,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Finite paths starting from node 1; no repeated node inside a path.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-24 Exercise 4, read from `walk`, and `edges`. Build the answer toward `node`, and `path`; keep `node` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-24 Exercise 4, expected output: Finite paths starting from node 1; no repeated node inside a path. The final columns are `node`, and `path`. The final order is `array_length(path, 1), path`.
+- **Independent verification:** For sql-24 Exercise 4, project `node` plus the raw source columns from `walk`, and `edges` at each join stage; record row count and distinct `node`, then assert the final `node`, and `path` values match those staged rows without unintended fanout or loss. Add one source row with a new `node`; verify the result gains exactly one row carrying that `node` value.
+- **Intermediate relation check:** For sql-24 Exercise 4, start with the first relation in `walk`, and `edges`; after each join, record total rows and distinct `node` so the exact fanout or loss is visible.
+- **Clause check:** For sql-24 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `walk`, and `edges`, preserve one row per `node`, and finish with `node`, and `path` ordered by `array_length(path, 1), path`.
+- **Alternative/trade-off:** For sql-24 Exercise 4, the chosen form is justified by this lesson-specific rationale: Reject a destination already present in the path before adding it. Evaluate another form against the concrete expected result (Finite paths starting from node 1; no repeated node inside a path) and the verification above.
+- **Edge case:** Add one source row with a new `node`; verify the result gains exactly one row carrying that `node` value.
 
 ## Exercise 5 — Debugging
 
@@ -337,18 +317,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per employee-ancestor relation.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-24 Exercise 5, read from `employees`, and `ancestors`. Build the answer toward `origin_employee_id`, `ancestor_id`, and `depth`; keep `employee_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-24 Exercise 5, expected output: One row per employee-ancestor relation. The final columns are `origin_employee_id`, `ancestor_id`, and `depth`. The final order is `origin_employee_id, depth`.
+- **Independent verification:** For sql-24 Exercise 5, project `employee_id` plus the raw source columns from `employees`, and `ancestors` at each join stage; record row count and distinct `employee_id`, then assert the final `origin_employee_id`, `ancestor_id`, and `depth` values match those staged rows without unintended fanout or loss. Add one row for which `(ancestor_id IS NOT NULL)` is true and one for which it is false; verify only the matching `employee_id` value is returned.
+- **Intermediate relation check:** For sql-24 Exercise 5, start with the first relation in `employees`, and `ancestors`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-24 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, and `ancestors`, preserve one row per `employee_id`, and finish with `origin_employee_id`, `ancestor_id`, and `depth` ordered by `origin_employee_id, depth`.
+- **Alternative/trade-off:** For sql-24 Exercise 5, the chosen form is justified by this lesson-specific rationale: The recursive step follows current manager ID to the manager row and appends it to path. Evaluate another form against the concrete expected result (One row per employee-ancestor relation) and the verification above.
+- **Edge case:** Add one row for which `(ancestor_id IS NOT NULL)` is true and one for which it is false; verify only the matching `employee_id` value is returned.
 
 ## Exercise 6 — Extension
 
@@ -400,18 +375,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per observed depth.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-24 Exercise 6, read from `employees`, and `organization`. Build the answer toward `depth`, and `employee_count`; keep `depth` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-24 Exercise 6, expected output: One row per observed depth. The final columns are `depth`, and `employee_count`. The final order is `depth`.
+- **Independent verification:** For sql-24 Exercise 6, independently aggregate `employees`, and `organization` by `depth`; require one output row for every distinct `depth` tuple and compare `employee_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `employee_count` for the existing `depth` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-24 Exercise 6, start with the first relation in `employees`, and `organization`; after each join, record total rows and distinct `depth` so the exact fanout or loss is visible.
+- **Clause check:** For sql-24 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, and `organization`, preserve one row per `depth`, and finish with `depth`, and `employee_count` ordered by `depth`.
+- **Alternative/trade-off:** For sql-24 Exercise 6, the chosen form is justified by this lesson-specific rationale: Build the guarded root traversal first, then aggregate only after depth is assigned. Evaluate another form against the concrete expected result (One row per observed depth) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `employee_count` for the existing `depth` tuple and verify the new tuple appears exactly once.
 
 ## Final self-check
 

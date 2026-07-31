@@ -112,18 +112,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per observed month.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-26 Exercise 1, read from `orders`. Build the answer toward `month_start`, `revenue`, `previous_revenue`, and `change`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-26 Exercise 1, expected output: One row per observed month. The final columns are `month_start`, `revenue`, `previous_revenue`, and `change`. The final order is `month_start`.
+- **Independent verification:** For sql-26 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `month_start`, `revenue`, `previous_revenue`, and `change` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-26 Exercise 1, run `monthly`, and `compared` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-26 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `month_start`, `revenue`, `previous_revenue`, and `change` ordered by `month_start`.
+- **Alternative/trade-off:** For sql-26 Exercise 1, the chosen form is justified by this lesson-specific rationale: Aggregate to month in a CTE, then lag the monthly measure. Evaluate another form against the concrete expected result (One row per observed month) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 2 — Query writing
 
@@ -173,18 +168,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per observed month/category.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-26 Exercise 2, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `revenue_rank`; keep `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-26 Exercise 2, expected output: One row per observed month/category. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
+- **Independent verification:** For sql-26 Exercise 2, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, and `revenue_rank`, then verify output keys remain `category`. Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-26 Exercise 2, run `category_month` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-26 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `category`, and finish with `month_start`, `category`, `revenue`, and `revenue_rank` ordered by `month_start, revenue_rank, category`.
+- **Alternative/trade-off:** For sql-26 Exercise 2, the chosen form is justified by this lesson-specific rationale: Aggregate month/category first, then rank the stable aggregate. Evaluate another form against the concrete expected result (One row per observed month/category) and the verification above.
+- **Edge case:** Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
 
 ## Exercise 3 — Query writing
 
@@ -235,18 +225,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Top three revenue ranks for each observed month.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-26 Exercise 3, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `revenue_rank`; keep `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-26 Exercise 3, expected output: Top three revenue ranks for each observed month. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
+- **Independent verification:** For sql-26 Exercise 3, project `category` plus the raw source columns from `orders`, `order_items`, and `products` at each join stage; record row count and distinct `category`, then assert the final `month_start`, `category`, `revenue`, and `revenue_rank` values match those staged rows without unintended fanout or loss. Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-26 Exercise 3, run `category_month`, and `ranked` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-26 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `category`, and finish with `month_start`, `category`, `revenue`, and `revenue_rank` ordered by `month_start, revenue_rank, category`.
+- **Alternative/trade-off:** For sql-26 Exercise 3, the chosen form is justified by this lesson-specific rationale: Rank in one CTE and filter the window result outside. Evaluate another form against the concrete expected result (Top three revenue ranks for each observed month) and the verification above.
+- **Edge case:** Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
 
 ## Exercise 4 — Prediction
 
@@ -301,18 +286,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per month/category with final share equal to one.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-26 Exercise 4, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `cumulative_revenue_share`; keep `month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-26 Exercise 4, expected output: One row per month/category with final share equal to one. The final columns are `month_start`, `category`, `revenue`, and `cumulative_revenue_share`. The final order is `month_start, revenue DESC, category`.
+- **Independent verification:** For sql-26 Exercise 4, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, and `cumulative_revenue_share`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-26 Exercise 4, run `category_month` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-26 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `month`, and finish with `month_start`, `category`, `revenue`, and `cumulative_revenue_share` ordered by `month_start, revenue DESC, category`.
+- **Alternative/trade-off:** For sql-26 Exercise 4, the chosen form is justified by this lesson-specific rationale: Divide running category revenue by the full monthly total; use explicit frames. Evaluate another form against the concrete expected result (One row per month/category with final share equal to one) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 5 — Debugging
 
@@ -373,18 +353,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A continuous chronological month series.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-26 Exercise 5, read from `orders`. Build the answer toward `month_start`, `revenue`, and `moving_3_month_average`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-26 Exercise 5, expected output: A continuous chronological month series. The final columns are `month_start`, `revenue`, and `moving_3_month_average`. The final order is `month_start`.
+- **Independent verification:** For sql-26 Exercise 5, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, and `moving_3_month_average`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-26 Exercise 5, run `bounds`, `calendar`, `monthly`, and `dense` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-26 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `month_start`, `revenue`, and `moving_3_month_average` ordered by `month_start`.
+- **Alternative/trade-off:** For sql-26 Exercise 5, the chosen form is justified by this lesson-specific rationale: Join observed monthly revenue onto the calendar and treat absent observed revenue as zero only because the report defines it that way. Evaluate another form against the concrete expected result (A continuous chronological month series) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 6 — Extension
 
@@ -440,18 +415,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row with zero difference.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-26 Exercise 6, read from `orders`. Build the answer toward `final_cumulative`, `independent_total`, and `difference`; keep `cumulative_revenue` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-26 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `independent_total`, and `difference`.
+- **Independent verification:** For sql-26 Exercise 6, independently aggregate `orders` by `cumulative_revenue`; require one output row for every distinct `cumulative_revenue` tuple and compare `independent_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `independent_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-26 Exercise 6, run `monthly`, `running`, and `final` one at a time. Record each CTE's row count and `cumulative_revenue` uniqueness before the next stage uses it.
+- **Clause check:** For sql-26 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `cumulative_revenue`, and finish with `final_cumulative`, `independent_total`, and `difference`.
+- **Alternative/trade-off:** For sql-26 Exercise 6, the chosen form is justified by this lesson-specific rationale: Compare at the end of the CTE/window chain instead of assuming transformations preserved totals. Evaluate another form against the concrete expected result (One row with zero difference) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `independent_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
 
 ## Final self-check
 

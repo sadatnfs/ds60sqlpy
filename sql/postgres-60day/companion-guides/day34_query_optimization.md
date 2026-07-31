@@ -35,8 +35,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-34/day34_query_optimization.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-34/lesson/workspace/sql/postgres-60day/day34_query_optimization.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -69,8 +69,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Baseline, Predicate pushdown, Semantic equivalence. Its worked SQL reads or creates `orders`, `customers`, `order_items`, `products`.
+on screen are not automatically stored. The key vocabulary for this lesson is Baseline, Predicate pushdown, Semantic equivalence. Its worked SQL reads or creates `orders`, `customers`, `order_items`, `products`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -80,12 +79,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: Capture a baseline and control totals, replace a repeated scalar aggregate with one grouped relation, and join it back. Recheck keys and totals before comparing plans; a faster query that silently drops zero-order customers is not an optimization of the same requirement.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The worked walkthrough's lesson-specific task is: Capture a baseline and control totals, replace a repeated scalar aggregate with one grouped relation, and join it back. Recheck keys and totals before comparing plans; a faster query that silently drops zero-order customers is not an optimization of the same requirement.
+The first runnable example has a concrete contract: Example 1 returns one grouped row per `order_id`, `customer_id`, and `country` with columns `order_id`, `customer_id`, and `country` from `orders`, and `customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `country`. Independently group `orders`, `filtered_orders`, and `customers` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
 
 ## Two worked SQL examples
 
@@ -104,11 +99,9 @@ GROUP BY c.country
 ORDER BY COUNT(*) DESC;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
+**How to read it:** Example 1: Start with `orders`, and `customers` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `country`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one grouped row per `order_id`, `customer_id`, and `country` with columns `order_id`, `customer_id`, and `country` from `orders`, and `customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
 
 ### Example 2
 
@@ -121,9 +114,7 @@ WHERE o.order_date >= now() - interval '7 days';
 
 **How to read it:** Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `order_id`, and `customer_id` key set and row count over `orders`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
 
 ## Learning objectives
 
@@ -149,23 +140,29 @@ optimization of the same requirement.
 Complete these in the [learner SQL](../day34_query_optimization.sql):
 
 1. Replace a scalar/correlated subquery with a join and compare plans.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-34 Exercise 1, run the underlying read-only query over `orders`, `order_items`, and `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+   **Expected result/shape:** For sql-34 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, and `order_date`.
+   **Verify:** For sql-34 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 2. Limit rows early without changing the result.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-34 Exercise 2, run the underlying read-only query over `orders`, `customers`, and `top_orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+   **Expected result/shape:** For sql-34 Exercise 2, expected output: at most 100 rows keyed by `order_id`. The final columns are `order_id`, `order_date`, and `country`. The final order is `t.order_date DESC, t.order_id DESC`.
+   **Verify:** For sql-34 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 3. Predict `MATERIALIZED` versus `NOT MATERIALIZED` planner freedom.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-34 Exercise 3, run the underlying read-only query over `orders`, `recent`, and `customers` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+   **Expected result/shape:** For sql-34 Exercise 3, expected output: one row per `order_id`. The final columns are `materialized`.
+   **Verify:** For sql-34 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 4. Pre-aggregate items at order grain and verify totals.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-34 Exercise 4, read from `order_items`, `orders`, and `customers`. Build the answer toward `country`, and `units`; keep `country` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-34 Exercise 4, expected output: one row per order before customer/country joins. The final columns are `country`, and `units`. The final order is `c.country`.
+   **Verify:** For sql-34 Exercise 4, independently aggregate `order_items`, `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `units` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `units` for the existing `country` tuple and verify the new tuple appears exactly once.
 5. Repair payment/item fanout.
-   **Expected result/shape:** Evidence of the incorrect behavior followed by a corrected result at the declared grain, with the violated invariant made visible.
-   **Verify:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
+   **Inputs/evidence:** For sql-34 Exercise 5, read from `payments`, `order_items`, and `orders`. Build the answer toward `order_id`, `paid_amount`, and `line_revenue`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-34 Exercise 5, expected output: at most 20 rows keyed by `order_id`. The final columns are `order_id`, `paid_amount`, and `line_revenue`. The final order is `o.order_id`.
+   **Verify:** For sql-34 Exercise 5, assert no more than 20 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `payments`, `order_items`, and `orders` to confirm `order_id`, `paid_amount`, and `line_revenue` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_id`.
 6. Replace nullable `NOT IN` logic with `NOT EXISTS`.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-34 Exercise 6, read from `customers`, and `orders`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-34 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_id`. The final order is `c.customer_id`.
+   **Verify:** For sql-34 Exercise 6, run an anti-check that counts rows where NOT ((NOT EXISTS ( SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id ))); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Repeat with `NULL` in `customer_id` and state whether the row is kept, rejected, or classified.
 
 Change one thing per experiment and reconcile results before timing.
 
@@ -206,13 +203,9 @@ shape that the optimizer can transform.
 4. Reconcile keys, counts, and totals.
 5. Compare plans under the same data and predicate.
 
-## Practice — match the learner prompts exactly
+## Practice map
 
-1. Replace a scalar or correlated subquery with a join to a pre-aggregated
-   relation, then compare the two plans and outputs.
-2. Limit rows as early as the business semantics permit and compare performance.
-   Do not move `LIMIT` before an aggregate or ordering if that changes which
-   rows are eligible.
+Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
 
 ## Pitfalls and validation
 
@@ -243,11 +236,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-34 — Query Optimization.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisite: `sql-33`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day34_query_optimization.md
 - Answer-free learner SQL: sql/postgres-60day/day34_query_optimization.sql
 
-The lesson concepts include Baseline, Predicate pushdown, Semantic equivalence. First define those terms in plain
+Key terms to teach in context: Baseline, Predicate pushdown, Semantic equivalence. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -258,11 +251,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-34/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

@@ -191,65 +191,121 @@ def decide_recovery(evidence: RecoveryEvidence) -> RecoveryDecision:
 #    description, command text/parameters, and verification.
 #    Hint: Canonical serialization must distinguish structure and parameter types without
 #    depending on object repr.
+#    Verify: Construct valid and invalid migrations; assert blank/bad IDs, blank description,
+#    empty commands, and missing verification fail, while two equal migrations have equal
+#    checksums and any identity/text/parameter change changes the hash.
 # 2. [Redaction] Implement `redact_fields()` for sensitive key names, URL-shaped values,
 #    non-serializable objects, and ordinary scalars.
 #    Hint: Use key classification and safe type conversion; never echo rejected values.
+#    Verify: Pass ordinary scalars, password/token keys, credential URLs, and an exception
+#    object; assert safe scalars survive, sensitive values become fixed markers, output is
+#    JSON-serializable, and no sentinel secret appears in `repr` or JSON.
 # 3. [Planning] Implement `plan_pending()` with duplicate/order validation, unknown
 #    applied-version rejection, and checksum-drift detection.
 #    Hint: Applied history is immutable and must be a prefix of known ordered migrations.
+#    Verify: Assert ordered known history returns only the pending suffix; duplicate/reordered
+#    source, database-only IDs, non-prefix history, and a changed stored checksum each raise
+#    before delivery.
 # 4. [Test double] Build a recording session fake that stores SQL separately from parameter
 #    tuples and never parses PostgreSQL through SQLite.
 #    Hint: Model transactional state and prepared query results explicitly.
+#    Verify: Use a session fake that records `(sql, params)` separately and queues results;
+#    assert it never parses SQL or imports SQLite and exposes commit/rollback/close event order.
 # 5. [Delivery] Implement the documented nine-step delivery order and prove rollback/close
 #    happen before injected retry delay.
 #    Hint: One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then
 #    report.
+#    Verify: Record the nine delivery stages—open, bootstrap/lock, re-check, commands, verify,
+#    metadata, commit, close, report—and in failure assert rollback and close occur before the
+#    sleeper.
 # 6. [Commit uncertainty] Simulate an uncertain commit whose retry sees a matching metadata row
 #    and prove commands are not applied twice.
 #    Hint: Re-check immutable metadata under lock before every attempt.
+#    Verify: Make fake commit persist metadata then raise; on retry, assert matching metadata is
+#    read under the lock, migration commands are not called twice, and result reports the
+#    version skipped/applied once.
 # 7. [Observability] Add event and metric fakes; require request/migration IDs in logs, exclude
 #    request IDs from metric tags, and prove secrets are absent.
 #    Hint: Logs support correlation; metrics require bounded dimensions.
+#    Verify: Inspect events for request and migration IDs and metrics for bounded
+#    migration/outcome tags; assert request ID is absent from metric tags and
+#    URL/password/parameters/exception message are absent everywhere.
 # 8. [Readiness] Implement read-only readiness for current, pending, drifted, and unreachable
 #    states while keeping liveness database-independent.
 #    Hint: Readiness describes safe traffic acceptance, not process existence.
+#    Verify: Assert liveness succeeds without a session; readiness is true for matching current
+#    history and false with explicit reasons for pending, checksum drift, unknown history, or
+#    unreachable database.
 # 9. [Recovery] Build a scenario table for recovery decisions, including incomplete evidence
 #    that must pause.
 #    Hint: Destructive or forward actions require rehearsed, compatible evidence.
+#    Verify: Create scenario rows for unconfirmed diagnosis, committed writes, compatibility,
+#    and rehearsed paths; assert incomplete evidence returns `PAUSE_AND_GATHER_EVIDENCE` and
+#    only supported rows choose forward/rollback.
 # 10. [Optional integration] After fake tests, run the disposable live lab twice and inspect
 #    migration metadata with a read-only query.
 #    Hint: The second run demonstrates idempotency; cleanup evidence is part of completion.
+#    Verify: With explicit live opt-in, run the disposable migration set twice; assert the
+#    second applies nothing, metadata IDs/checksums match source, and the read-only inspection
+#    targets only course objects.
 # 11. [Immutability] Change only SQL whitespace after a migration is applied and decide whether
 #    checksum drift should be accepted.
 #    Hint: A stored checksum is an immutable history contract, not a semantic SQL parser.
+#    Verify: Change only whitespace in applied SQL; assert checksum mismatch is detected and
+#    delivery stops rather than accepting edited immutable history.
 # 12. [Concurrency] Model two deployers contending for the same advisory lock and specify
 #    timeout/ownership behavior.
 #    Hint: Only one delivery transaction may make planning decisions at a time.
+#    Verify: Simulate two sessions on the same advisory lock; assert only the lock holder
+#    plans/applies at a time, the waiter obeys the declared timeout, and both close their own
+#    sessions.
 # 13. [PostgreSQL semantics] Identify which DDL is transactional in PostgreSQL and how
 #    non-transactional commands alter the migration policy.
 #    Hint: Do not assume every administrative statement can share ordinary transaction rollback.
+#    Verify: Produce a reviewed list separating transaction-safe DDL from commands requiring
+#    special handling; any non-transactional command must use a separate migration policy and
+#    recovery proof.
 # 14. [Timeouts] Set statement and lock timeouts per attempt without leaking settings to later
 #    pooled work.
 #    Hint: Transaction-local settings should expire with commit/rollback.
+#    Verify: Record transaction-local statement and lock timeout commands before migration SQL;
+#    assert they end with commit/rollback and are absent when a later pooled session begins.
 # 15. [Telemetry design] Define a bounded migration metric schema and a redaction test for
 #    exception objects and URL-like fields.
 #    Hint: Migration IDs may still become unbounded over years; choose dimensions deliberately.
+#    Verify: Define metric names/tags with a bounded outcome/error class and migration
+#    family/version policy; feed URL-like fields and exceptions through redaction and assert no
+#    secret/message becomes a label.
 # 16. [Probe semantics] Distinguish current-but-stale application readiness from database
 #    reachability and migration currency.
 #    Hint: Each probe should answer one operational question.
+#    Verify: Return separate probe fields for database reachability, schema currency,
+#    application staleness, and process liveness; assert changing one condition changes only its
+#    corresponding reason.
 # 17. [Decision analysis] Compare forward fix and release rollback when the new schema has
 #    already received writes.
 #    Hint: Data written under the new contract can make old code incompatible even if DDL
 #    reversal is possible.
+#    Verify: For schema that has received incompatible new writes, assert release rollback is
+#    rejected unless compatibility and reversal are rehearsed; choose a rehearsed forward fix or
+#    pause.
 # 18. [Expand-contract] Design a three-release expand/migrate/contract sequence for renaming a
 #    populated column.
 #    Hint: Maintain compatibility while old and new application versions overlap.
+#    Verify: Document release A adding nullable new column, release B
+#    dual-writing/backfilling/reading both, and release C enforcing new contract/removing old
+#    only after compatibility evidence.
 # 19. [Cleanup] Prove the optional live lab leaves no table, metadata row, lock, connection, or
 #    credential-bearing output behind.
 #    Hint: A passing mutation test is incomplete without postconditions.
+#    Verify: After the optional lab, query for course tables/metadata, inspect connection close
+#    calls, and scan captured output; assert no lab object, held lock/session, or credential
+#    sentinel remains.
 # 20. [Failure simulation] Inject a network-like error immediately after fake commit and require
 #    the retry to gather evidence rather than blindly replay.
 #    Hint: Client exceptions after commit do not prove server rollback.
+#    Verify: Raise immediately after fake commit; assert the next attempt reads lock-protected
+#    metadata/checksum before any command replay and pauses on conflicting or missing evidence.
 
 
 def main() -> int:

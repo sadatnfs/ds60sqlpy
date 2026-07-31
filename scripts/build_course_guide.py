@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Build the portable, dependency-free DS60 learning guide.
 
-The generated ``START_HERE.html`` embeds the checked-in catalog so it works
-from a clone or USB drive without a web server or network connection.
+The generated ``START_HERE.html`` embeds the checked-in catalog and each
+guide-authored Codex tutoring prompt so it works from a clone or USB drive
+without a web server or network connection.
 """
 
 from __future__ import annotations
@@ -19,8 +20,10 @@ SRC = REPO_ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from ds60sqlpy.catalog import Catalog  # noqa: E402
 from ds60sqlpy.lesson_reader import (  # noqa: E402
     COURSE_GUIDE_REFERENCE_PATHS,
+    codex_coaching_prompt,
     reference_relative_path,
 )
 
@@ -31,6 +34,15 @@ def _catalog_payload() -> dict[str, Any]:
     lessons = payload.get("lessons")
     if not isinstance(lessons, list) or not lessons:
         raise ValueError("curriculum/catalog.json has no lessons")
+    catalog = Catalog.load(REPO_ROOT)
+    for lesson_payload in lessons:
+        if not isinstance(lesson_payload, dict) or not isinstance(
+            lesson_payload.get("id"),
+            str,
+        ):
+            raise ValueError("curriculum/catalog.json contains an invalid lesson")
+        lesson = catalog.get(lesson_payload["id"])
+        lesson_payload["codex_prompt"] = codex_coaching_prompt(catalog, lesson)
     return payload
 
 
@@ -739,9 +751,10 @@ def build_html(payload: dict[str, Any]) -> str:
       <div>
         <strong>You are in portable reading mode.</strong>
         <p>
-          Guides and rendered notebooks are readable here, but a normal browser
-          page cannot safely start VS Code, Jupyter, Python, or PostgreSQL. On
-          Windows, double-click <code>START_DS60.cmd</code>. On macOS/Linux, run
+          Guides, notebooks, Python, and SQL are rendered here as read-only
+          lesson pages, but a normal browser page cannot safely start VS Code,
+          Jupyter, Python, or PostgreSQL. On Windows, double-click
+          <code>START_DS60.cmd</code>. On macOS/Linux, run
           <code>.venv/bin/python scripts/learning_portal.py</code>. The reopened
           page will say <em>Private launcher mode</em> and show real launch buttons.
         </p>
@@ -1020,12 +1033,14 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <div class="callout">
             <h3>Your first SQL launch</h3>
             <p>
-              Start with relational design, then continue to SQL Day 1. In
-              private mode, every SQL catalog card gains an
+              Start with SQL Day 1 and the supplied training schema. Complete
+              relational design between Days 15–16 and migration engineering
+              between Days 39–40. In private
+              mode, every SQL catalog card gains an
               <strong>Open SQL workspace</strong> button that creates the
               lesson-specific guided notebook for you.
             </p>
-            <a class="button" href="lesson-pages/sql-found-01.html">Start SQL foundations</a>
+            <a class="button" href="lesson-pages/sql-01.html">Start SQL Day 1</a>
           </div>
           <div class="callout warning">
             <h3>If a cell fails</h3>
@@ -1058,8 +1073,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <h3>New to both</h3>
             <ul>
               <li>Python Days 1–15</li>
-              <li><code>sql-found-01</code> and <code>sql-found-02</code></li>
               <li>SQL Days 1–15</li>
+              <li>Relational design between SQL Days 15–16</li>
+              <li>Migration engineering between SQL Days 39–40</li>
               <li>Alternate Python/SQL and add the bridge</li>
             </ul>
             <button type="button" class="secondary" data-path-filter="new">Show the starting sequence</button>
@@ -1077,8 +1093,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <article class="panel path-card">
             <h3>PostgreSQL and engineering</h3>
             <ul>
-              <li>Relational foundations before Day 1</li>
-              <li>Querying and analytical SQL</li>
+              <li>Querying starts at SQL Day 1</li>
+              <li>Relational design follows the first project</li>
+              <li>Analytical SQL, transactions, and migrations</li>
               <li>Performance, operations, and projects</li>
               <li>Python/PostgreSQL application bridge</li>
             </ul>
@@ -1130,6 +1147,37 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <strong>Completion means evidence.</strong>
           Mark a lesson complete when you can explain the core idea and produce
           a working attempt—not when you merely opened every file.
+        </div>
+        <div class="grid two" style="margin-top: 1rem">
+          <article class="panel">
+            <h3>What the guide gives you before you ask for help</h3>
+            <ul>
+              <li>A plain-language purpose, mental model, and defined vocabulary</li>
+              <li>Syntax or query anatomy plus two runnable, contrasted examples</li>
+              <li>Expected output, result shape, assertions, or other visible evidence</li>
+              <li>Practice from prediction through debugging, edge cases, and transfer</li>
+              <li>Common-error symptoms, diagnosis, retrieval questions, and next steps</li>
+            </ul>
+            <p class="microcopy">
+              These are enforced minimums, not a substitute for technical and
+              execution review. See the
+              <a href="docs/content-authoring.md">course teaching standard</a>.
+            </p>
+          </article>
+          <article class="panel">
+            <h3>When Codex adds value</h3>
+            <p>
+              Codex can adapt the explanation, ask you to predict, inspect your
+              real output, and reveal one hint at a time. It should not replace
+              missing course material or open the solution before your attempt.
+            </p>
+            <p>
+              Every lesson reader includes its own copy-ready prompt with the
+              stable lesson ID, exact files, prerequisites, safety boundary,
+              tutoring loop, and evidence-based done condition.
+            </p>
+            <a href="#codex">Choose a lesson prompt</a>
+          </article>
         </div>
       </div>
     </section>
@@ -1494,7 +1542,6 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           activePath === "new" &&
           !(
             (lesson.track === "python" && lesson.day >= 1 && lesson.day <= 15) ||
-            ["sql-found-01", "sql-found-02"].includes(lesson.id) ||
             (lesson.track === "sql" && lesson.day >= 1 && lesson.day <= 15)
           )
         ) return false;
@@ -1734,15 +1781,47 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 
     function renderPrompt() {
       const lesson = lessonById.get(codexLesson.value) || lessons[0];
+      if (lesson.codex_prompt) {
+        document.querySelector("#codex-prompt").value = lesson.codex_prompt;
+        return;
+      }
       const prerequisites = lesson.prerequisites.length
         ? lesson.prerequisites.join(", ")
         : "none";
+      const executionBoundary = lesson.track === "sql"
+        ? `For runnable work, use only the local disposable advanced_sql_training database. Prefer the selected lesson reader's Create/open guided SQL notebook action. Before execution, have me state the expected row grain; afterwards, inspect my complete psql transcript and result shape.`
+        : String(lesson.lesson_path).toLowerCase().endsWith(".ipynb")
+          ? `For runnable work, use the repository environment and select the Python (ds60sqlpy) kernel. Have me restart the kernel, run the notebook from the first cell downward, and show my actual output, assertion, or traceback.`
+          : `For runnable work, use the repository environment and run the cataloged learner artifact from the repository root. Inspect my actual output, assertion, test result, or traceback.`;
       document.querySelector("#codex-prompt").value =
 `Use $guide-ds60sqlpy-learning to coach me through ${lesson.id} — ${lesson.title}.
 
-Work from this repository root and inspect the catalog entry, companion guide, and learner artifact. My operating system is ${state.os}. The catalog prerequisites are ${prerequisites}.
+Goal:
+Help me understand and demonstrate this lesson as a complete beginner except for its declared prerequisites: ${prerequisites}.
 
-First verify that I am using the repository interpreter/kernel and ask 2–3 short prerequisite questions. Then teach one concept at a time. Ask me to predict behavior and attempt each exercise. Use progressive hints—concept, structure, partial answer—before any full answer. Do not open files under solutions/ until I ask or finish an honest attempt. Inspect my actual code/query and output, explain evidence precisely, and end with a short retrieval quiz plus the next concrete step.`;
+Repository context:
+- Stable lesson ID: ${lesson.id}
+- Catalog: curriculum/catalog.json
+- Companion guide: ${lesson.guide_path}
+- Answer-free learner artifact: ${lesson.lesson_path}
+- My operating system: ${state.os}
+
+Boundaries:
+- Read the catalog entry, companion guide, and learner artifact first.
+- Treat every path under solutions/ as closed until I explicitly ask after making an honest attempt.
+- Explain each new term in plain language and walk through the syntax or query anatomy before asking me to edit anything.
+- ${executionBoundary}
+- Give one progressive hint at a time; do not silently complete an exercise.
+
+Learning loop:
+1. Predict: ask me to predict the worked example before it runs.
+2. Attempt: ask me to complete one bounded exercise and show my real work.
+3. Hint: diagnose the first mismatch and reveal only the next useful hint.
+4. Evidence: inspect the actual code/query and output instead of accepting “it worked.”
+5. Retrieval: finish with three no-notes questions and one small transfer task.
+
+Done when:
+I can produce a working result, explain why it works in my own words, identify one common failure mode, justify the verification evidence, and answer the retrieval questions without copying an official solution.`;
     }
 
     codexLesson.addEventListener("change", renderPrompt);

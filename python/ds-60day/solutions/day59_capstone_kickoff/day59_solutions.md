@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Exercise 1 — Problem and hypotheses (template)
+Worked reference for Exercise 1 — Problem and hypotheses (template)
 ```markdown
 # Problem Statement
 We aim to predict <target> for <users/stakeholders> to achieve <business value>.
@@ -24,7 +24,7 @@ We aim to predict <target> for <users/stakeholders> to achieve <business value>.
 - Secondary: Calibration error ≤ 0.02, latency ≤ 50ms P95
 ```
 
-Exercise 2 — Data sources and contracts
+Worked reference for Exercise 2 — Data sources and contracts
 ```markdown
 ## Sources
 - Warehouse table analytics.users_daily (owner: data-eng)
@@ -35,7 +35,7 @@ Exercise 2 — Data sources and contracts
 - Access: request via JIRA SEC‑123; principle of least privilege
 ```
 
-Exercise 3 — Baseline, risks, milestones
+Worked reference for Exercise 3 — Baseline, risks, milestones
 ```markdown
 ## Baseline
 - Heuristic: last_30d_activity>0 → non‑churner; baseline AUC ≈ 0.62
@@ -91,7 +91,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Write the problem statement and success metric in the notebook.
 
@@ -101,16 +101,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Write the problem statement and success metric in the notebook`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — capstone scope, decision framing, data contracts, and early stop rules — write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Create the project skeleton.
 
@@ -120,16 +113,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Create the project skeleton`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+**Verify:** Practice 2 — capstone scope, decision framing, data contracts, and early stop rules — create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Build a baseline and record metrics.
 
@@ -139,14 +125,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Build a baseline and record metrics`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — capstone scope, decision framing, data contracts, and early stop rules — save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
 
 ### Exercise 4 — Scope and stop rules
 
@@ -165,14 +144,7 @@ Record the decision and date in a log. A well-supported “do not deploy” or
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data,...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Scope and stop rules — deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.
 
 ### Exercise 5 — Capstone data contract
 
@@ -191,14 +163,7 @@ credential, restricted dataset, or developer-specific absolute path.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Create a versioned schema and quality report for your chosen local dataset, including source/...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Capstone data contract — validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.
 
 ### Exercise 6 — Decision log
 
@@ -218,4 +183,4 @@ operational rather than permanent dogma.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Record at least five project decisions with date, question, alternatives, evidence, chosen ac...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+**Verify:** Decision log — record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.

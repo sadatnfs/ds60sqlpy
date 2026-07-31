@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Exercise 1 — Data classification matrix
+Worked reference for Exercise 1 — Data classification matrix
 ```markdown
 | Data class | Examples | Storage | Access | Retention |
 |-----------:|----------|---------|--------|-----------|
@@ -23,7 +23,7 @@ Guidance
 
 ---
 
-Exercise 2 — Group metrics
+Worked reference for Exercise 2 — Group metrics
 ```python
 import numpy as np, pandas as pd
 from sklearn.metrics import precision_score, recall_score
@@ -53,7 +53,7 @@ Notes
 
 ---
 
-Exercise 3 — Model card template
+Worked reference for Exercise 3 — Model card template
 ```markdown
 # Model Card — <model name>
 
@@ -124,7 +124,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Build a DataFrame PII scanner covering column names and free text.
 
@@ -134,16 +134,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Build a DataFrame PII scanner covering column names and free text`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+**Verify:** Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Add a function that masks email addresses and phone numbers in text.
 
@@ -153,16 +146,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Add a function that masks email addresses and phone numbers in text`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Simulate subgroup precision and recall for a classifier and compare groups.
 
@@ -172,16 +158,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Simulate subgroup precision and recall for a classifier and compare groups`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+**Verify:** Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 4
+### Exercise 4 — Original lesson practice
 
 **Prompt:** Draft a one-page data-ethics checklist for your project.
 
@@ -191,14 +170,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Draft a one-page data-ethics checklist for your project`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
-
+**Verify:** Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
 
 ### Exercise 5 — Threat modeling
 
@@ -218,14 +190,7 @@ checkbox marked complete.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For e...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.
 
 ### Exercise 6 — Re-identification reasoning
 
@@ -245,14 +210,7 @@ data, or differential privacy with an explicit threat model and privacy budget.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-ano...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.
 
 ### Exercise 7 — Fairness uncertainty
 
@@ -273,14 +231,7 @@ not by whichever metric looks most favorable.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
-
-
+**Verify:** Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.
 
 ### Exercise 8 — Incident response
 
@@ -301,4 +252,4 @@ access. Do not reproduce the sensitive value in tickets or logs.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Simulate discovering raw emails in a committed notebook output. Write the containment, notifi...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+**Verify:** Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.

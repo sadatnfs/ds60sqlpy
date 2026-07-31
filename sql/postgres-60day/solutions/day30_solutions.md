@@ -104,18 +104,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per cohort month.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-30 Exercise 1, read from `customers`. Build the answer toward `cohort_month`, and `cohort_size`; keep `cohort_month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-30 Exercise 1, expected output: One row per cohort month. The final columns are `cohort_month`, and `cohort_size`. The final order is `cohort_month`.
+- **Independent verification:** For sql-30 Exercise 1, independently aggregate `customers` by `cohort_month`; require one output row for every distinct `cohort_month` tuple and compare `cohort_size` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `cohort_size` for the existing `cohort_month` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-30 Exercise 1, run `cohorts` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-30 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `cohort_month`, and finish with `cohort_month`, and `cohort_size` ordered by `cohort_month`.
+- **Alternative/trade-off:** For sql-30 Exercise 1, the chosen form is justified by this lesson-specific rationale: Build the denominator from customers, including customers who never order. Evaluate another form against the concrete expected result (One row per cohort month) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `cohort_size` for the existing `cohort_month` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 2 — Query writing
 
@@ -166,18 +161,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per observed cohort/order month.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-30 Exercise 2, read from `orders`, `order_items`, and `customers`. Build the answer toward `cohort_month`, `order_month`, `active_customers`, and `net_revenue`; keep `cohort_month`, and `order_month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-30 Exercise 2, expected output: One row per observed cohort/order month. The final columns are `cohort_month`, `order_month`, `active_customers`, and `net_revenue`. The final order is `c.cohort_month, ov.order_month`.
+- **Independent verification:** For sql-30 Exercise 2, independently aggregate `orders`, `order_items`, and `customers` by `cohort_month`, and `order_month`; require one output row for every distinct `cohort_month`, and `order_month` tuple and compare `order_month`, `active_customers`, and `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `active_customers`, and `net_revenue` for the existing `cohort_month`, and `order_month` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-30 Exercise 2, run `order_values`, and `cohorts` one at a time. Record each CTE's row count and `cohort_month`, and `order_month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-30 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `customers`, preserve one row per `cohort_month`, and `order_month`, and finish with `cohort_month`, `order_month`, `active_customers`, and `net_revenue` ordered by `c.cohort_month, ov.order_month`.
+- **Alternative/trade-off:** For sql-30 Exercise 2, the chosen form is justified by this lesson-specific rationale: Aggregate line items to order grain before cohort joins, then count distinct active customers. Evaluate another form against the concrete expected result (One row per observed cohort/order month) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `active_customers`, and `net_revenue` for the existing `cohort_month`, and `order_month` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 3 — Query writing
 
@@ -235,18 +225,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Observed cohort/offset rows with retention from 0 to 1.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-30 Exercise 3, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`; keep `cohort_month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-30 Exercise 3, expected output: Observed cohort/offset rows with retention from 0 to 1. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`. The final order is `a.cohort_month, month_offset`.
+- **Independent verification:** For sql-30 Exercise 3, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
+- **Intermediate relation check:** For sql-30 Exercise 3, run `cohorts`, `cohort_sizes`, and `activity` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-30 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `cohort_month`, and finish with `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate` ordered by `a.cohort_month, month_offset`.
+- **Alternative/trade-off:** For sql-30 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use year-plus-month age components and guard the denominator. Evaluate another form against the concrete expected result (Observed cohort/offset rows with retention from 0 to 1) and the verification above.
+- **Edge case:** Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
 
 ## Exercise 4 — Prediction
 
@@ -317,18 +302,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Thirteen rows per cohort.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-30 Exercise 4, read from `customers`, `orders`, and `generate_series`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`; keep `cohort_month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-30 Exercise 4, expected output: Thirteen rows per cohort. The final columns are `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`. The final order is `s.cohort_month, s.month_offset`.
+- **Independent verification:** For sql-30 Exercise 4, project `cohort_month` plus the raw source columns from `customers`, `orders`, and `generate_series` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, and `active_customers` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
+- **Intermediate relation check:** For sql-30 Exercise 4, run `cohorts`, `cohort_sizes`, `activity`, and `spine` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-30 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, `orders`, and `generate_series`, preserve one row per `cohort_month`, and finish with `cohort_month`, `month_offset`, `cohort_size`, and `active_customers` ordered by `s.cohort_month, s.month_offset`.
+- **Alternative/trade-off:** For sql-30 Exercise 4, the chosen form is justified by this lesson-specific rationale: Cross join cohort months with generate_series, then left join observed activity at the same offset grain. Evaluate another form against the concrete expected result (Thirteen rows per cohort) and the verification above.
+- **Edge case:** Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
 
 ## Exercise 5 — Debugging
 
@@ -409,18 +389,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per observed cohort/month with nullable guarded measures.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-30 Exercise 5, read from `orders`, `order_items`, and `customers`. Build the answer toward `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`; keep `cohort_month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-30 Exercise 5, expected output: One row per observed cohort/month with nullable guarded measures. The final columns are `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`. The final order is `cohort_month, month_offset`.
+- **Independent verification:** For sql-30 Exercise 5, choose one complete partition from `orders`, `order_items`, and `customers`; hand-calculate its first, middle, and final window values for `order_month`, `active_customers`, `revenue`, and `revenue_per_active`, then verify output keys remain `cohort_month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-30 Exercise 5, run `order_values`, `cohorts`, `metrics`, and `per_active` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-30 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `customers`, preserve one row per `cohort_month`, and finish with `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv` ordered by `cohort_month, month_offset`.
+- **Alternative/trade-off:** For sql-30 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute stable cohort metrics before applying the window; disclose that observed rows may have month gaps. Evaluate another form against the concrete expected result (One row per observed cohort/month with nullable guarded measures) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 6 — Extension
 
@@ -511,18 +486,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row with zero retention violations and zero revenue difference.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-30 Exercise 6, read from `orders`, `order_items`, and `customers`. Build the answer toward `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-30 Exercise 6, expected output: One row with zero retention violations and zero revenue difference. The final columns are `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`.
+- **Independent verification:** For sql-30 Exercise 6, project `order_id` plus the raw source columns from `orders`, `order_items`, and `customers` at each join stage; record row count and distinct `order_id`, then assert the final `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-30 Exercise 6, run `order_values`, `cohorts`, `cohort_sizes`, `metrics`, and `scoped` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-30 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, `order_items`, and `customers`, preserve one row per `order_id`, and finish with `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`.
+- **Alternative/trade-off:** For sql-30 Exercise 6, the chosen form is justified by this lesson-specific rationale: Calculate violations and compare totals at the same scoped population. Evaluate another form against the concrete expected result (One row with zero retention violations and zero revenue difference) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Final self-check
 

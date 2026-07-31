@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import difflib
 import json
 import re
 import sys
@@ -47,10 +48,116 @@ EXPLICIT_CHECK = re.compile(
     r"success(?:\s+check)?|check)\s*:\*\*",
     re.IGNORECASE,
 )
+VERIFY_LINE = re.compile(
+    r"^\s*\*\*Verify:\*\*\s*(?P<body>.+)$",
+    re.IGNORECASE | re.MULTILINE,
+)
+FINAL_ORDER = re.compile(
+    r"\bthe\s+final\s+order\s+is\s+`(?P<order>[^`\n]+)`",
+    re.IGNORECASE,
+)
+NESTED_SQL_IN_FINAL_ORDER = re.compile(
+    r"\b(?:select|from|where|group\s+by|having|over|rows\s+between|"
+    r"range\s+between)\b|(?:\)\s+as\b)",
+    re.IGNORECASE,
+)
+OBSERVABLE_EVIDENCE = re.compile(
+    r"\b(?:assert(?:ion|ions)?|expected|equals?|matches?|contains?|returns?|"
+    r"prints?|reports?|records?|shows?|proves?|inspects?|compares?|counts?|"
+    r"rows?|columns?|shapes?|types?|values?|outputs?|results?|evidence|artifacts?|"
+    r"exceptions?|exit|status|files?|paths?|hash(?:es)?|metrics?|scores?|"
+    r"thresholds?|seeds?|repeats?|overlap|ranks?|tests?|checks?|logs?|"
+    r"checklists?|owners?|transcripts?|plots?|figures?|tables?|matri(?:x|ces)|"
+    r"notebooks?|readme|"
+    r"seconds?|bytes?|percent|warnings?|messages?)\b",
+    re.IGNORECASE,
+)
+GENERIC_AUTHORING_RESIDUE = (
+    "key or group explicitly named in the prompt",
+    "grouping key explicitly named in the prompt",
+    "requested calendar/cohort bucket and grouping key",
+    "the statement's declared columns/object",
+    "operation being learned",
+    "demonstrate the concrete requirement",
+    "use identical data, split, metric, and budget for both sides",
+    "assert the return type/shape/value for the stated valid input",
+    "produce the requested artifact with every named field/control",
+    "record the seed, resampling unit, run count, estimate",
+    "state one precise claim, the evidence supporting it",
+    "record the exact command/input, terminal result or returned value",
+    "reproduce the failure first, capture its smallest observable symptom",
+    "report row/feature shapes, seed/splitter",
+    "retain concrete output/assertion evidence",
+    "preserve observed values or named failures",
+    "is complete when a deterministic return value, exception, recorded call "
+    "sequence, or inspected query demonstrates",
+    "apply this constraint while checking it",
+    "is complete when sentinel input and captured output/call history prove the security boundary",
+    "is complete offline with fake-backed evidence",
+    "is complete when deterministic normal, edge, and failure checks demonstrate",
+    "is complete when the prediction is written before execution and the observed "
+    "result is compared with this contract",
+    "is complete when the failure is reproduced first, the repair is applied, and "
+    "before/after evidence demonstrates",
+    "is complete when a short written artifact addresses every named decision",
+    "with the prompt's exact filter, time window, and transaction boundary",
+    "distinguish `null`, zero, and no row, and make ranked/limited output "
+    "deterministic with a unique tie-breaker",
+    "compare key set, totals, `null` placement, and final order",
+    "explain `from`/`join` and `on`, `where`, grouping/aggregate, window, "
+    "projection, and final ordering in logical order",
+    "joins, subqueries, ctes, conditional aggregates, or windows are "
+    "interchangeable only when they preserve",
+    "inspect each join/cte stage over",
+    "versus numeric zero and an absent row",
+    "the expected contract is that the result must preserve the row grain "
+    "described in the walkthrough and expose every named key or measure",
+    "the answer's named identity",
+    "the demonstrated identity",
+    "intended the answer",
+    "the fields explicitly named in the answer",
+    "each of the derived value",
+    "one row per the answer",
+    "unique the answer",
+    "the intended accepted, ignored, updated, or rejected outcome",
+    "at most 1 rows",
+    "the final columns are `*`",
+    "the exercise's documented",
+    "the exercise's stated secondary order",
+    "the row-grain key",
+    "the intended the exercise's",
+    "named in the prompt",
+    "business sort value",
+    "qualifying group",
+    "one labeled matrix/checklist entry for every mechanism",
+    "preserve the stated grain",
+    "build exactly one summary row containing",
+    "run a single-purpose aggregate",
+    "before and after each join among",
+    "requested join grain",
+    "test one value exactly on each stated time/range boundary",
+    "use fewer source rows than the limit, then more than the limit",
+    "documented grain",
+    "requested order",
+    "this exercise's stated",
+    "empty qualifying set",
+    "against every noun in the prompt",
+    "with no related rows and one with tied candidate rows",
+    "leading `order by` expression",
+    "the `where` predicate",
+    "outer predicate",
+    "survives the filter",
+    "the first group's measure",
+    "result_value",
+    "the complete projected row",
+    "before/after rows keyed by",
+)
+TRUNCATED_TASK_LABEL = re.compile(r"for\s+task\s+`[^`\n]*\.\.\.`", re.IGNORECASE)
 PRACTICE_HEADING = re.compile(
-    r"^(?:(?:additional|guided|independent|mastery)\s+)?"
+    r"^(?:(?:additional|extended|guided|independent|learner|mastery|professional)\s+)*"
     r"(?:exercises?|practice(?:\s+(?:set|problems?|tasks?|lab))?|"
     r"challenges?|project\s+tasks?|checkpoints?)"
+    r"(?:\s+(?:and|with)\s+(?:progressive\s+)?hints?)?"
     r"(?:\s*[:—-].*)?$",
     re.IGNORECASE,
 )
@@ -191,6 +298,16 @@ def _practice_blocks(source: str) -> list[str]:
                 in_practice = True
                 practice_level = level
                 continue
+            if in_practice and re.fullmatch(
+                r"(?:progressive\s+)?hints?",
+                title.strip(),
+                re.IGNORECASE,
+            ):
+                if current:
+                    blocks.append("\n".join(current))
+                    current = []
+                in_practice = False
+                continue
             if in_practice and level <= practice_level:
                 if current:
                     blocks.append("\n".join(current))
@@ -226,6 +343,77 @@ def _repeated_check_lines(blocks: list[str]) -> dict[str, int]:
             counts[normalized] = counts.get(normalized, 0) + 1
             display.setdefault(normalized, compact)
     return {display[normalized]: count for normalized, count in counts.items() if count >= 3}
+
+
+def _weak_verify_lines(blocks: list[str]) -> tuple[str, ...]:
+    """Return Verify contracts that do not name observable completion evidence."""
+
+    weak: list[str] = []
+    for block in blocks:
+        for match in VERIFY_LINE.finditer(block):
+            body = match.group("body").strip()
+            if OBSERVABLE_EVIDENCE.search(body) is None:
+                weak.append(body)
+    return tuple(weak)
+
+
+def _contract_text(source: str) -> str:
+    """Normalize Markdown contract prose for near-duplicate comparisons."""
+
+    source = re.sub(r"^\s*\*\*[^*\n]{1,80}:\*\*\s*", "", source.strip())
+    return " ".join(re.findall(r"[a-z0-9]+", source.casefold()))
+
+
+def _restated_verify_lines(blocks: list[str]) -> tuple[str, ...]:
+    """Return Verify lines that mostly repeat the exercise instead of testing it."""
+
+    restated: list[str] = []
+    for block in blocks:
+        verify = VERIFY_LINE.search(block)
+        if verify is None:
+            continue
+        prompt = block[: verify.start()]
+        hint = re.search(
+            r"(?im)^\s*\*\*(?:progressive\s+)?hint:\*\*",
+            prompt,
+        )
+        if hint:
+            prompt = prompt[: hint.start()]
+        prompt_text = _contract_text(prompt)
+        verify_text = _contract_text(verify.group("body"))
+        if len(prompt_text.split()) < 6 or not verify_text:
+            continue
+        length_ratio = len(prompt_text.split()) / len(verify_text.split())
+        similarity = difflib.SequenceMatcher(None, prompt_text, verify_text).ratio()
+        prompt_is_most_of_verify = prompt_text in verify_text and length_ratio >= 0.65
+        if prompt_is_most_of_verify or similarity >= 0.84:
+            restated.append(verify.group("body").strip())
+    return tuple(restated)
+
+
+def _template_residue(source: str) -> tuple[str, ...]:
+    """Return generic authoring phrases that must be replaced with lesson facts."""
+
+    folded = " ".join(source.casefold().split())
+    residue = [
+        phrase
+        for phrase in GENERIC_AUTHORING_RESIDUE
+        if " ".join(phrase.casefold().split()) in folded
+    ]
+    if TRUNCATED_TASK_LABEL.search(source):
+        residue.append("truncated `For task ...` label")
+    return tuple(residue)
+
+
+def _malformed_final_orders(source: str) -> tuple[str, ...]:
+    """Return SQL contracts that confuse nested clauses with outer result order."""
+
+    return tuple(
+        match.group("order")
+        for match in FINAL_ORDER.finditer(source)
+        if len(match.group("order")) > 160
+        or NESTED_SQL_IN_FINAL_ORDER.search(match.group("order")) is not None
+    )
 
 
 def _notebook_depth(path: Path) -> NotebookDepth:
@@ -276,6 +464,26 @@ def _notebook_markdown(path: Path) -> str:
     return "\n\n".join(blocks)
 
 
+def _artifact_text(path: Path) -> str:
+    """Return searchable teaching text from a notebook or plain-text artifact."""
+
+    if path.suffix.lower() != ".ipynb":
+        return path.read_text(encoding="utf-8")
+    payload: Any = json.loads(path.read_text(encoding="utf-8"))
+    raw_cells = payload.get("cells", []) if isinstance(payload, dict) else []
+    blocks: list[str] = []
+    for raw_cell in raw_cells:
+        if not isinstance(raw_cell, dict):
+            continue
+        raw_source = raw_cell.get("source", [])
+        blocks.append(
+            "".join(str(part) for part in raw_source)
+            if isinstance(raw_source, list)
+            else str(raw_source)
+        )
+    return "\n\n".join(blocks)
+
+
 def _solution_markdown(catalog: Catalog, lesson: Lesson) -> tuple[int, int]:
     """Return the least-complete explanatory solution's words and code blocks."""
 
@@ -295,9 +503,24 @@ def _solution_structure_issues(catalog: Catalog, lesson: Lesson) -> list[str]:
 
     issues: list[str] = []
     for relative_path in lesson.solution_paths:
+        source = catalog.resolve(relative_path).read_text(encoding="utf-8")
+        residue = _template_residue(source)
+        if residue:
+            issues.append(
+                f"{relative_path} contains generic authoring residue "
+                f"{', '.join(repr(phrase) for phrase in residue)}; replace it with "
+                "the exercise's actual concept, grain, objects, and evidence"
+            )
+        if lesson.track == "sql":
+            malformed_orders = _malformed_final_orders(source)
+            if malformed_orders:
+                issues.append(
+                    f"{relative_path} contains {len(malformed_orders)} SQL exercise "
+                    "contracts that confuse a nested window/subquery clause with "
+                    "the final ORDER BY"
+                )
         if Path(relative_path).suffix.lower() != ".md":
             continue
-        source = catalog.resolve(relative_path).read_text(encoding="utf-8")
         counts = Counter(match.group("number") for match in SOLUTION_LABEL.finditer(source))
         duplicates = sorted(number for number, count in counts.items() if count > 1)
         if duplicates:
@@ -357,6 +580,9 @@ def _guide_issues(
     for marker, label in codex_markers.items():
         if marker.casefold() not in ask_codex.casefold():
             issues.append(f"Ask Codex prompt does not name {label}")
+    for prerequisite in lesson.prerequisites:
+        if prerequisite.casefold() not in ask_codex.casefold():
+            issues.append(f"Ask Codex prompt does not name catalog prerequisite {prerequisite}")
     if "```text" not in ask_codex.casefold():
         issues.append("Ask Codex section does not contain a fenced text prompt")
     for marker in ("predict", "attempt", "hint", "evidence", "retrieval"):
@@ -378,6 +604,19 @@ def _guide_issues(
             f"{len(practice_blocks) - explicit_checks}/{len(practice_blocks)} "
             "guide exercises lack an explicit Expected or Verify line"
         )
+    weak_verify_lines = _weak_verify_lines(practice_blocks)
+    if weak_verify_lines:
+        issues.append(
+            f"{len(weak_verify_lines)} guide Verify lines do not name observable "
+            "evidence such as an assertion, expected value, output, row/shape, "
+            "file/hash, metric, transcript, or test result"
+        )
+    restated_verify_lines = _restated_verify_lines(practice_blocks)
+    if restated_verify_lines:
+        issues.append(
+            f"{len(restated_verify_lines)} guide Verify lines merely restate the "
+            "exercise; add an independent, topic-specific acceptance check"
+        )
     repeated_checks = _repeated_check_lines(practice_blocks)
     if repeated_checks:
         worst_line, worst_count = max(repeated_checks.items(), key=lambda item: item[1])
@@ -385,8 +624,22 @@ def _guide_issues(
             f"guide repeats one Expected/Verify contract {worst_count} times; "
             f"make each exercise's evidence topic-specific: {worst_line}"
         )
+    residue = _template_residue(source)
+    if residue:
+        issues.append(
+            "guide contains generic authoring residue "
+            f"{', '.join(repr(phrase) for phrase in residue)}; replace it with the "
+            "lesson's actual concept, grain, objects, and evidence"
+        )
 
     if lesson.track == "sql":
+        malformed_orders = _malformed_final_orders(source)
+        if malformed_orders:
+            issues.append(
+                f"{len(malformed_orders)} SQL exercise contracts confuse a nested "
+                "window/subquery clause with the final ORDER BY; state only the "
+                "outer result order"
+            )
         workspace_path = f".learning/sql/{lesson.id}/lesson/workspace/{lesson.lesson_path}"
         required_sql_text = {
             "advanced_sql_training": "the disposable course database",
@@ -423,6 +676,21 @@ def measure_lesson(catalog: Catalog, lesson: Lesson) -> LessonDepth:
     issues.extend(_solution_structure_issues(catalog, lesson))
 
     lesson_path = catalog.resolve(lesson.lesson_path)
+    learner_residue = _template_residue(_artifact_text(lesson_path))
+    if learner_residue:
+        issues.append(
+            f"{lesson.lesson_path} contains generic authoring residue "
+            f"{', '.join(repr(phrase) for phrase in learner_residue)}; replace it "
+            "with the exercise's actual concept, grain, objects, and evidence"
+        )
+    if lesson.track == "sql":
+        malformed_orders = _malformed_final_orders(_artifact_text(lesson_path))
+        if malformed_orders:
+            issues.append(
+                f"{lesson.lesson_path} contains {len(malformed_orders)} SQL exercise "
+                "contracts that confuse a nested window/subquery clause with the "
+                "final ORDER BY"
+            )
     if (
         lesson.track == "python"
         and 1 <= lesson.day <= 60
@@ -496,6 +764,11 @@ def render_report(rows: list[LessonDepth]) -> str:
         f"- Minimum worked-example fences: **{MIN_GUIDE_CODE_BLOCKS}**",
         f"- Minimum explicitly defined terms: **{MIN_DEFINITIONS}**",
         f"- Minimum explanatory-solution words: **{MIN_SOLUTION_WORDS}**",
+        "- Generic or truncated authoring placeholders: **not allowed**",
+        "- Verify contracts without observable, topic-specific evidence: **not allowed**",
+        "- Duplicate authoritative numbered solution sections: **not allowed**",
+        "- SQL wildcard result columns or nested-query text presented as final order: "
+        "**not allowed**",
         (
             "- Historical Python notebook minimum: "
             f"**{MIN_NOTEBOOK_CELLS} cells**, **{MIN_NOTEBOOK_CODE_CELLS} code cells**, "

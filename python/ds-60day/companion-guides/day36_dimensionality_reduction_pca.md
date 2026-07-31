@@ -197,32 +197,16 @@ assert all(errors[k] >= errors[k + 1] for k in (1, 2, 3))
 
 1. Plot cumulative explained variance and choose a component count.
 
-**Verify:** For task `Plot cumulative explained variance and choose a component count`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
+**Verify:** Practice 1 — PCA geometry, scaling, variance, and reconstruction — fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
 
 2. Compare PCA before and after feature standardization.
 
-**Verify:** For task `Compare PCA before and after feature standardization`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 2 — PCA geometry, scaling, variance, and reconstruction — on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
 
 3. Try `SelectKBest` on a classification dataset and compare its validated
    performance with PCA.
 
-**Verify:** For task `Try SelectKBest on a classification dataset and compare its validated`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Practice 3 — PCA geometry, scaling, variance, and reconstruction — evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
 
 ### Progressive hints
 
@@ -243,39 +227,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Reconstruction analysis:** Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components.
    **Progressive hint:** Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.
 
-**Verify:** For task `Reconstruction analysis: Fit scaled PCA with several component counts, inverse-transform the...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Reconstruction analysis — for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.
 
 5. **Interpretation edge case:** Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent.
    **Progressive hint:** Eigenvectors are direction axes: v and -v describe the same axis. Compare subspaces or absolute loading patterns, not raw signs alone.
 
-**Verify:** For task `Interpretation edge case: Fit PCA twice to equivalent data and explain why a component and al...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Interpretation edge case — fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.
 
 6. **Leakage debugging:** Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference.
    **Progressive hint:** Selection performed globally can choose noise features that happen to correlate with all labels, including validation labels.
 
-**Verify:** For task `Leakage debugging: Create a dataset with many noise features, run SelectKBest once before cro...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
+**Verify:** Leakage debugging — print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -322,10 +287,12 @@ Emphasize PCA geometry, scaling, variance, and reconstruction. Use exactly these
 - guide: `python/ds-60day/companion-guides/day36_dimensionality_reduction_pca.md`
 - learner artifact: `python/ds-60day/notebooks/day36_dimensionality_reduction_pca.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-35`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

@@ -112,38 +112,38 @@ FROM diffs d;
 
 -- Exercises
 -- 1. Implement SCD2 change capture keyed by date_key (choose version where valid_from <= order_date <= coalesce(valid_to,'infinity')).
---    Inputs: Use only the declared lesson objects (training.customers, dim_customer, training.products, dim_product) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-53 Exercise 1, read from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`. Build the answer toward `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`; keep `order_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-53 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`.
+--    Verify: For sql-53 Exercise 1, project `order_id` plus the raw source columns from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-53 Exercise 1, start with the first relation in `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
 -- 2. Add audit columns (updated_by, updated_at) to dim tables.
---    Inputs: Use only the declared lesson objects (training.customers, dim_customer, training.products, dim_product) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-53 Exercise 2, change only `dim_customer`, and `dim_product` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `information_schema.columns` rows.
+--    Expected result/shape: For sql-53 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `updated_by`, and `day53_solution`.
+--    Verify: For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+--    Hint ladder, rung 1: For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
 -- 3. Prediction: explain why closing a version at CURRENT_DATE - 1 can create an
 --    invalid range when two changes for one key arrive on the same date.
---    Inputs: Use only the declared lesson objects (training.customers, dim_customer, training.products, dim_product) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-53 Exercise 3, read from `dim_customer`. Build the answer toward `customer_id`, `valid_from`, `valid_to`, and `invalid_range`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-53 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `valid_from`, `valid_to`, and `invalid_range`. The final order is `valid_from`.
+--    Verify: For sql-53 Exercise 3, run an anti-check that counts rows where NOT ((customer_id = 1)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `valid_from`, `valid_to`, and `invalid_range` against `dim_customer`. Add one row for which `(customer_id = 1)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+--    Hint ladder, rung 1: For sql-53 Exercise 3, inspect the source keys that survive `WHERE`; then check `valid_from` before applying the row cap.
 -- 4. Construction: add a constraint or exclusion-style validation that detects
 --    overlapping effective ranges for each natural customer key.
---    Inputs: Use only the declared lesson objects (training.customers, dim_customer, training.products, dim_product) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-53 Exercise 4, read from `dim_customer`. Build the answer toward `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-53 Exercise 4, expected output: one row per `customer_id`. The final columns are `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`. The final order is `a.customer_id, version_a, version_b`.
+--    Verify: For sql-53 Exercise 4, project `customer_id` plus the raw source columns from `dim_customer` at each join stage; record row count and distinct `customer_id`, then assert the final `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-53 Exercise 4, start with the first relation in `dim_customer`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
 -- 5. Debugging: make the SCD2 load idempotent so rerunning an unchanged source
 --    creates no new version.
---    Inputs: Use only the declared lesson objects (training.customers, dim_customer, training.products, dim_product) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-53 Exercise 5, read from `dim_customer`, `training.customers`, and `c.country`. Build the answer toward `unchanged_rows_that_would_version`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-53 Exercise 5, expected output: one row per `customer_id`. The final columns are `unchanged_rows_that_would_version`.
+--    Verify: For sql-53 Exercise 5, project `customer_id` plus the raw source columns from `dim_customer`, `training.customers`, and `c.country` at each join stage; record row count and distinct `customer_id`, then assert the final `unchanged_rows_that_would_version` values match those staged rows without unintended fanout or loss. Add duplicate source candidates for `customer_id`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+--    Hint ladder, rung 1: For sql-53 Exercise 5, start with the first relation in `dim_customer`, `training.customers`, and `c.country`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
 -- 6. Edge case: define a same-day change policy using timestamptz boundaries or
 --    source sequence numbers, and explain the tradeoff.
---    Inputs: Use only the declared lesson objects (training.customers, dim_customer, training.products, dim_product) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-53 Exercise 6, read from `training.customers`, `dim_customer`, and `changed_customers`. Compute `first_version`, and `ROLLBACK` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-53 Exercise 6, expected output: exactly one aggregate summary row. The final columns are `first_version`, and `ROLLBACK`.
+--    Verify: For sql-53 Exercise 6, evaluate each of `first_version`, and `ROLLBACK` in a separate control `SELECT` over `training.customers`, `dim_customer`, and `changed_customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-53 Exercise 6, select `customer_id` from `training.customers`, `dim_customer`, and `changed_customers` before adding derived columns.
 
 ROLLBACK;

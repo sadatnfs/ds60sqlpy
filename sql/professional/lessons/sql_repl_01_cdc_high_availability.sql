@@ -291,78 +291,78 @@ ORDER BY ci.consumer_name;
 --
 -- 1. Simulate a process crash after the business transaction commits but before
 --    publication. Prove the unpublished outbox event remains discoverable.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-repl-01 Exercise 1, read from `pro_replication_lab.outbox`. Build the answer toward `event_id`, `aggregate_key`, and `aggregate_version`; keep `event_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-repl-01 Exercise 1, expected output: one row per `event_id`. The final columns are `event_id`, `aggregate_key`, and `aggregate_version`. The final order is `o.aggregate_key, o.aggregate_version`.
+--    Verify: For sql-repl-01 Exercise 1, run an anti-check that counts rows where NOT ((NOT o.published)); require unique `event_id` where the expected grain is one row per key and confirm the projected `event_id`, `aggregate_key`, and `aggregate_version` against `pro_replication_lab.outbox`. Add one row for which `(NOT o.published)` is true and one for which it is false; verify only the matching `event_id` value is returned.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 1, inspect the source keys that survive `WHERE`; then check `o.aggregate_key, o.aggregate_version` before applying the row cap.
 -- 2. Simulate consumer redelivery after an external side effect but before
 --    acknowledgement. Explain why an inbox transaction works only when the
 --    effect shares its database; design an idempotency key for an external API.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-repl-01 Exercise 2, read from `pro_replication_lab.inbox`. Build the answer toward `consumer_name`, `event_id`, and `accepted_rows`; keep `consumer_name`, and `event_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-repl-01 Exercise 2, expected output: one row per `consumer_name`, and `event_id`. The final columns are `consumer_name`, `event_id`, and `accepted_rows`. The final order is `i.consumer_name, i.event_id`.
+--    Verify: For sql-repl-01 Exercise 2, independently aggregate `pro_replication_lab.inbox` by `consumer_name`, and `event_id`; require one output row for every distinct `consumer_name`, and `event_id` tuple and compare `accepted_rows` tuple by tuple. Add duplicate source candidates for `consumer_name`, and `event_id`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 2, confirm the groups are `consumer_name`, and `event_id`; then check `i.consumer_name, i.event_id` before applying the row cap.
 -- 3. Deliver aggregate version 3 before version 2 to a fresh consumer and prove
 --    the projection never regresses. Define how gaps are detected/repaired.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-repl-01 Exercise 3, read from `pro_replication_lab.projection`, `pro_replication_lab.inbox`, and `pro_replication_lab.outbox`. Build the answer toward `consumer_name`, `aggregate_key`, `aggregate_version`, and `status`; keep `status` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-repl-01 Exercise 3, expected output: one row per `status`. The final columns are `consumer_name`, `aggregate_key`, `aggregate_version`, and `status`. The final order is `av.aggregate_key`.
+--    Verify: For sql-repl-01 Exercise 3, project `status` plus the raw source columns from `pro_replication_lab.projection`, `pro_replication_lab.inbox`, and `pro_replication_lab.outbox` at each join stage; record row count and distinct `status`, then assert the final `consumer_name`, `aggregate_key`, `aggregate_version`, and `status` values match those staged rows without unintended fanout or loss. Add one source row with a new `status`; verify the result gains exactly one row carrying that `status` value.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 3, run `accepted_versions` one at a time. Record each CTE's row count and `status` uniqueness before the next stage uses it.
 -- 4. Explain physical streaming versus logical replication/publications, and
 --    whether schema DDL and sequences are replicated by the chosen mechanism.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-repl-01 Exercise 4, read from `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription`. Compute `connected_to_recovery_node`, and `server_version` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-repl-01 Exercise 4, expected output: exactly one aggregate summary row. The final columns are `connected_to_recovery_node`, and `server_version`.
+--    Verify: For sql-repl-01 Exercise 4, evaluate each of `server_version` in a separate control `SELECT` over `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription`; require one final row and compare every value. Add one source row with a new `connected_to_recovery_node`; verify the result gains exactly one row carrying that `connected_to_recovery_node` value.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 4, select `connected_to_recovery_node` from `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription` before adding derived columns.
 -- 5. Design slot monitoring around retained WAL bytes, active state, consumer
 --    lag, disk budget, alert threshold, and safe slot retirement. Never drop a
 --    slot merely because its consumer is temporarily disconnected.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-repl-01 Exercise 5, read from `pg_catalog.pg_replication_slots`. Build the answer toward `slot_name`, `slot_type`, `active`, `restart_lsn`, and `confirmed_flush_lsn`; keep `slot_name` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-repl-01 Exercise 5, expected output: one row per `slot_name`. The final columns are `slot_name`, `slot_type`, `active`, `restart_lsn`, and `confirmed_flush_lsn`. The final order is `s.slot_name`.
+--    Verify: For sql-repl-01 Exercise 5, reselect the returned keys directly from the source; require unique `slot_name` where the expected grain is one row per key and confirm the projected `slot_name`, `slot_type`, `active`, `restart_lsn`, and `confirmed_flush_lsn` against `pg_catalog.pg_replication_slots`. Add one source row with a new `slot_name`; verify the result gains exactly one row carrying that `slot_name` value.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 5, check `s.slot_name` before applying the row cap.
 -- 6. Write a failover runbook covering health/quorum, fencing the old primary,
 --    data-loss evidence, DNS/client reconnect, timeline, slot/subscriber state,
 --    RPO/RTO, rollback, and post-failover backups.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-repl-01 Exercise 6, use `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+--    Expected result/shape: For sql-repl-01 Exercise 6, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
+--    Verify: For sql-repl-01 Exercise 6, restore into an isolated target and reconcile `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 6, restore into an isolated target and reconcile `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
 -- 7. Design a logical publication for one table with a row filter and column
 --    list. Explain replica identity for UPDATE/DELETE, unsupported schema
 --    changes, sequence state, initial copy, and how to prove no tenant leaks.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-repl-01 Exercise 7, read from `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`. Build the answer toward `schema_name`, `table_name`, and `replica_identity`; keep `schema_name` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-repl-01 Exercise 7, expected output: one row per `schema_name`. The final columns are `schema_name`, `table_name`, and `replica_identity`.
+--    Verify: For sql-repl-01 Exercise 7, project `schema_name` plus the raw source columns from `pg_catalog.pg_class`, and `pg_catalog.pg_namespace` at each join stage; record row count and distinct `schema_name`, then assert the final `schema_name`, `table_name`, and `replica_identity` values match those staged rows without unintended fanout or loss. Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 7, start with the first relation in `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`; after each join, record total rows and distinct `schema_name` so the exact fanout or loss is visible.
 -- 8. Document a consistent snapshot-to-stream bootstrap. Relate exported
 --    snapshot, start LSN, replication slot, initial copy, handoff, deduplication,
 --    restart, WAL retention, and cleanup after an abandoned bootstrap.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-repl-01 Exercise 8, read from `matching`. Build the answer toward `step_number`, and `required_evidence`; keep `step_number` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-repl-01 Exercise 8, expected output: one row per `step_number`. The final columns are `step_number`, and `required_evidence`. The final order is `step_number`.
+--    Verify: For sql-repl-01 Exercise 8, reselect the returned keys directly from the source; require unique `step_number` where the expected grain is one row per key and confirm the projected `step_number`, and `required_evidence` against `matching`. Add one source row with a new `step_number`; verify the result gains exactly one row carrying that `step_number` value.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 8, check `step_number` before applying the row cap.
 -- 9. Specify a read-after-write contract for traffic sent to replicas. Compare
 --    primary pinning, LSN tokens/waits, bounded staleness, session guarantees,
 --    timeout fallback, and what lag metric users actually experience.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-repl-01 Exercise 9, read from `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription`. Compute `local_visibility_lsn` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-repl-01 Exercise 9, expected output: exactly one aggregate summary row. The final columns are `local_visibility_lsn`.
+--    Verify: For sql-repl-01 Exercise 9, evaluate each of `row_count` in a separate control `SELECT` over `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription`; require one final row and compare every value. Add one source row with a new `local_visibility_lsn`; verify the result gains exactly one row carrying that `local_visibility_lsn` value.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 9, select `local_visibility_lsn` from `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription` before adding derived columns.
 -- 10. Design conflict handling for accidental multi-writer topology. Explain
 --     why wall-clock last-write-wins is unsafe, and compare single-writer
 --     ownership, version checks, deterministic merge, quarantine, and repair.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-repl-01 Exercise 10, read the target keys from `pro_replication_lab.projection` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+--    Expected result/shape: For sql-repl-01 Exercise 10, expected output: the command tag and an independently counted set of affected `status` values. The final columns are `aggregate_key`, `aggregate_version`, and `status`. The final order is `p.aggregate_key`.
+--    Verify: For sql-repl-01 Exercise 10, materialize the intended `status` target set first; require the command tag/`RETURNING` set to match it, then query `pro_replication_lab.projection` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `status` values in both cases.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 10, materialize the intended `status` target set first; require the command tag/`RETURNING` set to match it, then query `pro_replication_lab.projection` again and prove rollback or idempotent retry.
 -- 11. Create a DDL compatibility matrix for publisher/subscriber versions.
 --     Sequence additive columns, defaults, constraints, type changes, indexes,
 --     application deployments, validation, and removal without stopping CDC.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-repl-01 Exercise 11, read from the inline `VALUES` fixture. Build the answer toward `phase`, and `compatibility_gate`; keep `phase` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-repl-01 Exercise 11, expected output: one row per `phase`. The final columns are `phase`, and `compatibility_gate`. The final order is `phase`.
+--    Verify: For sql-repl-01 Exercise 11, reselect the returned keys directly from the source; require unique `phase` where the expected grain is one row per key and confirm the projected `phase`, and `compatibility_gate` against the inline `VALUES` fixture. Add one source row with a new `phase`; verify the result gains exactly one row carrying that `phase` value.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 11, check `phase` before applying the row cap.
 -- 12. Write failback/reseed steps after promotion. Cover new-primary backup,
 --     old-primary fencing, timeline divergence, rewind or rebuild choice,
 --     replication slots, subscriptions, client routing, data checks, and audit.
@@ -389,10 +389,10 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-repl-01 Exercise 12, use `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+--    Expected result/shape: For sql-repl-01 Exercise 12, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
+--    Verify: For sql-repl-01 Exercise 12, restore into an isolated target and reconcile `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+--    Hint ladder, rung 1: For sql-repl-01 Exercise 12, restore into an isolated target and reconcile `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, and `pg_catalog.pg_subscription` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
 
 ROLLBACK;
 \echo 'SQL-REPL-01 complete: no replication object was created'

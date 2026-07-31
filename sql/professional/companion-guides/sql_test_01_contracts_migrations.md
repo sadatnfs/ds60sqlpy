@@ -46,8 +46,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-test-01/sql_test_01_contracts_migrations.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-test-01/lesson/workspace/sql/professional/lessons/sql_test_01_contracts_migrations.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -80,8 +80,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. Its worked SQL reads or creates `pro_contract_test_lab.schema_migrations`, `pro_contract_test_lab.customers`, `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, `pro_contract_test_lab.fixture_manifest`.
+on screen are not automatically stored. The key vocabulary for this lesson is Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. Its worked SQL reads or creates `pro_contract_test_lab.schema_migrations`, `pro_contract_test_lab.customers`, `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, `pro_contract_test_lab.fixture_manifest`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -91,12 +90,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The worked walkthrough's lesson-specific task is: asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_contract_test_lab.schema_migrations`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
 
 ## Two worked SQL examples
 
@@ -113,9 +108,7 @@ CREATE TABLE pro_contract_test_lab.schema_migrations (
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_contract_test_lab.schema_migrations`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ### Example 2
 
@@ -129,9 +122,7 @@ CREATE TABLE pro_contract_test_lab.customers (
 
 **How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 must print the expected DDL command tag for `pro_contract_test_lab.customers`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ## Learning objectives
 
@@ -205,44 +196,54 @@ test harness with a negative control:
 
 1. **Currency migration:** update migration manifest and expected contract for
    the new required defaulted column.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-test-01 Exercise 1, complete the currency migration written analysis and support its claims with read-only evidence from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-test-01 Exercise 1, expected output: a completed the currency migration written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `character`.
+   **Verify:** For sql-test-01 Exercise 1, check the currency migration written analysis against `character`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 2. **Producer duplicates:** report duplicate groups and participating detail
    rows without confusing their grains.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-test-01 Exercise 2, read from `pro_contract_test_lab.raw_orders`. Compute `source_order_key`, and `participating_rows` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-test-01 Exercise 2, expected output: one row per duplicate key group and labels its count `participating_rows`. The final columns are `source_order_key`, and `participating_rows`. The final order is `ro.source_order_key`.
+   **Verify:** For sql-test-01 Exercise 2, evaluate each of `source_order_key`, and `participating_rows` in a separate control `SELECT` over `pro_contract_test_lab.raw_orders`; require one final row and compare every value. Add duplicate source candidates for `source_order_key`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 3. **Key contracts:** inspect defaults, primary/unique keys, and foreign keys
    by properties rather than generated names.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-test-01 Exercise 3, read from `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`. Compute `conkey` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-test-01 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `conkey`.
+   **Verify:** For sql-test-01 Exercise 3, evaluate each of `row_count` in a separate control `SELECT` over `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`; require one final row and compare every value. Add two tied candidates and prove `conkey` identifies both without accidental loss.
 4. **Zero-line reconciliation:** preserve every order and distinguish absent
    detail from a numeric zero.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-test-01 Exercise 4, read from `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line`. Build the answer toward `order_id`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-test-01 Exercise 4, expected output: one row per `order_id`. The final columns are `order_id`.
+   **Verify:** For sql-test-01 Exercise 4, project `order_id` plus the raw source columns from `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line` at each join stage; record row count and distinct `order_id`, then assert the final `order_id` values match those staged rows without unintended fanout or loss. Add one row for which `(o.order_key = 'ORD-200')` is true and one for which it is false; verify only the matching `order_id` value is returned.
 5. **Harness:** document fixture ownership, isolation, negative control, CI exit,
    and cleanup.
-   **Expected result/shape:** Evidence of the incorrect behavior followed by a corrected result at the declared grain, with the violated invariant made visible.
-   **Verify:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
+   **Inputs/evidence:** For sql-test-01 Exercise 5, complete the harness written analysis and support its claims with read-only evidence from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-test-01 Exercise 5, expected output: a completed the harness written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `on_error_stop`.
+   **Verify:** For sql-test-01 Exercise 5, check the harness written analysis against `on_error_stop`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 6. **Expected SQLSTATE:** reject a duplicate for the intended category and fail
    if no error or the wrong error occurs.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-test-01 Exercise 6, read the target keys from `pro_contract_test_lab.orders` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-test-01 Exercise 6, expected output: the command tag and an independently counted set of affected `order_id` values. The final columns are `unique_violation`, and `constraint_name`.
+   **Verify:** For sql-test-01 Exercise 6, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_contract_test_lab.orders` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
 7. **Boundary matrix:** drive below/exact/above/malformed/NULL cases from data
    with an expected outcome for each.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-test-01 Exercise 7, read from `pro_contract_test_lab.boundary_probe`, and `pro_contract_test_lab.boundary_results`. Build the answer toward `case_id`, `quantity`, and `expected_accept`; keep `case_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-test-01 Exercise 7, expected output: one row per `case_id`. The final columns are `case_id`, `quantity`, and `expected_accept`. The final order is `case_id LOOP accepted := true`.
+   **Verify:** For sql-test-01 Exercise 7, reselect the returned keys directly from the source; require unique `case_id` where the expected grain is one row per key and confirm the projected `case_id`, `quantity`, and `expected_accept` against `pro_contract_test_lab.boundary_probe`, and `pro_contract_test_lab.boundary_results`. Repeat with `NULL` in `case_id`, and `quantity` and state whether the row is kept, rejected, or classified.
 8. **Concurrency:** specify sessions, barriers, timeouts, observed states,
    deterministic assertions, and cleanup.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-test-01 Exercise 8, read from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Build the answer toward `lock_timeout`, and `statement_timeout`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-test-01 Exercise 8, expected output: one row per `customer_id`. The final columns are `lock_timeout`, and `statement_timeout`.
+   **Verify:** For sql-test-01 Exercise 8, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `lock_timeout`, and `statement_timeout` against `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 9. **Schema fingerprint:** compare stable semantic properties while excluding
    OIDs and unstable generated names.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-test-01 Exercise 9, read from `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`. Build the answer toward `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default`; keep `ordinal_position` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-test-01 Exercise 9, expected output: one row per `ordinal_position`. The final columns are `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default`. The final order is `con.contype, definition`.
+   **Verify:** For sql-test-01 Exercise 9, project `ordinal_position` plus the raw source columns from `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace` at each join stage; record row count and distinct `ordinal_position`, then assert the final `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default` values match those staged rows without unintended fanout or loss. Give two rows the same `con.contype` value and different `definition` values; verify `con.contype, definition` produces the intended rank and display order.
 10. **Destructive rehearsal:** restore, migrate, reconcile, test critical
     queries, measure, assess rollback, and preserve approval evidence.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-test-01 Exercise 10, use `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+   **Expected result/shape:** For sql-test-01 Exercise 10, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
+   **Verify:** For sql-test-01 Exercise 10, restore into an isolated target and reconcile `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
 
 ## Self-check
 
@@ -283,11 +284,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-test-01 — SQL Tests, Migration Checks, and Data Contracts.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisites: `sql-found-02`, `sql-42`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_test_01_contracts_migrations.md
 - Answer-free learner SQL: sql/professional/lessons/sql_test_01_contracts_migrations.sql
 
-The lesson concepts include Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. First define those terms in plain
+Key terms to teach in context: Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -298,11 +299,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-test-01/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

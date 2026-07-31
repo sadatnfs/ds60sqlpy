@@ -24,13 +24,13 @@ Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=0, strat
 mlflow.set_experiment('rf-breast-cancer')
 ```
 
-Exercise 1 — Grid search with autologging
+Worked reference for Exercise 1 — Grid search with autologging
 ```python
 mlflow.sklearn.autolog()
 
 param_grid = {'n_estimators':[100,300], 'max_depth':[None,5,10]}
 rf = RandomForestClassifier(random_state=0)
-cv = GridSearchCV(rf, param_grid=param_grid, scoring='roc_auc', cv=3, n_jobs=-1, return_train_score=True)
+cv = GridSearchCV(rf, param_grid=param_grid, scoring='roc_auc', cv=3, n_jobs=1, return_train_score=True)
 
 with mlflow.start_run(run_name='rf_grid'):
     cv.fit(Xtr, ytr)
@@ -46,7 +46,7 @@ Explanation
 
 ---
 
-Exercise 2 — Log and load best model
+Worked reference for Exercise 2 — Log and load best model
 ```python
 with mlflow.start_run(run_name='rf_best_model') as run:
     best = RandomForestClassifier(random_state=0, **cv.best_params_).fit(Xtr, ytr)
@@ -68,12 +68,14 @@ Notes
 
 ---
 
-Exercise 3 — Model Registry (concepts)
+Worked reference for Exercise 3 — Model Registry (concepts)
 - Register models for stages: Staging → Production
 - Transition approvals and CI checks gate promotions
 - Versioned artifacts allow rollbacks and auditability
 
 ---
+
+**Portable worker default:** These reference runs use `n_jobs=1` so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming `n_jobs=1` is faster.
 
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
@@ -112,7 +114,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Log additional parameters such as Logistic Regression `C` and compare runs.
 
@@ -122,16 +124,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Log additional parameters such as Logistic Regression C and compare runs`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Save a confusion-matrix PNG and log it as an artifact.
 
@@ -141,16 +136,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Save a confusion-matrix PNG and log it as an artifact`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+**Verify:** Practice 2 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Try a different classifier, such as Random Forest, and compare ROC AUC.
 
@@ -160,14 +148,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Try a different classifier, such as Random Forest, and compare ROC AUC`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
 
 ### Exercise 4 — Failure-state handling
 
@@ -187,14 +168,7 @@ evidence is restricted.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Run an experiment that intentionally raises after logging parameters. Verify MLflow records a...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Failure-state handling — query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.
 
 ### Exercise 5 — Provenance manifest
 
@@ -214,14 +188,7 @@ Keep the source snapshot governed and reproducible.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock ha...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Provenance manifest — download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.
 
 ### Exercise 6 — Reload and signature check
 
@@ -241,4 +208,4 @@ as an extension rather than required for the portable course.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Log a fitted pipeline with an input example/signature, reload it by run URI, and assert predi...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Reload and signature check — load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.

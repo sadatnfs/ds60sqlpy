@@ -1,72 +1,113 @@
 # Day 52 — Solutions: Scalability with Dask
 
-We port a pandas pipeline to Dask, experiment with chunk sizes, and use the dashboard to find bottlenecks.
+We build a local CSV fixture, verify a Dask reduction against pandas, measure persisted reuse, and show an optional local-client boundary.
 
 Contents
-- Exercise 1: Convert pandas pipeline to Dask and benchmark
-- Exercise 2: Adjust chunk sizes and measure impact
-- Exercise 3: Use dashboard to identify bottlenecks
+- Worked reference 1: Verify a local Dask reduction against pandas
+- Worked reference 2: Measure persisted reuse honestly
+- Worked reference 3: Bound and close an optional local client
 
 ---
 
-Exercise 1 — Port pandas to Dask
+Worked reference for Exercise 1 — Port pandas to Dask
 ```python
+from pathlib import Path
+
 import dask.dataframe as dd
-import dask
+import numpy as np
+import pandas as pd
 from dask.diagnostics import ProgressBar
 
-# Example: read many Parquet files
-path = 's3://bucket/data/*.parquet'  # or local pattern
+artifact_dir = Path("artifacts/day52")
+artifact_dir.mkdir(parents=True, exist_ok=True)
+csv_path = artifact_dir / "sales.csv"
+rng = np.random.default_rng(52)
+source = pd.DataFrame(
+    {
+        "store": rng.choice(["north", "south", "west"], size=20_000),
+        "amount": rng.uniform(1, 100, size=20_000),
+        "qty": rng.integers(1, 8, size=20_000),
+    }
+)
+source.to_csv(csv_path, index=False)
 
-ddf = dd.read_parquet(path)
-
-# Pipeline: filter → feature → groupby aggregate
-pipe = (ddf[ddf.amount > 0]
-          .assign(unit=lambda d: d.amount/d.qty)
-          .groupby('store').unit.mean())
-
+ddf = dd.read_csv(str(csv_path), blocksize="64KB")
+pipe = (
+    ddf[ddf.amount > 0]
+    .assign(unit=lambda frame: frame.amount / frame.qty)
+    .groupby("store")
+    .unit.mean()
+)
 with ProgressBar():
-    res = pipe.compute()
-print(res.head())
+    result = pipe.compute().sort_index()
+
+expected = (
+    source[source.amount > 0]
+    .assign(unit=lambda frame: frame.amount / frame.qty)
+    .groupby("store")
+    .unit.mean()
+    .sort_index()
+)
+assert result.index.tolist() == expected.index.tolist()
+np.testing.assert_allclose(
+    result.to_numpy(), expected.to_numpy(), rtol=1e-12
+)
+print(result)
 ```
 Explanation
-- dd.read_parquet lazily constructs a task graph
-- compute triggers execution on the scheduler
-- ProgressBar provides visibility for CLI runs
+- `dd.read_csv` constructs a lazy graph over a concrete local fixture
+- `compute` triggers execution; the pandas result is an independent oracle
+- A small block size exposes partition behavior without requiring large data
 
 ---
 
-Exercise 2 — Chunk sizes
+Worked reference for Exercise 2 — Persisted reuse timing
 ```python
-import dask.array as da
 import time
 
-# About 128 MB of logical float64 data: visible chunking without a 12.8 GB job.
-shape = (4_000, 4_000)
-for chunk in [(500, 500), (1_000, 1_000), (2_000, 2_000)]:
-    x = da.random.random(shape, chunks=chunk)
-    t0 = time.perf_counter()
-    x.mean().compute()
-    elapsed = time.perf_counter() - t0
-    print({'chunk': chunk, 'seconds': round(elapsed, 2)})
+def timed_mean(frame) -> tuple[float, float]:
+    started = time.perf_counter()
+    value = float(frame.amount.mean().compute())
+    return value, time.perf_counter() - started
+
+uncached_value, uncached_seconds = timed_mean(ddf)
+persisted = ddf.persist(scheduler="threads")
+cached_value, cached_seconds = timed_mean(persisted)
+repeat_value, repeat_seconds = timed_mean(persisted)
+
+assert uncached_value == cached_value == repeat_value
+print(
+    {
+        "first_uncached_seconds": round(uncached_seconds, 4),
+        "first_persisted_seconds": round(cached_seconds, 4),
+        "repeat_persisted_seconds": round(repeat_seconds, 4),
+    }
+)
 ```
 Notes
-- Too small chunks → overhead; too large → poor parallelism/memory pressure
-- Use dashboard + this laptop-safe microbenchmark before increasing the shape
+- Include the first persistence cost when comparing one-off work
+- Reuse can help only when later actions share the persisted graph
+- Release persisted references and close clients when the analysis ends
 
 ---
 
-Exercise 3 — Dashboard
+Worked reference for Exercise 3 — Dashboard
 ```python
 from dask.distributed import Client
 
-client = Client()  # local cluster; dashboard at http://localhost:8787
-print(client)
-
-# Persist intermediate to keep in memory across steps
-cached = ddf.persist()
+# Threads avoid Windows process-spawn boilerplate in a notebook. Enable the
+# dashboard intentionally after confirming that the configured port is free.
+client = Client(processes=False, dashboard_address=None, n_workers=2)
+try:
+    cached = client.persist(ddf)
+    row_count = int(cached.shape[0].compute())
+    assert row_count == len(source)
+    print(client)
+finally:
+    client.close()
 ```
 Guidance
+- This smoke run disables the dashboard. Recreate the client with `dashboard_address=":8787"` only when you intentionally want the UI
 - Use the dashboard’s Task Stream to see long‑running tasks
 - Profile memory to detect spilling; consider repartitioning: `ddf = ddf.repartition(npartitions=desired)`
 - Close client when done to free resources: `client.close()`
@@ -110,7 +151,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Read a large local CSV with Dask and compute groupby aggregations.
 
@@ -120,16 +161,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Read a large local CSV with Dask and compute groupby aggregations`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — lazy task graphs, partitions, bounded reducers, and scale evidence — generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Persist the DataFrame and compare repeated timings with and without persistence.
 
@@ -139,16 +173,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Persist the DataFrame and compare repeated timings with and without persistence`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 2 — lazy task graphs, partitions, bounded reducers, and scale evidence — record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Implement the same reduction with `pandas.read_csv(..., chunksize=...)` and compare memory and elapsed time.
 
@@ -158,14 +185,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Implement the same reduction with pandas.readcsv(..., chunksize=...) and compare memory and e...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — lazy task graphs, partitions, bounded reducers, and scale evidence — for identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
 
 ### Exercise 4 — Task-graph tracing
 
@@ -185,14 +205,7 @@ Keep output bounded; computing a small aggregation is different from calling
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and comp...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Task-graph tracing — print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.
 
 ### Exercise 5 — Partition-skew diagnosis
 
@@ -212,14 +225,7 @@ shuffle. Preserve exactness and test the salted/two-stage result against pandas.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Create a group key where one value owns most rows. Measure partition sizes and groupby runtim...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Partition-skew diagnosis — print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.
 
 ### Exercise 6 — Reducer correctness
 
@@ -239,4 +245,4 @@ aggregations; averaging partition means is wrong when partition sizes differ.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Implement a mergeable mean/variance state for chunks and prove it matches NumPy across differ...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+**Verify:** Reducer correctness — test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.

@@ -47,8 +47,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-analytics-01/sql_analytics_01_query_patterns.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-analytics-01/lesson/workspace/sql/professional/lessons/sql_analytics_01_query_patterns.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -81,8 +81,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. Its worked SQL reads or creates `pro_analytics_lab.users`, `pro_analytics_lab.events`, `pro_analytics_lab.daily_activity`, `pro_analytics_lab.campaign_touches`, `pro_analytics_lab.tier_history`.
+on screen are not automatically stored. The key vocabulary for this lesson is Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. Its worked SQL reads or creates `pro_analytics_lab.users`, `pro_analytics_lab.events`, `pro_analytics_lab.daily_activity`, `pro_analytics_lab.campaign_touches`, `pro_analytics_lab.tier_history`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -92,12 +91,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: The raw event grain is one ingestion attempt, so sourceeventid can repeat. The canonical view partitions by source ID and chooses latest ingestedat, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The worked walkthrough's lesson-specific task is: The raw event grain is one ingestion attempt, so sourceeventid can repeat. The canonical view partitions by source ID and chooses latest ingestedat, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_analytics_lab.users`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
 
 ## Two worked SQL examples
 
@@ -114,9 +109,7 @@ CREATE TABLE pro_analytics_lab.users (
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_analytics_lab.users`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ### Example 2
 
@@ -133,9 +126,7 @@ CREATE TABLE pro_analytics_lab.events (
 
 **How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 must print the expected DDL command tag for `pro_analytics_lab.users`, and `pro_analytics_lab.events`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ## Learning objectives
 
@@ -207,53 +198,67 @@ policy, time zone, half-open bounds, tie-break, and an invariant query:
 
 1. **Deduplication:** prove one canonical row per source event and justify the
    winner order.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 1, complete the deduplication written analysis and support its claims with read-only evidence from `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-analytics-01 Exercise 1, expected output: a completed the deduplication written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `source_event_id`, `ingested_at`, and `ingestion_id`.
+   **Verify:** For sql-analytics-01 Exercise 1, check the deduplication written analysis against `source_event_id`, `ingested_at`, and `ingestion_id`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 2. **Sessions:** use a 60-minute rule, calculate duration, and test the exact
    threshold.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 2, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `user_id`, `session_number`, `started_at`, `ended_at`, `duration`, and `events`; keep `user_id`, and `session_number` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-analytics-01 Exercise 2, expected output: one row per `user_id`, and `session_number`. The final columns are `user_id`, `session_number`, `started_at`, `ended_at`, `duration`, and `events`. The final order is `user_id, session_number`.
+   **Verify:** For sql-analytics-01 Exercise 2, independently aggregate `pro_analytics_lab.deduplicated_events` by `user_id`, and `session_number`; require one output row for every distinct `user_id`, and `session_number` tuple and compare `duration`, and `events` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `duration`, and `events` for the existing `user_id`, and `session_number` tuple and verify the new tuple appears exactly once.
 3. **Funnel:** produce one ordered row per user and reject step regressions.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 3, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `user_id`, `signup_at`, `viewed_at`, `added_at`, and `purchased_at`; keep `user_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-analytics-01 Exercise 3, expected output: one row per `user_id`. The final columns are `user_id`, `signup_at`, `viewed_at`, `added_at`, and `purchased_at`. The final order is `c.user_id`.
+   **Verify:** For sql-analytics-01 Exercise 3, reselect the returned keys directly from the source; require unique `user_id` where the expected grain is one row per key and confirm the projected `user_id`, `signup_at`, `viewed_at`, `added_at`, and `purchased_at` against `pro_analytics_lab.deduplicated_events`. Add one source row with a new `user_id`; verify the result gains exactly one row carrying that `user_id` value.
 4. **Islands:** retain islands with at least two active days and verify gaps.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 4, read from `pro_analytics_lab.deduplicated_events`. Compute `user_id`, `island_start`, `island_end`, and `active_days` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-analytics-01 Exercise 4, expected output: one row per user-date. The final columns are `user_id`, `island_start`, `island_end`, and `active_days`. The final order is `n.user_id, island_start`.
+   **Verify:** For sql-analytics-01 Exercise 4, evaluate each of `island_start`, `island_end`, and `active_days` in a separate control `SELECT` over `pro_analytics_lab.deduplicated_events`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `island_start`, `island_end`, and `active_days` for the existing `user_id`, and `island_key` tuple and verify the new tuple appears exactly once.
 5. **Attribution:** test missing touches and timestamp ties with a deterministic
    winner.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 5, read from `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Build the answer toward `touched_at`, and `touch_id`; keep `touch_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-analytics-01 Exercise 5, expected output: one row per `touch_id`. The final columns are `touched_at`, and `touch_id`.
+   **Verify:** For sql-analytics-01 Exercise 5, reselect the returned keys directly from the source; require unique `touch_id` where the expected grain is one row per key and confirm the projected `touched_at`, and `touch_id` against `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Add two tied candidates and prove `touch_id` identifies both without accidental loss.
 6. **Retention:** independently verify cohort size, retained numerator, and
    division.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 6, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `cohort_month`, `cohort_users`, and `month_1_users`; keep `cohort_month` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-analytics-01 Exercise 6, expected output: one row per `cohort_month`. The final columns are `cohort_month`, `cohort_users`, and `month_1_users`. The final order is `c.cohort_month`.
+   **Verify:** For sql-analytics-01 Exercise 6, independently aggregate `pro_analytics_lab.deduplicated_events` by `cohort_month`; require one output row for every distinct `cohort_month` tuple and compare `cohort_users`, and `month_1_users` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `cohort_users`, and `month_1_users` for the existing `cohort_month` tuple and verify the new tuple appears exactly once.
 7. **As-of join:** test an event at an upper boundary and require one successor.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 7, read from `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Build the answer toward `valid_from`, `event_at`, and `valid_to`; keep `valid_from` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-analytics-01 Exercise 7, expected output: one row per `valid_from`. The final columns are `valid_from`, `event_at`, and `valid_to`.
+   **Verify:** For sql-analytics-01 Exercise 7, reselect the returned keys directly from the source; require unique `valid_from` where the expected grain is one row per key and confirm the projected `valid_from`, `event_at`, and `valid_to` against `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 8. **Trailing window:** use a dense date spine and compare `ROWS` with `RANGE`.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 8, read from `pro_analytics_lab.deduplicated_events`. Compute `report_date`, and `trailing_7d_active_users` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-analytics-01 Exercise 8, expected output: one row per calendar date in the requested business zone and LEFT JOIN deduplicated activity by local date. The final columns are `report_date`, and `trailing_7d_active_users`. The final order is `s.report_date`.
+   **Verify:** For sql-analytics-01 Exercise 8, evaluate each of `report_date`, and `trailing_7d_active_users` in a separate control `SELECT` over `pro_analytics_lab.deduplicated_events`; require one final row and compare every value. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 9. **Percentiles:** calculate median/P90 session duration and document
    interpolation and NULL behavior.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 9, use `pro_analytics_lab.deduplicated_events` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+   **Expected result/shape:** For sql-analytics-01 Exercise 9, expected output: one row per session with duration. The final columns are `session_count`, and `median_and_p90`.
+   **Verify:** For sql-analytics-01 Exercise 9, restore into an isolated target and reconcile `pro_analytics_lab.deduplicated_events` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
 10. **Top-N:** compare `row_number`, `rank`, and `dense_rank` under ties.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 10, read from `pro_analytics_lab.deduplicated_events`. Compute `user_id`, and `event_name` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-analytics-01 Exercise 10, expected output: one row per `(user_id,event_name)`, then calculate all three functions ordered by count descending. The final columns are `user_id`, and `event_name`. The final order is `c.user_id, row_number_position`.
+   **Verify:** For sql-analytics-01 Exercise 10, evaluate each of `event_name` in a separate control `SELECT` over `pro_analytics_lab.deduplicated_events`; require one final row and compare every value. Give two rows the same `c.user_id` value and different `row_number_position` values; verify `c.user_id, row_number_position` produces the intended rank and display order.
 11. **Hierarchy:** traverse recursively with depth, path, and cycle protection.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 11, read from `pro_analytics_lab.campaign_nodes`, and `tree`. Compute `campaign_id`, `parent_campaign_id`, `depth`, and `path` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-analytics-01 Exercise 11, expected output: one row per node in a multi-parent graph. The final columns are `campaign_id`, `parent_campaign_id`, `depth`, and `path`. The final order is `path`.
+   **Verify:** For sql-analytics-01 Exercise 11, evaluate each of `parent_campaign_id`, `depth`, and `path` in a separate control `SELECT` over `pro_analytics_lab.campaign_nodes`, and `tree`; require one final row and compare every value. Add one source row with a new `campaign_id`; verify the result gains exactly one row carrying that `campaign_id` value.
 12. **Zero-activity funnel:** retain empty dates and make denominators explicit.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 12, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `report_date`, `signups`, and `purchasers`; keep `report_date` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-analytics-01 Exercise 12, expected output: one row per `report_date`. The final columns are `report_date`, `signups`, and `purchasers`. The final order is `s.report_date`.
+   **Verify:** For sql-analytics-01 Exercise 12, independently aggregate `pro_analytics_lab.deduplicated_events` by `report_date`; require one output row for every distinct `report_date` tuple and compare `signups`, and `purchasers` tuple by tuple. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 13. **Approximation:** specify error, scale, merge, refresh, and exact-check
     requirements before proposing approximate distinct counts.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 13, read the target keys from `pro_analytics_lab.deduplicated_events` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-analytics-01 Exercise 13, expected output: the command tag and an independently counted set of affected `exact_distinct_users` values. The final columns are `exact_distinct_users`.
+   **Verify:** For sql-analytics-01 Exercise 13, materialize the intended `exact_distinct_users` target set first; require the command tag/`RETURNING` set to match it, then query `pro_analytics_lab.deduplicated_events` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `exact_distinct_users` values in both cases.
 14. **Reusable query:** validate parameters and add grain, duplicate, NULL,
     ordering, and time-boundary contracts.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 14, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `source_event_id`, and `event_at`; keep `source_event_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-analytics-01 Exercise 14, expected output: one row per `source_event_id`. The final columns are `source_event_id`, and `event_at`. The final order is `de.event_at, de.source_event_id`.
+   **Verify:** For sql-analytics-01 Exercise 14, project `source_event_id` plus the raw source columns from `pro_analytics_lab.deduplicated_events` at each join stage; record row count and distinct `source_event_id`, then assert the final `source_event_id`, and `event_at` values match those staged rows without unintended fanout or loss. Repeat with `NULL` in `source_event_id`, and `event_at` and state whether the row is kept, rejected, or classified.
 
 ## Self-check
 
@@ -293,11 +298,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-analytics-01 — Reusable Analytical Query Patterns.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisites: `sql-30`, `sql-test-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_analytics_01_query_patterns.md
 - Answer-free learner SQL: sql/professional/lessons/sql_analytics_01_query_patterns.sql
 
-The lesson concepts include Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. First define those terms in plain
+Key terms to teach in context: Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -308,11 +313,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-analytics-01/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

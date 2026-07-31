@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**relational keys, join types, cardinality, and reconciliation**.
+These worked answers demonstrate **relational keys, join types, cardinality, and reconciliation**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 A merge combines rows whose key values match. Before code, state each
 table's grain, which columns form the key, and whether that key is unique
@@ -28,258 +27,167 @@ has the intended meaning.
 - **anti-join:** rows from one side that have no match.
 - **reconciliation:** checks proving expected rows and measures were preserved.
 
-### Reference pattern 1 — Enrich many line items from one product row
+### How to compare an answer
 
-Make many-to-one cardinality executable.
+For this lesson's **relational keys, join types, cardinality, and reconciliation** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
+## Exercises 1–3 — Worked answers
+
+### Exercise 1 — worked answer
+
+**Learner contract:** Join product, order-item, and customer tables to compute revenue per customer. **Before code:** write each table's row grain and key uniqueness. **Sequence:** many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record. **Expected behavior:** one output row per customer with orders. **Verify:** assert both merges pass their declared `validate` relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.
+
+**Reasoning:** Implement this exact contract as written: Join product, order-item, and customer tables to compute revenue per customer. Before code: write each table's row grain and key uniqueness. Sequence: many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record. Expected behavior: one output row per customer with orders. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert both merges pass their declared `validate` relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly. That connects the answer to relational keys, join types, cardinality, and reconciliation.
 
 ```python
 import pandas as pd
 
-items = pd.DataFrame({"sku": ["A", "A", "B"], "qty": [1, 2, 1]})
-products = pd.DataFrame({"sku": ["A", "B"], "price": [10.0, 5.0]})
-priced = items.merge(
-    products, on="sku", how="left",
-    validate="many_to_one", indicator=True
+products = pd.DataFrame({"sku": ["A", "B"], "price": [5.0, 8.0]})
+order_items = pd.DataFrame(
+    {
+        "order_item_id": [1, 2, 3],
+        "cid": [10, 10, 20],
+        "sku": ["A", "B", "A"],
+        "qty": [2, 1, 3],
+    }
 )
-(len(priced), priced["_merge"].value_counts().to_dict())
+customers = pd.DataFrame(
+    {"cid": [10, 20, 30], "name": ["Ada", "Lin", "No Orders"]}
+)
+
+# Grains: one product per sku, one customer per cid, and one order item
+# per order_item_id.
+assert products["sku"].is_unique
+assert customers["cid"].is_unique
+assert order_items["order_item_id"].is_unique
+
+items = order_items.merge(
+    products, on="sku", how="left", validate="many_to_one"
+).assign(revenue=lambda frame: frame["qty"] * frame["price"])
+revenue = (
+    items.groupby("cid", as_index=False)
+    .agg(revenue=("revenue", "sum"))
+    .merge(customers, on="cid", how="left", validate="one_to_one")
+    .loc[:, ["cid", "name", "revenue"]]
+)
+assert revenue["cid"].is_unique
+assert revenue["revenue"].sum() == items["revenue"].sum()
 ```
 
-**Expected observation:** `(3, {'both': 3, ...})`; category counts may include zero-valued labels. No item row was lost or multiplied.
+**Verification evidence:** assert both merges pass their declared `validate` relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.
 
-### Reference pattern 2 — Make an orphan visible
-
-A left merge indicator supports reconciliation and anti-joins.
-
-```python
-more_items = pd.DataFrame({"sku": ["A", "C"], "qty": [1, 1]})
-checked = more_items.merge(
-    products, on="sku", how="left",
-    validate="many_to_one", indicator=True
-)
-checked[["sku", "_merge"]].to_dict("records")
-```
-
-**Expected observation:** `[{'sku': 'A', '_merge': 'both'}, {'sku': 'C', '_merge': 'left_only'}]`. Product `C` is an orphan.
-
-## Exercise-by-exercise reasoning map
-
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
-
-**Learner contract:** Join product, order-item, and customer tables to compute revenue per customer. **Before code:** write each table's row grain and key uniqueness. **Sequence:** many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record. **Expected behavior:** one output row per customer with orders. **Verify:** use `validate` on both merges and reconcile total line revenue to customer revenue.
-
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies relational keys, join types, cardinality, and reconciliation.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
-
-**Edge case:** Null keys, whitespace/case differences, composite keys, duplicate dimensions, and many-to-many multiplication need policy.
-
-**Solution evidence to inspect:** use `validate` on both merges and reconcile total line revenue to customer revenue.
-
-### Exercise 2 — reasoning, alternatives, and proof
+### Exercise 2 — worked answer
 
 **Learner contract:** Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order. **Expected behavior:** the unmatched right row survives with missing order fields. **Then:** swap table order and reproduce the result with a left join. **Verify:** compare sorted keys and explain why left joins are often easier to read from a chosen primary table.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies relational keys, join types, cardinality, and reconciliation.
+**Reasoning:** Implement this exact contract as written: Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order. Expected behavior: the unmatched right row survives with missing order fields. Then: swap table order and reproduce the result with a left join. Keep the prompt's named data and constraints visible in the code, then establish this specific result: compare sorted keys and explain why left joins are often easier to read from a chosen primary table. That connects the answer to relational keys, join types, cardinality, and reconciliation.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+right_joined = order_items.merge(
+    customers, on="cid", how="right", indicator=True
+)
+equivalent_left = customers.merge(
+    order_items, on="cid", how="left", indicator=True
+)
+right_keys = right_joined["cid"].sort_values().reset_index(drop=True)
+left_keys = equivalent_left["cid"].sort_values().reset_index(drop=True)
+pd.testing.assert_series_equal(right_keys, left_keys)
+assert (right_joined["_merge"] == "right_only").any()
+unmatched = right_joined.loc[right_joined["_merge"].eq("right_only")]
+assert unmatched["cid"].tolist() == [30]
+assert unmatched["order_item_id"].isna().all()
+```
 
-**Alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
+The swapped left join is often easier to read because the preserved
+customer table appears first.
 
-**Edge case:** Null keys, whitespace/case differences, composite keys, duplicate dimensions, and many-to-many multiplication need policy.
+**Verification evidence:** compare sorted keys and explain why left joins are often easier to read from a chosen primary table.
 
-**Solution evidence to inspect:** compare sorted keys and explain why left joins are often easier to read from a chosen primary table.
-
-### Exercise 3 — reasoning, alternatives, and proof
+### Exercise 3 — worked answer
 
 **Learner contract:** Create data where a supposedly unique dimension key is duplicated, then use the correct `validate` relationship to raise `MergeError`. **Constraints:** state which side should be one and which may be many; do not de-duplicate merely to silence the error. **Verify:** repair the fixture or data contract and show the validated merge succeeds without row multiplication.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in relational keys, join types, cardinality, and reconciliation.
+**Reasoning:** Reproduce the exact failure described here before changing code: Create data where a supposedly unique dimension key is duplicated, then use the correct `validate` relationship to raise `MergeError`. Constraints: state which side should be one and which may be many; do not de-duplicate merely to silence the error. Preserve that failing case, repair the violated rule, and rerun the evidence named here: repair the fixture or data contract and show the validated merge succeeds without row multiplication. The diagnosis depends on relational keys, join types, cardinality, and reconciliation.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+import pandas as pd
+from pandas.errors import MergeError
 
-**Alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
+duplicated_products = pd.concat([products, products.iloc[[0]]], ignore_index=True)
+try:
+    order_items.merge(
+        duplicated_products,
+        on="sku",
+        how="left",
+        validate="many_to_one",
+    )
+except MergeError:
+    pass
+else:
+    raise AssertionError("duplicated product keys must violate many_to_one")
 
-**Edge case:** Null keys, whitespace/case differences, composite keys, duplicate dimensions, and many-to-many multiplication need policy.
+assert products["sku"].is_unique
+repaired = order_items.merge(
+    products, on="sku", how="left", validate="many_to_one"
+)
+assert len(repaired) == len(order_items)
+```
 
-**Solution evidence to inspect:** repair the fixture or data contract and show the validated merge succeeds without row multiplication.
+**Verification evidence:** repair the fixture or data contract and show the validated merge succeeds without row multiplication.
 
-### Exercise 4 — reasoning, alternatives, and proof
+## Exercises 4–8 — Expanded mastery answers
+
+### Exercise 4 — answer contract
 
 **Learner contract:** **Prediction:** One key appears twice on the left and three times on the right. Predict the number of joined rows for that key. **Progressive hint:** A many-to-many match forms every pair: left count × right count. **Verify:** Build the 2-by-3 fixture and assert exactly six rows for that key; compare with `validate` rejecting the unintended many-to-many relationship.
 
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying relational keys, join types, cardinality, and reconciliation.
+**Reasoning:** Predict this named state change before running it: Prediction: One key appears twice on the left and three times on the right. Predict the number of joined rows for that key. Progressive hint: A many-to-many match forms every pair: left count × right count. Then compare the prediction with this proof target: Build the 2-by-3 fixture and assert exactly six rows for that key; compare with `validate` rejecting the unintended many-to-many relationship. This makes relational keys, join types, cardinality, and reconciliation observable instead of relying on intuition.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Build the 2-by-3 fixture and assert exactly six rows for that key; compare with `validate` rejecting the unintended many-to-many relationship.
 
-**Alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
-
-**Edge case:** Null keys, whitespace/case differences, composite keys, duplicate dimensions, and many-to-many multiplication need policy.
-
-**Solution evidence to inspect:** Build the 2-by-3 fixture and assert exactly six rows for that key; compare with `validate` rejecting the unintended many-to-many relationship.
-
-### Exercise 5 — reasoning, alternatives, and proof
+### Exercise 5 — answer contract
 
 **Learner contract:** **Tracing:** Trace an outer merge with `indicator=True` and classify `left_only`, `right_only`, and `both` rows. **Progressive hint:** The indicator is a compact reconciliation tool. **Verify:** Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.
 
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the relational keys, join types, cardinality, and reconciliation model is visible.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace an outer merge with `indicator=True` and classify `left_only`, `right_only`, and `both` rows. Progressive hint: The indicator is a compact reconciliation tool. Record the named value, shape, label, or iterator position needed to establish: Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count. The trace exposes relational keys, join types, cardinality, and reconciliation directly.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.
 
-**Alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
-
-**Edge case:** Null keys, whitespace/case differences, composite keys, duplicate dimensions, and many-to-many multiplication need policy.
-
-**Solution evidence to inspect:** Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.
-
-### Exercise 6 — reasoning, alternatives, and proof
+### Exercise 6 — answer contract
 
 **Learner contract:** **Implementation:** Implement an anti-join returning left rows whose key has no right match. **Progressive hint:** Use a left merge with indicator, then filter `left_only`. **Verify:** Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies relational keys, join types, cardinality, and reconciliation.
+**Reasoning:** Implement this exact contract as written: Implementation: Implement an anti-join returning left rows whose key has no right match. Progressive hint: Use a left merge with indicator, then filter `left_only`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat. That connects the answer to relational keys, join types, cardinality, and reconciliation.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.
 
-**Alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
-
-**Edge case:** Null keys, whitespace/case differences, composite keys, duplicate dimensions, and many-to-many multiplication need policy.
-
-**Solution evidence to inspect:** Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.
-
-### Exercise 7 — reasoning, alternatives, and proof
+### Exercise 7 — answer contract
 
 **Learner contract:** **Debugging:** Repair a merge whose `validate='one_to_many'` is reversed relative to the actual product-to-order-item relationship. **Progressive hint:** Say which side must have unique keys before choosing `1:m` or `m:1`. **Verify:** Assert key uniqueness on each side, choose `many_to_one` for item-to-product data, and show the reversed validation fails on the duplicate item key.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in relational keys, join types, cardinality, and reconciliation.
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a merge whose `validate='one_to_many'` is reversed relative to the actual product-to-order-item relationship. Progressive hint: Say which side must have unique keys before choosing `1:m` or `m:1`. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Assert key uniqueness on each side, choose `many_to_one` for item-to-product data, and show the reversed validation fails on the duplicate item key. The diagnosis depends on relational keys, join types, cardinality, and reconciliation.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert key uniqueness on each side, choose `many_to_one` for item-to-product data, and show the reversed validation fails on the duplicate item key.
 
-**Alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
-
-**Edge case:** Null keys, whitespace/case differences, composite keys, duplicate dimensions, and many-to-many multiplication need policy.
-
-**Solution evidence to inspect:** Assert key uniqueness on each side, choose `many_to_one` for item-to-product data, and show the reversed validation fails on the duplicate item key.
-
-### Exercise 8 — reasoning, alternatives, and proof
+### Exercise 8 — answer contract
 
 **Learner contract:** **Edge case and explanation:** Investigate how missing keys match in pandas and decide whether to reject, sentinel-fill, or separate them before a business-key join. **Progressive hint:** Do not assume pandas null-key behavior matches SQL. **Verify:** Test two missing keys under pandas behavior, then assert the chosen reject/separate/sentinel policy prevents them from being mistaken for a business match.
 
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from relational keys, join types, cardinality, and reconciliation.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Investigate how missing keys match in pandas and decide whether to reject, sentinel-fill, or separate them before a business-key join. Progressive hint: Do not assume pandas null-key behavior matches SQL. Values below, at, and above the named boundary must produce the evidence Test two missing keys under pandas behavior, then assert the chosen reject/separate/sentinel policy prevents them from being mistaken for a business match. Those cases show how relational keys, join types, cardinality, and reconciliation behaves at its edge.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
-
-**Edge case:** Null keys, whitespace/case differences, composite keys, duplicate dimensions, and many-to-many multiplication need policy.
-
-**Solution evidence to inspect:** Test two missing keys under pandas behavior, then assert the chosen reject/separate/sentinel policy prevents them from being mistaken for a business match.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-We build product and order item tables, compute revenue by customer, demonstrate right join, and validate merge cardinality.
-
-Contents
-- Exercise 1: Join products/order_items/customer to compute revenue
-- Exercise 2: Right join example and when it’s useful
-- Exercise 3: validate='one_to_many' to catch duplicates
-
----
-
-Setup
-```python
-import pandas as pd
-
-customers = pd.DataFrame({"cid":[1,2,3], "name":["Ada","Alan","Linus"]})
-products  = pd.DataFrame({"sku":["A","B"], "price":[10.0, 5.0]})
-order_items = pd.DataFrame({
-    "oid":[10,10,11,12],
-    "cid":[1,1,1,3],
-    "sku":["A","B","A","B"],
-    "qty":[2,1,1,3],
-})
-```
-
-Exercise 1 — Revenue by customer
-```python
-items = order_items.merge(products, on='sku', how='left', validate='m:1')
-items = items.assign(revenue=items['qty'] * items['price'])
-by_cust = (items
-    .groupby('cid', as_index=False)
-    .agg(revenue=('revenue','sum'))
-    .merge(customers, on='cid', how='left', validate='1:1')
-    .loc[:, ['cid','name','revenue']]
-)
-by_cust
-```
-
-Exercise 2 — Right join
-```python
-# Right join all customers with any orders (keep all orders even if cid missing from customers)
-right_demo = order_items.merge(customers, on='cid', how='right', indicator=True)
-right_demo['_merge'].value_counts()
-```
-When useful: preserving all rows from the right table regardless of matches (often you want left joins from a primary fact table; right is symmetric but less common).
-
-Exercise 3 — validate to catch duplicates
-```python
-# Expect each (sku) to map to a single product row; enforce m:1
-items = order_items.merge(products, on='sku', how='left', validate='m:1')
-# If a product appears twice, pandas raises MergeError explaining the violation.
-```
-Notes
-- Always think about join cardinality; use validate to enforce expectations.
-- Align dtypes for keys before merging to avoid surprises.
-
----
+**Evidence to locate in the grouped implementation:** Test two missing keys under pandas behavior, then assert the chosen reject/separate/sentinel policy prevents them from being mistaken for a business match.
 
 ## Expanded mastery lab solutions
 
 Declare each table's grain and key cardinality before merging. Use validation and reconciliation to make row loss or multiplication visible.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Cardinality and reconciliation
+### Shared implementation for Exercises 4–5 — Cardinality and reconciliation
 
 Two matching left rows times three matching right rows produce six output rows.
 An outer merge indicator shows orphans from each side as well as matches.
 
-### Practices 3–5 — Anti-join and an explicit null-key policy
+### Shared implementation for Exercises 6–8 — Anti-join and an explicit null-key policy
 
 ```python
 import pandas as pd

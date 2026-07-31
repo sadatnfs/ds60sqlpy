@@ -101,18 +101,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: Classify orders as small, medium, or large by total amount” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `small`, `evidence`, `order_size`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 1, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 1: Query writing Prompt: Classify orders as small, medium, or large by total amount. Why: Validate boundaries and place the highest threshold first. Expected: One row per order with exactly one size label. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - CASE: encodes ordered business conditions; the first true branch wins and ELSE defines the remainder. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-11 Exercise 1, read from `orders`. Compute `order_id`, `total_amount`, and `order_size` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-11 Exercise 1, expected output: One row per order with exactly one size label. The final columns are `order_id`, `total_amount`, and `order_size`. The final order is `o.order_id`.
+- **Independent verification:** For sql-11 Exercise 1, evaluate each of `total_amount`, and `order_size` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-11 Exercise 1, check `o.order_id` before applying the row cap.
+- **Clause check:** For sql-11 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `order_id`, `total_amount`, and `order_size` ordered by `o.order_id`.
+- **Alternative/trade-off:** For sql-11 Exercise 1, the chosen form is justified by this lesson-specific rationale: Validate boundaries and place the highest threshold first. Evaluate another form against the concrete expected result (One row per order with exactly one size label) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 2 — Query writing
 
@@ -142,18 +137,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation” at one summary row per grouping key explicitly named in the prompt. Named evidence columns/objects: `evidence`, `paid_like`, `open_orders`, `returned_orders`, `all_orders`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 2, prove uniqueness at one summary row per grouping key explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 2: Query writing Prompt: Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation. Why: Each COUNT() FILTER or SUM(CASE...) should state its denominator. Expected: One summary row. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - FILTER (WHERE ...): limits one aggregate without removing rows needed by neighboring aggregates.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-11 Exercise 2, read from `orders`. Compute `paid_like`, `open_orders`, `returned_orders`, and `all_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-11 Exercise 2, expected output: One summary row. The final columns are `paid_like`, `open_orders`, `returned_orders`, and `all_orders`.
+- **Independent verification:** For sql-11 Exercise 2, evaluate each of `open_orders`, `returned_orders`, and `all_orders` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-11 Exercise 2, count the input rows from `orders`, then run each aggregate `FILTER` predicate as its own count before combining the values into the one-row summary.
+- **Clause check:** For sql-11 Exercise 2, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `paid_like`, `open_orders`, `returned_orders`, and `all_orders`.
+- **Alternative/trade-off:** For sql-11 Exercise 2, the chosen form is justified by this lesson-specific rationale: Each `COUNT(*) FILTER` or `SUM(CASE...)` should state its denominator. Evaluate another form against the concrete expected result (One summary row) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 3 — Query writing
 
@@ -188,18 +178,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Label missing customer segments separately from known segment values” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `segment_group`, `c`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 3, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 3: Query writing Prompt: Label missing customer segments separately from known segment values. Why: Test IS NULL before comparing text values. Expected: One row per customer with an explicit segment label. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - CASE: encodes ordered business conditions; the first true branch wins and ELSE defines the remainder. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-11 Exercise 3, read from `customers`. Compute `customer_id`, `segment`, and `segment_group` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-11 Exercise 3, expected output: One row per customer with an explicit segment label. The final columns are `customer_id`, `segment`, and `segment_group`. The final order is `c.customer_id`.
+- **Independent verification:** For sql-11 Exercise 3, evaluate each of `segment`, and `segment_group` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Intermediate relation check:** For sql-11 Exercise 3, check `c.customer_id` before applying the row cap.
+- **Clause check:** For sql-11 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve exactly one summary row, and finish with `customer_id`, `segment`, and `segment_group` ordered by `c.customer_id`.
+- **Alternative/trade-off:** For sql-11 Exercise 3, the chosen form is justified by this lesson-specific rationale: Test `IS NULL` before comparing text values. Evaluate another form against the concrete expected result (One row per customer with an explicit segment label) and the verification above.
+- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
 ## Exercise 4 — Prediction
 
@@ -234,18 +219,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Predict the label for 500 when >= 100 appears before >= 500, then repair the branch order”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `corrected_label`, `sample`.
-- **Independent verification:** For Exercise 4, run the two forms over the identical rows in `orders`, `order_items`, `products`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 4: Prediction Prompt: Predict the label for 500 when >= 100 appears before >= 500, then repair the branch order. Why: First-match wins, so specific/high thresholds must precede broader/lower ones. Expected: A value of 500 is labeled high. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - VALUES: constructs a small relation explicitly, which makes examples and expected cardinality inspectable. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - CASE: encodes ordered business conditions; the first true branch wins and ELSE defines the remainder. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-11 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `amount`, and `corrected_label`; keep `corrected_label` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-11 Exercise 4, expected output: A value of 500 is labeled high. The final columns are `amount`, and `corrected_label`. The final order is `amount`.
+- **Independent verification:** For sql-11 Exercise 4, reselect the returned keys directly from the source; require unique `corrected_label` where the expected grain is one row per key and confirm the projected `amount`, and `corrected_label` against the inline `VALUES` fixture. Add one source row with a new `corrected_label`; verify the result gains exactly one row carrying that `corrected_label` value.
+- **Intermediate relation check:** For sql-11 Exercise 4, check `amount` before applying the row cap.
+- **Clause check:** For sql-11 Exercise 4, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `corrected_label`, and finish with `amount`, and `corrected_label` ordered by `amount`.
+- **Alternative/trade-off:** For sql-11 Exercise 4, the chosen form is justified by this lesson-specific rationale: First-match wins, so specific/high thresholds must precede broader/lower ones. Evaluate another form against the concrete expected result (A value of 500 is labeled high) and the verification above.
+- **Edge case:** Add one source row with a new `corrected_label`; verify the result gains exactly one row carrying that `corrected_label` value.
 
 ## Exercise 5 — Debugging
 
@@ -280,18 +260,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Replace a CASE expression that returns mixed numeric and text types with one consistent output type” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `value_state`, `sample`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 5, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `order_items`, `products`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 5: Debugging Prompt: Replace a CASE expression that returns mixed numeric and text types with one consistent output type. Why: All result branches must resolve to a compatible PostgreSQL type. Expected: Three rows with text labels. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - VALUES: constructs a small relation explicitly, which makes examples and expected cardinality inspectable. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - CASE: encodes ordered business conditions; the first true branch wins and ELSE defines the remainder. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-11 Exercise 5, read from the inline `VALUES` fixture. Build the answer toward `value`, and `value_state`; keep `value` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-11 Exercise 5, expected output: Three rows with text labels. The final columns are `value`, and `value_state`. The final order is `value NULLS FIRST`.
+- **Independent verification:** For sql-11 Exercise 5, reselect the returned keys directly from the source; require unique `value` where the expected grain is one row per key and confirm the projected `value`, and `value_state` against the inline `VALUES` fixture. Add one source row with a new `value`; verify the result gains exactly one row carrying that `value` value.
+- **Intermediate relation check:** For sql-11 Exercise 5, check `value NULLS FIRST` before applying the row cap.
+- **Clause check:** For sql-11 Exercise 5, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `value`, and finish with `value`, and `value_state` ordered by `value NULLS FIRST`.
+- **Alternative/trade-off:** For sql-11 Exercise 5, the chosen form is justified by this lesson-specific rationale: All result branches must resolve to a compatible PostgreSQL type. Evaluate another form against the concrete expected result (Three rows with text labels) and the verification above.
+- **Edge case:** Add one source row with a new `value`; verify the result gains exactly one row carrying that `value` value.
 
 ## Exercise 6 — Extension
 
@@ -330,18 +305,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 6 must make “Extension: Create payment-method display labels and preserve unknown future methods with an explicit fallback” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `method_label`, `payment_count`, `p`.
-- **Independent verification:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `method_label`, `payment_count`, `p`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 6: Extension Prompt: Create payment-method display labels and preserve unknown future methods with an explicit fallback. Why: A simple CASE fits equality mapping; ELSE prevents silent NULL labels. Expected: One row per payment method and display label. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - CASE: encodes ordered business conditions; the first true branch wins and ELSE defines the remainder. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-11 Exercise 6, read from `payments`. Compute `method`, `method_label`, and `payment_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-11 Exercise 6, expected output: One row per payment method and display label. The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
+- **Independent verification:** For sql-11 Exercise 6, evaluate each of `payment_count` in a separate control `SELECT` over `payments`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `payment_count` for the existing `method` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-11 Exercise 6, confirm the groups are `method`; then check `p.method` before applying the row cap.
+- **Clause check:** For sql-11 Exercise 6, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, preserve one row per `method`, and finish with `method`, `method_label`, and `payment_count` ordered by `p.method`.
+- **Alternative/trade-off:** For sql-11 Exercise 6, the chosen form is justified by this lesson-specific rationale: A simple CASE fits equality mapping; `ELSE` prevents silent NULL labels. Evaluate another form against the concrete expected result (One row per payment method and display label) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `payment_count` for the existing `method` tuple and verify the new tuple appears exactly once.
 
 ## Final self-check
 

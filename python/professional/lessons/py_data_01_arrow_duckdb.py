@@ -8,27 +8,27 @@ Professional learner deep dive (python-data-01)
 ------------------------------------------------
 
 Mental model:
-CSV records text and delimiters but carries no authoritative type or
-nullability contract. Arrow is a language-independent columnar memory
-representation; Parquet is a columnar file format with schema, row
-groups, encodings, and statistics. DuckDB is an embedded engine that
-can query these files without loading every column into pandas first.
-
-Columnar performance depends on selecting columns, filtering using
-supported predicates, row-group statistics, file sizes, and partition
-layout. An `EXPLAIN` plan shows intended operations; bytes read and
-elapsed profiles establish what was actually skipped.
+CSV records text and delimiters but carries no authoritative type or nullability contract. Arrow
+is a language-independent columnar memory representation; Parquet is a columnar file format with
+schema, row groups, encodings, and statistics. DuckDB is an embedded engine that can query these
+files without loading every column into pandas first.  Columnar performance depends on selecting
+columns, filtering using supported predicates, row-group statistics, file sizes, and partition
+layout. An `EXPLAIN` plan shows intended operations; bytes read and elapsed profiles establish
+what was actually skipped.
 
 API/boundary anatomy:
-* explicit parse/schema: turns untrusted text into typed dates, decimals, integers, and nullable fields at one controlled boundary.
-* Parquet row groups/partitions: organize data for selective scans without creating unsafe values or millions of tiny files.
-* DuckDB projection/filter: pushes required columns and supported predicates near the scan; inspect plan and profile.
+* explicit parse/schema: turns untrusted text into typed dates, decimals, integers, and nullable
+  fields at one controlled boundary.
+* Parquet row groups/partitions: organize data for selective scans without creating unsafe
+  values or millions of tiny files.
+* DuckDB projection/filter: pushes required columns and supported predicates near the scan;
+  inspect plan and profile.
 
 Micro-example A — observe CSV's string-only boundary::
 
     import csv
     from pathlib import Path
-    
+
     path = Path("python/professional/fixtures/data/sales.csv")
     with path.open("r", encoding="utf-8", newline="") as handle:
         row = next(csv.DictReader(handle))
@@ -36,7 +36,8 @@ Micro-example A — observe CSV's string-only boundary::
     print(row, types)
     assert set(types.values()) == {"str"}
 
-Expected: Dates, units, prices, and blanks all arrive as strings and must be interpreted by an explicit contract.
+Expected: Dates, units, prices, and blanks all arrive as strings and must be interpreted by an
+          explicit contract.
 
 Micro-example B — show why projection changes analytical work::
 
@@ -51,9 +52,11 @@ Micro-example B — show why projection changes analytical work::
     print(projected)
     assert projected == [{"region": "north", "units": 2}]
 
-Expected: The query's logical result needs only two fields; a columnar engine may avoid reading the unrelated note column.
+Expected: The query's logical result needs only two fields; a columnar engine may avoid reading
+          the unrelated note column.
 
-Debugging rule: Validate schema/nulls/keys/ranges, inspect file/row-group metadata and plan, then profile a bounded query against a CSV/pandas fallback.
+Debugging rule: Validate schema/nulls/keys/ranges, inspect file/row-group metadata and plan,
+                then profile a bounded query against a CSV/pandas fallback.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

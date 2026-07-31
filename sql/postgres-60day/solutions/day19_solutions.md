@@ -102,18 +102,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per order with nondecreasing cumulative revenue.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-19 Exercise 1, read from `orders`. Build the answer toward `order_id`, `order_date`, `total_amount`, and `cumulative_revenue`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-19 Exercise 1, expected output: One row per order with nondecreasing cumulative revenue. The final columns are `order_id`, `order_date`, `total_amount`, and `cumulative_revenue`. The final order is `o.order_date, o.order_id`.
+- **Independent verification:** For sql-19 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, `total_amount`, and `cumulative_revenue`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-19 Exercise 1, inspect one window partition before projecting; then check `o.order_date, o.order_id` before applying the row cap.
+- **Clause check:** For sql-19 Exercise 1, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `order_date`, `total_amount`, and `cumulative_revenue` ordered by `o.order_date, o.order_id`.
+- **Alternative/trade-off:** For sql-19 Exercise 1, the chosen form is justified by this lesson-specific rationale: Order by timestamp and unique ID; declare `ROWS ... CURRENT ROW`. Evaluate another form against the concrete expected result (One row per order with nondecreasing cumulative revenue) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 2 — Query writing
 
@@ -152,18 +147,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per order.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-19 Exercise 2, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, `total_amount`, and `customer_cumulative_spend`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-19 Exercise 2, expected output: One row per order. The final columns are `order_id`, `customer_id`, `order_date`, `total_amount`, and `customer_cumulative_spend`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-19 Exercise 2, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, `total_amount`, and `customer_cumulative_spend`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-19 Exercise 2, inspect one window partition before projecting; then check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
+- **Clause check:** For sql-19 Exercise 2, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, `total_amount`, and `customer_cumulative_spend` ordered by `o.customer_id, o.order_date, o.order_id`.
+- **Alternative/trade-off:** For sql-19 Exercise 2, the chosen form is justified by this lesson-specific rationale: Partition by customer and reset the explicit row frame for every customer. Evaluate another form against the concrete expected result (One row per order) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 3 — Query writing
 
@@ -204,18 +194,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per order with up to seven observations in its frame.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-19 Exercise 3, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `trailing_7_order_average`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-19 Exercise 3, expected output: One row per order with up to seven observations in its frame. The final columns are `order_id`, `customer_id`, `order_date`, and `trailing_7_order_average`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-19 Exercise 3, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, and `trailing_7_order_average`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-19 Exercise 3, inspect one window partition before projecting; then check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
+- **Clause check:** For sql-19 Exercise 3, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, and `trailing_7_order_average` ordered by `o.customer_id, o.order_date, o.order_id`.
+- **Alternative/trade-off:** For sql-19 Exercise 3, the chosen form is justified by this lesson-specific rationale: A seven-row frame is based on observations, not seven calendar days. Evaluate another form against the concrete expected result (One row per order with up to seven observations in its frame) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 4 — Prediction
 
@@ -260,18 +245,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Three rows making the peer difference visible.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-19 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `row_id`, `sort_value`, `amount`, `rows_sum`, and `range_sum`; keep `row_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-19 Exercise 4, expected output: Three rows making the peer difference visible. The final columns are `row_id`, `sort_value`, `amount`, `rows_sum`, and `range_sum`. The final order is `row_id`.
+- **Independent verification:** For sql-19 Exercise 4, hand-calculate all three peer rows from the inline fixture: `rows_sum` must be `(10, 30, 35)` while `range_sum` must be `(30, 30, 35)` in `row_id` order. Require three unique `row_id` values and explain why the two rows tied at `sort_value = 1` advance separately under `ROWS` but together under `RANGE`.
+- **Intermediate relation check:** For sql-19 Exercise 4, inspect one window partition before projecting; then check `row_id` before applying the row cap.
+- **Clause check:** For sql-19 Exercise 4, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `row_id`, and finish with `row_id`, `sort_value`, `amount`, `rows_sum`, and `range_sum` ordered by `row_id`.
+- **Alternative/trade-off:** For sql-19 Exercise 4, the chosen form is justified by this lesson-specific rationale: `RANGE` includes ordering peers together; `ROWS` advances one physical row at a time. Evaluate another form against the concrete expected result (Three rows making the peer difference visible) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 5 — Debugging
 
@@ -311,18 +291,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per expense.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-19 Exercise 5, read from `expenses`. Build the answer toward `expense_id`, `category`, `expense_date`, `amount`, and `category_month_running_expense`; keep `expense_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-19 Exercise 5, expected output: One row per expense. The final columns are `expense_id`, `category`, `expense_date`, `amount`, and `category_month_running_expense`. The final order is `e.category, e.expense_date, e.expense_id`.
+- **Independent verification:** For sql-19 Exercise 5, choose one complete partition from `expenses`; hand-calculate its first, middle, and final window values for `amount`, then verify output keys remain `expense_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-19 Exercise 5, inspect one window partition before projecting; then check `e.category, e.expense_date, e.expense_id` before applying the row cap.
+- **Clause check:** For sql-19 Exercise 5, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `expenses`, preserve one row per `expense_id`, and finish with `expense_id`, `category`, `expense_date`, `amount`, and `category_month_running_expense` ordered by `e.category, e.expense_date, e.expense_id`.
+- **Alternative/trade-off:** For sql-19 Exercise 5, the chosen form is justified by this lesson-specific rationale: Partition by both reset keys and order by date plus expense ID. Evaluate another form against the concrete expected result (One row per expense) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 6 — Extension
 
@@ -373,18 +348,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row with zero difference.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-19 Exercise 6, read from `orders`. Build the answer toward `final_cumulative`, `aggregate_total`, and `difference`; keep `cumulative_revenue` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-19 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `aggregate_total`, and `difference`.
+- **Independent verification:** For sql-19 Exercise 6, independently aggregate `orders` by `cumulative_revenue`; require one output row for every distinct `cumulative_revenue` tuple and compare `aggregate_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `aggregate_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-19 Exercise 6, run `running`, and `final_running` one at a time. Record each CTE's row count and `cumulative_revenue` uniqueness before the next stage uses it.
+- **Clause check:** For sql-19 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `cumulative_revenue`, and finish with `final_cumulative`, `aggregate_total`, and `difference`.
+- **Alternative/trade-off:** For sql-19 Exercise 6, the chosen form is justified by this lesson-specific rationale: Select the last ordered cumulative value and compare it with an independent aggregate. Evaluate another form against the concrete expected result (One row with zero difference) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `aggregate_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
 
 ## Final self-check
 

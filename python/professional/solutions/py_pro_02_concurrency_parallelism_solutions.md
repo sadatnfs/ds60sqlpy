@@ -87,7 +87,6 @@ timeout and failure propagation, cancellation cleanup, deterministic lost
 updates, thread output, and a small spawned-process calculation. No test relies
 on a narrow elapsed-time threshold, random scheduling, or external I/O.
 
-
 ---
 
 <!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
@@ -124,6 +123,7 @@ def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_pytho
         return "threads"
     return "processes-or-native-vectorization"
 
+
 assert choose_execution(waits_nonblocking=True) == "asyncio"
 assert choose_execution(cpu_python=True) == "processes-or-native-vectorization"
 ```
@@ -156,13 +156,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `choose a model`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** choose a model — implement choose execution model in the learner artifact; for each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations; reject labels that contradict each other.
 
 ### Exercise 2 — build a bounded async map
 
@@ -178,13 +172,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `build a bounded async map`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** build a bounded async map — on ten indexed inputs with queue capacity 2 and two consumers, assert output order equals input order, peak queued/active work stays bounded, queue acknowledgements reach zero, and an injected worker exception cancels siblings cleanly.
 
 ### Exercise 3 — add per-item timeouts
 
@@ -200,13 +188,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `add per-item timeouts`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** add per-item timeouts — test one worker slower than the limit; inspect the ExceptionGroup from TaskGroup, and verify a finally block returns the active count to zero; prediction: what happens to sibling consumers when one item times out?.
 
 ### Exercise 4 — adapt blocking I/O
 
@@ -222,13 +204,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `adapt blocking I/O`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** adapt blocking I/O — use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.
 
 ### Exercise 5 — isolate CPU work
 
@@ -244,13 +220,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `isolate CPU work`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** isolate CPU work — make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.
 
 ### Exercise 6 — reason about shared state
 
@@ -266,13 +236,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `reason about shared state`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** reason about shared state — use barriers to make two workers read counter=0 before either writes; assert the lost-update result is 1, then protect the same two increments and assert the serialized result is 2 without timing sleeps.
 
 ### Exercise 7 — prove cancellation cleanup
 
@@ -294,13 +258,7 @@ continuing with partial results is incorrect.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `prove cancellation cleanup`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** prove cancellation cleanup — cancel bounded map while workers are active; instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.
 
 ### Exercise 8 — inspect structured failures
 
@@ -321,13 +279,7 @@ from an independent worker defect.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `inspect structured failures`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** inspect structured failures — run multiple workers that fail with different typed exceptions; use except to handle one expected category while preserving unexpected failures and their original tracebacks.
 
 ### Exercise 9 — stream a backpressured producer
 
@@ -349,13 +301,7 @@ input, so expose an async result iterator instead.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `stream a backpressured producer`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** stream a backpressured producer — adapt bounded map from a finite Sequence to an async iterator whose length is unknown; preserve output order without retaining every input or creating one task per item.
 
 ### Exercise 10 — trace context across boundaries
 
@@ -376,13 +322,7 @@ tokens in a reviewed credential boundary, not a general diagnostic context.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `trace context across boundaries`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** trace context across boundaries — set a request ID in contextvars, then observe propagation through an async task, asyncio.to thread, a raw thread-pool submission, and a spawned process; make any explicit propagation visible.
 
 ### Exercise 11 — design graceful executor shutdown
 
@@ -403,13 +343,7 @@ Avoid relying only on garbage collection or interpreter teardown.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `design graceful executor shutdown`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** design graceful executor shutdown — own a thread or process pool through a context manager; stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.
 
 ### Exercise 12 — make an evidence-based model decision
 
@@ -431,4 +365,4 @@ decision honestly.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `make an evidence-based model decision`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+**Verify:** make an evidence-based model decision — benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures; record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.

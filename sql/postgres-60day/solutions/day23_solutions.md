@@ -109,18 +109,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per ordering customer.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-23 Exercise 1, read from `orders`, and `order_items`. Build the answer toward `customer_id`, `order_count`, and `net_revenue`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-23 Exercise 1, expected output: One row per ordering customer. The final columns are `customer_id`, `order_count`, and `net_revenue`. The final order is `net_revenue DESC, ov.customer_id`.
+- **Independent verification:** For sql-23 Exercise 1, independently aggregate `orders`, and `order_items` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `order_count`, and `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, and `net_revenue` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-23 Exercise 1, run `order_values` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-23 Exercise 1, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `order_items`, preserve one row per `customer_id`, and finish with `customer_id`, `order_count`, and `net_revenue` ordered by `net_revenue DESC, ov.customer_id`.
+- **Alternative/trade-off:** For sql-23 Exercise 1, the chosen form is justified by this lesson-specific rationale: Name the one-row-per-order grain before changing to customer grain. Evaluate another form against the concrete expected result (One row per ordering customer) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, and `net_revenue` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 2 — Query writing
 
@@ -164,18 +159,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One summary row.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-23 Exercise 2, read from `order_items`, and `products`. Compute `top_category`, and `all_revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-23 Exercise 2, expected output: One summary row. The final columns are `top_category`, and `all_revenue`.
+- **Independent verification:** For sql-23 Exercise 2, evaluate each of `all_revenue` in a separate control `SELECT` over `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
+- **Intermediate relation check:** For sql-23 Exercise 2, run `category_revenue` one at a time. Record each CTE's row count and `order_item_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-23 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `order_items`, and `products`, preserve exactly one summary row, and finish with `top_category`, and `all_revenue`.
+- **Alternative/trade-off:** For sql-23 Exercise 2, the chosen form is justified by this lesson-specific rationale: A named aggregate can support multiple scalar reads without repeating the business formula. Evaluate another form against the concrete expected result (One summary row) and the verification above.
+- **Edge case:** Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
 
 ## Exercise 3 — Query writing
 
@@ -223,18 +213,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per order.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-23 Exercise 3, read from `payments`, and `orders`. Build the answer toward `order_id`, `order_total`, `paid_amount`, and `unpaid_balance`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-23 Exercise 3, expected output: One row per order. The final columns are `order_id`, `order_total`, `paid_amount`, and `unpaid_balance`. The final order is `ABS(total_amount - paid_amount) DESC, order_id`.
+- **Independent verification:** For sql-23 Exercise 3, project `order_id` plus the raw source columns from `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_total`, `paid_amount`, and `unpaid_balance` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-23 Exercise 3, run `paid`, and `reconciled` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-23 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, and `orders`, preserve one row per `order_id`, and finish with `order_id`, `order_total`, `paid_amount`, and `unpaid_balance` ordered by `ABS(total_amount - paid_amount) DESC, order_id`.
+- **Alternative/trade-off:** For sql-23 Exercise 3, the chosen form is justified by this lesson-specific rationale: Aggregate payment detail before joining to orders and preserve unpaid orders with a left join. Evaluate another form against the concrete expected result (One row per order) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 4 — Prediction
 
@@ -277,18 +262,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Two count rows with equal values.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-23 Exercise 4, read from `orders`, `materialized_orders`, and `inline_orders`. Build the answer toward `variant`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-23 Exercise 4, expected output: Two count rows with equal values. The final columns are `variant`, and `row_count`. The final order is `variant`.
+- **Independent verification:** For sql-23 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `variant`, and `row_count` against `orders`, `materialized_orders`, and `inline_orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-23 Exercise 4, inspect the source keys that survive `WHERE`; then check `variant` before applying the row cap.
+- **Clause check:** For sql-23 Exercise 4, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `materialized_orders`, and `inline_orders`, preserve one row per `order_id`, and finish with `variant`, and `row_count` ordered by `variant`.
+- **Alternative/trade-off:** For sql-23 Exercise 4, the chosen form is justified by this lesson-specific rationale: Both return the same rows; planning effects require `EXPLAIN` evidence in a representative environment. Evaluate another form against the concrete expected result (Two count rows with equal values) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 5 — Debugging
 
@@ -337,18 +317,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per country.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-23 Exercise 5, read from `orders`, `order_items`, and `customers`. Build the answer toward `country`, and `country_revenue`; keep `country` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-23 Exercise 5, expected output: One row per country. The final columns are `country`, and `country_revenue`. The final order is `country_revenue DESC, c.country`.
+- **Independent verification:** For sql-23 Exercise 5, independently aggregate `orders`, `order_items`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `country_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `country_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-23 Exercise 5, run `order_values`, and `customer_revenue` one at a time. Record each CTE's row count and `country` uniqueness before the next stage uses it.
+- **Clause check:** For sql-23 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `customers`, preserve one row per `country`, and finish with `country`, and `country_revenue` ordered by `country_revenue DESC, c.country`.
+- **Alternative/trade-off:** For sql-23 Exercise 5, the chosen form is justified by this lesson-specific rationale: Name measures `order_value`, `customer_revenue`, and similar rather than carrying generic `total`. Evaluate another form against the concrete expected result (One row per country) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `country_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 6 — Extension
 
@@ -396,18 +371,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One summary row for a bounded three-product update.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-23 Exercise 6, read the target keys from `products` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-23 Exercise 6, expected output: One summary row for a bounded three-product update. The final columns are `updated_rows`, `first_updated_product`, and `last_updated_product`.
+- **Independent verification:** For sql-23 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
+- **Intermediate relation check:** For sql-23 Exercise 6, run `candidates`, and `updated` one at a time. Record each CTE's row count and `product_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-23 Exercise 6, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, `ORDER BY`, `LIMIT`, and `RETURNING`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `updated_rows`, `first_updated_product`, and `last_updated_product`.
+- **Alternative/trade-off:** For sql-23 Exercise 6, the chosen form is justified by this lesson-specific rationale: The outer lesson transaction rolls back; the CTE exposes changed rows as a relation. Evaluate another form against the concrete expected result (One summary row for a bounded three-product update) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
 
 ## Final self-check
 

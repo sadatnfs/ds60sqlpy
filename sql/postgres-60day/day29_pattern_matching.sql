@@ -53,33 +53,39 @@ ORDER BY p.product_id;
 -- Keep answers in your own scratch file; this learner script remains answer-free.
 -- 1. [Query writing] Find customer names beginning with `Customer 1` case-insensitively.
 --    Hint: `ILIKE 'Customer 1%'` uses `%` for any suffix.
---    Inputs: Use only the declared lesson objects (customers, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-29 Exercise 1, read from `customers`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-29 Exercise 1, expected output: Matching customer rows in stable ID order. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
+--    Verify: For sql-29 Exercise 1, run an anti-check that counts rows where NOT ((c.full_name ILIKE 'Customer 1%')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`. Add one row for which `(c.full_name ILIKE 'Customer 1%')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+--    Hint ladder, rung 1: For sql-29 Exercise 1, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
 -- 2. [Query writing] Find emails that match the course's simple lowercase example.com pattern.
 --    Hint: Anchor both ends and escape the literal dot in the POSIX regex.
---    Inputs: Use only the declared lesson objects (customers, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-29 Exercise 2, read from `customers`. Build the answer toward `customer_id`, and `email`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-29 Exercise 2, expected output: Only matching non-null email rows. The final columns are `customer_id`, and `email`. The final order is `c.customer_id`.
+--    Verify: For sql-29 Exercise 2, run an anti-check that counts rows where NOT ((c.email ~ '^customer[0-9]+@example[.]com$')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `email` against `customers`. Add one row for which `(c.email ~ '^customer[0-9]+@example[.]com$')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+--    Hint ladder, rung 1: For sql-29 Exercise 2, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
 -- 3. [Query writing] Return event paths under `/p/` using JSON extraction and an anchored pattern.
 --    Hint: Extract path text, then anchor the literal prefix.
---    Inputs: Use only the declared lesson objects (customers, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-29 Exercise 3, read from `events`. Build the answer toward `event_id`, and `path`; keep `event_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-29 Exercise 3, expected output: Events whose path begins `/p/`. The final columns are `event_id`, and `path`. The final order is `e.event_id`.
+--    Verify: For sql-29 Exercise 3, run an anti-check that counts rows where NOT ((e.metadata ->> 'path' LIKE '/p/%')); require unique `event_id` where the expected grain is one row per key and confirm the projected `event_id`, and `path` against `events`. Add one row for which `(e.metadata ->> 'path' LIKE '/p/%')` is true and one for which it is false; verify only the matching `event_id` value is returned.
+--    Hint ladder, rung 1: For sql-29 Exercise 3, inspect the source keys that survive `WHERE`; then check `e.event_id` before applying the row cap.
 -- 4. [Prediction] Match literal percent and underscore characters in sample text and contrast them with wildcard behavior.
 --    Hint: Declare an escape character and prefix each literal wildcard.
---    Inputs: Use only the declared lesson objects (customers, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Inputs: For sql-29 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `value`; keep `value` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-29 Exercise 4, expected output: Only the two rows containing the requested literal symbols. The final columns are `value`. The final order is `value`.
+--    Verify: For sql-29 Exercise 4, run an anti-check that counts rows where NOT ((value LIKE '%\%%' ESCAPE '\' OR value LIKE '%\_%' ESCAPE '\')); require unique `value` where the expected grain is one row per key and confirm the projected `value` against the inline `VALUES` fixture. Add one row for which `(value LIKE '%\%%' ESCAPE '\' OR value LIKE '%\_%' ESCAPE '\')` is true and one for which it is false; verify only the matching `value` value is returned.
+--    Hint ladder, rung 1: For sql-29 Exercise 4, inspect the source keys that survive `WHERE`; then check `value` before applying the row cap.
 -- 5. [Debugging] Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.
 --    Hint: First assert the anchored grammar, then use `substring(... FROM regex)`.
---    Inputs: Use only the declared lesson objects (customers, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
+--    Inputs: For sql-29 Exercise 5, read from `customers`. Compute `customer_id`, and `name_number` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-29 Exercise 5, expected output: One row per valid course customer name. The final columns are `customer_id`, and `name_number`. The final order is `c.customer_id`.
+--    Verify: For sql-29 Exercise 5, evaluate each of `name_number` in a separate control `SELECT` over `customers` using `(c.full_name ~ '^Customer [0-9]+$')`; require one final row and compare every value. Add one row for which `(c.full_name ~ '^Customer [0-9]+$')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+--    Hint ladder, rung 1: For sql-29 Exercise 5, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
 -- 6. [Extension] Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.
 --    Hint: Handle NULL first, then most specific anchored pattern, then a bounded general pattern.
---    Inputs: Use only the declared lesson objects (customers, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-29 Exercise 6, read from `customers`. Compute `customer_id`, `email`, and `email_class` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-29 Exercise 6, expected output: One row per customer with one classification. The final columns are `customer_id`, `email`, and `email_class`. The final order is `c.customer_id`.
+--    Verify: For sql-29 Exercise 6, evaluate each of `email`, and `email_class` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-29 Exercise 6, check `c.customer_id` before applying the row cap.
 
 ROLLBACK;

@@ -53,7 +53,6 @@ There are two mappings:
 Using the first procedure for both, or the second procedure on training rows,
 creates subtle errors.
 
-
 ## Worked example: inspect support before trusting a mean
 
 ```python
@@ -205,32 +204,16 @@ assert encoded.iloc[2] == prior and encoded.iloc[3] == prior
 1. Add K-fold target encoding to a scikit-learn pipeline through a custom
    transformer or `FunctionTransformer`.
 
-**Verify:** For task `Add K-fold target encoding to a scikit-learn pipeline through a custom`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
+**Verify:** Practice 1 — out-of-fold target encoding, smoothing, and transform-time unknowns — produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
 
 2. Add an appropriate prior and smoothing; experiment with `n_splits`.
 
-**Verify:** For task `Add an appropriate prior and smoothing; experiment with nsplits`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
+**Verify:** Practice 2 — out-of-fold target encoding, smoothing, and transform-time unknowns — print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
 
 3. Compare ROC AUC with one-hot encoding across multiple seeded train/test
    splits.
 
-**Verify:** For task `Compare ROC AUC with one-hot encoding across multiple seeded train/test`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Practice 3 — out-of-fold target encoding, smoothing, and transform-time unknowns — over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
 
 ### Progressive hints
 
@@ -256,39 +239,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Out-of-fold invariant:** Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead.
    **Progressive hint:** For a category absent from the fold's training partition, there is no valid category statistic; use the fold training prior.
 
-**Verify:** For task `Out-of-fold invariant: Create a unique category for every training row and show that a leaky...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Out-of-fold invariant — on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.
 
 5. **Unknown and missing categories:** Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three.
    **Progressive hint:** Normalize missing values to an explicit sentinel if missingness is a category; unseen categories generally receive the training global prior.
 
-**Verify:** For task `Unknown and missing categories: Define distinct policies for a missing category, an unseen ca...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Unknown and missing categories — assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.
 
 6. **Temporal leakage:** Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation.
    **Progressive hint:** Sort by event time and compute each row's category statistics from strictly earlier labeled rows; handle ties deliberately.
 
-**Verify:** For task `Temporal leakage: Design target encoding for timestamped events where later labels cannot inf...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Temporal leakage — print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -334,10 +298,12 @@ Emphasize out-of-fold target encoding, smoothing, and transform-time unknowns. U
 - guide: `python/ds-60day/companion-guides/day51_advanced_feature_engineering_target_encoding.md`
 - learner artifact: `python/ds-60day/notebooks/day51_advanced_feature_engineering_target_encoding.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-50`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

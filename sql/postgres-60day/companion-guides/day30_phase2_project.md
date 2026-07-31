@@ -36,8 +36,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-30/day30_phase2_project.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-30/lesson/workspace/sql/postgres-60day/day30_phase2_project.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -70,8 +70,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Cohort, Retention denominator, Calendar spine. Its worked SQL reads or creates `orders`, `order_items`, `customers`.
+on screen are not automatically stored. The key vocabulary for this lesson is Cohort, Retention denominator, Calendar spine. Its worked SQL reads or creates `orders`, `order_items`, `customers`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -81,7 +80,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: Calculate cohort size directly from customers at one row per signup cohort. Separately deduplicate activity to one row per customer/order month, derive month offset, and count active customers. Join numerator to denominator only after both relations are stable, then guard and range-check the retention rate.
+The worked walkthrough's lesson-specific task is: Calculate cohort size directly from customers at one row per signup cohort. Separately deduplicate activity to one row per customer/order month, derive month offset, and count active customers. Join numerator to denominator only after both relations are stable, then guard and range-check the retention rate.
 The expected contract is that One row per cohort month. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
@@ -160,11 +159,9 @@ ORDER BY agg.cohort_month_utc DESC, agg.month_offset
 LIMIT 200;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per cohort month.
+**How to read it:** Example 1: Start with `orders`, `order_items`, `customers`, and `age` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `cohort_month_utc`, `month_offset`, `original_customers`, `active_customers`, `retention_rate`, `revenue`, and `revenue_per_active`. `ORDER BY` determines presentation order and the final `LIMIT 200` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one grouped row per `cohort_month_utc`, capped at 200 rows with columns `cohort_month_utc`, `month_offset`, `original_customers`, `active_customers`, `retention_rate`, and `revenue` from `orders`, `order_items`, `customers`, and `age`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -238,9 +235,7 @@ LIMIT 200;
 
 **How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `cohort_month_utc` key set and row count over `orders`, `order_items`, `customers`, and `age`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
 
 ## Learning objectives
 
@@ -280,28 +275,49 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Calculate original customer count for each UTC signup cohort month.
    **Progressive hint:** Build the denominator from customers, including customers who never order.
-   **Expected shape:** One row per cohort month.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-30 Exercise 1, read from `customers`. Build the answer toward `cohort_month`, and `cohort_size`; keep `cohort_month` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-30 Exercise 1, expected output: One row per cohort month. The final columns are `cohort_month`, and `cohort_size`. The final order is `cohort_month`.
+   **Verify:** For sql-30 Exercise 1, independently aggregate `customers` by `cohort_month`; require one output row for every distinct `cohort_month` tuple and compare `cohort_size` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `cohort_size` for the existing `cohort_month` tuple and verify the new tuple appears exactly once.
 2. **Query writing:** Calculate active customers and net line revenue for each cohort/order month.
    **Progressive hint:** Aggregate line items to order grain before cohort joins, then count distinct active customers.
-   **Expected shape:** One row per observed cohort/order month.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-30 Exercise 2, read from `orders`, `order_items`, and `customers`. Build the answer toward `cohort_month`, `order_month`, `active_customers`, and `net_revenue`; keep `cohort_month`, and `order_month` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-30 Exercise 2, expected output: One row per observed cohort/order month. The final columns are `cohort_month`, `order_month`, `active_customers`, and `net_revenue`. The final order is `c.cohort_month, ov.order_month`.
+   **Verify:** For sql-30 Exercise 2, independently aggregate `orders`, `order_items`, and `customers` by `cohort_month`, and `order_month`; require one output row for every distinct `cohort_month`, and `order_month` tuple and compare `order_month`, `active_customers`, and `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `active_customers`, and `net_revenue` for the existing `cohort_month`, and `order_month` tuple and verify the new tuple appears exactly once.
 3. **Query writing:** Calculate cohort month offset and retention using original cohort size.
    **Progressive hint:** Use year-plus-month age components and guard the denominator.
-   **Expected shape:** Observed cohort/offset rows with retention from 0 to 1.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-30 Exercise 3, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`; keep `cohort_month` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-30 Exercise 3, expected output: Observed cohort/offset rows with retention from 0 to 1. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`. The final order is `a.cohort_month, month_offset`.
+   **Verify:** For sql-30 Exercise 3, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
 4. **Prediction:** Create a dense cohort/offset spine from offset 0 through 12 and show missing activity as zero.
    **Progressive hint:** Cross join cohort months with generate_series, then left join observed activity at the same offset grain.
-   **Expected shape:** Thirteen rows per cohort.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-30 Exercise 4, read from `customers`, `orders`, and `generate_series`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`; keep `cohort_month` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-30 Exercise 4, expected output: Thirteen rows per cohort. The final columns are `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`. The final order is `s.cohort_month, s.month_offset`.
+   **Verify:** For sql-30 Exercise 4, project `cohort_month` plus the raw source columns from `customers`, `orders`, and `generate_series` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, and `active_customers` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
 5. **Debugging:** Calculate revenue per active customer and a trailing three-observation annualized teaching projection.
    **Progressive hint:** Compute stable cohort metrics before applying the window; disclose that observed rows may have month gaps.
-   **Expected shape:** One row per observed cohort/month with nullable guarded measures.
-   **Verify:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
+   **Inputs/evidence:** For sql-30 Exercise 5, read from `orders`, `order_items`, and `customers`. Build the answer toward `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`; keep `cohort_month` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-30 Exercise 5, expected output: One row per observed cohort/month with nullable guarded measures. The final columns are `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`. The final order is `cohort_month, month_offset`.
+   **Verify:** For sql-30 Exercise 5, choose one complete partition from `orders`, `order_items`, and `customers`; hand-calculate its first, middle, and final window values for `order_month`, `active_customers`, `revenue`, and `revenue_per_active`, then verify output keys remain `cohort_month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 6. **Extension:** Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0–12.
    **Progressive hint:** Calculate violations and compare totals at the same scoped population.
-   **Expected shape:** One row with zero retention violations and zero revenue difference.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-30 Exercise 6, read from `orders`, `order_items`, and `customers`. Build the answer toward `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-30 Exercise 6, expected output: One row with zero retention violations and zero revenue difference. The final columns are `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`.
+   **Verify:** For sql-30 Exercise 6, project `order_id` plus the raw source columns from `orders`, `order_items`, and `customers` at each join stage; record row count and distinct `order_id`, then assert the final `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+
+## Common mistakes and how to recover
+
+- **Lesson-specific semantic mistake:** Observed rows are not a complete calendar; active customers must not exceed original cohort size, and a moving average is not a production CLV model.
+- **Unexpected row count:** display keys before aggregates, count rows after
+  each join/filter stage, and find the first stage whose grain differs from the
+  contract. Do not hide fanout with `DISTINCT`.
+- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
+  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
+  predicate placement and empty-input aggregate behavior.
+- **Unstable top/first/last output:** add `ORDER BY` with a unique final
+  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
+- **`psql` stops on an error:** fix the first error shown by
+  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
+  complete file. A later successful statement does not validate a partial run.
 
 ## Self-check
 
@@ -358,11 +374,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-30 — Phase2 Project.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisite: `sql-29`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day30_phase2_project.md
 - Answer-free learner SQL: sql/postgres-60day/day30_phase2_project.sql
 
-The lesson concepts include Cohort, Retention denominator, Calendar spine. First define those terms in plain
+Key terms to teach in context: Cohort, Retention denominator, Calendar spine. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -373,11 +389,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-30/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

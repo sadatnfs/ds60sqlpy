@@ -203,46 +203,27 @@ assert all(mean >= -3 * std for _, mean, std in summary)
 
 ## Learner exercises and progressive hints
 
-1. Compare a SHAP summary for the top five important features.
+1. On the first 50 held-out rows, rank features by mean absolute positive-class SHAP value. Report the five names and values, then compare their ordering with held-out permutation importance from the same fitted model, rows, scorer, and five seeded repeats.
 
-**Verify:** For task `Compare a SHAP summary for the top five important features`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Practice 1 — global versus local explanations, perturbation assumptions, and causal limits — assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
 
+2. Select the feature ranked first by the held-out permutation calculation in Exercise 1, then plot its one-dimensional PDP. Report its name, ranking value, PDP direction/nonlinearity, and where the displayed deciles show weak data support; do not use causal language.
 
+**Verify:** Practice 2 — global versus local explanations, perturbation assumptions, and causal limits — print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
 
-
-
-
-2. Plot PDP for the most important feature and interpret it.
-
-**Verify:** For task `Plot PDP for the most important feature and interpret it`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check.
-
-
-
-
-
-
-3. Optionally use LIME on one prediction and compare it with SHAP.
+3. Optionally explain held-out row 0 with LIME and SHAP using the same positive-class output. Repeat LIME with three declared seeds and compare the signs, top-five overlap, and instability; skip only when importing `lime` raises `ModuleNotFoundError`.
 
 LIME is installed by the `ml` dependency group but remains an optional lesson
 extension. Complete the required work with SHAP and scikit-learn before adding a
 second explanation library.
 
-**Verify:** For task `Optionally use LIME on one prediction and compare it with SHAP`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Practice 3 — global versus local explanations, perturbation assumptions, and causal limits — treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
 
 ### Progressive hints
 
-1. Rank features with mean absolute SHAP values, preserve the original feature
-   names, and then limit the display.
-2. Choose importance from held-out permutation or aggregated SHAP, not from a
-   single local case. Look for regions with little data support.
-3. If you intentionally install LIME during a connected session, fix its random
-   seed and compare direction, magnitude, and stability—not just wording.
+1. Normalize the SHAP output shape for the positive class, compute mean absolute values over exactly 50 held-out rows, and retain original feature names. Compute permutation importance on those same rows before comparing ranks.
+2. Reuse the seeded held-out permutation ranking rather than hardcoding a column index. Read the decile marks before describing behavior in sparse regions.
+3. Catch `ModuleNotFoundError` only around the LIME import. Once import succeeds, allow data, shape, or explainer failures to remain visible and debug them.
 
 ### Additional mastery practice
 
@@ -254,39 +235,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Local-versus-global diagnosis:** Construct a case where a feature is globally important but contributes little to one prediction. Explain why those statements do not conflict.
    **Progressive hint:** Global importance aggregates across rows; a local explanation is conditioned on one row and its baseline.
 
-**Verify:** For task `Local-versus-global diagnosis: Construct a case where a feature is globally important but con...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Local-versus-global diagnosis — record the feature's aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row's local contribution is near zero, and identify the row-specific baseline.
 
 5. **Explanation leakage:** Explain why selecting the 'most important' features with the final test set and then retraining a smaller model contaminates evaluation.
    **Progressive hint:** The explanation becomes a supervised feature-selection step. Keep the test set unavailable until the complete selection procedure is frozen.
 
-**Verify:** For task `Explanation leakage: Explain why selecting the 'most important' features with the final test...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Explanation leakage — draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.
 
 6. **Correlated-feature and causality check:** Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, and write a cautious stakeholder explanation.
    **Progressive hint:** Credit can move or split between substitutes; marginal perturbations can create implausible combinations.
 
-**Verify:** For task `Correlated-feature and causality check: Duplicate or strongly correlate one predictor, compar...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Correlated-feature and causality check — report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -333,10 +295,12 @@ Emphasize global versus local explanations, perturbation assumptions, and causal
 - guide: `python/ds-60day/companion-guides/day43_model_interpretation_shap_pdp.md`
 - learner artifact: `python/ds-60day/notebooks/day43_model_interpretation_shap_pdp.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-42`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

@@ -195,34 +195,18 @@ Complete these in the learner notebook:
 
 1. Simulate `Binomial(n=10, p=0.3)` 10,000 times and plot a histogram.
 
-**Verify:** For task `Simulate Binomial(n=10, p=0.3) 10,000 times and plot a histogram`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then show the labeled figure and reconcile it with a numeric summary so appearance is not the only check.
-
-
-
-
-
+**Verify:** Practice 1 — probability models, conditional evidence, and simulation error — with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
 
 2. Generate `Normal(0, 1)` values, compute their mean and variance, and overlay
    the probability density function. The standard-library formula is enough;
    SciPy is optional.
 
-**Verify:** For task `Generate Normal(0, 1) values, compute their mean and variance, and overlay`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
+**Verify:** Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
 
 3. Given sensitivity `0.95`, specificity `0.90`, and prevalence `0.01`, compute
    \(P(\text{disease}\mid\text{positive})\).
 
-**Verify:** For task `Given sensitivity 0.95, specificity 0.90, and prevalence 0.01, compute`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
-
+**Verify:** Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
 
 ### Progressive hints
 
@@ -243,39 +227,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Prediction and uncertainty:** For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.
    **Progressive hint:** Compute 1-(1-p)**n first. Treat each simulated experiment as one Bernoulli outcome and use sqrt(p_hat*(1-p_hat)/runs) for its standard error.
 
-**Verify:** For task `Prediction and uncertainty: For an event with probability 0.002 observed in 1,000 independent...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
-
+**Verify:** Prediction and uncertainty — show the analytic probability 1 - (1 - 0.002)^1000 (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
 
 5. **Implementation:** Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support.
    **Progressive hint:** Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.
 
-**Verify:** For task `Implementation: Estimate P(A|B) from two Boolean arrays without using a probability library....`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
-
+**Verify:** Implementation — for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.
 
 6. **Debugging and boundaries:** Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval.
    **Progressive hint:** n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.
 
-**Verify:** For task `Debugging and boundaries: Design and test a Binomial-parameter validator. Include n=0, p=0, p...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
+**Verify:** Debugging and boundaries — assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -320,10 +285,12 @@ Emphasize probability models, conditional evidence, and simulation error. Use ex
 - guide: `python/ds-60day/companion-guides/day31_probability_basics.md`
 - learner artifact: `python/ds-60day/notebooks/day31_probability_basics.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-30`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

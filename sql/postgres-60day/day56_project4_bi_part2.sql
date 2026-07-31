@@ -76,38 +76,38 @@ ORDER BY country NULLS FIRST, category NULLS FIRST;
 
 -- Exercises
 -- 1. Add payment method to the CUBE and measure row count increase.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-56 Exercise 1, read from `payments`, `orders`, `customers`, `order_items`, and `products`. Compute `two_dimension_rows`, and `three_dimension_rows` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-56 Exercise 1, expected output: one row; `three_dimension_rows` should be larger. The final columns are `two_dimension_rows`, and `three_dimension_rows`.
+--    Verify: For sql-56 Exercise 1, evaluate each of `two_dimension_rows`, and `three_dimension_rows` in a separate control `SELECT` over `payments`, `orders`, `customers`, `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
+--    Hint ladder, rung 1: For sql-56 Exercise 1, run `payment_by_method`, `ranked_payment`, `primary_payment`, `line`, `cube_two`, and `cube_three` one at a time. Record each CTE's row count and `payment_id` uniqueness before the next stage uses it.
 -- 2. Compute p50/p90 of order values per category-month.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-56 Exercise 2, read from `orders`, `order_items`, and `products`. Build the answer toward `month`, `category`, `p50_order_value`, and `p90_order_value`; keep `month`, and `category` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-56 Exercise 2, expected output: one row per represented `(month, category)`. The final columns are `month`, `category`, `p50_order_value`, and `p90_order_value`. The final order is `month DESC, category`.
+--    Verify: For sql-56 Exercise 2, independently aggregate `orders`, `order_items`, and `products` by `month`, and `category`; require one output row for every distinct `month`, and `category` tuple and compare `p50_order_value`, and `p90_order_value` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `p50_order_value`, and `p90_order_value` for the existing `month`, and `category` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-56 Exercise 2, run `category_orders` one at a time. Record each CTE's row count and `month`, and `category` uniqueness before the next stage uses it.
 -- 3. Prediction: explain why joining raw payments to raw order_items multiplies
 --    revenue when an order has several rows in both tables.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-56 Exercise 3, read from `orders`, `order_items`, and `payments`. Build the answer toward `raw_join_rows`, `distinct_items`, and `distinct_payments`; keep `order_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-56 Exercise 3, expected output: one row per `order_id`. The final columns are `raw_join_rows`, `distinct_items`, and `distinct_payments`.
+--    Verify: For sql-56 Exercise 3, project `order_id` plus the raw source columns from `orders`, `order_items`, and `payments` at each join stage; record row count and distinct `order_id`, then assert the final `raw_join_rows`, `distinct_items`, and `distinct_payments` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-56 Exercise 3, start with the first relation in `orders`, `order_items`, and `payments`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
 -- 4. Construction: pre-aggregate payment methods at order grain before joining
 --    line revenue, and reconcile the result to total line revenue.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-56 Exercise 4, read from `payments`, and `order_items`. Build the answer toward `reporting_method`, `revenue`, and `reconciled_total`; keep `payment_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-56 Exercise 4, expected output: one row per `payment_id`. The final columns are `reporting_method`, `revenue`, and `reconciled_total`. The final order is `reporting_method`.
+--    Verify: For sql-56 Exercise 4, choose one complete partition from `payments`, and `order_items`; hand-calculate its first, middle, and final window values for `revenue`, and `reconciled_total`, then verify output keys remain `payment_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+--    Hint ladder, rung 1: For sql-56 Exercise 4, run `method`, `lines`, and `attributed` one at a time. Record each CTE's row count and `payment_id` uniqueness before the next stage uses it.
 -- 5. Debugging: correct a percentile query that calculates percentiles over
 --    line items when the metric definition says order value.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-56 Exercise 5, read from `orders`, `order_items`, and `products`. Build the answer toward `category`, `observations`, and `p50`; keep `category` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-56 Exercise 5, expected output: one row per `category`. The final columns are `category`, `observations`, and `p50`. The final order is `category`.
+--    Verify: For sql-56 Exercise 5, independently aggregate `orders`, `order_items`, and `products` by `category`; require one output row for every distinct `category` tuple and compare `p50` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `p50` for the existing `category` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-56 Exercise 5, run `category_order` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
 -- 6. Edge case: compare percentile_cont and percentile_disc for a category-month
 --    with an even number of orders and explain which output is an observed value.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-56 Exercise 6, read from `orders`, `order_items`, and `products`. Build the answer toward `category`, `observations`, `continuous_p50`, and `discrete_p50`; keep `category` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-56 Exercise 6, expected output: one row per `category`. The final columns are `category`, `observations`, `continuous_p50`, and `discrete_p50`. The final order is `category`.
+--    Verify: For sql-56 Exercise 6, independently aggregate `orders`, `order_items`, and `products` by `category`; require one output row for every distinct `category` tuple and compare `continuous_p50`, and `discrete_p50` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `continuous_p50`, and `discrete_p50` for the existing `category` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-56 Exercise 6, run `category_order` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
 
 ROLLBACK;

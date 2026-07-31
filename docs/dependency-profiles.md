@@ -20,6 +20,13 @@ value into `pip install -e ".[VALUE]"`.
 | `nlp` | Transformers, datasets, evaluation, and spaCy | Run advanced setup, or install the `nlp` extra |
 | `advanced` | Capstone readiness across several optional groups | Run the aggregate advanced setup; there is intentionally no `advanced` extra |
 
+The `deep-learning` extra uses platform markers rather than assuming one wheel
+works everywhere. Windows and Linux use the current compatible
+PyTorch/TorchVision pair. Intel macOS uses the final published Intel-wheel
+pair, while Apple Silicon uses a pair that remains installable on macOS 13.
+These versions still support the tensor, training-loop, and transfer-learning
+APIs used by the course.
+
 The setup scripts are the simplest route:
 
 ```powershell

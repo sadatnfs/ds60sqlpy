@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Exercise 1 — Train and save model
+Worked reference for Exercise 1 — Train and save model
 ```python
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
@@ -35,7 +35,7 @@ Line-by-line
 
 ---
 
-Exercise 2 — Minimal FastAPI endpoint
+Worked reference for Exercise 2 — Minimal FastAPI endpoint
 Create `artifacts/day44/app.py`:
 ```python
 from typing import Annotated
@@ -68,7 +68,7 @@ python -m uvicorn app:app --app-dir artifacts/day44 --reload
 
 ---
 
-Exercise 3 — Test with curl; handle bad inputs
+Worked reference for Exercise 3 — Test with curl; handle bad inputs
 ```bash
 # OK request
 curl -s -X POST http://127.0.0.1:8000/predict \
@@ -128,7 +128,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Add input validation and friendly error behavior.
 
@@ -138,16 +138,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Add input validation and friendly error behavior`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — validated request contracts, trusted artifacts, and testable inference endpoints — with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Return the class name as well as the numeric class identifier.
 
@@ -157,16 +150,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Return the class name as well as the numeric class identifier`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 2 — validated request contracts, trusted artifacts, and testable inference endpoints — for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Create a minimal runtime dependency file for this API.
 
@@ -176,14 +162,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Create a minimal runtime dependency file for this API`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — validated request contracts, trusted artifacts, and testable inference endpoints — build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
 
 ### Exercise 4 — Boundary-case testing
 
@@ -203,14 +182,7 @@ probability range, class mapping, and model version.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong featur...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Boundary-case testing — parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.
 
 ### Exercise 5 — Batch contract
 
@@ -230,14 +202,7 @@ but requires a more complex, versioned response contract.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Design a /predict-batch request and response with stable row IDs, a maximum batch size, order...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Batch contract — define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.
 
 ### Exercise 6 — Artifact-compatibility check
 
@@ -257,4 +222,4 @@ and controlled storage are security boundaries.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `At startup, validate model version, expected feature schema, and class metadata before accept...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Artifact-compatibility check — tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.

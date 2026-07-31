@@ -100,18 +100,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: Return customer IDs that have either an order or a support event” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `o`, `e`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 1, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `events`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 1: Query writing Prompt: Return customer IDs that have either an order or a support event. Why: UNION expresses set membership and removes duplicates across both sources. Expected: One distinct customer ID per qualifying customer. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - set operation: combines compatible result shapes; the presence or absence of ALL controls duplicate preservation. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-06 Exercise 1, read from `orders`, and `events`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-06 Exercise 1, expected output: One distinct customer ID per qualifying customer. The final columns are `customer_id`. The final order is `customer_id`.
+- **Independent verification:** For sql-06 Exercise 1, run an anti-check that counts rows where NOT ((e.event_type = 'support')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `orders`, and `events`. Add one row for which `(e.event_type = 'support')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+- **Intermediate relation check:** For sql-06 Exercise 1, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.
+- **Clause check:** For sql-06 Exercise 1, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `events`, preserve one row per `customer_id`, and finish with `customer_id` ordered by `customer_id`.
+- **Alternative/trade-off:** For sql-06 Exercise 1, the chosen form is justified by this lesson-specific rationale: `UNION` expresses set membership and removes duplicates across both sources. Evaluate another form against the concrete expected result (One distinct customer ID per qualifying customer) and the verification above.
+- **Edge case:** Add one row for which `(e.event_type = 'support')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
 ## Exercise 2 — Query writing
 
@@ -145,18 +140,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Return customer IDs that have both an order and a support event” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `o`, `e`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 2, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `events`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 2: Query writing Prompt: Return customer IDs that have both an order and a support event. Why: INTERSECT keeps keys present in both compatible sets. Expected: One distinct customer ID in both sets. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - set operation: combines compatible result shapes; the presence or absence of ALL controls duplicate preservation. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-06 Exercise 2, read from `orders`, and `events`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-06 Exercise 2, expected output: One distinct customer ID in both sets. The final columns are `customer_id`. The final order is `customer_id`.
+- **Independent verification:** For sql-06 Exercise 2, run an anti-check that counts rows where NOT ((e.event_type = 'support')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `orders`, and `events`. Add one row for which `(e.event_type = 'support')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+- **Intermediate relation check:** For sql-06 Exercise 2, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.
+- **Clause check:** For sql-06 Exercise 2, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `events`, preserve one row per `customer_id`, and finish with `customer_id` ordered by `customer_id`.
+- **Alternative/trade-off:** For sql-06 Exercise 2, the chosen form is justified by this lesson-specific rationale: `INTERSECT` keeps keys present in both compatible sets. Evaluate another form against the concrete expected result (One distinct customer ID in both sets) and the verification above.
+- **Edge case:** Add one row for which `(e.event_type = 'support')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
 ## Exercise 3 — Query writing
 
@@ -188,18 +178,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Return customers who have no orders” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `c`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 3, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 3: Query writing Prompt: Return customers who have no orders. Why: EXCEPT subtracts the order-customer set from all customers. Expected: One row per customer absent from orders. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - set operation: combines compatible result shapes; the presence or absence of ALL controls duplicate preservation. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-06 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-06 Exercise 3, expected output: One row per customer absent from orders. The final columns are `customer_id`. The final order is `customer_id`.
+- **Independent verification:** For sql-06 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Intermediate relation check:** For sql-06 Exercise 3, check `customer_id` before applying the row cap.
+- **Clause check:** For sql-06 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `customer_id`, and finish with `customer_id` ordered by `customer_id`.
+- **Alternative/trade-off:** For sql-06 Exercise 3, the chosen form is justified by this lesson-specific rationale: `EXCEPT` subtracts the order-customer set from all customers. Evaluate another form against the concrete expected result (One row per customer absent from orders) and the verification above.
+- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
 ## Exercise 4 — Prediction
 
@@ -252,18 +237,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Compare row counts produced by UNION and UNION ALL for two overlapping status lists”. Show both compared result shapes at one summary row per grouping key explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `o`, `operation`, `row_count`, `union`, `all`.
-- **Independent verification:** For Exercise 4, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 4: Prediction Prompt: Compare row counts produced by UNION and UNION ALL for two overlapping status lists. Why: UNION ALL preserves every input row; UNION returns distinct rows. Expected: Two labeled summary rows showing all-count >= distinct-count. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - WITH: names an intermediate relation so its grain can be checked before later joins or aggregation. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - set operation: combines compatible result shapes; the presence or absence of ALL controls duplicate preservation. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-06 Exercise 4, read from `orders`. Build the answer toward `operation`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-06 Exercise 4, expected output: Two labeled summary rows showing all-count >= distinct-count. The final columns are `operation`, and `row_count`. The final order is `operation`.
+- **Independent verification:** For sql-06 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `operation`, and `row_count` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-06 Exercise 4, run `combined_all`, and `combined_distinct` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-06 Exercise 4, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `operation`, and `row_count` ordered by `operation`.
+- **Alternative/trade-off:** For sql-06 Exercise 4, the chosen form is justified by this lesson-specific rationale: `UNION ALL` preserves every input row; `UNION` returns distinct rows. Evaluate another form against the concrete expected result (Two labeled summary rows showing all-count >= distinct-count) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 5 — Debugging
 
@@ -297,18 +277,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts” at one row at the same report grain. Named evidence columns/objects: `evidence`, `measure`, `amount`, `o`, `e`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 5, prove uniqueness at one row at the same report grain; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `expenses`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 5: Debugging Prompt: Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts. Why: Each branch below returns one text label and one numeric amount at the same report grain. Expected: Rows identify revenue and expense measures with compatible types. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - set operation: combines compatible result shapes; the presence or absence of ALL controls duplicate preservation. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-06 Exercise 5, read from `orders`, and `expenses`. Build the answer toward `measure`, and `amount`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-06 Exercise 5, expected output: Rows identify revenue and expense measures with compatible types. The final columns are `measure`, and `amount`. The final order is `measure`.
+- **Independent verification:** For sql-06 Exercise 5, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `measure`, and `amount` against `orders`, and `expenses`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-06 Exercise 5, check `measure` before applying the row cap.
+- **Clause check:** For sql-06 Exercise 5, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `expenses`, preserve one row per `order_id`, and finish with `measure`, and `amount` ordered by `measure`.
+- **Alternative/trade-off:** For sql-06 Exercise 5, the chosen form is justified by this lesson-specific rationale: Each branch below returns one text label and one numeric amount at the same report grain. Evaluate another form against the concrete expected result (Rows identify revenue and expense measures with compatible types) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 6 — Extension
 
@@ -358,18 +333,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 6 must make “Extension: Return the symmetric difference between customers with orders and customers with support events” observable through the exact DDL/DML command tag plus one row per customer or the customer grouping key named by the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `o`, `e`, `source`.
-- **Independent verification:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `o`, `e`, `source`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 6: Extension Prompt: Return the symmetric difference between customers with orders and customers with support events. Why: Subtract each set from the other, then union the two differences. Expected: Customers present in exactly one of the two source sets. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - WITH: names an intermediate relation so its grain can be checked before later joins or aggregation. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - set operation: combines compatible result shapes; the presence or absence of ALL controls duplicate preservation. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-06 Exercise 6, read from `orders`, and `events`. Build the answer toward `customer_id`, and `source`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-06 Exercise 6, expected output: Customers present in exactly one of the two source sets. The final columns are `customer_id`, and `source`. The final order is `customer_id, source`.
+- **Independent verification:** For sql-06 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `source` against `orders`, and `events`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Intermediate relation check:** For sql-06 Exercise 6, run `ordering_customers`, `support_customers`, `only_orders`, and `only_support` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-06 Exercise 6, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `events`, preserve one row per `customer_id`, and finish with `customer_id`, and `source` ordered by `customer_id, source`.
+- **Alternative/trade-off:** For sql-06 Exercise 6, the chosen form is justified by this lesson-specific rationale: Subtract each set from the other, then union the two differences. Evaluate another form against the concrete expected result (Customers present in exactly one of the two source sets) and the verification above.
+- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
 ## Final self-check
 

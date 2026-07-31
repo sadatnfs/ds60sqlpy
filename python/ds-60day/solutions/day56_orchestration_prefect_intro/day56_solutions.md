@@ -10,18 +10,16 @@ Contents
 
 ---
 
-Exercise 1 — Flow and tasks
+Worked reference for Exercise 1 — Flow and tasks
 ```python
 from datetime import date
 from typing import TypedDict
 
 from prefect import flow, get_run_logger, task
 
-
 class ExtractedData(TypedDict):
     run_date: str
     values: list[int]
-
 
 @task(retries=2, retry_delay_seconds=1)
 def extract(run_date: str) -> ExtractedData:
@@ -29,11 +27,9 @@ def extract(run_date: str) -> ExtractedData:
     logger.info("Extracting the local sample for %s", run_date)
     return {"run_date": run_date, "values": [3, 1, 4, 1, 5]}
 
-
 @task
 def transform(data: ExtractedData) -> ExtractedData:
     return {**data, "values": sorted(set(data["values"]))}
-
 
 @task
 def load(data: ExtractedData) -> dict[str, int | str]:
@@ -44,7 +40,6 @@ def load(data: ExtractedData) -> dict[str, int | str]:
         "loaded_rows": len(data["values"]),
     }
 
-
 @flow(name="etl-daily")
 def etl_flow(run_date: str | None = None) -> dict[str, int | str]:
     effective_date = run_date or date.today().isoformat()
@@ -52,17 +47,15 @@ def etl_flow(run_date: str | None = None) -> dict[str, int | str]:
     clean = transform(raw)
     return load(clean)
 
-
 if __name__ == "__main__":
     print(etl_flow(run_date="2026-01-15"))
 ```
 This one-off run is local and deterministic. It needs no Prefect Cloud account,
 API key, external API, or network download after the dependency is installed.
 
-Exercise 2 — Retries and a local failure hook
+Worked reference for Exercise 2 — Retries and a local failure hook
 ```python
 from prefect.logging.loggers import flow_run_logger
-
 
 def log_failure(flow, flow_run, state) -> None:
     logger = flow_run_logger(flow_run, flow)
@@ -72,7 +65,6 @@ def log_failure(flow, flow_run, state) -> None:
         state.name,
         state.message,
     )
-
 
 @flow(name="monitored-etl", on_failure=[log_failure])
 def monitored_etl(run_date: str | None = None) -> dict[str, int | str]:
@@ -89,7 +81,7 @@ Notes
 
 ---
 
-Exercise 3 — Parameters and a local daily schedule
+Worked reference for Exercise 3 — Parameters and a local daily schedule
 ```python
 def serve_daily() -> None:
     # serve() creates a deployment and then blocks while listening for work.
@@ -98,7 +90,6 @@ def serve_daily() -> None:
         cron="0 2 * * *",
         pause_on_shutdown=True,
     )
-
 
 # Put the function above in etl_schedule.py, then uncomment for scheduled use:
 # if __name__ == "__main__":
@@ -167,7 +158,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Add `test_size` and `random_state` parameters to the training flow.
 
@@ -177,16 +168,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Add testsize and randomstate parameters to the training flow`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
+**Verify:** Practice 1 — observable task boundaries, retries, caching, and idempotent orchestration — run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Split the training task into separate train and evaluate tasks with explicit outputs.
 
@@ -196,16 +180,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Split the training task into separate train and evaluate tasks with explicit outputs`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+**Verify:** Practice 2 — observable task boundaries, retries, caching, and idempotent orchestration — make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Explore the optional local Prefect UI and scheduling basics.
 
@@ -215,14 +192,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Explore the optional local Prefect UI and scheduling basics`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — observable task boundaries, retries, caching, and idempotent orchestration — either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
 
 ### Exercise 4 — Retry and idempotence
 
@@ -241,14 +211,7 @@ errors. Classify the exception and preserve the original cause in task state.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Add retries to a task that writes an artifact. Make the write idempotent so a failure after w...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Retry and idempotence — inject a failure after the first artifact write, then retry; assert exactly one final path/manifest exists, its hash matches a clean run, no partial file remains, and attempt count/state are recorded.
 
 ### Exercise 5 — Cache-key design
 
@@ -269,14 +232,7 @@ contract or disable caching.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Design a task cache key that changes when data fingerprint, code/config, or relevant paramete...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Cache-key design — print cache keys for identical inputs, changed data hash, changed code/config, changed relevant parameter, and log-only change; assert equality only for identical/log-only cases and inequality for semantic changes.
 
 ### Exercise 6 — Failure observability
 
@@ -296,4 +252,4 @@ diagnosis.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Instrument a three-task flow so logs and a final summary identify run ID, task, safe input ve...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+**Verify:** Failure observability — capture a three-task failure run and assert every event contains run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category; raw row and secret sentinels must be absent and final state must identify the failed task.

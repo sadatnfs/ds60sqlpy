@@ -299,78 +299,78 @@ $negative_control$;
 -- 1. Add migration 3: currency_code character(3) NOT NULL DEFAULT 'USD'.
 --    Update the expected contract and prove versions 1-3 are exact.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-test-01 Exercise 1, complete the currency migration written analysis and support its claims with read-only evidence from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-test-01 Exercise 1, expected output: a completed the currency migration written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `character`.
+--    Verify: For sql-test-01 Exercise 1, check the currency migration written analysis against `character`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 1, check the currency migration written analysis against `character`.
 -- 2. Create a raw producer fixture with duplicate source_order_key values.
 --    Write one summary check and one detail query; label whether you count
 --    duplicate groups, keys, or participating rows.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-test-01 Exercise 2, read from `pro_contract_test_lab.raw_orders`. Compute `source_order_key`, and `participating_rows` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-test-01 Exercise 2, expected output: one row per duplicate key group and labels its count `participating_rows`. The final columns are `source_order_key`, and `participating_rows`. The final order is `ro.source_order_key`.
+--    Verify: For sql-test-01 Exercise 2, evaluate each of `source_order_key`, and `participating_rows` in a separate control `SELECT` over `pro_contract_test_lab.raw_orders`; require one final row and compare every value. Add duplicate source candidates for `source_order_key`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 2, confirm the groups are `source_order_key`; then check `ro.source_order_key` before applying the row cap.
 -- 3. Add contract checks for defaults, primary/unique keys, and the customer
 --    foreign key without depending on generated constraint names.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-test-01 Exercise 3, read from `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`. Compute `conkey` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-test-01 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `conkey`.
+--    Verify: For sql-test-01 Exercise 3, evaluate each of `row_count` in a separate control `SELECT` over `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`; require one final row and compare every value. Add two tied candidates and prove `conkey` identifies both without accidental loss.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 3, start with the first relation in `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`; after each join, record total rows and distinct `conkey` so the exact fanout or loss is visible.
 -- 4. Add a reconciliation that includes orders with zero lines and distinguishes
 --    a missing total from numeric zero.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-test-01 Exercise 4, read from `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line`. Build the answer toward `order_id`; keep `order_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-test-01 Exercise 4, expected output: one row per `order_id`. The final columns are `order_id`.
+--    Verify: For sql-test-01 Exercise 4, project `order_id` plus the raw source columns from `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line` at each join stage; record row count and distinct `order_id`, then assert the final `order_id` values match those staged rows without unintended fanout or loss. Add one row for which `(o.order_key = 'ORD-200')` is true and one for which it is false; verify only the matching `order_id` value is returned.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 4, start with the first relation in `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
 -- 5. Explain fixture ownership, rollback isolation, negative controls, and why
 --    a test that only prints failures is unsafe in CI.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-test-01 Exercise 5, complete the harness written analysis and support its claims with read-only evidence from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-test-01 Exercise 5, expected output: a completed the harness written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `on_error_stop`.
+--    Verify: For sql-test-01 Exercise 5, check the harness written analysis against `on_error_stop`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 5, check the harness written analysis against `on_error_stop`.
 -- 6. Assert that duplicate source_order_key fails with the expected SQLSTATE and
 --    constraint category. Explain why matching the entire localized error text
 --    or accepting any exception makes a brittle or false-positive test.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-test-01 Exercise 6, read the target keys from `pro_contract_test_lab.orders` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+--    Expected result/shape: For sql-test-01 Exercise 6, expected output: the command tag and an independently counted set of affected `order_id` values. The final columns are `unique_violation`, and `constraint_name`.
+--    Verify: For sql-test-01 Exercise 6, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_contract_test_lab.orders` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 6, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_contract_test_lab.orders` again and prove rollback or idempotent retry.
 -- 7. Build table-driven boundary fixtures for quantity, money, dates, NULL, and
 --    Unicode text. Include just-below, exact-boundary, just-above, and malformed
 --    cases, with an explicit expected outcome for every row.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-test-01 Exercise 7, read from `pro_contract_test_lab.boundary_probe`, and `pro_contract_test_lab.boundary_results`. Build the answer toward `case_id`, `quantity`, and `expected_accept`; keep `case_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-test-01 Exercise 7, expected output: one row per `case_id`. The final columns are `case_id`, `quantity`, and `expected_accept`. The final order is `case_id LOOP accepted := true`.
+--    Verify: For sql-test-01 Exercise 7, reselect the returned keys directly from the source; require unique `case_id` where the expected grain is one row per key and confirm the projected `case_id`, `quantity`, and `expected_accept` against `pro_contract_test_lab.boundary_probe`, and `pro_contract_test_lab.boundary_results`. Repeat with `NULL` in `case_id`, and `quantity` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 7, inspect the source keys that survive `WHERE`; then check `case_id LOOP accepted := true` before applying the row cap.
 -- 8. Design a two-session concurrency test for lost updates or double claims.
 --    Document synchronization barriers, timeouts, cleanup, deterministic pass
 --    criteria, and why a single transaction cannot reproduce every anomaly.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-test-01 Exercise 8, read from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Build the answer toward `lock_timeout`, and `statement_timeout`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-test-01 Exercise 8, expected output: one row per `customer_id`. The final columns are `lock_timeout`, and `statement_timeout`.
+--    Verify: For sql-test-01 Exercise 8, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `lock_timeout`, and `statement_timeout` against `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 8, select `customer_id` from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` before adding derived columns.
 -- 9. Capture a stable schema fingerprint before and after a migration. Exclude
 --    volatile OIDs and generated names, but detect changed types, defaults,
 --    nullability, constraints, indexes, privileges, and routine signatures.
 --
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-test-01 Exercise 9, read from `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`. Build the answer toward `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default`; keep `ordinal_position` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-test-01 Exercise 9, expected output: one row per `ordinal_position`. The final columns are `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default`. The final order is `con.contype, definition`.
+--    Verify: For sql-test-01 Exercise 9, project `ordinal_position` plus the raw source columns from `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace` at each join stage; record row count and distinct `ordinal_position`, then assert the final `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default` values match those staged rows without unintended fanout or loss. Give two rows the same `con.contype` value and different `definition` values; verify `con.contype, definition` produces the intended rank and display order.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 9, start with the first relation in `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`; after each join, record total rows and distinct `ordinal_position` so the exact fanout or loss is visible.
 -- 10. Rehearse a destructive migration against a disposable restored database.
 --     Compare row counts, checksums, rejected rows, critical queries, rollback
 --     feasibility, elapsed time, and application compatibility before approval.
---    Inputs: Use only the declared lesson objects (pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-test-01 Exercise 10, use `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+--    Expected result/shape: For sql-test-01 Exercise 10, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
+--    Verify: For sql-test-01 Exercise 10, restore into an isolated target and reconcile `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+--    Hint ladder, rung 1: For sql-test-01 Exercise 10, restore into an isolated target and reconcile `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
 
 ROLLBACK;
 \echo 'SQL-TEST-01 complete: pro_contract_test_lab was rolled back'

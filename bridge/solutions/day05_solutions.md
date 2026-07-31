@@ -40,6 +40,23 @@ contact it.
 The balanced suite has many pure tests, a few recording-adapter tests, and the
 smallest useful number of opt-in PostgreSQL tests.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+This example proves the domain rule and fake call history without a driver:
+
+```python
+from decimal import Decimal
+
+from bridge.solutions.day05_solution import FakeOrderRepository, customer_order_total
+
+repository = FakeOrderRepository({7: (Decimal("2.50"), Decimal("7.50"))})
+assert customer_order_total(repository, 7) == Decimal("10.00")
+assert repository.requested_customer_ids == [7]
+```
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs align one-for-one with the learner and guide. The executable
@@ -57,9 +74,7 @@ IDs, and return exact zero for no amounts.
 
 **Why this boundary matters:** Use a Decimal start value so the empty case keeps the money type.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert IDs `0` and `-1` raise `ValueError`; an empty repository returns `Decimal('0.00')`; and two configured Decimal amounts sum exactly without float conversion.
 
 ### Exercise 2 — Test double
 
@@ -72,9 +87,7 @@ every call, and return the configured sequence or an empty tuple.
 **Why this boundary matters:** A fake supplies behavior and observations; the test owns
 expectations.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Call the fake for configured and missing customer IDs; assert returned sequences and public call history match exactly, with no assertion performed inside the fake.
 
 ### Exercise 3 — Testing
 
@@ -86,9 +99,7 @@ should raise before the repository history changes.
 
 **Why this boundary matters:** Verify behavior and collaboration separately.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Compare exact totals for empty/single/multiple sequences, exact zero type, invalid-ID exceptions, unchanged Decimal values, and one repository call per valid request.
 
 ### Exercise 4 — Adapter
 
@@ -101,9 +112,7 @@ amount column as Decimals. The hostile test ID/value must never be interpolated 
 **Why this boundary matters:** Keep SQL structure static and adapt returned rows to Decimal
 values.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Use a recording cursor; assert the SQL remains static with one `%s`, the parameter tuple is `(customer_id,)`, one fetch occurs, and rows become `Decimal` values.
 
 ### Exercise 5 — Fixture
 
@@ -115,9 +124,7 @@ catch the body exception unless adding safe context, and never convert it into s
 
 **Why this boundary matters:** Fixture cleanup belongs in `finally`.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert rollback occurs after a passing body and after a body that raises; in the latter case the original exception identity remains visible and no commit occurs.
 
 ### Exercise 6 — Live-test gate
 
@@ -130,9 +137,7 @@ test suite should skip explicitly without importing Psycopg or printing the URL.
 **Why this boundary matters:** Opt-in state and connection location are independent
 requirements.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Parameterize missing flag, missing URL, and both present; assert only `DS60_RUN_LIVE_DB_TESTS=1` plus a URL enables the fixture and every other case skips.
 
 ### Exercise 7 — Integration
 
@@ -146,9 +151,7 @@ prove no row persisted.
 **Why this boundary matters:** Use a unique fixture key and verify disappearance after rollback
 when practical.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** In the opt-in database, insert and read one course-owned temporary order, then assert rollback removes it and a second run starts from the same clean state.
 
 ### Exercise 8 — Design
 
@@ -161,9 +164,7 @@ otherwise require excess test code.
 
 **Why this boundary matters:** Prefer the simplest double that expresses the evidence needed.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Provide a table mapping pure totals to the configured fake, SQL/parameter assertions to the recording stub, and one collaboration-count check to a mock, with one reason each.
 
 ### Exercise 9 — Failure analysis
 
@@ -176,9 +177,7 @@ swallow either failure.
 
 **Why this boundary matters:** Cleanup failures can mask the primary assertion.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Raise distinct body and rollback exceptions; inspect chaining/grouping and assert the test report contains evidence of both failures rather than silently replacing one.
 
 ### Exercise 10 — Database semantics
 
@@ -192,9 +191,7 @@ and Psycopg parameter adaptation.
 **Why this boundary matters:** A fast substitute is useful only when it shares the semantics
 under test.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** List the PostgreSQL behavior under test—conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls—and mark each as unproved by SQLite.
 
 ### Exercise 11 — Security testing
 
@@ -207,9 +204,7 @@ the exact value is present in the one-element parameter tuple.
 **Why this boundary matters:** Recording fakes should keep query and parameters in separate
 fields.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Send an injection-shaped customer value through the adapter; assert it is absent from SQL text and present unchanged only in the recorded parameter tuple.
 
 ### Exercise 12 — Property reasoning
 
@@ -223,9 +218,7 @@ domain-valid Decimals.
 **Why this boundary matters:** Useful invariants complement example cases without changing
 domain policy.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** For non-negative Decimal sequences, assert totals are non-negative, empty is exact zero, single returns itself, concatenation totals add, and input order does not change the sum.
 
 ### Exercise 13 — Sensitive fixtures
 
@@ -238,9 +231,7 @@ repository scanner.
 
 **Why this boundary matters:** Parameterized test IDs and reprs are output channels.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Scan test IDs, exception messages, logs, and snapshots with a sentinel credential; assert the secret never appears while explicit safe markers remain detectable.
 
 ### Exercise 14 — Isolation
 
@@ -253,6 +244,4 @@ assertion is forced to fail.
 
 **Why this boundary matters:** A passing test that leaves data behind is not isolated.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Run the opt-in case twice; assert each run sees only its own temporary row and post-test queries find no persisted course record.

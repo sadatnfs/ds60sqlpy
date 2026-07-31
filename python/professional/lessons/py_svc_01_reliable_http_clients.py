@@ -8,21 +8,20 @@ Professional learner deep dive (python-svc-01)
 ------------------------------------------------
 
 Mental model:
-An HTTP transport sends one request and returns one response or raises a
-transport error. A reliable client wraps that mechanism with policy:
-time budgets, status classification, bounded retries/backoff, replay
-safety, correlation/idempotency identities, response validation,
-pagination bounds, and redacted diagnostics.
-
-Retry decisions need two gates: the failure may be transient, and the
-operation must be safe to replay. A POST is not safe merely because a
-library can resend it. Deadlines bound the whole logical operation, not
-each attempt independently.
+An HTTP transport sends one request and returns one response or raises a transport error. A
+reliable client wraps that mechanism with policy: time budgets, status classification, bounded
+retries/backoff, replay safety, correlation/idempotency identities, response validation,
+pagination bounds, and redacted diagnostics.  Retry decisions need two gates: the failure may be
+transient, and the operation must be safe to replay. A POST is not safe merely because a library
+can resend it. Deadlines bound the whole logical operation, not each attempt independently.
 
 API/boundary anatomy:
-* transport Protocol: isolates request/response mechanics so policy is deterministic under scripted failures.
-* retry classifier + budget: allows only documented transient failures while respecting attempts, delay, and remaining deadline.
-* response/schema validation: rejects malformed success bodies before trusted domain code consumes them.
+* transport Protocol: isolates request/response mechanics so policy is deterministic under
+  scripted failures.
+* retry classifier + budget: allows only documented transient failures while respecting
+  attempts, delay, and remaining deadline.
+* response/schema validation: rejects malformed success bodies before trusted domain code
+  consumes them.
 
 Micro-example A — apply both retryability and replay-safety gates::
 
@@ -30,7 +29,7 @@ Micro-example A — apply both retryability and replay-safety gates::
         transient = status in {429, 502, 503, 504}
         replay_safe = method in {"GET", "HEAD"} or idempotency_key is not None
         return transient and replay_safe
-    
+
     cases = [
         ("GET", 503, None),
         ("POST", 503, None),
@@ -42,7 +41,8 @@ Micro-example A — apply both retryability and replay-safety gates::
     print(decisions)
     assert decisions == [True, False, True, False]
 
-Expected: A transient status is insufficient for an unsafe mutation without a stable idempotency identity.
+Expected: A transient status is insufficient for an unsafe mutation without a stable idempotency
+          identity.
 
 Micro-example B — reject a pagination cursor loop::
 
@@ -63,9 +63,11 @@ Micro-example B — reject a pagination cursor loop::
         if cursor is None:
             break
 
-Expected: The bounded collector fails on the repeated cursor instead of looping forever or duplicating items.
+Expected: The bounded collector fails on the repeated cursor instead of looping forever or
+          duplicating items.
 
-Debugging rule: Use a scripted fake to record attempt count, request identities, timeouts, delays, response closure, cursor history, and redacted log fields.
+Debugging rule: Use a scripted fake to record attempt count, request identities, timeouts,
+                delays, response closure, cursor history, and redacted log fields.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

@@ -75,38 +75,38 @@ LIMIT 120;
 
 -- Exercises
 -- 1. Compute operating margin: (cash_in - COGS - Payroll - Infrastructure - G&A) / cash_in.
---    Inputs: Use only the declared lesson objects (payments, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-51 Exercise 1, read from `payments`, and `expenses`. Build the answer toward `month`, `cash_in`, `operating_cost`, and `operating_margin`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-51 Exercise 1, expected output: one row per month appearing in either payments or operating expenses. The final columns are `month`, `cash_in`, `operating_cost`, and `operating_margin`. The final order is `month DESC`.
+--    Verify: For sql-51 Exercise 1, project `month` plus the raw source columns from `payments`, and `expenses` at each join stage; record row count and distinct `month`, then assert the final `month`, `cash_in`, `operating_cost`, and `operating_margin` values match those staged rows without unintended fanout or loss. Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
+--    Hint ladder, rung 1: For sql-51 Exercise 1, run `cash`, and `operating_expense` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
 -- 2. Project next 3 months net cash as the average of last 12 matching months (seasonal naive).
---    Inputs: Use only the declared lesson objects (payments, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-51 Exercise 2, read from `payments`, `expenses`, `h.month`, and `f.forecast_month`. Build the answer toward `forecast_month`, `projected_net_cash`, and `matching_historical_months`; keep `forecast_month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-51 Exercise 2, expected output: exactly three future month rows. The count column shows how much history supports each estimate; a `NULL` projection means there was none. The final columns are `forecast_month`, `projected_net_cash`, and `matching_historical_months`. The final order is `f.forecast_month`.
+--    Verify: For sql-51 Exercise 2, independently aggregate `payments`, `expenses`, `h.month`, and `f.forecast_month` by `forecast_month`; require one output row for every distinct `forecast_month` tuple and compare `projected_net_cash`, and `matching_historical_months` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `projected_net_cash`, and `matching_historical_months` for the existing `forecast_month` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-51 Exercise 2, run `cash`, `expense`, `historical`, and `future` one at a time. Record each CTE's row count and `forecast_month` uniqueness before the next stage uses it.
 -- 3. Prediction: compare cash-basis payments with order revenue and explain why
 --    timing differences make them unsuitable for one unlabeled margin metric.
---    Inputs: Use only the declared lesson objects (payments, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-51 Exercise 3, read from `orders`, and `payments`. Build the answer toward `month`, `booked_order_revenue`, and `cash_received`; keep `cash_received` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-51 Exercise 3, expected output: one row per `cash_received`. The final columns are `month`, `booked_order_revenue`, and `cash_received`. The final order is `month`.
+--    Verify: For sql-51 Exercise 3, independently aggregate `orders`, and `payments` by `cash_received`; require one output row for every distinct `cash_received` tuple and compare `booked_order_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `booked_order_revenue` for the existing `cash_received` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-51 Exercise 3, start with the first relation in `orders`, and `payments`; after each join, record total rows and distinct `cash_received` so the exact fanout or loss is visible.
 -- 4. Construction: produce monthly beginning cash, inflows, outflows, net cash,
 --    and ending cash with a running window.
---    Inputs: Use only the declared lesson objects (payments, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-51 Exercise 4, read from `payments`, and `expenses`. Build the answer toward `month`, `beginning_cash`, `cash_in`, `cash_out`, `net_cash`, and `ending_cash`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-51 Exercise 4, expected output: one row per `month`. The final columns are `month`, `beginning_cash`, `cash_in`, `cash_out`, `net_cash`, and `ending_cash`. The final order is `month`.
+--    Verify: For sql-51 Exercise 4, choose one complete partition from `payments`, and `expenses`; hand-calculate its first, middle, and final window values for `beginning_cash`, `cash_in`, and `cash_out`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+--    Hint ladder, rung 1: For sql-51 Exercise 4, run `flow`, and `balances` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
 -- 5. Debugging: preserve months with expenses but no payments by replacing an
 --    inner join with a calendar spine and left joins.
---    Inputs: Use only the declared lesson objects (payments, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-51 Exercise 5, read from `payments`, and `expenses`. Build the answer toward `month`, `cash_in`, and `cash_out`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-51 Exercise 5, expected output: one row per `month`. The final columns are `month`, `cash_in`, and `cash_out`. The final order is `m.month`.
+--    Verify: For sql-51 Exercise 5, project `month` plus the raw source columns from `payments`, and `expenses` at each join stage; record row count and distinct `month`, then assert the final `month`, `cash_in`, and `cash_out` values match those staged rows without unintended fanout or loss. Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
+--    Hint ladder, rung 1: For sql-51 Exercise 5, run `bounds`, `months`, `cash`, and `costs` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
 -- 6. Edge case: keep operating margin NULL when cash_in is zero and provide a
 --    separate status column explaining why the ratio is undefined.
---    Inputs: Use only the declared lesson objects (payments, expenses, budgets) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-51 Exercise 6, read from `toy`. Build the answer toward `month`, `operating_margin`, and `margin_status`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-51 Exercise 6, expected output: one row per `month`. The final columns are `month`, `operating_margin`, and `margin_status`.
+--    Verify: For sql-51 Exercise 6, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month`, `operating_margin`, and `margin_status` against `toy`. Repeat with `NULL` in `month`, and `operating_margin` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-51 Exercise 6, select `month` from `toy` before adding derived columns.
 
 ROLLBACK;

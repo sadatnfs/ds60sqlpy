@@ -173,14 +173,14 @@ def may_retry(method, status, *, idempotency_key=None):
     replay_safe = method in {"GET", "HEAD"} or idempotency_key is not None
     return transient and replay_safe
 
+
 cases = [
     ("GET", 503, None),
     ("POST", 503, None),
     ("POST", 503, "logical-operation-17"),
     ("GET", 400, None),
 ]
-decisions = [may_retry(method, status, idempotency_key=key)
-             for method, status, key in cases]
+decisions = [may_retry(method, status, idempotency_key=key) for method, status, key in cases]
 print(decisions)
 assert decisions == [True, False, True, False]
 ```
@@ -235,13 +235,7 @@ for this course policy. Reject impossible values.
 Classification is configurable in real systems. For example, a particular 409
 may be retryable only when the API contract says so.
 
-**Verify:** For task `classify status`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
-
+**Verify:** classify status — table-test classify_status for representative 2xx success, retryable 429/503, permanent 400/401/403, contract-specific 409, and impossible <100 or >599 values; assert the exact enum/result or ValueError.
 
 ### Exercise 2 — authorize replay
 
@@ -253,13 +247,7 @@ Implement `method_can_retry`:
 An idempotency header helps only if the server documents and enforces it.
 Never invent safety solely on the client side.
 
-**Verify:** For task `authorize replay`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then assert attempt/page counts and stable logical identities, then exercise the bounded permanent-failure or repeated-cursor path.
-
-
-
-
-
-
+**Verify:** authorize replay — implement method can retry: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics; pOST and PATCH require a non-empty idempotency key in this lesson; an idempotency header helps only if the server documents and enforces it.
 
 ### Exercise 3 — add bounded backoff
 
@@ -273,13 +261,7 @@ Cap the result. Inject the jitter source and sleep function so tests record
 delays without actually waiting. For 429 with numeric `Retry-After`, wait at
 least the server value but no longer than the policy cap.
 
-**Verify:** For task `add bounded backoff`, assert attempt/page counts and stable logical identities, then exercise the bounded permanent-failure or repeated-cursor path.
-
-
-
-
-
-
+**Verify:** add bounded backoff — with injected jitter/sleep, assert failed attempt n uses capped base_delay * 2**(n-1) plus the declared jitter; numeric Retry-After is honored up to the cap and tests record delays without sleeping.
 
 ### Exercise 4 — keep identities stable
 
@@ -290,13 +272,7 @@ same values.
 Do not create a new idempotency key inside a retry loop; the server would see
 each replay as a new operation.
 
-**Verify:** For task `keep identities stable`, assert attempt/page counts and stable logical identities, then exercise the bounded permanent-failure or repeated-cursor path.
-
-
-
-
-
-
+**Verify:** keep identities stable — generate one correlation ID before the attempt loop; generate or accept one idempotency key per logical mutation; assert every scripted attempt sees the same values.
 
 ### Exercise 5 — paginate defensively
 
@@ -306,13 +282,7 @@ blank cursors, remember seen cursors, and enforce a maximum page count.
 Treat the cursor as opaque. URL-encode it rather than parsing or concatenating
 it manually.
 
-**Verify:** For task `paginate defensively`, assert attempt/page counts and stable logical identities, then exercise the bounded permanent-failure or repeated-cursor path.
-
-
-
-
-
-
+**Verify:** paginate defensively — collect items until next cursor is null; require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count; treat the cursor as opaque.
 
 ### Exercise 6 — configure and redact auth
 
@@ -323,86 +293,32 @@ Implement case-insensitive redaction for authorization, cookies, proxy
 authorization, and API-key headers. Redact common query credential keys before
 logging URLs. Do not log bodies by default.
 
-**Verify:** For task `configure and redact auth`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then test representative forbidden values and prove they are absent from returned data, repr, logs, metrics, and generated artifacts.
-
-
-
-
-
-
+**Verify:** configure and redact auth — read DS60 API TOKEN, DS60 API BASE URL, and a numeric timeout from an injected environment mapping; make the token field repr=False; implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers.
 
 ### Exercise 7 — prove policy with scripts
 
 Create deterministic scripts for:
 
-1. 503 then 200 for GET,
+- 503 then 200 for GET,
 
-**Verify:** For task `503 then 200 for GET,`, demonstrate the concrete requirement “1. 503 then 200 for GET,” with explicit inputs, observable output, and one counterexample.
+- 400 for GET,
 
+- 503 for POST without a key,
 
+- 503 then 200 for POST with a key,
 
+- 429 with `Retry-After`,
 
+- three transport timeouts,
 
-2. 400 for GET,
+- two valid pages, and
 
-**Verify:** For task `400 for GET,`, demonstrate the concrete requirement “2. 400 for GET,” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-3. 503 for POST without a key,
-
-**Verify:** For task `503 for POST without a key,`, demonstrate the concrete requirement “3. 503 for POST without a key,” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-4. 503 then 200 for POST with a key,
-
-**Verify:** For task `503 then 200 for POST with a key,`, demonstrate the concrete requirement “4. 503 then 200 for POST with a key,” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-5. 429 with `Retry-After`,
-
-**Verify:** For task `429 with Retry-After,`, assert attempt/page counts and stable logical identities, then exercise the bounded permanent-failure or repeated-cursor path.
-
-
-
-
-
-6. three transport timeouts,
-
-**Verify:** For task `three transport timeouts,`, demonstrate the concrete requirement “6. three transport timeouts,” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-7. two valid pages, and
-
-**Verify:** For task `two valid pages, and`, demonstrate the concrete requirement “7. two valid pages, and” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-8. a repeated cursor.
+- a repeated cursor.
 
 Assert request count, delays, identities, timeout propagation, returned items,
 and redacted logs.
 
-**Verify:** For task `a repeated cursor`, assert attempt/page counts and stable logical identities, then exercise the bounded permanent-failure or repeated-cursor path; then test representative forbidden values and prove they are absent from returned data, repr, logs, metrics, and generated artifacts.
-
-
-
-
-
-
+**Verify:** prove policy with scripts — run scripted transports for 503→200 GET, permanent 400 GET, unsafe POST without key, retryable POST with stable key, 429 Retry-After, three timeouts, two pages, and repeated cursor; assert exact attempts/pages/final outcomes.
 
 ### Extended professional practice
 
@@ -416,13 +332,7 @@ Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and
 
 **Progressive hint:** Use an injected monotonic clock and compute a deadline once per logical request. Per-attempt timeouts must shrink with remaining time.
 
-**Verify:** For task `allocate an end-to-end timeout budget`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call; then assert attempt/page counts and stable logical identities, then exercise the bounded permanent-failure or repeated-cursor path.
-
-
-
-
-
-
+**Verify:** allocate an end-to-end timeout budget — given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts; reject a retry when the remaining budget cannot support another useful attempt.
 
 ### Exercise 9 — support Retry-After dates safely
 
@@ -430,13 +340,7 @@ Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject
 
 **Progressive hint:** HTTP-date parsing needs wall time; sleeping and deadline accounting need monotonic time. Invalid server guidance falls back to local backoff.
 
-**Verify:** For task `support Retry-After dates safely`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** support Retry-After dates safely — extend policy reasoning from numeric Retry-After seconds to an HTTP-date; inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.
 
 ### Exercise 10 — model a circuit breaker
 
@@ -444,13 +348,7 @@ Design closed, open, and half-open states around the existing retrying client. S
 
 **Progressive hint:** A breaker protects a dependency across logical requests; it does not replace per-attempt timeout or retry policy.
 
-**Verify:** For task `model a circuit breaker`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** model a circuit breaker — design closed, open, and half-open states around the existing retrying client; specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.
 
 ### Exercise 11 — bound concurrent requests
 
@@ -458,13 +356,7 @@ Add a client-side bulkhead that caps active transport calls and defines whether 
 
 **Progressive hint:** The concurrency permit surrounds only the scarce external call. A `finally` block or context manager owns release.
 
-**Verify:** For task `bound concurrent requests`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
-
+**Verify:** bound concurrent requests — add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately; prove permits release on success, exception, timeout, and cancellation.
 
 ### Exercise 12 — close streaming responses
 
@@ -472,13 +364,7 @@ Define a streaming-response protocol with explicit close and cancellation semant
 
 **Progressive hint:** Ownership must say who closes the response. Use a context manager and enforce size while reading chunks, not after buffering everything.
 
-**Verify:** For task `close streaming responses`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** close streaming responses — define a streaming-response protocol with explicit close and cancellation semantics; test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.
 
 ### Exercise 13 — inject a credential provider
 
@@ -486,13 +372,7 @@ Replace a static token field with a credential-provider protocol that can refres
 
 **Progressive hint:** Credential acquisition is a separate boundary. Cache/expiry policy and single-flight refresh belong to the provider.
 
-**Verify:** For task `inject a credential provider`, test representative forbidden values and prove they are absent from returned data, repr, logs, metrics, and generated artifacts.
-
-
-
-
-
-
+**Verify:** inject a credential provider — replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge; preserve redaction and prevent refresh loops.
 
 ### Exercise 14 — build an adversarial transport contract suite
 
@@ -500,13 +380,7 @@ Extend scripted tests with redirect loops, malformed JSON, wrong content type, r
 
 **Progressive hint:** Assert bounded attempts, exact request identity, closed resources, typed errors, and the absence of secret material in every diagnostic.
 
-**Verify:** For task `build an adversarial transport contract suite`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** build an adversarial transport contract suite — extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.
 
 ## Self-check
 
@@ -576,10 +450,12 @@ Emphasize HTTP mechanism versus retry, timeout, pagination, idempotency, and red
 - guide: `python/professional/companion-guides/py_svc_01_reliable_http_clients.md`
 - learner artifact: `python/professional/lessons/py_svc_01_reliable_http_clients.py`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-15`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

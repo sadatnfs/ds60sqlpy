@@ -25,18 +25,22 @@ for the checked-in generated inventory in `curriculum/catalog.json`. The index i
 ### New to programming and databases
 
 1. Complete Python Days 1–15.
-2. Complete `sql-found-01` and `sql-found-02`, then begin SQL Days 1–15.
+2. Complete SQL Days 1–15, beginning with a small `SELECT`.
 3. Continue Python Days 16–30.
-4. Continue SQL Days 16–30.
+4. Complete `sql-found-01` for relational design, then continue SQL Days
+   16–30.
 5. Add the engineering bridge after Python Day 15 and SQL Day 15 when you want
    application-oriented integration practice.
-6. Choose advanced data science, advanced SQL, or alternate both.
+6. After SQL Day 39, complete `sql-found-02` for versioned schema evolution
+   before Day 40.
+7. Choose advanced data science, advanced SQL, or alternate both.
 
 ### Comfortable with another programming language
 
 Review Python Days 1–9, then focus on testing, tooling, data work, and
-projects. Complete the two SQL foundations before Day 1 unless you can already
-design constraints and explain a versioned migration workflow.
+projects. Begin SQL at Day 1 unless a placement check shows that you should
+skip basic querying; take the relational-design and migration modules only
+after their declared catalog prerequisites.
 
 ### Comfortable with SQL
 
@@ -94,7 +98,8 @@ Artifacts currently present:
 - Companion guides: Days 1–60
 - Markdown solutions: Days 1–60
 - Executable solution SQL: Days 1–60
-- Relational foundations: 2 named modules before Day 1
+- Relational engineering: 2 named modules after the relevant querying,
+  transaction, and locking prerequisites
 - Professional and specialization SQL: 10 named modules after the shared core
 
 Runnable material and the maintained high-level plan both target PostgreSQL

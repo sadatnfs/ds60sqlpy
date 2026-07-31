@@ -20,10 +20,6 @@ By the end of this lesson, you can:
 
 Complete Day 12 (`python-12`), plus generators from Day 4 (`python-04`).
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -190,11 +186,9 @@ of them as blank-code prompts:
 from functools import lru_cache
 from itertools import chain, islice
 
-
 @lru_cache(maxsize=128)
 def expensive_label(code: int) -> str:
     return f"item-{code:04d}"
-
 
 pages = [[1, 2], [3, 4], [5]]
 first_three = list(islice(chain.from_iterable(pages), 3))
@@ -281,7 +275,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-13`
-(Day 13 — Functional Tools: `itertools` and `functools`). I am a complete beginner. Emphasize functions as values and composable iterable tools.
+(Day 13 — Functional Tools: `itertools` and `functools`). Direct catalog prerequisites: `python-12`.
+I have completed the direct prerequisites: `python-12`. Emphasize functions as values and composable iterable tools.
 Read `python/ds-60day/companion-guides/day13_functional_tools.md` and use the learner notebook
 `python/ds-60day/notebooks/day13_functional_tools.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

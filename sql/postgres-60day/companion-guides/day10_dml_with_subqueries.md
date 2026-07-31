@@ -102,9 +102,7 @@ GROUP BY p.category;
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one grouped row per `category` with columns `category`, and `revenue` from `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -114,11 +112,9 @@ FROM tmp_category_revenue
 ORDER BY revenue DESC, category;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One temporary row per product category.
+**How to read it:** Example 2: Start with `tmp_category_revenue` in `FROM`/`JOIN`. The final `SELECT` displays `category`, and `revenue`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one row per `category` with columns `category`, and `revenue` from `tmp_category_revenue`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -158,28 +154,34 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Materialize category net revenue into a temporary table with `INSERT ... SELECT`.
    **Progressive hint:** Declare the temporary schema and aggregate source rows before inserting.
-   **Expected result/shape:** Exercise 1 must make “Query writing: Materialize category net revenue into a temporary table with INSERT ... SELECT” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `oi`, `p`, `revenue`, `insert`.
-   **Verify:** For Exercise 1, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `oi`, `p`, `revenue`, `insert`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-10 Exercise 1, read the target keys from `exercise_category_revenue`, `order_items`, and `products` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-10 Exercise 1, expected output: One temporary row per product category. The final columns are `category`. The final order is `revenue DESC, category`.
+   **Verify:** For sql-10 Exercise 1, materialize the intended `category` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_category_revenue`, `order_items`, and `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.
 2. **Query writing:** Give Sales and Engineering employees a 5% demonstration raise and return affected rows.
    **Progressive hint:** Select departments by key, round exact numeric salary, and inspect `RETURNING`.
-   **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Give Sales and Engineering employees a 5% demonstration raise and return affected rows” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `e`, `d`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 2, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `employees`, `departments`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-10 Exercise 2, read the target keys from `employees`, and `departments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-10 Exercise 2, expected output: Affected employee rows only; no change persists. The final columns are `returning`, `update`, `from`, and `where`.
+   **Verify:** For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.
 3. **Query writing:** Delete orders older than one year only when no payment exists, returning candidate keys.
    **Progressive hint:** Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.
-   **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Delete orders older than one year only when no payment exists, returning candidate keys” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `o`, `p`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 3, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `payments`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-10 Exercise 3, read the target keys from `orders`, and `payments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-10 Exercise 3, expected output: Deleted-candidate order rows, then fully restored state. The final columns are `from`, `where`, and `returning`.
+   **Verify:** For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
 4. **Prediction:** Run an upsert twice against a temporary key-value table and prove only one row exists for the key.
    **Progressive hint:** A primary key supplies the conflict target; the second statement updates rather than inserts.
-   **Expected result/shape:** Exercise 4 must make “Prediction: Run an upsert twice against a temporary key-value table and prove only one row exists for the key” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`.
-   **Verify:** For Exercise 4, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-10 Exercise 4, read the target keys from `exercise_feed` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-10 Exercise 4, expected output: One row for `source_a` with the second value. The final columns are `source_key`, and `source_value`. The final order is `source_key`.
+   **Verify:** For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.
 5. **Debugging:** Preview and update a bounded product set while reconciling selected and returned key counts.
    **Progressive hint:** Store candidate keys in a temporary table and update only through that reviewed set.
-   **Expected result/shape:** Exercise 5 must make “Debugging: Preview and update a bounded product set while reconciling selected and returned key counts” observable through the exact DDL/DML command tag plus one row per product or product grouping requested; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `p`, `candidate`, `candidate_count`, `updated_count`.
-   **Verify:** For Exercise 5, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `p`, `candidate`, `candidate_count`, `updated_count`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-10 Exercise 5, read the target keys from `products`, and `exercise_product_candidates` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-10 Exercise 5, expected output: One summary row with equal candidate and updated counts. The final columns are `product_id`. The final order is `p.product_id`.
+   **Verify:** For sql-10 Exercise 5, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products`, and `exercise_product_candidates` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
 6. **Extension:** Stage product prices and update only rows whose incoming price is nonnegative and actually differs.
    **Progressive hint:** Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.
-   **Expected result/shape:** Exercise 6 must make “Extension: Stage product prices and update only rows whose incoming price is nonnegative and actually differs” observable through the exact DDL/DML command tag plus one row per product or product grouping requested; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `p`, `stage`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `p`, `stage`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-10 Exercise 6, read the target keys from `exercise_price_stage`, `products`, and `stage.new_price` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are `product_id`. The final order is `p.product_id`.
+   **Verify:** For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
 
 ## Common mistakes and how to recover
 
@@ -250,7 +252,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-10 — DML with Subqueries.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisite: `sql-09`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md
 - Answer-free learner SQL: sql/postgres-60day/day10_dml_with_subqueries.sql
 

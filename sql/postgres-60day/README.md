@@ -1,8 +1,9 @@
 # PostgreSQL track
 
 This track contains 60 ordered PostgreSQL lessons, companion guides, and
-projects. Two relational-foundation modules come before Day 1, and ten named
-professional modules continue after Day 60. The number is a sequence, not a
+projects. New learners start with Day 1. Two named relational-engineering
+modules form the milestones between Days 15–16 and Days 39–40, and ten
+professional modules extend the shared core. The number is a sequence, not a
 deadline.
 
 Start at the repository [README](../../README.md), and run every command from the repository root.
@@ -101,13 +102,14 @@ Both `--reset` commands recreate the disposable `training` schema first.
 4. Attempt exercises in your own scratch file or transaction.
 5. Read the separate solution only after an honest attempt.
 
-If you are new to relational databases, start with the professional
-foundations before Day 1:
+If you are new to relational databases, begin with Day 1 and the supplied
+training schema. Add the named relational-engineering modules only after their
+declared prerequisites:
 
-- [Relational design guide](../professional/companion-guides/sql_found_01_relational_design.md)
-- [Relational design learner SQL](../professional/lessons/sql_found_01_relational_design.sql)
-- [Versioned migrations guide](../professional/companion-guides/sql_found_02_versioned_migrations.md)
-- [Versioned migrations learner SQL](../professional/lessons/sql_found_02_versioned_migrations.sql)
+- after Day 15: [relational design guide](../professional/companion-guides/sql_found_01_relational_design.md)
+  and [learner SQL](../professional/lessons/sql_found_01_relational_design.sql);
+- after Day 39 and relational design: [versioned migrations guide](../professional/companion-guides/sql_found_02_versioned_migrations.md)
+  and [learner SQL](../professional/lessons/sql_found_02_versioned_migrations.sql).
 
 Run a named module through the cross-platform course CLI:
 

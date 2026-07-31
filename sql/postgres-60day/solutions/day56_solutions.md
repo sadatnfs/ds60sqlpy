@@ -108,18 +108,13 @@ Expected shape: one row; `three_dimension_rows` should be larger.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-56 Exercise 1, read from `payments`, `orders`, `customers`, `order_items`, and `products`. Compute `two_dimension_rows`, and `three_dimension_rows` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-56 Exercise 1, expected output: one row; `three_dimension_rows` should be larger. The final columns are `two_dimension_rows`, and `three_dimension_rows`.
+- **Independent verification:** For sql-56 Exercise 1, evaluate each of `two_dimension_rows`, and `three_dimension_rows` in a separate control `SELECT` over `payments`, `orders`, `customers`, `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
+- **Intermediate relation check:** For sql-56 Exercise 1, run `payment_by_method`, `ranked_payment`, `primary_payment`, `line`, `cube_two`, and `cube_three` one at a time. Record each CTE's row count and `payment_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-56 Exercise 1, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, `orders`, `customers`, `order_items`, and `products`, preserve exactly one summary row, and finish with `two_dimension_rows`, and `three_dimension_rows`.
+- **Alternative/trade-off:** For sql-56 Exercise 1, the chosen form is justified by this lesson-specific rationale: An order can have more than one payment. Evaluate another form against the concrete expected result (one row; `three_dimension_rows` should be larger) and the verification above.
+- **Edge case:** Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
 
 ## Exercise 2 — Category-month p50 and p90
 
@@ -158,18 +153,13 @@ Expected grain: one row per represented `(month, category)`.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-56 Exercise 2, read from `orders`, `order_items`, and `products`. Build the answer toward `month`, `category`, `p50_order_value`, and `p90_order_value`; keep `month`, and `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-56 Exercise 2, expected output: one row per represented `(month, category)`. The final columns are `month`, `category`, `p50_order_value`, and `p90_order_value`. The final order is `month DESC, category`.
+- **Independent verification:** For sql-56 Exercise 2, independently aggregate `orders`, `order_items`, and `products` by `month`, and `category`; require one output row for every distinct `month`, and `category` tuple and compare `p50_order_value`, and `p90_order_value` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `p50_order_value`, and `p90_order_value` for the existing `month`, and `category` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-56 Exercise 2, run `category_orders` one at a time. Record each CTE's row count and `month`, and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-56 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `month`, and `category`, and finish with `month`, `category`, `p50_order_value`, and `p90_order_value` ordered by `month DESC, category`.
+- **Alternative/trade-off:** For sql-56 Exercise 2, the chosen form is justified by this lesson-specific rationale: The metric is each category's contribution to an order, not the entire order total repeated for every category. Evaluate another form against the concrete expected result (one row per represented `(month, category)`) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `p50_order_value`, and `p90_order_value` for the existing `month`, and `category` tuple and verify the new tuple appears exactly once.
 
 ## Reasoning, safety, and pitfalls
 
@@ -190,18 +180,13 @@ with several rows on both sides demonstrate the multiplication risk.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-56 Exercise 3, read from `orders`, `order_items`, and `payments`. Build the answer toward `raw_join_rows`, `distinct_items`, and `distinct_payments`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-56 Exercise 3, expected output: one row per `order_id`. The final columns are `raw_join_rows`, `distinct_items`, and `distinct_payments`.
+- **Independent verification:** For sql-56 Exercise 3, project `order_id` plus the raw source columns from `orders`, `order_items`, and `payments` at each join stage; record row count and distinct `order_id`, then assert the final `raw_join_rows`, `distinct_items`, and `distinct_payments` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-56 Exercise 3, start with the first relation in `orders`, `order_items`, and `payments`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-56 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, and `SELECT`. Read only those operations: begin at `orders`, `order_items`, and `payments`, preserve one row per `order_id`, and finish with `raw_join_rows`, `distinct_items`, and `distinct_payments`.
+- **Alternative/trade-off:** For sql-56 Exercise 3, the chosen form is justified by this lesson-specific rationale: The raw payment/item join reports joined rows and distinct source keys. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 4 — Attribute at order grain
 
@@ -210,18 +195,13 @@ reduces to one order row. The windowed grand total reconciles attribution.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-56 Exercise 4, read from `payments`, and `order_items`. Build the answer toward `reporting_method`, `revenue`, and `reconciled_total`; keep `payment_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-56 Exercise 4, expected output: one row per `payment_id`. The final columns are `reporting_method`, `revenue`, and `reconciled_total`. The final order is `reporting_method`.
+- **Independent verification:** For sql-56 Exercise 4, choose one complete partition from `payments`, and `order_items`; hand-calculate its first, middle, and final window values for `revenue`, and `reconciled_total`, then verify output keys remain `payment_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-56 Exercise 4, run `method`, `lines`, and `attributed` one at a time. Record each CTE's row count and `payment_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-56 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, and `order_items`, preserve one row per `payment_id`, and finish with `reporting_method`, `revenue`, and `reconciled_total` ordered by `reporting_method`.
+- **Alternative/trade-off:** For sql-56 Exercise 4, the chosen form is justified by this lesson-specific rationale: Payment policy reduces methods to one order-level label; line revenue also reduces to one order row. Evaluate another form against the concrete expected result (one row per `payment_id`) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 5 — Match percentile grain
 
@@ -230,18 +210,13 @@ P50. A line-item percentile would answer a different question.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Evidence of the incorrect behavior followed by a corrected result at the declared grain, with the violated invariant made visible.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-56 Exercise 5, read from `orders`, `order_items`, and `products`. Build the answer toward `category`, `observations`, and `p50`; keep `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-56 Exercise 5, expected output: one row per `category`. The final columns are `category`, `observations`, and `p50`. The final order is `category`.
+- **Independent verification:** For sql-56 Exercise 5, independently aggregate `orders`, `order_items`, and `products` by `category`; require one output row for every distinct `category` tuple and compare `p50` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `p50` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-56 Exercise 5, run `category_order` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-56 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `category`, and finish with `category`, `observations`, and `p50` ordered by `category`.
+- **Alternative/trade-off:** For sql-56 Exercise 5, the chosen form is justified by this lesson-specific rationale: `category_order` emits one observation per category/order before calculating P50. Evaluate another form against the concrete expected result (one row per `category`) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `p50` for the existing `category` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 6 — Compare percentile definitions
 
@@ -250,15 +225,10 @@ observation count is retained so even-sized groups can be interpreted.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-56 Exercise 6, read from `orders`, `order_items`, and `products`. Build the answer toward `category`, `observations`, `continuous_p50`, and `discrete_p50`; keep `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-56 Exercise 6, expected output: one row per `category`. The final columns are `category`, `observations`, `continuous_p50`, and `discrete_p50`. The final order is `category`.
+- **Independent verification:** For sql-56 Exercise 6, independently aggregate `orders`, `order_items`, and `products` by `category`; require one output row for every distinct `category` tuple and compare `continuous_p50`, and `discrete_p50` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `continuous_p50`, and `discrete_p50` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-56 Exercise 6, run `category_order` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-56 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `category`, and finish with `category`, `observations`, `continuous_p50`, and `discrete_p50` ordered by `category`.
+- **Alternative/trade-off:** For sql-56 Exercise 6, the chosen form is justified by this lesson-specific rationale: Continuous P50 can interpolate; discrete P50 is an observed order value. Evaluate another form against the concrete expected result (one row per `category`) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `continuous_p50`, and `discrete_p50` for the existing `category` tuple and verify the new tuple appears exactly once.

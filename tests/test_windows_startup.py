@@ -12,6 +12,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 CMD_LAUNCHER = REPO_ROOT / "START_DS60.cmd"
 POWERSHELL_LAUNCHER = REPO_ROOT / "scripts" / "start_ds60.ps1"
 CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+README = REPO_ROOT / "README.md"
+OFFLINE_GUIDE = REPO_ROOT / "docs" / "setup" / "offline.md"
+WINDOWS_GUIDE = REPO_ROOT / "docs" / "setup" / "windows.md"
+MACOS_GUIDE = REPO_ROOT / "docs" / "setup" / "macos.md"
+LINUX_GUIDE = REPO_ROOT / "docs" / "setup" / "linux.md"
 
 
 def powershell_text() -> str:
@@ -157,6 +162,48 @@ def test_ci_executes_native_windows_startup_diagnostics() -> None:
     assert "Exercise guided Windows startup diagnostics" in text
     assert r".\scripts\start_ds60.ps1 `" in text
     assert "-DiagnosticsOnly -NonInteractive -SkipPostgreSql" in text
+
+
+def test_beginner_sql_start_uses_day_one_before_foundation_milestones() -> None:
+    text = README.read_text(encoding="utf-8")
+    sql_start = text.index("\nSQL:\n")
+    sql_end = text.index("\nPython + PostgreSQL engineering bridge:", sql_start)
+    sql_steps = text[sql_start:sql_end]
+
+    assert "Open [SQL Day 1](lesson-pages/sql-01.html)" in sql_steps
+    assert "**Create/open guided SQL notebook**" in sql_steps
+    assert ".learning/sql/sql-01/" in sql_steps
+    assert sql_steps.index("Open [SQL Day 1]") < sql_steps.index("between Days 15 and 16")
+    assert sql_steps.index("between Days 15 and 16") < sql_steps.index("between Days 39 and 40")
+
+
+def test_offline_windows_path_supports_both_repository_environment_layouts() -> None:
+    text = OFFLINE_GUIDE.read_text(encoding="utf-8")
+
+    assert r"& .\scripts\bootstrap_windows.ps1" in text
+    assert r".venv\Scripts\python.exe" in text
+    assert r".venv\python.exe" in text
+    assert "$CoursePython" in text
+    assert r"scripts\setup.ps1" not in text
+    assert "Windows `Core` bootstrap or macOS/Linux advanced setup" in text
+
+
+def test_posix_setup_guides_offer_the_private_portal_and_explain_static_mode() -> None:
+    for guide in (MACOS_GUIDE, LINUX_GUIDE):
+        text = guide.read_text(encoding="utf-8")
+        assert ".venv/bin/python scripts/learning_portal.py" in text
+        assert "read-only course navigator" in text
+        assert "**Create/open guided SQL notebook**" in text
+        assert ".learning/sql/sql-01/" in text
+
+
+def test_setup_guides_have_a_copy_ready_clone_command() -> None:
+    clone = "git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy"
+
+    for guide in (WINDOWS_GUIDE, MACOS_GUIDE, LINUX_GUIDE):
+        text = guide.read_text(encoding="utf-8")
+        assert clone in text
+        assert "git clone <repository-url>" not in text
 
 
 @pytest.mark.skipif(shutil.which("pwsh") is None, reason="PowerShell is not installed")

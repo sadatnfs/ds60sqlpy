@@ -33,6 +33,11 @@ ORDER BY runtime DESC NULLS LAST;
 -- runnable when the extension is not installed.
 CREATE TEMP TABLE top_statement_stats (
   ranking text,
+  rank_position integer,
+  userid oid,
+  dbid oid,
+  toplevel boolean,
+  queryid bigint,
   query text,
   calls bigint,
   mean_exec_time double precision,
@@ -44,16 +49,40 @@ BEGIN
   IF to_regclass('public.pg_stat_statements') IS NOT NULL THEN
     EXECUTE $by_total$
       INSERT INTO top_statement_stats
-      SELECT 'total_exec_time', left(query, 200), calls, mean_exec_time, total_exec_time
+      SELECT 'total_exec_time',
+             row_number() OVER (
+               ORDER BY total_exec_time DESC,
+                        userid, dbid, toplevel, queryid
+             )::integer,
+             userid,
+             dbid,
+             toplevel,
+             queryid,
+             left(query, 200),
+             calls,
+             mean_exec_time,
+             total_exec_time
       FROM public.pg_stat_statements
-      ORDER BY total_exec_time DESC
+      ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid
       LIMIT 10
     $by_total$;
     EXECUTE $by_mean$
       INSERT INTO top_statement_stats
-      SELECT 'mean_exec_time', left(query, 200), calls, mean_exec_time, total_exec_time
+      SELECT 'mean_exec_time',
+             row_number() OVER (
+               ORDER BY mean_exec_time DESC,
+                        userid, dbid, toplevel, queryid
+             )::integer,
+             userid,
+             dbid,
+             toplevel,
+             queryid,
+             left(query, 200),
+             calls,
+             mean_exec_time,
+             total_exec_time
       FROM public.pg_stat_statements
-      ORDER BY mean_exec_time DESC
+      ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid
       LIMIT 10
     $by_mean$;
   ELSE
@@ -64,7 +93,7 @@ $optional_pg_stat_statements$;
 
 SELECT *
 FROM top_statement_stats
-ORDER BY ranking, total_exec_time DESC;
+ORDER BY ranking, rank_position;
 
 -- Exercise 3: transaction age can exceed statement age, especially for
 -- idle-in-transaction sessions.
@@ -84,9 +113,18 @@ ORDER BY datname, usename, state;
 
 -- Exercise 5: retain both rankings. Mean identifies costly calls; total time
 -- captures cumulative workload impact.
-SELECT ranking, query, calls, mean_exec_time, total_exec_time
+SELECT ranking,
+       rank_position,
+       userid,
+       dbid,
+       toplevel,
+       queryid,
+       query,
+       calls,
+       mean_exec_time,
+       total_exec_time
 FROM top_statement_stats
-ORDER BY ranking, total_exec_time DESC, mean_exec_time DESC;
+ORDER BY ranking, rank_position;
 
 -- Exercise 6: this is diagnostic only; do not cancel or terminate sessions.
 SELECT pid, usename, datname,

@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Exercise 1 — PSI implementation
+Worked reference for Exercise 1 — PSI implementation
 ```python
 import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
@@ -45,7 +45,7 @@ Notes
 
 ---
 
-Exercise 2 — Logging schema
+Worked reference for Exercise 2 — Logging schema
 ```json
 {
   "timestamp": "2024-01-01T12:34:56Z",
@@ -63,7 +63,7 @@ Guidance
 
 ---
 
-Exercise 3 — Approval flow
+Worked reference for Exercise 3 — Approval flow
 - PR merges to main trigger CI: unit tests, data contract tests, reproducible training
 - Register candidate model to Registry as Staging; run shadow deployment A/B tests
 - Approval gate requires: model card, fairness metrics, governance checklist
@@ -108,7 +108,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Compute PSI for multiple features or score windows over time.
 
@@ -118,16 +118,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Compute PSI for multiple features or score windows over time`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+**Verify:** Practice 1 — monitoring layers, drift signals, delayed labels, and governance decisions — for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.
 
@@ -137,16 +130,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Build a small pandas/Matplotlib dashboard of weekly AUC and PSI`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 2 — monitoring layers, drift signals, delayed labels, and governance decisions — save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Draft a governance policy covering roles, approvals, alerts, and rollback.
 
@@ -156,14 +142,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Draft a governance policy covering roles, approvals, alerts, and rollback`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — monitoring layers, drift signals, delayed labels, and governance decisions — produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
 
 ### Exercise 4 — Label-delay analysis
 
@@ -184,14 +163,7 @@ as negatives.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Simulate labels arriving 14–30 days after predictions. Build separate views for immediate inp...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
-
-
+**Verify:** Label-delay analysis — print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.
 
 ### Exercise 5 — Alert hysteresis
 
@@ -211,14 +183,7 @@ incidents and false-alarm cost, assign ownership, and version changes.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Design warning and critical thresholds that require persistence or multiple windows, then sho...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Alert hysteresis — feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.
 
 ### Exercise 6 — Rollback drill
 
@@ -238,4 +203,4 @@ delete the failed artifact as part of the emergency path.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Write and rehearse a rollback from model version B to A, including trigger, authority, artifa...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+**Verify:** Rollback drill — record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.

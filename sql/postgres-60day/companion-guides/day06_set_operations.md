@@ -104,11 +104,9 @@ SELECT * FROM supporters
 ORDER BY customer_id;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One distinct customer ID per qualifying customer.
+**How to read it:** Example 1: Start with `orders`, and `events` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `*`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one row per `*` with columns `*` from `orders`, and `events`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -124,11 +122,9 @@ SELECT * FROM purchasers
 ORDER BY customer_id;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One distinct customer ID per qualifying customer.
+**How to read it:** Example 2: Start with `events`, and `orders` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `*`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one row per `*` with columns `*` from `events`, and `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -168,28 +164,34 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Return customer IDs that have either an order or a support event.
    **Progressive hint:** `UNION` expresses set membership and removes duplicates across both sources.
-   **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: Return customer IDs that have either an order or a support event” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `o`, `e`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 1, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `events`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-06 Exercise 1, read from `orders`, and `events`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-06 Exercise 1, expected output: One distinct customer ID per qualifying customer. The final columns are `customer_id`. The final order is `customer_id`.
+   **Verify:** For sql-06 Exercise 1, run an anti-check that counts rows where NOT ((e.event_type = 'support')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `orders`, and `events`. Add one row for which `(e.event_type = 'support')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 2. **Query writing:** Return customer IDs that have both an order and a support event.
    **Progressive hint:** `INTERSECT` keeps keys present in both compatible sets.
-   **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Return customer IDs that have both an order and a support event” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `o`, `e`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 2, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `events`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-06 Exercise 2, read from `orders`, and `events`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-06 Exercise 2, expected output: One distinct customer ID in both sets. The final columns are `customer_id`. The final order is `customer_id`.
+   **Verify:** For sql-06 Exercise 2, run an anti-check that counts rows where NOT ((e.event_type = 'support')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `orders`, and `events`. Add one row for which `(e.event_type = 'support')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 3. **Query writing:** Return customers who have no orders.
    **Progressive hint:** `EXCEPT` subtracts the order-customer set from all customers.
-   **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Return customers who have no orders” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `c`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 3, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-06 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-06 Exercise 3, expected output: One row per customer absent from orders. The final columns are `customer_id`. The final order is `customer_id`.
+   **Verify:** For sql-06 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 4. **Prediction:** Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.
    **Progressive hint:** `UNION ALL` preserves every input row; `UNION` returns distinct rows.
-   **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Compare row counts produced by UNION and UNION ALL for two overlapping status lists”. Show both compared result shapes at one summary row per grouping key explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `o`, `operation`, `row_count`, `union`, `all`.
-   **Verify:** For Exercise 4, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-06 Exercise 4, read from `orders`. Build the answer toward `operation`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-06 Exercise 4, expected output: Two labeled summary rows showing all-count >= distinct-count. The final columns are `operation`, and `row_count`. The final order is `operation`.
+   **Verify:** For sql-06 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `operation`, and `row_count` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 5. **Debugging:** Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.
    **Progressive hint:** Each branch below returns one text label and one numeric amount at the same report grain.
-   **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts” at one row at the same report grain. Named evidence columns/objects: `evidence`, `measure`, `amount`, `o`, `e`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 5, prove uniqueness at one row at the same report grain; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `expenses`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-06 Exercise 5, read from `orders`, and `expenses`. Build the answer toward `measure`, and `amount`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-06 Exercise 5, expected output: Rows identify revenue and expense measures with compatible types. The final columns are `measure`, and `amount`. The final order is `measure`.
+   **Verify:** For sql-06 Exercise 5, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `measure`, and `amount` against `orders`, and `expenses`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 6. **Extension:** Return the symmetric difference between customers with orders and customers with support events.
    **Progressive hint:** Subtract each set from the other, then union the two differences.
-   **Expected result/shape:** Exercise 6 must make “Extension: Return the symmetric difference between customers with orders and customers with support events” observable through the exact DDL/DML command tag plus one row per customer or the customer grouping key named by the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `o`, `e`, `source`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `o`, `e`, `source`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-06 Exercise 6, read from `orders`, and `events`. Build the answer toward `customer_id`, and `source`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-06 Exercise 6, expected output: Customers present in exactly one of the two source sets. The final columns are `customer_id`, and `source`. The final order is `customer_id, source`.
+   **Verify:** For sql-06 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `source` against `orders`, and `events`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
 ## Common mistakes and how to recover
 
@@ -258,7 +260,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-06 — Set Operations.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisite: `sql-05`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day06_set_operations.md
 - Answer-free learner SQL: sql/postgres-60day/day06_set_operations.sql
 

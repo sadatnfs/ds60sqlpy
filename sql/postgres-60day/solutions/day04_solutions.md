@@ -101,18 +101,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: List every customer with order count, including customers with zero orders” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `order_count`, `c`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 1, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 1: Query writing Prompt: List every customer with order count, including customers with zero orders. Why: Start from customers, left join orders, and count the nullable order key rather than COUNT(). Expected: One row per customer; zero is visible. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - JOIN ... ON: combines relations and may multiply rows; the match predicate and each input's grain must agree. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-04 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `order_count`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-04 Exercise 1, expected output: One row per customer; zero is visible. The final columns are `customer_id`, `full_name`, and `order_count`. The final order is `order_count DESC, c.customer_id`.
+- **Independent verification:** For sql-04 Exercise 1, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-04 Exercise 1, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, and `full_name` so the exact fanout or loss is visible.
+- **Clause check:** For sql-04 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `customer_id`, and `full_name`, and finish with `customer_id`, `full_name`, and `order_count` ordered by `order_count DESC, c.customer_id`.
+- **Alternative/trade-off:** For sql-04 Exercise 1, the chosen form is justified by this lesson-specific rationale: Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`. Evaluate another form against the concrete expected result (One row per customer; zero is visible) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 2 — Query writing
 
@@ -147,18 +142,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Find products that have never appeared in an order item” at one row per product or product grouping requested. Named evidence columns/objects: `evidence`, `p`, `oi`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 2, prove uniqueness at one row per product or product grouping requested; reconcile the result's row count and any count/sum/amount with a simpler control over `products`, `order_items`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 2: Query writing Prompt: Find products that have never appeared in an order item. Why: Left join and retain rows where the right-side primary key is NULL. Expected: One row per unsold product. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - JOIN ... ON: combines relations and may multiply rows; the match predicate and each input's grain must agree. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-04 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, and `category`; keep `product_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-04 Exercise 2, expected output: One row per unsold product. The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.
+- **Independent verification:** For sql-04 Exercise 2, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `product_id`, `name`, and `category` values match those staged rows without unintended fanout or loss. Add one row for which `(oi.order_item_id IS NULL)` is true and one for which it is false; verify only the matching `product_id` value is returned.
+- **Intermediate relation check:** For sql-04 Exercise 2, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-04 Exercise 2, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, and `order_items`, preserve one row per `product_id`, and finish with `product_id`, `name`, and `category` ordered by `p.product_id`.
+- **Alternative/trade-off:** For sql-04 Exercise 2, the chosen form is justified by this lesson-specific rationale: Left join and retain rows where the right-side primary key is NULL. Evaluate another form against the concrete expected result (One row per unsold product) and the verification above.
+- **Edge case:** Add one row for which `(oi.order_item_id IS NULL)` is true and one for which it is false; verify only the matching `product_id` value is returned.
 
 ## Exercise 3 — Query writing
 
@@ -210,18 +200,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 3 requires a written prediction and the observed result for “Query writing: Compare monthly budgets and expenses by category with a full outer join”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `actual_amount`, `e`, `budget_amount`, `b`, `category`, `bm`, `em`.
-- **Independent verification:** For Exercise 3, run the two forms over the identical rows in `expenses`, `budgets`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 3: Query writing Prompt: Compare monthly budgets and expenses by category with a full outer join. Why: Aggregate each side to the same category/month grain before joining; preserve keys from either side. Expected: One row per category/month present in either source. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - WITH: names an intermediate relation so its grain can be checked before later joins or aggregation. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - JOIN ... ON: combines relations and may multiply rows; the match predicate and each input's grain must agree. - COALESCE: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-04 Exercise 3, read from `expenses`, and `budgets`. Build the answer toward `category`, `period`, `budget_amount`, and `actual_amount`; keep `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-04 Exercise 3, expected output: One row per category/month present in either source. The final columns are `category`, `period`, `budget_amount`, and `actual_amount`. The final order is `period, category`.
+- **Independent verification:** For sql-04 Exercise 3, project `category` plus the raw source columns from `expenses`, and `budgets` at each join stage; record row count and distinct `category`, then assert the final `category`, `period`, `budget_amount`, and `actual_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
+- **Intermediate relation check:** For sql-04 Exercise 3, run `expense_months`, and `budget_months` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-04 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `expenses`, and `budgets`, preserve one row per `category`, and finish with `category`, `period`, `budget_amount`, and `actual_amount` ordered by `period, category`.
+- **Alternative/trade-off:** For sql-04 Exercise 3, the chosen form is justified by this lesson-specific rationale: Aggregate each side to the same category/month grain before joining; preserve keys from either side. Evaluate another form against the concrete expected result (One row per category/month present in either source) and the verification above.
+- **Edge case:** Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
 
 ## Exercise 4 — Prediction
 
@@ -257,18 +242,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Preserve every customer while counting only delivered orders; compare a status predicate in ON with the same predicate in WHERE”. Show both compared result shapes at one row per customer or the customer grouping key named by the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `delivered_orders`, `c`, `o`.
-- **Independent verification:** For Exercise 4, run the two forms over the identical rows in `customers`, `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 4: Prediction Prompt: Preserve every customer while counting only delivered orders; compare a status predicate in ON with the same predicate in WHERE. Why: Place o.status = 'delivered' in ON; WHERE would remove NULL-extended customers. Expected: One row per customer, including zero delivered orders. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - JOIN ... ON: combines relations and may multiply rows; the match predicate and each input's grain must agree. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-04 Exercise 4, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `delivered_orders`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-04 Exercise 4, expected output: One row per customer, including zero delivered orders. The final columns are `customer_id`, `full_name`, and `delivered_orders`. The final order is `delivered_orders DESC, c.customer_id`.
+- **Independent verification:** For sql-04 Exercise 4, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `delivered_orders` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `delivered_orders` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-04 Exercise 4, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, and `full_name` so the exact fanout or loss is visible.
+- **Clause check:** For sql-04 Exercise 4, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `customer_id`, and `full_name`, and finish with `customer_id`, `full_name`, and `delivered_orders` ordered by `delivered_orders DESC, c.customer_id`.
+- **Alternative/trade-off:** For sql-04 Exercise 4, the chosen form is justified by this lesson-specific rationale: Place `o.status = 'delivered'` in `ON`; `WHERE` would remove NULL-extended customers. Evaluate another form against the concrete expected result (One row per customer, including zero delivered orders) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `delivered_orders` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 5 — Debugging
 
@@ -302,18 +282,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Repair COUNT() in a left-join order count so customers without orders report zero rather than one” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `order_count`, `c`, `o`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 5, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 5: Debugging Prompt: Repair COUNT() in a left-join order count so customers without orders report zero rather than one. Why: Count a non-nullable right-side key that becomes NULL for an unmatched row. Expected: One row per customer with correct zero counts. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - JOIN ... ON: combines relations and may multiply rows; the match predicate and each input's grain must agree. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-04 Exercise 5, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `order_count`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-04 Exercise 5, expected output: One row per customer with correct zero counts. The final columns are `customer_id`, and `order_count`. The final order is `c.customer_id`.
+- **Independent verification:** For sql-04 Exercise 5, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-04 Exercise 5, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-04 Exercise 5, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `customer_id`, and finish with `customer_id`, and `order_count` ordered by `c.customer_id`.
+- **Alternative/trade-off:** For sql-04 Exercise 5, the chosen form is justified by this lesson-specific rationale: Count a non-nullable right-side key that becomes NULL for an unmatched row. Evaluate another form against the concrete expected result (One row per customer with correct zero counts) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 6 — Extension
 
@@ -352,18 +327,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 6 must make “Extension: Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys” observable through the exact DDL/DML command tag plus one row per product or product grouping requested; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `matched`, `evidence`, `matched_products`, `unsold_products`, `orphan_item_product_ids`, `p`, `oi`.
-- **Independent verification:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `matched`, `evidence`, `matched_products`, `unsold_products`, `orphan_item_product_ids`, `p`, `oi`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 6: Extension Prompt: Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys. Why: Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero. Expected: One summary row with three mutually interpretable counts. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - JOIN ... ON: combines relations and may multiply rows; the match predicate and each input's grain must agree. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - FILTER (WHERE ...): limits one aggregate without removing rows needed by neighboring aggregates.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-04 Exercise 6, read from `products`, and `order_items`. Build the answer toward `matched_products`, `unsold_products`, and `orphan_item_product_ids`; keep `product_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-04 Exercise 6, expected output: One summary row with three mutually interpretable counts. The final columns are `matched_products`, `unsold_products`, and `orphan_item_product_ids`.
+- **Independent verification:** For sql-04 Exercise 6, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `matched_products`, `unsold_products`, and `orphan_item_product_ids` values match those staged rows without unintended fanout or loss. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
+- **Intermediate relation check:** For sql-04 Exercise 6, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-04 Exercise 6, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `products`, and `order_items`, preserve one row per `product_id`, and finish with `matched_products`, `unsold_products`, and `orphan_item_product_ids`.
+- **Alternative/trade-off:** For sql-04 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero. Evaluate another form against the concrete expected result (One summary row with three mutually interpretable counts) and the verification above.
+- **Edge case:** Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
 
 ## Final self-check
 

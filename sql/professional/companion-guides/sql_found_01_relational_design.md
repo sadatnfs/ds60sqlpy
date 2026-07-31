@@ -2,10 +2,11 @@
 
 ## Level and prerequisites
 
-- **Level:** Foundation
-- **Catalog prerequisites:** none
-- **Prerequisites:** PostgreSQL setup and comfort running a `.sql` file with
-  `psql`; no earlier SQL lesson is required.
+- **Level:** Intermediate
+- **Catalog prerequisite:** `sql-15`
+- **Prerequisites:** Complete SQL Days 1–15 so you can query, join, aggregate,
+  modify, and verify the supplied training schema before designing one of your
+  own. PostgreSQL setup and the disposable database are also required.
 - **Artifacts:** [learner SQL](../lessons/sql_found_01_relational_design.sql) ·
   [solution reasoning](../solutions/sql_found_01_relational_design_solutions.md) ·
   [executable solution](../solutions/sql_found_01_relational_design_solutions.sql)
@@ -93,11 +94,7 @@ window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may exec
 different physical plan while preserving those semantics.
 
 The worked walkthrough's lesson-specific task is: The example begins with four requirements and turns each into a grain:
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_relational_lab.members`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
 
 ## Two worked SQL examples
 
@@ -118,9 +115,7 @@ CREATE TABLE pro_relational_lab.members (
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_relational_lab.members`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ### Example 2
 
@@ -135,9 +130,7 @@ CREATE TABLE pro_relational_lab.equipment_categories (
 
 **How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 must print the expected DDL command tag for `pro_relational_lab.equipment_categories`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ## Learning objectives
 
@@ -224,36 +217,44 @@ scratch SQL:
 
 1. **Maintenance DDL:** translate every visit requirement into a column,
    constraint, key, default, or generated expression; annotate the table grain.
-   **Expected result/shape:** Exercise 1 must make “Maintenance DDL: translate every visit requirement into a column, constraint, key, default, or generated expression; annotate the table grain” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `IDENTITY`, `ddl`, `pro_relational_lab.maintenance_visits`.
-   **Verify:** For Exercise 1, inspect the relevant `pg_catalog` or `information_schema` rows for `IDENTITY`, `ddl`, `pro_relational_lab.maintenance_visits`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-found-01 Exercise 1, change only `pro_relational_lab.equipment_items`, and `pro_relational_lab.maintenance_visits` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `information_schema.columns` rows.
+   **Expected result/shape:** For sql-found-01 Exercise 1, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `external_reference`, `service_days`, `completed_on`, `opened_on`, and `coalesce`.
+   **Verify:** For sql-found-01 Exercise 1, inspect `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `information_schema.columns` for `pro_relational_lab.equipment_items`, and `pro_relational_lab.maintenance_visits`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 2. **Negative cost:** insert one valid visit, isolate the rejected insert in a
    nested block, and verify the expected SQLSTATE category.
-   **Expected result/shape:** Exercise 2 needs a labeled transaction/session transcript that demonstrates “Negative cost: insert one valid visit, isolate the rejected insert in a nested block, and verify the expected SQLSTATE category”. Capture statement order, affected keys/counts, lock or snapshot state, and the expected SQLSTATE when an error is part of the exercise; finish with no open lesson transaction or leftover shared fixture. Named evidence columns/objects: `service`, `i`, `sqlstate`.
-   **Verify:** For Exercise 2, replay the written Session A/Session B order against `advanced_sql_training`, compare the observed values/SQLSTATE with the prediction, then query/drop the disposable fixture and confirm neither session retains a transaction or lock.
+   **Inputs/evidence:** For sql-found-01 Exercise 2, read the target keys from `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-found-01 Exercise 2, expected output: the command tag and an independently counted set of affected `item_id` values. The final columns are `item_id`.
+   **Verify:** For sql-found-01 Exercise 2, materialize the intended `item_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `item_id` values in both cases.
 3. **NULL uniqueness:** insert two NULL references, explain the observed rule,
    and write—but do not blindly apply—the stricter PostgreSQL 15+ alternative.
-   **Expected result/shape:** Exercise 3 requires a written prediction and the observed result for “NULL uniqueness: insert two NULL references, explain the observed rule, and write—but do not blindly apply—the stricter PostgreSQL 15+ alternative”. Show both compared result shapes at one row per requested calendar/cohort bucket and grouping key, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `i`, `dates`, `mv`.
-   **Verify:** For Exercise 3, run the two forms over the identical rows in `pro_relational_lab.maintenance_visits`, `pro_relational_lab.equipment_items`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-found-01 Exercise 3, read the target keys from `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-found-01 Exercise 3, expected output: at most one row may have no external reference,” PostgreSQL 15+ supports: That is uncommon for external identifiers. The final columns are `item_id`, `opened_on`, `service_note`, and `NULL`. The final order is `mv.visit_id`.
+   **Verify:** For sql-found-01 Exercise 3, materialize the intended `item_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `item_id` values in both cases.
 4. **Historical fee:** state the invariant, the historical question, and why the
    checkout snapshot is or is not deliberate denormalization.
-   **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Historical fee: state the invariant, the historical question, and why the checkout snapshot is or is not deliberate denormalization”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys.
-   **Verify:** For Exercise 4, run the two forms over the identical rows in `pro_relational_lab.members`, `pro_relational_lab.equipment_categories`, `pro_relational_lab.equipment_items`, `pro_relational_lab.loans`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-found-01 Exercise 4, read from `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items`. Build the answer toward `daily_fee_at_checkout`; keep `item_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-found-01 Exercise 4, expected output: one row per `item_id`. The final columns are `daily_fee_at_checkout`.
+   **Verify:** For sql-found-01 Exercise 4, reselect the returned keys directly from the source; require unique `item_id` where the expected grain is one row per key and confirm the projected `daily_fee_at_checkout` against `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items`. Add one source row with a new `item_id`; verify the result gains exactly one row carrying that `item_id` value.
 5. **Many-to-many work:** model providers, technicians, and assignments with
    one declared grain and key per relation; do not use delimited text.
-   **Expected result/shape:** Exercise 5 must make “Many-to-many work: model providers, technicians, and assignments with one declared grain and key per relation; do not use delimited text” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `IDENTITY`, `mv`, `t`, `pro_relational_lab.providers`, `pro_relational_lab.technicians`, `pro_relational_lab.visit_technicians`.
-   **Verify:** For Exercise 5, inspect the relevant `pg_catalog` or `information_schema` rows for `IDENTITY`, `mv`, `t`, `pro_relational_lab.providers`, `pro_relational_lab.technicians`, `pro_relational_lab.visit_technicians`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-found-01 Exercise 5, read from `pro_relational_lab.maintenance_visits`, `pro_relational_lab.technicians`, `pro_relational_lab.providers`, and `pro_relational_lab.visit_technicians`. Compute `visit_id`, and `technician_id` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-found-01 Exercise 5, expected output: one row per provider, one row per technician, and one row per visit/technician assignment. The final columns are `visit_id`, and `technician_id`.
+   **Verify:** For sql-found-01 Exercise 5, evaluate each of `technician_id` in a separate control `SELECT` over `pro_relational_lab.maintenance_visits`, `pro_relational_lab.technicians`, `pro_relational_lab.providers`, and `pro_relational_lab.visit_technicians` using `(mv.external_reference = 'VISIT-100')`; require one final row and compare every value. Add one row for which `(mv.external_reference = 'VISIT-100')` is true and one for which it is false; verify only the matching `visit_id` value is returned.
 6. **Outer-join report:** retain never-borrowed equipment, make date ties
    deterministic, and test the result with an item that has no loan.
-   **Expected result/shape:** Exercise 6 must make “Outer-join report: retain never-borrowed equipment, make date ties deterministic, and test the result with an item that has no loan” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `IDENTITY`, `i`, `loan_count`, `latest_checkout`, `l`, `pro_relational_lab.loans`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `IDENTITY`, `i`, `loan_count`, `latest_checkout`, `l`, `pro_relational_lab.loans`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-found-01 Exercise 6, read from `pro_relational_lab.equipment_items`, and `pro_relational_lab.loans`. Build the answer toward `item_id`; keep `item_id`, and `asset_tag` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-found-01 Exercise 6, expected output: one row per `item_id`, and `asset_tag`. The final columns are `item_id`. The final order is `i.asset_tag`.
+   **Verify:** For sql-found-01 Exercise 6, independently aggregate `pro_relational_lab.equipment_items`, and `pro_relational_lab.loans` by `item_id`, and `asset_tag`; require one output row for every distinct `item_id`, and `asset_tag` tuple satisfying `(i.asset_tag = 'AUD-001')` and compare `row_count` tuple by tuple. Give two rows the same `i.asset_tag` value and different ``item_id`, and `asset_tag`` values; verify `i.asset_tag` produces the intended rank and display order.
 7. **Deletion policy:** choose and defend one referential action for each named
    relationship, including what happens to historical records.
-   **Expected result/shape:** Exercise 7 must make “Deletion policy: choose and defend one referential action for each named relationship, including what happens to historical records” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `historical`.
-   **Verify:** For Exercise 7, inspect the relevant `pg_catalog` or `information_schema` rows for `historical`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-found-01 Exercise 7, read from `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items`. Build the answer toward `maintenance_visits`; keep `item_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-found-01 Exercise 7, expected output: one row per `item_id`. The final columns are `maintenance_visits`.
+   **Verify:** For sql-found-01 Exercise 7, reselect the returned keys directly from the source; require unique `item_id` where the expected grain is one row per key and confirm the projected `maintenance_visits` against `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items`. Add one source row with a new `item_id`; verify the result gains exactly one row carrying that `item_id` value.
 8. **Contract introspection:** prove key, check, generated-value, and uniqueness
    properties from catalogs without depending on generated object names.
-   **Expected result/shape:** Exercise 8 returns a table-shaped answer to “Contract introspection: prove key, check, generated-value, and uniqueness properties from catalogs without depending on generated object names” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `constraint_definition`, `con`, `rel`, `n`, `column_name`, `generated_expression`, `def`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 8, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, `pg_catalog.pg_attrdef`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-found-01 Exercise 8, read from `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, and `pg_catalog.pg_attrdef`. Build the answer toward `contype`, and `constraint_definition`; keep `contype` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-found-01 Exercise 8, expected output: one row per `contype`. The final columns are `contype`, and `constraint_definition`. The final order is `a.attnum`.
+   **Verify:** For sql-found-01 Exercise 8, project `contype` plus the raw source columns from `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, and `pg_catalog.pg_attrdef` at each join stage; record row count and distinct `contype`, then assert the final `contype`, and `constraint_definition` values match those staged rows without unintended fanout or loss. Give two rows the same `a.attnum` value and different ``contype`` values; verify `a.attnum` produces the intended rank and display order.
 
 ## Self-check
 
@@ -280,10 +281,11 @@ scratch SQL:
 
 ## Next step
 
-Continue to [SQL-FOUND-02 — versioned schema migrations](sql_found_02_versioned_migrations.md)
-to evolve a schema without rewriting deployment history. Then begin the
-[numbered SQL track](../../postgres-60day/README.md) and query a larger supplied
-model.
+Resume the numbered sequence at
+[SQL-16 — window-function fundamentals](../../postgres-60day/companion-guides/day16_window_functions_fundamentals.md).
+Continue through SQL-39 before taking SQL-FOUND-02; that later foundation
+module combines this lesson's schema design with the transaction and locking
+skills needed for safe migrations.
 
 ## Ask Codex about this lesson
 
@@ -294,7 +296,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-found-01 — Relational Design, DDL, and Integrity Constraints.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisite: `sql-15`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_found_01_relational_design.md
 - Answer-free learner SQL: sql/professional/lessons/sql_found_01_relational_design.sql
 

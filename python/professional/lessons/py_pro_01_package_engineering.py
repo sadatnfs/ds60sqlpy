@@ -8,27 +8,26 @@ Professional learner deep dive (python-pro-01)
 ------------------------------------------------
 
 Mental model:
-A source tree is not the deliverable. The build backend reads
-`pyproject.toml` and creates a wheel containing import packages plus
-distribution metadata. The **distribution name** used by installers
-may differ from the Python **import name**. A src layout prevents an
-accidental import from the repository root from masquerading as a
-successful installation.
-
-A release check therefore builds a wheel, inspects its contents and
-metadata, installs it into a clean environment, imports it from outside
-the source tree, runs tests, and records hashes. Editable installs are
-useful for development but do not prove the wheel.
+A source tree is not the deliverable. The build backend reads `pyproject.toml` and creates a
+wheel containing import packages plus distribution metadata. The **distribution name** used by
+installers may differ from the Python **import name**. A src layout prevents an accidental
+import from the repository root from masquerading as a successful installation.  A release check
+therefore builds a wheel, inspects its contents and metadata, installs it into a clean
+environment, imports it from outside the source tree, runs tests, and records hashes. Editable
+installs are useful for development but do not prove the wheel.
 
 API/boundary anatomy:
-* `[build-system]`: declares the backend and bootstrap requirements that turn source into a distribution artifact.
-* `[project]` metadata: defines distribution identity, version, Python range, dependencies, and entry points.
-* `python -m build` then clean install: proves the built wheel, not repository-path import behavior.
+* `[build-system]`: declares the backend and bootstrap requirements that turn source into a
+  distribution artifact.
+* `[project]` metadata: defines distribution identity, version, Python range, dependencies, and
+  entry points.
+* `python -m build` then clean install: proves the built wheel, not repository-path import
+  behavior.
 
 Micro-example A — distinguish distribution and import identities::
 
     import importlib.util
-    
+
     distribution_name = "beautiful-soup4"
     import_name = "bs4"
     print({"installer_name": distribution_name, "import_name": import_name})
@@ -36,12 +35,13 @@ Micro-example A — distinguish distribution and import identities::
     assert distribution_name.replace("-", "_") != import_name
     print("installed import available:", importlib.util.find_spec(import_name) is not None)
 
-Expected: Installer and import identifiers can differ; availability must be checked through the intended interface.
+Expected: Installer and import identifiers can differ; availability must be checked through the
+          intended interface.
 
 Micro-example B — create a deterministic source manifest digest::
 
     import hashlib
-    
+
     files = {
         "src/tiny/__init__.py": b'__version__ = "1.0.0"\n',
         "src/tiny/core.py": b"def add(a, b): return a + b\n",
@@ -54,9 +54,11 @@ Micro-example B — create a deterministic source manifest digest::
     print(manifest, digest, sep="\n")
     assert len(digest) == 64
 
-Expected: Sorting paths and hashing exact bytes gives a repeatable content identity, not a claim about package quality.
+Expected: Sorting paths and hashing exact bytes gives a repeatable content identity, not a claim
+          about package quality.
 
-Debugging rule: Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change the working directory, and print `module.__file__` plus distribution version.
+Debugging rule: Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change
+                the working directory, and print `module.__file__` plus distribution version.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

@@ -112,6 +112,29 @@ Add tests for checksum drift, concurrent re-check behavior, final-attempt
 failure, commit uncertainty, rollback/close failures, sensitive telemetry,
 readiness drift, and every recovery branch before adapting this pattern.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+Redaction is testable without a database session:
+
+```python
+from bridge.professional.solutions.bridge_ops_01_migration_observability_solution import (
+    redact_fields,
+)
+
+safe = redact_fields(
+    {
+        "request_id": "run-7",
+        "password": "secret",
+        "database_url": "postgresql://learner:" + "secret" + "@localhost/course",
+    }
+)
+assert safe["request_id"] == "run-7"
+assert "secret" not in repr(safe)
+```
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs map one-for-one to the answer-free learner artifact and
@@ -130,9 +153,7 @@ verification; serialize fields into a deterministic JSON-compatible form and has
 **Why:** Canonical serialization must distinguish structure and parameter types without
 depending on object repr.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Construct valid and invalid migrations; assert blank/bad IDs, blank description, empty commands, and missing verification fail, while two equal migrations have equal checksums and any identity/text/parameter change changes the hash.
 
 ### Exercise 2 — Redaction
 
@@ -144,9 +165,7 @@ scalars, convert unsupported objects to safe type labels, and recursively avoid 
 
 **Why:** Use key classification and safe type conversion; never echo rejected values.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Pass ordinary scalars, password/token keys, credential URLs, and an exception object; assert safe scalars survive, sensitive values become fixed markers, output is JSON-serializable, and no sentinel secret appears in `repr` or JSON.
 
 ### Exercise 3 — Planning
 
@@ -158,9 +177,7 @@ checksum, reject gaps/unknown versions, then return unapplied migrations in cano
 
 **Why:** Applied history is immutable and must be a prefix of known ordered migrations.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Assert ordered known history returns only the pending suffix; duplicate/reordered source, database-only IDs, non-prefix history, and a changed stored checksum each raise before delivery.
 
 ### Exercise 4 — Test double
 
@@ -172,9 +189,7 @@ commit/rollback/close events. Test SQL dialect behavior only in optional Postgre
 
 **Why:** Model transactional state and prepared query results explicitly.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Use a session fake that records `(sql, params)` separately and queues results; assert it never parses SQL or imports SQLite and exposes commit/rollback/close event order.
 
 ### Exercise 5 — Delivery
 
@@ -187,9 +202,7 @@ in the attempt's exception path, and let the outer retry call its fake sleeper a
 **Why:** One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then
 report.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Record the nine delivery stages—open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report—and in failure assert rollback and close occur before the sleeper.
 
 ### Exercise 6 — Commit uncertainty
 
@@ -201,9 +214,7 @@ so mark it skipped/applied evidence without re-running commands. Drift must fail
 
 **Why:** Re-check immutable metadata under lock before every attempt.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Make fake commit persist metadata then raise; on retry, assert matching metadata is read under the lock, migration commands are not called twice, and result reports the version skipped/applied once.
 
 ### Exercise 7 — Observability
 
@@ -215,9 +226,7 @@ tags such as outcome/migration class, and test sentinel secrets across every fie
 
 **Why:** Logs support correlation; metrics require bounded dimensions.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Inspect events for request and migration IDs and metrics for bounded migration/outcome tags; assert request ID is absent from metric tags and URL/password/parameters/exception message are absent everywhere.
 
 ### Exercise 8 — Readiness
 
@@ -229,9 +238,7 @@ reasons, and map connection failure to not-ready. Liveness remains a local proce
 
 **Why:** Readiness describes safe traffic acceptance, not process existence.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Assert liveness succeeds without a session; readiness is true for matching current history and false with explicit reasons for pending, checksum drift, unknown history, or unreachable database.
 
 ### Exercise 9 — Recovery
 
@@ -244,9 +251,7 @@ rollback evidence are established.
 
 **Why:** Destructive or forward actions require rehearsed, compatible evidence.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Create scenario rows for unconfirmed diagnosis, committed writes, compatibility, and rehearsed paths; assert incomplete evidence returns `PAUSE_AND_GATHER_EVIDENCE` and only supported rows choose forward/rollback.
 
 ### Exercise 10 — Optional integration
 
@@ -259,9 +264,7 @@ documented rollback-safe cleanup.
 
 **Why:** The second run demonstrates idempotency; cleanup evidence is part of completion.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** With explicit live opt-in, run the disposable migration set twice; assert the second applies nothing, metadata IDs/checksums match source, and the read-only inspection targets only course objects.
 
 ### Exercise 11 — Immutability
 
@@ -274,9 +277,7 @@ meaningful edits.
 
 **Why:** A stored checksum is an immutable history contract, not a semantic SQL parser.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Change only whitespace in applied SQL; assert checksum mismatch is detected and delivery stops rather than accepting edited immutable history.
 
 ### Exercise 12 — Concurrency
 
@@ -289,9 +290,7 @@ state.
 
 **Why:** Only one delivery transaction may make planning decisions at a time.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Simulate two sessions on the same advisory lock; assert only the lock holder plans/applies at a time, the waiter obeys the declared timeout, and both close their own sessions.
 
 ### Exercise 13 — PostgreSQL semantics
 
@@ -304,9 +303,7 @@ a separately designed/rehearsed workflow.
 
 **Why:** Do not assume every administrative statement can share ordinary transaction rollback.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Produce a reviewed list separating transaction-safe DDL from commands requiring special handling; any non-transactional command must use a separate migration policy and recovery proof.
 
 ### Exercise 14 — Timeouts
 
@@ -318,9 +315,7 @@ transaction, test their order before commands, and rely on transaction end to re
 
 **Why:** Transaction-local settings should expire with commit/rollback.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Record transaction-local statement and lock timeout commands before migration SQL; assert they end with commit/rollback and are absent when a later pooled session begins.
 
 ### Exercise 15 — Telemetry design
 
@@ -333,9 +328,7 @@ details before emission.
 
 **Why:** Migration IDs may still become unbounded over years; choose dimensions deliberately.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Define metric names/tags with a bounded outcome/error class and migration family/version policy; feed URL-like fields and exceptions through redaction and assert no secret/message becomes a label.
 
 ### Exercise 16 — Probe semantics
 
@@ -348,9 +341,7 @@ Report reasons independently.
 
 **Why:** Each probe should answer one operational question.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Return separate probe fields for database reachability, schema currency, application staleness, and process liveness; assert changing one condition changes only its corresponding reason.
 
 ### Exercise 17 — Decision analysis
 
@@ -364,9 +355,7 @@ read/write the evolved data.
 **Why:** Data written under the new contract can make old code incompatible even if DDL reversal
 is possible.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** For schema that has received incompatible new writes, assert release rollback is rejected unless compatibility and reversal are rehearsed; choose a rehearsed forward fix or pause.
 
 ### Exercise 18 — Expand-contract
 
@@ -379,9 +368,7 @@ close.
 
 **Why:** Maintain compatibility while old and new application versions overlap.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Document release A adding nullable new column, release B dual-writing/backfilling/reading both, and release C enforcing new contract/removing old only after compatibility evidence.
 
 ### Exercise 19 — Cleanup
 
@@ -394,9 +381,7 @@ sentinels.
 
 **Why:** A passing mutation test is incomplete without postconditions.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** After the optional lab, query for course tables/metadata, inspect connection close calls, and scan captured output; assert no lab object, held lock/session, or credential sentinel remains.
 
 ### Exercise 20 — Failure simulation
 
@@ -409,6 +394,4 @@ guessed into success.
 
 **Why:** Client exceptions after commit do not prove server rollback.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Raise immediately after fake commit; assert the next attempt reads lock-protected metadata/checksum before any command replay and pauses on conflicting or missing evidence.

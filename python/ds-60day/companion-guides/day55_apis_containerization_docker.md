@@ -230,32 +230,16 @@ assert during_dependency_outage == {"healthy": True, "ready": False}
 
 1. Create a slim dependency file containing only direct API runtime needs.
 
-**Verify:** For task `Create a slim dependency file containing only direct API runtime needs`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
+**Verify:** Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
 
 2. Add `GET /health` returning `{"status": "ok"}`.
 
-**Verify:** For task `Add GET /health returning {"status": "ok"}`, demonstrate the concrete requirement “2. Add GET /health returning {"status": "ok"}” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
 
 3. Optionally push the image to a registry if you intentionally use a connected
    account.
 
-**Verify:** For task `Optionally push the image to a registry if you intentionally use a connected`, demonstrate the concrete requirement “3. Optionally push the image to a registry if you intentionally use a connected account” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
 
 ### Progressive hints
 
@@ -277,39 +261,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Layer and secret audit:** Create a `.dockerignore`, inspect image history, and prove that `.env`, Git metadata, notebooks, caches, and local artifacts are absent.
    **Progressive hint:** The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.
 
-**Verify:** For task `Layer and secret audit: Create a .dockerignore, inspect image history, and prove that .env, G...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.
 
 5. **Least-privilege runtime:** Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.
    **Progressive hint:** Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.
 
-**Verify:** For task `Least-privilege runtime: Run the service as a non-root user with a read-only filesystem and a...`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.
 
 6. **Health semantics:** Implement separate `/live` and `/ready` checks and a startup failure when the model manifest is incompatible. Test all three states.
    **Progressive hint:** Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.
 
-**Verify:** For task `Health semantics: Implement separate /live and /ready checks and a startup failure when the m...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
+**Verify:** Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -355,10 +320,12 @@ Emphasize container build boundaries, minimal images, and health semantics. Use 
 - guide: `python/ds-60day/companion-guides/day55_apis_containerization_docker.md`
 - learner artifact: `python/ds-60day/notebooks/day55_apis_containerization_docker.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-54`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

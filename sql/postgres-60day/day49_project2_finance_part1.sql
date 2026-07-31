@@ -77,38 +77,38 @@ SELECT * FROM ma ORDER BY month DESC LIMIT 6;
 
 -- Exercises
 -- 1. Build MA(6) and MA(12) and compare MAPEs vs seasonal naive.
---    Inputs: Use only the declared lesson objects (orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-49 Exercise 1, aggregate `orders` by observed month, left-join to `month_spine`, compute full-window history counts, and reshape four forecasts over `common_scoring_rows`.
+--    Expected result/shape: For sql-49 Exercise 1, expected output: exactly four rows keyed by `model`, with `scored_rows`, `zero_actual_rows`, and `mape`, ordered by `model`.
+--    Verify: For sql-49 Exercise 1, require `ma6_history_rows = 6`, `ma12_history_rows = 12`, and a non-NULL twelve-month seasonal value before any model is scored. All four models must have identical eligible months and equal `scored_rows`; independently recompute each MAPE.
+--    Hint ladder, rung 1: Inspect `month_spine`, `monthly_complete`, `forecast_rows`, and `common_scoring_rows`; reject partial warm-up frames before reshaping models.
 -- 2. Produce a combined forecast blending 50% seasonal-naive and 50% MA(6).
---    Inputs: Use only the declared lesson objects (orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-49 Exercise 2, read from `orders`. Build the answer toward `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-49 Exercise 2, expected output: one row per `month`. The final columns are `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast`. The final order is `month DESC`.
+--    Verify: For sql-49 Exercise 2, run an anti-check that counts rows where NOT ((seasonal_naive IS NOT NULL)); require unique `month` where the expected grain is one row per key and confirm the projected `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast` against `orders`. Add one row for which `(seasonal_naive IS NOT NULL)` is true and one for which it is false; verify only the matching `month` value is returned.
+--    Hint ladder, rung 1: For sql-49 Exercise 2, run `monthly`, and `forecasted` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
 -- 3. Prediction: explain why evaluating a moving average on the same rows used
 --    to calculate it leaks the current actual and understates error.
---    Inputs: Use only the declared lesson objects (orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-49 Exercise 3, read from `orders`. Build the answer toward `month`, `revenue`, `leaky_ma6`, and `honest_ma6`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-49 Exercise 3, expected output: one row per `month`. The final columns are `month`, `revenue`, `leaky_ma6`, and `honest_ma6`. The final order is `month`.
+--    Verify: For sql-49 Exercise 3, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, `leaky_ma6`, and `honest_ma6`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+--    Hint ladder, rung 1: For sql-49 Exercise 3, run `monthly` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
 -- 4. Construction: create a complete monthly spine before LAG(..., 12), then
 --    distinguish a missing month from a true zero-revenue month.
---    Inputs: Use only the declared lesson objects (orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-49 Exercise 4, read from `orders`. Build the answer toward `month`, `revenue`, `had_source_rows`, and `seasonal_forecast`; keep `month` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-49 Exercise 4, expected output: one row per calendar month before the 12-row lag. The final columns are `month`, `revenue`, `had_source_rows`, and `seasonal_forecast`. The final order is `month`.
+--    Verify: For sql-49 Exercise 4, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, and `had_source_rows`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+--    Hint ladder, rung 1: For sql-49 Exercise 4, run `bounds`, `spine`, `actual`, and `complete` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
 -- 5. Debugging: repair MAPE when actual revenue is zero and report how many
 --    observations were excluded from the percentage error.
---    Inputs: Use only the declared lesson objects (orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-49 Exercise 5, read from `toy`. Build the answer toward `mape`, `scored_rows`, and `excluded_zero_actuals`; keep `mape` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-49 Exercise 5, expected output: one row per `mape`. The final columns are `mape`, `scored_rows`, and `excluded_zero_actuals`.
+--    Verify: For sql-49 Exercise 5, reselect the returned keys directly from the source; require unique `mape` where the expected grain is one row per key and confirm the projected `mape`, `scored_rows`, and `excluded_zero_actuals` against `toy`. Add one source row with a new `mape`; verify the result gains exactly one row carrying that `mape` value.
+--    Hint ladder, rung 1: For sql-49 Exercise 5, inspect the source keys that survive `WHERE`.
 -- 6. Edge case: compare MAE and MAPE when one low-revenue month has a modest
 --    absolute miss but a very large percentage miss.
---    Inputs: Use only the declared lesson objects (orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-49 Exercise 6, read from `toy`. Build the answer toward `mae`, and `mape`; keep `mae` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-49 Exercise 6, expected output: one row per `mae`. The final columns are `mae`, and `mape`.
+--    Verify: For sql-49 Exercise 6, reselect the returned keys directly from the source; require unique `mae` where the expected grain is one row per key and confirm the projected `mae`, and `mape` against `toy`. Add one source row with a new `mae`; verify the result gains exactly one row carrying that `mae` value.
+--    Hint ladder, rung 1: For sql-49 Exercise 6, select `mae` from `toy` before adding derived columns.
 
 ROLLBACK;

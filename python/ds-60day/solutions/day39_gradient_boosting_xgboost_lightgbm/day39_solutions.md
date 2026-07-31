@@ -32,7 +32,7 @@ X_train, X_valid, y_train, y_valid = train_test_split(
 )
 ```
 
-Exercise 1 — Sweep learning_rate and n_estimators (sklearn)
+Worked reference for Exercise 1 — Sweep learning_rate and n_estimators (sklearn)
 ```python
 learning_rates = [0.03, 0.05, 0.1]
 n_estimators_grid = [100, 250, 500]
@@ -101,7 +101,7 @@ else:
     }
 ```
 
-Exercise 2 — LightGBM comparison (if installed)
+Worked reference for Exercise 2 — LightGBM comparison (if installed)
 ```python
 try:
     import lightgbm as lgb
@@ -175,7 +175,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Tune `learning_rate` and `n_estimators` with a simple loop.
 
@@ -185,16 +185,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Tune learningrate and nestimators with a simple loop`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — sequential boosting, learning-rate budgets, and validation control — evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Compare XGBoost with LightGBM if the `ml` dependency group is installed.
 
@@ -204,14 +197,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Compare XGBoost with LightGBM if the ml dependency group is installed`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
-
+**Verify:** Practice 2 — sequential boosting, learning-rate budgets, and validation control — first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
 
 ### Exercise 3 — Early-stopping design
 
@@ -231,14 +217,7 @@ a fixed iteration count selected during development. Calling the test set
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Create train, validation, and final test boundaries for early stopping. Explain why using the...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Early-stopping design — record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.
 
 ### Exercise 4 — Calibration check
 
@@ -258,14 +237,7 @@ the calibrated result on data used for neither fitting nor calibration.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Compare ROC AUC, log loss, and a reliability diagram for a boosting classifier. Construct an...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
-
-
+**Verify:** Calibration check — print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.
 
 ### Exercise 5 — Portable backend contract
 
@@ -286,14 +258,7 @@ but document parameters that do not map exactly between libraries.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Design a comparison helper that uses scikit-learn's HistGradientBoostingClassifier offline an...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Portable backend contract — return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.
 
 ### Exercise 6 — Overfitting diagnosis
 
@@ -313,4 +278,4 @@ as training evidence.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Plot training and validation loss by boosting iteration and diagnose a curve where training l...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+**Verify:** Overfitting diagnosis — save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.

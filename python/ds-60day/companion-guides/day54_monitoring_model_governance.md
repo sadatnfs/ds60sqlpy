@@ -44,7 +44,6 @@ groups?**
 ```python
 import numpy as np
 
-
 def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -> float:
     edges = np.quantile(reference, np.linspace(0, 1, bins + 1))
     edges[0], edges[-1] = -np.inf, np.inf
@@ -198,31 +197,15 @@ assert label_coverage == 0.12
 
 1. Compute PSI for multiple features or score windows over time.
 
-**Verify:** For task `Compute PSI for multiple features or score windows over time`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
+**Verify:** Practice 1 — monitoring layers, drift signals, delayed labels, and governance decisions — for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
 
 2. Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.
 
-**Verify:** For task `Build a small pandas/Matplotlib dashboard of weekly AUC and PSI`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
+**Verify:** Practice 2 — monitoring layers, drift signals, delayed labels, and governance decisions — save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
 
 3. Draft a governance policy covering roles, approvals, alerts, and rollback.
 
-**Verify:** For task `Draft a governance policy covering roles, approvals, alerts, and rollback`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Practice 3 — monitoring layers, drift signals, delayed labels, and governance decisions — produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
 
 ### Progressive hints
 
@@ -243,39 +226,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Label-delay analysis:** Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
    **Progressive hint:** Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.
 
-**Verify:** For task `Label-delay analysis: Simulate labels arriving 14–30 days after predictions. Build separate v...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Label-delay analysis — print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.
 
 5. **Alert hysteresis:** Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping.
    **Progressive hint:** Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.
 
-**Verify:** For task `Alert hysteresis: Design warning and critical thresholds that require persistence or multiple...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report class support and confusion counts at the chosen threshold and prove the declared operating constraint is satisfied.
-
-
-
-
-
-
+**Verify:** Alert hysteresis — feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.
 
 6. **Rollback drill:** Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence.
    **Progressive hint:** A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.
 
-**Verify:** For task `Rollback drill: Write and rehearse a rollback from model version B to A, including trigger, a...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
+**Verify:** Rollback drill — record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -324,10 +288,12 @@ Emphasize monitoring layers, drift signals, delayed labels, and governance decis
 - guide: `python/ds-60day/companion-guides/day54_monitoring_model_governance.md`
 - learner artifact: `python/ds-60day/notebooks/day54_monitoring_model_governance.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-53`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

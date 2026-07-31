@@ -232,68 +232,32 @@ The notebook's project checklist is the exercise:
 
 1. Load the dataset and create train/validation/test boundaries.
 
-**Verify:** For task `Load the dataset and create train/validation/test boundaries`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Practice 1 — an end-to-end evidence chain from decision to reproducible artifact — record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.
 
 2. Preprocess with `ColumnTransformer`.
 
-**Verify:** For task `Preprocess with ColumnTransformer`, measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
+**Verify:** Practice 2 — an end-to-end evidence chain from decision to reproducible artifact — fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.
 
 3. Train a baseline model.
 
-**Verify:** For task `Train a baseline model`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Practice 3 — an end-to-end evidence chain from decision to reproducible artifact — fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.
 
 4. Evaluate with appropriate metrics and cross-validation.
 
-**Verify:** For task `Evaluate with appropriate metrics and cross-validation`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Practice 4 — an end-to-end evidence chain from decision to reproducible artifact — print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.
 
 5. Save the model and preprocessing together with `joblib`.
 
-**Verify:** For task `Save the model and preprocessing together with joblib`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
+**Verify:** Practice 5 — an end-to-end evidence chain from decision to reproducible artifact — save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.
 
 6. Write a short README-style section in the notebook covering rationale,
    metrics, limitations, and next steps.
 
-**Verify:** For task `Write a short README-style section in the notebook covering rationale,`, demonstrate the concrete requirement “6. Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 6 — an end-to-end evidence chain from decision to reproducible artifact — include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.
 
 7. Optionally adapt the Day 44 FastAPI service.
 
-**Verify:** For task `Optionally adapt the Day 44 FastAPI service`, demonstrate the concrete requirement “7. Optionally adapt the Day 44 FastAPI service” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Practice 7 — an end-to-end evidence chain from decision to reproducible artifact — if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.
 
 ### Progressive hints
 
@@ -313,83 +277,40 @@ attempt, and record the evidence that would prove your result correct.
 8. **Data-contract gate:** Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint.
    **Progressive hint:** Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.
 
-**Verify:** For task `Data-contract gate: Write executable checks for row identity, required columns, target domain...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
-
+**Verify:** Data-contract gate — run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.
 
 9. **Leakage audit:** Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field.
    **Progressive hint:** Ask whether the value exists at prediction time and whether it was computed using future rows or target information.
 
-**Verify:** For task `Leakage audit: Create a feature-by-feature table with availability time, source, transformati...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Leakage audit — save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.
 
 10. **Baseline ladder:** Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results.
    **Progressive hint:** Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.
 
-**Verify:** For task `Baseline ladder: Evaluate a dummy strategy, a simple linear/tree model, and one selected cand...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Baseline ladder — print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.
 
 11. **Operating-policy selection:** Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it.
    **Progressive hint:** Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.
 
-**Verify:** For task `Operating-policy selection: Build a threshold table with false-positive cost, false-negative...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Operating-policy selection — print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.
 
 12. **Error-slice analysis:** Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values.
    **Progressive hint:** Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.
 
-**Verify:** For task `Error-slice analysis: Define at least three pre-motivated slices, report support and error me...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** Error-slice analysis — for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.
 
 13. **Artifact manifest:** Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes.
    **Progressive hint:** JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.
 
-**Verify:** For task `Artifact manifest: Save the fitted pipeline with a JSON manifest containing model ID, trainin...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
-
+**Verify:** Artifact manifest — validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.
 
 14. **Fresh-process acceptance:** Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance.
    **Progressive hint:** Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.
 
-**Verify:** For task `Fresh-process acceptance: Create a smoke test that starts from a clean process, loads the sav...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
+**Verify:** Fresh-process acceptance — run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -433,10 +354,12 @@ Emphasize an end-to-end evidence chain from decision to reproducible artifact. U
 - guide: `python/ds-60day/companion-guides/day45_end_to_end_modeling_project.md`
 - learner artifact: `python/ds-60day/notebooks/day45_end_to_end_modeling_project.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-44`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

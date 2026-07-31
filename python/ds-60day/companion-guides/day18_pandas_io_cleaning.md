@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 17 (`python-17`): DataFrames, selection, dtypes, and copies.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -200,13 +196,11 @@ raw = pd.DataFrame(
     {"amount": ["10.5", "bad", None], "city": [" SF ", "ny", "NY"]}
 )
 
-
 def clean(frame: pd.DataFrame) -> pd.DataFrame:
     result = frame.copy()
     result["amount"] = pd.to_numeric(result["amount"], errors="coerce")
     result["city"] = result["city"].str.strip().str.upper().astype("string")
     return result
-
 
 tidy = raw.pipe(clean)
 ```
@@ -230,7 +224,7 @@ assertion or inspection and explain what it proves.
 
 1. Load a local CSV into pandas, recording path, encoding, row grain, shape, columns, dtypes, missing counts, and duplicate-key counts before changing anything.
    **Expected behavior:** produce a compact profile, not a full data dump. **Constraint:** use repository-relative `Path` objects and no network source.
-   **Verify:** restart the kernel and reproduce the same profile.
+   **Verify:** save the first profile values, restart the kernel, and assert the second shape, columns, dtypes, missing counts, and duplicate-key counts exactly match.
 
 2. Implement `clean_frame(raw)` that trims selected text, converts documented numeric/date fields, handles missing values by written policy, resolves duplicates by a stated key, and returns a new DataFrame. **Constraints:** do not mutate `raw` or use broad `dropna`; record conversion failures.
    **Verify:** assert raw preservation and `clean_frame(clean_frame(raw)).equals(clean_frame(raw))` for this contract.
@@ -302,7 +296,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-18`
-(Day 18 — pandas I/O and Data Cleaning). I am a complete beginner. Emphasize pandas input boundaries, explicit cleaning, and reproducible output.
+(Day 18 — pandas I/O and Data Cleaning). Direct catalog prerequisites: `python-17`.
+I have completed the direct prerequisites: `python-17`. Emphasize pandas input boundaries, explicit cleaning, and reproducible output.
 Read `python/ds-60day/companion-guides/day18_pandas_io_cleaning.md` and use the learner notebook
 `python/ds-60day/notebooks/day18_pandas_io_cleaning.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

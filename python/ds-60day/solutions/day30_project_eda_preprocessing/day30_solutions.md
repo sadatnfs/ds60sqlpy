@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**a restartable EDA and preprocessing project with an auditable evidence chain**.
+These worked answers demonstrate **a restartable EDA and preprocessing project with an auditable evidence chain**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 A project notebook is a reproducible report, not a diary of accidental
 execution order. Start with the question, provenance, row grain, keys,
@@ -29,327 +28,323 @@ or time leakage.
 - **manifest:** metadata describing artifact source, version, shape, and validation.
 - **restartability:** the ability to run top to bottom from a fresh kernel with the same result.
 
-### Reference pattern 1 — Reconcile a cleaning boundary
+### How to compare an answer
 
-Make every row removal visible and explainable.
+For this lesson's **a restartable EDA and preprocessing project with an auditable evidence chain** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
+## Exercises 1–5 — Worked answers
+
+### Exercise 1 — worked answer
+
+**Learner contract:** **Load and scope:** choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. **Expected behavior:** a fresh-kernel run can recreate the same raw profile without hidden state or network access. **Verify:** assert expected columns and key/time bounds before continuing.
+
+**Reasoning:** Implement this exact contract as written: Load and scope: choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. Expected behavior: a fresh-kernel run can recreate the same raw profile without hidden state or network access. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert expected columns and key/time bounds before continuing. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.
 
 ```python
 import pandas as pd
 
 raw = pd.DataFrame({
-    "id": [1, 2, 2, 3],
+    "entity_id": [1, 2, 2, 3],
+    "event_time": pd.to_datetime([
+        "2025-01-01", "2025-01-02", "2025-01-02", "2025-01-03"
+    ], utc=True),
     "amount": [10.0, 20.0, 20.0, None],
 })
-cleaned = raw.drop_duplicates().dropna(subset=["amount"]).copy()
-reconciliation = {
-    "raw_rows": len(raw),
-    "clean_rows": len(cleaned),
-    "rows_removed": len(raw) - len(cleaned),
-    "raw_known_total": raw["amount"].sum(),
-    "clean_total": cleaned["amount"].sum(),
+scope = {
+    "provenance": "constructed course fixture",
+    "license": "course-authored fixture; CC0-style reuse permitted",
+    "grain": "one entity event per row",
+    "keys": ["entity_id", "event_time"],
+    "shape": raw.shape,
+    "time_range_utc": (
+        raw["event_time"].min().isoformat(),
+        raw["event_time"].max().isoformat(),
+    ),
+    "question": "How much known amount is recorded by day?",
+    "acceptance": {
+        "required_columns_present": True,
+        "final_business_key_unique": True,
+        "final_amount_non_negative_or_missing": True,
+    },
 }
-reconciliation
+expected_columns = {"entity_id", "event_time", "amount"}
+assert set(raw.columns) == expected_columns
+assert set(scope["keys"]).issubset(raw.columns)
+assert raw["event_time"].min() >= pd.Timestamp("2025-01-01", tz="UTC")
+assert raw["event_time"].max() <= pd.Timestamp("2025-01-03", tz="UTC")
 ```
 
-**Expected observation:** The reconciliation reports four raw rows, two clean rows, two removed rows, and totals before/after. Those changes still need documented rationale.
+Because the data is constructed in the cell, a fresh offline kernel can
+reproduce the same four raw rows without hidden files or network state.
 
-### Reference pattern 2 — Represent a decision as data
+**Verification evidence:** assert expected columns and key/time bounds before continuing.
 
-A structured entry is easier to audit than a scattered comment.
-
-```python
-decision = {
-    "issue": "duplicate id=2 row",
-    "evidence": "two identical rows",
-    "action": "keep first exact duplicate",
-    "rationale": "duplicate adds no new information",
-    "validation": "id/amount pair is unique afterward",
-    "impact": "one row and amount=20 removed from row-level totals",
-}
-sorted(decision)
-```
-
-**Expected observation:** All six required fields are listed. The impact makes clear that de-duplication changes additive totals.
-
-## Exercise-by-exercise reasoning map
-
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
-
-**Learner contract:** **Load and scope:** choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. **Expected behavior:** a fresh-kernel run can recreate the same raw profile without hidden state or network access. **Verify:** assert expected columns and key/time bounds before continuing.
-
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
-
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
-
-**Solution evidence to inspect:** assert expected columns and key/time bounds before continuing.
-
-### Exercise 2 — reasoning, alternatives, and proof
+### Exercise 2 — worked answer
 
 **Learner contract:** **Explore:** analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. **Constraints:** pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. **Verify:** every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+**Reasoning:** Implement this exact contract as written: Explore: analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. Constraints: pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. Keep the prompt's named data and constraints visible in the code, then establish this specific result: every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+analysis_rows = raw["amount"].notna()
+known_amounts = raw.loc[analysis_rows, "amount"]
+exploration = {
+    "row_count": len(raw),
+    "missing_amount": int(raw["amount"].isna().sum()),
+    "duplicate_key_rows": int(
+        raw.duplicated(["entity_id", "event_time"]).sum()
+    ),
+    "known_total": float(raw["amount"].sum()),
+    "known_amount_denominator": int(analysis_rows.sum()),
+    "amount_median": float(known_amounts.median()),
+    "amount_range": (
+        float(known_amounts.min()),
+        float(known_amounts.max()),
+    ),
+    "entity_amount_correlation": float(
+        raw.loc[analysis_rows, ["entity_id", "amount"]]
+        .corr()
+        .loc["entity_id", "amount"]
+    ),
+}
+findings = [
+    {
+        "claim": "one of four rows has missing amount",
+        "evidence": exploration["missing_amount"],
+        "denominator": exploration["row_count"],
+        "caveat": "missingness reason is not available",
+    },
+    {
+        "claim": "one repeated business-key row can double count amount",
+        "evidence": exploration["duplicate_key_rows"],
+        "denominator": exploration["row_count"],
+        "caveat": "a real source owner must confirm duplicate semantics",
+    },
+]
+leakage_prone_fields_excluded: list[str] = []
 
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+assert exploration["missing_amount"] == 1
+assert exploration["duplicate_key_rows"] == 1
+assert exploration["known_total"] == 50.0
+assert exploration["known_amount_denominator"] == 3
+assert all({"claim", "evidence", "denominator", "caveat"} <= finding.keys()
+           for finding in findings)
+assert leakage_prone_fields_excluded == []
+```
 
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+The correlation is a reproducible description over only three known
+amounts, not a causal finding. This project has no predictive target, so
+no leakage-prone feature is present; the explicit empty list records
+that review instead of silently skipping it.
 
-**Solution evidence to inspect:** every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.
+**Verification evidence:** every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.
 
-### Exercise 3 — reasoning, alternatives, and proof
+### Exercise 3 — worked answer
 
 **Learner contract:** **Clean and transform:** implement `clean(raw)` that returns a new DataFrame and records each decision's evidence, action, rationale, validation, and impact. **Constraints:** preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. **Verify:** test idempotence where promised and reconcile row/entity counts plus key totals.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+**Reasoning:** Implement this exact contract as written: Clean and transform: implement `clean(raw)` that returns a new DataFrame and records each decision's evidence, action, rationale, validation, and impact. Constraints: preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. Keep the prompt's named data and constraints visible in the code, then establish this specific result: test idempotence where promised and reconcile row/entity counts plus key totals. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+def clean(raw_frame: pd.DataFrame) -> pd.DataFrame:
+    result = raw_frame.copy()
+    result = result.drop_duplicates(["entity_id", "event_time"])
+    return result.reset_index(drop=True)
 
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
 
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+raw_snapshot = raw.copy(deep=True)
+cleaned = clean(raw)
+assert raw.shape == (4, 3)
+assert cleaned.shape == (3, 3)
+assert clean(cleaned).equals(cleaned)
+pd.testing.assert_frame_equal(raw, raw_snapshot)
 
-**Solution evidence to inspect:** test idempotence where promised and reconcile row/entity counts plus key totals.
+decisions = [
+    {
+        "evidence": "one exact duplicate business key",
+        "action": "keep first",
+        "rationale": "duplicate carries identical values",
+        "validation": "business key unique afterward",
+        "impact": {"rows_removed": 1, "known_amount_removed": 20.0},
+    },
+    {
+        "evidence": "one amount is missing",
+        "action": "preserve missing value",
+        "rationale": "no defensible imputation rule is available",
+        "validation": "missing count remains one",
+        "impact": {"values_imputed": 0},
+    },
+]
+assert not cleaned.duplicated(["entity_id", "event_time"]).any()
+assert cleaned["entity_id"].nunique() == raw["entity_id"].nunique() == 3
+assert raw["amount"].sum() - cleaned["amount"].sum() == 20.0
+assert cleaned["amount"].isna().sum() == 1
+```
 
-### Exercise 4 — reasoning, alternatives, and proof
+**Verification evidence:** test idempotence where promised and reconcile row/entity counts plus key totals.
 
-**Learner contract:** **Validate:** apply the Day 29 schema to the actual final cleaned DataFrame before output. **Expected behavior:** one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. **Constraint:** do not catch and discard the validation failure. **Verify:** save is impossible until validation succeeds.
+### Exercise 4 — worked answer
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+**Learner contract:** **Validate:** apply the Day 29 schema to the actual final cleaned DataFrame before output. **Expected behavior:** one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. **Constraint:** do not catch and discard the validation failure. **Verify:** assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Reasoning:** Implement this exact contract as written: Validate: apply the Day 29 schema to the actual final cleaned DataFrame before output. Expected behavior: one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. Constraint: do not catch and discard the validation failure. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.
 
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+```python
+import pandera.pandas as pa
 
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+project_schema = pa.DataFrameSchema({
+    "entity_id": pa.Column(int, checks=pa.Check.ge(1)),
+    "event_time": pa.Column(
+        pd.DatetimeTZDtype(unit="ns", tz="UTC"),
+        nullable=False,
+    ),
+    "amount": pa.Column(float, checks=pa.Check.ge(0), nullable=True),
+})
+validated = project_schema.validate(cleaned, lazy=True)
+assert len(validated) == 3
 
-**Solution evidence to inspect:** save is impossible until validation succeeds.
+invalid = cleaned.assign(amount=[10.0, -0.01, None])
+validation_failure = None
+try:
+    project_schema.validate(invalid, lazy=True)
+except pa.errors.SchemaErrors as error:
+    validation_failure = error.failure_cases
+assert validation_failure is not None
+assert "amount" in validation_failure.to_string()
 
-### Exercise 5 — reasoning, alternatives, and proof
+frame_ready_to_save = validated
+assert frame_ready_to_save is validated
+```
+
+`frame_ready_to_save` is assigned only from the successful validation
+result. The negative fixture preserves its failure table as diagnostic
+evidence and never reaches the output code.
+
+**Verification evidence:** assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.
+
+### Exercise 5 — worked answer
 
 **Learner contract:** **Save and report:** write cleaned data and figures under an ignored `artifacts/day30/` path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. **Constraints:** handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. **Verify:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+**Reasoning:** Implement this exact contract as written: Save and report: write cleaned data and figures under an ignored `artifacts/day30/` path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. Constraints: handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. Keep the prompt's named data and constraints visible in the code, then establish this specific result: saved/reloaded shape, schema, and key totals match the validated in-memory frame. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+import json
+from datetime import datetime, timezone
+from pathlib import Path
 
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
+import matplotlib.pyplot as plt
 
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
+if validated.empty:
+    raise ValueError("project produced no accepted rows")
+artifact_dir = Path("artifacts/day30")
+artifact_dir.mkdir(parents=True, exist_ok=True)
+data_path = artifact_dir / "clean.csv"
+figure_path = artifact_dir / "daily-amount.png"
+manifest_path = artifact_dir / "manifest.json"
+report_path = artifact_dir / "report.md"
 
-**Solution evidence to inspect:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.
+validated.to_csv(data_path, index=False)
+daily_amount = (
+    validated.set_index("event_time")["amount"].resample("D").sum(min_count=1)
+)
+axes = daily_amount.plot(
+    kind="bar",
+    title="Known amount by UTC day",
+    ylabel="Amount (course units)",
+)
+axes.figure.tight_layout()
+axes.figure.savefig(figure_path, dpi=150)
+plt.close(axes.figure)
 
-### Exercise 6 — reasoning, alternatives, and proof
+report = (
+    "# Day 30 findings\n\n"
+    "- Finding: one exact duplicate key was removed.\n"
+    "- Limitation: one amount is missing and its cause is unknown.\n"
+    "- Lesson: preserve raw evidence and validate before saving.\n"
+)
+report_path.write_text(report, encoding="utf-8")
+manifest = {
+    "source": scope["provenance"],
+    "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+    "version_policy": "increment for any schema or cleaning-contract change",
+    "row_count": len(validated),
+    "schema_validated": True,
+    "known_amount_total": float(validated["amount"].sum()),
+    "unique_entity_count": int(validated["entity_id"].nunique()),
+    "files": [data_path.name, figure_path.name, report_path.name],
+    "version": 1,
+}
+manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+reloaded = pd.read_csv(data_path, parse_dates=["event_time"])
+reloaded["event_time"] = pd.to_datetime(reloaded["event_time"], utc=True)
+revalidated = project_schema.validate(reloaded, lazy=True)
+assert len(reloaded) == manifest["row_count"]
+assert float(revalidated["amount"].sum()) == manifest["known_amount_total"]
+assert revalidated["entity_id"].nunique() == manifest["unique_entity_count"]
+assert all((artifact_dir / name).exists() for name in manifest["files"])
+assert set(manifest["files"]) == {
+    "clean.csv", "daily-amount.png", "report.md"
+}
+```
+
+**Verification evidence:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.
+
+## Exercises 6–10 — Expanded mastery answers
+
+### Exercise 6 — answer contract
 
 **Learner contract:** **Prediction:** Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. **Progressive hint:** A declared expectation turns a surprise into a testable discrepancy. **Verify:** Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.
 
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying a restartable EDA and preprocessing project with an auditable evidence chain.
+**Reasoning:** Predict this named state change before running it: Prediction: Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. Progressive hint: A declared expectation turns a surprise into a testable discrepancy. Then compare the prediction with this proof target: Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred. This makes a restartable EDA and preprocessing project with an auditable evidence chain observable instead of relying on intuition.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.
 
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
-
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
-
-**Solution evidence to inspect:** Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.
-
-### Exercise 7 — reasoning, alternatives, and proof
+### Exercise 7 — answer contract
 
 **Learner contract:** **Tracing:** Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. **Progressive hint:** Every material change needs a reason and reconciliation. **Verify:** Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.
 
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the a restartable EDA and preprocessing project with an auditable evidence chain model is visible.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. Progressive hint: Every material change needs a reason and reconciliation. Record the named value, shape, label, or iterator position needed to establish: Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row. The trace exposes a restartable EDA and preprocessing project with an auditable evidence chain directly.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.
 
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
-
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
-
-**Solution evidence to inspect:** Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.
-
-### Exercise 8 — reasoning, alternatives, and proof
+### Exercise 8 — answer contract
 
 **Learner contract:** **Implementation:** Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. **Progressive hint:** Make decisions data, not scattered comments. **Verify:** Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies a restartable EDA and preprocessing project with an auditable evidence chain.
+**Reasoning:** Implement this exact contract as written: Implementation: Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. Progressive hint: Make decisions data, not scattered comments. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.
 
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
-
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
-
-**Solution evidence to inspect:** Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.
-
-### Exercise 9 — reasoning, alternatives, and proof
+### Exercise 9 — answer contract
 
 **Learner contract:** **Debugging:** Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. **Progressive hint:** Put parameters/imports first and make `clean(raw)` return a copy. **Verify:** Restart and run top to bottom; assert `raw` remains unchanged, `clean(raw)` returns a copy, and no cell requires a later-created name.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in a restartable EDA and preprocessing project with an auditable evidence chain.
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. Progressive hint: Put parameters/imports first and make `clean(raw)` return a copy. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Restart and run top to bottom; assert `raw` remains unchanged, `clean(raw)` returns a copy, and no cell requires a later-created name. The diagnosis depends on a restartable EDA and preprocessing project with an auditable evidence chain.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Restart and run top to bottom; assert `raw` remains unchanged, `clean(raw)` returns a copy, and no cell requires a later-created name.
 
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
-
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
-
-**Solution evidence to inspect:** Restart and run top to bottom; assert `raw` remains unchanged, `clean(raw)` returns a copy, and no cell requires a later-created name.
-
-### Exercise 10 — reasoning, alternatives, and proof
+### Exercise 10 — answer contract
 
 **Learner contract:** **Edge case and explanation:** Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. **Progressive hint:** Block artifact creation when acceptance criteria fail. **Verify:** Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.
 
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from a restartable EDA and preprocessing project with an auditable evidence chain.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. Progressive hint: Block artifact creation when acceptance criteria fail. Values below, at, and above the named boundary must produce the evidence Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files. Those cases show how a restartable EDA and preprocessing project with an auditable evidence chain behaves at its edge.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** A notebook is appropriate for a readable project report; extract stable cleaning/validation functions into modules once behavior is established and tested.
-
-**Edge case:** Empty outputs, duplicate/conflicting keys, schema drift, stale artifacts, hidden state, target/time leakage, and path portability need gates.
-
-**Solution evidence to inspect:** Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-We combine EDA, cleaning, schema validation, and report generation into a reproducible workflow.
-
-Deliverables
-- Reproducible notebook with sections
-- Cleaned dataset with schema
-- Short findings write-up
-
----
-
-Checklist with code skeletons
-
-1) Define problem/questions
-- What are we trying to predict/understand?
-- What are the target and key features?
-
-2) Load with dtypes + validate schema
-```python
-import pandas as pd
-import pandera.pandas as pa
-import pandera.typing as pat
-
-dtypes = {'city':'string', 'price':'float64', 'qty':'Int64', 'date':'string'}
-df = pd.read_csv('raw.csv', dtype=dtypes, parse_dates=['date'])
-
-class Schema(pa.DataFrameModel):
-    city: pat.Series[str]
-    price: pat.Series[float] = pa.Field(ge=0)
-    qty: pat.Series[int] = pa.Field(ge=0)
-    date: pat.Series[pd.DatetimeTZDtype] | pat.Series[pd.Timestamp]
-
-Schema.validate(df)
-```
-
-3) Profile nulls/dtypes/dupes/outliers
-```python
-summary = {
-    'shape': df.shape,
-    'nulls': df.isna().mean().to_dict(),
-    'dtypes': df.dtypes.astype(str).to_dict(),
-    'dupes': int(df.duplicated().sum()),
-}
-print(summary)
-```
-
-4) Clean and transform
-```python
-df['city'] = df['city'].str.strip().str.upper()
-df['price'] = pd.to_numeric(df['price'], errors='coerce').fillna(df['price'].median())
-```
-
-5) Visuals and segmentation
-```python
-import seaborn as sns, matplotlib.pyplot as plt
-sns.histplot(df, x='price', hue='city'); plt.show()
-```
-
-6) Split train/test before target-aware transforms
-```python
-from sklearn.model_selection import train_test_split
-train, test = train_test_split(df, test_size=0.2, random_state=42)
-```
-
-7) Save processed data and data dictionary
-```python
-from pathlib import Path
-
-artifact_dir = Path('artifacts/day30/processed')
-artifact_dir.mkdir(parents=True, exist_ok=True)
-train.to_parquet(artifact_dir / 'train.parquet', index=False)
-test.to_parquet(artifact_dir / 'test.parquet', index=False)
-metadata = {'columns': df.dtypes.astype(str).to_dict()}
-```
-
-Tips
-- Keep code in functions for reuse
-- Capture decisions and rationale in markdown cells
-
----
+**Evidence to locate in the grouped implementation:** Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.
 
 ## Expanded mastery lab solutions
 
 Build a restartable evidence chain: question and provenance → raw checks → decisions → clean data → validation → artifacts → limitations.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Define and reconcile the analytical unit
+### Shared implementation for Exercises 6–7 — Define and reconcile the analytical unit
 
 Record the question and grain before inspection. At each boundary, compare row
 count, unique IDs, missing critical values, and additive totals. A difference
 is acceptable only when a decision record explains and validates it.
 
-### Practices 3–5 — Structured decisions and artifact acceptance
+### Shared implementation for Exercises 8–10 — Structured decisions and artifact acceptance
 
 ```python
 from __future__ import annotations

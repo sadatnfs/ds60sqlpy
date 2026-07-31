@@ -41,6 +41,22 @@ A recording fake makes order observable:
 Also verify the decorated function's name, return type, and exception behavior.
 Do not assert timestamps or complete log formatting; those are incidental.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+The pure normalization function is a safe first comparison point:
+
+```python
+from bridge.solutions.day02_solution import normalize_customer_name
+
+assert normalize_customer_name("  Ada   Lovelace  ") == "Ada Lovelace"
+```
+
+For the resource manager, prefer a recording fake and assert the complete
+success and failure event order rather than only the returned value.
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs align one-for-one with the learner and guide. The executable
@@ -60,9 +76,7 @@ simpler and prevent accidental coupling.
 **Why this boundary matters:** A consumer Protocol should describe what the consumer calls, not
 an entire driver object.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** List the exact members each consumer calls: the managed connection boundary needs only `commit`, `rollback`, and `close`; any retained cursor member must have a named caller.
 
 ### Exercise 2 — Implementation
 
@@ -76,9 +90,7 @@ so normal and exceptional exits share cleanup.
 **Why this boundary matters:** Place closure in `finally`; keep commit after the yielded body
 returns.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert success events are `acquire, body, commit, close`; failure events are `acquire, body, rollback, close`; and the original body exception reaches the caller.
 
 ### Exercise 3 — Testing
 
@@ -92,9 +104,7 @@ makes no assertions itself.
 **Why this boundary matters:** The order is part of the contract, so assert the entire event
 list.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Configure a recording fake for one success and one body failure; compare the complete event lists and assert commit and rollback are mutually exclusive.
 
 ### Exercise 4 — Implementation
 
@@ -108,9 +118,7 @@ annotated return is `Callable[P, R]`.
 **Why this boundary matters:** Type wrapper parameters as `P.args`/`P.kwargs` and return the
 original `R`.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Decorate a typed two-argument function; assert its result is unchanged, its name and docstring survive, and logs contain qualified function name plus success/failure only.
 
 ### Exercise 5 — Security
 
@@ -123,9 +131,7 @@ records.
 
 **Why this boundary matters:** Treat every callable value as potentially sensitive.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Pass sentinel positional/keyword values and a secret-bearing connection repr; assert none of them, nor the return value, appears in captured log records.
 
 ### Exercise 6 — Typing
 
@@ -139,9 +145,7 @@ shapes.
 **Why this boundary matters:** `wraps` fixes runtime metadata; `ParamSpec` preserves the
 type-level call shape.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Compare `__name__`, `__doc__`, `inspect.signature`, returned value, and the identity of a raised exception before and after decoration; run the configured static type checker.
 
 ### Exercise 7 — Prediction
 
@@ -155,9 +159,7 @@ chooses broad cleanup while never translating interruption into success.
 **Why this boundary matters:** The exception scope is a policy decision, but closure must still
 be guaranteed.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Raise `KeyboardInterrupt` inside the managed body; assert rollback and close occur and the same interruption escapes rather than being converted to an ordinary error.
 
 ### Exercise 8 — Debugging
 
@@ -170,9 +172,7 @@ policy—often log cleanup failure safely while preserving the primary exception
 
 **Why this boundary matters:** Cleanup failures can replace the error that caused cleanup.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Make the body and rollback fail with different exception types, then make close fail in a separate case; inspect `__context__`/grouping so no cleanup failure is silently lost.
 
 ### Exercise 9 — Design
 
@@ -185,9 +185,7 @@ outer commit or rollback.
 
 **Why this boundary matters:** Exactly one layer should own each lifecycle transition.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Record two nested resources and assert LIFO ownership: inner commit/rollback and close finish before the outer resource commits/rolls back and closes.
 
 ### Exercise 10 — Comparison
 
@@ -201,9 +199,7 @@ lifecycle calls become asynchronous.
 **Why this boundary matters:** Preserve the same ownership state machine while changing the
 execution protocol.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Show an `asynccontextmanager` sketch where factory, commit, rollback, and close are awaited; identify `AsyncIterator` and async callable return types in the signature.
 
 ### Exercise 11 — Typing
 
@@ -217,9 +213,7 @@ return to a concrete driver class.
 **Why this boundary matters:** Use a Protocol when the boundary needs attributes or overloads
 beyond a bare call.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Run a type-checking example where both a named factory fake and a real adapter satisfy the callable Protocol; note the Protocol gives the boundary a reusable semantic name.
 
 ### Exercise 12 — Extension
 
@@ -233,6 +227,4 @@ propagation identical to `logged()`.
 **Why this boundary matters:** Compute duration from two injected clock calls and emit a bounded
 numeric field.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inject clock values `10.0` and `10.25`; assert the timing record is `0.25` seconds while captured logs still omit arguments and return values.

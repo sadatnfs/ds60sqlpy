@@ -49,8 +49,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-ops-01/sql_ops_01_indexes_statistics_maintenance.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-ops-01/lesson/workspace/sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -83,8 +83,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Access method, Operator class, Partial index, Expression index, Covering index, BRIN range. Its worked SQL reads or creates `pro_ops_lab.events`, `pg_catalog.pg_index`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_am`.
+on screen are not automatically stored. The key vocabulary for this lesson is Access method, Operator class, Partial index, Expression index, Covering index, BRIN range. Its worked SQL reads or creates `pro_ops_lab.events`, `pg_catalog.pg_index`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_am`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -94,12 +93,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: The fixture inserts 6,000 events in timestamp order. That physical correlation makes time a plausible BRIN candidate in a much larger append-oriented table. The teaching table is intentionally small, so PostgreSQL may still prefer a sequential scan; that is a valid cost decision.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The worked walkthrough's lesson-specific task is: The fixture inserts 6,000 events in timestamp order. That physical correlation makes time a plausible BRIN candidate in a much larger append-oriented table. The teaching table is intentionally small, so PostgreSQL may still prefer a sequential scan; that is a valid cost decision.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_ops_lab.events`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
 
 ## Two worked SQL examples
 
@@ -121,9 +116,7 @@ CREATE TABLE pro_ops_lab.events (
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_ops_lab.events`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ### Example 2
 
@@ -156,9 +149,7 @@ FROM generate_series(1, 6000) AS g(n);
 
 **How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one row per `smallint`, and `END` with columns `smallint`, and `END` from `pro_ops_lab.events`, and `generate_series`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
 
 ## Learning objectives
 
@@ -269,52 +260,64 @@ before/after evidence, write/storage cost, owner, review date, and rollback:
 
 1. **Covering partial index:** make the query predicate imply the index
    predicate and identify which columns are keys versus payload.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-ops-01 Exercise 1, change only `events_high_device_time_covering`, and `pro_ops_lab.events` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `information_schema.columns` rows.
+   **Expected result/shape:** For sql-ops-01 Exercise 1, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `object_name`, `catalog_definition`, `accepted_case`, and `rejected_sqlstate`.
+   **Verify:** For sql-ops-01 Exercise 1, inspect `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `information_schema.columns` for `events_high_device_time_covering`, and `pro_ops_lab.events`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 2. **Access methods:** map each GIN, GiST, SP-GiST, and BRIN index to supported
    operators and one nonmatching query.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-ops-01 Exercise 2, read from `pro_ops_lab.events`, `generate_series`, and `pg_catalog.pg_index`. Build the answer toward `access_methods_answer`; keep `access_methods_answer` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-ops-01 Exercise 2, expected output: one row per `access_methods_answer`. The final columns are `access_methods_answer`.
+   **Verify:** For sql-ops-01 Exercise 2, reselect the returned keys directly from the source; require unique `access_methods_answer` where the expected grain is one row per key and confirm the projected `access_methods_answer` against `pro_ops_lab.events`, `generate_series`, and `pg_catalog.pg_index`. Add one source row with a new `access_methods_answer`; verify the result gains exactly one row carrying that `access_methods_answer` value.
 3. **Extended statistics:** choose correlated columns, analyze, inspect, and
    explain the planner’s freedom.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-ops-01 Exercise 3, read from `pro_ops_lab.events`, `pg_catalog.pg_stats_ext`, and `events_category_severity_stats`. Build the answer toward `statistics_name`, `kinds`, and `attnames`; keep `statistics_name` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-ops-01 Exercise 3, expected output: one row per `statistics_name`. The final columns are `statistics_name`, `kinds`, and `attnames`. The final order is `s.statistics_name`.
+   **Verify:** For sql-ops-01 Exercise 3, run an anti-check that counts rows where NOT ((s.schemaname = 'pro_ops_lab')); require unique `statistics_name` where the expected grain is one row per key and confirm the projected `statistics_name`, `kinds`, and `attnames` against `pro_ops_lab.events`, `pg_catalog.pg_stats_ext`, and `events_category_severity_stats`. Add one row for which `(s.schemaname = 'pro_ops_lab')` is true and one for which it is false; verify only the matching `statistics_name` value is returned.
 4. **Lifecycle review:** combine usage window, size, writes, constraints, and
    plans without producing an automatic drop list.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-ops-01 Exercise 4, read from `pg_catalog.pg_index`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_stat_user_indexes`, and `pg_catalog.pg_indexes`. Build the answer toward `index_name`, `index_bytes`, `observed_scans`, `indisunique`, `indisprimary`, and `predicate`; keep `index_name` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-ops-01 Exercise 4, expected output: one row per `index_name`. The final columns are `index_name`, `index_bytes`, `observed_scans`, `indisunique`, `indisprimary`, and `predicate`. The final order is `ci.relname`.
+   **Verify:** For sql-ops-01 Exercise 4, project `index_name` plus the raw source columns from `pg_catalog.pg_index`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_stat_user_indexes`, and `pg_catalog.pg_indexes` at each join stage; record row count and distinct `index_name`, then assert the final `index_name`, `index_bytes`, `observed_scans`, `indisunique`, `indisprimary`, and `predicate` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after `severity >= 4`; identify which rows pass each inclusive or exclusive comparison.
 5. **Maintenance:** connect vacuum/analyze, visibility, dead tuples, bloat,
    autovacuum, and long transactions.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-ops-01 Exercise 5, read from `pro_ops_lab.events`, `generate_series`, and `pg_catalog.pg_index`. Build the answer toward `maintenance_answer`; keep `maintenance_answer` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-ops-01 Exercise 5, expected output: one row per `maintenance_answer`. The final columns are `maintenance_answer`.
+   **Verify:** For sql-ops-01 Exercise 5, reselect the returned keys directly from the source; require unique `maintenance_answer` where the expected grain is one row per key and confirm the projected `maintenance_answer` against `pro_ops_lab.events`, `generate_series`, and `pg_catalog.pg_index`. Add one source row with a new `maintenance_answer`; verify the result gains exactly one row carrying that `maintenance_answer` value.
 6. **Statement statistics:** design restricted, privacy-aware collection and
    review without enabling or exposing it here.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-ops-01 Exercise 6, complete the statement statistics written analysis and support its claims with read-only evidence from `pg_stat_statements`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-ops-01 Exercise 6, expected output: a completed the statement statistics written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `queryid`, and `shared_preload_libraries`.
+   **Verify:** For sql-ops-01 Exercise 6, check the statement statistics written analysis against `queryid`, and `shared_preload_libraries`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 7. **Redundancy candidates:** compare keys, order, predicate, operator class,
    collation, INCLUDE data, uniqueness, and plans.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-ops-01 Exercise 7, read from `pg_catalog.pg_index`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`. Build the answer toward `index_name`, `indisunique`, `indisprimary`, `index_definition`, and `predicate`; keep `index_name` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-ops-01 Exercise 7, expected output: one row per `index_name`. The final columns are `index_name`, `indisunique`, `indisprimary`, `index_definition`, and `predicate`. The final order is `ci.relname`.
+   **Verify:** For sql-ops-01 Exercise 7, project `index_name` plus the raw source columns from `pg_catalog.pg_index`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace` at each join stage; record row count and distinct `index_name`, then assert the final `index_name`, `indisunique`, `indisprimary`, `index_definition`, and `predicate` values match those staged rows without unintended fanout or loss. Add duplicate source candidates for `index_name`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 8. **Expression index:** test expression matching and document collation,
    function-volatility, and generated-column alternatives.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-ops-01 Exercise 8, run the underlying read-only query over `pro_ops_lab.events`, and `events_device_lower_idx` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+   **Expected result/shape:** For sql-ops-01 Exercise 8, expected output: one row per `event_id`. The final columns are `event_id`, and `device_id`. The final order is `e.event_id`.
+   **Verify:** For sql-ops-01 Exercise 8, run the underlying query without `EXPLAIN` and preserve its `event_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 9. **HOT updates:** observe a controlled workload and relate indexed columns,
    free space, fillfactor, vacuum, and old snapshots.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-ops-01 Exercise 9, read from `pro_ops_lab.events`, and `pg_catalog.pg_stat_user_tables`. Build the answer toward `relname`, `n_tup_upd`, `n_tup_hot_upd`, `n_dead_tup`, `last_autovacuum`, and `last_autoanalyze`; keep `relname` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-ops-01 Exercise 9, expected output: one row per `relname`. The final columns are `relname`, `n_tup_upd`, `n_tup_hot_upd`, `n_dead_tup`, `last_autovacuum`, and `last_autoanalyze`.
+   **Verify:** For sql-ops-01 Exercise 9, run an anti-check that counts rows where NOT ((e.event_id <= 100) OR (s.schemaname = 'pro_ops_lab' AND s.relname = 'events')); require unique `relname` where the expected grain is one row per key and confirm the projected `relname`, `n_tup_upd`, `n_tup_hot_upd`, `n_dead_tup`, `last_autovacuum`, and `last_autoanalyze` against `pro_ops_lab.events`, and `pg_catalog.pg_stat_user_tables`. Insert rows immediately before, exactly at, and immediately after `e.event_id <= 100`; identify which rows pass each inclusive or exclusive comparison.
 10. **Partition indexes:** account for pruning, local indexes, statistics,
     attach/detach, and global uniqueness limitations.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-ops-01 Exercise 10, read from `pro_ops_lab.events`, `generate_series`, and `pg_catalog.pg_index`. Build the answer toward `partition_indexes_answer`; keep `partition_indexes_answer` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-ops-01 Exercise 10, expected output: one row per `partition_indexes_answer`. The final columns are `partition_indexes_answer`.
+   **Verify:** For sql-ops-01 Exercise 10, reselect the returned keys directly from the source; require unique `partition_indexes_answer` where the expected grain is one row per key and confirm the projected `partition_indexes_answer` against `pro_ops_lab.events`, `generate_series`, and `pg_catalog.pg_index`. Add duplicate source candidates for `partition_indexes_answer`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 11. **Plan instrumentation:** distinguish execution and overhead across
     `EXPLAIN` options, especially for writes and cache state.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-ops-01 Exercise 11, run the underlying read-only query over `pro_ops_lab.events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+   **Expected result/shape:** For sql-ops-01 Exercise 11, expected output: one row per `explain`. The final columns are `explain`.
+   **Verify:** For sql-ops-01 Exercise 11, run the underlying query without `EXPLAIN` and preserve its `explain` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 12. **Maintenance scorecard:** define owners, budgets, cadence, escalation, and
     evidence for growth, health, waits, lag, and slow queries.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-ops-01 Exercise 12, read from the inline `VALUES` fixture. Build the answer toward `signal`, `evidence_source`, and `owner`; keep `signal` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-ops-01 Exercise 12, expected output: one row per `signal`. The final columns are `signal`, `evidence_source`, and `owner`. The final order is `signal`.
+   **Verify:** For sql-ops-01 Exercise 12, reselect the returned keys directly from the source; require unique `signal` where the expected grain is one row per key and confirm the projected `signal`, `evidence_source`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `signal`; verify the result gains exactly one row carrying that `signal` value.
 
 ## Self-check
 
@@ -356,11 +359,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-ops-01 — Index Types, Statistics, and Maintenance Lifecycle.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisites: `sql-35`, `sql-types-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md
 - Answer-free learner SQL: sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql
 
-The lesson concepts include Access method, Operator class, Partial index, Expression index, Covering index, BRIN range. First define those terms in plain
+Key terms to teach in context: Access method, Operator class, Partial index, Expression index, Covering index, BRIN range. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -371,11 +374,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-ops-01/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

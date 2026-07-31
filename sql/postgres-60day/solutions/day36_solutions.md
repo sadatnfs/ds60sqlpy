@@ -91,18 +91,13 @@ on Monday under `date_trunc('week', ...)`.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** Pre-aggregation or a differently ordered join pipeline is valid only if it prevents fanout and reconciles to the same scoped control total.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-36 Exercise 1, read from `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`. Compute `week_start`, `country`, and `revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-36 Exercise 1, expected output: one row per observed week-country pair. PostgreSQL weeks begin on Monday under `date_trunc('week',. The final columns are `week_start`, `country`, and `revenue`. The final order is `week_start DESC, revenue DESC`.
+- **Independent verification:** For sql-36 Exercise 1, evaluate each of `revenue` in a separate control `SELECT` over `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-36 Exercise 1, start with the first relation in `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
+- **Clause check:** For sql-36 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`, preserve one row per `country`, and finish with `week_start`, `country`, and `revenue` ordered by `week_start DESC, revenue DESC`.
+- **Alternative/trade-off:** For sql-36 Exercise 1, the chosen form is justified by this lesson-specific rationale: This demonstration is transactional and leaves no materialized view behind. Evaluate another form against the concrete expected result (one row per observed week-country pair. PostgreSQL weeks begin on Monday under `date_trunc('week',) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 2 — Compare base-table and snapshot plans
 
@@ -149,18 +144,13 @@ buffers as well as execution time.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** An alternative physical/object design is valid only if catalog inspection and valid/invalid behavior prove the same invariant.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-36 Exercise 2, run the underlying read-only query over `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+- **Expected result/shape:** For sql-36 Exercise 2, expected output: one row per `country`. The final columns are `week_start`, `country`, and `revenue`.
+- **Independent verification:** For sql-36 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Intermediate relation check:** For sql-36 Exercise 2, start with the first relation in `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
+- **Clause check:** For sql-36 Exercise 2, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare`, preserve one row per `country`, and finish with `week_start`, `country`, and `revenue`.
+- **Alternative/trade-off:** For sql-36 Exercise 2, the chosen form is justified by this lesson-specific rationale: The materialized-view plan should avoid source joins and aggregation. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
+- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
 ## Pitfalls
 
@@ -180,18 +170,13 @@ visible instead of merely described.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-36 Exercise 3, read from `orders`, and `mv_weekly_country_revenue_solution`. Compute `live_total`, and `refreshed_mv_total` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-36 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `live_total`, and `refreshed_mv_total`.
+- **Independent verification:** For sql-36 Exercise 3, evaluate each of `live_total`, and `refreshed_mv_total` in a separate control `SELECT` over `orders`, and `mv_weekly_country_revenue_solution` using `(order_id = (SELECT MIN(order_id) FROM orders))`; require one final row and compare every value. Add one row for which `(order_id = (SELECT MIN(order_id) FROM orders))` is true and one for which it is false; verify only the matching `order_id` value is returned.
+- **Intermediate relation check:** For sql-36 Exercise 3, inspect the source keys that survive `WHERE`.
+- **Clause check:** For sql-36 Exercise 3, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, and `mv_weekly_country_revenue_solution`, preserve exactly one summary row, and finish with `live_total`, and `refreshed_mv_total`.
+- **Alternative/trade-off:** For sql-36 Exercise 3, the chosen form is justified by this lesson-specific rationale: The transaction changes one disposable source row after materialization. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
+- **Edge case:** Add one row for which `(order_id = (SELECT MIN(order_id) FROM orders))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
 ## Exercise 4 — Explain concurrent-refresh eligibility
 
@@ -201,18 +186,13 @@ refresh; concurrent refresh also has transaction restrictions.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-36 Exercise 4, read from `pg_indexes`. Build the answer toward `indexdef`; keep `indexdef` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-36 Exercise 4, expected output: one row per `indexdef`. The final columns are `indexdef`.
+- **Independent verification:** For sql-36 Exercise 4, run an anti-check that counts rows where NOT ((schemaname = 'training' AND tablename = 'mv_weekly_country_revenue_solution')); require unique `indexdef` where the expected grain is one row per key and confirm the projected `indexdef` against `pg_indexes`. Add duplicate source candidates for `indexdef`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+- **Intermediate relation check:** For sql-36 Exercise 4, inspect the source keys that survive `WHERE`.
+- **Clause check:** For sql-36 Exercise 4, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `pg_indexes`, preserve one row per `indexdef`, and finish with `indexdef`.
+- **Alternative/trade-off:** For sql-36 Exercise 4, the chosen form is justified by this lesson-specific rationale: The unique `(week, country)` index supplies a stable row identity required by concurrent refresh. Evaluate another form against the concrete expected result (one row per `indexdef`) and the verification above.
+- **Edge case:** Add duplicate source candidates for `indexdef`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
 ## Exercise 5 — Name the revenue definition
 
@@ -221,18 +201,13 @@ line-item revenue side by side so a consumer must choose a business definition.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** Pre-aggregation or a differently ordered join pipeline is valid only if it prevents fanout and reconciles to the same scoped control total.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-36 Exercise 5, read from `orders`, and `order_items`. Compute `header_revenue`, and `line_revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-36 Exercise 5, expected output: exactly one aggregate summary row. The final columns are `header_revenue`, and `line_revenue`.
+- **Independent verification:** For sql-36 Exercise 5, evaluate each of `header_revenue`, and `line_revenue` in a separate control `SELECT` over `orders`, and `order_items`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-36 Exercise 5, select `order_id` from `orders`, and `order_items` before adding derived columns.
+- **Clause check:** For sql-36 Exercise 5, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `orders`, and `order_items`, preserve exactly one summary row, and finish with `header_revenue`, and `line_revenue`.
+- **Alternative/trade-off:** For sql-36 Exercise 5, the chosen form is justified by this lesson-specific rationale: The view stores order-header totals. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 6 — Materialize missing combinations explicitly
 
@@ -241,15 +216,10 @@ and `COALESCE` then implement a deliberate zero-display policy.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-36 Exercise 6, read from `orders`, `customers`, and `mv_weekly_country_revenue_solution`. Build the answer toward `week`, `country`, and `revenue`; keep `week`, and `country` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-36 Exercise 6, expected output: at most 20 rows keyed by `week`, and `country`. The final columns are `week`, `country`, and `revenue`. The final order is `m.week DESC, c.country`.
+- **Independent verification:** For sql-36 Exercise 6, assert no more than 20 rows, no duplicate `week`, and `country`, and no adjacent pair that violates `m.week DESC, c.country`. Rejoin the returned keys to `orders`, `customers`, and `mv_weekly_country_revenue_solution` to confirm `week`, `country`, and `revenue` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `m.week DESC, c.country`.
+- **Intermediate relation check:** For sql-36 Exercise 6, run `months`, and `countries` one at a time. Record each CTE's row count and `week`, and `country` uniqueness before the next stage uses it.
+- **Clause check:** For sql-36 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, `customers`, and `mv_weekly_country_revenue_solution`, preserve one row per `week`, and `country`, and finish with `week`, `country`, and `revenue` ordered by `m.week DESC, c.country`.
+- **Alternative/trade-off:** For sql-36 Exercise 6, the chosen form is justified by this lesson-specific rationale: A cross-joined week/country spine defines requested combinations. Evaluate another form against the concrete expected result (at most 20 rows keyed by `week`, and `country`) and the verification above.
+- **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `m.week DESC, c.country`.

@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**text normalization, bounded pattern matching, and portable paths**.
+These worked answers demonstrate **text normalization, bounded pattern matching, and portable paths**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 Strings are immutable sequences of Unicode characters. Ordinary string
 methods are the clearest tool for fixed separators and normalization.
@@ -28,275 +27,170 @@ collisions.
 - **path component:** one structured folder or filename element.
 - **suffix:** a final filename extension such as `.csv`.
 
-### Reference pattern 1 — Extract named fields from a bounded filename
+### How to compare an answer
 
-Use `fullmatch` when extra text must be rejected.
+For this lesson's **text normalization, bounded pattern matching, and portable paths** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
+## Exercises 1–2 — Worked answers
+
+### Exercise 1 — worked answer
+
+**Learner contract:** From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. **Constraints:** use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. **Verify:** assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`.
+
+**Reasoning:** Implement this exact contract as written: From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. Constraints: use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`. That connects the answer to text normalization, bounded pattern matching, and portable paths.
 
 ```python
 import re
 
-pattern = re.compile(
-    r"sales_(?P<date>\d{4}-\d{2}-\d{2})_(?P<region>[a-z]+)\.csv"
+EMAIL_SHAPE = re.compile(
+    r"(?<![\w.+-])[A-Za-z0-9._%+-]+@"
+    r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![\w.-])"
 )
-match = pattern.fullmatch("sales_2025-07-01_west.csv")
-match.groupdict() if match else None
+
+
+def extract_emails(text: str) -> list[str]:
+    matches = EMAIL_SHAPE.findall(text)
+    normalized = [match.casefold() for match in matches]
+    return list(dict.fromkeys(normalized))
+
+
+text = (
+    "Contact Ada@Example.com or lin@example.com; "
+    "ADA@example.com replied."
+)
+addresses = extract_emails(text)
+assert addresses == ["ada@example.com", "lin@example.com"]
+assert extract_emails("There is no address in this sentence.") == []
 ```
 
-**Expected observation:** `{'date': '2025-07-01', 'region': 'west'}`. A filename with extra trailing text returns `None`.
+The bounded pattern extracts a useful email *shape* only. Normalization
+and first-seen de-duplication are separate steps, and no claim is made
+that the domain or mailbox exists.
 
-### Reference pattern 2 — Build a path without platform-specific separators
+**Verification evidence:** assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`.
 
-Let `Path` own path joining and filename fields.
-
-```python
-from pathlib import Path
-
-report = Path("artifacts") / "daily sales.csv"
-(report.parent, report.stem, report.suffix, report.with_suffix(".json"))
-```
-
-**Expected observation:** A tuple of `Path` values is displayed. On every supported operating system the components remain meaningful without hard-coded `/` or `\` separators.
-
-## Exercise-by-exercise reasoning map
-
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
-
-**Learner contract:** From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. **Constraints:** use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. **Verify:** include duplicate spellings with different case and text containing no match.
-
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies text normalization, bounded pattern matching, and portable paths.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Prefer `split`, `partition`, `startswith`, and `endswith` for fixed formats; use a parser rather than regex for languages such as HTML.
-
-**Edge case:** Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.
-
-**Solution evidence to inspect:** include duplicate spellings with different case and text containing no match.
-
-### Exercise 2 — reasoning, alternatives, and proof
+### Exercise 2 — worked answer
 
 **Learner contract:** Write `plan_kebab_renames(folder: Path)` that returns source/destination pairs for regular files such as `Quarterly Report.CSV` without renaming them. **Rules:** normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. **Verify:** use a temporary directory and inspect the complete plan before implementing a separate apply step.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies text normalization, bounded pattern matching, and portable paths.
+**Reasoning:** Implement this exact contract as written: Write `plan_kebab_renames(folder: Path)` that returns source/destination pairs for regular files such as `Quarterly Report.CSV` without renaming them. Rules: normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. Keep the prompt's named data and constraints visible in the code, then establish this specific result: use a temporary directory and inspect the complete plan before implementing a separate apply step. That connects the answer to text normalization, bounded pattern matching, and portable paths.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+import re
+from pathlib import Path
+import tempfile
 
-**Alternative:** Prefer `split`, `partition`, `startswith`, and `endswith` for fixed formats; use a parser rather than regex for languages such as HTML.
 
-**Edge case:** Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.
+def kebab_stem(stem: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", stem.lower()).strip("-")
 
-**Solution evidence to inspect:** use a temporary directory and inspect the complete plan before implementing a separate apply step.
 
-### Exercise 3 — reasoning, alternatives, and proof
+def plan_kebab_renames(folder: Path) -> list[tuple[Path, Path]]:
+    files = sorted(
+        (path for path in folder.iterdir() if path.is_file()),
+        key=lambda path: path.name.casefold(),
+    )
+    proposals = [
+        (path, path.with_name(kebab_stem(path.stem) + path.suffix))
+        for path in files
+    ]
+    targets: dict[str, Path] = {}
+    source_names = {path.name.casefold(): path for path in files}
+    for source, target in proposals:
+        key = target.name.casefold()
+        prior = targets.get(key)
+        occupied = source_names.get(key)
+        if prior is not None and prior != source:
+            raise ValueError(f"rename targets collide at {target.name!r}")
+        if occupied is not None and occupied != source:
+            raise ValueError(f"target already exists: {target.name!r}")
+        targets[key] = source
+    return [
+        (source, target)
+        for source, target in proposals
+        if source.name != target.name
+    ]
+
+
+with tempfile.TemporaryDirectory() as temporary:
+    folder = Path(temporary)
+    source = folder / "Quarterly Report.CSV"
+    unchanged = folder / "notes.txt"
+    source.write_text("quarter,value\nQ1,10\n", encoding="utf-8")
+    unchanged.write_text("keep", encoding="utf-8")
+    planned = plan_kebab_renames(folder)
+    assert planned == [(source, folder / "quarterly-report.CSV")]
+    assert source.exists() and unchanged.exists()
+
+    (folder / "A B.txt").write_text("one", encoding="utf-8")
+    (folder / "a-b.TXT").write_text("two", encoding="utf-8")
+    try:
+        plan_kebab_renames(folder)
+    except ValueError as error:
+        assert "collide" in str(error) or "exists" in str(error)
+    else:
+        raise AssertionError("case-normalized collision should fail")
+```
+
+Applying `Path.rename` is a separate, deliberate mutation after this
+complete plan passes collision checks.
+
+**Verification evidence:** use a temporary directory and inspect the complete plan before implementing a separate apply step.
+
+## Exercises 3–7 — Expanded mastery answers
+
+### Exercise 3 — answer contract
 
 **Learner contract:** **Prediction:** Compare `"\n"` with `r"\n"` and predict their lengths and printed representations. **Progressive hint:** A raw string preserves the backslash needed by many regex patterns. **Verify:** Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.
 
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying text normalization, bounded pattern matching, and portable paths.
+**Reasoning:** Predict this named state change before running it: Prediction: Compare `"\n"` with `r"\n"` and predict their lengths and printed representations. Progressive hint: A raw string preserves the backslash needed by many regex patterns. Then compare the prediction with this proof target: Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2. This makes text normalization, bounded pattern matching, and portable paths observable instead of relying on intuition.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.
 
-**Alternative:** Prefer `split`, `partition`, `startswith`, and `endswith` for fixed formats; use a parser rather than regex for languages such as HTML.
-
-**Edge case:** Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.
-
-**Solution evidence to inspect:** Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.
-
-### Exercise 4 — reasoning, alternatives, and proof
+### Exercise 4 — answer contract
 
 **Learner contract:** **Tracing:** Trace named regex groups while parsing `order-2048.csv`; distinguish `group(0)` from the named capture. **Progressive hint:** The whole match and captured subparts are different values. **Verify:** Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match.
 
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the text normalization, bounded pattern matching, and portable paths model is visible.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace named regex groups while parsing `order-2048.csv`; distinguish `group(0)` from the named capture. Progressive hint: The whole match and captured subparts are different values. Record the named value, shape, label, or iterator position needed to establish: Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match. The trace exposes text normalization, bounded pattern matching, and portable paths directly.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match.
 
-**Alternative:** Prefer `split`, `partition`, `startswith`, and `endswith` for fixed formats; use a parser rather than regex for languages such as HTML.
-
-**Edge case:** Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.
-
-**Solution evidence to inspect:** Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match.
-
-### Exercise 5 — reasoning, alternatives, and proof
+### Exercise 5 — answer contract
 
 **Learner contract:** **Implementation:** Implement `parse_report_name(Path)` returning a date and region for names like `sales_2025-07-01_west.csv`, rejecting mismatches. **Progressive hint:** Use `fullmatch` so extra suffix text cannot pass silently. **Verify:** Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies text normalization, bounded pattern matching, and portable paths.
+**Reasoning:** Implement this exact contract as written: Implementation: Implement `parse_report_name(Path)` returning a date and region for names like `sales_2025-07-01_west.csv`, rejecting mismatches. Progressive hint: Use `fullmatch` so extra suffix text cannot pass silently. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected. That connects the answer to text normalization, bounded pattern matching, and portable paths.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.
 
-**Alternative:** Prefer `split`, `partition`, `startswith`, and `endswith` for fixed formats; use a parser rather than regex for languages such as HTML.
-
-**Edge case:** Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.
-
-**Solution evidence to inspect:** Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.
-
-### Exercise 6 — reasoning, alternatives, and proof
+### Exercise 6 — answer contract
 
 **Learner contract:** **Debugging:** Repair a greedy `<.*>` pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. **Progressive hint:** Use a constrained or non-greedy pattern only for a bounded format. **Verify:** Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in text normalization, bounded pattern matching, and portable paths.
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a greedy `<.*>` pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. Progressive hint: Use a constrained or non-greedy pattern only for a bounded format. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser. The diagnosis depends on text normalization, bounded pattern matching, and portable paths.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.
 
-**Alternative:** Prefer `split`, `partition`, `startswith`, and `endswith` for fixed formats; use a parser rather than regex for languages such as HTML.
-
-**Edge case:** Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.
-
-**Solution evidence to inspect:** Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.
-
-### Exercise 7 — reasoning, alternatives, and proof
+### Exercise 7 — answer contract
 
 **Learner contract:** **Edge case and explanation:** Build a rename plan to kebab-case that detects collisions before changing any files, including `A B.txt` and `a-b.txt`. **Progressive hint:** Separate planning/validation from filesystem mutation. **Verify:** Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.
 
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from text normalization, bounded pattern matching, and portable paths.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Build a rename plan to kebab-case that detects collisions before changing any files, including `A B.txt` and `a-b.txt`. Progressive hint: Separate planning/validation from filesystem mutation. Values below, at, and above the named boundary must produce the evidence Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed. Those cases show how text normalization, bounded pattern matching, and portable paths behaves at its edge.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Prefer `split`, `partition`, `startswith`, and `endswith` for fixed formats; use a parser rather than regex for languages such as HTML.
-
-**Edge case:** Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.
-
-**Solution evidence to inspect:** Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-We provide robust, beginner-friendly solutions with careful file handling.
-
-Contents
-- Exercise 1: Extract all emails from a multiline string
-- Exercise 2: Rename files in a directory to kebab-case using pathlib
-
----
-
-Exercise 1 — Extract all emails (unique, lowercased)
-```python
-import re
-from typing import Iterable, Set
-
-EMAIL = re.compile(r"[\w.%-]+@[\w.-]+\.[A-Za-z]{2,}")
-
-def extract_emails(lines: Iterable[str]) -> Set[str]:
-    """Return a set of normalized (lowercased) emails found across lines.
-
-    Uses a compiled regex. Lowercases to normalize case differences.
-    """
-    found: set[str] = set()
-    for line in lines:
-        for m in EMAIL.findall(line):    # 1) find all matches per line
-            found.add(m.lower())         # 2) normalize
-    return found
-
-# Demo
-text = """
-Contact alice@example.com, Bob@Example.com.
-Backup: team@sub.domain.org
-"""
-assert extract_emails(text.splitlines()) == {"alice@example.com","bob@example.com","team@sub.domain.org"}
-```
-Notes
-- The pattern is intentionally simple; real-world email validation is more complex. For production, consider `email.utils` or well-tested libraries.
-
----
-
-Exercise 2 — Rename files to kebab-case
-Goal: Rename files like `Report (Jan).CSV` → `report-jan.csv` in a target directory.
-
-```python
-from pathlib import Path
-import re
-
-_slug_chars = re.compile(r"[^a-z0-9-]+")
-_multi_dash = re.compile(r"-{2,}")
-
-
-def to_kebab(stem: str) -> str:
-    """Convert a filename stem to kebab-case (lowercase a-z0-9-)."""
-    s = stem.lower()                               # 1) normalize case
-    s = s.replace("_", "-").replace(" ", "-")    # 2) unify separators
-    s = _slug_chars.sub("-", s)                    # 3) drop/replace unsafe chars
-    s = _multi_dash.sub("-", s).strip("-")         # 4) collapse dashes, trim edges
-    return s or "file"                              # 5) fallback if empty
-
-
-def rename_dir_to_kebab(dirpath: Path, *, dry_run: bool = True) -> list[tuple[Path, Path]]:
-    """Rename files in dirpath to kebab-case; return list of (old, new) paths.
-
-    - Keeps file extension unchanged
-    - Skips if the target name already exists
-    - dry_run=True prints planned changes without renaming
-    """
-    changes: list[tuple[Path, Path]] = []
-    for p in dirpath.iterdir():
-        if not p.is_file():
-            continue
-        new_stem = to_kebab(p.stem)
-        target = p.with_name(new_stem + p.suffix.lower())
-        if target == p:
-            continue                       # already kebab-case
-        if target.exists():
-            print(f"skip (exists): {target}")
-            continue
-        changes.append((p, target))
-        if dry_run:
-            print(f"DRY-RUN: {p.name} -> {target.name}")
-        else:
-            p.rename(target)
-            print(f"renamed: {p.name} -> {target.name}")
-    return changes
-
-# Demo (dry run)
-# rename_dir_to_kebab(Path('reports'), dry_run=True)
-```
-Safety checklist
-- Use dry-run first to preview
-- Preserve extensions case-insensitively
-- Skip collisions to avoid overwriting existing files
-
----
+**Evidence to locate in the grouped implementation:** Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.
 
 ## Expanded mastery lab solutions
 
 Use ordinary string operations for fixed syntax, regular expressions for patterns, and `pathlib` for portable path semantics.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Escapes and groups
+### Shared implementation for Exercises 3–4 — Escapes and groups
 
 An ordinary `"\n"` is one newline character. The raw `r"\n"` is two characters:
 a backslash and `n`. `group(0)` is the full match; a named group returns only
 its captured portion.
 
-### Practices 3–5 — Parse and plan before mutating paths
+### Shared implementation for Exercises 5–7 — Parse and plan before mutating paths
 
 ```python
 from __future__ import annotations

@@ -152,38 +152,38 @@ LIMIT 50;
 
 -- Exercises
 -- 1. Add dim_country and link customers to it.
---    Inputs: Use only the declared lesson objects (dim_date, dim_customer, dim_product, fact_sales, training.orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-52 Exercise 1, read the target keys from `dim_country`, `training.customers`, `dim_customer`, and `dwh.dim_customer` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+--    Expected result/shape: For sql-52 Exercise 1, expected output: one row per country code in `dim_country`; every customer-dimension version has exactly one `country_sk`. The final columns are `country`. The final order is `country`.
+--    Verify: For sql-52 Exercise 1, materialize the intended `country` target set first; require the command tag/`RETURNING` set to match it, then query `dim_country`, `training.customers`, `dim_customer`, and `dwh.dim_customer` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `country` values in both cases.
+--    Hint ladder, rung 1: For sql-52 Exercise 1, materialize the intended `country` target set first; require the command tag/`RETURNING` set to match it, then query `dim_country`, `training.customers`, `dim_customer`, and `dwh.dim_customer` again and prove rollback or idempotent retry.
 -- 2. Build a second fact table fact_payments linked to dim_date and dim_customer.
---    Inputs: Use only the declared lesson objects (dim_date, dim_customer, dim_product, fact_sales, training.orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-52 Exercise 2, read from `training.payments`, `training.orders`, `dim_date`, and `dim_customer`. Compute `payment_id`, `order_id`, `date_key`, `customer_sk`, `amount`, and `method` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-52 Exercise 2, expected output: one row per source payment with: - `payment_id` as the idempotent fact key; - `order_id` as a degenerate operational reference; - the payment-. The final columns are `payment_id`, `order_id`, `date_key`, `customer_sk`, `amount`, and `method`. The final order is `p.payment_id`.
+--    Verify: For sql-52 Exercise 2, evaluate each of `customer_sk`, and `amount` in a separate control `SELECT` over `training.payments`, `training.orders`, `dim_date`, and `dim_customer`; require one final row and compare every value. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `p.payment_id`.
+--    Hint ladder, rung 1: For sql-52 Exercise 2, start with the first relation in `training.payments`, `training.orders`, `dim_date`, and `dim_customer`; after each join, record total rows and distinct `payment_id` so the exact fanout or loss is visible.
 -- 3. Prediction: identify the grain of fact_sales and explain why order_id alone
 --    cannot be its primary key.
---    Inputs: Use only the declared lesson objects (dim_date, dim_customer, dim_product, fact_sales, training.orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-52 Exercise 3, read from `fact_sales`. Compute `fact_rows`, `orders`, and `distinct_order_items` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-52 Exercise 3, expected output: one row per order line. The final columns are `fact_rows`, `orders`, and `distinct_order_items`.
+--    Verify: For sql-52 Exercise 3, evaluate each of `fact_rows`, `orders`, and `distinct_order_items` in a separate control `SELECT` over `fact_sales`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-52 Exercise 3, select `order_id` from `fact_sales` before adding derived columns.
 -- 4. Construction: add unknown (-1) members to dimensions and route an
 --    intentionally unmatched source key to them during a test load.
---    Inputs: Use only the declared lesson objects (dim_date, dim_customer, dim_product, fact_sales, training.orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-52 Exercise 4, read from `dim_country`, `dim_customer`, and `dim_product`. Build the answer toward `routed_customer_sk`; keep `routed_customer_sk` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-52 Exercise 4, expected output: one row per `routed_customer_sk`. The final columns are `routed_customer_sk`.
+--    Verify: For sql-52 Exercise 4, project `routed_customer_sk` plus the raw source columns from `dim_country`, `dim_customer`, and `dim_product` at each join stage; record row count and distinct `routed_customer_sk`, then assert the final `routed_customer_sk` values match those staged rows without unintended fanout or loss. Add one source row with a new `routed_customer_sk`; verify the result gains exactly one row carrying that `routed_customer_sk` value.
+--    Hint ladder, rung 1: For sql-52 Exercise 4, start with the first relation in `dim_country`, `dim_customer`, and `dim_product`; after each join, record total rows and distinct `routed_customer_sk` so the exact fanout or loss is visible.
 -- 5. Debugging: prove that fact_sales amount reconciles to source line-item
 --    revenue and investigate any row-count or amount difference.
---    Inputs: Use only the declared lesson objects (dim_date, dim_customer, dim_product, fact_sales, training.orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-52 Exercise 5, read from `fact_sales`, and `training.order_items`. Compute `fact_rows`, `source_rows`, `fact_amount`, and `source_amount` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-52 Exercise 5, expected output: exactly one aggregate summary row. The final columns are `fact_rows`, `source_rows`, `fact_amount`, and `source_amount`.
+--    Verify: For sql-52 Exercise 5, evaluate each of `fact_rows`, `source_rows`, `fact_amount`, and `source_amount` in a separate control `SELECT` over `fact_sales`, and `training.order_items`; require one final row and compare every value. Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
+--    Hint ladder, rung 1: For sql-52 Exercise 5, select `order_item_id` from `fact_sales`, and `training.order_items` before adding derived columns.
 -- 6. Edge case: document how a late-arriving payment date outside dim_date's
 --    generated range should fail, extend, or map according to an explicit policy.
---    Inputs: Use only the declared lesson objects (dim_date, dim_customer, dim_product, fact_sales, training.orders) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-52 Exercise 6, read from `training.payments`, and `dim_date`. Build the answer toward `payment_id`, and `date`; keep `payment_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-52 Exercise 6, expected output: one row per `payment_id`. The final columns are `payment_id`, and `date`. The final order is `p.payment_id`.
+--    Verify: For sql-52 Exercise 6, project `payment_id` plus the raw source columns from `training.payments`, and `dim_date` at each join stage; record row count and distinct `payment_id`, then assert the final `payment_id`, and `date` values match those staged rows without unintended fanout or loss. Add one row for which `(d.date_key IS NULL)` is true and one for which it is false; verify only the matching `payment_id` value is returned.
+--    Hint ladder, rung 1: For sql-52 Exercise 6, start with the first relation in `training.payments`, and `dim_date`; after each join, record total rows and distinct `payment_id` so the exact fanout or loss is visible.
 
 COMMIT;

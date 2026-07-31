@@ -77,18 +77,13 @@ and `INSERT=false`.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 1, complete the two-layer reads written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-sec-01 Exercise 1, expected output: a completed the two-layer reads written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`.
+- **Independent verification:** For sql-sec-01 Exercise 1, check the two-layer reads written analysis against `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-sec-01 Exercise 1, check the two-layer reads written analysis against `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`.
+- **Clause check:** For sql-sec-01 Exercise 1, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 1, the chosen form is justified by this lesson-specific rationale: `has_schema_privilege(role, schema, 'USAGE')` and `has_table_privilege(role, table, 'SELECT')` answer different questions. Evaluate another form against the concrete expected result (a completed the two-layer reads written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 2 — Read-only auditor
 
@@ -113,18 +108,13 @@ this SQL lesson.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 2, change only `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` rows.
+- **Expected result/shape:** For sql-sec-01 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `usage`.
+- **Independent verification:** For sql-sec-01 Exercise 2, inspect `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` for `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+- **Intermediate relation check:** For sql-sec-01 Exercise 2, inspect `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` for `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
+- **Clause check:** For sql-sec-01 Exercise 2, the solution actually uses `SELECT`. Read only those operations: begin at `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`, preserve exactly one summary row, and finish with `usage`.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 2, the chosen form is justified by this lesson-specific rationale: The solution creates a NOLOGIN `ds60_sec_auditor`, grants schema `USAGE`, lets the owner's default privileges grant future table `SELECT`, and adds: The auditor sees both seeded rows because the policy delibera. Evaluate another form against the concrete expected result (the requested DDL command tag plus catalog rows and one accepted and one rejected behavior) and the verification above.
+- **Edge case:** Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 
 ## Exercise 3 — Owner-specific default privileges
 
@@ -141,18 +131,13 @@ unchanged by `ALTER DEFAULT PRIVILEGES`; use an explicit `GRANT` for them.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 3, read from `ds60_sec_owner`. Compute `ds60_sec_auditor` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-sec-01 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `ds60_sec_auditor`.
+- **Independent verification:** For sql-sec-01 Exercise 3, evaluate each of `row_count` in a separate control `SELECT` over `ds60_sec_owner`; require one final row and compare every value. Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
+- **Intermediate relation check:** For sql-sec-01 Exercise 3, select `ds60_sec_auditor` from `ds60_sec_owner` before adding derived columns.
+- **Clause check:** For sql-sec-01 Exercise 3, the solution actually uses `SELECT`. Read only those operations: begin at `ds60_sec_owner`, preserve exactly one summary row, and finish with `ds60_sec_auditor`.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 3, the chosen form is justified by this lesson-specific rationale: `audit_notes` is created by `ds60_sec_owner` after: The assertion confirms auditor `SELECT` arrived automatically. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
+- **Edge case:** Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
 
 ## Exercise 4 — Review the definer boundary
 
@@ -177,18 +162,13 @@ status can see rows that the caller cannot.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** An alternative physical/object design is valid only if catalog inspection and valid/invalid behavior prove the same invariant.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 4, complete the definer boundary written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-sec-01 Exercise 4, expected output: a completed the definer boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `document_count_for_tenant`, `search_path`, and `current_user`.
+- **Independent verification:** For sql-sec-01 Exercise 4, check the definer boundary written analysis against `document_count_for_tenant`, `search_path`, and `current_user`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-sec-01 Exercise 4, check the definer boundary written analysis against `document_count_for_tenant`, `search_path`, and `current_user`.
+- **Clause check:** For sql-sec-01 Exercise 4, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 4, the chosen form is justified by this lesson-specific rationale: The solution's `document_count_for_tenant(text)` demonstrates minimum controls: - a NOLOGIN owner with narrowly managed membership; - `SET search_path = pg_catalog`; - a fully qualified relation; - a bounded ag. Evaluate another form against the concrete expected result (a completed the definer boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 5 — RLS bypass cases
 
@@ -205,18 +185,13 @@ tenant-policy test identity.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 5, complete the rls bypass written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-sec-01 Exercise 5, expected output: a completed the rls bypass written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `bypassrls`.
+- **Independent verification:** For sql-sec-01 Exercise 5, check the rls bypass written analysis against `bypassrls`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-sec-01 Exercise 5, check the rls bypass written analysis against `bypassrls`.
+- **Clause check:** For sql-sec-01 Exercise 5, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 5, the chosen form is justified by this lesson-specific rationale: - An ordinary table owner normally bypasses RLS. Evaluate another form against the concrete expected result (a completed the rls bypass written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 6 — Effective-access inventory
 
@@ -232,18 +207,13 @@ SUPERUSER or BYPASSRLS can dominate ordinary grants.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 6, complete the effective access written analysis and support its claims with read-only evidence from `pg_auth_members`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-sec-01 Exercise 6, expected output: a completed the effective access written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `has__privilege`, `aclexplode`, `insert`, and `usage`.
+- **Independent verification:** For sql-sec-01 Exercise 6, check the effective access written analysis against `has__privilege`, `aclexplode`, `insert`, and `usage`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-sec-01 Exercise 6, check the effective access written analysis against `has__privilege`, `aclexplode`, `insert`, and `usage`.
+- **Clause check:** For sql-sec-01 Exercise 6, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_auth_members` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use `has__privilege` functions for the final yes/no matrix because they account for ownership, membership inheritance, and PUBLIC grants. Evaluate another form against the concrete expected result (a completed the effective access written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 7 — Session and execution identity
 
@@ -259,18 +229,13 @@ action appear to come from its owner.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 7, complete the identity context written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-sec-01 Exercise 7, expected output: a completed the identity context written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `session_user`, and `current_user`.
+- **Independent verification:** For sql-sec-01 Exercise 7, check the identity context written analysis against `session_user`, and `current_user`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-sec-01 Exercise 7, check the identity context written analysis against `session_user`, and `current_user`.
+- **Clause check:** For sql-sec-01 Exercise 7, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 7, the chosen form is justified by this lesson-specific rationale: `SESSION_USER` is the authenticated session identity. Evaluate another form against the concrete expected result (a completed the identity context written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 8 — Fail-closed tenant context
 
@@ -286,18 +251,13 @@ cross-tenant SELECT, INSERT, UPDATE, and DELETE.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 8, complete the fail-closed tenancy written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-sec-01 Exercise 8, expected output: a completed the fail-closed tenancy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+- **Independent verification:** For sql-sec-01 Exercise 8, check the fail-closed tenancy written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-sec-01 Exercise 8, check the fail-closed tenancy written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+- **Clause check:** For sql-sec-01 Exercise 8, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 8, the chosen form is justified by this lesson-specific rationale: The safe policy maps only exact allowed identities/context values and returns NULL/false for everything else. Evaluate another form against the concrete expected result (a completed the fail-closed tenancy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 9 — A narrow writer
 
@@ -313,18 +273,13 @@ designed API; test the actual statement shape.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 9, complete the narrow writer written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-sec-01 Exercise 9, expected output: a completed the narrow writer written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `usage`, `insert`, and `returning`.
+- **Independent verification:** For sql-sec-01 Exercise 9, check the narrow writer written analysis against `usage`, `insert`, and `returning`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-sec-01 Exercise 9, check the narrow writer written analysis against `usage`, `insert`, and `returning`.
+- **Clause check:** For sql-sec-01 Exercise 9, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 9, the chosen form is justified by this lesson-specific rationale: Grant schema `USAGE`, `INSERT` on only permitted columns, and sequence `USAGE` when an identity sequence requires it. Evaluate another form against the concrete expected result (a completed the narrow writer written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 10 — Offboarding and emergency revocation
 
@@ -340,18 +295,13 @@ changes. Cluster-wide commands remain reviewed runbook steps, not lesson SQL.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-sec-01 Exercise 10, complete the revocation runbook written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-sec-01 Exercise 10, expected output: a completed the revocation runbook written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+- **Independent verification:** For sql-sec-01 Exercise 10, check the revocation runbook written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-sec-01 Exercise 10, check the revocation runbook written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+- **Clause check:** For sql-sec-01 Exercise 10, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-sec-01 Exercise 10, the chosen form is justified by this lesson-specific rationale: First disable login/rotate the external credential and terminate or drain approved sessions according to incident authority. Evaluate another form against the concrete expected result (a completed the revocation runbook written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Edge cases and alternatives
 

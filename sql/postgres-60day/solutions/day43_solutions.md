@@ -98,18 +98,13 @@ table and run `\copy customers_restore_stage FROM ...`.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-43 Exercise 1, read from `training.customers`. Build the answer toward `staged_rows`, and `customers_restore_stage`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-43 Exercise 1, expected output: CSV rows are streamed to the client, and `staged_rows` equals the number of US customers. A real import would create an explicit staging table and run `\copy customers_restore_stage FROM. The final columns are `staged_rows`, and `customers_restore_stage`.
+- **Independent verification:** For sql-43 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `staged_rows`, and `customers_restore_stage` against `training.customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Intermediate relation check:** For sql-43 Exercise 1, inspect the source keys that survive `WHERE`.
+- **Clause check:** For sql-43 Exercise 1, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `training.customers`, preserve one row per `customer_id`, and finish with `staged_rows`, and `customers_restore_stage`.
+- **Alternative/trade-off:** For sql-43 Exercise 1, the chosen form is justified by this lesson-specific rationale: In interactive `psql`, `\copy` writes on the client machine: Replace that filename with a path the learner owns. Evaluate another form against the concrete expected result (CSV rows are streamed to the client, and `staged_rows` equals the number of US customers. A real import would create an explicit staging table and run `\copy customers_restore_stage FROM) and the verification above.
+- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
 ## Exercise 2 — Idempotent restore with conflict handling
 
@@ -145,18 +140,13 @@ data unchanged.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-43 Exercise 2, use `customers`, and `customers_restore_stage` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+- **Expected result/shape:** For sql-43 Exercise 2, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `full_name`, `email`, `country`, `created_at`, `segment`, and `attributes`.
+- **Independent verification:** For sql-43 Exercise 2, restore into an isolated target and reconcile `customers`, and `customers_restore_stage` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+- **Intermediate relation check:** For sql-43 Exercise 2, restore into an isolated target and reconcile `customers`, and `customers_restore_stage` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
+- **Clause check:** For sql-43 Exercise 2, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `customers`, and `customers_restore_stage`, preserve one row per `country`, and `segment`, and finish with `full_name`, `email`, `country`, `created_at`, `segment`, and `attributes`.
+- **Alternative/trade-off:** For sql-43 Exercise 2, the chosen form is justified by this lesson-specific rationale: Email is the current schema's unique business key for this exercise. Evaluate another form against the concrete expected result (a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record) and the verification above.
+- **Edge case:** Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
 
 ## Reasoning, safety, and pitfalls
 
@@ -177,18 +167,13 @@ workflow.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-43 Exercise 3, complete the explain server-side copy versus client-side copy written analysis and support its claims with read-only evidence from `customers`, `customers_stg`, and `customers_restore_stage`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-43 Exercise 3, expected output: a completed the explain server-side copy versus client-side copy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `copy`.
+- **Independent verification:** For sql-43 Exercise 3, check the explain server-side copy versus client-side copy written analysis against `copy`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-43 Exercise 3, check the explain server-side copy versus client-side copy written analysis against `copy`.
+- **Clause check:** For sql-43 Exercise 3, the solution actually uses `FROM`. Read only those operations: begin at `customers`, `customers_stg`, and `customers_restore_stage`, preserve one row per `customer_id`, and finish with `copy`.
+- **Alternative/trade-off:** For sql-43 Exercise 3, the chosen form is justified by this lesson-specific rationale: Server-side `COPY` accesses the database server's filesystem. Evaluate another form against the concrete expected result (a completed the explain server-side copy versus client-side copy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 4 — Build a manifest
 
@@ -197,18 +182,13 @@ automation should also hash the exported file outside SQL.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-43 Exercise 4, read from `customers`. Build the answer toward `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-43 Exercise 4, expected output: one row per `customer_id`. The final columns are `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`.
+- **Independent verification:** For sql-43 Exercise 4, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Intermediate relation check:** For sql-43 Exercise 4, select `customer_id` from `customers` before adding derived columns.
+- **Clause check:** For sql-43 Exercise 4, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`.
+- **Alternative/trade-off:** For sql-43 Exercise 4, the chosen form is justified by this lesson-specific rationale: The manifest records table, count, key range, and observation time. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
+- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
 ## Exercise 5 — Deduplicate deterministically
 
@@ -217,18 +197,13 @@ tie-break policy. Upsert never receives arbitrary duplicate winners.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-43 Exercise 5, read from `customers_restore_stage`. Build the answer toward `full_name`, `email`, and `country`; keep `country` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-43 Exercise 5, expected output: one row per `country`. The final columns are `full_name`, `email`, and `country`. The final order is `email`.
+- **Independent verification:** For sql-43 Exercise 5, run an anti-check that counts rows where NOT ((winner_rank = 1)); require unique `country` where the expected grain is one row per key and confirm the projected `full_name`, `email`, and `country` against `customers_restore_stage`. Add duplicate source candidates for `country`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+- **Intermediate relation check:** For sql-43 Exercise 5, run `staged_duplicates` one at a time. Record each CTE's row count and `country` uniqueness before the next stage uses it.
+- **Clause check:** For sql-43 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers_restore_stage`, preserve one row per `country`, and finish with `full_name`, `email`, and `country` ordered by `email`.
+- **Alternative/trade-off:** For sql-43 Exercise 5, the chosen form is justified by this lesson-specific rationale: `ROW_NUMBER` partitions by normalized email and orders by an explicit newest/ tie-break policy. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
+- **Edge case:** Add duplicate source candidates for `country`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
 ## Exercise 6 — Compare NULL safely
 
@@ -237,15 +212,10 @@ therefore reports real source/restore differences without UNKNOWN results.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-43 Exercise 6, use `customers_restore_stage`, `customers`, `c.country`, and `c.segment` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+- **Expected result/shape:** For sql-43 Exercise 6, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `email`, `staged_name`, and `restored_name`. The final order is `s.email`.
+- **Independent verification:** For sql-43 Exercise 6, restore into an isolated target and reconcile `customers_restore_stage`, `customers`, `c.country`, and `c.segment` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+- **Intermediate relation check:** For sql-43 Exercise 6, start with the first relation in `customers_restore_stage`, `customers`, `c.country`, and `c.segment`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-43 Exercise 6, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers_restore_stage`, `customers`, `c.country`, and `c.segment`, preserve one row per `customer_id`, and finish with `email`, `staged_name`, and `restored_name` ordered by `s.email`.
+- **Alternative/trade-off:** For sql-43 Exercise 6, the chosen form is justified by this lesson-specific rationale: `IS DISTINCT FROM` treats two NULLs as equal and one NULL as different. Evaluate another form against the concrete expected result (a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record) and the verification above.
+- **Edge case:** Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.

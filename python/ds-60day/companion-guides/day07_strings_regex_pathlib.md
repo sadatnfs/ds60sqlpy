@@ -18,10 +18,6 @@ By the end of this lesson, you can:
 
 Complete Day 6 (`python-06`): lists, sets, dictionaries, and iteration.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -208,7 +204,7 @@ result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
 1. From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. **Constraints:** use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation.
-   **Verify:** include duplicate spellings with different case and text containing no match.
+   **Verify:** assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`.
 
 2. Write `plan_kebab_renames(folder: Path)` that returns source/destination pairs for regular files such as `Quarterly Report.CSV` without renaming them. **Rules:** normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions.
    **Verify:** use a temporary directory and inspect the complete plan before implementing a separate apply step.
@@ -276,7 +272,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-07`
-(Day 7 — Strings, Regular Expressions, and `pathlib`). I am a complete beginner. Emphasize text normalization, bounded pattern matching, and portable paths.
+(Day 7 — Strings, Regular Expressions, and `pathlib`). Direct catalog prerequisites: `python-06`.
+I have completed the direct prerequisites: `python-06`. Emphasize text normalization, bounded pattern matching, and portable paths.
 Read `python/ds-60day/companion-guides/day07_strings_regex_pathlib.md` and use the learner notebook
 `python/ds-60day/notebooks/day07_strings_regex_pathlib.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

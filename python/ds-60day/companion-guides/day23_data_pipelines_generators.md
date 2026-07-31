@@ -20,10 +20,6 @@ By the end of this lesson, you can:
 Complete Day 22 (`python-22`), generators from Day 4 (`python-04`), and file I/O
 from Day 8 (`python-08`).
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -202,7 +198,6 @@ of them as blank-code prompts:
 ```python
 from collections.abc import Iterable, Iterator
 
-
 def parsed_integers(lines: Iterable[str]) -> Iterator[int]:
     for line_number, raw in enumerate(lines, start=1):
         text = raw.strip()
@@ -212,7 +207,6 @@ def parsed_integers(lines: Iterable[str]) -> Iterator[int]:
             yield int(text)
         except ValueError as exc:
             raise ValueError(f"line {line_number}: expected integer") from exc
-
 
 result = list(parsed_integers(["10\n", "\n", "20\n"]))
 ```
@@ -296,7 +290,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-23`
-(Day 23 — Streaming Data Pipelines and Generators). I am a complete beginner. Emphasize lazy, composable data-pipeline stages with explicit resource and error policy.
+(Day 23 — Streaming Data Pipelines and Generators). Direct catalog prerequisites: `python-22`.
+I have completed the direct prerequisites: `python-22`. Emphasize lazy, composable data-pipeline stages with explicit resource and error policy.
 Read `python/ds-60day/companion-guides/day23_data_pipelines_generators.md` and use the learner notebook
 `python/ds-60day/notebooks/day23_data_pipelines_generators.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

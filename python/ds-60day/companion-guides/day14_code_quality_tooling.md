@@ -20,10 +20,6 @@ By the end of this lesson, you can:
 Complete Day 13 (`python-13`), Day 10 testing (`python-10`), and Day 5 type hints
 (`python-05`).
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -243,7 +239,7 @@ code; these extend rather than replace the original practice above.
    **Verify:** Create a four-row matrix mapping each defect to formatter, linter, type checker, or test; run the tools and record which predictions were confirmed.
 4. **Tracing:** Trace type narrowing for `str | None` through an explicit `is None` branch and state the type in each path.
    **Progressive hint:** A type checker follows control-flow evidence.
-   **Verify:** Use `reveal_type` or equivalent diagnostics in both branches; confirm the non-None branch narrows to `str` and the absence branch cannot call string methods.
+   **Verify:** Capture `reveal_type` or equivalent type-checker output in both branches; assert the non-None branch reports `str` and the absence branch reports an error for a string-method call.
 5. **Implementation:** Refactor an untyped file loader into a typed function using `Path`, a context manager, UTF-8, and a validated return shape.
    **Progressive hint:** Boundary validation can replace an unhelpfully broad `Any`.
    **Verify:** Type-check the loader, then test valid UTF-8 input plus missing column, invalid field type, and missing path boundaries.
@@ -293,7 +289,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-14`
-(Day 14 — Code Quality with Ruff, mypy, and pytest). I am a complete beginner. Emphasize automated formatting, linting, and static type feedback.
+(Day 14 — Code Quality with Ruff, mypy, and pytest). Direct catalog prerequisites: `python-13`.
+I have completed the direct prerequisites: `python-13`. Emphasize automated formatting, linting, and static type feedback.
 Read `python/ds-60day/companion-guides/day14_code_quality_tooling.md` and use the learner notebook
 `python/ds-60day/notebooks/day14_code_quality_tooling.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

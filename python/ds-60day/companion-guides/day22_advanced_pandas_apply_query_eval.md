@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 21 (`python-21`) and Day 19 grouping (`python-19`).
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -222,7 +218,7 @@ assertion or inspection and explain what it proves.
 
 1. Find one row-wise `apply(axis=1)` in a supplied example and replace it with column arithmetic, string methods, mapping, masks, `np.select`, or group transform as appropriate.
    **Expected behavior:** values and index match the original for normal and missing inputs. **Constraints:** do not optimize by changing the contract.
-   **Verify:** use `pd.testing` for equality and measure repeated execution on representative data.
+   **Verify:** use `pd.testing` to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.
 
 2. Convert a repeated string column to categorical only after profiling. **Evidence:** record row count, unique count, object memory, categorical memory, and the category levels.
    **Expected behavior:** keep the categorical version only if it reduces memory for this data.
@@ -289,7 +285,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-22`
-(Day 22 — Advanced pandas: Vectorization, `query`, and Categoricals). I am a complete beginner. Emphasize pandas vectorization, expression APIs, and memory-aware categoricals.
+(Day 22 — Advanced pandas: Vectorization, `query`, and Categoricals). Direct catalog prerequisites: `python-21`.
+I have completed the direct prerequisites: `python-21`. Emphasize pandas vectorization, expression APIs, and memory-aware categoricals.
 Read `python/ds-60day/companion-guides/day22_advanced_pandas_apply_query_eval.md` and use the learner notebook
 `python/ds-60day/notebooks/day22_advanced_pandas_apply_query_eval.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

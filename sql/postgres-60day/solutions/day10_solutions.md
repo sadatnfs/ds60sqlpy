@@ -112,18 +112,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 1 must make “Query writing: Materialize category net revenue into a temporary table with INSERT ... SELECT” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `oi`, `p`, `revenue`, `insert`.
-- **Independent verification:** For Exercise 1, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `oi`, `p`, `revenue`, `insert`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 1: Query writing Prompt: Materialize category net revenue into a temporary table with INSERT ... SELECT. Why: Declare the temporary schema and aggregate source rows before inserting. Expected: One temporary row per product category. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - CREATE TEMP: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable. - INSERT INTO: adds rows to the named target; an explicit column list prevents accidental position-based mistakes. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - JOIN ... ON: combines relations and may multiply rows; the match predicate and each input's grain must agree. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic. - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-10 Exercise 1, read the target keys from `exercise_category_revenue`, `order_items`, and `products` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-10 Exercise 1, expected output: One temporary row per product category. The final columns are `category`. The final order is `revenue DESC, category`.
+- **Independent verification:** For sql-10 Exercise 1, materialize the intended `category` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_category_revenue`, `order_items`, and `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.
+- **Intermediate relation check:** For sql-10 Exercise 1, start with the first relation in `exercise_category_revenue`, `order_items`, and `products`; after each join, record total rows and distinct `category` so the exact fanout or loss is visible.
+- **Clause check:** For sql-10 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `exercise_category_revenue`, `order_items`, and `products`, preserve one row per `category`, and finish with `category` ordered by `revenue DESC, category`.
+- **Alternative/trade-off:** For sql-10 Exercise 1, the chosen form is justified by this lesson-specific rationale: Declare the temporary schema and aggregate source rows before inserting. Evaluate another form against the concrete expected result (One temporary row per product category) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.
 
 ## Exercise 2 — Query writing
 
@@ -161,18 +156,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Give Sales and Engineering employees a 5% demonstration raise and return affected rows” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `e`, `d`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 2, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `employees`, `departments`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 2: Query writing Prompt: Give Sales and Engineering employees a 5% demonstration raise and return affected rows. Why: Select departments by key, round exact numeric salary, and inspect RETURNING. Expected: Affected employee rows only; no change persists. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - UPDATE: changes only the target rows selected by its predicate; preview that population before executing. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - RETURNING: shows the rows changed by DML, providing immediate evidence of the affected population. - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-10 Exercise 2, read the target keys from `employees`, and `departments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-10 Exercise 2, expected output: Affected employee rows only; no change persists. The final columns are `returning`, `update`, `from`, and `where`.
+- **Independent verification:** For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.
+- **Intermediate relation check:** For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry.
+- **Clause check:** For sql-10 Exercise 2, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `RETURNING`. Read only those operations: begin at `employees`, and `departments`, preserve one row per `employee_id`, and finish with `returning`, `update`, `from`, and `where`.
+- **Alternative/trade-off:** For sql-10 Exercise 2, the chosen form is justified by this lesson-specific rationale: Select departments by key, round exact numeric salary, and inspect `RETURNING`. Evaluate another form against the concrete expected result (Affected employee rows only; no change persists) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.
 
 ## Exercise 3 — Query writing
 
@@ -210,18 +200,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Delete orders older than one year only when no payment exists, returning candidate keys” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `o`, `p`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 3, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `payments`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 3: Query writing Prompt: Delete orders older than one year only when no payment exists, returning candidate keys. Why: Use correlated NOT EXISTS; foreign-key cascades remain rollback-protected. Expected: Deleted-candidate order rows, then fully restored state. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - DELETE FROM: removes only the predicate-matched rows; the lesson's transaction wrapper makes the example reversible. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - RETURNING: shows the rows changed by DML, providing immediate evidence of the affected population. - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-10 Exercise 3, read the target keys from `orders`, and `payments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-10 Exercise 3, expected output: Deleted-candidate order rows, then fully restored state. The final columns are `from`, `where`, and `returning`.
+- **Independent verification:** For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
+- **Intermediate relation check:** For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry.
+- **Clause check:** For sql-10 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `RETURNING`. Read only those operations: begin at `orders`, and `payments`, preserve one row per `order_id`, and finish with `from`, `where`, and `returning`.
+- **Alternative/trade-off:** For sql-10 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected. Evaluate another form against the concrete expected result (Deleted-candidate order rows, then fully restored state) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
 
 ## Exercise 4 — Prediction
 
@@ -268,18 +253,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 4 must make “Prediction: Run an upsert twice against a temporary key-value table and prove only one row exists for the key” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`.
-- **Independent verification:** For Exercise 4, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 4: Prediction Prompt: Run an upsert twice against a temporary key-value table and prove only one row exists for the key. Why: A primary key supplies the conflict target; the second statement updates rather than inserts. Expected: One row for sourcea with the second value. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - CREATE TEMP: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable. - INSERT INTO: adds rows to the named target; an explicit column list prevents accidental position-based mistakes. - UPDATE: changes only the target rows selected by its predicate; preview that population before executing. - VALUES: constructs a small relation explicitly, which makes examples and expected cardinality inspectable. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic. - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-10 Exercise 4, read the target keys from `exercise_feed` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-10 Exercise 4, expected output: One row for `source_a` with the second value. The final columns are `source_key`, and `source_value`. The final order is `source_key`.
+- **Independent verification:** For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.
+- **Intermediate relation check:** For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry.
+- **Clause check:** For sql-10 Exercise 4, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `exercise_feed`, preserve one row per `source_key`, and finish with `source_key`, and `source_value` ordered by `source_key`.
+- **Alternative/trade-off:** For sql-10 Exercise 4, the chosen form is justified by this lesson-specific rationale: A primary key supplies the conflict target; the second statement updates rather than inserts. Evaluate another form against the concrete expected result (One row for `source_a` with the second value) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.
 
 ## Exercise 5 — Debugging
 
@@ -331,18 +311,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 5 must make “Debugging: Preview and update a bounded product set while reconciling selected and returned key counts” observable through the exact DDL/DML command tag plus one row per product or product grouping requested; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `p`, `candidate`, `candidate_count`, `updated_count`.
-- **Independent verification:** For Exercise 5, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `p`, `candidate`, `candidate_count`, `updated_count`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 5: Debugging Prompt: Preview and update a bounded product set while reconciling selected and returned key counts. Why: Store candidate keys in a temporary table and update only through that reviewed set. Expected: One summary row with equal candidate and updated counts. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - WITH: names an intermediate relation so its grain can be checked before later joins or aggregation. - CREATE TEMP: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable. - UPDATE: changes only the target rows selected by its predicate; preview that population before executing. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic. - LIMIT: is applied after ordering and is meaningful only when the query first defines which rows come first. - RETURNING: shows the rows changed by DML, providing immediate evidence of the affected population. - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-10 Exercise 5, read the target keys from `products`, and `exercise_product_candidates` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-10 Exercise 5, expected output: One summary row with equal candidate and updated counts. The final columns are `product_id`. The final order is `p.product_id`.
+- **Independent verification:** For sql-10 Exercise 5, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products`, and `exercise_product_candidates` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
+- **Intermediate relation check:** For sql-10 Exercise 5, run `updated` one at a time. Record each CTE's row count and `product_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-10 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, `ORDER BY`, `LIMIT`, and `RETURNING`. Read only those operations: begin at `products`, and `exercise_product_candidates`, preserve one row per `product_id`, and finish with `product_id` ordered by `p.product_id`.
+- **Alternative/trade-off:** For sql-10 Exercise 5, the chosen form is justified by this lesson-specific rationale: Store candidate keys in a temporary table and update only through that reviewed set. Evaluate another form against the concrete expected result (One summary row with equal candidate and updated counts) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
 
 ## Exercise 6 — Extension
 
@@ -393,18 +368,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 6 must make “Extension: Stage product prices and update only rows whose incoming price is nonnegative and actually differs” observable through the exact DDL/DML command tag plus one row per product or product grouping requested; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `p`, `stage`.
-- **Independent verification:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `p`, `stage`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 6: Extension Prompt: Stage product prices and update only rows whose incoming price is nonnegative and actually differs. Why: Use UPDATE ... FROM, validate the stage predicate, and compare with IS DISTINCT FROM. Expected: Returned rows only for valid changed products. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - CREATE TEMP: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable. - INSERT INTO: adds rows to the named target; an explicit column list prevents accidental position-based mistakes. - UPDATE: changes only the target rows selected by its predicate; preview that population before executing. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic. - LIMIT: is applied after ordering and is meaningful only when the query first defines which rows come first. - RETURNING: shows the rows changed by DML, providing immediate evidence of the affected population. - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-10 Exercise 6, read the target keys from `exercise_price_stage`, `products`, and `stage.new_price` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are `product_id`. The final order is `p.product_id`.
+- **Independent verification:** For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
+- **Intermediate relation check:** For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry.
+- **Clause check:** For sql-10 Exercise 6, the solution actually uses `FROM`, `WHERE`, `SELECT`, `ORDER BY`, `LIMIT`, and `RETURNING`. Read only those operations: begin at `exercise_price_stage`, `products`, and `stage.new_price`, preserve one row per `product_id`, and finish with `product_id` ordered by `p.product_id`.
+- **Alternative/trade-off:** For sql-10 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`. Evaluate another form against the concrete expected result (Returned rows only for valid changed products) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
 
 ## Final self-check
 

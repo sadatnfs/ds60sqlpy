@@ -102,18 +102,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per order with sequence starting at one per customer.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-17 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `recency_number`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-17 Exercise 1, expected output: One row per order with sequence starting at one per customer. The final columns are `order_id`, `customer_id`, `order_date`, and `recency_number`. The final order is `o.customer_id, recency_number`.
+- **Independent verification:** For sql-17 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, then verify output keys remain `order_id`. Give two rows the same `o.customer_id` value and different `recency_number` values; verify `o.customer_id, recency_number` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-17 Exercise 1, inspect one window partition before projecting; then check `o.customer_id, recency_number` before applying the row cap.
+- **Clause check:** For sql-17 Exercise 1, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, and `recency_number` ordered by `o.customer_id, recency_number`.
+- **Alternative/trade-off:** For sql-17 Exercise 1, the chosen form is justified by this lesson-specific rationale: Partition by customer and use order date plus order ID as a unique descending order. Evaluate another form against the concrete expected result (One row per order with sequence starting at one per customer) and the verification above.
+- **Edge case:** Give two rows the same `o.customer_id` value and different `recency_number` values; verify `o.customer_id, recency_number` produces the intended rank and display order.
 
 ## Exercise 2 — Query writing
 
@@ -151,18 +146,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per product with two rank semantics.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-17 Exercise 2, read from `products`. Build the answer toward `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`; keep `product_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-17 Exercise 2, expected output: One row per product with two rank semantics. The final columns are `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`. The final order is `p.category, p.price DESC, p.product_id`.
+- **Independent verification:** For sql-17 Exercise 2, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `price_rank`, and `dense_price_rank`, then verify output keys remain `product_id`. Give two rows the same `p.category` value and different `p.product_id` values; verify `p.category, p.price DESC, p.product_id` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-17 Exercise 2, inspect one window partition before projecting; then check `p.category, p.price DESC, p.product_id` before applying the row cap.
+- **Clause check:** For sql-17 Exercise 2, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank` ordered by `p.category, p.price DESC, p.product_id`.
+- **Alternative/trade-off:** For sql-17 Exercise 2, the chosen form is justified by this lesson-specific rationale: Rank only on price so equal prices tie; order the final display by product ID. Evaluate another form against the concrete expected result (One row per product with two rank semantics) and the verification above.
+- **Edge case:** Give two rows the same `p.category` value and different `p.product_id` values; verify `p.category, p.price DESC, p.product_id` produces the intended rank and display order.
 
 ## Exercise 3 — Query writing
 
@@ -206,18 +196,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** At least three price levels per category where available.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-17 Exercise 3, read from `products`. Build the answer toward `product_id`, `name`, `category`, `price`, and `price_rank`; keep `product_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-17 Exercise 3, expected output: At least three price levels per category where available. The final columns are `product_id`, `name`, `category`, `price`, and `price_rank`. The final order is `category, price_rank, product_id`.
+- **Independent verification:** For sql-17 Exercise 3, run an anti-check that counts rows where NOT ((price_rank <= 3)); require unique `product_id` where the expected grain is one row per key and confirm the projected `product_id`, `name`, `category`, `price`, and `price_rank` against `products`. Give two rows the same `category` value and different `product_id` values; verify `category, price_rank, product_id` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-17 Exercise 3, run `ranked` one at a time. Record each CTE's row count and `product_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-17 Exercise 3, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, `name`, `category`, `price`, and `price_rank` ordered by `category, price_rank, product_id`.
+- **Alternative/trade-off:** For sql-17 Exercise 3, the chosen form is justified by this lesson-specific rationale: Compute `DENSE_RANK` in a CTE and filter outside. Evaluate another form against the concrete expected result (At least three price levels per category where available) and the verification above.
+- **Edge case:** Give two rows the same `category` value and different `product_id` values; verify `category, price_rank, product_id` produces the intended rank and display order.
 
 ## Exercise 4 — Prediction
 
@@ -251,18 +236,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-17 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value`; keep `sample_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-17 Exercise 4, expected output: Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2. The final columns are `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value`. The final order is `sample_id`.
+- **Independent verification:** For sql-17 Exercise 4, choose one complete partition from the inline `VALUES` fixture; hand-calculate its first, middle, and final window values for `score`, `row_number_value`, `rank_value`, and `dense_rank_value`, then verify output keys remain `sample_id`. Give two rows the same `sample_id` value and different ``sample_id`` values; verify `sample_id` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-17 Exercise 4, inspect one window partition before projecting; then check `sample_id` before applying the row cap.
+- **Clause check:** For sql-17 Exercise 4, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `sample_id`, and finish with `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value` ordered by `sample_id`.
+- **Alternative/trade-off:** For sql-17 Exercise 4, the chosen form is justified by this lesson-specific rationale: Use a deterministic ID only for row number; adding it to rank ordering would destroy the tie. Evaluate another form against the concrete expected result (Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2) and the verification above.
+- **Edge case:** Give two rows the same `sample_id` value and different ``sample_id`` values; verify `sample_id` produces the intended rank and display order.
 
 ## Exercise 5 — Debugging
 
@@ -306,18 +286,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** At most one row per customer.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-17 Exercise 5, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-17 Exercise 5, expected output: At most one row per customer. The final columns are `order_id`, `customer_id`, `order_date`, and `total_amount`. The final order is `customer_id`.
+- **Independent verification:** For sql-17 Exercise 5, run an anti-check that counts rows where NOT ((recency_number = 1)); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `order_date`, and `total_amount` against `orders`. Give two rows the same `customer_id` value and different ``order_id`` values; verify `customer_id` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-17 Exercise 5, run `numbered` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-17 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, and `total_amount` ordered by `customer_id`.
+- **Alternative/trade-off:** For sql-17 Exercise 5, the chosen form is justified by this lesson-specific rationale: Use row number with the unique order ID as final tie-breaker. Evaluate another form against the concrete expected result (At most one row per customer) and the verification above.
+- **Edge case:** Give two rows the same `customer_id` value and different ``order_id`` values; verify `customer_id` produces the intended rank and display order.
 
 ## Exercise 6 — Extension
 
@@ -361,18 +336,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Top two salary levels per department.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-17 Exercise 6, read from `employees`. Build the answer toward `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`; keep `employee_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-17 Exercise 6, expected output: Top two salary levels per department. The final columns are `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`. The final order is `department_id, salary_rank, employee_id`.
+- **Independent verification:** For sql-17 Exercise 6, run an anti-check that counts rows where NOT ((salary_rank <= 2)); require unique `employee_id` where the expected grain is one row per key and confirm the projected `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank` against `employees`. Give two rows the same `department_id` value and different `employee_id` values; verify `department_id, salary_rank, employee_id` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-17 Exercise 6, run `ranked` one at a time. Record each CTE's row count and `employee_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-17 Exercise 6, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, preserve one row per `employee_id`, and finish with `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank` ordered by `department_id, salary_rank, employee_id`.
+- **Alternative/trade-off:** For sql-17 Exercise 6, the chosen form is justified by this lesson-specific rationale: Dense rank includes all employees tied at either of the top two salary values. Evaluate another form against the concrete expected result (Top two salary levels per department) and the verification above.
+- **Edge case:** Give two rows the same `department_id` value and different `employee_id` values; verify `department_id, salary_rank, employee_id` produces the intended rank and display order.
 
 ## Final self-check
 

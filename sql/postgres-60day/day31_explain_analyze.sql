@@ -38,42 +38,42 @@ ORDER BY qty DESC;
 
 -- Exercises
 -- 1. Add WHERE predicates and observe selectivity effects.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-31 Exercise 1, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-31 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, and `total_amount`.
+--    Verify: For sql-31 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-31 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
 -- 2. Compare EXPLAIN vs EXPLAIN ANALYZE outputs; note actual vs estimated rows.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-31 Exercise 2, run the underlying read-only query over `orders`, `customers`, and `order_items` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-31 Exercise 2, expected output: one row per `country`. The final columns are `country`, and `units`.
+--    Verify: For sql-31 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-31 Exercise 2, start with the first relation in `orders`, `customers`, and `order_items`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
 -- 3. Prediction: before running it, decide whether total_amount > 0 or
 --    total_amount > 900 should produce the smaller row estimate. Run both with
 --    EXPLAIN (ANALYZE, BUFFERS) and record estimated rows, actual rows, and
 --    shared buffer hits.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-31 Exercise 3, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-31 Exercise 3, expected output: one row per `order_id`. The final columns are `order_id`.
+--    Verify: For sql-31 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-31 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
 -- 4. Construction: explain a customer -> orders join filtered to one country.
 --    Include VERBOSE and identify the scan node, join node, and aggregate node.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-31 Exercise 4, run the underlying read-only query over `customers`, and `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-31 Exercise 4, expected output: one row per `country`. The final columns are `country`, and `order_count`.
+--    Verify: For sql-31 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-31 Exercise 4, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
 -- 5. Debugging: explain why EXPLAIN ANALYZE is unsafe around an UPDATE you do
 --    not intend to execute. Demonstrate safely by wrapping a no-op UPDATE
 --    (SET status = status) in a savepoint and rolling back to it.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-31 Exercise 5, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-31 Exercise 5, expected output: one row per `order_id`. The final columns are `update`, and `analyze`.
+--    Verify: For sql-31 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-31 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
 -- 6. Edge case: find one predicate that returns zero rows. Compare the estimate
 --    with the actual count and write one sentence about stale statistics versus
 --    data that is merely rare.
---    Inputs: Use only the declared lesson objects (orders, customers, order_items) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-31 Exercise 6, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+--    Expected result/shape: For sql-31 Exercise 6, expected output: one row per `order_id`. The final columns are `order_id`.
+--    Verify: For sql-31 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+--    Hint ladder, rung 1: For sql-31 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
 
 ROLLBACK;

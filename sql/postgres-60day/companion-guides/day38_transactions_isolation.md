@@ -35,8 +35,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-38/day38_transactions_isolation.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-38/lesson/workspace/sql/postgres-60day/day38_transactions_isolation.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -71,8 +71,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-MVCC, Isolation level, Serialization failure. Its worked SQL reads or creates `txn_demo`.
+on screen are not automatically stored. The key vocabulary for this lesson is MVCC, Isolation level, Serialization failure. Its worked SQL reads or creates `txn_demo`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -82,12 +81,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: Open two disposable sessions and write down each statement before running it. Under READ COMMITTED, have session A read a count, session B commit a matching insert, and session A read again. Repeat at REPEATABLE READ and explain the snapshot difference; clean up the shared disposable table afterward.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The worked walkthrough's lesson-specific task is: Open two disposable sessions and write down each statement before running it. Under READ COMMITTED, have session A read a count, session B commit a matching insert, and session A read again. Repeat at REPEATABLE READ and explain the snapshot difference; clean up the shared disposable table afterward.
+The first runnable example has a concrete contract: Example 1 must complete through `psql` with its documented command tag or notice for the lesson evidence named below. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup. Its final projection is the columns written in the final `SELECT`. Reselect the returned key columns from the columns written in the final `SELECT`, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.
 
 ## Two worked SQL examples
 
@@ -101,9 +96,7 @@ CREATE TEMP TABLE txn_demo(id int PRIMARY KEY, qty int);
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 must complete through `psql` with its documented command tag or notice for the lesson evidence named below. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.
 
 ### Example 2
 
@@ -113,9 +106,7 @@ INSERT INTO txn_demo VALUES (1, 10), (2, 20), (3, 30);
 
 **How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 must complete through `psql` with its documented command tag or notice for `txn_demo`. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.
 
 ## Learning objectives
 
@@ -141,26 +132,33 @@ snapshot difference; clean up the shared disposable table afterward.
 Complete these in the [learner SQL](../day38_transactions_isolation.sql):
 
 1. Reproduce a non-repeatable read under `READ COMMITTED`.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-38 Exercise 1, read from `isolation_lab`. Build the answer toward `qty`; keep `qty` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-38 Exercise 1, expected output: one row per `qty`. The final columns are `qty`.
+   **Verify:** For sql-38 Exercise 1, run an anti-check that counts rows where NOT ((id = 1)); require unique `qty` where the expected grain is one row per key and confirm the projected `qty` against `isolation_lab`. Add one row for which `(id = 1)` is true and one for which it is false; verify only the matching `qty` value is returned.
 2. Reproduce a phantom with two counts and a concurrent insert.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-38 Exercise 2, read the target keys from `training.isolation_lab` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-38 Exercise 2, expected output: the command tag and an independently counted set of affected `affected_row_count` values. The final columns are `affected_row_count`, and `command_tag`.
+   **Verify:** For sql-38 Exercise 2, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `training.isolation_lab` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
 3. Cause/retry a `SERIALIZABLE` failure.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-38 Exercise 3, read from `training.isolation_lab`. Build the answer toward `serializable`; keep `serializable` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-38 Exercise 3, expected output: one row per `serializable`. The final columns are `serializable`.
+   **Verify:** For sql-38 Exercise 3, run an anti-check that counts rows where NOT ((id = 1) OR (id = 2) OR (id >= 3)); require unique `serializable` where the expected grain is one row per key and confirm the projected `serializable` against `training.isolation_lab`. Add one row for which `(id = 1) OR (id = 2) OR (id >= 3)` is true and one for which it is false; verify only the matching `serializable` value is returned.
 4. Predict savepoint state after `ROLLBACK TO SAVEPOINT`.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-38 Exercise 4, read from `isolation_solution`. Build the answer toward `release`; keep `release` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-38 Exercise 4, expected output: one row per `release`. The final columns are `release`. The final order is `id`.
+   **Verify:** For sql-38 Exercise 4, run an anti-check that counts rows where NOT ((id = 2)); require unique `release` where the expected grain is one row per key and confirm the projected `release` against `isolation_solution`. Add one row for which `(id = 2)` is true and one for which it is false; verify only the matching `release` value is returned.
 5. Build an atomic checked transfer between two temp accounts.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-38 Exercise 5, read from `transfer_accounts`. Build the answer toward `available`; keep `available` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-38 Exercise 5, expected output: one row per `available`. The final columns are `available`.
+   **Verify:** For sql-38 Exercise 5, run an anti-check that counts rows where NOT ((account_id = 1 FOR UPDATE) OR (account_id = 1) OR (account_id = 2)); require unique `available` where the expected grain is one row per key and confirm the projected `available` against `transfer_accounts`. Add one row for which `(account_id = 1 FOR UPDATE) OR (account_id = 1) OR (account_id = 2)` is true and one for which it is false; verify only the matching `available` value is returned.
 6. Recover after a unique-key error at a savepoint.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-38 Exercise 6, read from `isolation_solution`. Build the answer toward `still_usable`; keep `still_usable` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-38 Exercise 6, expected output: one row per `still_usable`. The final columns are `still_usable`.
+   **Verify:** For sql-38 Exercise 6, reselect the returned keys directly from the source; require unique `still_usable` where the expected grain is one row per key and confirm the projected `still_usable` against `isolation_solution`. Add duplicate source candidates for `still_usable`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 7. Explain an isolation choice for a multi-query read-only report.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-38 Exercise 7, use two labeled terminals and only `txn_demo`, `isolation_solution`, and `transfer_accounts`. Write the statement order, expected wait/SQLSTATE, and cleanup step before opening either transaction.
+   **Expected result/shape:** For sql-38 Exercise 7, expected output: a statement-by-statement Session A/Session B transcript followed by the committed fixture state and cleanup evidence. The final columns are `session`, `statement_number`, `outcome`, and `sqlstate`.
+   **Verify:** For sql-38 Exercise 7, compare every observed value, wait, and SQLSTATE with the written schedule; query `txn_demo`, `isolation_solution`, and `transfer_accounts` after each commit/rollback and finish with both sessions idle and the fixture reset. Repeat the exact interleaving after cleanup and confirm the same wait, SQLSTATE, and committed final rows.
 
 Record exact two-session ordering and SQLSTATEs.
 
@@ -196,13 +194,9 @@ PostgreSQL uses MVCC snapshots:
 - `SERIALIZABLE` adds conflict tracking and can abort a transaction with SQLSTATE
   `40001`; the application must retry the entire transaction.
 
-## Practice — match the learner prompts exactly
+## Practice map
 
-1. In two sessions, reproduce a non-repeatable read under `READ COMMITTED`.
-2. In two sessions, run `SELECT COUNT(*)`, commit a matching insert elsewhere,
-   and run the count again to demonstrate a phantom under `READ COMMITTED`.
-3. Run conflicting read/modify/write transactions at `SERIALIZABLE`; observe
-   which transaction PostgreSQL aborts and retry it from `BEGIN`.
+Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
 
 ## Important two-session limitation
 
@@ -240,11 +234,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-38 — Transactions Isolation.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisite: `sql-37`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day38_transactions_isolation.md
 - Answer-free learner SQL: sql/postgres-60day/day38_transactions_isolation.sql
 
-The lesson concepts include MVCC, Isolation level, Serialization failure. First define those terms in plain
+Key terms to teach in context: MVCC, Isolation level, Serialization failure. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -255,11 +249,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-38/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

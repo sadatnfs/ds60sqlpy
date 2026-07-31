@@ -90,6 +90,25 @@ The structural tests verify metadata, clean execution state, tag coverage,
 required concepts, named parameters, and prohibited credential/setup patterns.
 Only an opt-in live run can prove the local PostgreSQL and JupySQL integration.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small query check
+
+The completed notebook keeps changing data in named parameters and keeps
+identifiers static:
+
+```sql
+SELECT customer_id, full_name
+FROM training.customers
+WHERE country = :exercise_country
+ORDER BY customer_id
+LIMIT 10;
+```
+
+Before running it, define `exercise_country` in a Python cell. The variable's
+value must not be pasted into the SQL source or displayed as connection text.
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs map one-for-one to the answer-free learner artifact and
@@ -108,9 +127,7 @@ discipline.
 
 **Why:** Choose from statement shape and reviewability, not from different security semantics.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Run `%sql SELECT current_database()` and the formatted customer cell query; record the same database name plus bounded rows, then explain that line magic suits a short diagnostic while cell magic exposes multi-line structure.
 
 ### Exercise 2 — Security testing
 
@@ -123,9 +140,7 @@ SQL structure.
 
 **Why:** Use `:name`; never paste the sentinel into SQL or notebook output.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Bind `US' OR TRUE --` through `:injection_value`; assert the harmless comparison returns zero/expected rows, no schema changes, and saved SQL still contains `:injection_value` rather than the rendered sentinel.
 
 ### Exercise 3 — SQL practice
 
@@ -138,9 +153,7 @@ and threshold, order deterministically, and limit to 10.
 **Why:** Aggregate after a left join, apply the threshold after grouping, and add customer ID as
 tie-breaker.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Assert the query keeps `:exercise_country` and `:exercise_minimum_total`, returns at most 10 US customers meeting the threshold, and orders equal totals by customer ID.
 
 ### Exercise 4 — DataFrame boundary
 
@@ -152,9 +165,7 @@ and assert the row count is bounded by 10 before using the frame.
 
 **Why:** Treat conversion as an explicit boundary and validate shape before analysis.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Convert the assigned result and assert columns equal `['customer_id', 'full_name', 'lifetime_total']` in that order, row count is at most 10, and `lifetime_total` is numeric/Decimal-compatible.
 
 ### Exercise 5 — Configuration
 
@@ -166,9 +177,7 @@ and reset it in the same teaching section so later cells retain explicit result 
 
 **Why:** Notebook-global magic configuration is hidden state unless restored visibly.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** With `autopandas=False`, record a JupySQL result supporting `.DataFrame()`; with it true, record a pandas DataFrame; finally inspect configuration and assert it is restored false.
 
 ### Exercise 6 — Memory reasoning
 
@@ -181,9 +190,7 @@ substantial server work.
 
 **Why:** Rendering fewer rows is different from fetching fewer rows.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** State that `displaylimit=25` changes rendering only; inspect `autolimit` and explicit SQL `LIMIT` as fetch bounds, and identify aggregation/server work that `LIMIT` does not bound.
 
 ### Exercise 7 — Identifier boundary
 
@@ -196,9 +203,7 @@ object, then composes it with `psycopg.sql.Identifier`; it does not pass a table
 
 **Why:** Bound parameters represent data values, never SQL grammar.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Show `FROM :table_name` fails as grammar rather than selecting a table; the application design must allowlist the name and compose it with `psycopg.sql.Identifier`.
 
 ### Exercise 8 — Architecture decision
 
@@ -212,9 +217,7 @@ application code.
 **Why:** Consider reuse, transaction ownership, tests, dynamic structure, scale, and operational
 observability.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Choose notebook magics or Psycopg in a decision table covering reuse, typing/testing, transaction ownership, result size, and interactivity; the choice must follow those facts.
 
 ### Exercise 9 — Cleanup
 
@@ -226,9 +229,7 @@ clear all outputs/execution counts, and scan notebook JSON for URL-shaped creden
 
 **Why:** Both JupySQL alias state and SQLAlchemy pool state need explicit cleanup.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Run `%sql --connections`, close alias `ds60-course`, dispose the engine, and assert the final saved notebook has no connection URL, rendered credential, or non-empty output.
 
 ### Exercise 10 — Setup review
 
@@ -241,9 +242,7 @@ then bind the object rather than a literal URL.
 
 **Why:** Validate scheme, driver, host/database target, and display settings before connecting.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Trace `DS60_DATABASE_URL` to `make_url`, PostgreSQL/database-name validation, `postgresql+psycopg`, `create_engine`, and `%sql engine`; assert no step prints or evaluates the URL/engine as the final cell expression.
 
 ### Exercise 11 — Prediction
 
@@ -256,9 +255,7 @@ otherwise equivalent.
 
 **Why:** Compare Python assignment syntax, multi-line readability, and result access.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Predict and confirm that assigned `%sql` returns a result object, while `%%sql` owns the remaining cell and cannot be placed on the assignment's right side; both return the same rows.
 
 ### Exercise 12 — Capacity
 
@@ -271,9 +268,7 @@ large scan/sort and does not cap aggregate work.
 
 **Why:** Bound output, scan scope, and server work separately.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** For a million-row table, show a reviewed aggregate/count plus an explicit `LIMIT 25`; record that returned rows are bounded while scan, sort, and server execution may remain large.
 
 ### Exercise 13 — Type binding
 
@@ -286,9 +281,7 @@ explicitly.
 
 **Why:** Let SQLAlchemy/JupySQL adapt Python values; do not pre-render literals.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Bind a `Decimal`, `date`, Boolean, and Python list through named parameters; record PostgreSQL types/values and assert none of their literal representations was pasted into SQL.
 
 ### Exercise 14 — Transaction reasoning
 
@@ -302,9 +295,7 @@ opt-in, rollback-protected artifact.
 **Why:** The checked-in notebook remains read-only; describe or run writes only in an explicitly
 authorized disposable lab.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Use `engine.begin()` with a temporary/course-owned rollback-safe scope and inspect cleanup; state that the context, not `%sql`, owns commit/rollback and leave the checked-in notebook read-only.
 
 ### Exercise 15 — Jinja boundary
 
@@ -317,9 +308,7 @@ driver binding.
 
 **Why:** Rendered text becomes SQL before the driver sees parameters.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Render one harmless fixed Jinja example as text and compare it with `:value`: assert Jinja changes SQL source before execution while the named parameter leaves source unchanged.
 
 ### Exercise 16 — Notebook hygiene
 
@@ -332,9 +321,7 @@ installation/credential/write patterns.
 
 **Why:** Inspect the serialized artifact, not only the visible notebook UI.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Run notebook validation and assert nbformat/stable IDs/kernel/tags are valid, outputs and execution counts are clear, and no install magic, shell install, URL literal, or destructive SQL exists.
 
 ### Exercise 17 — Offline review
 
@@ -347,9 +334,7 @@ against PostgreSQL remain explicitly unverified until the opt-in live path runs.
 
 **Why:** Separate structural/offline evidence from live query evidence.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Offline, compile/inspect Python and SQL cells, verify tags/metadata/parameters/cleanup text, and explicitly label database name, returned rows, and driver adaptation as unexecuted claims.
 
 ### Exercise 18 — Handoff
 
@@ -362,6 +347,4 @@ optional live integration test.
 
 **Why:** Carry over SQL and value semantics while changing the ownership/testing surface.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Specify a typed Psycopg function whose cursor Protocol records static SQL plus a two-value parameter tuple; assert a fake returns the same ordered customer result without JupySQL state.

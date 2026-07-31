@@ -53,11 +53,18 @@ can then request only these fixed, catalog-resolved actions:
   open that notebook in JupyterLab.
 
 Every Python and SQL reader also has an **Ask Codex about this lesson** panel.
-It contains a read-only, copy-ready prompt built from that exact catalog entry:
-stable ID, title, guide and learner paths, prerequisites, execution safety,
-solution boundary, progressive coaching loop, and evidence-based done
-condition. This is optional coaching context; the rendered guide before it
-must still define and demonstrate the concept completely.
+It contains the read-only, copy-ready fenced prompt authored in that lesson's
+companion guide. The guide is the single source of truth for the stable ID,
+paths, prerequisites, lesson-specific concepts, execution safety, solution
+boundary, progressive coaching loop, and evidence-based done condition. The
+reader generator uses a catalog-derived safe fallback only if an older or
+temporarily incomplete guide lacks the required block; the depth audit rejects
+that missing block. This is optional coaching context; the rendered guide
+before it must still define and demonstrate the concept completely.
+
+The generated `START_HERE.html` selector embeds the same guide-authored prompt
+for every catalog entry. Selecting a lesson on the dashboard and opening its
+reader therefore cannot produce two different tutoring contracts.
 
 On Windows, double-click `START_DS60.cmd` rather than trying to make a static
 browser page start local software. It performs readiness checks and reopens

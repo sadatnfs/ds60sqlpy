@@ -19,6 +19,9 @@ historical “60-day” shape.
 ## Sources of truth
 
 - Lesson artifacts and `src/ds60sqlpy/catalog_builder.py`: inputs for lesson identity, ordering, prerequisites, dependency groups, network behavior, and artifact availability
+- `src/ds60sqlpy/catalog.py`: catalog loading and learner-facing ordering;
+  named modules can use an explicit order override to appear at their
+  prerequisite milestone without renumbering the historical day tracks
 - `curriculum/catalog.json`: checked-in generated index consumed by tools; regenerate it rather than editing it by hand
 - `README.md`: learner entry point
 - `docs/setup/`: operating-system setup
@@ -153,6 +156,11 @@ For each lesson change:
     stable lesson ID, exact guide and learner paths, the
     `guide-ds60sqlpy-learning` skill, the `solutions/` boundary, and the
     explain → predict → attempt → one hint → evidence → retrieval loop.
+    The guide's fenced prompt is the source used by both the lesson reader and
+    `START_HERE.html`; do not maintain separate prompt prose in generated HTML.
+11. Make each `Expected`/`Verify` contract independently inspectable. It may
+    not merely restate the exercise or apply a generic checklist unrelated to
+    that exercise's mechanism.
 
 Do not expand the curriculum merely to increase lesson count. Add content only when it closes a documented learning gap.
 

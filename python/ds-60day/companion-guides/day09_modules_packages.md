@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 8 (`python-08`): functions, paths, and file boundaries.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -197,7 +193,6 @@ demo/
 def title(text: str) -> str:
     return text.strip().title()
 
-
 # demo/__main__.py
 from demo.formatters import title
 
@@ -295,7 +290,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-09`
-(Day 9 — Modules, Packages, Imports, and `__main__`). I am a complete beginner. Emphasize modules, package namespaces, imports, and safe entry points.
+(Day 9 — Modules, Packages, Imports, and `__main__`). Direct catalog prerequisites: `python-08`.
+I have completed the direct prerequisites: `python-08`. Emphasize modules, package namespaces, imports, and safe entry points.
 Read `python/ds-60day/companion-guides/day09_modules_packages.md` and use the learner notebook
 `python/ds-60day/notebooks/day09_modules_packages.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

@@ -35,8 +35,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-37/day37_partitioning_sharding.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-37/lesson/workspace/sql/postgres-60day/day37_partitioning_sharding.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -69,8 +69,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Partition bound, Partition pruning, Sharding. Its worked SQL reads or creates `big_events`, `big_events_2025_01`, `big_events_2025_02`.
+on screen are not automatically stored. The key vocabulary for this lesson is Partition bound, Partition pruning, Sharding. Its worked SQL reads or creates `big_events`, `big_events_2025_01`, `big_events_2025_02`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -80,12 +79,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect EXPLAIN to prove February is pruned rather than assuming it.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The worked walkthrough's lesson-specific task is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect EXPLAIN to prove February is pruned rather than assuming it.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `big_events`. Verify the object in `pg_catalog.pg_inherits`, and `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
 
 ## Two worked SQL examples
 
@@ -104,9 +99,7 @@ CREATE TABLE big_events (
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 must print the expected DDL command tag for `big_events`. Verify the object in `pg_catalog.pg_inherits`, and `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ### Example 2
 
@@ -117,9 +110,7 @@ CREATE TABLE big_events_2025_01 PARTITION OF big_events
 
 **How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 must print the expected DDL command tag for `big_events_2025_01`. Verify the object in `pg_catalog.pg_inherits`, and `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ## Learning objectives
 
@@ -145,23 +136,29 @@ pruned rather than assuming it.
 Complete these in the [learner SQL](../day37_partitioning_sharding.sql):
 
 1. Add partitions and test pruning.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-37 Exercise 1, run the underlying read-only query over `solution_big_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+   **Expected result/shape:** For sql-37 Exercise 1, expected output: one row per `big_events`. The final columns are `big_events`.
+   **Verify:** For sql-37 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `big_events` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 2. Add local indexes and compare plans.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-37 Exercise 2, run the underlying read-only query over `indexed_big_events`, `indexed_big_events_2025_01_time_idx`, `indexed_big_events_2025_02_time_idx`, `indexed_big_events_2025_03_time_idx`, and `indexed_big_events_2025_01` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+   **Expected result/shape:** For sql-37 Exercise 2, expected output: one row per `plan_node`. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`.
+   **Verify:** For sql-37 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 3. Predict partition scans with and without a time predicate.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-37 Exercise 3, run the underlying read-only query over `solution_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+   **Expected result/shape:** For sql-37 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`.
+   **Verify:** For sql-37 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 4. Add a DEFAULT partition and inspect row placement via `tableoid`.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-37 Exercise 4, read from `solution_events`, and `solution_events_default`. Build the answer toward `physical_partition`, and `event_time`; keep `physical_partition` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-37 Exercise 4, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.
+   **Verify:** For sql-37 Exercise 4, run an anti-check that counts rows where NOT ((event_time = timestamptz '2025-06-15 00:00:00+00')); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`, and `solution_events_default`. Add one row for which `(event_time = timestamptz '2025-06-15 00:00:00+00')` is true and one for which it is false; verify only the matching `physical_partition` value is returned.
 5. Diagnose an insert into an uncovered range.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-37 Exercise 5, read the target keys from `pg_class` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+   **Expected result/shape:** For sql-37 Exercise 5, expected output: the command tag and an independently counted set of affected `partition_name` values. The final columns are `partition_name`, and `partition_bound`. The final order is `c.relname`.
+   **Verify:** For sql-37 Exercise 5, materialize the intended `partition_name` target set first; require the command tag/`RETURNING` set to match it, then query `pg_class` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `partition_name` values in both cases.
 6. Test the inclusive-FROM/exclusive-TO boundary at February 1.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-37 Exercise 6, read from `solution_events`. Build the answer toward `physical_partition`, and `event_time`; keep `physical_partition` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-37 Exercise 6, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.
+   **Verify:** For sql-37 Exercise 6, run an anti-check that counts rows where NOT ((payload->>'source' = 'boundary')); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 
 Test every boundary and one value without a matching named partition.
 
@@ -202,12 +199,9 @@ query.
 - The learner script demonstrates partitioning only. “Sharding” remains an
   architecture discussion, not a runnable course setup.
 
-## Practice — match the learner prompts exactly
+## Practice map
 
-1. Add one or more new `big_events` partitions, insert matching rows, and use
-   `EXPLAIN` to prove pruning for single- and multi-partition date ranges.
-2. Create indexes on the relevant partitions and compare query plans for a
-   selective event/customer lookup.
+Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
 
 ## Pitfalls and validation
 
@@ -239,11 +233,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-37 — Partitioning Sharding.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisite: `sql-36`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day37_partitioning_sharding.md
 - Answer-free learner SQL: sql/postgres-60day/day37_partitioning_sharding.sql
 
-The lesson concepts include Partition bound, Partition pruning, Sharding. First define those terms in plain
+Key terms to teach in context: Partition bound, Partition pruning, Sharding. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -254,11 +248,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-37/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

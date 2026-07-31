@@ -225,89 +225,89 @@ ORDER BY
 -- 1. Classify each requested extension as unavailable, available-but-not-
 --    installed, or installed. Record exact versions; do not infer CREATE
 --    privilege from availability.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-ext-01 Exercise 1, complete the capability matrix written analysis and support its claims with read-only evidence from `pg_available_extensions`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-ext-01 Exercise 1, expected output: a completed the capability matrix written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `installed_version`.
+--    Verify: For sql-ext-01 Exercise 1, check the capability matrix written analysis against `installed_version`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 1, check the capability matrix written analysis against `installed_version`.
 -- 2. Explain where generated lower(display_name) differs from citext, including
 --    Unicode/collation, operators, joins, and every writer's contract.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-ext-01 Exercise 2, read from `pro_extensions_lab.items`, `items_normalized_name_uk`, and `pro_extensions_lab.checked_l2`. Build the answer toward `result`; keep `result` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 2, expected output: one row per `result`. The final columns are `result`.
+--    Verify: For sql-ext-01 Exercise 2, project `result` plus the raw source columns from `pro_extensions_lab.items`, `items_normalized_name_uk`, and `pro_extensions_lab.checked_l2` at each join stage; record row count and distinct `result`, then assert the final `result` values match those staged rows without unintended fanout or loss. Add one source row with a new `result`; verify the result gains exactly one row carrying that `result` value.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 2, start with the first relation in `pro_extensions_lab.items`, `items_normalized_name_uk`, and `pro_extensions_lab.checked_l2`; after each join, record total rows and distinct `result` so the exact fanout or loss is visible.
 -- 3. Compare built-in point distance with PostGIS geometry/geography and SRIDs.
 --    State why latitude/longitude must not be treated as an abstract point grid.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-ext-01 Exercise 3, read from `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources`. Build the answer toward `point`; keep `point` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 3, expected output: one row per `point`. The final columns are `point`.
+--    Verify: For sql-ext-01 Exercise 3, reselect the returned keys directly from the source; require unique `point` where the expected grain is one row per key and confirm the projected `point` against `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources`. Add one source row with a new `point`; verify the result gains exactly one row carrying that `point` value.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 3, select `point` from `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources` before adding derived columns.
 -- 4. Extend array_l2_distance with explicit dimension validation and compare an
 --    exact scan with pgvector HNSW/IVFFlat recall, build, memory, and write cost.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-ext-01 Exercise 4, read from `pro_extensions_lab.items`. Build the answer toward `item_name`, `planar_distance`, `vector_distance`, and `payload_sha256`; keep `planar_distance` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 4, expected output: one row per `planar_distance`. The final columns are `item_name`, `planar_distance`, `vector_distance`, and `payload_sha256`. The final order is `vector_distance, i.item_id`.
+--    Verify: For sql-ext-01 Exercise 4, reselect the returned keys directly from the source; require unique `planar_distance` where the expected grain is one row per key and confirm the projected `item_name`, `planar_distance`, `vector_distance`, and `payload_sha256` against `pro_extensions_lab.items`. Add one source row with a new `planar_distance`; verify the result gains exactly one row carrying that `planar_distance` value.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 4, check `vector_distance, i.item_id` before applying the row cap.
 -- 5. Compare built-in SHA-256, pgcrypto digest/crypt/PGP functions, and external
 --    key management. Never use a fast digest alone for password storage.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-ext-01 Exercise 5, use `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+--    Expected result/shape: For sql-ext-01 Exercise 5, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `crypt`.
+--    Verify: For sql-ext-01 Exercise 5, restore into an isolated target and reconcile `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 5, restore into an isolated target and reconcile `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
 -- 6. Design an approved postgres_fdw boundary: server ownership, user mapping
 --    secrets, imported-column contract, pushdown, transaction consistency,
 --    failure isolation, and local snapshot fallback.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-ext-01 Exercise 6, read from `pro_extensions_lab.remote_snapshot`, and `pg_catalog.pg_extension`. Build the answer toward `source_key`, `fetched_at`, and `payload`; keep `source_key` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 6, expected output: one row per `source_key`. The final columns are `source_key`, `fetched_at`, and `payload`. The final order is `rs.source_key, rs.fetched_at DESC, rs.snapshot_id DESC`.
+--    Verify: For sql-ext-01 Exercise 6, reselect the returned keys directly from the source; require unique `source_key` where the expected grain is one row per key and confirm the projected `source_key`, `fetched_at`, and `payload` against `pro_extensions_lab.remote_snapshot`, and `pg_catalog.pg_extension`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 6, inspect the source keys that survive `WHERE`; then check `rs.source_key, rs.fetched_at DESC, rs.snapshot_id DESC` before applying the row cap.
 -- 7. Explain pg_trgm similarity versus prefix LIKE and full-text search. Name
 --    the exact operators an optional trigram index must serve.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-ext-01 Exercise 7, read from `requested`, `pg_catalog.pg_available_extensions`, and `pg_catalog.pg_extension`. Build the answer toward `extension_name`, `default_version`, `installed_version`, and `installed_owner`; keep `extension_name` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 7, expected output: one row per `extension_name`. The final columns are `extension_name`, `default_version`, `installed_version`, and `installed_owner`. The final order is `r.extension_name`.
+--    Verify: For sql-ext-01 Exercise 7, project `extension_name` plus the raw source columns from `requested`, `pg_catalog.pg_available_extensions`, and `pg_catalog.pg_extension` at each join stage; record row count and distinct `extension_name`, then assert the final `extension_name`, `default_version`, `installed_version`, and `installed_owner` values match those staged rows without unintended fanout or loss. Add one source row with a new `extension_name`; verify the result gains exactly one row carrying that `extension_name` value.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 7, start with the first relation in `requested`, `pg_catalog.pg_available_extensions`, and `pg_catalog.pg_extension`; after each join, record total rows and distinct `extension_name` so the exact fanout or loss is visible.
 -- 8. Build an extension lifecycle inventory: owner, installed/default/available
 --    versions, dependencies, trusted flag, update path, publisher, approval,
 --    backup/restore needs, and rollback test. Do not upgrade anything here.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-ext-01 Exercise 8, use `pg_extension` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+--    Expected result/shape: For sql-ext-01 Exercise 8, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
+--    Verify: For sql-ext-01 Exercise 8, restore into an isolated target and reconcile `pg_extension` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 8, restore into an isolated target and reconcile `pg_extension` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
 -- 9. Detect collation provider/version drift and explain why affected indexes
 --    may require REINDEX after operating-system or ICU changes. Separate
 --    detection, impact analysis, remediation, and validation.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-ext-01 Exercise 9, read from `pg_catalog.pg_collation`. Build the answer toward `collname`, `collprovider`, `recorded_version`, and `actual_version`; keep `collname` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 9, expected output: one row per `collname`. The final columns are `collname`, `collprovider`, `recorded_version`, and `actual_version`. The final order is `c.collname`.
+--    Verify: For sql-ext-01 Exercise 9, run an anti-check that counts rows where NOT ((c.collversion IS NOT NULL AND c.collversion IS DISTINCT FROM pg_catalog.pg_collation_actual_version(c.oid))); require unique `collname` where the expected grain is one row per key and confirm the projected `collname`, `collprovider`, `recorded_version`, and `actual_version` against `pg_catalog.pg_collation`. Add one row for which `(c.collversion IS NOT NULL AND c.collversion IS DISTINCT FROM pg_catalog.pg_collation_actual_version(c.oid))` is true and one for which it is false; verify only the matching `collname` value is returned.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 9, inspect the source keys that survive `WHERE`; then check `c.collname` before applying the row cap.
 -- 10. If PostGIS is approved elsewhere, design a nearest-resource query using
 --     geography and a GiST index. Address SRID, units, antimeridian/poles,
 --     ST_DWithin prefiltering, exact distance, and deterministic ties.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-ext-01 Exercise 10, complete the postgis nearest written analysis and support its claims with read-only evidence from `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-ext-01 Exercise 10, expected output: a completed the postgis nearest written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `st_dwithin`, and `st_distance`.
+--    Verify: For sql-ext-01 Exercise 10, check the postgis nearest written analysis against `st_dwithin`, and `st_distance`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 10, check the postgis nearest written analysis against `st_dwithin`, and `st_distance`.
 -- 11. If pgvector is approved elsewhere, compare cosine, inner-product, and L2
 --     operators plus HNSW and IVFFlat. State normalization, recall benchmark,
 --     build/update cost, filtering, dimension, and exact fallback requirements.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-ext-01 Exercise 11, read from `pro_extensions_lab.items`. Build the answer toward `item_id`, `item_name`, and `exact_l2`; keep `item_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 11, expected output: one row per `item_id`. The final columns are `item_id`, `item_name`, and `exact_l2`. The final order is `exact_l2, i.item_id`.
+--    Verify: For sql-ext-01 Exercise 11, reselect the returned keys directly from the source; require unique `item_id` where the expected grain is one row per key and confirm the projected `item_id`, `item_name`, and `exact_l2` against `pro_extensions_lab.items`. Add one source row with a new `item_id`; verify the result gains exactly one row carrying that `item_id` value.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 11, check `exact_l2, i.item_id` before applying the row cap.
 -- 12. Extend the FDW design for credential rotation, connection limits, remote
 --     schema drift, timeouts, pushdown inspection, partial failure, observability,
 --     and a last-known-good snapshot. Never put credentials in learner SQL.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-ext-01 Exercise 12, read from `pro_extensions_lab.remote_snapshot`. Build the answer toward `source_key`, `snapshot_watermark`, and `retained_versions`; keep `source_key` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 12, expected output: one row per `source_key`. The final columns are `source_key`, `snapshot_watermark`, and `retained_versions`. The final order is `rs.source_key`.
+--    Verify: For sql-ext-01 Exercise 12, independently aggregate `pro_extensions_lab.remote_snapshot` by `source_key`; require one output row for every distinct `source_key` tuple and compare `snapshot_watermark`, and `retained_versions` tuple by tuple. Tie two rows on `rs.source_key` and give them different `rs.source_key` values; verify `rs.source_key` chooses a stable first/last row.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 12, confirm the groups are `source_key`; then check `rs.source_key` before applying the row cap.
 -- 13. Write a supply-chain review for an extension unavailable from the trusted
 --     package source. Cover source/build provenance, native-code privilege,
 --     CVEs, reproducibility, licensing, patch ownership, and removal testing.
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-ext-01 Exercise 13, read from `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources`. Build the answer toward `supply_chain_answer`; keep `supply_chain_answer` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-ext-01 Exercise 13, expected output: one row per `supply_chain_answer`. The final columns are `supply_chain_answer`.
+--    Verify: For sql-ext-01 Exercise 13, reselect the returned keys directly from the source; require unique `supply_chain_answer` where the expected grain is one row per key and confirm the projected `supply_chain_answer` against `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources`. Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 13, select `supply_chain_answer` from `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources` before adding derived columns.
 -- 14. Plan an extension upgrade rehearsal in a restored disposable database.
 --     Capture dependencies and plans before/after, application canaries,
 --     performance/correctness checks, backup compatibility, and rollback limits.
@@ -325,10 +325,10 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: Use only the declared lesson objects (pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-ext-01 Exercise 14, use `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+--    Expected result/shape: For sql-ext-01 Exercise 14, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
+--    Verify: For sql-ext-01 Exercise 14, restore into an isolated target and reconcile `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+--    Hint ladder, rung 1: For sql-ext-01 Exercise 14, restore into an isolated target and reconcile `requested`, `pg_catalog.pg_available_extensions`, and `pro_extensions_lab.resources` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
 
 ROLLBACK;
 \echo 'SQL-EXT-01 complete: no extension was created and schema was rolled back'

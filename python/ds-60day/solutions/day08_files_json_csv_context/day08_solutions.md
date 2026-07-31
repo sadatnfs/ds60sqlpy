@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**resource ownership, text encodings, and structured file boundaries**.
+These worked answers demonstrate **resource ownership, text encodings, and structured file boundaries**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 A file handle is a stateful resource with a current cursor and an open
 or closed lifetime. A context manager (`with`) makes ownership visible:
@@ -29,277 +28,156 @@ programming errors.
 - **serialization:** converting in-memory data to a storable representation.
 - **schema:** the expected fields, types, and constraints of data.
 
-### Reference pattern 1 — Round-trip JSON through an in-memory stream
+### How to compare an answer
 
-Observe serialization without creating learner files.
+For this lesson's **resource ownership, text encodings, and structured file boundaries** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
 
-```python
-import io
-import json
+## Exercises 1–2 — Worked answers
 
-record = {"name": "Ada", "skills": ["Python", "SQL"], "active": True}
-stream = io.StringIO()
-json.dump(record, stream, ensure_ascii=False)
-encoded = stream.getvalue()
-decoded = json.loads(encoded)
-(encoded, decoded == record)
-```
-
-**Expected observation:** The JSON text and `True` are displayed. Serialization creates text; parsing reconstructs equivalent Python data.
-
-### Reference pattern 2 — Read CSV rows as dictionaries
-
-Column headers become keys while every field initially remains text.
-
-```python
-import csv
-import io
-
-csv_text = "name,score\nAda,9\nLin,10\n"
-rows = list(csv.DictReader(io.StringIO(csv_text)))
-(rows, type(rows[0]["score"]).__name__)
-```
-
-**Expected observation:** `([{'name': 'Ada', 'score': '9'}, {'name': 'Lin', 'score': '10'}], 'str')`. Numeric-looking CSV fields still require conversion.
-
-## Exercise-by-exercise reasoning map
-
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
+### Exercise 1 — worked answer
 
 **Learner contract:** Implement `safe_load_json(path)` that returns parsed data on success and `None` only for a missing file or malformed JSON, logging which expected failure occurred. **Constraints:** open with UTF-8, catch `FileNotFoundError` and `json.JSONDecodeError` explicitly, and let unrelated errors surface. **Verify:** test a valid file, a missing path, and an invalid JSON file inside a temporary directory.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies resource ownership, text encodings, and structured file boundaries.
+**Reasoning:** Implement this exact contract as written: Implement `safe_load_json(path)` that returns parsed data on success and `None` only for a missing file or malformed JSON, logging which expected failure occurred. Constraints: open with UTF-8, catch `FileNotFoundError` and `json.JSONDecodeError` explicitly, and let unrelated errors surface. Keep the prompt's named data and constraints visible in the code, then establish this specific result: test a valid file, a missing path, and an invalid JSON file inside a temporary directory. That connects the answer to resource ownership, text encodings, and structured file boundaries.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+import json
+import logging
+from pathlib import Path
+import tempfile
+from typing import Any
 
-**Alternative:** Use `json.loads`/`dumps` for in-memory text and `load`/`dump` for open file objects; use a database or columnar format when CSV cannot express the needed contract.
+logger = logging.getLogger(__name__)
 
-**Edge case:** Missing files, malformed records, absent or extra CSV columns, non-ASCII names, partial writes, and empty files need deliberate behavior.
 
-**Solution evidence to inspect:** test a valid file, a missing path, and an invalid JSON file inside a temporary directory.
+def safe_load_json(path: Path) -> Any | None:
+    try:
+        with path.open(encoding="utf-8") as handle:
+            return json.load(handle)
+    except FileNotFoundError:
+        logger.warning("JSON file is missing: %s", path)
+    except json.JSONDecodeError as error:
+        logger.warning("Invalid JSON in %s at line %d", path, error.lineno)
+    return None
 
-### Exercise 2 — reasoning, alternatives, and proof
+
+with tempfile.TemporaryDirectory() as temporary:
+    folder = Path(temporary)
+    valid_path = folder / "valid.json"
+    invalid_path = folder / "invalid.json"
+    missing_path = folder / "missing.json"
+    valid_path.write_text('{"course": "ds60"}', encoding="utf-8")
+    invalid_path.write_text('{"course":', encoding="utf-8")
+
+    assert safe_load_json(valid_path) == {"course": "ds60"}
+    assert safe_load_json(invalid_path) is None
+    assert safe_load_json(missing_path) is None
+```
+
+The two expected boundary failures are distinguished; unrelated
+permission or programming failures remain visible.
+
+**Verification evidence:** test a valid file, a missing path, and an invalid JSON file inside a temporary directory.
+
+### Exercise 2 — worked answer
 
 **Learner contract:** Implement `csv_to_records(path)` and `records_to_csv(records, path)` using `csv.DictReader` and `csv.DictWriter`. **Contract:** headers define keys, output field order is explicit, and numeric conversion policy is documented. **Constraints:** use UTF-8 and `newline=''`; do not hand-split comma-delimited text. **Verify:** round-trip two records including a non-ASCII name and compare the normalized records.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies resource ownership, text encodings, and structured file boundaries.
+**Reasoning:** Implement this exact contract as written: Implement `csv_to_records(path)` and `records_to_csv(records, path)` using `csv.DictReader` and `csv.DictWriter`. Contract: headers define keys, output field order is explicit, and numeric conversion policy is documented. Constraints: use UTF-8 and `newline=''`; do not hand-split comma-delimited text. Keep the prompt's named data and constraints visible in the code, then establish this specific result: round-trip two records including a non-ASCII name and compare the normalized records. That connects the answer to resource ownership, text encodings, and structured file boundaries.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use `json.loads`/`dumps` for in-memory text and `load`/`dump` for open file objects; use a database or columnar format when CSV cannot express the needed contract.
-
-**Edge case:** Missing files, malformed records, absent or extra CSV columns, non-ASCII names, partial writes, and empty files need deliberate behavior.
-
-**Solution evidence to inspect:** round-trip two records including a non-ASCII name and compare the normalized records.
-
-### Exercise 3 — reasoning, alternatives, and proof
-
-**Learner contract:** **Prediction:** After `handle.read(2)` on a text file containing `abcd`, predict what a second `handle.read()` returns and explain the cursor. **Progressive hint:** Reads advance the file object's current position. **Verify:** Assert the first read is `'ab'`, the second is `'cd'`, and a third is empty; record cursor positions `2` and `4`.
-
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying resource ownership, text encodings, and structured file boundaries.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use `json.loads`/`dumps` for in-memory text and `load`/`dump` for open file objects; use a database or columnar format when CSV cannot express the needed contract.
-
-**Edge case:** Missing files, malformed records, absent or extra CSV columns, non-ASCII names, partial writes, and empty files need deliberate behavior.
-
-**Solution evidence to inspect:** Assert the first read is `'ab'`, the second is `'cd'`, and a third is empty; record cursor positions `2` and `4`.
-
-### Exercise 4 — reasoning, alternatives, and proof
-
-**Learner contract:** **Tracing:** Trace when a file is open and closed through a `with` block, including when JSON decoding raises inside the block. **Progressive hint:** Context-manager cleanup runs on both normal and exceptional exit. **Verify:** Record `handle.closed` inside and after both successful and failing `with` blocks; assert it is true after either exit.
-
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the resource ownership, text encodings, and structured file boundaries model is visible.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use `json.loads`/`dumps` for in-memory text and `load`/`dump` for open file objects; use a database or columnar format when CSV cannot express the needed contract.
-
-**Edge case:** Missing files, malformed records, absent or extra CSV columns, non-ASCII names, partial writes, and empty files need deliberate behavior.
-
-**Solution evidence to inspect:** Record `handle.closed` inside and after both successful and failing `with` blocks; assert it is true after either exit.
-
-### Exercise 5 — reasoning, alternatives, and proof
-
-**Learner contract:** **Implementation:** Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. **Progressive hint:** Use explicit UTF-8, `json.dump`, and `Path.replace`. **Verify:** Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.
-
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies resource ownership, text encodings, and structured file boundaries.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use `json.loads`/`dumps` for in-memory text and `load`/`dump` for open file objects; use a database or columnar format when CSV cannot express the needed contract.
-
-**Edge case:** Missing files, malformed records, absent or extra CSV columns, non-ASCII names, partial writes, and empty files need deliberate behavior.
-
-**Solution evidence to inspect:** Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.
-
-### Exercise 6 — reasoning, alternatives, and proof
-
-**Learner contract:** **Debugging:** Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. **Progressive hint:** Open with `newline=''` and `encoding='utf-8'`. **Verify:** Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.
-
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in resource ownership, text encodings, and structured file boundaries.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use `json.loads`/`dumps` for in-memory text and `load`/`dump` for open file objects; use a database or columnar format when CSV cannot express the needed contract.
-
-**Edge case:** Missing files, malformed records, absent or extra CSV columns, non-ASCII names, partial writes, and empty files need deliberate behavior.
-
-**Solution evidence to inspect:** Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.
-
-### Exercise 7 — reasoning, alternatives, and proof
-
-**Learner contract:** **Edge case and explanation:** Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. **Progressive hint:** Validate each row at the boundary rather than failing much later. **Verify:** Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule.
-
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from resource ownership, text encodings, and structured file boundaries.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Use `json.loads`/`dumps` for in-memory text and `load`/`dump` for open file objects; use a database or columnar format when CSV cannot express the needed contract.
-
-**Edge case:** Missing files, malformed records, absent or extra CSV columns, non-ASCII names, partial writes, and empty files need deliberate behavior.
-
-**Solution evidence to inspect:** Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-We build a safe JSON loader and converters between CSV and JSON with careful error handling.
-
-Contents
-- Exercise 1: `safe_load_json(path)` returns None on errors and logs them
-- Exercise 2: Convert CSV → JSON and JSON → CSV
-
----
-
-Exercise 1 — Safe JSON loader
-```python
-from pathlib import Path
-from typing import Any
-import json
-
-
-def safe_load_json(path: str | Path, *, verbose: bool = True) -> Any | None:
-    """Load JSON or return None on error; print concise diagnostics when verbose.
-
-    - Opens with utf-8 encoding
-    - Differentiates not found, permission, and decoding errors
-    """
-    p = Path(path)
-    try:
-        with p.open(encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        if verbose:
-            print(f"safe_load_json: not found: {p}")
-    except PermissionError:
-        if verbose:
-            print(f"safe_load_json: permission denied: {p}")
-    except json.JSONDecodeError as e:
-        if verbose:
-            print(f"safe_load_json: invalid JSON in {p}: line {e.lineno}, col {e.colno}: {e.msg}")
-    return None
-
-# Demo
-# data = safe_load_json('data/people.json')
-```
-Why return None?
-- Signals failure without raising; the caller can decide a default or next step.
-
----
-
-Exercise 2 — CSV ↔ JSON converters
-CSV → JSON
 ```python
 import csv
 from pathlib import Path
-from typing import Iterable
+import tempfile
+
+CSV_FIELDS = ("name", "score")
 
 
-def csv_to_json(csv_path: Path, json_path: Path) -> None:
-    """Read rows from csv_path and write a JSON array to json_path."""
-    with csv_path.open(encoding='utf-8', newline='') as f:
-        reader = csv.DictReader(f)
-        rows = list(reader)                  # small to medium files; stream for huge files
-    # Optional: type coercion (e.g., ints) could be added here
-    with json_path.open('w', encoding='utf-8') as out:
-        json.dump(rows, out, indent=2, ensure_ascii=False)
+def csv_to_records(path: Path) -> list[dict[str, str]]:
+    with path.open(encoding="utf-8", newline="") as handle:
+        return list(csv.DictReader(handle))
 
-# csv_to_json(Path('data/people.csv'), Path('data/people.json'))
+
+def records_to_csv(
+    records: list[dict[str, str]], path: Path
+) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS)
+        writer.writeheader()
+        writer.writerows(records)
+
+
+records = [
+    {"name": "Ada", "score": "10"},
+    {"name": "José", "score": "8"},
+]
+with tempfile.TemporaryDirectory() as temporary:
+    path = Path(temporary) / "scores.csv"
+    records_to_csv(records, path)
+    reloaded = csv_to_records(path)
+    assert reloaded == records
+    assert list(reloaded[0]) == list(CSV_FIELDS)
 ```
 
-JSON → CSV
-```python
-from typing import Any
+`DictReader` returns text, so this contract deliberately preserves
+`"10"` and `"8"` as strings. A later domain-specific parsing stage may
+convert them; the CSV transport layer does not guess numeric meaning.
 
+**Verification evidence:** round-trip two records including a non-ASCII name and compare the normalized records.
 
-def json_to_csv(json_path: Path, csv_path: Path) -> None:
-    """Write records in json_path (list of dict-like) to CSV with unioned fieldnames."""
-    data: list[dict[str, Any]] = safe_load_json(json_path) or []
-    if not data:
-        # Write empty CSV with no header when no data
-        csv_path.write_text('', encoding='utf-8')
-        return
+## Exercises 3–7 — Expanded mastery answers
 
-    # Determine all fieldnames across records to avoid missing columns
-    fieldnames: list[str] = sorted({k for rec in data for k in rec.keys()})
-    with csv_path.open('w', encoding='utf-8', newline='') as f:
-        w = csv.DictWriter(f, fieldnames=fieldnames)
-        w.writeheader()
-        for rec in data:
-            w.writerow({k: rec.get(k, '') for k in fieldnames})
+### Exercise 3 — answer contract
 
-# json_to_csv(Path('data/people.json'), Path('data/people.csv'))
-```
-Notes
-- Always specify encoding; use newline='' when writing CSVs (especially on Windows).
-- For large files, stream row-by-row rather than building a list in memory.
+**Learner contract:** **Prediction:** After `handle.read(2)` on a text file containing `abcd`, predict what a second `handle.read()` returns and explain the cursor. **Progressive hint:** Reads advance the file object's current position. **Verify:** Assert the first read is `'ab'`, the second is `'cd'`, and a third is empty; record cursor positions `2` and `4`.
 
----
+**Reasoning:** Predict this named state change before running it: Prediction: After `handle.read(2)` on a text file containing `abcd`, predict what a second `handle.read()` returns and explain the cursor. Progressive hint: Reads advance the file object's current position. Then compare the prediction with this proof target: Assert the first read is `'ab'`, the second is `'cd'`, and a third is empty; record cursor positions `2` and `4`. This makes resource ownership, text encodings, and structured file boundaries observable instead of relying on intuition.
+
+**Evidence to locate in the grouped implementation:** Assert the first read is `'ab'`, the second is `'cd'`, and a third is empty; record cursor positions `2` and `4`.
+
+### Exercise 4 — answer contract
+
+**Learner contract:** **Tracing:** Trace when a file is open and closed through a `with` block, including when JSON decoding raises inside the block. **Progressive hint:** Context-manager cleanup runs on both normal and exceptional exit. **Verify:** Record `handle.closed` inside and after both successful and failing `with` blocks; assert it is true after either exit.
+
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace when a file is open and closed through a `with` block, including when JSON decoding raises inside the block. Progressive hint: Context-manager cleanup runs on both normal and exceptional exit. Record the named value, shape, label, or iterator position needed to establish: Record `handle.closed` inside and after both successful and failing `with` blocks; assert it is true after either exit. The trace exposes resource ownership, text encodings, and structured file boundaries directly.
+
+**Evidence to locate in the grouped implementation:** Record `handle.closed` inside and after both successful and failing `with` blocks; assert it is true after either exit.
+
+### Exercise 5 — answer contract
+
+**Learner contract:** **Implementation:** Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. **Progressive hint:** Use explicit UTF-8, `json.dump`, and `Path.replace`. **Verify:** Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.
+
+**Reasoning:** Implement this exact contract as written: Implementation: Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. Progressive hint: Use explicit UTF-8, `json.dump`, and `Path.replace`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact. That connects the answer to resource ownership, text encodings, and structured file boundaries.
+
+**Evidence to locate in the grouped implementation:** Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.
+
+### Exercise 6 — answer contract
+
+**Learner contract:** **Debugging:** Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. **Progressive hint:** Open with `newline=''` and `encoding='utf-8'`. **Verify:** Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.
+
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. Progressive hint: Open with `newline=''` and `encoding='utf-8'`. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters. The diagnosis depends on resource ownership, text encodings, and structured file boundaries.
+
+**Evidence to locate in the grouped implementation:** Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.
+
+### Exercise 7 — answer contract
+
+**Learner contract:** **Edge case and explanation:** Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. **Progressive hint:** Validate each row at the boundary rather than failing much later. **Verify:** Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule.
+
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. Progressive hint: Validate each row at the boundary rather than failing much later. Values below, at, and above the named boundary must produce the evidence Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule. Those cases show how resource ownership, text encodings, and structured file boundaries behaves at its edge.
+
+**Evidence to locate in the grouped implementation:** Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule.
 
 ## Expanded mastery lab solutions
 
 Treat files as fallible boundaries. Specify encoding, newline behavior, schema, and failure policy, and keep writes recoverable.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Cursor and context-manager behavior
+### Shared implementation for Exercises 3–4 — Cursor and context-manager behavior
 
 The second read returns `"cd"` because the cursor is already after `"ab"`.
 Leaving a `with` block closes the handle even when decoding raises.
 
-### Practices 3–5 — Recoverable writes and explicit row validation
+### Shared implementation for Exercises 5–7 — Recoverable writes and explicit row validation
 
 ```python
 from __future__ import annotations

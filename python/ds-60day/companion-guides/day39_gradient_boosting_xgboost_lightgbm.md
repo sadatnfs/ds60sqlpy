@@ -208,22 +208,11 @@ for rate, rounds in ((0.2, 30), (0.03, 200)):
 
 1. Tune `learning_rate` and `n_estimators` with a simple loop.
 
-**Verify:** For task `Tune learningrate and nestimators with a simple loop`, demonstrate the concrete requirement “1. Tune learning rate and n estimators with a simple loop” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 1 — sequential boosting, learning-rate budgets, and validation control — evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
 
 2. Compare XGBoost with LightGBM if the `ml` dependency group is installed.
 
-**Verify:** For task `Compare XGBoost with LightGBM if the ml dependency group is installed`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** Practice 2 — sequential boosting, learning-rate budgets, and validation control — first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
 
 ### Progressive hints
 
@@ -242,50 +231,25 @@ attempt, and record the evidence that would prove your result correct.
 3. **Early-stopping design:** Create train, validation, and final test boundaries for early stopping. Explain why using the test set as the early-stopping evaluation set invalidates the final score.
    **Progressive hint:** The stopping iteration is a selected hyperparameter. Only the validation set may guide it; the test set remains untouched.
 
-**Verify:** For task `Early-stopping design: Create train, validation, and final test boundaries for early stopping...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Early-stopping design — record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.
 
 4. **Calibration check:** Compare ROC AUC, log loss, and a reliability diagram for a boosting classifier. Construct an example where ranking is good but probability estimates are overconfident.
    **Progressive hint:** AUC depends on ordering; log loss and calibration depend on the numeric probabilities. Use a separate calibration boundary.
 
-**Verify:** For task `Calibration check: Compare ROC AUC, log loss, and a reliability diagram for a boosting classi...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Calibration check — print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.
 
 5. **Portable backend contract:** Design a comparison helper that uses scikit-learn's HistGradientBoostingClassifier offline and adds XGBoost/LightGBM only when installed. It must report skipped backends explicitly.
    **Progressive hint:** Detect availability with importlib, keep the baseline unconditional, and never convert a missing optional package into a silent pass.
 
-**Verify:** For task `Portable backend contract: Design a comparison helper that uses scikit-learn's HistGradientBo...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Portable backend contract — return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.
 
 6. **Overfitting diagnosis:** Plot training and validation loss by boosting iteration and diagnose a curve where training loss falls continuously while validation loss starts rising.
    **Progressive hint:** The iteration at minimum validation loss is the candidate stopping point. Also test depth, minimum leaf support, subsampling, and learning rate.
 
-**Verify:** For task `Overfitting diagnosis: Plot training and validation loss by boosting iteration and diagnose a...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Overfitting diagnosis — save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -332,10 +296,12 @@ Emphasize sequential boosting, learning-rate budgets, and validation control. Us
 - guide: `python/ds-60day/companion-guides/day39_gradient_boosting_xgboost_lightgbm.md`
 - learner artifact: `python/ds-60day/notebooks/day39_gradient_boosting_xgboost_lightgbm.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-38`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

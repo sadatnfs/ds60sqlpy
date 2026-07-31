@@ -83,6 +83,25 @@ Extend this project only when a new model has a declared grain, dependencies,
 contract, violation queries, independent reconciliation where applicable, and
 a deterministic expected change to the final snapshot.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+The checked-in model graph has a deterministic dependency order:
+
+```python
+from bridge.professional.solutions.bridge_analytics_01_local_project_solution import (
+    MODELS,
+    SOURCE_NAMES,
+    topological_order,
+)
+
+ordered_names = tuple(model.name for model in topological_order(MODELS, source_names=SOURCE_NAMES))
+assert ordered_names[-1] == "mart_daily_revenue"
+assert ordered_names.index("int_order_revenue") < ordered_names.index("mart_daily_revenue")
+```
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs map one-for-one to the answer-free learner artifact and
@@ -100,9 +119,7 @@ and add deterministic fixtures that differ only by the duplicate row.
 
 **Why:** Validate the complete key tuple and report only safe row position/key metadata.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** For each producer contract, load one unique fixture successfully, duplicate its primary-key tuple, and assert validation fails with the source/grain named before DuckDB insertion.
 
 ### Exercise 2 — DAG
 
@@ -114,9 +131,7 @@ states, choose lexicographic ready nodes, and raise with the bounded cycle/missi
 
 **Why:** Break ties by stable model name so valid independent branches are reproducible.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Assert raw sources precede dependent staging/intermediate/mart models with stable name ordering; an unknown dependency and a two-model cycle each raise `ValueError` listing unresolved names.
 
 ### Exercise 3 — Staging
 
@@ -128,9 +143,7 @@ source row. Let producer tests expose duplicates rather than masking them.
 
 **Why:** Staging should rename/cast, not hide duplicate producer rows.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Compare staging row counts with their raw sources, assert no `DISTINCT`/aggregation, and record grains `customer_id`, `order_id`, and `(order_id, line_number)` with typed/normalized columns.
 
 ### Exercise 4 — Intermediate model
 
@@ -142,9 +155,7 @@ only dimensions/many-to-one sources, and reconcile predicted order count with so
 
 **Why:** Aggregate line items to one row per order before joining other facts.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Predict and assert one row per order in `int_order_revenue`, with exact summed item revenue and retained customer/status/date fields; row count equals raw orders, including orders without matching items per policy.
 
 ### Exercise 5 — Mart
 
@@ -157,9 +168,7 @@ documentation.
 
 **Why:** Every selected non-aggregate must belong to the daily grain.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Assert one row per UTC order date, only the documented completed/paid statuses contribute, revenue/order/customer measures match fixtures, and output is ordered by date.
 
 ### Exercise 6 — Identifier safety
 
@@ -171,9 +180,7 @@ schema separators/quotes, and generate DDL only from validated internal specs.
 **Why:** Parameters cannot bind identifiers; constrain structure with a strict
 grammar/allowlist.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Pass every checked-in model name and injection-shaped/uppercase/punctuated names; assert only names matching the trusted identifier policy reach generated DDL.
 
 ### Exercise 7 — Schema contract
 
@@ -185,9 +192,7 @@ and raise targeted errors for missing/extra/type/nullability drift.
 
 **Why:** Check position, normalized type prefix, and nullability according to declared policy.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Compare exact `DESCRIBE` column order/type compatibility with `MART_CONTRACT`; separate fixtures must report name drift and type drift distinctly before publication.
 
 ### Exercise 8 — Data tests
 
@@ -199,9 +204,7 @@ preserve individual results rather than one combined opaque flag.
 
 **Why:** A test query returns violating rows; passing means count zero.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Execute each violation query against valid fixtures and assert zero rows; inject one uniqueness, null, status, relationship, money, and quantity violation and assert its named test returns evidence rows.
 
 ### Exercise 9 — Reconciliation
 
@@ -212,9 +215,7 @@ day, and fail on missing sides or exact measure differences.
 
 **Why:** Do not reuse the mart's exact transformation path for its check.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Independently recompute daily revenue/order/customer measures from order grain and full-outer compare; assert zero mismatches, then perturb each mart measure and observe a dated mismatch row.
 
 ### Exercise 10 — Semantic metric
 
@@ -227,9 +228,7 @@ behavior.
 
 **Why:** A metric definition is a contract, not merely a SQL expression.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Define an additional metric with model, expression, aggregation, grain, time dimension, unit, exclusions, and denominator; calculate one fixture date and compare the exact value.
 
 ### Exercise 11 — Idempotency
 
@@ -240,9 +239,7 @@ both times, and compare deterministic `ORDER BY` snapshots plus unchanged row co
 
 **Why:** Rebuild semantics should replace trusted models rather than append.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Run the project twice in one connection; assert identical ordered snapshots, row counts, test results, and reconciliation, with no duplicate append state.
 
 ### Exercise 12 — Impact analysis
 
@@ -254,9 +251,7 @@ rebuild, and assert only those rows/measures change while all contracts remain i
 
 **Why:** Write expected deltas before executing the rebuild.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Add one source row and write predicted staging/intermediate/mart row and measure deltas first; assert the actual snapshot matches every predicted change and existing contracts remain unchanged.
 
 ### Exercise 13 — Freshness
 
@@ -268,9 +263,7 @@ timestamp with injected UTC as-of; report empty and stale sources as separate fa
 
 **Why:** Time-based tests must not call the wall clock directly.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** With an injected as-of instant, assert a present old source is reported stale, an absent source missing, and a recent source current using the declared threshold.
 
 ### Exercise 14 — Build strategy
 
@@ -283,9 +276,7 @@ periodic full rebuilds.
 
 **Why:** Idempotent full rebuild is the reference correctness baseline.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Provide a comparison of full rebuild versus incremental state, keys, late updates, delete handling, and atomic publication; mark incrementality unproved until change-capture and replay tests exist.
 
 ### Exercise 15 — Money correctness
 
@@ -297,9 +288,7 @@ to Decimal at the boundary, and round only labeled presentation values.
 
 **Why:** Reject silent float conversion and premature rounding.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Trace one exact Decimal from source tuple through DuckDB `DECIMAL`, order aggregation, mart aggregation, Python snapshot, and reconciliation; assert equality at every boundary without float conversion.
 
 ### Exercise 16 — NULL semantics
 
@@ -312,9 +301,7 @@ reconcile fact counts/revenue before and after enrichment.
 **Why:** An `unknown` label is a business rule; a filtering join is a data-loss bug unless
 declared.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Inject a missing dimension label; assert the declared replacement/NULL policy, unchanged fact row count, and unchanged revenue/order totals.
 
 ### Exercise 17 — Time semantics
 
@@ -327,9 +314,7 @@ assignment.
 
 **Why:** Convert the instant to the reporting zone before deriving its date.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Place timezone-aware orders immediately before and after the declared UTC midnight; assert they land on the two expected dates and no local-machine timezone changes the snapshot.
 
 ### Exercise 18 — Late data
 
@@ -341,9 +326,7 @@ ingestion-time lookback or affected-partition reprocessing plus reconciliation.
 
 **Why:** Watermarks based only on event time can miss late records.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Add a late order to an already-built date; assert full rebuild corrects that date and the proposed incremental repair reprocesses the same affected partition to an identical result.
 
 ### Exercise 19 — Snapshot determinism
 
@@ -355,9 +338,7 @@ normalize exact scalar serialization, and compare tuples rather than display-for
 
 **Why:** Database row order is undefined without final `ORDER BY`.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Assert mart queries include a complete unique order, serialize dates/Decimals with the documented stable format, and produce byte-identical snapshots across repeated runs.
 
 ### Exercise 20 — Performance
 
@@ -369,9 +350,7 @@ columns or pre-aggregate at declared grain, then re-run all tests/reconciliation
 
 **Why:** Optimize after contracts and reconciliation pass.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Capture bounded `EXPLAIN` output for intermediate and mart builds, identify scan/join/aggregate operators, and propose one optimization whose post-change grain, counts, and reconciliation remain identical.
 
 ### Exercise 21 — Lineage
 
@@ -384,9 +363,7 @@ edges and metric exclusions, and test the expected path.
 **Why:** Lineage should be derivable from checked-in contracts rather than hand-maintained prose
 alone.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Generate lineage rows from every raw source through models to each metric; assert all declared dependencies appear, no orphan/cycle exists, and `gross_revenue` terminates at `mart_daily_revenue`.
 
 ### Exercise 22 — Transaction
 
@@ -399,9 +376,7 @@ swap after validation.
 
 **Why:** Check DuckDB transaction/DDL semantics rather than assuming atomicity.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Inject failure before publication and assert readers retain the prior complete mart; the design must stage or transact replacement so no partial model set becomes visible.
 
 ### Exercise 23 — Failure policy
 
@@ -413,9 +388,7 @@ bounded failure evidence without mutating the last known-good artifact.
 
 **Why:** Do not continue to a green artifact after a red quality gate.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Force producer-contract, table-contract, data-test, and reconciliation failures separately; assert each blocks publication while retaining the named failing query/result for diagnosis.
 
 ### Exercise 24 — Portable artifact
 
@@ -428,6 +401,4 @@ regeneration/removal.
 
 **Why:** Separate generated artifacts from source and never include local paths or credentials.
 
-**Evidence:** Assert deterministic outputs plus the exact calls that did
-and did not cross the boundary. Keep live/network evidence opt-in,
-credential-free, bounded, and separately labeled.
+**Verification evidence:** Export an ordered result plus manifest containing lesson/version, schema/grain, metric definitions, source fixture hashes, test/reconciliation results, creation command, and cleanup; repeat and compare deterministically.

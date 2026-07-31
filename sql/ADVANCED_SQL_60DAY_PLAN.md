@@ -276,9 +276,11 @@ plans, reconcile business totals, and explain any remaining quality exception.
 
 ## Relational foundations and professional extensions
 
-The original Days 1–60 remain stable. New learners should first complete
-`sql-found-01` (relational design and constraints) and `sql-found-02`
-(versioned migrations). Ten named professional modules then extend the track:
+The original Days 1–60 remain stable. New learners begin at Day 1.
+`sql-found-01` (relational design and constraints) follows Day 15, while
+`sql-found-02` (versioned migrations) follows relational design and the
+transaction/locking sequence through Day 39. Ten named professional modules
+then extend the track:
 
 - `sql-sec-01`: roles, privileges, safe search paths, and row-level security
 - `sql-prog-01`: functions, procedures, triggers, and auditing boundaries

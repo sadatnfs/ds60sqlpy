@@ -88,6 +88,13 @@ canonical setup document, but every lesson still needs a short, concrete
 handoff to that workflow. Topic explanations, examples, mistakes, and expected
 observations must be specific to the lesson.
 
+Do not paste mechanically shortened prompt text such as
+`For task "Build a pipeli..."` into learner-facing prose. Name the operation
+directly, and state its complete expected evidence. Likewise, placeholders
+such as “the key named in the prompt,” “the operation being learned,” or “the
+declared object” must be resolved to the actual key, concept, or object before
+review.
+
 ### Exercise contracts
 
 An exercise must be specific enough that a learner and a reviewer can agree on
@@ -116,6 +123,25 @@ Write a bounded contract instead:
 The second version names the input, filter boundary, result name, ordering and
 mutation constraints, expected value, and edge cases without revealing the
 comprehension itself.
+
+An `**Expected:**` or `**Verify:**` label is not evidence by itself. Its body
+must name something the learner can inspect: an assertion and value, an exact
+exception, output columns and row grain, a bounded count, a file and hash, a
+metric and tolerance, a command and exit status, a transcript, or another
+topic-specific artifact. Do not copy the exercise behind a generic wrapper
+such as “a deterministic result demonstrates the requirement,” and do not
+apply every possible control to every task. A one-row aggregate does not need a
+ranking tie-breaker; a simple projection does not need a CTE-stage audit; a
+configuration parser does not need a database query. Verification must follow
+the actual mechanism and failure modes of that exercise.
+
+More prose is not automatically more teaching. Do not inflate a lesson with a
+generated “independent verification,” “edge case,” or “alternative” paragraph
+whose test does not apply to that exact query or program. A wrong scalar,
+join, window, DML, limit, or time-boundary checklist is worse than omitting the
+check. Keep the exercise-specific explanation and remove boilerplate whenever
+the artifact cannot name literal inputs, keys, measures, expected values, and
+the independent evidence that proves them.
 
 ### Notebook teaching flow
 
@@ -157,10 +183,10 @@ The prompt must be specific rather than “explain this topic.” Include:
 - a done condition based on working evidence and retrieval in the learner's
   own words.
 
-The generated lesson reader also presents this prompt in a dedicated,
-copyable coaching panel. Keep the Markdown source and generated reader aligned
-so the prompt remains usable in VS Code, plain text, static HTML, and private
-portal modes.
+The generated lesson reader extracts this exact fenced prompt into a dedicated,
+copyable coaching panel; it does not maintain a second hand-authored prompt.
+Keep the Markdown block complete so the same source remains usable in VS Code,
+plain text, static HTML, and private portal modes.
 
 ## Difficulty and pacing
 
@@ -217,6 +243,14 @@ fragment to a lesson notebook.
 
 - Target PostgreSQL 16+ and test canonical automation on PostgreSQL 17.
 - Use PostgreSQL syntax in runnable files.
+- State the outer result grain with its real identity columns. Do not infer
+  grain from the last selected alias, treat a measure such as `count` or
+  `ranking` as a unique key, or use placeholders such as “the answer's named
+  identity.”
+- List the final projected columns explicitly in exercise contracts instead
+  of saying `*`. If order matters, state only the outer query's final
+  `ORDER BY`; never copy a window frame, nested subquery, CTE body, or
+  truncated SQL fragment into the result-order description.
 - Keep normal lessons transactional and rollback-safe.
 - Declare persistent project fixtures.
 - Explain NULL, ordering, time zone, and money assumptions.

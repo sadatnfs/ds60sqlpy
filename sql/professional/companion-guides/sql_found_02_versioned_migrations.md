@@ -3,10 +3,10 @@
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Catalog prerequisite:** `sql-found-01`
+- **Catalog prerequisites:** `sql-found-01` and `sql-39`
 - **Prerequisites:** [SQL-FOUND-01 — relational design](sql_found_01_relational_design.md),
-  transactions, constraints, and permission to create/drop an isolated schema
-  in `advanced_sql_training`.
+  the transaction/locking sequence through SQL Day 39, constraints, and
+  permission to create/drop an isolated schema in `advanced_sql_training`.
 - **Artifacts:** [learner SQL](../lessons/sql_found_02_versioned_migrations.sql) ·
   [fixture migrations](../fixtures/migrations/README.md) ·
   [solution reasoning](../solutions/sql_found_02_versioned_migrations_solutions.md) ·
@@ -98,11 +98,7 @@ window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may exec
 different physical plan while preserving those semantics.
 
 The worked walkthrough's lesson-specific task is: The fixture owns one schema and five ordered files. Every migration starts a transaction, checks schemamigrations, performs its body only when absent, records metadata last, and commits. A failed statement prevents the metadata row from lying about a partial migration.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The first runnable example has a concrete contract: Example 1 returns one row per `migration_id` with columns `migration_id`, `migration_name`, and `content_tag` from `pro_migration_lab.schema_migrations`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce. Its final projection is `migration_id`, `migration_name`, and `content_tag`. Reselect the returned key columns from `pro_migration_lab.schema_migrations`, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
 
 ## Two worked SQL examples
 
@@ -119,11 +115,9 @@ FROM pro_migration_lab.schema_migrations AS sm
 ORDER BY sm.migration_id;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+**How to read it:** Example 1: Start with `pro_migration_lab.schema_migrations` in `FROM`/`JOIN`. The final `SELECT` displays `migration_id`, `migration_name`, and `content_tag`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one row per `migration_id` with columns `migration_id`, `migration_name`, and `content_tag` from `pro_migration_lab.schema_migrations`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -139,11 +133,9 @@ JOIN pro_migration_lab.service_requests_api AS api
 ORDER BY sr.request_key;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+**How to read it:** Example 2: Start with `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` in `FROM`/`JOIN`. The final `SELECT` displays `request_key`, `legacy_storage`, `new_storage`, and `stable_api_value`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one row per `request_key` with columns `request_key`, `legacy_storage`, `new_storage`, and `stable_api_value` from `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -239,36 +231,44 @@ For every migration, record precondition, change, verification, compatibility
 window, recovery action, and cleanup:
 
 1. **Manifest:** return versions 1–5 once and in order with stable metadata.
-   **Expected result/shape:** Exercise 1 must make “Manifest: return versions 1–5 once and in order with stable metadata” observable through the exact DDL/DML command tag plus one catalog/behavior check per object or invariant; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `sm`, `api`, `sr`, `pro_migration_lab.service_requests`.
-   **Verify:** For Exercise 1, inspect the relevant `pg_catalog` or `information_schema` rows for `sm`, `api`, `sr`, `pro_migration_lab.service_requests`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-found-02 Exercise 1, read from `pro_migration_lab.schema_migrations`. Build the answer toward `migration_id`, `migration_name`, and `content_tag`; keep `migration_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-found-02 Exercise 1, expected output: one row per `migration_id`. The final columns are `migration_id`, `migration_name`, and `content_tag`. The final order is `sm.migration_id`.
+   **Verify:** For sql-found-02 Exercise 1, run an anti-check that counts rows where NOT ((sm.migration_id BETWEEN 1 AND 5)); require unique `migration_id` where the expected grain is one row per key and confirm the projected `migration_id`, `migration_name`, and `content_tag` against `pro_migration_lab.schema_migrations`. Add one row for which `(sm.migration_id BETWEEN 1 AND 5)` is true and one for which it is false; verify only the matching `migration_id` value is returned.
 2. **Compatibility:** explain the version-2 view and order schema, reader,
    writer, backfill, validation, and contract deployments.
-   **Expected result/shape:** Exercise 2 must make “Compatibility: explain the version-2 view and order schema, reader, writer, backfill, validation, and contract deployments” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement.
-   **Verify:** For Exercise 2, inspect the relevant `pg_catalog` or `information_schema` rows for `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, `pro_migration_lab.service_requests_api`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-found-02 Exercise 2, complete the compatibility written analysis and support its claims with read-only evidence from `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-found-02 Exercise 2, expected output: a completed the compatibility written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `urgency_label`, and `priority_code`.
+   **Verify:** For sql-found-02 Exercise 2, check the compatibility written analysis against `urgency_label`, and `priority_code`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 3. **Forward series:** design versions 6–8 for `assigned_team` as separate
    expand, backfill, and contract steps.
-   **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Forward series: design versions 6–8 for assignedteam as separate expand, backfill, and contract steps” at one result row per key or group explicitly named in the prompt. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 3, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, `pro_migration_lab.service_requests_api`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-found-02 Exercise 3, complete the forward series written analysis and support its claims with read-only evidence from `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-found-02 Exercise 3, expected output: a completed the forward series written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `assigned_team`, `high`, `critical`, `response`, and `general`.
+   **Verify:** For sql-found-02 Exercise 3, check the forward series written analysis against `assigned_team`, `high`, `critical`, `response`, and `general`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 4. **Runner boundaries:** identify nontransactional operations and explain why
    lossy changes do not have universal “down” migrations.
-   **Expected result/shape:** Exercise 4 needs a labeled transaction/session transcript that demonstrates “Runner boundaries: identify nontransactional operations and explain why lossy changes do not have universal “down” migrations”. Capture statement order, affected keys/counts, lock or snapshot state, and the expected SQLSTATE when an error is part of the exercise; finish with no open lesson transaction or leftover shared fixture. Named evidence columns/objects: `CONCURRENTLY`.
-   **Verify:** For Exercise 4, replay the written Session A/Session B order against `advanced_sql_training`, compare the observed values/SQLSTATE with the prediction, then query/drop the disposable fixture and confirm neither session retains a transaction or lock.
+   **Inputs/evidence:** For sql-found-02 Exercise 4, change only `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_class` rows.
+   **Expected result/shape:** For sql-found-02 Exercise 4, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `vacuum`, and `update`.
+   **Verify:** For sql-found-02 Exercise 4, inspect `pg_catalog.pg_class` for `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 5. **Interrupted retry:** make version 6 recoverable after an uncertain client
    disconnect, while detecting rather than concealing incompatible drift.
-   **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Interrupted retry: make version 6 recoverable after an uncertain client disconnect, while detecting rather than concealing incompatible drift” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `sm`, `manifest_matches`, `c`, `schema_matches`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 5, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `pro_migration_lab.schema_migrations`, `information_schema.columns`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-found-02 Exercise 5, read from `pro_migration_lab.schema_migrations`, and `information_schema.columns`. Compute `manifest_matches`, and `schema_matches` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-found-02 Exercise 5, expected output: exactly one aggregate summary row. The final columns are `manifest_matches`, and `schema_matches`.
+   **Verify:** For sql-found-02 Exercise 5, evaluate each of `manifest_matches`, and `schema_matches` in a separate control `SELECT` over `pro_migration_lab.schema_migrations`, and `information_schema.columns`; require one final row and compare every value. Add one source row with a new `version`; verify the result gains exactly one row carrying that `version` value.
 6. **Low-lock rollout:** mark boundaries and evidence for concurrent index
    creation and `NOT VALID`/`VALIDATE CONSTRAINT`.
-   **Expected result/shape:** Exercise 6 needs a labeled transaction/session transcript that demonstrates “Low-lock rollout: mark boundaries and evidence for concurrent index creation and NOT VALID/VALIDATE CONSTRAINT”. Capture statement order, affected keys/counts, lock or snapshot state, and the expected SQLSTATE when an error is part of the exercise; finish with no open lesson transaction or leftover shared fixture. Named evidence columns/objects: `not`, `valid`, `validate`, `constraint`, `CONCURRENTLY`.
-   **Verify:** For Exercise 6, replay the written Session A/Session B order against `advanced_sql_training`, compare the observed values/SQLSTATE with the prediction, then query/drop the disposable fixture and confirm neither session retains a transaction or lock.
+   **Inputs/evidence:** For sql-found-02 Exercise 6, change only `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_constraint` rows.
+   **Expected result/shape:** For sql-found-02 Exercise 6, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `object_name`, `catalog_definition`, `accepted_case`, and `rejected_sqlstate`.
+   **Verify:** For sql-found-02 Exercise 6, inspect `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_constraint` for `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 7. **Drift report:** compare expected and observed columns, constraints, and
    indexes; label missing, unexpected, and changed objects deterministically.
-   **Expected result/shape:** Exercise 7 needs the plan evidence for “Drift report: compare expected and observed columns, constraints, and indexes; label missing, unexpected, and changed objects deterministically”: one plan tree per compared query with node type, estimated rows, actual rows/loops when ANALYZE is used, and buffers or predicate details requested by the prompt. The underlying query must still return one catalog/behavior check per object or invariant. Named evidence columns/objects: `c`, `column_name`, `drift_status`, `e`, `o`.
-   **Verify:** For Exercise 7, hold SQL text, parameters, seed data, and settings constant except for the intended change; compare result keys/counts from `information_schema.columns` before interpreting scan/join nodes, estimates, actual rows, loops, and buffers.
+   **Inputs/evidence:** For sql-found-02 Exercise 7, read from `information_schema.columns`, `expected`, and `pg_get_expr`. Build the answer toward `column_name`; keep `column_name` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-found-02 Exercise 7, expected output: one row per `column_name`. The final columns are `column_name`. The final order is `column_name`.
+   **Verify:** For sql-found-02 Exercise 7, project `column_name` plus the raw source columns from `information_schema.columns`, `expected`, and `pg_get_expr` at each join stage; record row count and distinct `column_name`, then assert the final `column_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `column_name`; verify the result gains exactly one row carrying that `column_name` value.
 8. **Failed deployment:** write phase-specific compatibility, pause, restore,
    reconciliation, and decision evidence for recovery.
-   **Expected result/shape:** Exercise 8 returns a table-shaped answer to “Failed deployment: write phase-specific compatibility, pause, restore, reconciliation, and decision evidence for recovery” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `recovery`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 8, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, `pro_migration_lab.service_requests_api`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-found-02 Exercise 8, use the inline `VALUES` fixture in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
+   **Expected result/shape:** For sql-found-02 Exercise 8, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`. The final order is `phase`.
+   **Verify:** For sql-found-02 Exercise 8, restore into an isolated target and reconcile the inline `VALUES` fixture using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
 
 ## Self-check
 
@@ -300,8 +300,9 @@ window, recovery action, and cleanup:
 
 ## Next step
 
-Continue to [SQL-SEC-01 — roles, privileges, and row-level security](sql_sec_01_roles_privileges_rls.md)
-after SQL Day 39. Later professional modules can add migration regression tests,
+Continue directly to
+[SQL-40 — advanced analytic functions](../../postgres-60day/companion-guides/day40_analytic_functions_advanced.md).
+The later professional modules then add security, migration regression tests,
 routine deployment, operational rehearsal, and application-coordinated release
 evidence.
 
@@ -314,7 +315,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-found-02 — Versioned Schema Migrations and Safe Evolution.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisites: `sql-found-01`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_found_02_versioned_migrations.md
 - Answer-free learner SQL: sql/professional/lessons/sql_found_02_versioned_migrations.sql
 

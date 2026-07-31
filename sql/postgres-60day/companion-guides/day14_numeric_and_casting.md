@@ -102,11 +102,9 @@ ORDER BY total_amount DESC, order_id
 LIMIT 50;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per product.
+**How to read it:** Example 1: Start with `orders` in `FROM`/`JOIN`. The final `SELECT` displays `order_id`, `total_amount`, `rounded`, and `as_int`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one row per `order_id`, capped at 50 rows with columns `order_id`, `total_amount`, `rounded`, and `as_int` from `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -120,11 +118,9 @@ GROUP BY p.category
 ORDER BY avg_price DESC, p.category;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per product.
+**How to read it:** Example 2: Start with `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `qty`, and `avg_price`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one grouped row per `category` with columns `category`, `qty`, and `avg_price` from `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -162,28 +158,34 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Calculate product gross margin amount and percentage, returning NULL percentage for zero price.
    **Progressive hint:** Keep exact numeric arithmetic and guard the denominator with `NULLIF`.
-   **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: Calculate product gross margin amount and percentage, returning NULL percentage for zero price” at one row per product or product grouping requested. Named evidence columns/objects: `evidence`, `margin_amount`, `margin_rate`, `p`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 1, prove uniqueness at one row per product or product grouping requested; reconcile the result's row count and any count/sum/amount with a simpler control over `products`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-14 Exercise 1, read from `products`. Build the answer toward `product_id`, `price`, `cost`, `margin_amount`, and `margin_rate`; keep `product_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-14 Exercise 1, expected output: One row per product. The final columns are `product_id`, `price`, `cost`, `margin_amount`, and `margin_rate`. The final order is `margin_rate DESC NULLS LAST, p.product_id`.
+   **Verify:** For sql-14 Exercise 1, reselect the returned keys directly from the source; require unique `product_id` where the expected grain is one row per key and confirm the projected `product_id`, `price`, `cost`, `margin_amount`, and `margin_rate` against `products`. Repeat with `NULL` in `product_id`, and `price` and state whether the row is kept, rejected, or classified.
 2. **Query writing:** Safely cast a set of text values to numeric only when they match a numeric grammar.
    **Progressive hint:** Validate with a regex before casting; otherwise return NULL.
-   **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Safely cast a set of text values to numeric only when they match a numeric grammar” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `parsed_numeric`, `sample`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 2, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `order_items`, `products`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-14 Exercise 2, read from the inline `VALUES` fixture. Build the answer toward `raw_value`, and `parsed_numeric`; keep `parsed_numeric` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-14 Exercise 2, expected output: One row per sample text. The final columns are `raw_value`, and `parsed_numeric`.
+   **Verify:** For sql-14 Exercise 2, reselect the returned keys directly from the source; require unique `parsed_numeric` where the expected grain is one row per key and confirm the projected `raw_value`, and `parsed_numeric` against the inline `VALUES` fixture. Add one source row with a new `parsed_numeric`; verify the result gains exactly one row carrying that `parsed_numeric` value.
 3. **Query writing:** Show order-item net revenue rounded only after summing.
    **Progressive hint:** Aggregate exact line expressions first; round the final display value.
-   **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Show order-item net revenue rounded only after summing” at one summary row per grouping key explicitly named in the prompt. Named evidence columns/objects: `evidence`, `net_order_revenue`, `oi`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 3, prove uniqueness at one summary row per grouping key explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `order_items`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-14 Exercise 3, read from `order_items`. Build the answer toward `order_id`, and `net_order_revenue`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-14 Exercise 3, expected output: One row per order. The final columns are `order_id`, and `net_order_revenue`. The final order is `oi.order_id`.
+   **Verify:** For sql-14 Exercise 3, independently aggregate `order_items` by `order_id`; require one output row for every distinct `order_id` tuple and compare `net_order_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `net_order_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
 4. **Prediction:** Compare integer division with numeric division for 1 divided by 4.
    **Progressive hint:** At least one operand must be numeric to preserve the fraction.
-   **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Compare integer division with numeric division for 1 divided by 4”. Show both compared result shapes at one row at least one operand must be numeric to preserve the fraction grain, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `integer_division`, `numeric_division`.
-   **Verify:** For Exercise 4, run the two forms over the identical rows in `orders`, `order_items`, `products`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-14 Exercise 4, read from `orders`, `order_items`, and `products`. Compute `integer_division`, and `numeric_division` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-14 Exercise 4, expected output: One row showing 0 and 0.25. The final columns are `integer_division`, and `numeric_division`.
+   **Verify:** For sql-14 Exercise 4, evaluate each of `integer_division`, and `numeric_division` in a separate control `SELECT` over `orders`, `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 5. **Debugging:** Calculate average payment amount per paid order without dividing by zero or counting payment rows as orders.
    **Progressive hint:** Aggregate payment amount and count distinct order IDs at one common scope.
-   **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Calculate average payment amount per paid order without dividing by zero or counting payment rows as orders” at one row at one common scope grain. Named evidence columns/objects: `orders`, `evidence`, `average_paid_amount_per_order`, `p`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 5, prove uniqueness at one row at one common scope grain; reconcile the result's row count and any count/sum/amount with a simpler control over `payments`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-14 Exercise 5, read from `payments`. Build the answer toward `average_paid_amount_per_order`; keep `payment_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-14 Exercise 5, expected output: Exactly one summary row. The final columns are `average_paid_amount_per_order`.
+   **Verify:** For sql-14 Exercise 5, reselect the returned keys directly from the source; require unique `payment_id` where the expected grain is one row per key and confirm the projected `average_paid_amount_per_order` against `payments`. Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
 6. **Extension:** Compare sum-of-rounded line values with rounded exact total and quantify the rounding difference.
    **Progressive hint:** This diagnostic makes the consequence of early rounding visible.
-   **Expected result/shape:** Exercise 6 must make “Extension: Compare sum-of-rounded line values with rounded exact total and quantify the rounding difference” observable through the exact DDL/DML command tag plus one summary row per grouping key explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `sum_of_rounded_lines`, `rounded_exact_total`, `rounding_difference`, `oi`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `sum_of_rounded_lines`, `rounded_exact_total`, `rounding_difference`, `oi`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-14 Exercise 6, read from `order_items`. Build the answer toward `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`; keep `order_item_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-14 Exercise 6, expected output: One row with two totals and their signed difference. The final columns are `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
+   **Verify:** For sql-14 Exercise 6, reselect the returned keys directly from the source; require unique `order_item_id` where the expected grain is one row per key and confirm the projected `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference` against `order_items`. Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
 
 ## Common mistakes and how to recover
 
@@ -249,7 +251,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-14 — Numeric and Casting.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisite: `sql-13`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day14_numeric_and_casting.md
 - Answer-free learner SQL: sql/postgres-60day/day14_numeric_and_casting.sql
 

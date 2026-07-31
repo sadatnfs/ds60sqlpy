@@ -115,7 +115,9 @@ without opening a browser.
 
 The focused learner-entry tests cover different boundaries:
 
-- `test_course_guide.py` checks dashboard catalog links and generated copy.
+- `test_course_guide.py` checks dashboard catalog links, generated copy, and
+  that all 154 guide-authored Codex prompts are embedded without fallback
+  drift.
 - `test_lesson_depth_audit.py` checks the curriculum-wide beginner-depth
   contract, duplicate/template guards, runnable guide fences, and report.
 - `test_lesson_reader.py` checks deterministic rendered pages, safe link
@@ -158,7 +160,8 @@ registering a kernel, or requiring a database server on the CI image.
 The weekly and manually dispatched heavy job validates the lock, installs every
 extra, then exercises the maintained advanced import manifest for the `bridge`,
 `professional`, `sql-notebooks`, `ml`, `production`, `deep-learning`, `nlp`,
-and `geo` lesson stacks on fresh Windows and Ubuntu Python 3.12 runners:
+and `geo` lesson stacks on fresh Windows, Ubuntu, and macOS Python 3.12
+runners:
 
 ```text
 uv sync --frozen --all-extras
@@ -167,14 +170,38 @@ uv run --no-sync python scripts/check_advanced_imports.py
 
 Each import runs in an isolated process and does not fetch datasets, pretrained
 weights, spaCy pipelines, or external services. This proves locked package
-installation and basic import compatibility on those two platforms; it does
-not prove model training, GPU support, asset availability, live APIs, or every
-advanced lesson's runtime behavior. macOS receives the core matrix but not this
-heavy all-extras gate. The ML extra constrains Numba by platform because SHAP's
-transitive requirement is otherwise broad enough for a legacy source release
-with incomplete Python-version metadata to enter a valid-looking lock. The
-bounds retain Python 3.12 wheels on Windows, Linux, Intel macOS, and Apple
-silicon.
+installation and basic import compatibility on those platforms; it does not
+prove model training, GPU support, asset availability, live APIs, or every
+advanced lesson's runtime behavior. A fast core-job dry run also proves that
+the all-extras lock has an installable plan for Windows x86-64, Linux x86-64,
+Intel macOS, and Apple Silicon before the heavy job starts. The ML extra
+constrains Numba by platform because SHAP's transitive requirement is otherwise
+broad enough for a legacy source release with incomplete Python-version
+metadata to enter a valid-looking lock. PyTorch and TorchVision are likewise
+paired by macOS architecture because current PyTorch releases no longer ship
+Intel-macOS wheels and now require macOS 14 for Apple Silicon. The macOS heavy
+job installs Homebrew's `libomp` first, matching the documented learner setup
+and allowing the locked LightGBM and XGBoost binaries to load.
+
+`Advanced imports` intentionally does **not** run for an ordinary push or pull
+request because installing every optional package is the slowest workflow
+surface. To run it immediately, follow GitHub's
+[manual workflow instructions](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow):
+
+1. Open **Actions**.
+2. Select **Course validation**.
+3. Choose **Run workflow**, select the branch containing the changes, and
+   confirm **Run workflow**.
+4. Open that run and watch the three `Advanced imports` matrix jobs.
+
+GitHub dispatches the whole workflow; its UI cannot start only one job inside a
+workflow. The `workflow_dispatch` event is what makes the advanced job eligible
+while the normal core, learner-bootstrap, and PostgreSQL jobs also run. With the
+GitHub CLI installed, the equivalent command is:
+
+```text
+gh workflow run ci.yml --ref <branch-name>
+```
 
 ## Local validation evidence (2026-07-30)
 

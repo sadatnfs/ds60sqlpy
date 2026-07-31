@@ -105,33 +105,39 @@ ORDER BY wide.category, month_value.month_name;
 -- Keep answers in your own scratch file; this learner script remains answer-free.
 -- 1. [Query writing] Pivot order counts by status into one summary row.
 --    Hint: Use one filtered count per known status and keep an all-orders denominator.
---    Inputs: Use only the declared lesson objects (order_items, orders, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-27 Exercise 1, read from `orders`. Build the answer toward `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`; keep `order_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-27 Exercise 1, expected output: Exactly one row. The final columns are `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`.
+--    Verify: For sql-27 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+--    Hint ladder, rung 1: For sql-27 Exercise 1, inspect the source keys that survive `WHERE`.
 -- 2. [Query writing] Pivot customer counts for US, CA, GB, and DE by segment.
 --    Hint: Group at segment grain and use filtered counts for known country columns.
---    Inputs: Use only the declared lesson objects (order_items, orders, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-27 Exercise 2, read from `customers`. Build the answer toward `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`; keep `segment` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-27 Exercise 2, expected output: One row per segment. The final columns are `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`. The final order is `c.segment NULLS LAST`.
+--    Verify: For sql-27 Exercise 2, independently aggregate `customers` by `segment`; require one output row for every distinct `segment` tuple and compare `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `us_customers`, `ca_customers`, and `gb_customers` for the existing `segment` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-27 Exercise 2, inspect the source keys that survive `WHERE`; then confirm the groups are `segment`; then check `c.segment NULLS LAST` before applying the row cap.
 -- 3. [Query writing] Unpivot a wide quarterly sample into quarter/amount rows.
 --    Hint: Use a lateral `VALUES` relation with one output row per source column.
---    Inputs: Use only the declared lesson objects (order_items, orders, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-27 Exercise 3, read from `wide`. Build the answer toward `company`, `quarter`, and `amount`; keep `company` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-27 Exercise 3, expected output: Eight rows from two source rows and four quarters. The final columns are `company`, `quarter`, and `amount`. The final order is `w.company, unpivoted.quarter`.
+--    Verify: For sql-27 Exercise 3, project `company` plus the raw source columns from `wide` at each join stage; record row count and distinct `company`, then assert the final `company`, `quarter`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `company`; verify the result gains exactly one row carrying that `company` value.
+--    Hint ladder, rung 1: For sql-27 Exercise 3, start with the first relation in `wide`; after each join, record total rows and distinct `company` so the exact fanout or loss is visible.
 -- 4. [Prediction] Compare a missing pivot combination with a real zero and preserve the distinction.
 --    Hint: Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero.
---    Inputs: Use only the declared lesson objects (order_items, orders, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
+--    Inputs: For sql-27 Exercise 4, read from `expenses`. Build the answer toward `category`, `january_observed_amount`, and `january_reported_zero_if_absent`; keep `category` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-27 Exercise 4, expected output: One row per expense category with nullable/zero-aware columns. The final columns are `category`, `january_observed_amount`, and `january_reported_zero_if_absent`. The final order is `e.category`.
+--    Verify: For sql-27 Exercise 4, independently aggregate `expenses` by `category`; require one output row for every distinct `category` tuple and compare `january_observed_amount` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `january_observed_amount` for the existing `category` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-27 Exercise 4, inspect the source keys that survive `WHERE`; then confirm the groups are `category`; then check `e.category` before applying the row cap.
 -- 5. [Debugging] Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.
 --    Hint: Aggregate category/value pairs into data values so the result schema remains stable.
---    Inputs: Use only the declared lesson objects (order_items, orders, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
+--    Inputs: For sql-27 Exercise 5, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, and `revenue_by_category`; keep `month_start` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-27 Exercise 5, expected output: One row per UTC month with a JSON object of category revenue. The final columns are `month_start`, and `revenue_by_category`. The final order is `month_start`.
+--    Verify: For sql-27 Exercise 5, independently aggregate `orders`, `order_items`, and `products` by `month_start`; require one output row for every distinct `month_start` tuple and compare `revenue_by_category` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_by_category` for the existing `month_start` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-27 Exercise 5, run `category_month` one at a time. Record each CTE's row count and `month_start` uniqueness before the next stage uses it.
 -- 6. [Extension] Round-trip a wide sample to long form and back, verifying values and NULLs.
 --    Hint: Unpivot with lateral values, then use conditional aggregation keyed by company.
---    Inputs: Use only the declared lesson objects (order_items, orders, products) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
+--    Inputs: For sql-27 Exercise 6, read from `wide`. Build the answer toward `company`, `q1`, and `q2`; keep `company` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-27 Exercise 6, expected output: Two reconstructed rows matching the source. The final columns are `company`, `q1`, and `q2`. The final order is `company`.
+--    Verify: For sql-27 Exercise 6, independently aggregate `wide` by `company`; require one output row for every distinct `company` tuple and compare `q1`, and `q2` tuple by tuple. Repeat with `NULL` in `company`, and `q1` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-27 Exercise 6, run `long` one at a time. Record each CTE's row count and `company` uniqueness before the next stage uses it.
 
 ROLLBACK;

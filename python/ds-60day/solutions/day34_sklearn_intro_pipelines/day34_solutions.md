@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Exercise 1 — Pipeline with scaler + LinearRegression
+Worked reference for Exercise 1 — Pipeline with scaler + LinearRegression
 ```python
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -34,7 +34,7 @@ Line-by-line
 
 ---
 
-Exercise 2 — Swap to Ridge and compare
+Worked reference for Exercise 2 — Swap to Ridge and compare
 ```python
 from sklearn.linear_model import Ridge
 
@@ -52,7 +52,7 @@ Notes
 
 ---
 
-Exercise 3 — Inspect coefficients with and without scaling
+Worked reference for Exercise 3 — Inspect coefficients with and without scaling
 ```python
 # With scaling
 pipe.fit(Xtr, ytr)
@@ -112,7 +112,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Swap `LinearRegression` for `Ridge` and compare test scores.
 
@@ -122,16 +122,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Swap LinearRegression for Ridge and compare test scores`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — the scikit-learn estimator contract and leakage-safe pipelines — use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Inspect the coefficients and discuss how feature scaling changes their numeric values and interpretation.
 
@@ -141,14 +134,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Inspect the coefficients and discuss how feature scaling changes their numeric values and int...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
-
+**Verify:** Practice 2 — the scikit-learn estimator contract and leakage-safe pipelines — print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
 
 ### Exercise 3 — Leakage prediction
 
@@ -169,14 +155,7 @@ target encoding, and learned dimensionality reduction.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Predict how cross-validation scores can change when a scaler is fit on the complete dataset b...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Leakage prediction — on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.
 
 ### Exercise 4 — Mixed-type implementation
 
@@ -227,14 +206,7 @@ learned state, not harmless cleanup constants.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Build a ColumnTransformer for numeric imputation/scaling and categorical imputation/one-hot e...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Mixed-type implementation — fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.
 
 ### Exercise 5 — Unknown-category debugging
 
@@ -254,14 +226,7 @@ that would change the feature schema and invalidate fitted coefficients.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Fit on regions north and south, then predict a row with region west. Compare OneHotEncoder de...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Unknown-category debugging — capture the default OneHotEncoder unknown-category ValueError for region='west'; with handle_unknown='ignore', assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.
 
 ### Exercise 6 — Inspection and schema contract
 
@@ -272,13 +237,11 @@ assumption or data boundary rather than hiding the failure.
 ```python
 required = numeric + categorical
 
-
 def validate_inference_frame(frame: pd.DataFrame) -> pd.DataFrame:
     missing = sorted(set(required) - set(frame.columns))
     if missing:
         raise ValueError(f"missing required columns: {missing}")
     return frame.loc[:, required].copy()
-
 
 # After `model.fit(train_frame, target)`:
 # names = model.named_steps["preprocess"].get_feature_names_out()
@@ -294,4 +257,4 @@ serving code cannot silently invent another column order.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `After fitting the mixed-type pipeline, recover transformed feature names, pair them with coef...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+**Verify:** Inspection and schema contract — print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.

@@ -4,27 +4,27 @@ Professional learner deep dive (python-stats-01)
 ------------------------------------------------
 
 Mental model:
-Resampling approximates repeated sampling under an explicit scheme. A
-bootstrap samples observational units with replacement to estimate an
-estimator's sampling variability. A permutation test shuffles labels
-under an exchangeability/null assumption to build a reference
-distribution. Clustered or temporal data needs cluster/block schemes.
-
-In an experiment, the estimand states the effect being targeted, such
-as difference in means under assigned treatment. Random assignment
-supports causal interpretation when assignment, interference,
-attrition, compliance, and measurement assumptions are credible.
-Observational adjustment does not recreate randomization automatically.
+Resampling approximates repeated sampling under an explicit scheme. A bootstrap samples
+observational units with replacement to estimate an estimator's sampling variability. A
+permutation test shuffles labels under an exchangeability/null assumption to build a reference
+distribution. Clustered or temporal data needs cluster/block schemes.  In an experiment, the
+estimand states the effect being targeted, such as difference in means under assigned treatment.
+Random assignment supports causal interpretation when assignment, interference, attrition,
+compliance, and measurement assumptions are credible. Observational adjustment does not recreate
+randomization automatically.
 
 API/boundary anatomy:
-* resampling unit: matches the independent assignment/observation grain rather than blindly sampling rows.
-* seeded bootstrap/permutation loop: produces a reproducible distribution of a declared statistic with Monte Carlo error.
-* estimand + assignment mechanism: defines which causal contrast is identified and which assumptions support it.
+* resampling unit: matches the independent assignment/observation grain rather than blindly
+  sampling rows.
+* seeded bootstrap/permutation loop: produces a reproducible distribution of a declared
+  statistic with Monte Carlo error.
+* estimand + assignment mechanism: defines which causal contrast is identified and which
+  assumptions support it.
 
 Micro-example A — bootstrap a mean difference with a seeded generator::
 
     import numpy as np
-    
+
     control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])
     treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
     rng = np.random.default_rng(6101)
@@ -36,12 +36,13 @@ Micro-example A — bootstrap a mean difference with a seeded generator::
     interval = np.quantile(draws, [0.025, 0.975])
     print({"estimate": treatment.mean() - control.mean(), "interval": interval})
 
-Expected: The resampled interval describes uncertainty under independent within-group resampling; the small sample makes it wide/discrete.
+Expected: The resampled interval describes uncertainty under independent within-group
+          resampling; the small sample makes it wide/discrete.
 
 Micro-example B — build a randomization-style null distribution::
 
     import numpy as np
-    
+
     outcomes = np.array([1, 2, 3, 4, 7, 8, 9, 10], dtype=float)
     assigned = np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=int)
     observed = outcomes[assigned == 1].mean() - outcomes[assigned == 0].mean()
@@ -55,9 +56,11 @@ Micro-example B — build a randomization-style null distribution::
     p_value = np.mean(np.abs(null) >= abs(observed))
     print({"observed": observed, "two_sided_p": p_value})
 
-Expected: The null distribution comes from assignments consistent with the shuffle rule, not from a parametric t formula.
+Expected: The null distribution comes from assignments consistent with the shuffle rule, not
+          from a parametric t formula.
 
-Debugging rule: Write the estimand, unit, assignment/sampling mechanism, statistic, resampling rule, seed/runs, interval/test convention, and assumption violations.
+Debugging rule: Write the estimand, unit, assignment/sampling mechanism, statistic, resampling
+                rule, seed/runs, interval/test convention, and assumption violations.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

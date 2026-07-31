@@ -121,16 +121,21 @@ JOIN dim_customer b
  AND b.valid_from <= COALESCE(a.valid_to, 'infinity'::date)
 ORDER BY a.customer_id, version_a, version_b;
 
--- Exercise 5: an unchanged current source should produce zero differences;
--- this is the idempotency gate before closing/inserting a new version.
+-- Exercise 5: replay the SAME desired state used by the first application.
+-- Comparing to training.customers here would be wrong: Exercise 2 deliberately
+-- changed the segment only in staged_customer_change and dim_customer.
+WITH desired_customer_state AS (
+  SELECT customer_id, full_name, country, segment
+  FROM staged_customer_change
+)
 SELECT COUNT(*) AS unchanged_rows_that_would_version
 FROM dim_customer dc
-JOIN training.customers c USING (customer_id)
+JOIN desired_customer_state desired USING (customer_id)
 WHERE dc.is_current
   AND (
-    dc.full_name IS DISTINCT FROM c.full_name
-    OR dc.country IS DISTINCT FROM c.country
-    OR dc.segment IS DISTINCT FROM COALESCE(c.segment, 'standard')
+    dc.full_name IS DISTINCT FROM desired.full_name
+    OR dc.country IS DISTINCT FROM desired.country
+    OR dc.segment IS DISTINCT FROM desired.segment
   );
 
 -- Exercise 6: timestamp-effective ranges support same-day ordering, but require

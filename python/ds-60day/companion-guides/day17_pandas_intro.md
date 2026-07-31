@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 16 (`python-16`): arrays, shapes, dtypes, masks, and vectorization.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -286,7 +282,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-17`
-(Day 17 — pandas Series, DataFrames, and Indexing). I am a complete beginner. Emphasize labeled tabular data, row grain, indexes, selection, and vectorized columns.
+(Day 17 — pandas Series, DataFrames, and Indexing). Direct catalog prerequisites: `python-16`.
+I have completed the direct prerequisites: `python-16`. Emphasize labeled tabular data, row grain, indexes, selection, and vectorized columns.
 Read `python/ds-60day/companion-guides/day17_pandas_intro.md` and use the learner notebook
 `python/ds-60day/notebooks/day17_pandas_intro.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

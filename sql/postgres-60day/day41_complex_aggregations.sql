@@ -53,38 +53,38 @@ LIMIT 10;
 
 -- Exercises
 -- 1. Build a 6-metric dashboard by category using FILTER for various time windows.
---    Inputs: Use only the declared lesson objects (order_items, products, orders, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-41 Exercise 1, read from `orders`, `order_items`, `products`, and `training.products`. Build the answer toward `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`; keep `category` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-41 Exercise 1, expected output: one row for each category in `training.products`, with six metric columns. The final columns are `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`. The final order is `revenue_30d DESC NULLS LAST, category`.
+--    Verify: For sql-41 Exercise 1, independently aggregate `orders`, `order_items`, `products`, and `training.products` by `category`; require one output row for every distinct `category` tuple and compare `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_30d`, `revenue_90d`, and `orders_30d` for the existing `category` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-41 Exercise 1, run `lines` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
 -- 2. Create a per-country string_agg of top 5 product names by revenue.
---    Inputs: Use only the declared lesson objects (order_items, products, orders, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-41 Exercise 2, read from `customers`, `orders`, `order_items`, and `products`. Build the answer toward `country`, and `top_five_products`; keep `country` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-41 Exercise 2, expected output: one row per represented country and one comma-separated label ordered from highest to lowest product revenue. The final columns are `country`, and `top_five_products`. The final order is `country`.
+--    Verify: For sql-41 Exercise 2, independently aggregate `customers`, `orders`, `order_items`, and `products` by `country`; require one output row for every distinct `country` tuple satisfying `(product_rank <= 5)` and compare `top_five_products` tuple by tuple. Give two rows the same `country` value and different ``country`` values; verify `country` produces the intended rank and display order.
+--    Hint ladder, rung 1: For sql-41 Exercise 2, run `product_revenue`, and `ranked` one at a time. Record each CTE's row count and `country` uniqueness before the next stage uses it.
 -- 3. Prediction: compare GROUPING SETS ((country), (category), ()) with CUBE
 --    (country, category). Predict which country/category detail level is absent.
---    Inputs: Use only the declared lesson objects (order_items, products, orders, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-41 Exercise 3, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `revenue`, and `grouping_mask`; keep `country`, and `category` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-41 Exercise 3, expected output: one row per `country`, and `category`. The final columns are `country`, `category`, `revenue`, and `grouping_mask`. The final order is `grouping_mask, country, category`.
+--    Verify: For sql-41 Exercise 3, independently aggregate `orders`, `customers`, `order_items`, and `products` by `country`, and `category`; require one output row for every distinct `country`, and `category` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-41 Exercise 3, run `lines` one at a time. Record each CTE's row count and `country`, and `category` uniqueness before the next stage uses it.
 -- 4. Construction: report order count, paid revenue, returned revenue, and
 --    distinct customers per country using FILTER.
---    Inputs: Use only the declared lesson objects (order_items, products, orders, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-41 Exercise 4, read from `orders`, and `customers`. Build the answer toward `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`; keep `country` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-41 Exercise 4, expected output: one row per `country`. The final columns are `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`. The final order is `c.country`.
+--    Verify: For sql-41 Exercise 4, independently aggregate `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `orders`, `paid_orders`, and `paid_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-41 Exercise 4, start with the first relation in `orders`, and `customers`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
 -- 5. Debugging: distinguish a real NULL country from a subtotal NULL by adding
 --    GROUPING(country) and a safe display label.
---    Inputs: Use only the declared lesson objects (order_items, products, orders, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-41 Exercise 5, read from `customers`. Build the answer toward `country_label`, `is_subtotal`, and `customers`; keep `country_label`, and `is_subtotal` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-41 Exercise 5, expected output: one row per `country_label`, and `is_subtotal`. The final columns are `country_label`, `is_subtotal`, and `customers`. The final order is `is_subtotal, country_label`.
+--    Verify: For sql-41 Exercise 5, independently aggregate `customers` by `country_label`, and `is_subtotal`; require one output row for every distinct `country_label`, and `is_subtotal` tuple and compare `customers` tuple by tuple. Repeat with `NULL` in `GROUPING` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-41 Exercise 5, confirm the groups are `country_label`, and `is_subtotal`; then check `is_subtotal, country_label` before applying the row cap.
 -- 6. Edge case: return an empty array rather than NULL when an aggregate input
 --    set is empty, and explain the COALESCE type cast.
---    Inputs: Use only the declared lesson objects (order_items, products, orders, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-41 Exercise 6, read from `customers`. Build the answer toward `empty_email_array`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-41 Exercise 6, expected output: one row per `customer_id`. The final columns are `empty_email_array`.
+--    Verify: For sql-41 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `empty_email_array` against `customers`. Repeat with `NULL` in `empty_email_array` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-41 Exercise 6, inspect the source keys that survive `WHERE`.
 
 ROLLBACK;

@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 4 (`python-04`): collections, iteration, and generators.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -215,7 +211,7 @@ assertion or inspection and explain what it proves.
    **Verify:** Use `math.isclose` to confirm mean `5.0` and population standard deviation `2.0`, then show empty input follows the documented failure path.
 
 2. Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. **Constraint:** choose and document one explicit behavior—this lesson's reference raises `ValueError`.
-   **Verify:** `help(describe)` communicates the contract without reading the body.
+   **Verify:** capture `help(describe)` output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input `ValueError` without reading the body.
 
 3. Validate `describe` near its boundary: reject an empty list and any non-finite value such as `float('nan')` with a useful `ValueError`.
    **Verify:** show the normal result and use two separate `try`/`except ValueError` checks for the invalid cases; do not catch errors inside the function that it cannot repair.
@@ -283,7 +279,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-05`
-(Day 5 — Functions, Docstrings, and Type Hints). I am a complete beginner. Emphasize function contracts, parameters, return values, scope, and type hints.
+(Day 5 — Functions, Docstrings, and Type Hints). Direct catalog prerequisites: `python-04`.
+I have completed the direct prerequisites: `python-04`. Emphasize function contracts, parameters, return values, scope, and type hints.
 Read `python/ds-60day/companion-guides/day05_functions_type_hints.md` and use the learner notebook
 `python/ds-60day/notebooks/day05_functions_type_hints.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

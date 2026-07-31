@@ -54,10 +54,8 @@ artifact_dir = Path(__file__).resolve().parent
 model = joblib.load(artifact_dir / "model.joblib")  # load only an artifact you trust
 class_names = ["setosa", "versicolor", "virginica"]
 
-
 class IrisFeatures(BaseModel):
     features: Annotated[list[float], Field(min_length=4, max_length=4)]
-
 
 @app.post("/predict")
 def predict(payload: IrisFeatures) -> dict[str, int | str]:
@@ -224,31 +222,15 @@ print(model.predict_proba(request_features).tolist())
 
 1. Add input validation and friendly error behavior.
 
-**Verify:** For task `Add input validation and friendly error behavior`, demonstrate the concrete requirement “1. Add input validation and friendly error behavior” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 1 — validated request contracts, trusted artifacts, and testable inference endpoints — with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
 
 2. Return the class name as well as the numeric class identifier.
 
-**Verify:** For task `Return the class name as well as the numeric class identifier`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
+**Verify:** Practice 2 — validated request contracts, trusted artifacts, and testable inference endpoints — for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
 
 3. Create a minimal runtime dependency file for this API.
 
-**Verify:** For task `Create a minimal runtime dependency file for this API`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** Practice 3 — validated request contracts, trusted artifacts, and testable inference endpoints — build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
 
 ### Progressive hints
 
@@ -269,39 +251,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Boundary-case testing:** Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each.
    **Progressive hint:** Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.
 
-**Verify:** For task `Boundary-case testing: Write API tests for a missing feature, an extra feature, a string, NaN...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
-
+**Verify:** Boundary-case testing — parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.
 
 5. **Batch contract:** Design a `/predict-batch` request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata.
    **Progressive hint:** Validate the entire batch before scoring or define explicit partial failure semantics. Never rely only on list position to identify rows.
 
-**Verify:** For task `Batch contract: Design a /predict-batch request and response with stable row IDs, a maximum b...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Batch contract — define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.
 
 6. **Artifact-compatibility check:** At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe.
    **Progressive hint:** Persist a small manifest beside the artifact and compare required fields. Python pickle/joblib loading can execute code.
 
-**Verify:** For task `Artifact-compatibility check: At startup, validate model version, expected feature schema, an...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Artifact-compatibility check — tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -347,10 +310,12 @@ Emphasize validated request contracts, trusted artifacts, and testable inference
 - guide: `python/ds-60day/companion-guides/day44_model_deployment_fastapi.md`
 - learner artifact: `python/ds-60day/notebooks/day44_model_deployment_fastapi.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-43`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

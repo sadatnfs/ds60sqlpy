@@ -114,11 +114,9 @@ ORDER BY revenue DESC, country, category
 LIMIT 50;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per order status.
+**How to read it:** Example 1: Start with `orders`, `customers`, `order_items`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `country`, `category`, `revenue`, `buyers`, and `rev_per_buyer`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one grouped row per `country`, and `category`, capped at 50 rows with columns `country`, `category`, `revenue`, `buyers`, and `rev_per_buyer` from `orders`, `customers`, `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -147,9 +145,7 @@ LIMIT 50;
 
 **How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `country`, and `category` key set and row count over `orders`, `customers`, `order_items`, and `products`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
 
 ## Learning objectives
 
@@ -190,28 +186,34 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Build an order KPI table by status with order count, revenue, average order value, and distinct customers.
    **Progressive hint:** Aggregate orders at status grain and round only displayed monetary values.
-   **Expected result/shape:** Exercise 1 must make “Query writing: Build an order KPI table by status with order count, revenue, average order value, and distinct customers” observable through the exact DDL/DML command tag plus one row at status grain; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `order_count`, `customer_count`, `revenue`, `average_order_value`, `o`, `kpi`.
-   **Verify:** For Exercise 1, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `order_count`, `customer_count`, `revenue`, `average_order_value`, `o`, `kpi`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-07 Exercise 1, read from `orders`. Build the answer toward `status`, `order_count`, `customer_count`, `revenue`, and `average_order_value`; keep `status` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-07 Exercise 1, expected output: One row per order status. The final columns are `status`, `order_count`, `customer_count`, `revenue`, and `average_order_value`. The final order is `revenue DESC, o.status`.
+   **Verify:** For sql-07 Exercise 1, independently aggregate `orders` by `status`; require one output row for every distinct `status` tuple and compare `order_count`, `customer_count`, `revenue`, and `average_order_value` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, `customer_count`, and `revenue` for the existing `status` tuple and verify the new tuple appears exactly once.
 2. **Query writing:** Return the 20 products with the highest net line revenue.
    **Progressive hint:** Aggregate order items by product before ranking; use product ID as tie-breaker.
-   **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Return the 20 products with the highest net line revenue” at one row per product or product grouping requested. Named evidence columns/objects: `tie`, `evidence`, `net_revenue`, `p`, `oi`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 2, prove uniqueness at one row per product or product grouping requested; reconcile the result's row count and any count/sum/amount with a simpler control over `products`, `order_items`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-07 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, `category`, and `net_revenue`; keep `product_id`, `name`, and `category` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-07 Exercise 2, expected output: At most 20 product rows. The final columns are `product_id`, `name`, `category`, and `net_revenue`. The final order is `net_revenue DESC, p.product_id`.
+   **Verify:** For sql-07 Exercise 2, assert no more than 20 rows, no duplicate `product_id`, `name`, and `category`, and no adjacent pair that violates `net_revenue DESC, p.product_id`. Rejoin the returned keys to `products`, and `order_items` to confirm `product_id`, `name`, `category`, and `net_revenue` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `net_revenue DESC, p.product_id`.
 3. **Query writing:** Create a customer summary that retains customers with no orders.
    **Progressive hint:** Left join from customers and count/order-sum nullable matches with `COALESCE` only where zero has clear meaning.
-   **Expected result/shape:** Exercise 3 must make “Query writing: Create a customer summary that retains customers with no orders” observable through the exact DDL/DML command tag plus one row per customer or the customer grouping key named by the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `order_count`, `stored_order_total`, `c`, `o`.
-   **Verify:** For Exercise 3, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `order_count`, `stored_order_total`, `c`, `o`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-07 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, `country`, `order_count`, and `stored_order_total`; keep `customer_id`, `full_name`, and `country` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-07 Exercise 3, expected output: One row per customer. The final columns are `customer_id`, `full_name`, `country`, `order_count`, and `stored_order_total`. The final order is `stored_order_total DESC, c.customer_id`.
+   **Verify:** For sql-07 Exercise 3, independently aggregate `customers`, and `orders` by `customer_id`, `full_name`, and `country`; require one output row for every distinct `customer_id`, `full_name`, and `country` tuple and compare `order_count`, and `stored_order_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_order_total` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
 4. **Debugging:** Reconcile stored order totals, computed line totals, and payments without multiplying item and payment rows.
    **Progressive hint:** Aggregate each detail table to order grain first, then join the one-row-per-order relations.
-   **Expected result/shape:** Exercise 4 returns a table-shaped answer to “Debugging: Reconcile stored order totals, computed line totals, and payments without multiplying item and payment rows” at one summary row per grouping key explicitly named in the prompt. Named evidence columns/objects: `p`, `stored_total`, `storage_difference`, `unpaid_balance`, `o`, `it`, `pt`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 4, prove uniqueness at one summary row per grouping key explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `order_items`, `payments`, `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-07 Exercise 4, read from `order_items`, `payments`, and `orders`. Build the answer toward `order_id`, `status`, `stored_total`, `line_total`, `storage_difference`, `paid_total`, and `unpaid_balance`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-07 Exercise 4, expected output: One row per order with signed differences. The final columns are `order_id`, `status`, `stored_total`, `line_total`, `storage_difference`, `paid_total`, and `unpaid_balance`. The final order is `ABS(o.total_amount - it.line_total) DESC, o.order_id`.
+   **Verify:** For sql-07 Exercise 4, project `order_id` plus the raw source columns from `order_items`, `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `status`, `stored_total`, `line_total`, `storage_difference`, `paid_total`, and `unpaid_balance` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 5. **Prediction:** Build a monthly order trend and explain which months are absent rather than zero.
    **Progressive hint:** Grouping observed orders alone cannot create empty calendar months.
-   **Expected result/shape:** Exercise 5 needs the plan evidence for “Prediction: Build a monthly order trend and explain which months are absent rather than zero”: one plan tree per compared query with node type, estimated rows, actual rows/loops when ANALYZE is used, and buffers or predicate details requested by the prompt. The underlying query must still return one row per requested calendar/cohort bucket and grouping key. Named evidence columns/objects: `evidence`, `order_month`, `order_count`, `stored_revenue`, `o`.
-   **Verify:** For Exercise 5, hold SQL text, parameters, seed data, and settings constant except for the intended change; compare result keys/counts from `orders` before interpreting scan/join nodes, estimates, actual rows, loops, and buffers.
+   **Inputs/evidence:** For sql-07 Exercise 5, read from `orders`. Build the answer toward `order_month`, `order_count`, and `stored_revenue`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-07 Exercise 5, expected output: One row per observed order month. The final columns are `order_month`, `order_count`, and `stored_revenue`. The final order is `order_month`.
+   **Verify:** For sql-07 Exercise 5, independently aggregate `orders` by `order_id`; require one output row for every distinct `order_id` tuple and compare `order_month`, `order_count`, and `stored_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_month`, `order_count`, and `stored_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
 6. **Extension:** Create a compact one-row audit of customer, order, item, and payment coverage.
    **Progressive hint:** Use scalar subqueries for independent counts; this avoids accidental cross multiplication.
-   **Expected result/shape:** Exercise 6 must make “Extension: Create a compact one-row audit of customer, order, item, and payment coverage” observable through the exact DDL/DML command tag plus one row per customer or the customer grouping key named by the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, `c`, `o`, `customers_without_orders`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, `c`, `o`, `customers_without_orders`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-07 Exercise 6, read from `customers`, `orders`, `order_items`, and `payments`. Compute `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-07 Exercise 6, expected output: Exactly one audit row. The final columns are `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders`.
+   **Verify:** For sql-07 Exercise 6, evaluate each of `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders` in a separate control `SELECT` over `customers`, `orders`, `order_items`, and `payments`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
 ## Common mistakes and how to recover
 
@@ -277,7 +279,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-07 — Week1 Project.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisite: `sql-06`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day07_week1_project.md
 - Answer-free learner SQL: sql/postgres-60day/day07_week1_project.sql
 

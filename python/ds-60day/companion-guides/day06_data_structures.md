@@ -17,10 +17,6 @@ By the end of this lesson, you can:
 
 Complete Day 5 (`python-05`): functions, collection annotations, and contracts.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -280,7 +276,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-06`
-(Day 6 — Lists, Tuples, Sets, and Dictionaries). I am a complete beginner. Emphasize choosing lists, tuples, sets, and dictionaries by semantics.
+(Day 6 — Lists, Tuples, Sets, and Dictionaries). Direct catalog prerequisites: `python-05`.
+I have completed the direct prerequisites: `python-05`. Emphasize choosing lists, tuples, sets, and dictionaries by semantics.
 Read `python/ds-60day/companion-guides/day06_data_structures.md` and use the learner notebook
 `python/ds-60day/notebooks/day06_data_structures.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

@@ -200,31 +200,15 @@ print({"threshold": chosen[0], "precision": chosen[1], "recall": chosen[2]})
 
 1. Compare `class_weight="balanced"` with a SMOTE strategy.
 
-**Verify:** For task `Compare classweight="balanced" with a SMOTE strategy`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 1 — rare-class metrics, training interventions, and threshold policy — compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
 
 2. Tune the threshold to maximize minority-class F1.
 
-**Verify:** For task `Tune the threshold to maximize minority-class F1`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then report class support and confusion counts at the chosen threshold and prove the declared operating constraint is satisfied.
-
-
-
-
-
+**Verify:** Practice 2 — rare-class metrics, training interventions, and threshold policy — choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
 
 3. Plot precision–recall curves and discuss the tradeoff.
 
-**Verify:** For task `Plot precision–recall curves and discuss the tradeoff`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then report class support and confusion counts at the chosen threshold and prove the declared operating constraint is satisfied.
-
-
-
-
-
-
+**Verify:** Practice 3 — rare-class metrics, training interventions, and threshold policy — save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
 
 ### Progressive hints
 
@@ -245,39 +229,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Prevalence-shift reasoning:** Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predict how precision changes and verify it with Bayes' rule.
    **Progressive hint:** Precision depends on the base rate: TP/(TP+FP). Use a hypothetical population such as 10,000 to make the counts visible.
 
-**Verify:** For task `Prevalence-shift reasoning: Hold sensitivity and specificity fixed while changing event preva...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report class support and confusion counts at the chosen threshold and prove the declared operating constraint is satisfied.
-
-
-
-
-
-
+**Verify:** Prevalence-shift reasoning — choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes' rule, and verify both against a hand-built confusion table; the 2% precision must be lower.
 
 5. **Grouped imbalance split:** Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold.
    **Progressive hint:** Use StratifiedGroupKFold when feasible. Print group overlap, positive count, negative count, and prevalence per validation fold.
 
-**Verify:** For task `Grouped imbalance split: Create a cross-validation plan for rare outcomes with multiple rows...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Grouped imbalance split — print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.
 
 6. **Calibration after resampling:** Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data.
    **Progressive hint:** Oversampling changes the class distribution seen during fitting. Fit/calibrate inside development data and assess reliability on natural prevalence.
 
-**Verify:** For task `Calibration after resampling: Explain why probabilities from a model trained on oversampled d...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
+**Verify:** Calibration after resampling — fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -325,10 +290,12 @@ Emphasize rare-class metrics, training interventions, and threshold policy. Use 
 - guide: `python/ds-60day/companion-guides/day41_imbalance_handling.md`
 - learner artifact: `python/ds-60day/notebooks/day41_imbalance_handling.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-40`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

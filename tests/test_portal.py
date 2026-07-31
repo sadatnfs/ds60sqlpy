@@ -192,6 +192,12 @@ def test_launcher_builds_only_cataloged_commands(
         "jupyterlab",
         str(tmp_path / "python" / "ds-60day" / "notebooks"),
     )
+    assert launcher.command("jupyter-sql") == (
+        str(python),
+        "-m",
+        "jupyterlab",
+        str(tmp_path / "bridge" / "professional" / "notebooks"),
+    )
     with pytest.raises(PortalError, match="Unsupported portal action"):
         launcher.command("shell")
     with pytest.raises(KeyError, match="Unknown lesson"):
@@ -203,6 +209,29 @@ def test_launcher_builds_only_cataloged_commands(
             artifact="solution",
             solution_index=99,
         )
+
+
+def test_launcher_can_disable_every_native_process_action() -> None:
+    launcher = PortalLauncher(Catalog.load(), enabled=False)
+
+    with pytest.raises(PortalError, match="Native launches are disabled"):
+        launcher.launch("open-repo")
+
+
+def test_windows_vscode_command_shim_resolves_to_native_executable(tmp_path: Path) -> None:
+    install = tmp_path / "Microsoft VS Code"
+    shim = install / "bin" / "code.cmd"
+    executable = install / "Code.exe"
+    shim.parent.mkdir(parents=True)
+    shim.touch()
+    executable.touch()
+
+    assert PortalLauncher._native_code_path(shim) == str(executable)
+
+    orphan = tmp_path / "orphan" / "code.cmd"
+    orphan.parent.mkdir()
+    orphan.touch()
+    assert PortalLauncher._native_code_path(orphan) is None
 
 
 def test_launcher_supports_conda_prefix_and_rejects_non_notebook_jupyter(

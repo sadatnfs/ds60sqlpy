@@ -52,7 +52,6 @@ PHONE = re.compile(
     r"(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}"
 )
 
-
 def detected_kinds(text: str) -> set[str]:
     kinds: set[str] = set()
     if EMAIL.search(text):
@@ -202,40 +201,19 @@ assert report["group_b"]["support"] == 5
 
 1. Build a DataFrame PII scanner covering column names and free text.
 
-**Verify:** For task `Build a DataFrame PII scanner covering column names and free text`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
+**Verify:** Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
 
 2. Add a function that masks email addresses and phone numbers in text.
 
-**Verify:** For task `Add a function that masks email addresses and phone numbers in text`, demonstrate the concrete requirement “2. Add a function that masks email addresses and phone numbers in text” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
+**Verify:** Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
 
 3. Simulate subgroup precision and recall for a classifier and compare groups.
 
-**Verify:** For task `Simulate subgroup precision and recall for a classifier and compare groups`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
+**Verify:** Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
 
 4. Draft a one-page data-ethics checklist for your project.
 
-**Verify:** For task `Draft a one-page data-ethics checklist for your project`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
 
 ### Progressive hints
 
@@ -258,50 +236,25 @@ attempt, and record the evidence that would prove your result correct.
 5. **Threat modeling:** Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner.
    **Progressive hint:** Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.
 
-**Verify:** For task `Threat modeling: Create a data-flow diagram for collection, notebook, artifacts, API, logs, a...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
-
+**Verify:** Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.
 
 6. **Re-identification reasoning:** Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information.
    **Progressive hint:** Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.
 
-**Verify:** For task `Re-identification reasoning: Generalize a small dataset to satisfy a chosen k-anonymity targe...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.
 
 7. **Fairness uncertainty:** Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group's denominator is nearly zero.
    **Progressive hint:** Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.
 
-**Verify:** For task `Fairness uncertainty: Bootstrap subgroup precision and recall, show confidence intervals and...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.
 
 8. **Incident response:** Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps.
    **Progressive hint:** Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.
 
-**Verify:** For task `Incident response: Simulate discovering raw emails in a committed notebook output. Write the...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
+**Verify:** Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -350,10 +303,12 @@ Emphasize data minimization, privacy boundaries, fairness evidence, and accounta
 - guide: `python/ds-60day/companion-guides/day57_security_privacy_ethics.md`
 - learner artifact: `python/ds-60day/notebooks/day57_security_privacy_ethics.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-56`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

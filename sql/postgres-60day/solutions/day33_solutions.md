@@ -81,23 +81,18 @@ ROLLBACK;
 
 The equality condition on the leading `category` column lets the B-tree narrow
 the search before applying the `created_at` range and can also support the
-requested order. A predicate on `created_at` alone cannot use the leftmost
+`ORDER BY created_at, product_id`. A predicate on `created_at` alone cannot use the leftmost
 `category` key as efficiently.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** An alternative physical/object design is valid only if catalog inspection and valid/invalid behavior prove the same invariant.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-33 Exercise 1, run the underlying read-only query over `products`, `training.idx_products_category_created_solution`, and `idx_products_category_created_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+- **Expected result/shape:** For sql-33 Exercise 1, expected output: one row per `product_id`. The final columns are `product_id`, `name`, and `created_at`. The final order is `created_at DESC`.
+- **Independent verification:** For sql-33 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Intermediate relation check:** For sql-33 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `product_id` rows.
+- **Clause check:** For sql-33 Exercise 1, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, `training.idx_products_category_created_solution`, and `idx_products_category_created_solution`, preserve one row per `product_id`, and finish with `product_id`, `name`, and `created_at` ordered by `created_at DESC`.
+- **Alternative/trade-off:** For sql-33 Exercise 1, the chosen form is justified by this lesson-specific rationale: The equality condition on the leading `category` column lets the B-tree narrow the search before applying the `created_at` range and can also support `ORDER BY created_at, product_id`. Evaluate another form against the concrete expected result (one row per `product_id`) and the verification above.
+- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
 ## Exercise 2 — Partial index for high-value orders
 
@@ -127,18 +122,13 @@ the index condition. The index excludes lower-value orders, reducing its size.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** An alternative physical/object design is valid only if catalog inspection and valid/invalid behavior prove the same invariant.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-33 Exercise 2, run the underlying read-only query over `orders`, `training.idx_orders_high_value_solution`, and `idx_orders_high_value_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+- **Expected result/shape:** For sql-33 Exercise 2, expected output: one row per `order_id`. The final columns are `order_id`, `total_amount`, and `order_date`. The final order is `total_amount DESC`.
+- **Independent verification:** For sql-33 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Intermediate relation check:** For sql-33 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
+- **Clause check:** For sql-33 Exercise 2, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `training.idx_orders_high_value_solution`, and `idx_orders_high_value_solution`, preserve one row per `order_id`, and finish with `order_id`, `total_amount`, and `order_date` ordered by `total_amount DESC`.
+- **Alternative/trade-off:** For sql-33 Exercise 2, the chosen form is justified by this lesson-specific rationale: The query repeats the partial predicate in a form the planner can prove implies the index condition. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
+- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
 ## Pitfalls
 
@@ -160,18 +150,13 @@ seek through a known category prefix.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-33 Exercise 3, run the underlying read-only query over `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+- **Expected result/shape:** For sql-33 Exercise 3, expected output: one row per `product_id`. The final columns are `product_id`, and `created_at`.
+- **Independent verification:** For sql-33 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Intermediate relation check:** For sql-33 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `product_id` rows.
+- **Clause check:** For sql-33 Exercise 3, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, and `created_at`.
+- **Alternative/trade-off:** For sql-33 Exercise 3, the chosen form is justified by this lesson-specific rationale: Filtering only `created_at` omits the composite index's first search column. Evaluate another form against the concrete expected result (one row per `product_id`) and the verification above.
+- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
 ## Exercise 4 — Cover customer order history
 
@@ -181,18 +166,13 @@ search key.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-33 Exercise 4, run the underlying read-only query over `orders`, and `idx_orders_history_cover_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+- **Expected result/shape:** For sql-33 Exercise 4, expected output: one row per `order_id`. The final columns are `order_id`, `order_date`, `status`, and `total_amount`. The final order is `order_date DESC`.
+- **Independent verification:** For sql-33 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Intermediate relation check:** For sql-33 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
+- **Clause check:** For sql-33 Exercise 4, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `idx_orders_history_cover_solution`, preserve one row per `order_id`, and finish with `order_id`, `order_date`, `status`, and `total_amount` ordered by `order_date DESC`.
+- **Alternative/trade-off:** For sql-33 Exercise 4, the chosen form is justified by this lesson-specific rationale: `customer_id, order_date` are search/order keys. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
+- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
 ## Exercise 5 — Prove partial-index eligibility
 
@@ -201,18 +181,13 @@ Eligibility and final selection are separate planner decisions.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** An alternative physical/object design is valid only if catalog inspection and valid/invalid behavior prove the same invariant.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-33 Exercise 5, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+- **Expected result/shape:** For sql-33 Exercise 5, expected output: one row per `order_id`. The final columns are `order_id`.
+- **Independent verification:** For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Intermediate relation check:** For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
+- **Clause check:** For sql-33 Exercise 5, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`.
+- **Alternative/trade-off:** For sql-33 Exercise 5, the chosen form is justified by this lesson-specific rationale: `total_amount > 1200` implies the stored `> 1000` predicate; `> 500` does not. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
+- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
 ## Exercise 6 — Evaluate the NULL subset
 
@@ -222,15 +197,10 @@ write/storage cost—not on syntax alone.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-33 Exercise 6, run the underlying read-only query over `customers`, `idx_customers_null_segment_solution`, and `customers.segment` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
+- **Expected result/shape:** For sql-33 Exercise 6, expected output: one row per `customer_id`. The final columns are `all_customers`, and `null_segments`.
+- **Independent verification:** For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Intermediate relation check:** For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.
+- **Clause check:** For sql-33 Exercise 6, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `customers`, `idx_customers_null_segment_solution`, and `customers.segment`, preserve one row per `customer_id`, and finish with `all_customers`, and `null_segments`.
+- **Alternative/trade-off:** For sql-33 Exercise 6, the chosen form is justified by this lesson-specific rationale: The answer first measures NULL prevalence, then builds a NULL-only index. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
+- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.

@@ -20,10 +20,6 @@ By the end of this lesson, you can:
 Complete the Python foundations through Day 15 (`python-15`). The standard setup
 installs the `data` dependency group containing NumPy.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -282,7 +278,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-16`
-(Day 16 — NumPy Arrays, Vectorization, and Broadcasting). I am a complete beginner. Emphasize NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
+(Day 16 — NumPy Arrays, Vectorization, and Broadcasting). Direct catalog prerequisites: `python-15`.
+I have completed the direct prerequisites: `python-15`. Emphasize NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
 Read `python/ds-60day/companion-guides/day16_numpy_fundamentals.md` and use the learner notebook
 `python/ds-60day/notebooks/day16_numpy_fundamentals.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

@@ -48,6 +48,24 @@ hosts require `require`, `verify-ca`, or `verify-full`.
 The strongest capstone evidence is the failure test: the second batch fails,
 checkpoint `2` remains, and the next run processes only sequences `3` and `4`.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+Transport validation returns no secret-bearing value and can be checked without
+opening a socket:
+
+```python
+from bridge.solutions.day08_solution import validate_database_transport
+
+validate_database_transport("postgresql://localhost/advanced_sql_training")
+validate_database_transport("postgresql://db.example/advanced_sql_training?sslmode=require")
+```
+
+Also test that a remote URL without an approved `sslmode` raises `ValueError`
+whose message does not contain the URL.
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs align one-for-one with the learner and guide. The executable
@@ -67,9 +85,7 @@ construction.
 **Why this boundary matters:** Reject invalid orchestration configuration before the first
 effect.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Construct runners with blank names and non-positive batch sizes; assert `ValueError` before any dependency is retained or called, while a valid constructor has zero effects.
 
 ### Exercise 2 — Orchestration
 
@@ -82,9 +98,7 @@ metrics, and return `JobResult`.
 
 **Why this boundary matters:** Validate the full extracted sequence before the first sink call.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** For a two-batch run, assert event order `load, extract, validate, write, checkpoint` per batch and compare `JobResult` read/written counts plus final checkpoint.
 
 ### Exercise 3 — Test doubles
 
@@ -97,9 +111,7 @@ evidence.
 
 **Why this boundary matters:** Fakes should expose histories and deterministic failure switches.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Configure fakes with public call lists and sink failure index; assert inputs, batches, checkpoint saves, metric events, and failure call are all independently inspectable.
 
 ### Exercise 4 — Recovery test
 
@@ -111,9 +123,7 @@ records 3–4, and saves `4`. No checkpoint for the failed batch is recorded.
 
 **Why this boundary matters:** Extraction on retry must receive the last durable checkpoint.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** With sequences 1–4 and batch size two, fail write two; assert checkpoint `2`, then restart and assert only sequences 3–4 are written and checkpoint becomes `4`.
 
 ### Exercise 5 — Record validation
 
@@ -126,9 +136,7 @@ the first invariant violation. The sink history must remain empty for every inva
 **Why this boundary matters:** Check global order/uniqueness after validating individual
 records.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Parameterize duplicate IDs, sequence zero, repeated/decreasing sequence, `NaN`/infinity, and non-positive amount; assert each fails before the sink or checkpoint is touched.
 
 ### Exercise 6 — Observability
 
@@ -141,9 +149,7 @@ Emit numeric counts as values, not tags, and never use the exception message.
 **Why this boundary matters:** Keep messages, record IDs, checkpoints, and request IDs out of
 metric dimensions.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inspect metrics/logs for success and failure: tags contain only job/outcome/exception class, counts are correct, and records, URLs, and exception messages are absent.
 
 ### Exercise 7 — Transport security
 
@@ -156,9 +162,7 @@ messages.
 
 **Why this boundary matters:** Parse without echoing; local and remote host policies differ.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Accept local PostgreSQL URLs and remote URLs with `require`, `verify-ca`, or `verify-full`; reject missing host, wrong scheme, and insecure remote mode without echoing URL.
 
 ### Exercise 8 — Runbook
 
@@ -172,9 +176,7 @@ how to rotate without logging the URL.
 **Why this boundary matters:** Every action needs prerequisites, expected evidence, and a stop
 condition.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Produce a runbook checklist covering startup, liveness/readiness/last-run evidence, retry owner, checkpoint query, replay, rollback, rotation, escalation owner, and stop condition.
 
 ### Exercise 9 — No-op behavior
 
@@ -185,9 +187,7 @@ success/no-op count, and leave sink/checkpoint save histories empty.
 
 **Why this boundary matters:** A no-op should not write or advance a checkpoint.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** For empty extraction, assert zero read/written counts, unchanged checkpoint, no sink or checkpoint-save call, and one bounded successful no-op metric/event.
 
 ### Exercise 10 — Checkpoint validation
 
@@ -200,9 +200,7 @@ increasing. Reject a stale or regressing response with no sink calls.
 **Why this boundary matters:** Do not assume an injected extractor obeys its Protocol's semantic
 promise.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Feed a record equal to the checkpoint and a decreasing pair; assert each raises before the first write and leaves the stored checkpoint unchanged.
 
 ### Exercise 11 — Ambiguous writes
 
@@ -216,9 +214,7 @@ advancing the checkpoint.
 **Why this boundary matters:** Post-write checkpoint ordering alone cannot prevent a duplicate
 replay.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Model server commit followed by client error; assert restart consults sink idempotency evidence and checkpoint state before replaying rather than advancing blindly.
 
 ### Exercise 12 — Metric design
 
@@ -232,9 +228,7 @@ in neither default channel.
 **Why this boundary matters:** Observability channels have different retention and indexing
 costs.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Classify job/outcome/error class/counts as bounded metrics, run/request ID as structured log fields, and record IDs/payloads/URLs as neither; test the resulting cardinality.
 
 ### Exercise 13 — Health model
 
@@ -246,9 +240,7 @@ collapse them into one green flag.
 
 **Why this boundary matters:** A process can be alive while unable to make safe progress.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Return independent evidence for process liveness, dependency readiness, and last-run success; force each one false while the other two remain true.
 
 ### Exercise 14 — URL edge cases
 
@@ -262,9 +254,7 @@ without returning the original URL.
 **Why this boundary matters:** Normalize parsed components and keep every failure message
 secret-free.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Parameterize localhost, loopback IPv4/IPv6, missing host, mixed-case TLS values, wrong schemes, and insecure remote URLs; compare exact accept/reject outcomes and safe messages.
 
 ### Exercise 15 — Operations drill
 
@@ -277,9 +267,7 @@ durable sequence.
 
 **Why this boundary matters:** Credentials identify access, not processing position.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Swap a secret-bearing URL between runs without changing checkpoint storage; assert the new adapter is used, no URL is logged, and processing resumes after the valid checkpoint.
 
 ### Exercise 16 — Invariant testing
 
@@ -292,6 +280,4 @@ written under an idempotent sink.
 
 **Why this boundary matters:** Vary boundaries while holding deterministic records and fakes.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Generate batch sizes and failure positions; after every failed run, assert persisted checkpoint equals the last sequence of a fully completed batch and never a failed batch.

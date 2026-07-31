@@ -4,21 +4,20 @@ Professional learner deep dive (python-svc-02)
 ------------------------------------------------
 
 Mental model:
-Service hardening turns assumptions into admission and evidence policy.
-Liveness says the process can run; readiness says it should receive
-traffic given dependencies, verified artifacts, and draining state.
-A bulkhead bounds concurrent work and a rate limiter bounds arrival
-over time.
-
-Authentication establishes identity; authorization checks allowed
-actions. Structured logs may carry one bounded correlation ID but never
-credentials or full request bodies. Metrics use low-cardinality labels;
-request/user IDs belong in logs/traces, not metric dimensions.
+Service hardening turns assumptions into admission and evidence policy. Liveness says the
+process can run; readiness says it should receive traffic given dependencies, verified
+artifacts, and draining state. A bulkhead bounds concurrent work and a rate limiter bounds
+arrival over time.  Authentication establishes identity; authorization checks allowed actions.
+Structured logs may carry one bounded correlation ID but never credentials or full request
+bodies. Metrics use low-cardinality labels; request/user IDs belong in logs/traces, not metric
+dimensions.
 
 API/boundary anatomy:
-* startup validation + artifact verification: fails before traffic when capacity, policy, or trusted model bytes are invalid.
+* startup validation + artifact verification: fails before traffic when capacity, policy, or
+  trusted model bytes are invalid.
 * admission chain: checks readiness, identity/role, rate, and concurrency before expensive work.
-* structured log + metrics: records bounded diagnostic context and aggregate outcomes without secrets or unbounded labels.
+* structured log + metrics: records bounded diagnostic context and aggregate outcomes without
+  secrets or unbounded labels.
 
 Micro-example A — keep liveness and readiness independent::
 
@@ -30,7 +29,7 @@ Micro-example A — keep liveness and readiness independent::
                 and artifact_verified and not draining
             ),
         }
-    
+
     outage = status(
         running=True, dependencies=[True, False],
         artifact_verified=True, draining=False
@@ -53,9 +52,11 @@ Micro-example B — reject high-cardinality metric labels::
     print({"forbidden_metric_labels": sorted(forbidden)})
     assert forbidden == {"request_id", "user_id"}
 
-Expected: Per-request and per-user identities are rejected from metrics, preventing unbounded series growth and privacy leakage.
+Expected: Per-request and per-user identities are rejected from metrics, preventing unbounded
+          series growth and privacy leakage.
 
-Debugging rule: Inject dependency, auth, limiter, saturation, artifact, handler, and telemetry failures; assert status, cleanup, bounded log event, and metric outcome.
+Debugging rule: Inject dependency, auth, limiter, saturation, artifact, handler, and telemetry
+                failures; assert status, cleanup, bounded log event, and metric outcome.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

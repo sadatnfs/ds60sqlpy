@@ -47,8 +47,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-types-01/sql_types_01_native_types_search.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-types-01/lesson/workspace/sql/professional/lessons/sql_types_01_native_types_search.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -81,8 +81,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Domain, Enum, UUID, Array, Range/multirange, JSONB. Its worked SQL reads or creates `pro_types_lab.documents`, `pg_catalog.pg_indexes`, `pg_catalog.pg_available_extensions`.
+on screen are not automatically stored. The key vocabulary for this lesson is Domain, Enum, UUID, Array, Range/multirange, JSONB. Its worked SQL reads or creates `pro_types_lab.documents`, `pg_catalog.pg_indexes`, `pg_catalog.pg_available_extensions`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -92,12 +91,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: The model uses a domain for a reusable email-shape rule and an enum for a small database-owned lifecycle. Enums are compact and clear, but adding/removing labels is migration work; a reference table is more flexible when labels carry metadata or change frequently.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The worked walkthrough's lesson-specific task is: The model uses a domain for a reusable email-shape rule and an enum for a small database-owned lifecycle. Enums are compact and clear, but adding/removing labels is migration work; a reference table is more flexible when labels carry metadata or change frequently.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_types_lab.documents`. Verify the object in `pg_catalog.pg_class`, and `information_schema.columns`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
 
 ## Two worked SQL examples
 
@@ -135,9 +130,7 @@ CREATE TABLE pro_types_lab.documents (
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_types_lab.documents`. Verify the object in `pg_catalog.pg_class`, and `information_schema.columns`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ### Example 2
 
@@ -196,9 +189,7 @@ VALUES
 
 **How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 must complete through `psql` with its documented command tag or notice for `pro_types_lab.documents`. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.
 
 ## Learning objectives
 
@@ -279,51 +270,63 @@ write cost, and migration cost:
 
 1. **Tag containment:** require both tags, preserve published status, and order
    ties deterministically.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-types-01 Exercise 1, complete the tag containment written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-types-01 Exercise 1, expected output: a completed the tag containment written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `any`.
+   **Verify:** For sql-types-01 Exercise 1, check the tag containment written analysis against `any`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 2. **Range subtraction:** apply the half-open rule and prove both range
    boundaries.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-types-01 Exercise 2, complete the range subtraction written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-types-01 Exercise 2, expected output: a completed the range subtraction written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+   **Verify:** For sql-types-01 Exercise 2, check the range subtraction written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 3. **Typed JSONPath:** guard shape/type before numeric comparison.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-types-01 Exercise 3, complete the typed jsonpath written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-types-01 Exercise 3, expected output: a completed the typed jsonpath written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+   **Verify:** For sql-types-01 Exercise 3, check the typed jsonpath written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 4. **Full-text query:** parse the web-style phrase, rank, and add a stable
    secondary order.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-types-01 Exercise 4, complete the full-text query written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-types-01 Exercise 4, expected output: a completed the full-text query written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `websearch_to_tsquery`.
+   **Verify:** For sql-types-01 Exercise 4, check the full-text query written analysis against `websearch_to_tsquery`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 5. **Index comparison:** map JSONB, text-search, and trigram operators to their
    useful operator classes.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-types-01 Exercise 5, read from `pg_trgm`. Build the answer toward `jsonb_ops`, `jsonb_path_ops`, and `tsvector`; keep `jsonb_ops` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-types-01 Exercise 5, expected output: one row per `jsonb_ops`. The final columns are `jsonb_ops`, `jsonb_path_ops`, and `tsvector`.
+   **Verify:** For sql-types-01 Exercise 5, reselect the returned keys directly from the source; require unique `jsonb_ops` where the expected grain is one row per key and confirm the projected `jsonb_ops`, `jsonb_path_ops`, and `tsvector` against `pg_trgm`. Add one source row with a new `jsonb_ops`; verify the result gains exactly one row carrying that `jsonb_ops` value.
 6. **Type decision:** defend domain, enum, lookup, array, range, JSONB, or
    normalized-relation choices field by field.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-types-01 Exercise 6, complete the type decision written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-types-01 Exercise 6, expected output: a completed the type decision written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+   **Verify:** For sql-types-01 Exercise 6, check the type decision written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 7. **Multirange:** normalize availability, find August gaps, and define whether
    adjacency merges.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-types-01 Exercise 7, read from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Compute `normalized_availability`, and `august_gaps` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-types-01 Exercise 7, expected output: one row per day. The final columns are `normalized_availability`, and `august_gaps`.
+   **Verify:** For sql-types-01 Exercise 7, evaluate each of `normalized_availability`, and `august_gaps` in a separate control `SELECT` over `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`; require one final row and compare every value. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
 8. **Networks:** match addresses to their most-specific containing `cidr` and
    identify an operator-compatible index.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-types-01 Exercise 8, read from `clients`, and `rules`. Build the answer toward `client_id`, `address`, `rule_id`, and `network`; keep `client_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-types-01 Exercise 8, expected output: one row per `client_id`. The final columns are `client_id`, `address`, `rule_id`, and `network`. The final order is `client_id`.
+   **Verify:** For sql-types-01 Exercise 8, project `client_id` plus the raw source columns from `clients`, and `rules` at each join stage; record row count and distinct `client_id`, then assert the final `client_id`, `address`, `rule_id`, and `network` values match those staged rows without unintended fanout or loss. Add one row for which `(match_rank = 1)` is true and one for which it is false; verify only the matching `client_id` value is returned.
 9. **Money:** compare fixed-scale numeric, minor-unit bigint, and floating point
    using explicit precision and rounding tests.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-types-01 Exercise 9, read from `pro_types_lab.nonnegative_money`. Compute `exact_decimal_sum`, and `declared_rounding_example` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-types-01 Exercise 9, expected output: exactly one aggregate summary row. The final columns are `exact_decimal_sum`, and `declared_rounding_example`.
+   **Verify:** For sql-types-01 Exercise 9, evaluate each of `exact_decimal_sum` in a separate control `SELECT` over `pro_types_lab.nonnegative_money`; require one final row and compare every value. Add one source row with a new `declared_rounding_example`; verify the result gains exactly one row carrying that `declared_rounding_example` value.
 10. **Promoted JSON:** validate a generated typed value, index it, and test an
     old payload against the evolved contract.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-types-01 Exercise 10, read from `pro_types_lab.documents`, and `documents_estimated_minutes_idx`. Build the answer toward `document_id`, and `estimated_minutes`; keep `document_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-types-01 Exercise 10, expected output: one row per `document_id`. The final columns are `document_id`, and `estimated_minutes`. The final order is `d.document_id`.
+   **Verify:** For sql-types-01 Exercise 10, run an anti-check that counts rows where NOT ((d.estimated_minutes > 30)); require unique `document_id` where the expected grain is one row per key and confirm the projected `document_id`, and `estimated_minutes` against `pro_types_lab.documents`, and `documents_estimated_minutes_idx`. Insert rows immediately before, exactly at, and immediately after `d.estimated_minutes > 30`; identify which rows pass each inclusive or exclusive comparison.
 11. **Language search:** inspect lexemes and design configuration selection for
     non-English rows.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-types-01 Exercise 11, read from `pro_types_lab.documents`. Build the answer toward `document_id`, and `lexemes`; keep `document_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-types-01 Exercise 11, expected output: one row per `document_id`. The final columns are `document_id`, and `lexemes`. The final order is `d.document_id`.
+   **Verify:** For sql-types-01 Exercise 11, reselect the returned keys directly from the source; require unique `document_id` where the expected grain is one row per key and confirm the projected `document_id`, and `lexemes` against `pro_types_lab.documents`. Add one source row with a new `document_id`; verify the result gains exactly one row carrying that `document_id` value.
 12. **Normalize tags:** compare normalized keys and joins with array
     containment, duplicates, order, constraints, and writes.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-types-01 Exercise 12, read from `pro_types_lab.documents`, `pro_types_lab.tags`, and `pro_types_lab.document_tags`. Build the answer toward `tag_name`; keep `document_id`, and `title` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-types-01 Exercise 12, expected output: one row per `document_id`, and `title`. The final columns are `tag_name`. The final order is `d.document_id`.
+   **Verify:** For sql-types-01 Exercise 12, independently aggregate `pro_types_lab.documents`, `pro_types_lab.tags`, and `pro_types_lab.document_tags` by `document_id`, and `title`; require one output row for every distinct `document_id`, and `title` tuple satisfying `(t.tag_name IN ('postgresql', 'operations'))` and compare `tag_name` tuple by tuple. Add duplicate source candidates for `document_id`, and `title`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
 ## Self-check
 
@@ -364,11 +367,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-types-01 — PostgreSQL-Native Types and Searchable Documents.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisite: `sql-29`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_types_01_native_types_search.md
 - Answer-free learner SQL: sql/professional/lessons/sql_types_01_native_types_search.sql
 
-The lesson concepts include Domain, Enum, UUID, Array, Range/multirange, JSONB. First define those terms in plain
+Key terms to teach in context: Domain, Enum, UUID, Array, Range/multirange, JSONB. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -379,11 +382,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-types-01/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

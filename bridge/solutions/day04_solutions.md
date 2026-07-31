@@ -39,6 +39,41 @@ aborted transaction.
 Test the last-attempt failure, zero delay, invalid policy, a permanent error,
 duplicate keys, and rollback-before-reraise behavior.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+An injected sleeper turns retry timing into ordinary deterministic evidence:
+
+```python
+from bridge.solutions.day04_solution import (
+    RetryPolicy,
+    TransientDatabaseError,
+    run_with_retry,
+)
+
+attempts = 0
+delays: list[float] = []
+
+
+def eventually_succeeds() -> str:
+    global attempts
+    attempts += 1
+    if attempts < 3:
+        raise TransientDatabaseError("temporary")
+    return "ok"
+
+
+result = run_with_retry(
+    eventually_succeeds,
+    policy=RetryPolicy(max_attempts=3, base_delay_seconds=0.1),
+    sleep=delays.append,
+)
+assert result == "ok"
+assert delays == [0.1, 0.2]
+```
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs align one-for-one with the learner and guide. The executable
@@ -57,9 +92,7 @@ delay below zero, raising clear `ValueError` messages.
 **Why this boundary matters:** Reject unusable policy at construction rather than inside a
 failing retry loop.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Construct policies at attempts `0/1` and delays `-1/0/inf/nan`; assert only attempts at least one with finite non-negative delay succeed and every invalid case raises `ValueError` immediately.
 
 ### Exercise 2 — SQL implementation
 
@@ -72,9 +105,7 @@ either inserts and returns a row or reports no returned row after the conflict p
 **Why this boundary matters:** Let the uniqueness constraint arbitrate concurrency; do not
 pre-read.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Record one cursor call and assert static SQL contains `ON CONFLICT ... DO NOTHING` plus `RETURNING job_id`, while idempotency key and payload appear only in the two-value tuple.
 
 ### Exercise 3 — Mapping
 
@@ -86,9 +117,7 @@ preliminary `SELECT` would add a race window and is unnecessary.
 
 **Why this boundary matters:** Treat `None` as the documented `DO NOTHING` result.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Configure `fetchone()` as `(42,)` then `None`; assert results are `42` and `None` and each case issues exactly one statement.
 
 ### Exercise 4 — Transaction
 
@@ -101,9 +130,7 @@ failure, roll back and use bare `raise` so type, traceback, and message are pres
 **Why this boundary matters:** The wrapper owns the boundary; the operation owns only domain
 work.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert success events end `operation, commit` with no rollback; failure events end `operation, rollback`, no commit occurs, and the same exception is re-raised.
 
 ### Exercise 5 — Retry
 
@@ -116,9 +143,7 @@ either re-raise at the limit or call the injected sleeper with the current expon
 **Why this boundary matters:** Never sleep after the last failed attempt and never catch
 permanent errors.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** For base delay `0.1` and three attempts, assert delays are `[0.1, 0.2]`; a third transient error is re-raised and a permanent `ValueError` is never retried.
 
 ### Exercise 6 — Testing
 
@@ -131,9 +156,7 @@ classification.
 
 **Why this boundary matters:** Assert result, call count, and the complete delay sequence.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Use an operation that fails transiently twice then returns `ok`; assert three calls, delays `[base, base*2]`, result `ok`, and a separate `ValueError` case has one call.
 
 ### Exercise 7 — Design
 
@@ -147,9 +170,7 @@ is invalid, and retrying an overly broad command may repeat unrelated effects.
 **Why this boundary matters:** A failed PostgreSQL transaction cannot safely continue; retry
 needs fresh state.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Produce a scope decision naming the complete transaction attempt as the retry unit and show why retrying only a statement can reuse an aborted transaction.
 
 ### Exercise 8 — Composition
 
@@ -163,9 +184,7 @@ and acquisition for attempt N+1.
 **Why this boundary matters:** The retry operation should create and finish one complete
 transaction attempt.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Record resource identities and events across two failures and success; assert each attempt gets a new connection and rollback/close precede the corresponding sleep.
 
 ### Exercise 9 — Extension
 
@@ -178,9 +197,7 @@ no-sleep-after-final rule.
 
 **Why this boundary matters:** Randomness is another effect boundary and should be injected.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inject fixed jitter values and assert every computed delay stays within the declared bounds; replaying the same jitter sequence must produce identical delays.
 
 ### Exercise 10 — Failure analysis
 
@@ -193,9 +210,7 @@ lookup when the existing job ID is required.
 
 **Why this boundary matters:** The client may not know whether the server committed.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Model a commit that succeeds server-side then raises client-side; assert the next attempt re-checks the idempotency key and reports the existing job without a second effect.
 
 ### Exercise 11 — Input validation
 
@@ -209,9 +224,7 @@ concurrent boundary.
 **Why this boundary matters:** Fast local validation avoids obviously invalid database work but
 does not replace constraints.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert blank/whitespace keys and payloads above the declared byte limit fail before the connection factory or cursor is called.
 
 ### Exercise 12 — Concurrency
 
@@ -225,9 +238,7 @@ required.
 **Why this boundary matters:** A read-then-insert sequence cannot provide the same atomic
 guarantee.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Run two fake workers against one uniqueness arbiter; assert at most one receives an inserted ID and the other observes the duplicate path rather than a second logical job.
 
 ### Exercise 13 — Observability
 
@@ -241,9 +252,7 @@ metric tag.
 **Why this boundary matters:** Dimensions should describe bounded classes, not individual
 events.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inspect emitted metrics: tags are limited to bounded outcome/error-class fields and contain no payload, idempotency key, request ID, or exception message.
 
 ### Exercise 14 — Interruption
 
@@ -257,6 +266,4 @@ escape immediately with no retry sleep.
 **Why this boundary matters:** Cleanup may be broad, but retry classification should remain
 narrow.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Raise `KeyboardInterrupt` through the transaction/retry composition; assert rollback and close occur once and no delay or retry is scheduled.

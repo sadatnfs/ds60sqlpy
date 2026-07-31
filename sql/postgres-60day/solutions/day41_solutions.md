@@ -123,18 +123,13 @@ division-by-zero error.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-41 Exercise 1, read from `orders`, `order_items`, `products`, and `training.products`. Build the answer toward `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`; keep `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-41 Exercise 1, expected output: one row for each category in `training.products`, with six metric columns. The final columns are `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`. The final order is `revenue_30d DESC NULLS LAST, category`.
+- **Independent verification:** For sql-41 Exercise 1, independently aggregate `orders`, `order_items`, `products`, and `training.products` by `category`; require one output row for every distinct `category` tuple and compare `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_30d`, `revenue_90d`, and `orders_30d` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-41 Exercise 1, run `lines` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-41 Exercise 1, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, `products`, and `training.products`, preserve one row per `category`, and finish with `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d` ordered by `revenue_30d DESC NULLS LAST, category`.
+- **Alternative/trade-off:** For sql-41 Exercise 1, the chosen form is justified by this lesson-specific rationale: Build one row per product category containing: 1. Evaluate another form against the concrete expected result (one row for each category in `training.products`, with six metric columns) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue_30d`, `revenue_90d`, and `orders_30d` for the existing `category` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 2 — Top five product names per country
 
@@ -175,18 +170,13 @@ ordered from highest to lowest product revenue.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A different window or subquery shape is valid only with the same partition, peer, frame, tie, and output-order semantics.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-41 Exercise 2, read from `customers`, `orders`, `order_items`, and `products`. Build the answer toward `country`, and `top_five_products`; keep `country` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-41 Exercise 2, expected output: one row per represented country and one comma-separated label ordered from highest to lowest product revenue. The final columns are `country`, and `top_five_products`. The final order is `country`.
+- **Independent verification:** For sql-41 Exercise 2, independently aggregate `customers`, `orders`, `order_items`, and `products` by `country`; require one output row for every distinct `country` tuple satisfying `(product_rank <= 5)` and compare `top_five_products` tuple by tuple. Give two rows the same `country` value and different ``country`` values; verify `country` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-41 Exercise 2, run `product_revenue`, and `ranked` one at a time. Record each CTE's row count and `country` uniqueness before the next stage uses it.
+- **Clause check:** For sql-41 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, `orders`, `order_items`, and `products`, preserve one row per `country`, and finish with `country`, and `top_five_products` ordered by `country`.
+- **Alternative/trade-off:** For sql-41 Exercise 2, the chosen form is justified by this lesson-specific rationale: Rank at `(country, product)` grain before aggregating names. Evaluate another form against the concrete expected result (one row per represented country and one comma-separated label ordered from highest to lowest product revenue) and the verification above.
+- **Edge case:** Give two rows the same `country` value and different ``country`` values; verify `country` produces the intended rank and display order.
 
 ## Reasoning, safety, and pitfalls
 
@@ -204,18 +194,13 @@ generated level.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-41 Exercise 3, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `revenue`, and `grouping_mask`; keep `country`, and `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-41 Exercise 3, expected output: one row per `country`, and `category`. The final columns are `country`, `category`, `revenue`, and `grouping_mask`. The final order is `grouping_mask, country, category`.
+- **Independent verification:** For sql-41 Exercise 3, independently aggregate `orders`, `customers`, `order_items`, and `products` by `country`, and `category`; require one output row for every distinct `country`, and `category` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-41 Exercise 3, run `lines` one at a time. Record each CTE's row count and `country`, and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-41 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `products`, preserve one row per `country`, and `category`, and finish with `country`, `category`, `revenue`, and `grouping_mask` ordered by `grouping_mask, country, category`.
+- **Alternative/trade-off:** For sql-41 Exercise 3, the chosen form is justified by this lesson-specific rationale: The `CUBE(country, category)` answer emits detail, both one-dimensional subtotals, and the grand total. Evaluate another form against the concrete expected result (one row per `country`, and `category`) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 4 — State metric populations with FILTER
 
@@ -224,18 +209,13 @@ country metrics readable without repeating the whole grouped relation.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-41 Exercise 4, read from `orders`, and `customers`. Build the answer toward `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`; keep `country` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-41 Exercise 4, expected output: one row per `country`. The final columns are `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`. The final order is `c.country`.
+- **Independent verification:** For sql-41 Exercise 4, independently aggregate `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `orders`, `paid_orders`, and `paid_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-41 Exercise 4, start with the first relation in `orders`, and `customers`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
+- **Clause check:** For sql-41 Exercise 4, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `customers`, preserve one row per `country`, and finish with `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers` ordered by `c.country`.
+- **Alternative/trade-off:** For sql-41 Exercise 4, the chosen form is justified by this lesson-specific rationale: Each status/time population appears beside its aggregate, making several country metrics readable without repeating the whole grouped relation. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `orders`, `paid_orders`, and `paid_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 5 — Distinguish stored and generated NULLs
 
@@ -244,18 +224,13 @@ allowed by the model, keeps grouping flag zero and receives a different label.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-41 Exercise 5, read from `customers`. Build the answer toward `country_label`, `is_subtotal`, and `customers`; keep `country_label`, and `is_subtotal` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-41 Exercise 5, expected output: one row per `country_label`, and `is_subtotal`. The final columns are `country_label`, `is_subtotal`, and `customers`. The final order is `is_subtotal, country_label`.
+- **Independent verification:** For sql-41 Exercise 5, independently aggregate `customers` by `country_label`, and `is_subtotal`; require one output row for every distinct `country_label`, and `is_subtotal` tuple and compare `customers` tuple by tuple. Repeat with `NULL` in `GROUPING` and state whether the row is kept, rejected, or classified.
+- **Intermediate relation check:** For sql-41 Exercise 5, confirm the groups are `country_label`, and `is_subtotal`; then check `is_subtotal, country_label` before applying the row cap.
+- **Clause check:** For sql-41 Exercise 5, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `country_label`, and `is_subtotal`, and finish with `country_label`, `is_subtotal`, and `customers` ordered by `is_subtotal, country_label`.
+- **Alternative/trade-off:** For sql-41 Exercise 5, the chosen form is justified by this lesson-specific rationale: `GROUPING(country)` is one only for the generated subtotal. Evaluate another form against the concrete expected result (one row per `country_label`, and `is_subtotal`) and the verification above.
+- **Edge case:** Repeat with `NULL` in `GROUPING` and state whether the row is kept, rejected, or classified.
 
 ## Exercise 6 — Return a typed empty collection
 
@@ -264,15 +239,10 @@ allowed by the model, keeps grouping flag zero and receives a different label.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-41 Exercise 6, read from `customers`. Build the answer toward `empty_email_array`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-41 Exercise 6, expected output: one row per `customer_id`. The final columns are `empty_email_array`.
+- **Independent verification:** For sql-41 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `empty_email_array` against `customers`. Repeat with `NULL` in `empty_email_array` and state whether the row is kept, rejected, or classified.
+- **Intermediate relation check:** For sql-41 Exercise 6, inspect the source keys that survive `WHERE`.
+- **Clause check:** For sql-41 Exercise 6, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `empty_email_array`.
+- **Alternative/trade-off:** For sql-41 Exercise 6, the chosen form is justified by this lesson-specific rationale: `array_agg` over no qualifying inputs is NULL. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
+- **Edge case:** Repeat with `NULL` in `empty_email_array` and state whether the row is kept, rejected, or classified.

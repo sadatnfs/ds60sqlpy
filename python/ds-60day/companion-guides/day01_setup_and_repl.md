@@ -21,10 +21,6 @@ None. Start with the operating-system setup in
 [`docs/setup/windows.md`](../../../docs/setup/windows.md) or the corresponding
 macOS/Linux guide. Python 3.12 is the canonical version; 3.11 is also supported.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -224,7 +220,6 @@ Try this in the REPL, then save it as `hello.py` and run the file:
 def greet(name: str) -> str:
     return f"Hello, {name}!"
 
-
 print(greet("learner"))
 ```
 
@@ -264,7 +259,7 @@ code; these extend rather than replace the original practice above.
    **Verify:** Resolve the REPL and notebook `sys.executable` values and assert both identify the same course `.venv`; record the exact shared path component.
 7. **Tracing:** Trace the difference between `python -m pip --version` and a bare `pip --version`: which interpreter owns each command?
    **Progressive hint:** Read the Python and site-packages paths printed by pip.
-   **Verify:** Save both pip-version lines, underline the Python/site-packages owner in each, and explain any mismatch instead of assuming the commands are equivalent.
+   **Verify:** Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch.
 8. **Implementation:** Write `environment_report()` returning the Python version, executable, platform, and current working directory without shell commands.
    **Progressive hint:** Use `sys`, `platform`, and `pathlib.Path`.
    **Verify:** Assert `environment_report()` has exactly the four required fields with string values and that its executable/cwd agree with direct `sys`/`Path` inspection.
@@ -273,7 +268,7 @@ code; these extend rather than replace the original practice above.
    **Verify:** Record `sys.executable`, `python -m pip --version`, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.
 10. **Edge case and explanation:** Explain how to recover when the `ds60sqlpy` kernel is absent even though `.venv` exists, and state what remains possible offline.
    **Progressive hint:** Kernel registration and package download are separate operations.
-   **Verify:** After local kernel registration, confirm `jupyter kernelspec list` includes `ds60sqlpy` and run one already-installed offline import without downloading a package.
+   **Verify:** After local kernel registration, assert the `jupyter kernelspec list` output contains `ds60sqlpy`, then run one already-installed offline import and record its successful output without downloading a package.
 
 Before opening the reference solution, write one sentence explaining
 which contract or mental model each result confirms.
@@ -314,7 +309,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-01`
-(Day 1 — Setup, REPL, Virtual Environments, and Packages). I am a complete beginner. Emphasize execution contexts and a trustworthy course environment.
+(Day 1 — Setup, REPL, Virtual Environments, and Packages). Direct catalog prerequisites: none.
+I am new to this course and have no prior course lesson prerequisites. Emphasize execution contexts and a trustworthy course environment.
 Read `python/ds-60day/companion-guides/day01_setup_and_repl.md` and use the learner notebook
 `python/ds-60day/notebooks/day01_setup_and_repl.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

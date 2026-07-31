@@ -101,18 +101,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: Return orders whose total exceeds the overall average order total” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `o`, `all_orders`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 1, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 1: Query writing Prompt: Return orders whose total exceeds the overall average order total. Why: The aggregate subquery is guaranteed to return exactly one value. Expected: Order rows above the global average. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-08 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-08 Exercise 1, expected output: Order rows above the global average. The final columns are `order_id`, `customer_id`, and `total_amount`. The final order is `o.total_amount DESC, o.order_id`.
+- **Independent verification:** For sql-08 Exercise 1, run an anti-check that counts rows where NOT ((o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, and `total_amount` against `orders`. Add one row for which `(o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
+- **Intermediate relation check:** For sql-08 Exercise 1, inspect the source keys that survive `WHERE`; then check `o.total_amount DESC, o.order_id` before applying the row cap.
+- **Clause check:** For sql-08 Exercise 1, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, and `total_amount` ordered by `o.total_amount DESC, o.order_id`.
+- **Alternative/trade-off:** For sql-08 Exercise 1, the chosen form is justified by this lesson-specific rationale: The aggregate subquery is guaranteed to return exactly one value. Evaluate another form against the concrete expected result (Order rows above the global average) and the verification above.
+- **Edge case:** Add one row for which `(o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
 ## Exercise 2 — Query writing
 
@@ -144,18 +139,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Add the total customer count as a scalar column beside each country-level customer count” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `country_customers`, `all_customers`, `c`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 2, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 2: Query writing Prompt: Add the total customer count as a scalar column beside each country-level customer count. Why: An uncorrelated aggregate subquery is one row and repeats safely for each grouped output row. Expected: One row per country with a common global total. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-08 Exercise 2, read from `customers`. Build the answer toward `country`, `country_customers`, and `all_customers`; keep `country` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-08 Exercise 2, expected output: One row per country with a common global total. The final columns are `country`, `country_customers`, and `all_customers`. The final order is `country_customers DESC, c.country`.
+- **Independent verification:** For sql-08 Exercise 2, independently aggregate `customers` by `country`; require one output row for every distinct `country` tuple and compare `country_customers`, and `all_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `country_customers`, and `all_customers` for the existing `country` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-08 Exercise 2, confirm the groups are `country`; then check `country_customers DESC, c.country` before applying the row cap.
+- **Clause check:** For sql-08 Exercise 2, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `country`, and finish with `country`, `country_customers`, and `all_customers` ordered by `country_customers DESC, c.country`.
+- **Alternative/trade-off:** For sql-08 Exercise 2, the chosen form is justified by this lesson-specific rationale: An uncorrelated aggregate subquery is one row and repeats safely for each grouped output row. Evaluate another form against the concrete expected result (One row per country with a common global total) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `country_customers`, and `all_customers` for the existing `country` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 3 — Query writing
 
@@ -190,18 +180,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Show each customer with their latest order timestamp using a scalar correlated subquery” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `o`, `latest_order_date`, `c`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 3, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `customers`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 3: Query writing Prompt: Show each customer with their latest order timestamp using a scalar correlated subquery. Why: Use MAX to guarantee one result and let customers without orders receive NULL. Expected: One row per customer. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-08 Exercise 3, read from `orders`, and `customers`. Build the answer toward `customer_id`, `full_name`, and `latest_order_date`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-08 Exercise 3, expected output: One row per customer. The final columns are `customer_id`, `full_name`, and `latest_order_date`. The final order is `latest_order_date DESC NULLS LAST, c.customer_id`.
+- **Independent verification:** For sql-08 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `latest_order_date` against `orders`, and `customers`. Tie two rows on `latest_order_date DESC NULLS LAST` and give them different `c.customer_id` values; verify `latest_order_date DESC NULLS LAST, c.customer_id` chooses a stable first/last row.
+- **Intermediate relation check:** For sql-08 Exercise 3, inspect the source keys that survive `WHERE`; then check `latest_order_date DESC NULLS LAST, c.customer_id` before applying the row cap.
+- **Clause check:** For sql-08 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `customers`, preserve one row per `customer_id`, and finish with `customer_id`, `full_name`, and `latest_order_date` ordered by `latest_order_date DESC NULLS LAST, c.customer_id`.
+- **Alternative/trade-off:** For sql-08 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use `MAX` to guarantee one result and let customers without orders receive NULL. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
+- **Edge case:** Tie two rows on `latest_order_date DESC NULLS LAST` and give them different `c.customer_id` values; verify `latest_order_date DESC NULLS LAST, c.customer_id` chooses a stable first/last row.
 
 ## Exercise 4 — Prediction
 
@@ -231,18 +216,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Demonstrate that a scalar subquery with no matching rows returns NULL”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `p`, `no_row_becomes_null`.
-- **Independent verification:** For Exercise 4, run the two forms over the identical rows in `products`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 4: Prediction Prompt: Demonstrate that a scalar subquery with no matching rows returns NULL. Why: Use a deliberately impossible product key and test the scalar result with IS NULL. Expected: One row whose boolean result is true. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - WHERE: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-08 Exercise 4, read from `products`. Compute `no_row_becomes_null` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-08 Exercise 4, expected output: One row whose boolean result is true. The final columns are `no_row_becomes_null`.
+- **Independent verification:** For sql-08 Exercise 4, evaluate each of `no_row_becomes_null` in a separate control `SELECT` over `products`; require one final row and compare every value. Repeat with `NULL` in `no_row_becomes_null` and state whether the row is kept, rejected, or classified.
+- **Intermediate relation check:** For sql-08 Exercise 4, inspect the source keys that survive `WHERE`.
+- **Clause check:** For sql-08 Exercise 4, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `products`, preserve exactly one summary row, and finish with `no_row_becomes_null`.
+- **Alternative/trade-off:** For sql-08 Exercise 4, the chosen form is justified by this lesson-specific rationale: Use a deliberately impossible product key and test the scalar result with `IS NULL`. Evaluate another form against the concrete expected result (One row whose boolean result is true) and the verification above.
+- **Edge case:** Repeat with `NULL` in `no_row_becomes_null` and state whether the row is kept, rejected, or classified.
 
 ## Exercise 5 — Debugging
 
@@ -274,18 +254,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Repair a scalar subquery that returns many product prices by aggregating to the intended single value” at one row per product or product grouping requested. Named evidence columns/objects: `evidence`, `category_max_price`, `all_products`, `global_max_price`, `p`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 5, prove uniqueness at one row per product or product grouping requested; reconcile the result's row count and any count/sum/amount with a simpler control over `products`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 5: Debugging Prompt: Repair a scalar subquery that returns many product prices by aggregating to the intended single value. Why: Choose the business reduction explicitly; this answer uses maximum price. Expected: One row per category with a scalar global maximum for comparison. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-08 Exercise 5, read from `products`. Build the answer toward `category`, `category_max_price`, and `global_max_price`; keep `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-08 Exercise 5, expected output: One row per category with a scalar global maximum for comparison. The final columns are `category`, `category_max_price`, and `global_max_price`. The final order is `p.category`.
+- **Independent verification:** For sql-08 Exercise 5, independently aggregate `products` by `category`; require one output row for every distinct `category` tuple and compare `category_max_price`, and `global_max_price` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `category_max_price`, and `global_max_price` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-08 Exercise 5, confirm the groups are `category`; then check `p.category` before applying the row cap.
+- **Clause check:** For sql-08 Exercise 5, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per `category`, and finish with `category`, `category_max_price`, and `global_max_price` ordered by `p.category`.
+- **Alternative/trade-off:** For sql-08 Exercise 5, the chosen form is justified by this lesson-specific rationale: Choose the business reduction explicitly; this answer uses maximum price. Evaluate another form against the concrete expected result (One row per category with a scalar global maximum for comparison) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `category_max_price`, and `global_max_price` for the existing `category` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 6 — Extension
 
@@ -325,18 +300,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 6 must make “Extension: Rewrite a repeated scalar aggregate as a one-row CTE crossed into a customer-country report” observable through the exact DDL/DML command tag plus one row per customer or the customer grouping key named by the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `customer_count`, `country_customers`, `customer_share`, `c`, `cte`.
-- **Independent verification:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `customer_count`, `country_customers`, `customer_share`, `c`, `cte`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state. The executable solution's check is: Exercise 6: Extension Prompt: Rewrite a repeated scalar aggregate as a one-row CTE crossed into a customer-country report. Why: Compute the global total once, then cross join the guaranteed one-row relation. Expected: One row per country with country share. Review the selected keys, grain, NULL behavior, and ordering before treating the output as evidence. Clause-by-clause reading: - WITH: names an intermediate relation so its grain can be checked before later joins or aggregation. - SELECT: defines the output columns at the query's final grain; aliases document the meaning of derived values. - FROM: establishes the starting relation and therefore the initial row grain. - JOIN ... ON: combines relations and may multiply rows; the match predicate and each input's grain must agree. - NULLIF: turns a prohibited denominator into NULL so division reports unknown instead of raising an error. - GROUP BY: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain. - ORDER BY: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-08 Exercise 6, read from `customers`. Build the answer toward `country`, `country_customers`, and `customer_share`; keep `country`, and `customer_count` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-08 Exercise 6, expected output: One row per country with country share. The final columns are `country`, `country_customers`, and `customer_share`. The final order is `customer_share DESC, c.country`.
+- **Independent verification:** For sql-08 Exercise 6, independently aggregate `customers` by `country`, and `customer_count`; require one output row for every distinct `country`, and `customer_count` tuple and compare `country_customers`, and `customer_share` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `country_customers`, and `customer_share` for the existing `country`, and `customer_count` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-08 Exercise 6, run `global` one at a time. Record each CTE's row count and `country`, and `customer_count` uniqueness before the next stage uses it.
+- **Clause check:** For sql-08 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `country`, and `customer_count`, and finish with `country`, `country_customers`, and `customer_share` ordered by `customer_share DESC, c.country`.
+- **Alternative/trade-off:** For sql-08 Exercise 6, the chosen form is justified by this lesson-specific rationale: Compute the global total once, then cross join the guaranteed one-row relation. Evaluate another form against the concrete expected result (One row per country with country share) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `country_customers`, and `customer_share` for the existing `country`, and `customer_count` tuple and verify the new tuple appears exactly once.
 
 ## Final self-check
 

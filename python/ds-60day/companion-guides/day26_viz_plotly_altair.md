@@ -20,10 +20,6 @@ By the end of this lesson, you can:
 Complete Day 25 (`python-25`): chart selection, visual encodings, labels, and
 static export. Plotly and Altair are in the `data` dependency group.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -297,7 +293,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-26`
-(Day 26 — Interactive Visualization with Plotly and Altair). I am a complete beginner. Emphasize interactive visual encodings, bounded interaction, and portable HTML export.
+(Day 26 — Interactive Visualization with Plotly and Altair). Direct catalog prerequisites: `python-25`.
+I have completed the direct prerequisites: `python-25`. Emphasize interactive visual encodings, bounded interaction, and portable HTML export.
 Read `python/ds-60day/companion-guides/day26_viz_plotly_altair.md` and use the learner notebook
 `python/ds-60day/notebooks/day26_viz_plotly_altair.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

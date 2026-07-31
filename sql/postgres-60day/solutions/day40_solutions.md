@@ -101,18 +101,13 @@ and decide whether missing days mean zero or unknown.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** Pre-aggregation or a differently ordered join pipeline is valid only if it prevents fanout and reconciles to the same scoped control total.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-40 Exercise 1, read from `orders`. Compute `order_day`, `revenue`, `avg15`, `sd15`, and `z_score` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-40 Exercise 1, expected output: one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it. The final columns are `order_day`, `revenue`, `avg15`, `sd15`, and `z_score`. The final order is `order_day`.
+- **Independent verification:** For sql-40 Exercise 1, evaluate each of `order_day`, `revenue`, `sd15`, and `z_score` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
+- **Intermediate relation check:** For sql-40 Exercise 1, run `daily`, and `rolling` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
+- **Clause check:** For sql-40 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `order_day`, `revenue`, `avg15`, `sd15`, and `z_score` ordered by `order_day`.
+- **Alternative/trade-off:** For sql-40 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: one row per day with orders. Evaluate another form against the concrete expected result (one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it) and the verification above.
+- **Edge case:** Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
 
 ## Exercise 2 — Category P50 and P90 of order values
 
@@ -157,18 +152,13 @@ between observed values, so a percentile need not equal an actual order value.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-40 Exercise 2, read from `order_items`, and `products`. Compute `category`, `p50_order_value`, `p90_order_value`, and `category_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-40 Exercise 2, expected output: one row per sold category. `PERCENTILE_CONT` can interpolate between observed values, so a percentile need not equal an actual order value. The final columns are `category`, `p50_order_value`, `p90_order_value`, and `category_orders`. The final order is `category`.
+- **Independent verification:** For sql-40 Exercise 2, evaluate each of `p50_order_value`, `p90_order_value`, and `category_orders` in a separate control `SELECT` over `order_items`, and `products`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `p50_order_value`, `p90_order_value`, and `category_orders` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-40 Exercise 2, run `category_order_values` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-40 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `order_items`, and `products`, preserve one row per `category`, and finish with `category`, `p50_order_value`, `p90_order_value`, and `category_orders` ordered by `category`.
+- **Alternative/trade-off:** For sql-40 Exercise 2, the chosen form is justified by this lesson-specific rationale: An order can contain several categories. Evaluate another form against the concrete expected result (one row per sold category. `PERCENTILE_CONT` can interpolate between observed values, so a percentile need not equal an actual order value) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `p50_order_value`, `p90_order_value`, and `category_orders` for the existing `category` tuple and verify the new tuple appears exactly once.
 
 ## Pitfalls
 
@@ -188,18 +178,13 @@ difference deterministic.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-40 Exercise 3, read from the inline `VALUES` fixture. Build the answer toward `discrete_median`, and `continuous_median`; keep `discrete_median` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-40 Exercise 3, expected output: one row per `discrete_median`. The final columns are `discrete_median`, and `continuous_median`.
+- **Independent verification:** For sql-40 Exercise 3, reselect the returned keys directly from the source; require unique `discrete_median` where the expected grain is one row per key and confirm the projected `discrete_median`, and `continuous_median` against the inline `VALUES` fixture. Add one source row with a new `discrete_median`; verify the result gains exactly one row carrying that `discrete_median` value.
+- **Intermediate relation check:** For sql-40 Exercise 3, select `discrete_median` from the inline `VALUES` fixture before adding derived columns.
+- **Clause check:** For sql-40 Exercise 3, the solution actually uses `WITH`, `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `discrete_median`, and finish with `discrete_median`, and `continuous_median`.
+- **Alternative/trade-off:** For sql-40 Exercise 3, the chosen form is justified by this lesson-specific rationale: For four values, the discrete median chooses an observed central value while the continuous median interpolates. Evaluate another form against the concrete expected result (one row per `discrete_median`) and the verification above.
+- **Edge case:** Add one source row with a new `discrete_median`; verify the result gains exactly one row carrying that `discrete_median` value.
 
 ## Exercise 4 — Share and rank within month
 
@@ -208,18 +193,13 @@ partitions by month, and `ROW_NUMBER` adds category as a deterministic tie-break
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A different window or subquery shape is valid only with the same partition, peer, frame, tie, and output-order semantics.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-40 Exercise 4, read from `orders`, `order_items`, and `products`. Build the answer toward `month`, `category`, `revenue`, `month_share`, and `category_rank`; keep `month`, and `category` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-40 Exercise 4, expected output: one row per `month`, and `category`. The final columns are `month`, `category`, `revenue`, `month_share`, and `category_rank`. The final order is `month DESC, category_rank`.
+- **Independent verification:** For sql-40 Exercise 4, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, `month_share`, and `category_rank`, then verify output keys remain `month`, and `category`. Give two rows the same `month DESC` value and different `category_rank` values; verify `month DESC, category_rank` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-40 Exercise 4, run `category_month` one at a time. Record each CTE's row count and `month`, and `category` uniqueness before the next stage uses it.
+- **Clause check:** For sql-40 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `month`, and `category`, and finish with `month`, `category`, `revenue`, `month_share`, and `category_rank` ordered by `month DESC, category_rank`.
+- **Alternative/trade-off:** For sql-40 Exercise 4, the chosen form is justified by this lesson-specific rationale: Revenue is first aggregated to month/category grain. Evaluate another form against the concrete expected result (one row per `month`, and `category`) and the verification above.
+- **Edge case:** Give two rows the same `month DESC` value and different `category_rank` values; verify `month DESC, category_rank` produces the intended rank and display order.
 
 ## Exercise 5 — Remove forecast leakage
 
@@ -228,18 +208,13 @@ row would let the target actual influence its own forecast.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Evidence of the incorrect behavior followed by a corrected result at the declared grain, with the violated invariant made visible.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-40 Exercise 5, read from `orders`. Build the answer toward `day`, `revenue`, and `prior_seven_forecast`; keep `day` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-40 Exercise 5, expected output: at most 20 rows keyed by `day`. The final columns are `day`, `revenue`, and `prior_seven_forecast`. The final order is `day DESC`.
+- **Independent verification:** For sql-40 Exercise 5, assert no more than 20 rows, no duplicate `day`, and no adjacent pair that violates `day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, and `prior_seven_forecast` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.
+- **Intermediate relation check:** For sql-40 Exercise 5, run `daily` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
+- **Clause check:** For sql-40 Exercise 5, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `day`, and finish with `day`, `revenue`, and `prior_seven_forecast` ordered by `day DESC`.
+- **Alternative/trade-off:** For sql-40 Exercise 5, the chosen form is justified by this lesson-specific rationale: The corrected frame is `7 PRECEDING` through `1 PRECEDING`. Evaluate another form against the concrete expected result (at most 20 rows keyed by `day`) and the verification above.
+- **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.
 
 ## Exercise 6 — Preserve undefined dispersion
 
@@ -248,15 +223,10 @@ for every z-score, accurately distinguishing undefined from normal.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-40 Exercise 6, read from `constant`. Build the answer toward `value`, and `z_score`; keep `value` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-40 Exercise 6, expected output: one row per `value`. The final columns are `value`, and `z_score`.
+- **Independent verification:** For sql-40 Exercise 6, reselect the returned keys directly from the source; require unique `value` where the expected grain is one row per key and confirm the projected `value`, and `z_score` against `constant`. Repeat with `NULL` in `value`, and `z_score` and state whether the row is kept, rejected, or classified.
+- **Intermediate relation check:** For sql-40 Exercise 6, run `moments` one at a time. Record each CTE's row count and `value` uniqueness before the next stage uses it.
+- **Clause check:** For sql-40 Exercise 6, the solution actually uses `WITH`, `FROM`, window `OVER`, and `SELECT`. Read only those operations: begin at `constant`, preserve one row per `value`, and finish with `value`, and `z_score`.
+- **Alternative/trade-off:** For sql-40 Exercise 6, the chosen form is justified by this lesson-specific rationale: The constant fixture has standard deviation zero. Evaluate another form against the concrete expected result (one row per `value`) and the verification above.
+- **Edge case:** Repeat with `NULL` in `value`, and `z_score` and state whether the row is kept, rejected, or classified.

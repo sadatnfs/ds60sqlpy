@@ -21,10 +21,6 @@ By the end of this lesson, you can:
 Complete Day 27 (`python-27`), pandas preprocessing (`python-18`), and data
 validation concepts from prior lessons. scikit-learn is in the `data` group.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -225,7 +221,7 @@ assertion or inspection and explain what it proves.
 
 2. Compare one model pipeline with scaling against the same model pipeline without scaling. **Constraints:** keep split/folds, random state, features, model, and all other transforms identical; fit both only on training data.
    **Expected behavior:** report held-out or cross-validated scores with uncertainty, not training score.
-   **Verify:** state whether the observed difference is large enough to matter and why the model family may or may not need scaling.
+   **Verify:** report both score estimates, uncertainty intervals, and their difference; compare that difference with a stated practical threshold and connect the result to the model family's sensitivity to feature scale.
 
 ### Additional mastery practice
 
@@ -290,7 +286,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-28`
-(Day 28 — Feature Engineering with scikit-learn). I am a complete beginner. Emphasize reproducible feature transformations without information leakage.
+(Day 28 — Feature Engineering with scikit-learn). Direct catalog prerequisites: `python-27`.
+I have completed the direct prerequisites: `python-27`. Emphasize reproducible feature transformations without information leakage.
 Read `python/ds-60day/companion-guides/day28_feature_engineering.md` and use the learner notebook
 `python/ds-60day/notebooks/day28_feature_engineering.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

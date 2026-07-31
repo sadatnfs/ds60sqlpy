@@ -744,8 +744,8 @@ def _static_run_help(lesson: Lesson) -> str:
     )
 
 
-def _codex_coaching_prompt(lesson: Lesson) -> str:
-    """Build a context-rich, answer-safe coaching prompt for one lesson."""
+def _default_codex_coaching_prompt(lesson: Lesson) -> str:
+    """Build a context-rich fallback prompt when a guide has no prompt block."""
 
     prerequisites = ", ".join(lesson.prerequisites) if lesson.prerequisites else "none"
     execution_boundary = (
@@ -797,6 +797,35 @@ def _codex_coaching_prompt(lesson: Lesson) -> str:
         solution.
         """
     )
+
+
+def codex_coaching_prompt(catalog: Catalog, lesson: Lesson) -> str:
+    """Return the guide's checked-in tutoring prompt, with a safe fallback.
+
+    The companion guide is the authoring source of truth for lesson-specific
+    concepts, evidence, and coaching boundaries. Generated HTML must not drift
+    into a second, generic prompt merely because the reader is rebuilt.
+    """
+
+    guide_path = catalog.resolve(lesson.guide_path)
+    with suppress(OSError):
+        source = guide_path.read_text(encoding="utf-8")
+        heading = re.search(
+            r"(?im)^##[ \t]+Ask Codex about this lesson[ \t]*$",
+            source,
+        )
+        if heading:
+            remainder = source[heading.end() :]
+            next_heading = re.search(r"(?m)^##[ \t]+", remainder)
+            section = remainder[: next_heading.start()] if next_heading else remainder
+            prompt = re.search(
+                r"(?ms)^[ \t]*```text[ \t]*\n(?P<body>.*?)(?:\n)?^[ \t]*```[ \t]*$",
+                section,
+            )
+            if prompt and prompt.group("body").strip():
+                return prompt.group("body").strip()
+
+    return _default_codex_coaching_prompt(lesson)
 
 
 def _sql_run_walkthrough(lesson: Lesson) -> str:
@@ -1022,7 +1051,7 @@ def build_lesson_html(
     lesson_id_json = _safe_script_json(lesson.id)
     lesson_path_json = _safe_script_json(lesson.lesson_path)
     static_run_help = _static_run_help(lesson)
-    codex_prompt = html.escape(_codex_coaching_prompt(lesson))
+    codex_prompt = html.escape(codex_coaching_prompt(catalog, lesson))
     sql_run_walkthrough = _sql_run_walkthrough(lesson)
     notebook_action = (
         '<button class="button launcher-only" type="button" id="launch-jupyter" hidden>'
@@ -1319,8 +1348,18 @@ def build_lesson_html(
         <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
       </div>
 
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        {solution_tabs}
+      </nav>
+
+      {guide_panel}
+      {learner_panel}
+      {solution_panels}
+
       <section class="coach-card" aria-labelledby="coach-heading">
-        <p class="eyebrow">Optional learning coach</p>
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
         <h2 id="coach-heading">Ask Codex about this lesson</h2>
         <p>
           The lesson is complete without Codex. If this repository is open in Codex,
@@ -1336,16 +1375,6 @@ def build_lesson_html(
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
-
-      <nav class="tabs" role="tablist" aria-label="Lesson materials">
-        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
-        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
-        {solution_tabs}
-      </nav>
-
-      {guide_panel}
-      {learner_panel}
-      {solution_panels}
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         {previous_link}

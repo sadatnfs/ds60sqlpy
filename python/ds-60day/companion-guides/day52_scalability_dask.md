@@ -195,33 +195,17 @@ assert result == 42 and calls == [21]
 
 1. Read a large local CSV with Dask and compute groupby aggregations.
 
-**Verify:** For task `Read a large local CSV with Dask and compute groupby aggregations`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
+**Verify:** Practice 1 — lazy task graphs, partitions, bounded reducers, and scale evidence — generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
 
 2. Persist the DataFrame and compare repeated timings with and without
    persistence.
 
-**Verify:** For task `Persist the DataFrame and compare repeated timings with and without`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 2 — lazy task graphs, partitions, bounded reducers, and scale evidence — record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
 
 3. Implement the same reduction with `pandas.read_csv(..., chunksize=...)` and
    compare memory and elapsed time.
 
-**Verify:** For task `Implement the same reduction with pandas.readcsv(..., chunksize=...) and`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Practice 3 — lazy task graphs, partitions, bounded reducers, and scale evidence — for identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
 
 ### Progressive hints
 
@@ -246,39 +230,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Task-graph tracing:** Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined `dask.compute` call.
    **Progressive hint:** Building an expression does not read all data. Combining terminal computations can share upstream work without persisting the entire frame.
 
-**Verify:** For task `Task-graph tracing: Build two aggregations from the same lazy Dask DataFrame, inspect their t...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
-
+**Verify:** Task-graph tracing — print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.
 
 5. **Partition-skew diagnosis:** Create a group key where one value owns most rows. Measure partition sizes and groupby runtime, then propose repartitioning or algorithm changes.
    **Progressive hint:** A balanced row count before a shuffle does not guarantee balanced work after grouping; one hot key can become a straggler.
 
-**Verify:** For task `Partition-skew diagnosis: Create a group key where one value owns most rows. Measure partitio...`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** Partition-skew diagnosis — print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.
 
 6. **Reducer correctness:** Implement a mergeable mean/variance state for chunks and prove it matches NumPy across different chunk boundaries, including an empty chunk.
    **Progressive hint:** A mean alone is not mergeable without support. Carry count, mean, and M2 (sum of squared deviations) using a stable combine formula.
 
-**Verify:** For task `Reducer correctness: Implement a mergeable mean/variance state for chunks and prove it matche...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then run the named missing/unknown/empty boundary and assert its explicit fallback or exception instead of accepting an accidental default.
-
-
-
-
-
+**Verify:** Reducer correctness — test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -325,10 +290,12 @@ Emphasize lazy task graphs, partitions, bounded reducers, and scale evidence. Us
 - guide: `python/ds-60day/companion-guides/day52_scalability_dask.md`
 - learner artifact: `python/ds-60day/notebooks/day52_scalability_dask.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-51`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

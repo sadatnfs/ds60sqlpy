@@ -24,7 +24,7 @@ Apple Silicon and Intel Macs are supported, but optional heavy machine-learning 
 ## 2. Clone and open the repository
 
 ```bash
-git clone <repository-url> ds60sqlpy
+git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
 cd ds60sqlpy
 code .
 test -f README.md
@@ -61,9 +61,11 @@ bash scripts/setup.sh --advanced
 ```
 
 The Homebrew OpenMP runtime is required by the LightGBM and XGBoost macOS
-wheels. The advanced profile can take substantially longer. You may defer it
-until the generated catalog shows that a planned lesson needs it. Use the
-[catalog-label mapping](../dependency-profiles.md): labels such as `core`,
+wheels. The dependency profile selects a compatible PyTorch/TorchVision pair:
+the final Intel-macOS wheels on Intel Macs and a macOS 13-compatible pair on
+Apple Silicon. The advanced profile can take substantially longer. You may
+defer it until the generated catalog shows that a planned lesson needs it. Use
+the [catalog-label mapping](../dependency-profiles.md): labels such as `core`,
 `postgres`, and `advanced` are not literal package extras.
 
 ## 4. Set up PostgreSQL
@@ -99,6 +101,17 @@ Docker-based automation uses PostgreSQL 17. It is the most consistent choice for
 
 ## 5. Start learning
 
+For the guided dashboard, file-backed progress, and exact VS Code/Jupyter
+lesson actions, start the private loopback portal and keep its terminal open:
+
+```bash
+.venv/bin/python scripts/learning_portal.py
+```
+
+The browser page clearly identifies private launcher mode. If you instead open
+`START_HERE.html` directly, it is a read-only course navigator; it cannot start
+local programs.
+
 Python:
 
 ```bash
@@ -110,6 +123,11 @@ SQL:
 ```bash
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
 ```
+
+In private launcher mode, the recommended SQL route is to open the Day 1
+reader and choose **Create/open guided SQL notebook**. That creates a preserved,
+ignored working copy under `.learning/sql/sql-01/` and runs the complete script
+through a fixed `psql -f` path.
 
 For `%sql` and `%%sql` in the course kernel, continue with
 [PostgreSQL in Jupyter](jupyter-postgresql.md).

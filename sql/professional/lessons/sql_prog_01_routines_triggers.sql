@@ -217,73 +217,73 @@ ORDER BY wi.item_id;
 -- 1. Write a STABLE SQL function status_change_count(item_id) that returns the
 --    number of audit rows for one item. Decide what NULL input should return.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-prog-01 Exercise 1, read from `pro_routines_lab.work_item_audit`, `pro_routines_lab.work_items`, `OF`, `pro_routines_lab.status_change_count`, and `pro_routines_lab.reassign_open_items`. Build the answer toward `stable`; keep `stable` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-prog-01 Exercise 1, expected output: one row per `stable`. The final columns are `stable`. The final order is `wi.item_id`.
+--    Verify: For sql-prog-01 Exercise 1, run an anti-check that counts rows where NOT ((a.item_id = p_item_id $function$) OR (wi.owner_name = p_from_owner AND wi.status <> 'closed') OR (wi.item_id = 1)); require unique `stable` where the expected grain is one row per key and confirm the projected `stable` against `pro_routines_lab.work_item_audit`, `pro_routines_lab.work_items`, `OF`, `pro_routines_lab.status_change_count`, and `pro_routines_lab.reassign_open_items`. Repeat with `NULL` in `stable` and state whether the row is kept, rejected, or classified.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 1, inspect the source keys that survive `WHERE`; then check `wi.item_id` before applying the row cap.
 -- 2. Write a procedure reassign_open_items(from_owner, to_owner) that changes
 --    only non-closed items and rejects a blank destination owner.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-prog-01 Exercise 2, complete the reassignment procedure written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-prog-01 Exercise 2, expected output: a completed the reassignment procedure written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `update`.
+--    Verify: For sql-prog-01 Exercise 2, check the reassignment procedure written analysis against `update`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 2, check the reassignment procedure written analysis against `update`.
 -- 3. Add a BEFORE UPDATE trigger that rejects a direct closed -> open
 --    transition. Safely prove the rejection and explain when application code
 --    or a dedicated transition table would be clearer.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-prog-01 Exercise 3, complete the transition guard written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-prog-01 Exercise 3, expected output: a completed the transition guard written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `check_violation`, and `if`.
+--    Verify: For sql-prog-01 Exercise 3, check the transition guard written analysis against `check_violation`, and `if`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 3, check the transition guard written analysis against `check_violation`, and `if`.
 -- 4. Compare the number of row-audit records with statement-audit records after
 --    a multirow update. State the grain of each audit table.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-prog-01 Exercise 4, read from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Build the answer toward `changed_rows`; keep `changed_rows` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-prog-01 Exercise 4, expected output: one row per `changed_rows`. The final columns are `changed_rows`.
+--    Verify: For sql-prog-01 Exercise 4, reselect the returned keys directly from the source; require unique `changed_rows` where the expected grain is one row per key and confirm the projected `changed_rows` against `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Add one source row with a new `changed_rows`; verify the result gains exactly one row carrying that `changed_rows` value.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 4, select `changed_rows` from `pro_routines_lab.work_items`, `ON`, and `NEW.status` before adding derived columns.
 -- 5. Explain why a CHECK constraint, not a trigger, enforces the allowed status
 --    values. Explain why functions cannot COMMIT, and when a top-level procedure
 --    may control transactions.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-prog-01 Exercise 5, complete the declarative boundary written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-prog-01 Exercise 5, expected output: a completed the declarative boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `call`.
+--    Verify: For sql-prog-01 Exercise 5, check the declarative boundary written analysis against `call`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 5, check the declarative boundary written analysis against `call`.
 -- 6. Classify the lesson routines as VOLATILE, STABLE, or IMMUTABLE and decide
 --    whether each can be PARALLEL SAFE. Explain why an incorrect promise can
 --    produce wrong plans or results even when a demo appears to work.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-prog-01 Exercise 6, read from `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace`. Build the answer toward `proname`, `volatility`, and `parallel_mode`; keep `proname` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-prog-01 Exercise 6, expected output: one row per `proname`. The final columns are `proname`, `volatility`, and `parallel_mode`. The final order is `p.proname`.
+--    Verify: For sql-prog-01 Exercise 6, project `proname` plus the raw source columns from `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace` at each join stage; record row count and distinct `proname`, then assert the final `proname`, `volatility`, and `parallel_mode` values match those staged rows without unintended fanout or loss. Add one row for which `(n.nspname = 'pro_routines_lab')` is true and one for which it is false; verify only the matching `proname` value is returned.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 6, start with the first relation in `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace`; after each join, record total rows and distinct `proname` so the exact fanout or loss is visible.
 -- 7. Add an AFTER UPDATE statement trigger with transition tables that records
 --    one summary row per statement. Reconcile affected rows against the
 --    row-level audit and define behavior for an update that changes zero rows.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-prog-01 Exercise 7, read the target keys from `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+--    Expected result/shape: For sql-prog-01 Exercise 7, expected output: the command tag and an independently counted set of affected `integer` values. The final columns are `integer`. The final order is `s.summary_id`.
+--    Verify: For sql-prog-01 Exercise 7, materialize the intended `integer` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `integer` values in both cases.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 7, start with the first relation in `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON`; after each join, record total rows and distinct `integer` so the exact fanout or loss is visible.
 -- 8. Use a nested PL/pgSQL block to catch one expected unique_violation, then
 --    prove only the inner subtransaction was rolled back. Re-raise every
 --    unexpected SQLSTATE instead of using WHEN OTHERS as silent control flow.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-prog-01 Exercise 8, read the target keys from `pro_routines_lab.exception_probe` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+--    Expected result/shape: For sql-prog-01 Exercise 8, expected output: the command tag and an independently counted set of affected `unique_violation` values. The final columns are `unique_violation`.
+--    Verify: For sql-prog-01 Exercise 8, materialize the intended `unique_violation` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.exception_probe` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `unique_violation` values in both cases.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 8, materialize the intended `unique_violation` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.exception_probe` again and prove rollback or idempotent retry.
 -- 9. Harden a SECURITY DEFINER reporting function: fixed search_path,
 --    schema-qualified objects, validated parameters, revoked PUBLIC execution,
 --    narrow owner privileges, and explicit grants. State why ownership itself
 --    is part of the security boundary.
 --
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-prog-01 Exercise 9, read from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Build the answer toward `search_path`; keep `search_path` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-prog-01 Exercise 9, expected output: one row per `search_path`. The final columns are `search_path`.
+--    Verify: For sql-prog-01 Exercise 9, reselect the returned keys directly from the source; require unique `search_path` where the expected grain is one row per key and confirm the projected `search_path` against `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Add one source row with a new `search_path`; verify the result gains exactly one row carrying that `search_path` value.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 9, select `search_path` from `pro_routines_lab.work_items`, `ON`, and `NEW.status` before adding derived columns.
 -- 10. Simulate two workers claiming open items. Design one solution using
 --     SELECT ... FOR UPDATE SKIP LOCKED, define deterministic batch order, and
 --     explain starvation, retry, and transaction-length trade-offs.
@@ -304,10 +304,10 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: Use only the declared lesson objects (pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-prog-01 Exercise 10, read the target keys from `pro_routines_lab.claim_queue`, and `SKIP` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+--    Expected result/shape: For sql-prog-01 Exercise 10, expected output: one `RETURNING` row per affected `affected_row_count` plus the command tag, with pre-write and post-write values that reconcile. The final columns are `affected_row_count`, and `command_tag`.
+--    Verify: For sql-prog-01 Exercise 10, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.claim_queue`, and `SKIP` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
+--    Hint ladder, rung 1: For sql-prog-01 Exercise 10, run `claimable` one at a time. Record each CTE's row count and `affected_row_count` uniqueness before the next stage uses it.
 
 ROLLBACK;
 \echo 'SQL-PROG-01 complete: pro_routines_lab was rolled back'

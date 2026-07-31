@@ -199,23 +199,12 @@ assert transformed[0].sum() == 0
 
 1. Swap `LinearRegression` for `Ridge` and compare test scores.
 
-**Verify:** For task `Swap LinearRegression for Ridge and compare test scores`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 1 — the scikit-learn estimator contract and leakage-safe pipelines — use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
 
 2. Inspect the coefficients and discuss how feature scaling changes their
    numeric values and interpretation.
 
-**Verify:** For task `Inspect the coefficients and discuss how feature scaling changes their`, demonstrate the concrete requirement “2. Inspect the coefficients and discuss how feature scaling changes their numeric values and interpretation” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Practice 2 — the scikit-learn estimator contract and leakage-safe pipelines — print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
 
 ### Progressive hints
 
@@ -236,50 +225,25 @@ attempt, and record the evidence that would prove your result correct.
 3. **Leakage prediction:** Predict how cross-validation scores can change when a scaler is fit on the complete dataset before `cross_val_score`, then explain why the code still runs without warning.
    **Progressive hint:** The globally fitted mean and scale contain information from each validation fold. A Pipeline refits them using only the fold's training rows.
 
-**Verify:** For task `Leakage prediction: Predict how cross-validation scores can change when a scaler is fit on th...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Leakage prediction — on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.
 
 4. **Mixed-type implementation:** Build a `ColumnTransformer` for numeric imputation/scaling and categorical imputation/one-hot encoding, followed by LogisticRegression. Use a tiny DataFrame containing a missing value.
    **Progressive hint:** Use separate nested pipelines and `handle_unknown='ignore'`; keep column lists explicit so schema drift is visible.
 
-**Verify:** For task `Mixed-type implementation: Build a ColumnTransformer for numeric imputation/scaling and categ...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** Mixed-type implementation — fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.
 
 5. **Unknown-category debugging:** Fit on regions `north` and `south`, then predict a row with region `west`. Compare `OneHotEncoder` default behavior with `handle_unknown='ignore'` and explain the resulting representation.
    **Progressive hint:** The default raises on an unseen category. Ignore maps the unknown to all zeros for that feature block, which is operationally safe but lossy.
 
-**Verify:** For task `Unknown-category debugging: Fit on regions north and south, then predict a row with region we...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Unknown-category debugging — capture the default OneHotEncoder unknown-category ValueError for region='west'; with handle_unknown='ignore', assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.
 
 6. **Inspection and schema contract:** After fitting the mixed-type pipeline, recover transformed feature names, pair them with coefficients, and assert that an inference DataFrame has the required columns in a safe order.
    **Progressive hint:** Use `get_feature_names_out()` from the fitted ColumnTransformer. Select by column name rather than trusting an incoming positional order.
 
-**Verify:** For task `Inspection and schema contract: After fitting the mixed-type pipeline, recover transformed fe...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
+**Verify:** Inspection and schema contract — print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -326,10 +290,12 @@ Emphasize the scikit-learn estimator contract and leakage-safe pipelines. Use ex
 - guide: `python/ds-60day/companion-guides/day34_sklearn_intro_pipelines.md`
 - learner artifact: `python/ds-60day/notebooks/day34_sklearn_intro_pipelines.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-33`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

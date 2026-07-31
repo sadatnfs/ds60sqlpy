@@ -4,21 +4,21 @@ Professional learner deep dive (python-test-01)
 ------------------------------------------------
 
 Mental model:
-A test seam makes time, storage, randomness, environment, or transport
-replaceable. A fake is a working simplified implementation; a mock
-records a narrow interaction; a real-local implementation proves
-serialization or filesystem behavior. Shared contract tests prevent a
-convenient fake from drifting away from the real boundary.
-
-Property-based testing starts with an invariant and generates many
-inputs, then shrinks a failure to a small counterexample. It complements
-named examples and boundary tests; it does not infer the property or
-replace external integration evidence.
+A test seam makes time, storage, randomness, environment, or transport replaceable. A fake is a
+working simplified implementation; a mock records a narrow interaction; a real-local
+implementation proves serialization or filesystem behavior. Shared contract tests prevent a
+convenient fake from drifting away from the real boundary.  Property-based testing starts with
+an invariant and generates many inputs, then shrinks a failure to a small counterexample. It
+complements named examples and boundary tests; it does not infer the property or replace
+external integration evidence.
 
 API/boundary anatomy:
-* Protocol/injected dependency: lets production policy receive a fake clock/store without patching global implementation details.
-* shared contract suite: applies the same observable create/read/update/delete requirements to fake and real-local implementations.
-* Hypothesis strategy + property: defines an input domain and invariant, with deterministic settings and no repository cache.
+* Protocol/injected dependency: lets production policy receive a fake clock/store without
+  patching global implementation details.
+* shared contract suite: applies the same observable create/read/update/delete requirements to
+  fake and real-local implementations.
+* Hypothesis strategy + property: defines an input domain and invariant, with deterministic
+  settings and no repository cache.
 
 Micro-example A — replace wall-clock sleep with an injected clock::
 
@@ -27,33 +27,36 @@ Micro-example A — replace wall-clock sleep with an injected clock::
             self.value = value
         def now(self):
             return self.value
-    
+
     def is_fresh(created_at, ttl, clock):
         if ttl <= 0:
             raise ValueError("ttl must be positive")
         return clock.now() < created_at + ttl
-    
+
     clock = FixedClock(12.0)
     assert is_fresh(10.0, 3.0, clock)
     clock.value = 13.0
     assert not is_fresh(10.0, 3.0, clock)
 
-Expected: The exact expiration boundary is tested instantly and deterministically without sleeping.
+Expected: The exact expiration boundary is tested instantly and deterministically without
+          sleeping.
 
 Micro-example B — state an idempotence property::
 
     def normalize_tags(tags):
         return tuple(sorted({tag.strip().lower() for tag in tags if tag.strip()}))
-    
+
     original = [" Python ", "sql", "PYTHON", ""]
     once = normalize_tags(original)
     twice = normalize_tags(once)
     print(once)
     assert once == twice  # applying normalization twice changes nothing
 
-Expected: The named example demonstrates idempotence, a reusable property over a much broader input domain.
+Expected: The named example demonstrates idempotence, a reusable property over a much broader
+          input domain.
 
-Debugging rule: Name the observable behavior, choose the smallest seam/double, run the same contract on a real-local implementation, and retain the shrunk counterexample.
+Debugging rule: Name the observable behavior, choose the smallest seam/double, run the same
+                contract on a real-local implementation, and retain the shrunk counterexample.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

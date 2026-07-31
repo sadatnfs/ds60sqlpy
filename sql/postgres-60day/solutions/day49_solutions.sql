@@ -14,47 +14,74 @@
 --
 SET search_path TO training, public;
 
-WITH monthly AS (
+WITH monthly_observed AS (
   SELECT date_trunc('month', order_date)::date AS month,
          SUM(total_amount) AS revenue
   FROM orders
   GROUP BY date_trunc('month', order_date)
-), forecasts AS (
+), bounds AS (
+  SELECT MIN(month) AS first_month, MAX(month) AS last_month
+  FROM monthly_observed
+), month_spine AS (
+  SELECT generate_series(
+           first_month, last_month, interval '1 month'
+         )::date AS month
+  FROM bounds
+), monthly_complete AS (
+  SELECT spine.month,
+         COALESCE(observed.revenue, 0::numeric) AS revenue,
+         observed.month IS NOT NULL AS had_source_rows
+  FROM month_spine spine
+  LEFT JOIN monthly_observed observed USING (month)
+), forecast_rows AS (
   SELECT month,
          revenue,
          AVG(revenue) OVER (
            ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING
          ) AS ma6_forecast,
+         COUNT(revenue) OVER (
+           ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING
+         ) AS ma6_history_rows,
          AVG(revenue) OVER (
            ORDER BY month ROWS BETWEEN 12 PRECEDING AND 1 PRECEDING
          ) AS ma12_forecast,
+         COUNT(revenue) OVER (
+           ORDER BY month ROWS BETWEEN 12 PRECEDING AND 1 PRECEDING
+         ) AS ma12_history_rows,
          LAG(revenue, 12) OVER (ORDER BY month) AS seasonal_naive
-  FROM monthly
-), scored AS (
-  SELECT *,
-         ABS(revenue - ma6_forecast) / NULLIF(revenue, 0) AS ape_ma6,
-         ABS(revenue - ma12_forecast) / NULLIF(revenue, 0) AS ape_ma12,
-         ABS(revenue - seasonal_naive) / NULLIF(revenue, 0) AS ape_seasonal,
+  FROM monthly_complete
+), common_scoring_rows AS (
+  SELECT month,
+         revenue,
+         ma6_forecast,
+         ma12_forecast,
+         seasonal_naive,
          0.5 * seasonal_naive + 0.5 * ma6_forecast AS blended_forecast
-  FROM forecasts
+  FROM forecast_rows
+  WHERE ma6_history_rows = 6
+    AND ma12_history_rows = 12
+    AND seasonal_naive IS NOT NULL
+), model_scores AS (
+  SELECT rows.month,
+         rows.revenue,
+         model.model,
+         model.forecast
+  FROM common_scoring_rows rows
+  CROSS JOIN LATERAL (
+    VALUES
+      ('MA(6)'::text, rows.ma6_forecast),
+      ('MA(12)', rows.ma12_forecast),
+      ('seasonal naive', rows.seasonal_naive),
+      ('50% seasonal + 50% MA(6)', rows.blended_forecast)
+  ) AS model(model, forecast)
 )
 -- Exercise 1: compare out-of-sample-style one-step forecast errors.
-SELECT 'MA(6)' AS model, ROUND(AVG(ape_ma6), 4) AS mape
-FROM scored
-WHERE ma6_forecast IS NOT NULL
-UNION ALL
-SELECT 'MA(12)', ROUND(AVG(ape_ma12), 4)
-FROM scored
-WHERE ma12_forecast IS NOT NULL
-UNION ALL
-SELECT 'seasonal naive', ROUND(AVG(ape_seasonal), 4)
-FROM scored
-WHERE seasonal_naive IS NOT NULL
-UNION ALL
-SELECT '50% seasonal + 50% MA(6)',
-       ROUND(AVG(ABS(revenue - blended_forecast) / NULLIF(revenue, 0)), 4)
-FROM scored
-WHERE blended_forecast IS NOT NULL
+SELECT model,
+       COUNT(*) FILTER (WHERE revenue <> 0) AS scored_rows,
+       COUNT(*) FILTER (WHERE revenue = 0) AS zero_actual_rows,
+       ROUND(AVG(ABS(revenue - forecast) / NULLIF(revenue, 0)), 4) AS mape
+FROM model_scores
+GROUP BY model
 ORDER BY model;
 
 -- Exercise 2: forecast the next three months. This compact answer holds the

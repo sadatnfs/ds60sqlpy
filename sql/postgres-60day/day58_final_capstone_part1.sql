@@ -109,61 +109,61 @@ LEFT JOIN country_map cm ON cm.code = src.country;
 
 -- Exercises
 -- 1. Extend the parser to handle additional datetime formats.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-58 Exercise 1, read from `stg_customers_raw`, `customers`, and `country_map`. Build the answer toward `parse_additional_datetime_formats_safely_answer`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 1, expected output: one row per `customer_id`. The final columns are `parse_additional_datetime_formats_safely_answer`.
+--    Verify: For sql-58 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `parse_additional_datetime_formats_safely_answer` against `stg_customers_raw`, `customers`, and `country_map`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-58 Exercise 1, select `customer_id` from `stg_customers_raw`, `customers`, and `country_map` before adding derived columns.
 -- 2. Add phone number and normalize it using regex; flag invalid formats.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-58 Exercise 2, read from `training.customers`. Build the answer toward `normalizevalidate_staged_phone_values_answer`; keep `customer_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 2, expected output: one row per `customer_id`. The final columns are `normalizevalidate_staged_phone_values_answer`.
+--    Verify: For sql-58 Exercise 2, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `normalizevalidate_staged_phone_values_answer` against `training.customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+--    Hint ladder, rung 1: For sql-58 Exercise 2, select `customer_id` from `training.customers` before adding derived columns.
 -- 3. Write a stored procedure that ingests stg_ rows, cleans, validates, and upserts, returning a DQ summary.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-58 Exercise 3, read from `stg_customer_ingest_solution`, `cleaned_customer_ingest_solution`, `customers`, and `ingest_customer_stage_solution`. Build the answer toward `full_name`, `email`, `country`, `segment`, `parsed_created_at`, `phone_digits`, `phone_valid`, `email_valid`, `country_valid`, and `attributes`; keep `country`, and `segment` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 3, expected output: one row per `country`, and `segment`. The final columns are `full_name`, `email`, `country`, `segment`, `parsed_created_at`, `phone_digits`, `phone_valid`, `email_valid`, `country_valid`, and `attributes`. The final order is `email`.
+--    Verify: For sql-58 Exercise 3, run an anti-check that counts rows where NOT ((NOT email_valid OR NOT country_valid OR NOT phone_valid OR created_at IS NULL OR full_name IS NULL OR full_name = '') OR (email_valid AND country_valid AND phone_valid AND created_at IS NOT NULL AND full_name <> '' ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name, country = EXCLUDED.country, segment = EXCLUDED.segment, attributes = EXCLUDED.att)); require unique `country`, and `segment` where the expected grain is one row per key and confirm the projected `full_name`, `email`, `country`, `segment`, `parsed_created_at`, `phone_digits`, `phone_valid`, `email_valid`, `country_valid`, and `attributes` against `stg_customer_ingest_solution`, `cleaned_customer_ingest_solution`, `customers`, and `ingest_customer_stage_solution`. Add one row for which `(NOT email_valid OR NOT country_valid OR NOT phone_valid OR created_at IS NULL OR full_name IS NULL OR full_name = '') OR (email_valid AND country_valid AND phone_valid AND created_at IS NOT NULL AND full_name <> '' ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name, country = EXCLUDED.country, segment = EXCLUDED.segment, attributes = EXCLUDED.att)` is true and one for which it is false; verify only the matching `country`, and `segment` value is returned.
+--    Hint ladder, rung 1: For sql-58 Exercise 3, run `normalized` one at a time. Record each CTE's row count and `country`, and `segment` uniqueness before the next stage uses it.
 -- 4. Prediction: identify which source duplicates survive ON CONFLICT DO
 --    NOTHING and explain why input order must not decide production outcomes.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-58 Exercise 4, read from `stg_customer_ingest_solution`. Build the answer toward `make_source_duplicate_winner_selection_determini`; keep `make_source_duplicate_winner_selection_determini` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 4, expected output: one row per `make_source_duplicate_winner_selection_determini`. The final columns are `make_source_duplicate_winner_selection_determini`. The final order is `normalized_email`.
+--    Verify: For sql-58 Exercise 4, run an anti-check that counts rows where NOT ((winner_rank = 1)); require unique `make_source_duplicate_winner_selection_determini` where the expected grain is one row per key and confirm the projected `make_source_duplicate_winner_selection_determini` against `stg_customer_ingest_solution`. Add duplicate source candidates for `make_source_duplicate_winner_selection_determini`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+--    Hint ladder, rung 1: For sql-58 Exercise 4, run `candidates` one at a time. Record each CTE's row count and `make_source_duplicate_winner_selection_determini` uniqueness before the next stage uses it.
 -- 5. Construction: create accepted and rejected result sets with a reason code
 --    for every rejected row; reconcile both counts to the staging count.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-58 Exercise 5, read from `cleaned_customer_ingest_solution`. Build the answer toward `outcome`, and `rows`; keep `outcome` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 5, expected output: one row per `outcome`. The final columns are `outcome`, and `rows`. The final order is `outcome`.
+--    Verify: For sql-58 Exercise 5, independently aggregate `cleaned_customer_ingest_solution` by `outcome`; require one output row for every distinct `outcome` tuple and compare `rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `rows` for the existing `outcome` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-58 Exercise 5, run `classified` one at a time. Record each CTE's row count and `outcome` uniqueness before the next stage uses it.
 -- 6. Debugging: normalize email before deduplication so case-only variants do
 --    not become two competing records.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-58 Exercise 6, read from `cleaned_customer_ingest_solution`. Build the answer toward `normalized_email`, and `candidate_rows`; keep `email` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 6, expected output: one row per `email`. The final columns are `normalized_email`, and `candidate_rows`. The final order is `email`.
+--    Verify: For sql-58 Exercise 6, independently aggregate `cleaned_customer_ingest_solution` by `email`; require one output row for every distinct `email` tuple and compare `candidate_rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `candidate_rows` for the existing `email` tuple and verify the new tuple appears exactly once.
+--    Hint ladder, rung 1: For sql-58 Exercise 6, confirm the groups are `email`; then check `email` before applying the row cap.
 -- 7. Edge case: distinguish a missing country from an unrecognized country and
 --    preserve the raw value for audit rather than coercing both to one default.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-58 Exercise 7, read from `stg_customer_ingest_solution`. Build the answer toward `raw_country`, `normalized_candidate`, and `country_status`; keep `raw_country` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 7, expected output: one row per `raw_country`. The final columns are `raw_country`, `normalized_candidate`, and `country_status`. The final order is `raw_country NULLS FIRST`.
+--    Verify: For sql-58 Exercise 7, reselect the returned keys directly from the source; require unique `raw_country` where the expected grain is one row per key and confirm the projected `raw_country`, `normalized_candidate`, and `country_status` against `stg_customer_ingest_solution`. Add one source row with a new `raw_country`; verify the result gains exactly one row carrying that `raw_country` value.
+--    Hint ladder, rung 1: For sql-58 Exercise 7, check `raw_country NULLS FIRST` before applying the row cap.
 -- 8. Construction: make the staging load idempotent by assigning a source batch
 --    ID and source row number, then reject repeated natural source records.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-58 Exercise 8, read from `staged_batch_identity`, and `stg_customer_ingest_solution`. Build the answer toward `email`; keep `email` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 8, expected output: one row per `email`. The final columns are `email`.
+--    Verify: For sql-58 Exercise 8, choose one complete partition from `staged_batch_identity`, and `stg_customer_ingest_solution`; hand-calculate its first, middle, and final window values for `row_count`, then verify output keys remain `email`. Add duplicate source candidates for `email`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+--    Hint ladder, rung 1: For sql-58 Exercise 8, inspect one window partition before projecting.
 -- 9. Debugging: prevent a single malformed JSON value from aborting the whole
 --    batch; preserve the raw text and emit an invalid_json reason code.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Show the incorrect/failing behavior and then a corrected result with the violated invariant, keys, and row grain visible.
---    Verify: Keep a minimal failing case and reconcile corrected counts/totals against an independent control rather than checking syntax alone.
---    Hint ladder, rung 1: Reproduce the smallest wrong result first, then inspect the earliest relation or clause where its grain/count stops matching the contract.
+--    Inputs: For sql-58 Exercise 9, read from `stg_customer_ingest_solution`. Build the answer toward `email`, `raw_attributes`, and `json_status`; keep `email` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 9, expected output: one row per `email`. The final columns are `email`, `raw_attributes`, and `json_status`. The final order is `email`.
+--    Verify: For sql-58 Exercise 9, reselect the returned keys directly from the source; require unique `email` where the expected grain is one row per key and confirm the projected `email`, `raw_attributes`, and `json_status` against `stg_customer_ingest_solution`. Add one source row with a new `email`; verify the result gains exactly one row carrying that `email` value.
+--    Hint ladder, rung 1: For sql-58 Exercise 9, check `email` before applying the row cap.
 -- 10. Explanation: reconcile staged, accepted, rejected, inserted, and updated
 --     counts, and state why each row must end in exactly one outcome.
---    Inputs: Use only the declared lesson objects (stg_customers_raw, customers) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-58 Exercise 10, read from `cleaned_customer_ingest_solution`, and `stg_customer_ingest_solution`. Build the answer toward `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows`; keep `staged_rows` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-58 Exercise 10, expected output: one row per `staged_rows`. The final columns are `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows`.
+--    Verify: For sql-58 Exercise 10, reselect the returned keys directly from the source; require unique `staged_rows` where the expected grain is one row per key and confirm the projected `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows` against `cleaned_customer_ingest_solution`, and `stg_customer_ingest_solution`. Add one source row with a new `staged_rows`; verify the result gains exactly one row carrying that `staged_rows` value.
+--    Hint ladder, rung 1: For sql-58 Exercise 10, run `classified` one at a time. Record each CTE's row count and `staged_rows` uniqueness before the next stage uses it.
 
 ROLLBACK;

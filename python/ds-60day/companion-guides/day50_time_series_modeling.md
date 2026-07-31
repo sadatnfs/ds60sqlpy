@@ -196,33 +196,17 @@ assert features.loc[3, "trailing_mean_2"] == 25.0
 1. Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the
    same test window.
 
-**Verify:** For task `Fit autoarima with m=7 and m=30; compare mean absolute error on the`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Practice 1 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
 
 2. Create last-value and 30-day seasonal-naive forecasts and compare them with
    ARIMA.
 
-**Verify:** For task `Create last-value and 30-day seasonal-naive forecasts and compare them with`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 2 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
 
 3. Difference the training series and inspect autocorrelation without using
    test-period observations.
 
-**Verify:** For task `Difference the training series and inspect autocorrelation without using`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Practice 3 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
 
 ### Progressive hints
 
@@ -247,39 +231,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Rolling-origin evaluation:** Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.
    **Progressive hint:** At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.
 
-**Verify:** For task `Rolling-origin evaluation: Implement at least four expanding-window forecast origins with a f...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Rolling-origin evaluation — print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.
 
 5. **Prediction intervals:** Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.
    **Progressive hint:** For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.
 
-**Verify:** For task `Prediction intervals: Produce forecast intervals and evaluate empirical coverage and width ac...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Prediction intervals — print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.
 
 6. **Timestamp/data-quality debugging:** Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.
    **Progressive hint:** Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.
 
-**Verify:** For task `Timestamp/data-quality debugging: Validate a series containing duplicate timestamps, missing...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Timestamp/data-quality debugging — produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -327,10 +292,12 @@ Emphasize forecast horizons, temporal backtesting, naive baselines, and leakage-
 - guide: `python/ds-60day/companion-guides/day50_time_series_modeling.md`
 - learner artifact: `python/ds-60day/notebooks/day50_time_series_modeling.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-49`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

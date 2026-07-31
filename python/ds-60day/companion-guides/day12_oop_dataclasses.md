@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 11 (`python-11`): function contracts, logging, tests, and type hints.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -198,7 +194,6 @@ of them as blank-code prompts:
 ```python
 from dataclasses import dataclass
 
-
 @dataclass(frozen=True, slots=True)
 class Temperature:
     celsius: float
@@ -222,7 +217,7 @@ result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
 1. Create a `BankAccount` class with owner and private-by-convention balance state plus `deposit`, `withdraw`, and `balance` behavior. **Contract:** deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise `ValueError` without changing state.
-   **Verify:** trace a new account through one deposit, one withdrawal, and two rejected boundary cases.
+   **Verify:** assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus `ValueError` after a zero deposit and an overdraw.
 
 2. Convert a plain product record to `@dataclass Product(name: str, price: float, quantity: int = 0)`. Add `__post_init__` validation and a `stock_value()` method.
    **Expected behavior:** `Product('tea', 4.0, 3).stock_value() == 12.0`; negative values raise. **Constraint:** use `field(default_factory=...)` if you add any mutable collection field.
@@ -290,7 +285,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-12`
-(Day 12 — OOP Basics and Dataclasses). I am a complete beginner. Emphasize objects that keep related state and behavior together.
+(Day 12 — OOP Basics and Dataclasses). Direct catalog prerequisites: `python-11`.
+I have completed the direct prerequisites: `python-11`. Emphasize objects that keep related state and behavior together.
 Read `python/ds-60day/companion-guides/day12_oop_dataclasses.md` and use the learner notebook
 `python/ds-60day/notebooks/day12_oop_dataclasses.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

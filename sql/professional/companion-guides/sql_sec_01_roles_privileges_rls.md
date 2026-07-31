@@ -53,8 +53,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-sec-01/sql_sec_01_roles_privileges_rls.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-sec-01/lesson/workspace/sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -89,8 +89,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. Its worked SQL reads or creates `pg_catalog.pg_roles`, `pro_security_lab.documents`, `pro_security_lab.announcements`, `pro_security_lab.owner_context_documents`, `pro_security_lab.visible_documents`.
+on screen are not automatically stored. The key vocabulary for this lesson is Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. Its worked SQL reads or creates `pg_catalog.pg_roles`, `pro_security_lab.documents`, `pro_security_lab.announcements`, `pro_security_lab.owner_context_documents`, `pro_security_lab.visible_documents`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -100,12 +99,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: The script first queries pgroles and stores a Boolean for a psql \if. Restricted installations print a safe skip and current capability summary. No attempted CREATE ROLE is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
-The expected contract is that the result must preserve the row grain described in the walkthrough and expose every named key or measure. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The worked walkthrough's lesson-specific task is: The script first queries pgroles and stores a Boolean for a psql \if. Restricted installations print a safe skip and current capability summary. No attempted CREATE ROLE is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
+The first runnable example has a concrete contract: Example 1 returns one row per `rolcreaterole` with columns `rolcreaterole` from `pg_catalog.pg_roles`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `rolcreaterole`. Reselect the returned key columns from `pg_catalog.pg_roles`, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.
 
 ## Two worked SQL examples
 
@@ -125,11 +120,9 @@ SELECT COALESCE(
 ;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+**How to read it:** Example 1: Start with `pg_catalog.pg_roles` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `rolcreaterole`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one row per `rolcreaterole` with columns `rolcreaterole` from `pg_catalog.pg_roles`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
 
 ### Example 2
 
@@ -146,11 +139,9 @@ SELECT NOT EXISTS (
 ;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
+**How to read it:** Example 2: Start with `pg_catalog.pg_roles` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays the columns written in the final `SELECT`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one row per the primary/business key of `pg_catalog.pg_roles` from `pg_catalog.pg_roles`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
 
 ## Learning objectives
 
@@ -259,44 +250,54 @@ print a reassuring message.
 Security work is complete only when both allowed and denied paths are proven:
 
 1. **Two-layer reads:** show schema `USAGE` and table `SELECT` independently.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-sec-01 Exercise 1, complete the two-layer reads written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-sec-01 Exercise 1, expected output: a completed the two-layer reads written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`.
+   **Verify:** For sql-sec-01 Exercise 1, check the two-layer reads written analysis against `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 2. **Auditor:** create a NOLOGIN read-only role, explicit policy, positive read
    test, and negative write tests.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-sec-01 Exercise 2, change only `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` rows.
+   **Expected result/shape:** For sql-sec-01 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `usage`.
+   **Verify:** For sql-sec-01 Exercise 2, inspect `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` for `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 3. **Default privileges:** prove which object owner’s future table receives the
    grant and which different owner does not.
-   **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-sec-01 Exercise 3, read from `ds60_sec_owner`. Compute `ds60_sec_auditor` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-sec-01 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `ds60_sec_auditor`.
+   **Verify:** For sql-sec-01 Exercise 3, evaluate each of `row_count` in a separate control `SELECT` over `ds60_sec_owner`; require one final row and compare every value. Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
 4. **Definer boundary:** inventory owner, search path, qualification, parameter,
    PUBLIC, grant, and RLS risks around the routine.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-sec-01 Exercise 4, complete the definer boundary written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-sec-01 Exercise 4, expected output: a completed the definer boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `document_count_for_tenant`, `search_path`, and `current_user`.
+   **Verify:** For sql-sec-01 Exercise 4, check the definer boundary written analysis against `document_count_for_tenant`, `search_path`, and `current_user`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 5. **RLS bypass:** compare ordinary caller, owner, forced owner, BYPASSRLS, and
    superuser semantics without granting bypass attributes.
-   **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-sec-01 Exercise 5, complete the rls bypass written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-sec-01 Exercise 5, expected output: a completed the rls bypass written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `bypassrls`.
+   **Verify:** For sql-sec-01 Exercise 5, check the rls bypass written analysis against `bypassrls`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 6. **Effective access:** reconcile schema, relation, column, sequence, routine,
    membership, inheritance, and PUBLIC access.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-sec-01 Exercise 6, complete the effective access written analysis and support its claims with read-only evidence from `pg_auth_members`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-sec-01 Exercise 6, expected output: a completed the effective access written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `has__privilege`, `aclexplode`, `insert`, and `usage`.
+   **Verify:** For sql-sec-01 Exercise 6, check the effective access written analysis against `has__privilege`, `aclexplode`, `insert`, and `usage`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 7. **Identity context:** observe `SESSION_USER` and `CURRENT_USER` across
    `SET ROLE` and a definer call; choose audit identities deliberately.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-sec-01 Exercise 7, complete the identity context written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-sec-01 Exercise 7, expected output: a completed the identity context written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `session_user`, and `current_user`.
+   **Verify:** For sql-sec-01 Exercise 7, check the identity context written analysis against `session_user`, and `current_user`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 8. **Fail-closed tenancy:** test NULL, case variants, unknown tenants, and
    unvalidated/reset session context.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-sec-01 Exercise 8, complete the fail-closed tenancy written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-sec-01 Exercise 8, expected output: a completed the fail-closed tenancy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+   **Verify:** For sql-sec-01 Exercise 8, check the fail-closed tenancy written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 9. **Narrow writer:** prove only required insert columns/sequence/return values
    work and all unrelated writes or reads fail.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-sec-01 Exercise 9, complete the narrow writer written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-sec-01 Exercise 9, expected output: a completed the narrow writer written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `usage`, `insert`, and `returning`.
+   **Verify:** For sql-sec-01 Exercise 9, check the narrow writer written analysis against `usage`, `insert`, and `returning`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 10. **Revocation runbook:** document sessions, membership, ownership, default
     grants, dependent ACLs, verification, recovery, and durable audit evidence.
-   **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-sec-01 Exercise 10, complete the revocation runbook written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
+   **Expected result/shape:** For sql-sec-01 Exercise 10, expected output: a completed the revocation runbook written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+   **Verify:** For sql-sec-01 Exercise 10, check the revocation runbook written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Self-check
 
@@ -349,11 +350,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-sec-01 — Schemas, Roles, Privileges, and Row-Level Security.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisites: `sql-found-02`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_sec_01_roles_privileges_rls.md
 - Answer-free learner SQL: sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql
 
-The lesson concepts include Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. First define those terms in plain
+Key terms to teach in context: Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -364,11 +365,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-sec-01/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

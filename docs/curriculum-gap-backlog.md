@@ -97,7 +97,7 @@ The external references below helped calibrate the scope. They are design refere
 
 ### PostgreSQL foundations and application safety
 
-- [x] **SQL-FOUND-01 — Relational design, DDL, and integrity constraints** *(new foundation module before SQL Day 1)*
+- [x] **SQL-FOUND-01 — Relational design, DDL, and integrity constraints** *(named relational-engineering module after SQL Day 15)*
 
   The SQL track starts with querying a supplied schema. Add an intentional schema-design lesson covering table grain, cardinality, keys, NOT NULL, CHECK, UNIQUE, primary and foreign keys, defaults, identities/generated columns, NULL semantics, and normalization versus deliberate denormalization. Use a small domain that learners model from requirements before they query it.
 
@@ -182,7 +182,10 @@ The external references below helped calibrate the scope. They are design refere
 
 ## Completed implementation order
 
-1. **Make unseen foundations visible:** SQL-FOUND-01, SQL-FOUND-02, and PY-PRO-01. These give learners a schema and a package they can own before more sophisticated projects.
+1. **Make unseen engineering foundations visible:** SQL-FOUND-01,
+   SQL-FOUND-02, and PY-PRO-01. These give learners a schema and a package they
+   can own before more sophisticated projects, without putting migration
+   engineering in front of a beginner's first query.
 2. **Make local systems reliable:** PY-SVC-01, PY-PRO-02, and PY-DATA-01. Each can run using deterministic local services/files after bootstrap.
 3. **Teach database responsibility:** SQL-SEC-01, SQL-PROG-01, SQL-TYPES-01, SQL-OPS-01, and SQL-TEST-01.
 4. **Add cumulative professional practice:** PY-TEST-01, PY-STATS-01, PY-ML-01, PY-SVC-02, SQL-OPS-02, SQL-ANALYTICS-01, and BRIDGE-OPS-01.
@@ -207,10 +210,12 @@ index and exact prerequisite routes.
 ## Implementation decision record
 
 The course was deliberately **not** renumbered into a “90-day” linear
-sequence. A small relational-foundations path now precedes SQL Day 1, while
-named professional and advanced modules sit at relevant checkpoints. Learners
-can choose a Python/data, SQL/database, or integrated engineering path without
-being forced through every specialization.
+sequence. SQL Day 1 remains the complete beginner's entry; relational design
+and migration engineering now sit after the querying and transaction
+prerequisites they depend on. Other named professional and advanced modules
+remain at relevant checkpoints. Learners can choose a Python/data,
+SQL/database, or integrated engineering path without being forced through
+every specialization.
 
 Future changes should preserve the stable IDs, executable separation between
 learner and solution artifacts, offline default, and explicit capability

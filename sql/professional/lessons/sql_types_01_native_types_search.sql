@@ -201,86 +201,86 @@ WHERE e.name = 'pg_trgm';
 -- 1. Return published documents tagged with both postgresql and operations.
 --    Explain why @> is a better fit than two ANY expressions for this question.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-types-01 Exercise 1, complete the tag containment written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-types-01 Exercise 1, expected output: a completed the tag containment written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `any`.
+--    Verify: For sql-types-01 Exercise 1, check the tag containment written analysis against `any`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 1, check the tag containment written analysis against `any`.
 -- 2. Find documents available on 2026-08-11 but not inside a blackout window.
 --    State the inclusive/exclusive boundary rule.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-types-01 Exercise 2, complete the range subtraction written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-types-01 Exercise 2, expected output: a completed the range subtraction written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Verify: For sql-types-01 Exercise 2, check the range subtraction written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 2, check the range subtraction written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
 -- 3. Use JSONPath to return documents whose numeric minutes exceed 30. Avoid
 --    assuming that every arbitrary JSON value can be cast safely.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-types-01 Exercise 3, complete the typed jsonpath written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-types-01 Exercise 3, expected output: a completed the typed jsonpath written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Verify: For sql-types-01 Exercise 3, check the typed jsonpath written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 3, check the typed jsonpath written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
 -- 4. Search for the web-style query '"schema migration" verify' and rank
 --    matches deterministically.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-types-01 Exercise 4, complete the full-text query written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-types-01 Exercise 4, expected output: a completed the full-text query written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `websearch_to_tsquery`.
+--    Verify: For sql-types-01 Exercise 4, check the full-text query written analysis against `websearch_to_tsquery`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 4, check the full-text query written analysis against `websearch_to_tsquery`.
 -- 5. Compare jsonb_ops with jsonb_path_ops, and GIN full-text search with an
 --    optional pg_trgm similarity index. State which operators and update costs
 --    matter before choosing.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-types-01 Exercise 5, read from `pg_trgm`. Build the answer toward `jsonb_ops`, `jsonb_path_ops`, and `tsvector`; keep `jsonb_ops` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-types-01 Exercise 5, expected output: one row per `jsonb_ops`. The final columns are `jsonb_ops`, `jsonb_path_ops`, and `tsvector`.
+--    Verify: For sql-types-01 Exercise 5, reselect the returned keys directly from the source; require unique `jsonb_ops` where the expected grain is one row per key and confirm the projected `jsonb_ops`, `jsonb_path_ops`, and `tsvector` against `pg_trgm`. Add one source row with a new `jsonb_ops`; verify the result gains exactly one row carrying that `jsonb_ops` value.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 5, select `jsonb_ops` from `pg_trgm` before adding derived columns.
 -- 6. Decide which modeled fields deserve a domain, enum, reference table,
 --    array, range, JSONB document, or ordinary normalized relation.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-types-01 Exercise 6, complete the type decision written analysis and support its claims with read-only evidence from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Mark unverified assumptions explicitly.
+--    Expected result/shape: For sql-types-01 Exercise 6, expected output: a completed the type decision written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Verify: For sql-types-01 Exercise 6, check the type decision written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 6, check the type decision written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
 -- 7. Model recurring availability with datemultirange. Normalize overlapping
 --    input ranges, find gaps inside August 2026, and state whether adjacent
 --    ranges should merge for this domain.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Return the keys/measures named by the prompt at one explicitly declared row grain, with deterministic order for ranked or limited output and an explicit policy for NULL/empty input.
---    Verify: Check uniqueness at the declared grain and compare row counts or totals with a simpler control query over the same population.
---    Hint ladder, rung 1: Build FROM/JOIN and inspect keys first; add filtering, grouping/windows, projection, and deterministic ordering one stage at a time.
+--    Inputs: For sql-types-01 Exercise 7, read from `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`. Compute `normalized_availability`, and `august_gaps` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-types-01 Exercise 7, expected output: one row per day. The final columns are `normalized_availability`, and `august_gaps`.
+--    Verify: For sql-types-01 Exercise 7, evaluate each of `normalized_availability`, and `august_gaps` in a separate control `SELECT` over `pro_types_lab.documents`, `pg_catalog.pg_indexes`, and `pg_catalog.pg_available_extensions`; require one final row and compare every value. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 7, run `schedule` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
 -- 8. Add inet client addresses and cidr network rules. Return the most-specific
 --    containing network for each address using network operators, prefix length,
 --    and deterministic tie-breaking; identify a suitable index family.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-types-01 Exercise 8, read from `clients`, and `rules`. Build the answer toward `client_id`, `address`, `rule_id`, and `network`; keep `client_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-types-01 Exercise 8, expected output: one row per `client_id`. The final columns are `client_id`, `address`, `rule_id`, and `network`. The final order is `client_id`.
+--    Verify: For sql-types-01 Exercise 8, project `client_id` plus the raw source columns from `clients`, and `rules` at each join stage; record row count and distinct `client_id`, then assert the final `client_id`, `address`, `rule_id`, and `network` values match those staged rows without unintended fanout or loss. Add one row for which `(match_rank = 1)` is true and one for which it is false; verify only the matching `client_id` value is returned.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 8, run `ranked` one at a time. Record each CTE's row count and `client_id` uniqueness before the next stage uses it.
 -- 9. Define a domain for a nonnegative monetary amount with fixed scale.
 --    Compare numeric with bigint minor units and double precision for equality,
 --    aggregation, range, rounding, and application interoperability.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Record the prediction first, then capture both result/plan shapes with the prompt's named keys, measures, row counts, or SQLSTATE.
---    Verify: Use identical inputs for the comparison and explain every observed difference; revise the prediction when the transcript disagrees.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-types-01 Exercise 9, read from `pro_types_lab.nonnegative_money`. Compute `exact_decimal_sum`, and `declared_rounding_example` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Expected result/shape: For sql-types-01 Exercise 9, expected output: exactly one aggregate summary row. The final columns are `exact_decimal_sum`, and `declared_rounding_example`.
+--    Verify: For sql-types-01 Exercise 9, evaluate each of `exact_decimal_sum` in a separate control `SELECT` over `pro_types_lab.nonnegative_money`; require one final row and compare every value. Add one source row with a new `declared_rounding_example`; verify the result gains exactly one row carrying that `declared_rounding_example` value.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 9, select `declared_rounding_example` from `pro_types_lab.nonnegative_money` before adding derived columns.
 -- 10. Promote one frequently queried JSONB property into a stored generated
 --     column. Guard shape and type, index the promoted value, and explain how
 --     schema evolution can make a formerly valid payload fail on write.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-types-01 Exercise 10, read from `pro_types_lab.documents`, and `documents_estimated_minutes_idx`. Build the answer toward `document_id`, and `estimated_minutes`; keep `document_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-types-01 Exercise 10, expected output: one row per `document_id`. The final columns are `document_id`, and `estimated_minutes`. The final order is `d.document_id`.
+--    Verify: For sql-types-01 Exercise 10, run an anti-check that counts rows where NOT ((d.estimated_minutes > 30)); require unique `document_id` where the expected grain is one row per key and confirm the projected `document_id`, and `estimated_minutes` against `pro_types_lab.documents`, and `documents_estimated_minutes_idx`. Insert rows immediately before, exactly at, and immediately after `d.estimated_minutes > 30`; identify which rows pass each inclusive or exclusive comparison.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 10, inspect the source keys that survive `WHERE`; then check `d.document_id` before applying the row cap.
 -- 11. Inspect to_tsvector output and explain dictionaries, stop words,
 --     stemming, weights, and language configuration. Design a policy for rows
 --     whose language differs from the default English configuration.
 --
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Hold every input constant, change one clause or case, and write down the expected row count/shape before executing either form.
+--    Inputs: For sql-types-01 Exercise 11, read from `pro_types_lab.documents`. Build the answer toward `document_id`, and `lexemes`; keep `document_id` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-types-01 Exercise 11, expected output: one row per `document_id`. The final columns are `document_id`, and `lexemes`. The final order is `d.document_id`.
+--    Verify: For sql-types-01 Exercise 11, reselect the returned keys directly from the source; require unique `document_id` where the expected grain is one row per key and confirm the projected `document_id`, and `lexemes` against `pro_types_lab.documents`. Add one source row with a new `document_id`; verify the result gains exactly one row carrying that `document_id` value.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 11, check `d.document_id` before applying the row cap.
 -- 12. Replace the tags array with normalized document_tags rows and a foreign
 --     key to tags. Compare containment queries, order/duplicates, constraints,
 --     write amplification, and when an array remains the clearer model.
@@ -302,10 +302,10 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: Use only the declared lesson objects (pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions) and any small disposable fixture the prompt explicitly asks you to create.
---    Expected result/shape: Expect a successful command tag plus a catalog/behavior result that shows the named object or invariant; do not count an unverified CREATE/ALTER as completion.
---    Verify: Query pg_catalog/information_schema where appropriate, then run one valid and one boundary case inside the lesson safety boundary.
---    Hint ladder, rung 1: Write the row grain and invariant in prose first; then map each requirement to the smallest column, key, constraint, or migration step.
+--    Inputs: For sql-types-01 Exercise 12, read from `pro_types_lab.documents`, `pro_types_lab.tags`, and `pro_types_lab.document_tags`. Build the answer toward `tag_name`; keep `document_id`, and `title` visible whenever the result has row-level grain.
+--    Expected result/shape: For sql-types-01 Exercise 12, expected output: one row per `document_id`, and `title`. The final columns are `tag_name`. The final order is `d.document_id`.
+--    Verify: For sql-types-01 Exercise 12, independently aggregate `pro_types_lab.documents`, `pro_types_lab.tags`, and `pro_types_lab.document_tags` by `document_id`, and `title`; require one output row for every distinct `document_id`, and `title` tuple satisfying `(t.tag_name IN ('postgresql', 'operations'))` and compare `tag_name` tuple by tuple. Add duplicate source candidates for `document_id`, and `title`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+--    Hint ladder, rung 1: For sql-types-01 Exercise 12, start with the first relation in `pro_types_lab.documents`, `pro_types_lab.tags`, and `pro_types_lab.document_tags`; after each join, record total rows and distinct `document_id`, and `title` so the exact fanout or loss is visible.
 
 ROLLBACK;
 \echo 'SQL-TYPES-01 complete: pro_types_lab was rolled back'

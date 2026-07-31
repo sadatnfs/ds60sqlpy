@@ -21,8 +21,11 @@ def test_portable_course_guide_matches_catalog() -> None:
 
     assert GUIDE.read_text(encoding="utf-8") == rendered
     assert f"<strong>{len(payload['lessons'])}</strong><span>cataloged lessons</span>" in rendered
+    assert all(lesson.get("codex_prompt") for lesson in payload["lessons"])
     for lesson in payload["lessons"]:
         assert f'"id":"{lesson["id"]}"' in rendered
+        guide_source = (REPO_ROOT / lesson["guide_path"]).read_text(encoding="utf-8")
+        assert lesson["codex_prompt"] in guide_source
     assert "lesson-pages/${lesson.id}.html" in rendered
 
 
@@ -39,12 +42,24 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
     assert "START_DS60.cmd" in rendered
     assert "Double-click" in rendered
     assert "You are in portable reading mode." in rendered
+    assert "rendered here as read-only" in rendered
     assert "Private launcher mode is active." in rendered
     assert 'id="run-sql"' in rendered
     assert "Open SQL workspace" in rendered
     assert 'launchNative("jupyter-sql"' in rendered
     assert 'launchNative("jupyter-lesson"' in rendered
     assert "Open PostgreSQL magics lab" in rendered
+    assert "What the guide gives you before you ask for help" in rendered
+    assert "evidence-based done condition" in rendered
+    assert 'href="lesson-pages/sql-01.html">Start SQL Day 1' in rendered
+    assert "relational design between Days 15–16" in rendered
+    assert "Companion guide: ${lesson.guide_path}" in rendered
+    assert "Answer-free learner artifact: ${lesson.lesson_path}" in rendered
+    assert "Treat every path under solutions/ as closed" in rendered
+    assert "Done when:" in rendered
+    assert "if (lesson.codex_prompt)" in rendered
+    assert "eager collection building, and lazy generators" in rendered
+    assert "Projection, Predicate, Deterministic ordering" in rendered
     assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
     for source_path in COURSE_GUIDE_REFERENCE_PATHS:
         assert f'href="{reference_relative_path(source_path)}"' in rendered

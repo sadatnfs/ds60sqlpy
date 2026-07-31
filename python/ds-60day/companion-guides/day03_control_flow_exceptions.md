@@ -18,10 +18,6 @@ By the end of this lesson, you can:
 
 Complete Day 2 (`python-02`): types, conversions, comparisons, and truthiness.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -217,7 +213,7 @@ result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
 1. Print FizzBuzz for every integer from 1 through 30 inclusive. **Rules:** multiples of both 3 and 5 print `FizzBuzz`; only 3 prints `Fizz`; only 5 prints `Buzz`; all others print the number. **Constraints:** use one ordered `if`/`elif`/`else` chain.
-   **Verify:** positions 3, 5, 15, 16, and 30 are correct and exactly 30 lines are produced.
+   **Verify:** capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal `Fizz`, `Buzz`, `FizzBuzz`, `16`, and `FizzBuzz`.
 
 2. Write `parse_age(text)` that returns an integer for valid integer text and returns `None` only when conversion raises `ValueError`. **Constraints:** put only `int(text)` inside `try`; do not use a bare `except`.
    **Verify:** test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`.
@@ -288,7 +284,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-03`
-(Day 3 — Control Flow, Truthiness, and Exceptions). I am a complete beginner. Emphasize branch selection, loop decisions, and narrow exception boundaries.
+(Day 3 — Control Flow, Truthiness, and Exceptions). Direct catalog prerequisites: `python-02`.
+I have completed the direct prerequisites: `python-02`. Emphasize branch selection, loop decisions, and narrow exception boundaries.
 Read `python/ds-60day/companion-guides/day03_control_flow_exceptions.md` and use the learner notebook
 `python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

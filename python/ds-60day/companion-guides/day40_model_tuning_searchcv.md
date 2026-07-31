@@ -206,23 +206,12 @@ assert search.refit == "f1_macro"
 
 1. Use `RandomizedSearchCV` with a wider parameter space.
 
-**Verify:** For task `Use RandomizedSearchCV with a wider parameter space`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Practice 1 — hyperparameter search spaces, fit budgets, and nested evaluation — declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
 
 2. Implement nested cross-validation and compare its result with the non-nested
    search score.
 
-**Verify:** For task `Implement nested cross-validation and compare its result with the non-nested`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Practice 2 — hyperparameter search spaces, fit budgets, and nested evaluation — print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
 
 ### Progressive hints
 
@@ -242,50 +231,25 @@ attempt, and record the evidence that would prove your result correct.
 3. **Search-budget calculation:** For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running.
    **Progressive hint:** Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.
 
-**Verify:** For task `Search-budget calculation: For a grid with 5 values of C, 4 penalties, 3 class weights, and 5...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Search-budget calculation — show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.
 
 4. **Multi-metric selection:** Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan.
    **Progressive hint:** Pass a scoring dictionary and set `refit` to a metric name. Selection changes when metrics rank candidates differently.
 
-**Verify:** For task `Multi-metric selection: Configure GridSearchCV to report ROC AUC, average precision, and bala...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Multi-metric selection — configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.
 
 5. **Results-table diagnosis:** Turn `cv_results_` into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates.
    **Progressive hint:** Large train-validation gaps suggest overfit; large fold standard deviation suggests sensitivity. Sort by the declared rank, not by eye.
 
-**Verify:** For task `Results-table diagnosis: Turn cvresults into a tidy table containing parameters, mean and sta...`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** Results-table diagnosis — emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.
 
 6. **Reproducibility debugging:** A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison.
    **Progressive hint:** Seed the sampler, splitters, and estimator. Threaded numeric libraries and GPU algorithms can still introduce small nondeterminism.
 
-**Verify:** For task `Reproducibility debugging: A randomized search produces different winners on repeated runs. L...`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
+**Verify:** Reproducibility debugging — run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -332,10 +296,12 @@ Emphasize hyperparameter search spaces, fit budgets, and nested evaluation. Use 
 - guide: `python/ds-60day/companion-guides/day40_model_tuning_searchcv.md`
 - learner artifact: `python/ds-60day/notebooks/day40_model_tuning_searchcv.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-39`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

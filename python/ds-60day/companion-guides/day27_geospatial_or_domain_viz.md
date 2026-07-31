@@ -34,10 +34,6 @@ macOS/Linux:
 bash scripts/setup.sh --advanced
 ```
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -311,7 +307,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-27`
-(Day 27 — Geospatial or Domain-Specific Visualization). I am a complete beginner. Emphasize geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+(Day 27 — Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
+I have completed the direct prerequisites: `python-26`. Emphasize geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
 Read `python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md` and use the learner notebook
 `python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

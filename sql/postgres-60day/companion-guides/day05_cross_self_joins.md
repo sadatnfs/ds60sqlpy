@@ -103,11 +103,9 @@ FROM cats CROSS JOIN ctries
 ORDER BY 1,2;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per employee.
+**How to read it:** Example 1: Start with `products`, and `customers` in `FROM`/`JOIN`. The final `SELECT` displays `category`, and `country`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one row per `category`, and `country` with columns `category`, and `country` from `products`, and `customers`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -122,11 +120,9 @@ ORDER BY manager NULLS FIRST,
 LIMIT 50;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per employee.
+**How to read it:** Example 2: Start with `employees` in `FROM`/`JOIN`. The final `SELECT` displays `employee_id`, `employee`, and `manager`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one row per `employee_id`, capped at 50 rows with columns `employee_id`, `employee`, and `manager` from `employees`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -165,28 +161,34 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** List every employee with their direct manager when present.
    **Progressive hint:** Self join employees and use a left join so top-level employees remain visible.
-   **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: List every employee with their direct manager when present” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `employee_name`, `manager_id`, `manager_name`, `e`, `m`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 1, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `employees`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-05 Exercise 1, read from `employees`. Build the answer toward `employee_id`, `employee_name`, `manager_id`, and `manager_name`; keep `employee_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-05 Exercise 1, expected output: One row per employee. The final columns are `employee_id`, `employee_name`, `manager_id`, and `manager_name`. The final order is `e.employee_id`.
+   **Verify:** For sql-05 Exercise 1, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `employee_name`, `manager_id`, and `manager_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 2. **Query writing:** Find employees who manage nobody.
    **Progressive hint:** Left join candidate managers to reports and retain managers with no right-side match.
-   **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Find employees who manage nobody” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `e`, `report`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 2, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `employees`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-05 Exercise 2, read from `employees`. Build the answer toward `employee_id`, and `full_name`; keep `employee_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-05 Exercise 2, expected output: One row per leaf employee. The final columns are `employee_id`, and `full_name`. The final order is `e.employee_id`.
+   **Verify:** For sql-05 Exercise 2, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, and `full_name` values match those staged rows without unintended fanout or loss. Add one row for which `(report.employee_id IS NULL)` is true and one for which it is false; verify only the matching `employee_id` value is returned.
 3. **Query writing:** Build a complete grid of six recent months and all expense categories.
    **Progressive hint:** Cross join two small declared dimensions; do not cross join raw fact tables.
-   **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Build a complete grid of six recent months and all expense categories” at one row per requested calendar/cohort bucket and grouping key. Named evidence columns/objects: `evidence`, `month_start`, `e`, `c`, `m`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 3, prove uniqueness at one row per requested calendar/cohort bucket and grouping key; reconcile the result's row count and any count/sum/amount with a simpler control over `expenses`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-05 Exercise 3, read from `expenses`. Build the answer toward `category`, and `month_start`; keep `category` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-05 Exercise 3, expected output: Six rows per distinct expense category. The final columns are `category`, and `month_start`. The final order is `c.category, m.month_start`.
+   **Verify:** For sql-05 Exercise 3, project `category` plus the raw source columns from `expenses` at each join stage; record row count and distinct `category`, then assert the final `category`, and `month_start` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
 4. **Prediction:** Predict the count from crossing six departments with twelve months, then verify it without materializing extra columns.
    **Progressive hint:** Cross-join cardinality is the product of input row counts.
-   **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Predict the count from crossing six departments with twelve months, then verify it without materializing extra columns”. Show both compared result shapes at one row per requested calendar/cohort bucket and grouping key, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `month_number`, `department_month_combinations`, `d`, `m`.
-   **Verify:** For Exercise 4, run the two forms over the identical rows in `departments`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-05 Exercise 4, read from `departments`. Build the answer toward `department_month_combinations`; keep `department_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-05 Exercise 4, expected output: One row containing 72. The final columns are `department_month_combinations`.
+   **Verify:** For sql-05 Exercise 4, project `department_id` plus the raw source columns from `departments` at each join stage; record row count and distinct `department_id`, then assert the final `department_month_combinations` values match those staged rows without unintended fanout or loss. Add one source row with a new `department_id`; verify the result gains exactly one row carrying that `department_id` value.
 5. **Debugging:** List unique employee pairs in the same department without self-pairs or mirrored duplicates.
    **Progressive hint:** Use `left.employee_id < right.employee_id` as both the join condition and uniqueness rule.
-   **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: List unique employee pairs in the same department without self-pairs or mirrored duplicates” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `both`, `evidence`, `first_employee_id`, `second_employee_id`, `left_employee`, `right_employee`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 5, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `employees`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-05 Exercise 5, read from `employees` twice at employee grain. Build the answer toward `department_id`, `first_employee_id`, and `second_employee_id`; keep all three columns visible as the composite pair key.
+   **Expected result/shape:** For sql-05 Exercise 5, expected output: One row per unordered same-department pair. The final columns are `department_id`, `first_employee_id`, and `second_employee_id`. The final order is `left_employee.department_id, left_employee.employee_id, right_employee.employee_id`.
+   **Verify:** For sql-05 Exercise 5, assert `first_employee_id < second_employee_id` for every row, require uniqueness of (`department_id`, `first_employee_id`, `second_employee_id`), and anti-check for both self-pairs and mirrored `(a, b)` / `(b, a)` pairs. For each department with `n` employees, independently require `n * (n - 1) / 2` result rows.
 6. **Extension:** Show each employee, their manager, and their manager's manager.
    **Progressive hint:** Use two independently aliased left self joins; NULLs indicate the hierarchy ends.
-   **Expected result/shape:** Exercise 6 must make “Extension: Show each employee, their manager, and their manager's manager” observable through the exact DDL/DML command tag plus one result row per key or group explicitly named in the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `employee_name`, `manager_name`, `grandmanager_name`, `e`, `manager`, `grandmanager`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `employee_name`, `manager_name`, `grandmanager_name`, `e`, `manager`, `grandmanager`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-05 Exercise 6, read from `employees`. Build the answer toward `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name`; keep `employee_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-05 Exercise 6, expected output: One row per employee with up to two ancestor columns. The final columns are `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name`. The final order is `e.employee_id`.
+   **Verify:** For sql-05 Exercise 6, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 
 ## Common mistakes and how to recover
 
@@ -258,7 +260,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-05 — Cross Self Joins.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisite: `sql-04`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day05_cross_self_joins.md
 - Answer-free learner SQL: sql/postgres-60day/day05_cross_self_joins.sql
 

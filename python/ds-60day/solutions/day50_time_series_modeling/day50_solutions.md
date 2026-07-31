@@ -23,7 +23,7 @@ y = 10 + 2*np.sin(2*np.pi*rng.dayofyear/7) + np.random.normal(0,0.8,len(rng))
 df = pd.DataFrame({'ds': rng, 'y': y}).set_index('ds')
 ```
 
-Exercise 1 — Seasonal naive baseline
+Worked reference for Exercise 1 — Seasonal naive baseline
 ```python
 # 7-day seasonal naive: forecast y_t = y_{t-7}
 H = 14  # horizon
@@ -40,7 +40,7 @@ Explanation
 
 ---
 
-Exercise 2 — TimeSeriesSplit and models
+Worked reference for Exercise 2 — TimeSeriesSplit and models
 ```python
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
@@ -79,7 +79,7 @@ Line‑by‑line
 
 ---
 
-Exercise 3 — Final fit and error visualization
+Worked reference for Exercise 3 — Final fit and error visualization
 ```python
 # Fit best model on full train and forecast last H steps using a walk‑forward loop
 H = 14
@@ -142,7 +142,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the same test window.
 
@@ -152,16 +152,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Fit autoarima with m=7 and m=30; compare mean absolute error on the same test window`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.
 
@@ -171,16 +164,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 2 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Difference the training series and inspect autocorrelation without using test-period observations.
 
@@ -190,14 +176,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Difference the training series and inspect autocorrelation without using test-period observat...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
 
 ### Exercise 4 — Rolling-origin evaluation
 
@@ -217,14 +196,7 @@ backtest.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Implement at least four expanding-window forecast origins with a fixed horizon. Compare seaso...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Rolling-origin evaluation — print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.
 
 ### Exercise 5 — Prediction intervals
 
@@ -244,14 +216,7 @@ forward-only calibration data and exchangeability assumptions.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Produce forecast intervals and evaluate empirical coverage and width across rolling origins....`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
-
-
+**Verify:** Prediction intervals — print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.
 
 ### Exercise 6 — Timestamp/data-quality debugging
 
@@ -272,4 +237,4 @@ evaluation.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Validate a series containing duplicate timestamps, missing periods, an irregular interval, an...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Timestamp/data-quality debugging — produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.

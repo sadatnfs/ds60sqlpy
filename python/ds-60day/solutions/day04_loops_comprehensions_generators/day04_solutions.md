@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**iteration, eager collection building, and lazy generators**.
+These worked answers demonstrate **iteration, eager collection building, and lazy generators**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 An iterable is a source that can provide values one at a time. A `for`
 loop asks for each next value, binds it to a loop name, and runs the
@@ -29,291 +28,141 @@ normally exhausted after one pass.
 - **generator:** an iterator that computes values lazily.
 - **exhaustion:** the state after an iterator has no more values.
 
-### Reference pattern 1 — Translate an append loop one clause at a time
+### How to compare an answer
 
-Use the loop as a readable specification before compressing it.
+For this lesson's **iteration, eager collection building, and lazy generators** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
 
-```python
-temperatures = [-4, 0, 7, 12]
-warm_fahrenheit = []
-for celsius in temperatures:
-    if celsius > 0:
-        warm_fahrenheit.append(celsius * 9 / 5 + 32)
+## Exercises 1–3 — Worked answers
 
-compact = [c * 9 / 5 + 32 for c in temperatures if c > 0]
-(warm_fahrenheit, compact, warm_fahrenheit == compact)
-```
-
-**Expected observation:** `([44.6, 53.6], [44.6, 53.6], True)`. The two forms implement the same filter and transformation.
-
-### Reference pattern 2 — Observe a generator's saved position
-
-Consumption advances the iterator instead of restarting it.
-
-```python
-squares = (number**2 for number in range(4))
-first = next(squares)
-rest = list(squares)
-after_exhaustion = list(squares)
-(first, rest, after_exhaustion)
-```
-
-**Expected observation:** `(0, [1, 4, 9], [])`. Materializing `rest` consumes everything that remained.
-
-## Exercise-by-exercise reasoning map
-
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
+### Exercise 1 — worked answer
 
 **Learner contract:** Start with `numbers = [-3, -1, 0, 2, 5]`. Write an ordinary loop that appends the **squares of strictly positive values** to `positive_squares`, then write an equivalent list comprehension named `compact_squares`. **Expected result:** both are `[4, 25]`. **Constraints:** do not mutate `numbers`, and keep the filter (`> 0`) distinct from the transformation (`value ** 2`). **Verify:** assert the two results are equal and the input is unchanged.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies iteration, eager collection building, and lazy generators.
+**Reasoning:** Implement this exact contract as written: Start with `numbers = [-3, -1, 0, 2, 5]`. Write an ordinary loop that appends the squares of strictly positive values to `positive_squares`, then write an equivalent list comprehension named `compact_squares`. Expected result: both are `[4, 25]`. Constraints: do not mutate `numbers`, and keep the filter (`> 0`) distinct from the transformation (`value ** 2`). Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert the two results are equal and the input is unchanged. That connects the answer to iteration, eager collection building, and lazy generators.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+numbers = [-3, -1, 0, 2, 5]
+positive_squares = []
+for value in numbers:
+    if value > 0:
+        positive_squares.append(value**2)
 
-**Alternative:** Choose a normal loop for side effects or several decisions, a comprehension for one clear collection transformation, and a generator for streaming.
+compact_squares = [value**2 for value in numbers if value > 0]
+assert positive_squares == compact_squares == [4, 25]
+assert numbers == [-3, -1, 0, 2, 5]
+```
 
-**Edge case:** Empty inputs, a non-positive batch size, a final partial batch, and inclusive versus exclusive endpoints must be explicit.
+The output expression, source, and filter map directly from the loop to
+the comprehension.
 
-**Solution evidence to inspect:** assert the two results are equal and the input is unchanged.
+**Verification evidence:** assert the two results are equal and the input is unchanged.
 
-### Exercise 2 — reasoning, alternatives, and proof
+### Exercise 2 — worked answer
 
 **Learner contract:** Implement `evens_through(limit)` as a generator that yields even integers from `0` through `limit` **inclusive**. **Inputs to verify:** `-1`, `0`, `1`, `2`, and `7`. **Expected results:** `[]`, `[0]`, `[0]`, `[0, 2]`, and `[0, 2, 4, 6]`. **Constraints:** use `yield`, return no stored list, and document the inclusive endpoint. **Verify:** Assert the exact five expected lists for limits `-1`, `0`, `1`, `2`, and `7`; also confirm `inspect.isgenerator(evens_through(2))` is true.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies iteration, eager collection building, and lazy generators.
+**Reasoning:** Implement this exact contract as written: Implement `evens_through(limit)` as a generator that yields even integers from `0` through `limit` inclusive. Inputs to verify: `-1`, `0`, `1`, `2`, and `7`. Expected results: `[]`, `[0]`, `[0]`, `[0, 2]`, and `[0, 2, 4, 6]`. Constraints: use `yield`, return no stored list, and document the inclusive endpoint. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert the exact five expected lists for limits `-1`, `0`, `1`, `2`, and `7`; also confirm `inspect.isgenerator(evens_through(2))` is true. That connects the answer to iteration, eager collection building, and lazy generators.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+from collections.abc import Iterator
+import inspect
 
-**Alternative:** Choose a normal loop for side effects or several decisions, a comprehension for one clear collection transformation, and a generator for streaming.
 
-**Edge case:** Empty inputs, a non-positive batch size, a final partial batch, and inclusive versus exclusive endpoints must be explicit.
+def evens_through(limit: int) -> Iterator[int]:
+    """Yield even integers from zero through ``limit``, inclusive."""
 
-**Solution evidence to inspect:** Assert the exact five expected lists for limits `-1`, `0`, `1`, `2`, and `7`; also confirm `inspect.isgenerator(evens_through(2))` is true.
+    yield from range(0, limit + 1, 2)
 
-### Exercise 3 — reasoning, alternatives, and proof
+
+expected = {
+    -1: [],
+    0: [0],
+    1: [0],
+    2: [0, 2],
+    7: [0, 2, 4, 6],
+}
+assert {limit: list(evens_through(limit)) for limit in expected} == expected
+assert inspect.isgenerator(evens_through(2))
+```
+
+`range(0, limit + 1, 2)` makes the inclusive endpoint explicit. When
+`limit` is negative, the range is empty, so the generator yields
+nothing instead of raising an unrelated error.
+
+**Verification evidence:** Assert the exact five expected lists for limits `-1`, `0`, `1`, `2`, and `7`; also confirm `inspect.isgenerator(evens_through(2))` is true.
+
+### Exercise 3 — worked answer
 
 **Learner contract:** For `items = ['red', 'blue', 'red', 'green', 'blue', 'red']`, build a frequency mapping whose expected value is `{'red': 3, 'blue': 2, 'green': 1}`. **First:** implement an explicit one-pass loop with `dict.get`. **Then:** compare it with `collections.Counter`. **Constraint:** do not repeatedly call `items.count` in production code. **Verify:** assert both mappings agree and explain their time-cost difference.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies iteration, eager collection building, and lazy generators.
+**Reasoning:** Implement this exact contract as written: For `items = ['red', 'blue', 'red', 'green', 'blue', 'red']`, build a frequency mapping whose expected value is `{'red': 3, 'blue': 2, 'green': 1}`. First: implement an explicit one-pass loop with `dict.get`. Then: compare it with `collections.Counter`. Constraint: do not repeatedly call `items.count` in production code. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert both mappings agree and explain their time-cost difference. That connects the answer to iteration, eager collection building, and lazy generators.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+from collections import Counter
 
-**Alternative:** Choose a normal loop for side effects or several decisions, a comprehension for one clear collection transformation, and a generator for streaming.
+items = ["red", "blue", "red", "green", "blue", "red"]
+frequencies: dict[str, int] = {}
+for item in items:
+    frequencies[item] = frequencies.get(item, 0) + 1
 
-**Edge case:** Empty inputs, a non-positive batch size, a final partial batch, and inclusive versus exclusive endpoints must be explicit.
+counter_frequencies = dict(Counter(items))
+expected = {"red": 3, "blue": 2, "green": 1}
+assert frequencies == counter_frequencies == expected
+```
 
-**Solution evidence to inspect:** assert both mappings agree and explain their time-cost difference.
+The explicit loop and `Counter` are both one-pass approaches; repeated
+`items.count(item)` would rescan the list for each distinct value.
 
-### Exercise 4 — reasoning, alternatives, and proof
+**Verification evidence:** assert both mappings agree and explain their time-cost difference.
+
+## Exercises 4–8 — Expanded mastery answers
+
+### Exercise 4 — answer contract
 
 **Learner contract:** **Prediction:** Create a generator expression, consume one item with `next`, then convert the rest to a list. Predict what remains and why. **Progressive hint:** Iterators remember their current position and are usually one-shot. **Verify:** Assert the first consumed square is `0`, the remaining list is `[1, 4, 9]`, and a third pass is empty; explain the saved iterator position.
 
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying iteration, eager collection building, and lazy generators.
+**Reasoning:** Predict this named state change before running it: Prediction: Create a generator expression, consume one item with `next`, then convert the rest to a list. Predict what remains and why. Progressive hint: Iterators remember their current position and are usually one-shot. Then compare the prediction with this proof target: Assert the first consumed square is `0`, the remaining list is `[1, 4, 9]`, and a third pass is empty; explain the saved iterator position. This makes iteration, eager collection building, and lazy generators observable instead of relying on intuition.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert the first consumed square is `0`, the remaining list is `[1, 4, 9]`, and a third pass is empty; explain the saved iterator position.
 
-**Alternative:** Choose a normal loop for side effects or several decisions, a comprehension for one clear collection transformation, and a generator for streaming.
-
-**Edge case:** Empty inputs, a non-positive batch size, a final partial batch, and inclusive versus exclusive endpoints must be explicit.
-
-**Solution evidence to inspect:** Assert the first consumed square is `0`, the remaining list is `[1, 4, 9]`, and a third pass is empty; explain the saved iterator position.
-
-### Exercise 5 — reasoning, alternatives, and proof
+### Exercise 5 — answer contract
 
 **Learner contract:** **Tracing:** Trace `[n * 10 for n in range(6) if n % 2]` one input at a time. **Progressive hint:** Evaluate the filter before the output expression. **Verify:** Build a six-row trace for inputs `0..5` containing filter result and optional output; confirm the final list is `[10, 30, 50]`.
 
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the iteration, eager collection building, and lazy generators model is visible.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace `[n * 10 for n in range(6) if n % 2]` one input at a time. Progressive hint: Evaluate the filter before the output expression. Record the named value, shape, label, or iterator position needed to establish: Build a six-row trace for inputs `0..5` containing filter result and optional output; confirm the final list is `[10, 30, 50]`. The trace exposes iteration, eager collection building, and lazy generators directly.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Build a six-row trace for inputs `0..5` containing filter result and optional output; confirm the final list is `[10, 30, 50]`.
 
-**Alternative:** Choose a normal loop for side effects or several decisions, a comprehension for one clear collection transformation, and a generator for streaming.
-
-**Edge case:** Empty inputs, a non-positive batch size, a final partial batch, and inclusive versus exclusive endpoints must be explicit.
-
-**Solution evidence to inspect:** Build a six-row trace for inputs `0..5` containing filter result and optional output; confirm the final list is `[10, 30, 50]`.
-
-### Exercise 6 — reasoning, alternatives, and proof
+### Exercise 6 — answer contract
 
 **Learner contract:** **Implementation:** Implement `batched(items, size)` yielding lists of at most `size`, including a final partial batch. **Progressive hint:** Accumulate, yield when full, then handle leftovers after the loop. **Verify:** Assert `list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]`, empty input yields no batches, and size `0` raises.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies iteration, eager collection building, and lazy generators.
+**Reasoning:** Implement this exact contract as written: Implementation: Implement `batched(items, size)` yielding lists of at most `size`, including a final partial batch. Progressive hint: Accumulate, yield when full, then handle leftovers after the loop. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert `list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]`, empty input yields no batches, and size `0` raises. That connects the answer to iteration, eager collection building, and lazy generators.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert `list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]`, empty input yields no batches, and size `0` raises.
 
-**Alternative:** Choose a normal loop for side effects or several decisions, a comprehension for one clear collection transformation, and a generator for streaming.
-
-**Edge case:** Empty inputs, a non-positive batch size, a final partial batch, and inclusive versus exclusive endpoints must be explicit.
-
-**Solution evidence to inspect:** Assert `list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]`, empty input yields no batches, and size `0` raises.
-
-### Exercise 7 — reasoning, alternatives, and proof
+### Exercise 7 — answer contract
 
 **Learner contract:** **Debugging:** Explain and repair a loop that removes negative values from the same list it is iterating over. **Progressive hint:** Build a new list or iterate over a copy. **Verify:** Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in iteration, eager collection building, and lazy generators.
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Explain and repair a loop that removes negative values from the same list it is iterating over. Progressive hint: Build a new list or iterate over a copy. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly. The diagnosis depends on iteration, eager collection building, and lazy generators.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly.
 
-**Alternative:** Choose a normal loop for side effects or several decisions, a comprehension for one clear collection transformation, and a generator for streaming.
-
-**Edge case:** Empty inputs, a non-positive batch size, a final partial batch, and inclusive versus exclusive endpoints must be explicit.
-
-**Solution evidence to inspect:** Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly.
-
-### Exercise 8 — reasoning, alternatives, and proof
+### Exercise 8 — answer contract
 
 **Learner contract:** **Edge case and explanation:** Define whether an even-number generator 'up to N' includes N and test N values -1, 0, 1, 2, and 3. **Progressive hint:** Boundary examples turn ambiguous English into a contract. **Verify:** Assert exact output for `N` values `-1, 0, 1, 2, 3`; identify which tests prove the endpoint is inclusive and how negative input behaves.
 
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from iteration, eager collection building, and lazy generators.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Define whether an even-number generator 'up to N' includes N and test N values -1, 0, 1, 2, and 3. Progressive hint: Boundary examples turn ambiguous English into a contract. Values below, at, and above the named boundary must produce the evidence Assert exact output for `N` values `-1, 0, 1, 2, 3`; identify which tests prove the endpoint is inclusive and how negative input behaves. Those cases show how iteration, eager collection building, and lazy generators behaves at its edge.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Choose a normal loop for side effects or several decisions, a comprehension for one clear collection transformation, and a generator for streaming.
-
-**Edge case:** Empty inputs, a non-positive batch size, a final partial batch, and inclusive versus exclusive endpoints must be explicit.
-
-**Solution evidence to inspect:** Assert exact output for `N` values `-1, 0, 1, 2, 3`; identify which tests prove the endpoint is inclusive and how negative input behaves.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-Beginner-friendly, line-by-line explanations for each exercise.
-
-Contents
-- Exercise 1: Loop → list comprehension
-- Exercise 2: Even-number generator up to N
-- Exercise 3: Frequency dictionary via comprehension (and Counter)
-
----
-
-Exercise 1 — Convert a loop that builds a filtered list into a comprehension
-Goal: Given a list of numbers, keep the squares of the positive ones.
-
-Loop version (starting point)
-```python
-nums = [-2, -1, 0, 3, 5]
-out = []
-for x in nums:                  # 1) iterate each element
-    if x > 0:                   # 2) keep only positives
-        out.append(x * x)       # 3) append its square
-```
-
-Comprehension version
-```python
-nums = [-2, -1, 0, 3, 5]
-out = [x * x for x in nums if x > 0]
-```
-Line-by-line mapping
-- [x * x ...] → what to compute per kept element (the square)
-- for x in nums → where elements come from (the input iterable)
-- if x > 0 → filter condition; only truthy items are included
-
-Notes
-- List comprehensions are concise and often faster than manual loops for simple transforms + filters.
-- Prefer readability: if the expression becomes long or uses nested loops, break it back into a normal loop.
-
----
-
-Exercise 2 — Generator that yields even numbers up to N
-Goal: Produce a sequence lazily (one-at-a-time) to avoid building large lists in memory.
-
-```python
-def evens_up_to(n: int):
-    """Yield even integers from 0 up to and including n.
-
-    Args:
-        n: non-negative upper bound
-
-    Yields:
-        even integers in ascending order
-    """
-    if n < 0:                          # 1) guard clause for invalid input
-        raise ValueError("n must be >= 0")
-    for i in range(0, n + 1, 2):       # 2) start at 0, step by 2
-        yield i                        # 3) produce one value at a time
-
-# Demo
-list(evens_up_to(10))  # [0, 2, 4, 6, 8, 10]
-```
-Why a generator?
-- Memory-friendly for large n (doesn’t build a full list)
-- Composable with other generators or streaming pipelines
-
-Variation: generator expression
-```python
-evens = (i for i in range(101) if i % 2 == 0)
-```
-
----
-
-Exercise 3 — Build a frequency dict using a comprehension
-Goal: Count occurrences of items. We’ll show both a comprehension-based approach and the purpose-built tools.
-
-Comprehension + set baseline
-```python
-items = list("datascience")
-unique = set(items)                                   # unique symbols
-freq = {ch: sum(1 for x in items if x == ch) for ch in unique}
-freq  # e.g., {'d': 1, 'a': 2, ...}
-```
-Line-by-line
-- unique = set(items) → we only compute one count per unique element
-- {ch: ... for ch in unique} → dict comprehension mapping char → count
-- sum(1 for x in items if x == ch) → count matches by summing 1s
-
-Better: collections.Counter (clearer and faster)
-```python
-from collections import Counter
-items = list("datascience")
-freq = Counter(items)           # Counter({'e': 3, 'a': 2, 's': 2, 'd': 1, 't': 1, 'c': 1, 'i': 1, 'n': 1})
-```
-Trade-offs
-- Comprehension teaches the mechanics but is O(n^2) in worst case
-- Counter is the idiomatic O(n) solution and should be preferred in practice
-
----
+**Evidence to locate in the grouped implementation:** Assert exact output for `N` values `-1, 0, 1, 2, 3`; identify which tests prove the endpoint is inclusive and how negative input behaves.
 
 ## Expanded mastery lab solutions
 
 Trace iteration boundaries and laziness. Prefer a clear loop when a comprehension would hide state changes or several decisions.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Iteration traces
+### Shared implementation for Exercises 4–5 — Iteration traces
 
 ```python
 stream = (n * n for n in range(4))
@@ -326,7 +175,7 @@ assert remaining == [1, 4, 9]
 assert [n * 10 for n in range(6) if n % 2] == [10, 30, 50]
 ```
 
-### Practices 3–5 — Batches, safe filtering, and explicit endpoints
+### Shared implementation for Exercises 6–8 — Batches, safe filtering, and explicit endpoints
 
 ```python
 from collections.abc import Iterable, Iterator
@@ -363,6 +212,13 @@ def evens_through(n: int) -> Iterator[int]:
 
 
 assert list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]
+assert list(batched([], 2)) == []
+try:
+    list(batched(range(3), 0))
+except ValueError as error:
+    assert "size must be positive" in str(error)
+else:
+    raise AssertionError("zero batch size should raise")
 assert [list(evens_through(n)) for n in (-1, 0, 1, 2, 3)] == [
     [], [0], [0], [0, 2], [0, 2]
 ]

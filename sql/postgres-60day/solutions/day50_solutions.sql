@@ -128,18 +128,36 @@ ORDER BY month DESC, category;
 -- window references its coalesced keys, never one nullable join side.
 
 -- Exercise 6: classify missing plans before applying an overspend threshold.
-WITH totals AS (
-  SELECT e.category, SUM(e.amount) AS actual, SUM(b.amount) AS budget
-  FROM expenses e
-  FULL JOIN budgets b
-    ON b.category = e.category
-   AND b.period = date_trunc('month', e.expense_date)::date
-  GROUP BY e.category
+-- Aggregate each many-row source BEFORE joining. Joining raw expenses to one
+-- monthly budget row would repeat that budget once per expense and overstate it.
+WITH expense_monthly AS (
+  SELECT date_trunc('month', expense_date)::date AS month,
+         category,
+         SUM(amount) AS actual
+  FROM expenses
+  GROUP BY 1, 2
+), budget_monthly AS (
+  SELECT period AS month,
+         category,
+         SUM(amount) AS budget
+  FROM budgets
+  GROUP BY 1, 2
+), monthly AS (
+  SELECT COALESCE(e.month, b.month) AS month,
+         COALESCE(e.category, b.category) AS category,
+         e.actual,
+         b.budget
+  FROM expense_monthly e
+  FULL JOIN budget_monthly b USING (month, category)
 )
-SELECT category, actual, budget,
+SELECT month,
+       category,
+       actual,
+       budget,
        CASE WHEN budget IS NULL THEN 'unbudgeted spend'
+            WHEN actual IS NULL THEN 'budget without spend'
             WHEN budget = 0 THEN 'zero budget'
             WHEN actual > budget THEN 'overspend'
             ELSE 'within budget' END AS status
-FROM totals
-ORDER BY category;
+FROM monthly
+ORDER BY month, category;

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 X, y_true = make_blobs(n_samples=600, centers=3, cluster_std=1.2, random_state=42)
 ```
 
-Exercise 1 — Elbow (inertia vs K)
+Worked reference for Exercise 1 — Elbow (inertia vs K)
 ```python
 Ks = range(1, 10)
 inertias = []
@@ -39,7 +39,7 @@ Interpretation
 
 ---
 
-Exercise 2 — Silhouette for K in [2..6]
+Worked reference for Exercise 2 — Silhouette for K in [2..6]
 ```python
 sil_scores = {}
 for k in range(2, 7):
@@ -64,7 +64,7 @@ plt.tight_layout(); plt.show()
 
 ---
 
-Exercise 3 — Anomaly detection: IsolationForest vs LOF
+Worked reference for Exercise 3 — Anomaly detection: IsolationForest vs LOF
 ```python
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
@@ -125,7 +125,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Try several values of `k` and plot inertia versus `k` (the elbow plot).
 
@@ -135,16 +135,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Try several values of k and plot inertia versus k (the elbow plot)`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Practice 1 — unsupervised geometry, cluster stability, and anomaly ranking — for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Compute silhouette scores for `k` from 2 through 6 and discuss the result.
 
@@ -154,16 +147,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Compute silhouette scores for k from 2 through 6 and discuss the result`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
+**Verify:** Practice 2 — unsupervised geometry, cluster stability, and anomaly ranking — for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Compare Isolation Forest with Local Outlier Factor.
 
@@ -173,14 +159,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Compare Isolation Forest with Local Outlier Factor`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — unsupervised geometry, cluster stability, and anomaly ranking — on identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
 
 ### Exercise 4 — Scaling sensitivity
 
@@ -201,14 +180,7 @@ similarity for this problem.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignme...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Scaling sensitivity — print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.
 
 ### Exercise 5 — Cluster stability
 
@@ -228,14 +200,7 @@ knowledge and downstream usefulness.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, a...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
-
-
+**Verify:** Cluster stability — over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.
 
 ### Exercise 6 — Anomaly validation without labels
 
@@ -255,4 +220,4 @@ describe the detector's `-1` output as a confirmed incident.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Design an evaluation plan for an anomaly detector when historical anomaly labels are incomple...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+**Verify:** Anomaly validation without labels — deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.

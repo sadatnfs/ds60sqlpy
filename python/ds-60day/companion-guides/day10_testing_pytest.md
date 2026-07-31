@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 9 (`python-09`): importable functions and package structure.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -188,18 +184,15 @@ Tests do not prove the absence of every bug; they preserve selected contracts.
 ```python
 import pytest
 
-
 def normalize_age(raw: str) -> int:
     age = int(raw)
     if age < 0:
         raise ValueError("age must be non-negative")
     return age
 
-
 @pytest.mark.parametrize(("raw", "expected"), [("0", 0), ("42", 42)])
 def test_normalize_age(raw: str, expected: int) -> None:
     assert normalize_age(raw) == expected
-
 
 def test_normalize_age_rejects_negative() -> None:
     with pytest.raises(ValueError, match="non-negative"):
@@ -254,7 +247,7 @@ code; these extend rather than replace the original practice above.
    **Verify:** Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it.
 7. **Edge case and explanation:** Test floating-point output and `NaN` correctly. Explain why direct equality is inappropriate for each.
    **Progressive hint:** Use `pytest.approx` for tolerance and `math.isnan` for NaN.
-   **Verify:** Use `pytest.approx` for one computed float and `math.isnan` for NaN; demonstrate why `nan == nan` is false.
+   **Verify:** Assert one computed float passes with `pytest.approx`, assert `math.isnan(value)` is true for NaN, and record that `value == value` is false.
 
 Before opening the reference solution, write one sentence explaining
 which contract or mental model each result confirms.
@@ -295,7 +288,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-10`
-(Day 10 — Testing with pytest). I am a complete beginner. Emphasize tests as executable contracts and useful failure reports.
+(Day 10 — Testing with pytest). Direct catalog prerequisites: `python-09`.
+I have completed the direct prerequisites: `python-09`. Emphasize tests as executable contracts and useful failure reports.
 Read `python/ds-60day/companion-guides/day10_testing_pytest.md` and use the learner notebook
 `python/ds-60day/notebooks/day10_testing_pytest.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

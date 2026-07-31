@@ -105,18 +105,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per order with constant first/last values per customer.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-20 Exercise 1, read from `orders`. Compute `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-20 Exercise 1, expected output: One row per order with constant first/last values per customer. The final columns are `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-20 Exercise 1, evaluate each of `order_date`, `first_order_date`, and `last_order_date` in a separate control `SELECT` over `orders`; require one final row and compare every value. Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
+- **Intermediate relation check:** For sql-20 Exercise 1, check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
+- **Clause check:** For sql-20 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date` ordered by `o.customer_id, o.order_date, o.order_id`.
+- **Alternative/trade-off:** For sql-20 Exercise 1, the chosen form is justified by this lesson-specific rationale: Use one full-partition frame from unbounded preceding through unbounded following. Evaluate another form against the concrete expected result (One row per order with constant first/last values per customer) and the verification above.
+- **Edge case:** Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
 
 ## Exercise 2 — Query writing
 
@@ -155,18 +150,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per product.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-20 Exercise 2, read from `products`. Compute `product_id`, `category`, `price`, `category_min_price`, and `category_max_price` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-20 Exercise 2, expected output: One row per product. The final columns are `product_id`, `category`, `price`, `category_min_price`, and `category_max_price`. The final order is `p.category, p.price, p.product_id`.
+- **Independent verification:** For sql-20 Exercise 2, evaluate each of `category_min_price`, and `category_max_price` in a separate control `SELECT` over `products`; require one final row and compare every value. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
+- **Intermediate relation check:** For sql-20 Exercise 2, check `p.category, p.price, p.product_id` before applying the row cap.
+- **Clause check:** For sql-20 Exercise 2, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve exactly one summary row, and finish with `product_id`, `category`, `price`, `category_min_price`, and `category_max_price` ordered by `p.category, p.price, p.product_id`.
+- **Alternative/trade-off:** For sql-20 Exercise 2, the chosen form is justified by this lesson-specific rationale: Order by price and use a full frame; values tie without needing row identity. Evaluate another form against the concrete expected result (One row per product) and the verification above.
+- **Edge case:** Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
 
 ## Exercise 3 — Query writing
 
@@ -206,18 +196,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per payment.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-20 Exercise 3, read from `payments`. Compute `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-20 Exercise 3, expected output: One row per payment. The final columns are `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount`. The final order is `p.order_id, p.payment_date, p.payment_id`.
+- **Independent verification:** For sql-20 Exercise 3, evaluate each of `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` in a separate control `SELECT` over `payments`; require one final row and compare every value. Tie two rows on `p.order_id` and give them different `p.payment_id` values; verify `p.order_id, p.payment_date, p.payment_id` chooses a stable first/last row.
+- **Intermediate relation check:** For sql-20 Exercise 3, check `p.order_id, p.payment_date, p.payment_id` before applying the row cap.
+- **Clause check:** For sql-20 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, preserve exactly one summary row, and finish with `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` ordered by `p.order_id, p.payment_date, p.payment_id`.
+- **Alternative/trade-off:** For sql-20 Exercise 3, the chosen form is justified by this lesson-specific rationale: Partition by order, order by timestamp/payment ID, and keep the full frame. Evaluate another form against the concrete expected result (One row per payment) and the verification above.
+- **Edge case:** Tie two rows on `p.order_id` and give them different `p.payment_id` values; verify `p.order_id, p.payment_date, p.payment_id` chooses a stable first/last row.
 
 ## Exercise 4 — Prediction
 
@@ -253,18 +238,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Three rows showing default current value and full-frame 30.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-20 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `value`, `default_last_value`, and `partition_last_value`; keep `value` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-20 Exercise 4, expected output: Three rows showing default current value and full-frame 30. The final columns are `value`, `default_last_value`, and `partition_last_value`. The final order is `value`.
+- **Independent verification:** For sql-20 Exercise 4, choose one complete partition from the inline `VALUES` fixture; hand-calculate its first, middle, and final window values for `value`, `default_last_value`, and `partition_last_value`, then verify output keys remain `value`. Use a one-row partition and a partition tied on `value`; verify `value` and `value` preserve the intended first/last row.
+- **Intermediate relation check:** For sql-20 Exercise 4, inspect one window partition before projecting; then check `value` before applying the row cap.
+- **Clause check:** For sql-20 Exercise 4, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `value`, and finish with `value`, `default_last_value`, and `partition_last_value` ordered by `value`.
+- **Alternative/trade-off:** For sql-20 Exercise 4, the chosen form is justified by this lesson-specific rationale: The default ends at the current row; explicit following reaches the true last row. Evaluate another form against the concrete expected result (Three rows showing default current value and full-frame 30) and the verification above.
+- **Edge case:** Use a one-row partition and a partition tied on `value`; verify `value` and `value` preserve the intended first/last row.
 
 ## Exercise 5 — Debugging
 
@@ -308,18 +288,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per customer with orders.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-20 Exercise 5, read from `orders`. Compute `customer_id`, `first_order_id`, and `last_order_id` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-20 Exercise 5, expected output: One row per customer with orders. The final columns are `customer_id`, `first_order_id`, and `last_order_id`. The final order is `customer_id`.
+- **Independent verification:** For sql-20 Exercise 5, evaluate each of `first_order_id`, and `last_order_id` in a separate control `SELECT` over `orders`; require one final row and compare every value. Tie two rows on `customer_id` and give them different `customer_id` values; verify `customer_id` chooses a stable first/last row.
+- **Intermediate relation check:** For sql-20 Exercise 5, run `annotated` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-20 Exercise 5, the solution actually uses `WITH`, `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `customer_id`, `first_order_id`, and `last_order_id` ordered by `customer_id`.
+- **Alternative/trade-off:** For sql-20 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute first/last IDs with full-frame windows, then select distinct customer-level output. Evaluate another form against the concrete expected result (One row per customer with orders) and the verification above.
+- **Edge case:** Tie two rows on `customer_id` and give them different `customer_id` values; verify `customer_id` chooses a stable first/last row.
 
 ## Exercise 6 — Extension
 
@@ -352,18 +327,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** At most one latest order per customer.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-20 Exercise 6, read from `orders`. Build the answer toward `customer_id`, `order_id`, `order_date`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-20 Exercise 6, expected output: At most one latest order per customer. The final columns are `customer_id`, `order_id`, `order_date`, and `total_amount`. The final order is `o.customer_id, o.order_date DESC, o.order_id DESC`.
+- **Independent verification:** For sql-20 Exercise 6, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `customer_id`, `order_id`, `order_date`, and `total_amount` against `orders`. Tie two rows on `o.customer_id` and give them different `o.order_id DESC` values; verify `o.customer_id, o.order_date DESC, o.order_id DESC` chooses a stable first/last row.
+- **Intermediate relation check:** For sql-20 Exercise 6, check `o.customer_id, o.order_date DESC, o.order_id DESC` before applying the row cap.
+- **Clause check:** For sql-20 Exercise 6, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `customer_id`, `order_id`, `order_date`, and `total_amount` ordered by `o.customer_id, o.order_date DESC, o.order_id DESC`.
+- **Alternative/trade-off:** For sql-20 Exercise 6, the chosen form is justified by this lesson-specific rationale: `DISTINCT ON` keeps the first row under its mandatory leading order keys. Evaluate another form against the concrete expected result (At most one latest order per customer) and the verification above.
+- **Edge case:** Tie two rows on `o.customer_id` and give them different `o.order_id DESC` values; verify `o.customer_id, o.order_date DESC, o.order_id DESC` chooses a stable first/last row.
 
 ## Final self-check
 

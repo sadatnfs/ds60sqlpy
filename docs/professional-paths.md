@@ -18,16 +18,20 @@ prerequisites and artifact paths:
 Choose a lane from demonstrated prerequisites. You do not need every
 specialization to call the shared curriculum complete.
 
-## Start SQL with the missing foundations
+## Add relational engineering after SQL fundamentals
 
-New SQL learners begin here before SQL Day 1:
+A new SQL learner begins with
+[SQL Day 1 — SELECT, WHERE, and ORDER BY](../sql/postgres-60day/companion-guides/day01_select_where_orderby.md).
+The named relational-engineering modules then deepen responsibilities at the
+point where their prerequisites make sense:
 
-1. [`sql-found-01` — relational design, DDL, and constraints](../sql/professional/companion-guides/sql_found_01_relational_design.md)
-2. [`sql-found-02` — versioned migrations and safe evolution](../sql/professional/companion-guides/sql_found_02_versioned_migrations.md)
-3. [SQL Day 1 — SELECT, WHERE, and ORDER BY](../sql/postgres-60day/companion-guides/day01_select_where_orderby.md)
+1. Complete SQL Days 1–15.
+2. Take [`sql-found-01` — relational design, DDL, and constraints](../sql/professional/companion-guides/sql_found_01_relational_design.md).
+3. Complete the transaction and locking sequence through SQL Day 39.
+4. Take [`sql-found-02` — versioned migrations and safe evolution](../sql/professional/companion-guides/sql_found_02_versioned_migrations.md).
 
-The foundation scripts use isolated disposable schemas. SQL Day 1 then queries
-the seeded `training` schema.
+Both named scripts use isolated disposable schemas; SQL Days 1–60 continue to
+query the seeded `training` schema.
 
 ## Professional Python engineering lane
 

@@ -186,33 +186,17 @@ print({"rank": rank, "condition": condition,
 
 1. Add an intercept column of ones and recompute the coefficients.
 
-**Verify:** For task `Add an intercept column of ones and recompute the coefficients`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
+**Verify:** Practice 1 — matrix shapes, linear transformations, rank, and stable least squares — assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.
 
 2. Compare the closed-form result with scikit-learn's `LinearRegression` on the
    same data.
 
-**Verify:** For task `Compare the closed-form result with scikit-learn's LinearRegression on the`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 2 — matrix shapes, linear transformations, rank, and stable least squares — fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.
 
 3. Explain when the normal equation becomes numerically unstable and why
    iterative methods are often used for larger problems.
 
-**Verify:** For task `Explain when the normal equation becomes numerically unstable and why`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Practice 3 — matrix shapes, linear transformations, rank, and stable least squares — construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.
 
 ### Progressive hints
 
@@ -234,39 +218,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Shape tracing:** For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1).
    **Progressive hint:** Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.
 
-**Verify:** For task `Shape tracing: For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trac...`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Shape tracing — print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.
 
 5. **Rank-deficiency debugging:** Construct a design matrix whose third column equals the sum of the first two. Compare `np.linalg.solve(X.T @ X, X.T @ y)` with `np.linalg.lstsq(X, y, rcond=None)` and interpret the rank.
    **Progressive hint:** The dependent column makes X.T @ X singular. `lstsq` returns a minimum-norm solution plus rank information without forming an inverse.
 
-**Verify:** For task `Rank-deficiency debugging: Construct a design matrix whose third column equals the sum of the...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Rank-deficiency debugging — use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve's singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.
 
 6. **Robust vector operation:** Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector.
    **Progressive hint:** Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.
 
-**Verify:** For task `Robust vector operation: Implement cosine similarity for two one-dimensional vectors. Validat...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
+**Verify:** Robust vector operation — assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -314,10 +279,12 @@ Emphasize matrix shapes, linear transformations, rank, and stable least squares.
 - guide: `python/ds-60day/companion-guides/day33_linear_algebra_matrices.md`
 - learner artifact: `python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-32`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

@@ -20,10 +20,6 @@ By the end of this lesson, you can:
 Complete Day 24 (`python-24`): EDA questions, distributions, segmentation, and
 data-quality caveats.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -295,7 +291,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-25`
-(Day 25 — Visualization with Matplotlib and Seaborn). I am a complete beginner. Emphasize static chart choice, figure/axes ownership, labeling, and reproducible export.
+(Day 25 — Visualization with Matplotlib and Seaborn). Direct catalog prerequisites: `python-24`.
+I have completed the direct prerequisites: `python-24`. Emphasize static chart choice, figure/axes ownership, labeling, and reproducible export.
 Read `python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md` and use the learner notebook
 `python/ds-60day/notebooks/day25_viz_matplotlib_seaborn.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

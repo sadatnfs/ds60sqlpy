@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 7 (`python-07`): string normalization, exceptions, and `Path`.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -286,7 +282,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-08`
-(Day 8 — Files, JSON, CSV, and Context Managers). I am a complete beginner. Emphasize resource ownership, text encodings, and structured file boundaries.
+(Day 8 — Files, JSON, CSV, and Context Managers). Direct catalog prerequisites: `python-07`.
+I have completed the direct prerequisites: `python-07`. Emphasize resource ownership, text encodings, and structured file boundaries.
 Read `python/ds-60day/companion-guides/day08_files_json_csv_context.md` and use the learner notebook
 `python/ds-60day/notebooks/day08_files_json_csv_context.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

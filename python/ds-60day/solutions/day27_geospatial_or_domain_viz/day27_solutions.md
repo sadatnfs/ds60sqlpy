@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**geospatial semantics, coordinate reference systems, valid geometry, and offline fallback**.
+These worked answers demonstrate **geospatial semantics, coordinate reference systems, valid geometry, and offline fallback**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 Geospatial data combines ordinary attributes with geometry and a
 coordinate reference system (CRS). A coordinate pair is conventionally
@@ -28,227 +27,165 @@ emptiness, bounds, provenance, and offline availability before plotting.
 - **latitude:** north-south angular coordinate, used as y in geographic pairs.
 - **spatial join:** matching records by a geometric relationship such as within or intersects.
 
-### Reference pattern 1 — Create known geographic points and inspect bounds
+### How to compare an answer
 
-Constructed geometry avoids any network or external file.
+For this lesson's **geospatial semantics, coordinate reference systems, valid geometry, and offline fallback** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
+## Exercises 1–2 — Worked answers
+
+### Exercise 1 — worked answer
+
+**Learner contract:** Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. **Before plotting:** record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. **Constraints:** transform all layers to one appropriate CRS and never use `set_crs` as if it reprojected coordinates. **Verify:** check a known location/bounds and confirm entity count survives reprojection.
+
+**Reasoning:** Make this boundary unambiguous in code: Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. Before plotting: record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. Constraints: transform all layers to one appropriate CRS and never use `set_crs` as if it reprojected coordinates. Values below, at, and above the named boundary must produce the evidence check a known location/bounds and confirm entity count survives reprojection. Those cases show how geospatial semantics, coordinate reference systems, valid geometry, and offline fallback behaves at its edge.
 
 ```python
 import geopandas as gpd
 from shapely.geometry import Point
 
 places = gpd.GeoDataFrame(
-    {"name": ["A", "B"]},
+    {"name": ["San Francisco", "New York"]},
     geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],
     crs="EPSG:4326",
 )
-(str(places.crs), places.total_bounds.round(1).tolist())
-```
-
-**Expected observation:** The CRS is WGS 84/EPSG:4326 and bounds are approximately `[-122.4, 37.8, -73.9, 40.7]` in longitude/latitude degrees.
-
-### Reference pattern 2 — Reproject rather than relabel
-
-Projected coordinates use different units while representing the same places.
-
-```python
-projected = places.to_crs("EPSG:3857")
-{
-    "same_rows": len(projected) == len(places),
-    "projected_crs": str(projected.crs),
-    "x_units_are_not_degrees": abs(projected.geometry.x.iloc[0]) > 1_000,
+spatial_profile = {
+    "provenance": "constructed course points",
+    "license": "course-authored fixture; unrestricted educational reuse",
+    "crs": places.crs.to_string(),
+    "geometry_types": sorted(places.geom_type.unique().tolist()),
+    "invalid_count": int((~places.geometry.is_valid).sum()),
+    "empty_count": int(places.geometry.is_empty.sum()),
+    "bounds": places.total_bounds.tolist(),
 }
+assert places.crs is not None
+assert places.geometry.is_valid.all()
+assert spatial_profile["geometry_types"] == ["Point"]
+assert spatial_profile["bounds"][0] < -122
+assert places.loc[
+    places["name"].eq("San Francisco"), "geometry"
+].iloc[0].x == -122.4
+projected = places.to_crs("EPSG:3857")
+assert len(projected) == len(places)
+assert projected.crs == "EPSG:3857"
+assert not projected.geometry.equals(places.geometry)
+ax = projected.plot()
+assert len(ax.collections) >= 1
 ```
 
-**Expected observation:** All checks are true; the coordinates are transformed to meter-like Web Mercator values.
+This constructed local fixture needs no basemap or network source.
+`to_crs` transforms coordinates; `set_crs` would only relabel their
+meaning and would be incorrect here.
 
-## Exercise-by-exercise reasoning map
+**Verification evidence:** check a known location/bounds and confirm entity count survives reprojection.
 
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
-
-**Learner contract:** Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. **Before plotting:** record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. **Constraints:** transform all layers to one appropriate CRS and never use `set_crs` as if it reprojected coordinates. **Verify:** check a known location/bounds and confirm entity count survives reprojection.
-
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.
-
-**Edge case:** Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.
-
-**Solution evidence to inspect:** check a known location/bounds and confirm entity count survives reprojection.
-
-### Exercise 2 — reasoning, alternatives, and proof
+### Exercise 2 — worked answer
 
 **Learner contract:** Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. **Constraints:** use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. **Verify:** reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+**Reasoning:** Implement this exact contract as written: Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. Constraints: use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. Keep the prompt's named data and constraints visible in the code, then establish this specific result: reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer. That connects the answer to geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+import matplotlib.pyplot as plt
+import networkx as nx
 
-**Alternative:** When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.
+graph = nx.Graph()
+graph.add_nodes_from([
+    ("source", {"role": "input"}),
+    ("clean", {"role": "transform"}),
+    ("report", {"role": "output"}),
+])
+graph.add_edges_from([
+    ("source", "clean", {"meaning": "feeds"}),
+    ("clean", "report", {"meaning": "produces"}),
+])
+positions = nx.spring_layout(graph, seed=42)
+fig, ax = plt.subplots(figsize=(5, 3))
+role_shapes = {"input": "s", "transform": "o", "output": "^"}
+for role, shape in role_shapes.items():
+    nodes = [
+        node for node, attributes in graph.nodes(data=True)
+        if attributes["role"] == role
+    ]
+    nx.draw_networkx_nodes(
+        graph,
+        positions,
+        nodelist=nodes,
+        node_shape=shape,
+        label=role,
+        ax=ax,
+    )
+nx.draw_networkx_edges(graph, positions, ax=ax)
+nx.draw_networkx_labels(graph, positions, ax=ax)
+ax.legend(title="Node role")
+ax.set_axis_off()
 
-**Edge case:** Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.
+assert graph.number_of_nodes() == 3
+assert graph.number_of_edges() == 2
+assert set(positions) == set(graph)
+assert sum(len(collection.get_offsets()) for collection in ax.collections[:3]) == 3
+plt.close(fig)
+```
 
-**Solution evidence to inspect:** reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.
+A deterministic graph can show dependency relationships offline, but
+it cannot answer geographic distance, containment, or coordinate
+questions because its layout encodes readability, not physical space.
 
-### Exercise 3 — reasoning, alternatives, and proof
+**Verification evidence:** reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.
+
+## Exercises 3–7 — Expanded mastery answers
+
+### Exercise 3 — answer contract
 
 **Learner contract:** **Prediction:** Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. **Progressive hint:** Layers must use compatible coordinate reference systems (CRSs). **Verify:** Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.
 
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+**Reasoning:** Predict this named state change before running it: Prediction: Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. Progressive hint: Layers must use compatible coordinate reference systems (CRSs). Then compare the prediction with this proof target: Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent. This makes geospatial semantics, coordinate reference systems, valid geometry, and offline fallback observable instead of relying on intuition.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.
 
-**Alternative:** When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.
-
-**Edge case:** Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.
-
-**Solution evidence to inspect:** Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.
-
-### Exercise 4 — reasoning, alternatives, and proof
+### Exercise 4 — answer contract
 
 **Learner contract:** **Tracing:** Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. **Progressive hint:** Both numbers may fall in legal ranges, so semantic order matters. **Verify:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.
 
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the geospatial semantics, coordinate reference systems, valid geometry, and offline fallback model is visible.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. Progressive hint: Both numbers may fall in legal ranges, so semantic order matters. Record the named value, shape, label, or iterator position needed to establish: Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location. The trace exposes geospatial semantics, coordinate reference systems, valid geometry, and offline fallback directly.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.
 
-**Alternative:** When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.
-
-**Edge case:** Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.
-
-**Solution evidence to inspect:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.
-
-### Exercise 5 — reasoning, alternatives, and proof
+### Exercise 5 — answer contract
 
 **Learner contract:** **Implementation:** Implement a longitude/latitude bounding-box validator with clear ordering and range checks. **Progressive hint:** Require west ≤ east, south ≤ north, and geographic bounds. **Verify:** Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+**Reasoning:** Implement this exact contract as written: Implementation: Implement a longitude/latitude bounding-box validator with clear ordering and range checks. Progressive hint: Require west ≤ east, south ≤ north, and geographic bounds. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90. That connects the answer to geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90.
 
-**Alternative:** When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.
-
-**Edge case:** Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.
-
-**Solution evidence to inspect:** Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90.
-
-### Exercise 6 — reasoning, alternatives, and proof
+### Exercise 6 — answer contract
 
 **Learner contract:** **Debugging:** Repair a spatial join or overlay attempted before CRS comparison and reprojection. **Progressive hint:** Inspect `.crs`; transform one layer to the other's CRS. **Verify:** Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a spatial join or overlay attempted before CRS comparison and reprojection. Progressive hint: Inspect `.crs`; transform one layer to the other's CRS. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities. The diagnosis depends on geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.
 
-**Alternative:** When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.
-
-**Edge case:** Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.
-
-**Solution evidence to inspect:** Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.
-
-### Exercise 7 — reasoning, alternatives, and proof
+### Exercise 7 — answer contract
 
 **Learner contract:** **Edge case and explanation:** Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. **Progressive hint:** A missing basemap should not erase the analytical data layer. **Verify:** Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.
 
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. Progressive hint: A missing basemap should not erase the analytical data layer. Values below, at, and above the named boundary must produce the evidence Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback. Those cases show how geospatial semantics, coordinate reference systems, valid geometry, and offline fallback behaves at its edge.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.
-
-**Edge case:** Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.
-
-**Solution evidence to inspect:** Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-Two tracks depending on environment: GeoPandas map or a domain visualization with networkx.
-
-Contents
-- Exercise 1: Plot city/country boundaries (GeoPandas)
-- Exercise 2: Alternative domain visualization (network graph)
-
----
-
-Track A — Geospatial (GeoPandas)
-```python
-# Requires: geopandas, contextily, geodatasets
-import contextily as cx
-import geopandas as gpd
-from geodatasets import get_path
-
-world = gpd.read_file(get_path('naturalearth.land')).to_crs(3857)
-ax = world.plot(figsize=(8, 6), alpha=0.6, edgecolor='k')
-cx.add_basemap(ax, source=cx.providers.OpenStreetMap.Mapnik)
-ax.set(title='World basemap (Web Mercator)')
-```
-
-Track B — Domain viz (NetworkX)
-```python
-import networkx as nx
-import matplotlib.pyplot as plt
-
-G = nx.Graph()
-G.add_edge('ingest','clean'); G.add_edge('clean','validate'); G.add_edge('validate','model')
-G.add_edge('model','serve'); G.add_edge('serve','monitor')
-
-pos = nx.spring_layout(G, seed=42)
-plt.figure(figsize=(6,4))
-nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=1200)
-plt.title('Pipeline Stages (Network Graph)'); plt.tight_layout(); plt.show()
-```
-Notes
-- For maps, ensure CRS is consistent; reproject to 3857 for web tiles
-- `geodatasets` and contextily tiles download/cache data on first use
-- For network graphs, layout algorithms (spring, kamada_kawai) affect readability
-
----
+**Evidence to locate in the grouped implementation:** Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.
 
 ## Expanded mastery lab solutions
 
 Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — CRS and coordinate order
+### Shared implementation for Exercises 3–4 — CRS and coordinate order
 
 Longitude/latitude data are commonly stored as `(x, y) = (longitude, latitude)`.
 Swapping them may still produce numbers inside valid ranges but a wrong place.
 Degrees and projected meters cannot be overlaid without reprojection.
 
-### Practices 3–5 — Validate spatial boundaries and degrade gracefully
+### Shared implementation for Exercises 5–7 — Validate spatial boundaries and degrade gracefully
 
 ```python
 from dataclasses import dataclass

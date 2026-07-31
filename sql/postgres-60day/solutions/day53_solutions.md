@@ -105,18 +105,13 @@ new current row, and then performs this temporal mapping.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-53 Exercise 1, read from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`. Build the answer toward `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-53 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`.
+- **Independent verification:** For sql-53 Exercise 1, project `order_id` plus the raw source columns from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-53 Exercise 1, start with the first relation in `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-53 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, and `SELECT`. Read only those operations: begin at `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`, preserve one row per `order_id`, and finish with `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`.
+- **Alternative/trade-off:** For sql-53 Exercise 1, the chosen form is justified by this lesson-specific rationale: The exercise requires the customer and product surrogate keys whose validity intervals contain each source order date. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 2 — Audit columns
 
@@ -143,18 +138,13 @@ lesson.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-53 Exercise 2, change only `dim_customer`, and `dim_product` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `information_schema.columns` rows.
+- **Expected result/shape:** For sql-53 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `updated_by`, and `day53_solution`.
+- **Independent verification:** For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+- **Intermediate relation check:** For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
+- **Clause check:** For sql-53 Exercise 2, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `dim_customer`, and `dim_product` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-53 Exercise 2, the chosen form is justified by this lesson-specific rationale: Inside the Day 53 transaction, the answer adds: The SCD close and insert explicitly stamp `updated_by = 'day53_solution'`. Evaluate another form against the concrete expected result (the requested DDL command tag plus catalog rows and one accepted and one rejected behavior) and the verification above.
+- **Edge case:** Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
 
 ## Reasoning, state, and pitfalls
 
@@ -176,18 +166,13 @@ invalid close-before-open interval. The answer surfaces invalid ranges.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-53 Exercise 3, read from `dim_customer`. Build the answer toward `customer_id`, `valid_from`, `valid_to`, and `invalid_range`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-53 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `valid_from`, `valid_to`, and `invalid_range`. The final order is `valid_from`.
+- **Independent verification:** For sql-53 Exercise 3, run an anti-check that counts rows where NOT ((customer_id = 1)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `valid_from`, `valid_to`, and `invalid_range` against `dim_customer`. Add one row for which `(customer_id = 1)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+- **Intermediate relation check:** For sql-53 Exercise 3, inspect the source keys that survive `WHERE`; then check `valid_from` before applying the row cap.
+- **Clause check:** For sql-53 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `dim_customer`, preserve one row per `customer_id`, and finish with `customer_id`, `valid_from`, `valid_to`, and `invalid_range` ordered by `valid_from`.
+- **Alternative/trade-off:** For sql-53 Exercise 3, the chosen form is justified by this lesson-specific rationale: Inclusive DATE ranges cannot order two changes on one day without overlap or an invalid close-before-open interval. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
+- **Edge case:** Add one row for which `(customer_id = 1)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
 ## Exercise 4 — Detect overlapping versions
 
@@ -196,38 +181,45 @@ overlap condition. Any row can map one fact date to multiple surrogates.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Evidence of the incorrect behavior followed by a corrected result at the declared grain, with the violated invariant made visible.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-53 Exercise 4, read from `dim_customer`. Build the answer toward `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-53 Exercise 4, expected output: one row per `customer_id`. The final columns are `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`. The final order is `a.customer_id, version_a, version_b`.
+- **Independent verification:** For sql-53 Exercise 4, project `customer_id` plus the raw source columns from `dim_customer` at each join stage; record row count and distinct `customer_id`, then assert the final `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Intermediate relation check:** For sql-53 Exercise 4, start with the first relation in `dim_customer`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
+- **Clause check:** For sql-53 Exercise 4, the solution actually uses `FROM`, `JOIN ... ON`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `dim_customer`, preserve one row per `customer_id`, and finish with `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to` ordered by `a.customer_id, version_a, version_b`.
+- **Alternative/trade-off:** For sql-53 Exercise 4, the chosen form is justified by this lesson-specific rationale: The self-join compares each customer-version pair once and applies the inclusive overlap condition. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
+- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
 ## Exercise 5 — Gate unchanged reruns
 
-`IS DISTINCT FROM` compares nullable attributes safely. Only real source/current
-differences should close and insert a version; zero differences prove idempotency.
+`IS DISTINCT FROM` compares nullable attributes safely. The replay must use the
+same staged desired state that produced the new version—not the unchanged base
+table—otherwise the deliberate segment change looks like a new change again.
+
+```sql
+WITH desired_customer_state AS (
+  SELECT customer_id, full_name, country, segment
+  FROM staged_customer_change
+)
+SELECT COUNT(*) AS unchanged_rows_that_would_version
+FROM dim_customer current_version
+JOIN desired_customer_state desired USING (customer_id)
+WHERE current_version.is_current
+  AND (
+    current_version.full_name IS DISTINCT FROM desired.full_name
+    OR current_version.country IS DISTINCT FROM desired.country
+    OR current_version.segment IS DISTINCT FROM desired.segment
+  );
+```
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-53 Exercise 5, compare the current `dim_customer` row to `desired_customer_state`, which is copied from the same `staged_customer_change` used by Exercise 2.
+- **Expected result/shape:** For sql-53 Exercise 5, expected output: exactly one aggregate row, `unchanged_rows_that_would_version = 0`.
+- **Independent verification:** For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; require zero differences. Then alter one staged attribute and require exactly one difference before applying any close/insert statements.
+- **Intermediate relation check:** For sql-53 Exercise 5, prove `desired_customer_state` and the current dimension are each unique on `customer_id` before comparing attributes.
+- **Clause check:** For sql-53 Exercise 5, `IS DISTINCT FROM` compares nullable attributes, while `dc.is_current` restricts the check to the one version that a replay would consider.
+- **Alternative/trade-off:** For sql-53 Exercise 5, the chosen form is justified by this lesson-specific rationale: `IS DISTINCT FROM` compares nullable attributes safely. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
+- **Edge case:** A duplicate `customer_id` in desired state must fail a uniqueness gate before versioning; do not let the join multiply candidate changes.
 
 ## Exercise 6 — Define a same-day policy
 
@@ -236,15 +228,10 @@ They require trustworthy source effective time or sequence, not load-time guessw
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-53 Exercise 6, read from `training.customers`, `dim_customer`, and `changed_customers`. Compute `first_version`, and `ROLLBACK` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Expected result/shape:** For sql-53 Exercise 6, expected output: exactly one aggregate summary row. The final columns are `first_version`, and `ROLLBACK`.
+- **Independent verification:** For sql-53 Exercise 6, evaluate each of `first_version`, and `ROLLBACK` in a separate control `SELECT` over `training.customers`, `dim_customer`, and `changed_customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Intermediate relation check:** For sql-53 Exercise 6, select `customer_id` from `training.customers`, `dim_customer`, and `changed_customers` before adding derived columns.
+- **Clause check:** For sql-53 Exercise 6, the solution actually uses `SELECT`. Read only those operations: begin at `training.customers`, `dim_customer`, and `changed_customers`, preserve exactly one summary row, and finish with `first_version`, and `ROLLBACK`.
+- **Alternative/trade-off:** For sql-53 Exercise 6, the chosen form is justified by this lesson-specific rationale: Half-open `tstzrange` examples show how effective timestamps can order changes. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
+- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.

@@ -155,9 +155,7 @@ rng = np.random.default_rng(6102)
 null = []
 for _ in range(5_000):
     shuffled = rng.permutation(assigned)
-    null.append(
-        outcomes[shuffled == 1].mean() - outcomes[shuffled == 0].mean()
-    )
+    null.append(outcomes[shuffled == 1].mean() - outcomes[shuffled == 0].mean())
 p_value = np.mean(np.abs(null) >= abs(observed))
 print({"observed": observed, "two_sided_p": p_value})
 ```
@@ -192,26 +190,14 @@ Write an `ExperimentPlan` containing:
 
 Do this before computing outcomes.
 
-**Verify:** For task `Define the experiment before analysis`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then run the named missing/unknown/empty boundary and assert its explicit fallback or exception instead of accepting an accidental default.
-
-
-
-
-
-
+**Verify:** Define the experiment before analysis — write an ExperimentPlan containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling; do this before computing outcomes.
 
 ### 2. Complete standardized effect
 
 Use the pooled sample standard deviation. Reject groups smaller than two and
 zero pooled variance. Explain raw units and standardized units side by side.
 
-**Verify:** For task `Complete standardized effect`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** Complete standardized effect — assert the standardized-effect fixture equals the hand-computed pooled-SD value within 1e-12; groups of size <2 and zero pooled variance raise named errors, and the report includes raw-unit and standardized effects.
 
 ### 3. Bootstrap the difference
 
@@ -220,13 +206,7 @@ sort them, and select percentile endpoints. Repeat with the same seed and
 verify equality. Change the seed and expect small endpoint variation, not a
 different conclusion guaranteed by design.
 
-**Verify:** For task `Bootstrap the difference`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** Bootstrap the difference — resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints; repeat with the same seed and verify equality; change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.
 
 ### 4. Permute assignments
 
@@ -237,13 +217,7 @@ seeded Monte Carlo assignments and the plus-one p-value correction.
 State why permuting individual rows is invalid if assignment occurred by
 account or site.
 
-**Verify:** For task `Permute assignments`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Permute assignments — pool outcomes and enumerate treatment-index combinations when feasible; use a two-sided comparison to the observed absolute difference; state why permuting individual rows is invalid if assignment occurred by account or site.
 
 ### 5. Plan sample size
 
@@ -251,13 +225,7 @@ Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8.
 Explain why variance uncertainty, clustering, attrition, noncompliance, and a
 binary metric require a more specific planner.
 
-**Verify:** For task `Plan sample size`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Plan sample size — use the Normal approximation for standardized effects 0.2, 0.5, and 0.8; explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.
 
 ### 6. Control a comparison family
 
@@ -265,13 +233,7 @@ Complete `holm_adjust` for three p-values. Preserve original order and enforce
 monotonic adjusted values after sorting. Identify the family before viewing
 results; splitting an inconvenient family after analysis defeats control.
 
-**Verify:** For task `Control a comparison family`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** Control a comparison family — for the three fixture p-values, print sorted raw thresholds and adjusted values, restore original order, assert adjusted values are monotone in sorted order and within [0,1], and name the predeclared comparison family.
 
 ### 7. Check assignment and attrition
 
@@ -279,13 +241,7 @@ Compute baseline standardized difference by arm. Then remove outcomes
 selectively from one arm and explain how that affects causal credibility even
 if the remaining p-value is small.
 
-**Verify:** For task `Check assignment and attrition`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
-
+**Verify:** Check assignment and attrition — compute baseline standardized difference by arm; then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.
 
 ### 8. Simulate peeking policy
 
@@ -293,13 +249,7 @@ Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson's
 simple Bonferroni per-look split illustrates the budget. Compare it with a
 single final look and research group-sequential designs before production use.
 
-**Verify:** For task `Simulate peeking policy`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Simulate peeking policy — with seed and run count declared, estimate the false-positive rate for five alpha=.05 looks, compare with one final look and the .01 Bonferroni-per-look rule, and report Monte Carlo standard errors.
 
 ### 9. Bound the claim
 
@@ -308,13 +258,7 @@ attrition permit a causal interpretation under additional assumptions.
 Observational grouping, compromised randomization, or severe differential
 attrition returns an associational scope.
 
-**Verify:** For task `Bound the claim`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** Bound the claim — complete claim scope; randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions; observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
 
 ### Extended professional practice
 
@@ -328,13 +272,7 @@ Extend the experiment fixture with multiple rows per account. Bootstrap accounts
 
 **Progressive hint:** Sample independent assignment units with replacement and carry all of each selected account's observations into the resample.
 
-**Verify:** For task `bootstrap clustered assignments`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** bootstrap clustered assignments — extend the experiment fixture with multiple rows per account; bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.
 
 ### Exercise 11 — bootstrap a ratio metric
 
@@ -342,13 +280,7 @@ Estimate treatment lift for revenue per active user, preserving each user's nume
 
 **Progressive hint:** Define the estimand first; the two ratio formulas answer different questions. Resample complete user records.
 
-**Verify:** For task `bootstrap a ratio metric`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** bootstrap a ratio metric — estimate treatment lift for revenue per active user, preserving each user's numerator and denominator; handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
 
 ### Exercise 12 — apply covariate adjustment without leakage
 
@@ -356,13 +288,7 @@ Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment
 
 **Progressive hint:** The covariate must be measured before assignment and not affected by treatment. Center it with a documented analysis-sample mean.
 
-**Verify:** For task `apply covariate adjustment without leakage`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** apply covariate adjustment without leakage — use a pre-experiment outcome as a CUPED-style covariate; estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
 
 ### Exercise 13 — separate intention-to-treat from treatment-on-treated
 
@@ -370,13 +296,7 @@ Simulate assigned treatment with imperfect compliance. Compute the intention-to-
 
 **Progressive hint:** Random assignment protects the assignment groups, not the self-selected compliance groups.
 
-**Verify:** For task `separate intention-to-treat from treatment-on-treated`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** separate intention-to-treat from treatment-on-treated — simulate assigned treatment with imperfect compliance; compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
 
 ### Exercise 14 — perform missing-outcome sensitivity
 
@@ -384,13 +304,7 @@ Create differential attrition by arm. Report complete-case results and bounded b
 
 **Progressive hint:** Missing outcomes are not automatically zero or missing completely at random. Show how strong an assumption is needed to reverse the conclusion.
 
-**Verify:** For task `perform missing-outcome sensitivity`, run the named missing/unknown/empty boundary and assert its explicit fallback or exception instead of accepting an accidental default.
-
-
-
-
-
-
+**Verify:** perform missing-outcome sensitivity — create differential attrition by arm; report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
 
 ### Exercise 15 — simulate sequential false positives
 
@@ -398,13 +312,7 @@ Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever
 
 **Progressive hint:** Use a seeded outer simulation and record the first crossing. The simple split illustrates budgeting; it is not an optimized group-sequential design.
 
-**Verify:** For task `simulate sequential false positives`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** simulate sequential false positives — under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability; compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
 
 ### Exercise 16 — pre-specify heterogeneous effects
 
@@ -412,13 +320,7 @@ Choose two domain-motivated subgroups before analysis, estimate effects with unc
 
 **Progressive hint:** An interaction test addresses whether effects differ; significance in one subgroup and not another is not itself evidence of difference.
 
-**Verify:** For task `pre-specify heterogeneous effects`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
-
+**Verify:** pre-specify heterogeneous effects — choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family; contrast this with mining many cuts for the largest lift.
 
 ### Exercise 17 — run clustered randomization inference
 
@@ -426,13 +328,7 @@ For a site-randomized experiment, permute site assignments while keeping all row
 
 **Progressive hint:** Enumerate or sample assignments consistent with the original design, including treated-site count and any stratification.
 
-**Verify:** For task `run clustered randomization inference`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** run clustered randomization inference — for a site-randomized experiment, permute site assignments while keeping all rows within a site together; compare with invalid row-level permutation and state the sharp-null interpretation.
 
 ### Exercise 18 — produce an auditable analysis packet
 
@@ -440,13 +336,7 @@ Write a deterministic JSON/Markdown packet containing plan hash, data fingerprin
 
 **Progressive hint:** Generate machine-readable values and prose from one result object. Keep random seeds and units visible; exclude raw sensitive rows.
 
-**Verify:** For task `produce an auditable analysis packet`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
-
+**Verify:** produce an auditable analysis packet — write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.
 
 ## Self-check
 
@@ -509,10 +399,12 @@ Emphasize bootstrap and permutation resampling, experimental estimands, and caus
 - guide: `python/professional/companion-guides/py_stats_01_resampling_experiments.md`
 - learner artifact: `python/professional/lessons/py_stats_01_resampling_experiments.py`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-32`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

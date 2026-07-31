@@ -4,42 +4,42 @@ Professional learner deep dive (python-lang-01)
 ------------------------------------------------
 
 Mental model:
-Type hints describe contracts for static tools and readers; they do not
-automatically validate runtime data. A Protocol is structural: a class
-satisfies it by providing required members, without inheritance.
-Covariance is safe for values a container only produces; mutable
-read/write containers are generally invariant.
-
-Python syntax such as iteration, context management, attribute access,
-and `super()` is powered by data-model protocols. Implementing these
-hooks means honoring their full lifecycle: `StopIteration`, exception
-propagation and cleanup, descriptor class/instance access, and
-cooperative method-resolution order.
+Type hints describe contracts for static tools and readers; they do not automatically validate
+runtime data. A Protocol is structural: a class satisfies it by providing required members,
+without inheritance. Covariance is safe for values a container only produces; mutable read/write
+containers are generally invariant.  Python syntax such as iteration, context management,
+attribute access, and `super()` is powered by data-model protocols. Implementing these hooks
+means honoring their full lifecycle: `StopIteration`, exception propagation and cleanup,
+descriptor class/instance access, and cooperative method-resolution order.
 
 API/boundary anatomy:
-* `Protocol` + `TypeVar`: expresses the smallest structural interface and its variance from producer/consumer behavior.
-* `@overload` signatures + one implementation: gives static callers precise return types while runtime code still validates the discriminant.
-* `__iter__` / `__next__` / `__enter__` / `__exit__`: participates in Python-managed lifecycle and must honor exhaustion, cleanup, and exception rules.
+* `Protocol` + `TypeVar`: expresses the smallest structural interface and its variance from
+  producer/consumer behavior.
+* `@overload` signatures + one implementation: gives static callers precise return types while
+  runtime code still validates the discriminant.
+* `__iter__` / `__next__` / `__enter__` / `__exit__`: participates in Python-managed lifecycle
+  and must honor exhaustion, cleanup, and exception rules.
 
 Micro-example A — show structural compatibility without inheritance::
 
     from typing import Protocol
-    
+
     class Named(Protocol):
         @property
         def name(self) -> str: ...
-    
+
     class PlainRecord:
         def __init__(self, name):
             self.name = name
-    
+
     def label(value: Named) -> str:
         return value.name.upper()
-    
+
     print(label(PlainRecord("ada")))
     assert label(PlainRecord("ada")) == "ADA"
 
-Expected: `PlainRecord` never inherits from `Named`; static structural matching uses its available member.
+Expected: `PlainRecord` never inherits from `Named`; static structural matching uses its
+          available member.
 
 Micro-example B — honor iterator exhaustion and partial batches::
 
@@ -53,7 +53,8 @@ Micro-example B — honor iterator exhaustion and partial batches::
 
 Expected: The final partial batch is a valid value; only the following call signals exhaustion.
 
-Debugging rule: Run mypy/pyright on intended and intentionally invalid uses, then separately test runtime boundary validation and every data-model lifecycle edge.
+Debugging rule: Run mypy/pyright on intended and intentionally invalid uses, then separately
+                test runtime boundary validation and every data-model lifecycle edge.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

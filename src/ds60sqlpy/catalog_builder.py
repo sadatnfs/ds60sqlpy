@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ds60sqlpy.catalog import TRACK_ORDER, find_repo_root
+from ds60sqlpy.catalog import catalog_order_key, find_repo_root
 
 DAY_PATTERN = re.compile(r"^day(?P<day>\d{2})_(?P<slug>.+)$")
 SEABORN_CACHE_DAYS = {17, 18, 19, 22, 24, 25, 26, 28, 45, 51, 56}
@@ -48,10 +48,10 @@ PROFESSIONAL_LESSON_SPECS: tuple[dict[str, Any], ...] = (
         "track": "sql",
         "day": -1,
         "title": "Relational Design, DDL, and Integrity Constraints",
-        "level": "foundation",
-        "phase": "Relational foundations",
+        "level": "intermediate",
+        "phase": "Relational engineering",
         "estimated_minutes": 150,
-        "prerequisites": [],
+        "prerequisites": ["sql-15"],
         "lesson_path": "sql/professional/lessons/sql_found_01_relational_design.sql",
         "guide_path": "sql/professional/companion-guides/sql_found_01_relational_design.md",
         "solution_paths": [
@@ -67,9 +67,9 @@ PROFESSIONAL_LESSON_SPECS: tuple[dict[str, Any], ...] = (
         "day": 0,
         "title": "Versioned Schema Migrations and Safe Evolution",
         "level": "intermediate",
-        "phase": "Relational foundations",
+        "phase": "Relational engineering",
         "estimated_minutes": 180,
-        "prerequisites": ["sql-found-01"],
+        "prerequisites": ["sql-found-01", "sql-39"],
         "lesson_path": "sql/professional/lessons/sql_found_02_versioned_migrations.sql",
         "guide_path": "sql/professional/companion-guides/sql_found_02_versioned_migrations.md",
         "solution_paths": [
@@ -686,7 +686,15 @@ def _sql_lessons(root: Path) -> list[dict[str, Any]]:
                 "level": level,
                 "phase": phase,
                 "estimated_minutes": minutes,
-                "prerequisites": ["sql-found-02"] if day == 1 else [f"sql-{day - 1:02d}"],
+                "prerequisites": (
+                    []
+                    if day == 1
+                    else ["sql-found-01"]
+                    if day == 16
+                    else ["sql-found-02"]
+                    if day == 40
+                    else [f"sql-{day - 1:02d}"]
+                ),
                 "lesson_path": script.relative_to(root).as_posix(),
                 "guide_path": (guide_dir / f"{script.stem}.md").relative_to(root).as_posix(),
                 "solution_paths": solution_paths,
@@ -775,7 +783,11 @@ def build_catalog(repo_root: Path | None = None) -> dict[str, Any]:
         },
         "lessons": sorted(
             lessons,
-            key=lambda item: (TRACK_ORDER[item["track"]], item["day"]),
+            key=lambda item: catalog_order_key(
+                item["track"],
+                item["day"],
+                item["id"],
+            ),
         ),
     }
 

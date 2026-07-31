@@ -162,6 +162,7 @@ def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_pytho
         return "threads"
     return "processes-or-native-vectorization"
 
+
 assert choose_execution(waits_nonblocking=True) == "asyncio"
 assert choose_execution(cpu_python=True) == "processes-or-native-vectorization"
 ```
@@ -174,6 +175,7 @@ assert choose_execution(cpu_python=True) == "processes-or-native-vectorization"
 
 ```python
 import asyncio
+
 
 async def demo():
     gate = asyncio.Semaphore(2)
@@ -191,6 +193,7 @@ async def demo():
 
     results = await asyncio.gather(*(work(i) for i in range(6)))
     return results, peak
+
 
 results, peak = asyncio.run(demo())
 print(results, peak)
@@ -226,70 +229,28 @@ write one sentence explaining the choice:
 Reject labels that contradict each other. An async function that performs
 computation without `await` is still CPU work and blocks the event loop.
 
-**Verify:** For task `choose a model`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** choose a model — implement choose execution model in the learner artifact; for each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations; reject labels that contradict each other.
 
 ### Exercise 2 — build a bounded async map
 
 Implement `bounded_map` with:
 
-1. `asyncio.Queue(maxsize=queue_capacity)`,
+- `asyncio.Queue(maxsize=queue_capacity)`,
 
-**Verify:** For task `asyncio.Queue(maxsize=queuecapacity),`, measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
+- one producer,
 
+- a fixed number of consumers,
 
+- indexed items so results retain input order,
 
+- a unique sentinel per consumer, and
 
-
-2. one producer,
-
-**Verify:** For task `one producer,`, demonstrate the concrete requirement “2. one producer,” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-3. a fixed number of consumers,
-
-**Verify:** For task `a fixed number of consumers,`, demonstrate the concrete requirement “3. a fixed number of consumers,” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-4. indexed items so results retain input order,
-
-**Verify:** For task `indexed items so results retain input order,`, demonstrate the concrete requirement “4. indexed items so results retain input order,” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-5. a unique sentinel per consumer, and
-
-**Verify:** For task `a unique sentinel per consumer, and`, demonstrate the concrete requirement “5. a unique sentinel per consumer, and” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-6. `asyncio.TaskGroup`.
+- `asyncio.TaskGroup`.
 
 Place `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch
 `CancelledError` unless cleanup requires it; if caught, re-raise it.
 
-**Verify:** For task `asyncio.TaskGroup`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
-
+**Verify:** build a bounded async map — on ten indexed inputs with queue capacity 2 and two consumers, assert output order equals input order, peak queued/active work stays bounded, queue acknowledgements reach zero, and an injected worker exception cancels siblings cleanly.
 
 ### Exercise 3 — add per-item timeouts
 
@@ -299,13 +260,7 @@ block returns the active count to zero.
 
 Prediction: what happens to sibling consumers when one item times out?
 
-**Verify:** For task `add per-item timeouts`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
-
+**Verify:** add per-item timeouts — test one worker slower than the limit; inspect the ExceptionGroup from TaskGroup, and verify a finally block returns the active count to zero; prediction: what happens to sibling consumers when one item times out?.
 
 ### Exercise 4 — adapt blocking I/O
 
@@ -316,13 +271,7 @@ ordered results rather than treating speed as the correctness assertion.
 Explain why a thread pool requires a deliberate `max_workers`, even if the
 remote service could theoretically accept more requests.
 
-**Verify:** For task `adapt blocking I/O`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** adapt blocking I/O — use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.
 
 ### Exercise 5 — isolate CPU work
 
@@ -355,13 +304,7 @@ macOS/Linux:
 The workload is intentionally small for safety; process startup may make it
 slower than sequential execution. That observation is part of the lesson.
 
-**Verify:** For task `isolate CPU work`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
-
+**Verify:** isolate CPU work — make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.
 
 ### Exercise 6 — reason about shared state
 
@@ -374,13 +317,7 @@ List three repairs:
 - a lock protects the complete read/modify/write unit, or
 - an external system performs an atomic update.
 
-**Verify:** For task `reason about shared state`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** reason about shared state — use barriers to make two workers read counter=0 before either writes; assert the lost-update result is 1, then protect the same two increments and assert the serialized result is 2 without timing sleeps.
 
 ### Extended professional practice
 
@@ -394,13 +331,7 @@ Cancel `bounded_map` while workers are active. Instrument acquired resources and
 
 **Progressive hint:** Put cleanup in `finally`, do not suppress `CancelledError`, and use TaskGroup as the child ownership boundary.
 
-**Verify:** For task `prove cancellation cleanup`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** prove cancellation cleanup — cancel bounded map while workers are active; instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.
 
 ### Exercise 8 — inspect structured failures
 
@@ -408,13 +339,7 @@ Run multiple workers that fail with different typed exceptions. Use `except*` to
 
 **Progressive hint:** ExceptionGroup is a tree. Match by exception type and re-raise what the current layer cannot translate.
 
-**Verify:** For task `inspect structured failures`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** inspect structured failures — run multiple workers that fail with different typed exceptions; use except to handle one expected category while preserving unexpected failures and their original tracebacks.
 
 ### Exercise 9 — stream a backpressured producer
 
@@ -422,13 +347,7 @@ Adapt `bounded_map` from a finite Sequence to an async iterator whose length is 
 
 **Progressive hint:** Assign increasing indexes at production, use a bounded queue, and emit completed results through a second bounded channel.
 
-**Verify:** For task `stream a backpressured producer`, measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure; then run the named missing/unknown/empty boundary and assert its explicit fallback or exception instead of accepting an accidental default.
-
-
-
-
-
-
+**Verify:** stream a backpressured producer — adapt bounded map from a finite Sequence to an async iterator whose length is unknown; preserve output order without retaining every input or creating one task per item.
 
 ### Exercise 10 — trace context across boundaries
 
@@ -436,13 +355,7 @@ Set a request ID in `contextvars`, then observe propagation through an async tas
 
 **Progressive hint:** Async tasks and `to_thread` copy context by design; arbitrary executors and processes need deliberate value transfer.
 
-**Verify:** For task `trace context across boundaries`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
-
+**Verify:** trace context across boundaries — set a request ID in contextvars, then observe propagation through an async task, asyncio.to thread, a raw thread-pool submission, and a spawned process; make any explicit propagation visible.
 
 ### Exercise 11 — design graceful executor shutdown
 
@@ -450,13 +363,7 @@ Own a thread or process pool through a context manager. Stop accepting new work,
 
 **Progressive hint:** Lifecycle ownership belongs to the component that created the executor. Differentiate pending work from already-running calls.
 
-**Verify:** For task `design graceful executor shutdown`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** design graceful executor shutdown — own a thread or process pool through a context manager; stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.
 
 ### Exercise 12 — make an evidence-based model decision
 
@@ -464,13 +371,7 @@ Benchmark sequential, bounded asyncio/threads, and spawned processes on represen
 
 **Progressive hint:** Use generous repeated measurements and interpret each model only for the workload it matches. A tiny workload can legitimately stay sequential.
 
-**Verify:** For task `make an evidence-based model decision`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** make an evidence-based model decision — benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures; record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.
 
 ## Self-check
 
@@ -539,10 +440,12 @@ Emphasize choosing async, threads, or processes and bounding concurrent work. Us
 - guide: `python/professional/companion-guides/py_pro_02_concurrency_parallelism.md`
 - learner artifact: `python/professional/lessons/py_pro_02_concurrency_parallelism.py`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-15`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

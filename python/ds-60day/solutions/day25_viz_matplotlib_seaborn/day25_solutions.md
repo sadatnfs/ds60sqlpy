@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**static chart choice, figure/axes ownership, labeling, and reproducible export**.
+These worked answers demonstrate **static chart choice, figure/axes ownership, labeling, and reproducible export**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 A visualization maps data fields to visual encodings such as position,
 length, color, shape, or size. Choose a chart from the analytical
@@ -28,236 +27,164 @@ and never encode meaning through color alone.
 - **distribution:** the frequency and shape of a variable's values.
 - **accessibility:** design that remains interpretable across vision and interaction needs.
 
-### Reference pattern 1 — Build a labeled distribution plot
+### How to compare an answer
 
-Constructed data keeps the lesson offline and deterministic.
+For this lesson's **static chart choice, figure/axes ownership, labeling, and reproducible export** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
 
-```python
-import matplotlib.pyplot as plt
+## Exercises 1–2 — Worked answers
 
-durations = [2, 3, 3, 4, 5, 8, 13]
-fig, ax = plt.subplots(figsize=(5, 3))
-ax.hist(durations, bins=[0, 3, 6, 9, 12, 15], edgecolor="black")
-ax.set(title="Task duration distribution", xlabel="Duration (minutes)", ylabel="Tasks")
-fig.tight_layout()
-(type(fig).__name__, type(ax).__name__, len(ax.patches))
-```
-
-**Expected observation:** The tuple identifies `Figure`, `Axes`, and five histogram bins. The displayed chart has units on both axes.
-
-### Reference pattern 2 — Make category ordering explicit
-
-Bar positions should reflect the intended comparison, not accidental input order.
-
-```python
-categories = ["bronze", "silver", "gold"]
-counts = [8, 5, 2]
-fig2, ax2 = plt.subplots(figsize=(5, 3))
-bars = ax2.bar(categories, counts, color=["0.45", "0.65", "0.85"])
-ax2.set(title="Accounts by tier", xlabel="Tier", ylabel="Accounts")
-ax2.bar_label(bars)
-fig2.tight_layout()
-[bar.get_height() for bar in bars]
-```
-
-**Expected observation:** `[8, 5, 2]`. Direct value labels make the quantities readable without relying on color.
-
-## Exercise-by-exercise reasoning map
-
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
+### Exercise 1 — worked answer
 
 **Learner contract:** Recreate two Day 24 plots and improve their communication. **For each:** write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. **Expected behavior:** a reader can state the intended comparison without reading surrounding code. **Verify:** reconcile plotted counts/summary values to the source DataFrame.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies static chart choice, figure/axes ownership, labeling, and reproducible export.
+**Reasoning:** Implement this exact contract as written: Recreate two Day 24 plots and improve their communication. For each: write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. Expected behavior: a reader can state the intended comparison without reading surrounding code. Keep the prompt's named data and constraints visible in the code, then establish this specific result: reconcile plotted counts/summary values to the source DataFrame. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
 
-**Alternative:** Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.
+source = pd.DataFrame(
+    {
+        "duration_minutes": [2, 3, 3, 4, 5, 8],
+        "segment": ["new", "new", "returning", "new", "new", "returning"],
+    }
+)
+values = source["duration_minutes"]
+category_counts = (
+    source["segment"].value_counts().reindex(["new", "returning"])
+)
 
-**Edge case:** Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.
+distribution_fig, distribution_ax = plt.subplots(figsize=(5, 3))
+distribution_ax.hist(values, bins=4, edgecolor="black")
+distribution_ax.set(
+    title="Task duration distribution",
+    xlabel="Duration (minutes)",
+    ylabel="Tasks (n)",
+)
 
-**Solution evidence to inspect:** reconcile plotted counts/summary values to the source DataFrame.
+category_fig, category_ax = plt.subplots(figsize=(5, 3))
+bars = category_ax.bar(
+    category_counts.index,
+    category_counts.values,
+    color="0.75",
+    edgecolor="black",
+    hatch=["//", ".."],
+)
+category_ax.bar_label(bars)
+category_ax.set(
+    title="Tasks by account segment",
+    xlabel="Account segment",
+    ylabel="Tasks (n)",
+)
+distribution_fig.tight_layout()
+category_fig.tight_layout()
 
-### Exercise 2 — reasoning, alternatives, and proof
+histogram_total = sum(patch.get_height() for patch in distribution_ax.patches)
+assert histogram_total == source["duration_minutes"].notna().sum()
+assert [bar.get_height() for bar in bars] == category_counts.tolist()
+```
+
+The operations reader can now answer two written questions: “How are
+task durations distributed?” and “How many tasks belong to each
+segment?” Units, denominators, labels, outlines, hatches, and deliberate
+category order make both comparisons readable without color alone.
+
+**Verification evidence:** reconcile plotted counts/summary values to the source DataFrame.
+
+### Exercise 2 — worked answer
 
 **Learner contract:** Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. **Constraints:** use `Path`, create parents, call `fig.tight_layout()`, and save through the figure before display/close. **Verify:** files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies static chart choice, figure/axes ownership, labeling, and reproducible export.
+**Reasoning:** Implement this exact contract as written: Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. Constraints: use `Path`, create parents, call `fig.tight_layout()`, and save through the figure before display/close. Keep the prompt's named data and constraints visible in the code, then establish this specific result: files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+from pathlib import Path
+from PIL import Image
 
-**Alternative:** Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.
+artifact_dir = Path("artifacts/day25")
+artifact_dir.mkdir(parents=True, exist_ok=True)
+exports = [
+    (
+        distribution_fig,
+        artifact_dir / "task-duration-distribution.png",
+        "Task duration distribution",
+    ),
+    (
+        category_fig,
+        artifact_dir / "tasks-by-segment.png",
+        "Tasks by account segment",
+    ),
+]
+for figure, destination, expected_title in exports:
+    figure.tight_layout()
+    assert figure.axes[0].get_title() == expected_title
+    figure.savefig(destination, dpi=150, bbox_inches="tight")
+    assert destination.exists() and destination.stat().st_size > 0
+    with Image.open(destination) as image:
+        image.verify()
+    plt.close(figure)
+```
 
-**Edge case:** Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.
+Both figures use the same 5-by-3-inch dimensions, 150 DPI, naming
+convention, and ignored artifact directory. Titles and axes are checked
+before saving; Pillow then proves each nonempty PNG can be reopened.
 
-**Solution evidence to inspect:** files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.
+**Verification evidence:** files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.
 
-### Exercise 3 — reasoning, alternatives, and proof
+## Exercises 3–7 — Expanded mastery answers
+
+### Exercise 3 — answer contract
 
 **Learner contract:** **Prediction:** Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. **Progressive hint:** Match the mark and axes to the analytical question. **Verify:** Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.
 
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying static chart choice, figure/axes ownership, labeling, and reproducible export.
+**Reasoning:** Predict this named state change before running it: Prediction: Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. Progressive hint: Match the mark and axes to the analytical question. Then compare the prediction with this proof target: Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason. This makes static chart choice, figure/axes ownership, labeling, and reproducible export observable instead of relying on intuition.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.
 
-**Alternative:** Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.
-
-**Edge case:** Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.
-
-**Solution evidence to inspect:** Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.
-
-### Exercise 4 — reasoning, alternatives, and proof
+### Exercise 4 — answer contract
 
 **Learner contract:** **Tracing:** Trace figure and axes ownership when using `fig, ax = plt.subplots()` and explain where title, labels, and save operations belong. **Progressive hint:** The figure owns the canvas; the axes owns one plot region. **Verify:** Assert the title/x/y labels live on `ax`, the canvas saves through `fig`, and the expected number of axes/marks exists.
 
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the static chart choice, figure/axes ownership, labeling, and reproducible export model is visible.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace figure and axes ownership when using `fig, ax = plt.subplots()` and explain where title, labels, and save operations belong. Progressive hint: The figure owns the canvas; the axes owns one plot region. Record the named value, shape, label, or iterator position needed to establish: Assert the title/x/y labels live on `ax`, the canvas saves through `fig`, and the expected number of axes/marks exists. The trace exposes static chart choice, figure/axes ownership, labeling, and reproducible export directly.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert the title/x/y labels live on `ax`, the canvas saves through `fig`, and the expected number of axes/marks exists.
 
-**Alternative:** Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.
-
-**Edge case:** Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.
-
-**Solution evidence to inspect:** Assert the title/x/y labels live on `ax`, the canvas saves through `fig`, and the expected number of axes/marks exists.
-
-### Exercise 5 — reasoning, alternatives, and proof
+### Exercise 5 — answer contract
 
 **Learner contract:** **Implementation:** Implement a reusable distribution function accepting an axes object, units, and title without calling `show`. **Progressive hint:** Returning the axes makes composition and testing easier. **Verify:** Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global `show` is called.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies static chart choice, figure/axes ownership, labeling, and reproducible export.
+**Reasoning:** Implement this exact contract as written: Implementation: Implement a reusable distribution function accepting an axes object, units, and title without calling `show`. Progressive hint: Returning the axes makes composition and testing easier. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global `show` is called. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global `show` is called.
 
-**Alternative:** Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.
-
-**Edge case:** Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.
-
-**Solution evidence to inspect:** Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global `show` is called.
-
-### Exercise 6 — reasoning, alternatives, and proof
+### Exercise 6 — answer contract
 
 **Learner contract:** **Debugging:** Repair an export that calls `show()` or closes the figure before `savefig`, producing a blank file in some environments. **Progressive hint:** Save through the figure before display/close. **Verify:** Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in static chart choice, figure/axes ownership, labeling, and reproducible export.
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair an export that calls `show()` or closes the figure before `savefig`, producing a blank file in some environments. Progressive hint: Save through the figure before display/close. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order. The diagnosis depends on static chart choice, figure/axes ownership, labeling, and reproducible export.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.
 
-**Alternative:** Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.
-
-**Edge case:** Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.
-
-**Solution evidence to inspect:** Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.
-
-### Exercise 7 — reasoning, alternatives, and proof
+### Exercise 7 — answer contract
 
 **Learner contract:** **Edge case and explanation:** Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. **Progressive hint:** Do not communicate meaning through color alone. **Verify:** Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.
 
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from static chart choice, figure/axes ownership, labeling, and reproducible export.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. Progressive hint: Do not communicate meaning through color alone. Values below, at, and above the named boundary must produce the evidence Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible. Those cases show how static chart choice, figure/axes ownership, labeling, and reproducible export behaves at its edge.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.
-
-**Edge case:** Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.
-
-**Solution evidence to inspect:** Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-We recreate EDA visuals with better labeling and export figures with a consistent style.
-
-Contents
-- Exercise 1: Recreate two plots with improved labeling
-- Exercise 2: Export figures under the ignored course artifact directory
-
----
-
-Setup
-```python
-import pathlib
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-sns.set_theme(context='notebook', style='whitegrid')
-FIG_DIR = pathlib.Path('artifacts/day25/figures')
-FIG_DIR.mkdir(parents=True, exist_ok=True)
-```
-
-Exercise 1 — Improved labeling
-```python
-df = sns.load_dataset('tips')
-
-# Histogram
-fig, ax = plt.subplots(figsize=(6,4))
-sns.histplot(data=df, x='total_bill', kde=True, ax=ax)
-ax.set(title='Distribution of Total Bill', xlabel='Total bill ($)', ylabel='Count')
-fig.tight_layout(); fig.savefig(FIG_DIR/'total_bill_hist.png', dpi=150)
-
-# Scatter with trend
-fig, ax = plt.subplots(figsize=(6,4))
-sns.regplot(data=df, x='total_bill', y='tip', scatter_kws={'alpha':0.4}, ax=ax)
-ax.set(title='Tip vs Total Bill', xlabel='Total bill ($)', ylabel='Tip ($)')
-fig.tight_layout(); fig.savefig(FIG_DIR/'tip_vs_total_bill.png', dpi=150)
-```
-
-Exercise 2 — Consistent style export
-```python
-plt.style.use('seaborn-v0_8-whitegrid')
-for ext in ['png','pdf']:
-    (FIG_DIR/'total_bill_hist').with_suffix('.'+ext)
-    (FIG_DIR/'tip_vs_total_bill').with_suffix('.'+ext)
-```
-Notes
-- Use tight_layout to avoid cut labels
-- Save both PNG and PDF for web and print
-
----
+**Evidence to locate in the grouped implementation:** Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.
 
 ## Expanded mastery lab solutions
 
 Choose a chart from the question and data types, then make units, denominators, ordering, uncertainty, and accessibility explicit.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Chart choice and object ownership
+### Shared implementation for Exercises 3–4 — Chart choice and object ownership
 
 Use bars for category comparisons, histograms for distributions, lines for
 ordered time trends, and scatterplots for relationships between two numeric
 variables. `Axes` owns labels and marks; `Figure` owns layout and saving.
 
-### Practices 3–5 — Reusable, testable plotting
+### Shared implementation for Exercises 5–7 — Reusable, testable plotting
 
 ```python
 from pathlib import Path

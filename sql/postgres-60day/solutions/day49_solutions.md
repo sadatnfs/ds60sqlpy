@@ -62,66 +62,88 @@ model. See [`day49_solutions.sql`](day49_solutions.sql).
 ```sql
 SET search_path TO training, public;
 
-WITH monthly AS (
+WITH monthly_observed AS (
   SELECT date_trunc('month', order_date)::date AS month,
          SUM(total_amount) AS revenue
   FROM orders
   GROUP BY date_trunc('month', order_date)
-), forecasts AS (
+), bounds AS (
+  SELECT MIN(month) AS first_month, MAX(month) AS last_month
+  FROM monthly_observed
+), month_spine AS (
+  SELECT generate_series(
+           first_month, last_month, interval '1 month'
+         )::date AS month
+  FROM bounds
+), monthly_complete AS (
+  SELECT spine.month,
+         COALESCE(observed.revenue, 0::numeric) AS revenue,
+         observed.month IS NOT NULL AS had_source_rows
+  FROM month_spine spine
+  LEFT JOIN monthly_observed observed USING (month)
+), forecast_rows AS (
   SELECT month,
          revenue,
          AVG(revenue) OVER (
            ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING
          ) AS ma6_forecast,
+         COUNT(revenue) OVER (
+           ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING
+         ) AS ma6_history_rows,
          AVG(revenue) OVER (
            ORDER BY month ROWS BETWEEN 12 PRECEDING AND 1 PRECEDING
          ) AS ma12_forecast,
+         COUNT(revenue) OVER (
+           ORDER BY month ROWS BETWEEN 12 PRECEDING AND 1 PRECEDING
+         ) AS ma12_history_rows,
          LAG(revenue, 12) OVER (ORDER BY month) AS seasonal_naive
-  FROM monthly
-), scored AS (
-  SELECT *,
-         ABS(revenue - ma6_forecast) / NULLIF(revenue, 0) AS ape_ma6,
-         ABS(revenue - ma12_forecast) / NULLIF(revenue, 0) AS ape_ma12,
-         ABS(revenue - seasonal_naive) / NULLIF(revenue, 0) AS ape_seasonal,
+  FROM monthly_complete
+), common_scoring_rows AS (
+  SELECT month,
+         revenue,
+         ma6_forecast,
+         ma12_forecast,
+         seasonal_naive,
          0.5 * seasonal_naive + 0.5 * ma6_forecast AS blended_forecast
-  FROM forecasts
+  FROM forecast_rows
+  WHERE ma6_history_rows = 6
+    AND ma12_history_rows = 12
+    AND seasonal_naive IS NOT NULL
+), model_scores AS (
+  SELECT rows.month,
+         rows.revenue,
+         model.model,
+         model.forecast
+  FROM common_scoring_rows rows
+  CROSS JOIN LATERAL (
+    VALUES
+      ('MA(6)'::text, rows.ma6_forecast),
+      ('MA(12)', rows.ma12_forecast),
+      ('seasonal naive', rows.seasonal_naive),
+      ('50% seasonal + 50% MA(6)', rows.blended_forecast)
+  ) AS model(model, forecast)
 )
-SELECT 'MA(6)' AS model, ROUND(AVG(ape_ma6), 4) AS mape
-FROM scored
-WHERE ma6_forecast IS NOT NULL
-UNION ALL
-SELECT 'MA(12)', ROUND(AVG(ape_ma12), 4)
-FROM scored
-WHERE ma12_forecast IS NOT NULL
-UNION ALL
-SELECT 'seasonal naive', ROUND(AVG(ape_seasonal), 4)
-FROM scored
-WHERE seasonal_naive IS NOT NULL
-UNION ALL
-SELECT '50% seasonal + 50% MA(6)',
-       ROUND(AVG(ABS(revenue - blended_forecast) / NULLIF(revenue, 0)), 4)
-FROM scored
-WHERE blended_forecast IS NOT NULL
+SELECT model,
+       COUNT(*) FILTER (WHERE revenue <> 0) AS scored_rows,
+       COUNT(*) FILTER (WHERE revenue = 0) AS zero_actual_rows,
+       ROUND(AVG(ABS(revenue - forecast) / NULLIF(revenue, 0)), 4) AS mape
+FROM model_scores
+GROUP BY model
 ORDER BY model;
 ```
 
-Expected shape: four model rows. Lower MAPE is better on the months each model
-can score.
+Expected shape: four model rows scored on the identical complete-history month
+set. `scored_rows` and `zero_actual_rows` make the MAPE denominator explicit.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-49 Exercise 1, aggregate `orders` by observed month, left-join to `month_spine`, compute full-window history counts, and reshape four forecasts over `common_scoring_rows`.
+- **Expected result/shape:** For sql-49 Exercise 1, expected output: exactly four rows keyed by `model`, with `scored_rows`, `zero_actual_rows`, and `mape`, ordered by `model`.
+- **Independent verification:** For sql-49 Exercise 1, require `ma6_history_rows = 6`, `ma12_history_rows = 12`, and a non-NULL twelve-month seasonal value before any model is scored. All four models must have identical eligible months and equal `scored_rows`; independently recompute each MAPE.
+- **Intermediate relation check:** For sql-49 Exercise 1, inspect `month_spine`, `monthly_complete`, `forecast_rows`, and `common_scoring_rows`; prove no calendar month is missing and warm-up rows are excluded.
+- **Clause check:** For sql-49 Exercise 1, full `ROWS` frames provide prior observations, the counts reject partial warm-up frames, `LAG(..., 12)` now means twelve calendar months because the spine is dense, and the lateral `VALUES` block establishes model grain.
+- **Alternative/trade-off:** For sql-49 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: four model rows. Evaluate another form against the concrete expected result (four model rows. Lower MAPE is better on the months each model can score) and the verification above.
+- **Edge case:** Remove an observed month; `monthly_complete` must retain it as zero revenue, and all four models must still use the same complete-history scoring months.
 
 ## Exercise 2 — Month-by-month blended forecast
 
@@ -154,18 +176,13 @@ ORDER BY month DESC;
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-49 Exercise 2, read from `orders`. Build the answer toward `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast`; keep `month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-49 Exercise 2, expected output: one row per `month`. The final columns are `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast`. The final order is `month DESC`.
+- **Independent verification:** For sql-49 Exercise 2, run an anti-check that counts rows where NOT ((seasonal_naive IS NOT NULL)); require unique `month` where the expected grain is one row per key and confirm the projected `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast` against `orders`. Add one row for which `(seasonal_naive IS NOT NULL)` is true and one for which it is false; verify only the matching `month` value is returned.
+- **Intermediate relation check:** For sql-49 Exercise 2, run `monthly`, and `forecasted` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-49 Exercise 2, the solution actually uses `WITH`, `FROM`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month`, and finish with `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast` ordered by `month DESC`.
+- **Alternative/trade-off:** For sql-49 Exercise 2, the chosen form is justified by this lesson-specific rationale: Produce a 50/50 seasonal/MA(6) forecast.. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
+- **Edge case:** Add one row for which `(seasonal_naive IS NOT NULL)` is true and one for which it is false; verify only the matching `month` value is returned.
 
 ## Reasoning, safety, and pitfalls
 
@@ -185,18 +202,13 @@ rows and stops at `1 PRECEDING`. Side-by-side output makes the bias visible.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-49 Exercise 3, read from `orders`. Build the answer toward `month`, `revenue`, `leaky_ma6`, and `honest_ma6`; keep `month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-49 Exercise 3, expected output: one row per `month`. The final columns are `month`, `revenue`, `leaky_ma6`, and `honest_ma6`. The final order is `month`.
+- **Independent verification:** For sql-49 Exercise 3, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, `leaky_ma6`, and `honest_ma6`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-49 Exercise 3, run `monthly` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-49 Exercise 3, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month`, and finish with `month`, `revenue`, `leaky_ma6`, and `honest_ma6` ordered by `month`.
+- **Alternative/trade-off:** For sql-49 Exercise 3, the chosen form is justified by this lesson-specific rationale: The leaky frame includes `CURRENT ROW`; the honest MA(6) frame uses six preceding rows and stops at `1 PRECEDING`. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 4 — Build a monthly spine
 
@@ -205,18 +217,13 @@ The separate source-present flag distinguishes no row from a chosen zero policy.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-49 Exercise 4, read from `orders`. Build the answer toward `month`, `revenue`, `had_source_rows`, and `seasonal_forecast`; keep `month` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-49 Exercise 4, expected output: one row per calendar month before the 12-row lag. The final columns are `month`, `revenue`, `had_source_rows`, and `seasonal_forecast`. The final order is `month`.
+- **Independent verification:** For sql-49 Exercise 4, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, and `had_source_rows`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-49 Exercise 4, run `bounds`, `spine`, `actual`, and `complete` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
+- **Clause check:** For sql-49 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month`, and finish with `month`, `revenue`, `had_source_rows`, and `seasonal_forecast` ordered by `month`.
+- **Alternative/trade-off:** For sql-49 Exercise 4, the chosen form is justified by this lesson-specific rationale: `generate_series` establishes one row per calendar month before the 12-row lag. Evaluate another form against the concrete expected result (one row per calendar month before the 12-row lag) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 5 — Report the MAPE denominator
 
@@ -225,18 +232,13 @@ both scored and excluded observations. Never publish MAPE without that context.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-49 Exercise 5, read from `toy`. Build the answer toward `mape`, `scored_rows`, and `excluded_zero_actuals`; keep `mape` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-49 Exercise 5, expected output: one row per `mape`. The final columns are `mape`, `scored_rows`, and `excluded_zero_actuals`.
+- **Independent verification:** For sql-49 Exercise 5, reselect the returned keys directly from the source; require unique `mape` where the expected grain is one row per key and confirm the projected `mape`, `scored_rows`, and `excluded_zero_actuals` against `toy`. Add one source row with a new `mape`; verify the result gains exactly one row carrying that `mape` value.
+- **Intermediate relation check:** For sql-49 Exercise 5, inspect the source keys that survive `WHERE`.
+- **Clause check:** For sql-49 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `toy`, preserve one row per `mape`, and finish with `mape`, `scored_rows`, and `excluded_zero_actuals`.
+- **Alternative/trade-off:** For sql-49 Exercise 5, the chosen form is justified by this lesson-specific rationale: `NULLIF(actual, 0)` excludes undefined percentage errors, and FILTER counts both scored and excluded observations. Evaluate another form against the concrete expected result (one row per `mape`) and the verification above.
+- **Edge case:** Add one source row with a new `mape`; verify the result gains exactly one row carrying that `mape` value.
 
 ## Exercise 6 — Compare MAE and MAPE
 
@@ -245,15 +247,10 @@ MAPE can be dominated by a modest miss on a very small actual.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A written prediction plus the actual query/plan output, including the compared row counts, keys, measures, or SQLSTATE named by the prompt.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-49 Exercise 6, read from `toy`. Build the answer toward `mae`, and `mape`; keep `mae` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-49 Exercise 6, expected output: one row per `mae`. The final columns are `mae`, and `mape`.
+- **Independent verification:** For sql-49 Exercise 6, reselect the returned keys directly from the source; require unique `mae` where the expected grain is one row per key and confirm the projected `mae`, and `mape` against `toy`. Add one source row with a new `mae`; verify the result gains exactly one row carrying that `mae` value.
+- **Intermediate relation check:** For sql-49 Exercise 6, select `mae` from `toy` before adding derived columns.
+- **Clause check:** For sql-49 Exercise 6, the solution actually uses `WITH`, `FROM`, and `SELECT`. Read only those operations: begin at `toy`, preserve one row per `mae`, and finish with `mae`, and `mape`.
+- **Alternative/trade-off:** For sql-49 Exercise 6, the chosen form is justified by this lesson-specific rationale: The deterministic fixture shows that MAE reflects currency-scale error while MAPE can be dominated by a modest miss on a very small actual. Evaluate another form against the concrete expected result (one row per `mae`) and the verification above.
+- **Edge case:** Add one source row with a new `mae`; verify the result gains exactly one row carrying that `mae` value.

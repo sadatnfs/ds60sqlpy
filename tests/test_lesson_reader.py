@@ -72,7 +72,16 @@ def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
     assert "python/ds-60day/notebooks/day01_setup_and_repl.ipynb" in python_reader
     assert "solutions/" in python_reader
     assert "advanced_sql_training" in sql_reader
-    assert "inspect my actual psql transcript" in sql_reader
+    assert "complete psql transcript/query result" in sql_reader
+    assert "Projection, Predicate, Deterministic ordering" in sql_reader
+
+
+def test_reader_uses_the_guides_lesson_specific_codex_prompt() -> None:
+    catalog = Catalog.load(REPO_ROOT)
+    rendered = build_lesson_html(catalog, catalog.get("python-04"))
+
+    assert "eager collection building, and lazy generators" in rendered
+    assert "Direct catalog prerequisites: `python-03`" in rendered
 
 
 def test_markdown_links_to_catalog_artifacts_become_reader_links() -> None:

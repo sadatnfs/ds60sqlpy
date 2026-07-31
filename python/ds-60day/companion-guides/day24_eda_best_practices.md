@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 23 (`python-23`) and pandas cleaning/grouping through Day 22.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -298,7 +294,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-24`
-(Day 24 — Exploratory Data Analysis Best Practices). I am a complete beginner. Emphasize question-led exploratory data analysis with evidence, caveats, and quality checks.
+(Day 24 — Exploratory Data Analysis Best Practices). Direct catalog prerequisites: `python-23`.
+I have completed the direct prerequisites: `python-23`. Emphasize question-led exploratory data analysis with evidence, caveats, and quality checks.
 Read `python/ds-60day/companion-guides/day24_eda_best_practices.md` and use the learner notebook
 `python/ds-60day/notebooks/day24_eda_best_practices.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

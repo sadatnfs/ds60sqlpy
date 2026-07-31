@@ -20,10 +20,6 @@ By the end of this project, you can:
 Complete Days 1–14, especially packages (`python-09`), pytest (`python-10`),
 logging (`python-11`), and quality tooling (`python-14`).
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -199,7 +195,6 @@ This tiny parser demonstrates the interface without solving the data project:
 import argparse
 from pathlib import Path
 
-
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Inspect an input path")
     parser.add_argument("--input", required=True, type=Path)
@@ -217,7 +212,7 @@ result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
 1. Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. **Architecture:** `build_parser()`, pure core function(s), and `main(argv=None) -> int`. **Constraints:** use `pathlib`, UTF-8, no notebook-only state, and no hard-coded absolute paths.
-   **Verify:** run `--help`, one successful command, and one invalid invocation.
+   **Verify:** assert `--help` exits `0` and names the command/options, a valid fixture exits `0` with the expected bounded output, and invalid input exits nonzero with a useful stderr message.
 
 2. Add options for input path, output path, and a typed transformation parameter such as `--limit`.
    **Expected behavior:** argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. **Constraint:** do not catch programming errors broadly.
@@ -231,7 +226,7 @@ assertion or inspection and explain what it proves.
    **Verify:** test both import and module execution.
 
 5. Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. **Constraint:** do not mix Bash syntax into PowerShell.
-   **Verify:** copy and run the command appropriate to your operating system.
+   **Verify:** copy the command for your operating system, record exit code `0` and the expected output, and confirm the quoted path with spaces is received as one argument.
 
 ### Additional mastery practice
 
@@ -258,7 +253,6 @@ code; these extend rather than replace the original practice above.
 
 Before opening the reference solution, write one sentence explaining
 which contract or mental model each result confirms.
-
 
 ## Run the project
 
@@ -312,7 +306,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-15`
-(Day 15 — Project: A Testable CLI Data Tool). I am a complete beginner. Emphasize a small command-line application with separated boundaries.
+(Day 15 — Project: A Testable CLI Data Tool). Direct catalog prerequisites: `python-14`.
+I have completed the direct prerequisites: `python-14`. Emphasize a small command-line application with separated boundaries.
 Read `python/ds-60day/companion-guides/day15_cli_project.md` and use the learner notebook
 `python/ds-60day/notebooks/day15_cli_project.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

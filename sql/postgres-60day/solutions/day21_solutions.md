@@ -107,18 +107,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per ordering customer with bucket 1–4.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-21 Exercise 1, read from `orders`. Build the answer toward `customer_id`, `stored_spend`, and `spend_quartile`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-21 Exercise 1, expected output: One row per ordering customer with bucket 1–4. The final columns are `customer_id`, `stored_spend`, and `spend_quartile`. The final order is `spend_quartile, stored_spend DESC, customer_id`.
+- **Independent verification:** For sql-21 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `customer_id`, `stored_spend`, and `spend_quartile`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-21 Exercise 1, run `customer_spend` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-21 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `customer_id`, `stored_spend`, and `spend_quartile` ordered by `spend_quartile, stored_spend DESC, customer_id`.
+- **Alternative/trade-off:** For sql-21 Exercise 1, the chosen form is justified by this lesson-specific rationale: Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker. Evaluate another form against the concrete expected result (One row per ordering customer with bucket 1–4) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 2 — Query writing
 
@@ -153,18 +148,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per employee with values from 0 to 1.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-21 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `department_id`, `salary`, and `salary_percent_rank`; keep `employee_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-21 Exercise 2, expected output: One row per employee with values from 0 to 1. The final columns are `employee_id`, `department_id`, `salary`, and `salary_percent_rank`. The final order is `e.department_id, e.salary, e.employee_id`.
+- **Independent verification:** For sql-21 Exercise 2, choose one complete partition from `employees`; hand-calculate its first, middle, and final window values for `salary_percent_rank`, then verify output keys remain `employee_id`. Give two rows the same `e.department_id` value and different `e.employee_id` values; verify `e.department_id, e.salary, e.employee_id` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-21 Exercise 2, inspect one window partition before projecting; then check `e.department_id, e.salary, e.employee_id` before applying the row cap.
+- **Clause check:** For sql-21 Exercise 2, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, preserve one row per `employee_id`, and finish with `employee_id`, `department_id`, `salary`, and `salary_percent_rank` ordered by `e.department_id, e.salary, e.employee_id`.
+- **Alternative/trade-off:** For sql-21 Exercise 2, the chosen form is justified by this lesson-specific rationale: Partition by department and rank on salary alone so tied salaries share rank. Evaluate another form against the concrete expected result (One row per employee with values from 0 to 1) and the verification above.
+- **Edge case:** Give two rows the same `e.department_id` value and different `e.employee_id` values; verify `e.department_id, e.salary, e.employee_id` produces the intended rank and display order.
 
 ## Exercise 3 — Query writing
 
@@ -199,18 +189,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per product with cumedist in (0, 1].
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-21 Exercise 3, read from `products`. Build the answer toward `product_id`, `category`, `price`, and `price_cume_dist`; keep `product_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-21 Exercise 3, expected output: One row per product with cume_dist in (0, 1]. The final columns are `product_id`, `category`, `price`, and `price_cume_dist`. The final order is `p.category, p.price, p.product_id`.
+- **Independent verification:** For sql-21 Exercise 3, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `category`, `price`, and `price_cume_dist`, then verify output keys remain `product_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-21 Exercise 3, inspect one window partition before projecting; then check `p.category, p.price, p.product_id` before applying the row cap.
+- **Clause check:** For sql-21 Exercise 3, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, `category`, `price`, and `price_cume_dist` ordered by `p.category, p.price, p.product_id`.
+- **Alternative/trade-off:** For sql-21 Exercise 3, the chosen form is justified by this lesson-specific rationale: Partition by category and order on price. Evaluate another form against the concrete expected result (One row per product with cume_dist in (0, 1]) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 4 — Prediction
 
@@ -243,18 +228,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Three rows making tie behavior visible.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-21 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `row_id`, `value`, `percent_rank_value`, and `cume_dist_value`; keep `row_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-21 Exercise 4, expected output: Three rows making tie behavior visible. The final columns are `row_id`, `value`, `percent_rank_value`, and `cume_dist_value`. The final order is `row_id`.
+- **Independent verification:** For sql-21 Exercise 4, choose one complete partition from the inline `VALUES` fixture; hand-calculate its first, middle, and final window values for `value`, `percent_rank_value`, and `cume_dist_value`, then verify output keys remain `row_id`. Give two rows the same `row_id` value and different ``row_id`` values; verify `row_id` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-21 Exercise 4, inspect one window partition before projecting; then check `row_id` before applying the row cap.
+- **Clause check:** For sql-21 Exercise 4, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `row_id`, and finish with `row_id`, `value`, `percent_rank_value`, and `cume_dist_value` ordered by `row_id`.
+- **Alternative/trade-off:** For sql-21 Exercise 4, the chosen form is justified by this lesson-specific rationale: Tied values share rank and cumulative endpoint, but the two functions use different formulas. Evaluate another form against the concrete expected result (Three rows making tie behavior visible) and the verification above.
+- **Edge case:** Give two rows the same `row_id` value and different ``row_id`` values; verify `row_id` produces the intended rank and display order.
 
 ## Exercise 5 — Debugging
 
@@ -299,18 +279,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Up to 10 bucket rows with counts.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-21 Exercise 5, read from `orders`. Build the answer toward `decile`, and `customers`; keep `decile` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-21 Exercise 5, expected output: Up to 10 bucket rows with counts. The final columns are `decile`, and `customers`. The final order is `decile`.
+- **Independent verification:** For sql-21 Exercise 5, independently aggregate `orders` by `decile`; require one output row for every distinct `decile` tuple and compare `customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `customers` for the existing `decile` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-21 Exercise 5, run `spend`, and `bucketed` one at a time. Record each CTE's row count and `decile` uniqueness before the next stage uses it.
+- **Clause check:** For sql-21 Exercise 5, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `decile`, and finish with `decile`, and `customers` ordered by `decile`.
+- **Alternative/trade-off:** For sql-21 Exercise 5, the chosen form is justified by this lesson-specific rationale: NTILE bucket sizes differ by at most one when row count is not divisible by ten. Evaluate another form against the concrete expected result (Up to 10 bucket rows with counts) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `customers` for the existing `decile` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 6 — Extension
 
@@ -360,18 +335,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Customers in decile 1.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-21 Exercise 6, read from `orders`. Build the answer toward `customer_id`, `total_spend`, `decile`, and `population`; keep `customer_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-21 Exercise 6, expected output: Customers in decile 1. The final columns are `customer_id`, `total_spend`, `decile`, and `population`. The final order is `total_spend DESC, customer_id`.
+- **Independent verification:** For sql-21 Exercise 6, run an anti-check that counts rows where NOT ((decile = 1)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `total_spend`, `decile`, and `population` against `orders`. Give two rows the same `total_spend DESC` value and different `customer_id` values; verify `total_spend DESC, customer_id` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-21 Exercise 6, run `spend`, and `bucketed` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-21 Exercise 6, the solution actually uses `WITH`, `FROM`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `customer_id`, and finish with `customer_id`, `total_spend`, `decile`, and `population` ordered by `total_spend DESC, customer_id`.
+- **Alternative/trade-off:** For sql-21 Exercise 6, the chosen form is justified by this lesson-specific rationale: Filter an outer query after assigning deciles; state that bucket 1 is highest because ordering is descending. Evaluate another form against the concrete expected result (Customers in decile 1) and the verification above.
+- **Edge case:** Give two rows the same `total_spend DESC` value and different `customer_id` values; verify `total_spend DESC, customer_id` produces the intended rank and display order.
 
 ## Final self-check
 

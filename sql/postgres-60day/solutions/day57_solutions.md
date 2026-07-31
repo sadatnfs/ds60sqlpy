@@ -109,18 +109,13 @@ Expected shape: two model rows. Zero-revenue days are excluded from MAPE by
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 1 requires a written prediction and the observed result for “Compare MA(7) with calendar-week seasonal naive using MAPE”. Show both compared result shapes at one row per requested calendar/cohort bucket and grouping key, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `day`, `revenue`, `ma7_forecast`, `seasonal_naive`, `model`, `mape`, `ma`.
-- **Independent verification:** For Exercise 1, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 1: compare prior-seven-day average with seven-day seasonal naive.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A different window or subquery shape is valid only with the same partition, peer, frame, tie, and output-order semantics.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-57 Exercise 1, read `orders` into a one-row-per-day calendar spine, calculate `ma7_forecast` and `seasonal_naive` in `forecasts`, and aggregate the final `model` and `mape`; the output grain is model, not order.
+- **Expected result/shape:** For sql-57 Exercise 1, expected output: two model rows. Zero-revenue days are excluded from MAPE by `NULLIF`; disclose that choice. The final columns are `model`, and `mape`. The final order is `model`.
+- **Independent verification:** For sql-57 Exercise 1, require exactly two rows with model values `MA(7)` and `seasonal naive (lag 7)` and require unique `model`. From the same `forecasts` rows and 180-day evaluation window, independently recompute each model's absolute percentage-error numerator and eligible denominator, compare the resulting `mape`, and disclose that zero-revenue days and NULL forecasts are excluded.
+- **Intermediate relation check:** For sql-57 Exercise 1, run `bounds`, `calendar`, `daily`, `complete`, and `forecasts` one at a time. Confirm that `calendar`, `complete`, and `forecasts` have unique `day` values before the final aggregation changes the grain to model.
+- **Clause check:** For sql-57 Exercise 1, the solution uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, `UNION ALL`, and `ORDER BY`. It begins at `orders`, establishes one row per `day`, and then returns one aggregate row per `model` ordered by `model`.
+- **Alternative/trade-off:** For sql-57 Exercise 1, the chosen form is justified by this lesson-specific rationale: The calendar spine makes “seven days ago” mean seven calendar days, including days with no orders as zero revenue. Evaluate another form against the concrete expected result (two model rows. Zero-revenue days are excluded from MAPE by `NULLIF`; disclose that choice) and the verification above.
+- **Edge case:** If every eligible actual is zero, MAPE is NULL because its denominator is empty after `NULLIF`; report that state rather than replacing it with zero.
 
 ## Exercise 2 — Top ten positive and negative anomalies
 
@@ -186,18 +181,13 @@ score is a ranking heuristic; it is not a calibrated probability.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Rank positive/negative anomalies with SD and MAD scores” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `absolute_deviation`, `mad`, `sd_z`, `modified_z`, `direction`, `anomaly_rank`, `sd`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 2, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 2: rank positive and negative anomalies using both standard and median-absolute-deviation scores.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A different window or subquery shape is valid only with the same partition, peer, frame, tie, and output-order semantics.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-57 Exercise 2, read from `orders`. Build the answer toward `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z`; keep `day` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-57 Exercise 2, expected output: up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability. The final columns are `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z`. The final order is `direction DESC, anomaly_rank`.
+- **Independent verification:** For sql-57 Exercise 2, project `day` plus the raw source columns from `orders` at each join stage; record row count and distinct `day`, then assert the final `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z` values match those staged rows without unintended fanout or loss. Give two rows the same `direction DESC` value and different `anomaly_rank` values; verify `direction DESC, anomaly_rank` produces the intended rank and display order.
+- **Intermediate relation check:** For sql-57 Exercise 2, run `daily`, `moments`, `median`, `deviations`, `mad`, `scored`, and `ranked` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
+- **Clause check:** For sql-57 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `day`, and finish with `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z` ordered by `direction DESC, anomaly_rank`.
+- **Alternative/trade-off:** For sql-57 Exercise 2, the chosen form is justified by this lesson-specific rationale: Expected shape: up to ten positive and ten negative rows. Evaluate another form against the concrete expected result (up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability) and the verification above.
+- **Edge case:** Give two rows the same `direction DESC` value and different `anomaly_rank` values; verify `direction DESC, anomaly_rank` produces the intended rank and display order.
 
 ## Reasoning, safety, and pitfalls
 
@@ -259,18 +249,13 @@ Neither population is automatically correct; the metric contract decides.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 3 requires a written prediction and the observed result for “Predict how removing the date spine changes LAG(..., 7)”. Show both compared result shapes at one row per requested calendar/cohort bucket and grouping key, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `max_day`, `day`, `revenue`, `observed_row_lag7`, `calendar`, `calendar_day_lag7`, `lag`.
-- **Independent verification:** For Exercise 3, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 3: show exactly why the calendar spine matters. observeddaily has one row only when orders exist, so LAG(..., 7) means “seven prior observations.” calendardaily has one row per calendar date, so the same offset means “seven calendar days.”
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-57 Exercise 3, read from `orders`. Build the answer toward `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7`; keep `day` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-57 Exercise 3, expected output: at most 30 rows keyed by `day`. The final columns are `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7`. The final order is `c.day DESC`.
+- **Independent verification:** For sql-57 Exercise 3, assert no more than 30 rows, no duplicate `day`, and no adjacent pair that violates `c.day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7` came from the same source rows. Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining `c.day DESC`.
+- **Intermediate relation check:** For sql-57 Exercise 3, run `bounds`, `observed_daily`, `observed_lag`, `calendar_daily`, and `calendar_lag` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
+- **Clause check:** For sql-57 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `day`, and finish with `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7` ordered by `c.day DESC`.
+- **Alternative/trade-off:** For sql-57 Exercise 3, the chosen form is justified by this lesson-specific rationale: The answer calculates `observed_row_lag7` before building a spine and `calendar_day_lag7` after it. Evaluate another form against the concrete expected result (at most 30 rows keyed by `day`) and the verification above.
+- **Edge case:** Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining `c.day DESC`.
 
 ## Exercise 4 — Compare MAE, RMSE, and MAPE fairly
 
@@ -286,18 +271,13 @@ both models one evaluation population.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Compare MAE, RMSE, MAPE, and scored-row counts on one window”. Show both compared result shapes at one summary row per grouping key explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `error`, `model`, `scored_rows`, `mae`, `rmse`, `mape`, `zero_actual_rows`.
-- **Independent verification:** For Exercise 4, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 4: score both forecast models on one identical evaluation set. 1. calendardaily establishes one row per date and a documented zero policy. 2. forecasts uses only prior rows: MA(7) ends at 1 PRECEDING, while the seasonal model reads exactly seven calendar rows back. 3. LATERAL VALUES reshapes the two model columns to a common tidy model grain. 4. The WHERE clause requires both forecasts, so model comparisons use the same dates. MAPE additionally excludes zero actuals through NULLIF.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-57 Exercise 4, derive `common_scoring_rows` from `orders`, reshape both forecasts to `model_name` rows, and build `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows`; keep `model_name` as the final grouping key.
+- **Expected result/shape:** For sql-57 Exercise 4, expected output: one row per `model_name`. The final columns are `model_name`, `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows`. The final order is `model_name`.
+- **Independent verification:** For sql-57 Exercise 4, independently aggregate `common_scoring_rows` by `model_name` and require exactly two unique `model_name` rows. Require both models to have the same `scored_rows` and `zero_actual_rows` because they share one evaluation population; recompute `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows` for each model and compare every value, preserving NULL `mape` when the eligible percentage-error denominator is zero.
+- **Intermediate relation check:** For sql-57 Exercise 4, run `bounds`, `daily`, `calendar_daily`, `forecasts`, and `common_scoring_rows` one at a time. Record each CTE's row count and `model_name` uniqueness before the next stage uses it.
+- **Clause check:** For sql-57 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `model_name`, and finish with `model_name`, `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows` ordered by `model_name`.
+- **Alternative/trade-off:** For sql-57 Exercise 4, the chosen form is justified by this lesson-specific rationale: `calendar_daily` and `forecasts` repeat the leakage-free foundation. Evaluate another form against the concrete expected result (one row per `model_name`) and the verification above.
+- **Edge case:** A zero-revenue day remains in `scored_rows` and `zero_actual_rows`, contributes to MAE and RMSE, and contributes no percentage term to MAPE.
 
 ## Exercise 5 — Detect a leaky frame
 
@@ -307,18 +287,13 @@ proof of the semantic difference.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Detect and remove current-row forecast leakage” at one row per requested calendar/cohort bucket and grouping key. Named evidence columns/objects: `day`, `revenue`, `leaky_window`, `forecast_window`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-- **Independent verification:** For Exercise 5, prove uniqueness at one row per requested calendar/cohort bucket and grouping key; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary. The executable solution's check is: Exercise 5: place the leaky and honest frames side by side. The leaky result includes the current actual, so it is not a forecast of that day. The honest frame ends at 1 PRECEDING and can be computed before the target is known.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-57 Exercise 5, read from `orders`. Build the answer toward `day`, `revenue`, `leaky_window`, and `forecast_window`; keep `day` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-57 Exercise 5, expected output: at most 20 rows keyed by `day`. The final columns are `day`, `revenue`, `leaky_window`, and `forecast_window`. The final order is `day DESC`.
+- **Independent verification:** For sql-57 Exercise 5, assert no more than 20 rows, no duplicate `day`, and no adjacent pair that violates `day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, `leaky_window`, and `forecast_window` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.
+- **Intermediate relation check:** For sql-57 Exercise 5, run `daily` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
+- **Clause check:** For sql-57 Exercise 5, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `day`, and finish with `day`, `revenue`, `leaky_window`, and `forecast_window` ordered by `day DESC`.
+- **Alternative/trade-off:** For sql-57 Exercise 5, the chosen form is justified by this lesson-specific rationale: The leaky window ends at `CURRENT ROW`, so the day's actual helps predict itself. Evaluate another form against the concrete expected result (at most 20 rows keyed by `day`) and the verification above.
+- **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.
 
 ## Exercise 6 — Preserve undefined zero-dispersion scores
 
@@ -329,15 +304,10 @@ normal.”
 
 ### Reasoning and verification
 
-- **Expected result/shape:** Exercise 6 requires a written prediction and the observed result for “Preserve undefined scores for a constant series. Compare absent no-order days with explicit zero-revenue days”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `median_revenue`, `mean_revenue`, `sd_revenue`, `absolute_deviation`, `mad`, `sd_z`, `modified_mad_z`.
-- **Independent verification:** For Exercise 6, run the two forms over the identical rows in `orders`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript. The executable solution's check is: Exercise 6: constant data has zero SD and zero MAD. Both denominators use NULLIF, preserving an undefined score as NULL instead of declaring the points “normal” with a fabricated zero score.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-57 Exercise 6, read from `constant`. Build the answer toward `day`, `revenue`, `sd_z`, and `modified_mad_z`; keep `day` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-57 Exercise 6, expected output: one row per `day`. The final columns are `day`, `revenue`, `sd_z`, and `modified_mad_z`. The final order is `d.day`.
+- **Independent verification:** For sql-57 Exercise 6, project `day` plus the raw source columns from `constant` at each join stage; record row count and distinct `day`, then assert the final `day`, `revenue`, `sd_z`, and `modified_mad_z` values match those staged rows without unintended fanout or loss. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
+- **Intermediate relation check:** For sql-57 Exercise 6, run `center`, `deviations`, and `dispersion` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
+- **Clause check:** For sql-57 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `constant`, preserve one row per `day`, and finish with `day`, `revenue`, `sd_z`, and `modified_mad_z` ordered by `d.day`.
+- **Alternative/trade-off:** For sql-57 Exercise 6, the chosen form is justified by this lesson-specific rationale: The constant three-day fixture has standard deviation and MAD equal to zero. Evaluate another form against the concrete expected result (one row per `day`) and the verification above.
+- **Edge case:** Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.

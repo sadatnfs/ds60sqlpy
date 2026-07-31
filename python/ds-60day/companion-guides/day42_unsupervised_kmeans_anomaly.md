@@ -199,31 +199,15 @@ assert {200, 201}.issubset(set(most_unusual))
 
 1. Try several values of `k` and plot inertia versus `k` (the elbow plot).
 
-**Verify:** For task `Try several values of k and plot inertia versus k (the elbow plot)`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 1 — unsupervised geometry, cluster stability, and anomaly ranking — for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
 
 2. Compute silhouette scores for `k` from 2 through 6 and discuss the result.
 
-**Verify:** For task `Compute silhouette scores for k from 2 through 6 and discuss the result`, show the formula or intermediate quantities and check the final value independently rather than trusting one library call.
-
-
-
-
-
+**Verify:** Practice 2 — unsupervised geometry, cluster stability, and anomaly ranking — for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
 
 3. Compare Isolation Forest with Local Outlier Factor.
 
-**Verify:** For task `Compare Isolation Forest with Local Outlier Factor`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Practice 3 — unsupervised geometry, cluster stability, and anomaly ranking — on identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
 
 ### Progressive hints
 
@@ -244,39 +228,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Scaling sensitivity:** Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization.
    **Progressive hint:** Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.
 
-**Verify:** For task `Scaling sensitivity: Create two features with equal structure but scales of 1 and 10,000. Com...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Scaling sensitivity — print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.
 
 5. **Cluster stability:** Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up.
    **Progressive hint:** Labels can permute. Use adjusted Rand index or align centers before comparing assignments.
 
-**Verify:** For task `Cluster stability: Refit K-Means across at least ten seeds and bootstrap samples. Compare ine...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Cluster stability — over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.
 
 6. **Anomaly validation without labels:** Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity.
    **Progressive hint:** Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.
 
-**Verify:** For task `Anomaly validation without labels: Design an evaluation plan for an anomaly detector when his...`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
+**Verify:** Anomaly validation without labels — deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -323,10 +288,12 @@ Emphasize unsupervised geometry, cluster stability, and anomaly ranking. Use exa
 - guide: `python/ds-60day/companion-guides/day42_unsupervised_kmeans_anomaly.md`
 - learner artifact: `python/ds-60day/notebooks/day42_unsupervised_kmeans_anomaly.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-41`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

@@ -105,11 +105,9 @@ ORDER BY lifetime_revenue DESC, c.customer_id
 LIMIT 20;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; Order rows above the global average.
+**How to read it:** Example 1: Start with `orders`, `order_items`, and `customers` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays the columns written in the final `SELECT`. `ORDER BY` determines presentation order and the final `LIMIT 20` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns exactly one summary row, capped at 20 rows from `orders`, `order_items`, and `customers`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -126,11 +124,9 @@ GROUP BY x.category
 ORDER BY avg_order_total DESC, x.category;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; Order rows above the global average.
+**How to read it:** Example 2: Start with `orders`, `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `order_id`, and `order_total`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns one grouped row per `category`, and `order_id` with columns `category`, `order_id`, and `order_total` from `orders`, `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -169,28 +165,34 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Return orders whose total exceeds the overall average order total.
    **Progressive hint:** The aggregate subquery is guaranteed to return exactly one value.
-   **Expected result/shape:** Exercise 1 returns a table-shaped answer to “Query writing: Return orders whose total exceeds the overall average order total” at one result row per key or group explicitly named in the prompt. Named evidence columns/objects: `evidence`, `o`, `all_orders`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 1, prove uniqueness at one result row per key or group explicitly named in the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-08 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-08 Exercise 1, expected output: Order rows above the global average. The final columns are `order_id`, `customer_id`, and `total_amount`. The final order is `o.total_amount DESC, o.order_id`.
+   **Verify:** For sql-08 Exercise 1, run an anti-check that counts rows where NOT ((o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, and `total_amount` against `orders`. Add one row for which `(o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 2. **Query writing:** Add the total customer count as a scalar column beside each country-level customer count.
    **Progressive hint:** An uncorrelated aggregate subquery is one row and repeats safely for each grouped output row.
-   **Expected result/shape:** Exercise 2 returns a table-shaped answer to “Query writing: Add the total customer count as a scalar column beside each country-level customer count” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `country_customers`, `all_customers`, `c`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 2, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `customers`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-08 Exercise 2, read from `customers`. Build the answer toward `country`, `country_customers`, and `all_customers`; keep `country` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-08 Exercise 2, expected output: One row per country with a common global total. The final columns are `country`, `country_customers`, and `all_customers`. The final order is `country_customers DESC, c.country`.
+   **Verify:** For sql-08 Exercise 2, independently aggregate `customers` by `country`; require one output row for every distinct `country` tuple and compare `country_customers`, and `all_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `country_customers`, and `all_customers` for the existing `country` tuple and verify the new tuple appears exactly once.
 3. **Query writing:** Show each customer with their latest order timestamp using a scalar correlated subquery.
    **Progressive hint:** Use `MAX` to guarantee one result and let customers without orders receive NULL.
-   **Expected result/shape:** Exercise 3 returns a table-shaped answer to “Query writing: Show each customer with their latest order timestamp using a scalar correlated subquery” at one row per customer or the customer grouping key named by the prompt. Named evidence columns/objects: `evidence`, `o`, `latest_order_date`, `c`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 3, prove uniqueness at one row per customer or the customer grouping key named by the prompt; reconcile the result's row count and any count/sum/amount with a simpler control over `orders`, `customers`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-08 Exercise 3, read from `orders`, and `customers`. Build the answer toward `customer_id`, `full_name`, and `latest_order_date`; keep `customer_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-08 Exercise 3, expected output: One row per customer. The final columns are `customer_id`, `full_name`, and `latest_order_date`. The final order is `latest_order_date DESC NULLS LAST, c.customer_id`.
+   **Verify:** For sql-08 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `latest_order_date` against `orders`, and `customers`. Tie two rows on `latest_order_date DESC NULLS LAST` and give them different `c.customer_id` values; verify `latest_order_date DESC NULLS LAST, c.customer_id` chooses a stable first/last row.
 4. **Prediction:** Demonstrate that a scalar subquery with no matching rows returns NULL.
    **Progressive hint:** Use a deliberately impossible product key and test the scalar result with `IS NULL`.
-   **Expected result/shape:** Exercise 4 requires a written prediction and the observed result for “Prediction: Demonstrate that a scalar subquery with no matching rows returns NULL”. Show both compared result shapes at one result row per key or group explicitly named in the prompt, including their row counts, relevant `NULL` values, and stable sort keys. Named evidence columns/objects: `evidence`, `p`, `no_row_becomes_null`.
-   **Verify:** For Exercise 4, run the two forms over the identical rows in `products`; compare the named columns, count, `NULL` placement, and order, then explain any difference between prediction and transcript.
+   **Inputs/evidence:** For sql-08 Exercise 4, read from `products`. Compute `no_row_becomes_null` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Expected result/shape:** For sql-08 Exercise 4, expected output: One row whose boolean result is true. The final columns are `no_row_becomes_null`.
+   **Verify:** For sql-08 Exercise 4, evaluate each of `no_row_becomes_null` in a separate control `SELECT` over `products`; require one final row and compare every value. Repeat with `NULL` in `no_row_becomes_null` and state whether the row is kept, rejected, or classified.
 5. **Debugging:** Repair a scalar subquery that returns many product prices by aggregating to the intended single value.
    **Progressive hint:** Choose the business reduction explicitly; this answer uses maximum price.
-   **Expected result/shape:** Exercise 5 returns a table-shaped answer to “Debugging: Repair a scalar subquery that returns many product prices by aggregating to the intended single value” at one row per product or product grouping requested. Named evidence columns/objects: `evidence`, `category_max_price`, `all_products`, `global_max_price`, `p`. Include every key/measure named by the prompt, preserve `NULL` versus zero/absent-row meaning, and use a unique final sort key whenever rows are ranked or limited.
-   **Verify:** For Exercise 5, prove uniqueness at one row per product or product grouping requested; reconcile the result's row count and any count/sum/amount with a simpler control over `products`, and inspect the prompt's empty, tied, duplicate, or `NULL` boundary.
+   **Inputs/evidence:** For sql-08 Exercise 5, read from `products`. Build the answer toward `category`, `category_max_price`, and `global_max_price`; keep `category` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-08 Exercise 5, expected output: One row per category with a scalar global maximum for comparison. The final columns are `category`, `category_max_price`, and `global_max_price`. The final order is `p.category`.
+   **Verify:** For sql-08 Exercise 5, independently aggregate `products` by `category`; require one output row for every distinct `category` tuple and compare `category_max_price`, and `global_max_price` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `category_max_price`, and `global_max_price` for the existing `category` tuple and verify the new tuple appears exactly once.
 6. **Extension:** Rewrite a repeated scalar aggregate as a one-row CTE crossed into a customer-country report.
    **Progressive hint:** Compute the global total once, then cross join the guaranteed one-row relation.
-   **Expected result/shape:** Exercise 6 must make “Extension: Rewrite a repeated scalar aggregate as a one-row CTE crossed into a customer-country report” observable through the exact DDL/DML command tag plus one row per customer or the customer grouping key named by the prompt; include a catalog or behavior result for every named object/invariant, not only a successful statement. Named evidence columns/objects: `evidence`, `customer_count`, `country_customers`, `customer_share`, `c`, `cte`.
-   **Verify:** For Exercise 6, inspect the relevant `pg_catalog` or `information_schema` rows for `evidence`, `customer_count`, `country_customers`, `customer_share`, `c`, `cte`, run one valid case and the prompt's invalid/boundary case, and confirm the lesson transaction or cleanup removes only its disposable state.
+   **Inputs/evidence:** For sql-08 Exercise 6, read from `customers`. Build the answer toward `country`, `country_customers`, and `customer_share`; keep `country`, and `customer_count` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-08 Exercise 6, expected output: One row per country with country share. The final columns are `country`, `country_customers`, and `customer_share`. The final order is `customer_share DESC, c.country`.
+   **Verify:** For sql-08 Exercise 6, independently aggregate `customers` by `country`, and `customer_count`; require one output row for every distinct `country`, and `customer_count` tuple and compare `country_customers`, and `customer_share` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `country_customers`, and `customer_share` for the existing `country`, and `customer_count` tuple and verify the new tuple appears exactly once.
 
 ## Common mistakes and how to recover
 
@@ -256,7 +258,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-08 — Scalar Inline Subqueries.
 
-I am a complete beginner. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I have completed the direct catalog prerequisite: `sql-07`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day08_scalar_inline_subqueries.md
 - Answer-free learner SQL: sql/postgres-60day/day08_scalar_inline_subqueries.sql
 

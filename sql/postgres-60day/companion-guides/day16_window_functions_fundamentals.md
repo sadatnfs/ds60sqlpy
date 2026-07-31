@@ -3,8 +3,11 @@
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Prerequisites:** [Day 15 — Phase 1 project](day15_phase1_project.md), including
-  grouped aggregates and declared result grain
+- **Direct prerequisite:** [SQL-FOUND-01 — Relational design, DDL, and integrity
+  constraints](../../professional/companion-guides/sql_found_01_relational_design.md).
+  That module follows [Day 15 — Phase 1 project](day15_phase1_project.md), so
+  you should already be comfortable with grouped aggregates and declared
+  result grain.
 - **Artifacts:** [learner SQL](../day16_window_functions_fundamentals.sql) ·
   [solution reasoning](../solutions/day16_solutions.md) ·
   [executable solution](../solutions/day16_solutions.sql)
@@ -36,8 +39,8 @@ ignored working copy, and complete `psql` transcript remain together.
    course-owned training state, set `CONFIRM_COURSE_RESET = True` and run the
    cell. It loads deterministic seed rows, verifies them, and prepares any
    cataloged stateful predecessor.
-4. Open and edit the ignored learner copy at
-   `.learning/sql/sql-16/day16_window_functions_fundamentals.sql`. Save it, then run the notebook's
+4. Use the **editable-copy link inside the generated notebook**. It opens the ignored learner copy at
+   `.learning/sql/sql-16/lesson/workspace/sql/postgres-60day/day16_window_functions_fundamentals.sql`. Save it, then run the notebook's
    full-script cell. It uses `psql -X -v ON_ERROR_STOP=1 -f`, preserving
    transaction and `psql` meta-command behavior.
 5. Read output directly below the run cell. A `SELECT` prints column headings,
@@ -70,8 +73,7 @@ whole file instead of trusting partial output.
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. This lesson introduces or reinforces
-Window, Partition, Frame. Its worked SQL reads or creates `order_items`, `products`, `orders`.
+on screen are not automatically stored. The key vocabulary for this lesson is Window, Partition, Frame. Its worked SQL reads or creates `order_items`, `products`, `orders`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -81,7 +83,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The lesson-specific reasoning path is: Pre-aggregate net revenue to one row per category, then calculate SUM(revenue) OVER () beside each category. The ordinary aggregate establishes the category grain; the window exposes the grand total without removing those category rows.
+The worked walkthrough's lesson-specific task is: Pre-aggregate net revenue to one row per category, then calculate SUM(revenue) OVER () beside each category. The ordinary aggregate establishes the category grain; the window exposes the grand total without removing those category rows.
 The expected contract is that One row per order. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
@@ -110,11 +112,9 @@ FROM category_totals
 ORDER BY category_revenue DESC, category;
 ```
 
-**How to read it:** Example 1 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per order.
+**How to read it:** Example 1: Start with `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `category`, `category_revenue`, `total_revenue`, and `category_share`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 1 returns one grouped row per `category` with columns `category`, `category_revenue`, `total_revenue`, and `category_share` from `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ### Example 2
 
@@ -130,11 +130,9 @@ ORDER BY o.customer_id, o.order_date, o.order_id
 LIMIT 100;
 ```
 
-**How to read it:** Example 2 returns a table-shaped result. Read `FROM`/`JOIN` as the input relation, then filters, grouping or windows, and finally the selected columns. Predict the keys before running it; One row per order.
+**How to read it:** Example 2: Start with `orders` in `FROM`/`JOIN`; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `order_id`, `customer_id`, `order_date`, `total_amount`, `avg_customer_order`, and `orders_per_customer`. `ORDER BY` determines presentation order and the final `LIMIT 100` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
 
-**Expected result/shape:** The output or command tag must match the statement's
-declared columns/object and the lesson's stated grain; unexpected duplicates,
-missing keys, or an unreported `NULL` require investigation.
+**Expected result/shape:** Example 2 returns exactly one summary row, capped at 100 rows with columns `order_id`, `customer_id`, `order_date`, `total_amount`, `avg_customer_order`, and `orders_per_customer` from `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
 
 ## Learning objectives
 
@@ -173,28 +171,49 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Show each order with the customer's average order total.
    **Progressive hint:** Partition by customer ID and keep one output row per order.
-   **Expected shape:** One row per order.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-16 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `customer_average`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-16 Exercise 1, expected output: One row per order. The final columns are `order_id`, `customer_id`, `total_amount`, and `customer_average`. The final order is `o.customer_id, o.order_date, o.order_id`.
+   **Verify:** For sql-16 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `total_amount`, and `customer_average`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 2. **Query writing:** Show each employee salary with department average, minimum, and maximum.
    **Progressive hint:** Partition all three window aggregates by department.
-   **Expected shape:** One row per employee.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-16 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `department_id`, `salary`, `department_average`, `department_minimum`, and `department_maximum`; keep `employee_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-16 Exercise 2, expected output: One row per employee. The final columns are `employee_id`, `department_id`, `salary`, `department_average`, `department_minimum`, and `department_maximum`. The final order is `e.department_id, e.employee_id`.
+   **Verify:** For sql-16 Exercise 2, choose one complete partition from `employees`; hand-calculate its first, middle, and final window values for `department_average`, then verify output keys remain `employee_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 3. **Query writing:** Calculate every order's share of its customer's stored revenue.
    **Progressive hint:** Use a partition total denominator and guard it with `NULLIF`.
-   **Expected shape:** One row per order with shares summing near one per customer.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-16 Exercise 3, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `customer_revenue_share`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-16 Exercise 3, expected output: One row per order with shares summing near one per customer. The final columns are `order_id`, `customer_id`, `total_amount`, and `customer_revenue_share`. The final order is `o.customer_id, o.order_date, o.order_id`.
+   **Verify:** For sql-16 Exercise 3, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `total_amount`, and `customer_revenue_share`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 4. **Prediction:** Compare `GROUP BY customer_id` with `AVG(...) OVER (PARTITION BY customer_id)` and report their row counts.
    **Progressive hint:** Grouping collapses to one row per customer; a window preserves every order row.
-   **Expected shape:** Two labeled count rows.
-   **Verify:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
+   **Inputs/evidence:** For sql-16 Exercise 4, read from `orders`. Build the answer toward `method`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-16 Exercise 4, expected output: Two labeled count rows. The final columns are `method`, and `row_count`. The final order is `method`.
+   **Verify:** For sql-16 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `method`, and `row_count` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 5. **Debugging:** Return orders above their customer average without placing a window function in `WHERE`.
    **Progressive hint:** Compute the window value in a CTE, then filter the named column outside.
-   **Expected shape:** Order rows above their customer mean.
-   **Verify:** Inspect the applicable `pg_catalog`/`information_schema` entry and run one valid plus one boundary case inside the lesson's safety boundary.
+   **Inputs/evidence:** For sql-16 Exercise 5, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `customer_average`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-16 Exercise 5, expected output: Order rows above their customer mean. The final columns are `order_id`, `customer_id`, `total_amount`, and `customer_average`. The final order is `customer_id, total_amount DESC, order_id`.
+   **Verify:** For sql-16 Exercise 5, run an anti-check that counts rows where NOT ((total_amount > customer_average)); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `total_amount`, and `customer_average` against `orders`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 6. **Extension:** Show order count and revenue context at both customer and country levels in the same row.
    **Progressive hint:** Use different partitions for independent analytical contexts.
-   **Expected shape:** One row per order with customer and country totals.
-   **Verify:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
+   **Inputs/evidence:** For sql-16 Exercise 6, read from `orders`, and `customers`. Build the answer toward `order_id`, `customer_id`, `country`, `customer_order_count`, `customer_revenue`, and `country_revenue`; keep `order_id` visible whenever the result has row-level grain.
+   **Expected result/shape:** For sql-16 Exercise 6, expected output: One row per order with customer and country totals. The final columns are `order_id`, `customer_id`, `country`, `customer_order_count`, `customer_revenue`, and `country_revenue`. The final order is `c.country, o.customer_id, o.order_date, o.order_id`.
+   **Verify:** For sql-16 Exercise 6, choose one complete partition from `orders`, and `customers`; hand-calculate its first, middle, and final window values for `customer_order_count`, `customer_revenue`, and `country_revenue`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+
+## Common mistakes and how to recover
+
+- **Lesson-specific semantic mistake:** Filtering a window result in the same query level is invalid; compute it in a subquery or CTE first.
+- **Unexpected row count:** display keys before aggregates, count rows after
+  each join/filter stage, and find the first stage whose grain differs from the
+  contract. Do not hide fanout with `DISTINCT`.
+- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
+  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
+  predicate placement and empty-input aggregate behavior.
+- **Unstable top/first/last output:** add `ORDER BY` with a unique final
+  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
+- **`psql` stops on an error:** fix the first error shown by
+  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
+  complete file. A later successful statement does not validate a partial run.
 
 ## Self-check
 
@@ -267,11 +286,11 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-16 — Window Functions Fundamentals.
 
-I am a complete beginner. Use these checked-in sources:
+I have completed the direct catalog prerequisite: `sql-found-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day16_window_functions_fundamentals.md
 - Answer-free learner SQL: sql/postgres-60day/day16_window_functions_fundamentals.sql
 
-The lesson concepts include Window, Partition, Frame. First define those terms in plain
+Key terms to teach in context: Window, Partition, Frame. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
@@ -282,11 +301,13 @@ lesson reader's Create/open guided SQL notebook action and its ignored
 .learning/sql/sql-16/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
-Follow guide -> prediction -> my attempt -> one progressive hint at a time ->
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -> predict -> my attempt -> one progressive hint at a time ->
 solution comparison. Do not open, quote, or summarize an official solution
 unless I explicitly ask after attempting the exercise. Ask for my actual SQL
 and the complete psql transcript/query result; inspect that evidence rather
 than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
-transfer task that I answer without looking back.
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.
 ```

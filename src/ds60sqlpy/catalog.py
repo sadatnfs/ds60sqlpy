@@ -11,6 +11,24 @@ from typing import Any, Literal, cast
 
 Track = Literal["python", "sql", "bridge"]
 TRACK_ORDER: dict[Track, int] = {"python": 0, "sql": 1, "bridge": 2}
+LESSON_ORDER_OVERRIDES: dict[str, float] = {
+    "sql-found-01": 15.5,
+    "sql-found-02": 39.5,
+}
+
+
+def catalog_order_key(
+    track: Track,
+    day: int,
+    lesson_id: str,
+) -> tuple[int, float, str]:
+    """Return the learner-facing order without changing a stable lesson ID."""
+
+    return (
+        TRACK_ORDER[track],
+        LESSON_ORDER_OVERRIDES.get(lesson_id, float(day)),
+        lesson_id,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,7 +106,14 @@ class Catalog:
     def __init__(self, repo_root: Path, lessons: Iterable[Lesson]) -> None:
         self.repo_root = repo_root.resolve()
         self._lessons = tuple(
-            sorted(lessons, key=lambda lesson: (TRACK_ORDER[lesson.track], lesson.day))
+            sorted(
+                lessons,
+                key=lambda lesson: catalog_order_key(
+                    lesson.track,
+                    lesson.day,
+                    lesson.id,
+                ),
+            )
         )
         lesson_ids = [lesson.id for lesson in self._lessons]
         if len(lesson_ids) != len(set(lesson_ids)):

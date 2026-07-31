@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Exercise 1 — Minimal FastAPI app and Dockerfile
+Worked reference for Exercise 1 — Minimal FastAPI app and Dockerfile
 ```python
 # app.py
 from fastapi import FastAPI
@@ -51,7 +51,7 @@ docker run -p 8000:8000 ds-fastapi:latest
 
 ---
 
-Exercise 2 — Health endpoint and HEALTHCHECK
+Worked reference for Exercise 2 — Health endpoint and HEALTHCHECK
 ```python
 # app.py addition
 @app.get("/health")
@@ -74,7 +74,7 @@ Explanation
 
 ---
 
-Exercise 3 — Multi‑stage build
+Worked reference for Exercise 3 — Multi‑stage build
 ```dockerfile
 # Stage 1: build dependencies in an isolated virtual environment.
 FROM python:3.12-slim AS builder
@@ -144,7 +144,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Create a slim dependency file containing only direct API runtime needs.
 
@@ -154,16 +154,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Create a slim dependency file containing only direct API runtime needs`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+**Verify:** Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Add `GET /health` returning `{"status": "ok"}`.
 
@@ -173,16 +166,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Add GET /health returning {"status": "ok"}`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+**Verify:** Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
+### Exercise 3 — Original lesson practice
 
 **Prompt:** Optionally push the image to a registry if you intentionally use a connected account.
 
@@ -192,14 +178,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Optionally push the image to a registry if you intentionally use a connected account`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
 
 ### Exercise 4 — Layer and secret audit
 
@@ -219,14 +198,7 @@ latest layer is not sufficient.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Create a .dockerignore, inspect image history, and prove that .env, Git metadata, notebooks,...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.
 
 ### Exercise 5 — Least-privilege runtime
 
@@ -246,14 +218,7 @@ does not replace dependency updates, network policy, or input validation.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Run the service as a non-root user with a read-only filesystem and an explicit writable tempo...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.
 
 ### Exercise 6 — Health semantics
 
@@ -273,4 +238,4 @@ or a network, then add one container smoke test for the packaged path.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Implement separate /live and /ready checks and a startup failure when the model manifest is i...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+**Verify:** Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.

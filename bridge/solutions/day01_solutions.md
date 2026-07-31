@@ -46,6 +46,28 @@ effort echo. `settings_summary()` is an explicit allowlist of safe fields.
 The important invariant is not the exact redacted string. It is that no secret
 substring can appear and malformed input is never reflected into output.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+Run this only after attempting the learner functions. It checks normalization
+and redaction without contacting PostgreSQL:
+
+```python
+from bridge.solutions.day01_solution import load_settings, redact_database_url
+
+settings = load_settings({"DS60_LOG_LEVEL": "warning"})
+assert settings.log_level == "WARNING"
+assert settings.database_url is None
+
+sentinel_password = "secret-marker"
+database_url = "postgresql://learner:" + sentinel_password + "@localhost:5432/course?token=hidden"
+safe_label = redact_database_url(database_url)
+assert sentinel_password not in safe_label
+assert "hidden" not in safe_label
+```
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs align one-for-one with the learner and guide. The executable
@@ -65,9 +87,7 @@ environment key. Pass the chosen level through one normalizer and construct the 
 **Why this boundary matters:** Resolve each source once, then validate the final selected value
 at the boundary.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert that CLI `debug` overrides environment `WARNING`, an absent URL remains `None`, `INF0` raises `ValueError`, and the supplied environment mapping is unchanged.
 
 ### Exercise 2 — Security
 
@@ -81,9 +101,7 @@ contains none of the original text.
 **Why this boundary matters:** Parsing components is safer than replacing substrings in an
 opaque secret.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Use a URL containing sentinel password, query token, and fragment; assert all three sentinels are absent while scheme, username, host, port, and database remain visible.
 
 ### Exercise 3 — Implementation
 
@@ -96,9 +114,7 @@ neutral so `load_settings()` can apply environment fallback after parsing.
 **Why this boundary matters:** Parser construction and argument parsing are separate
 responsibilities.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert `parse_args([])` leaves URL and log-level overrides unset with `dry_run=False`; then parse all three flags and compare the exact namespace without reading `sys.argv`.
 
 ### Exercise 4 — Integration
 
@@ -112,9 +128,7 @@ log `Settings` directly.
 **Why this boundary matters:** A testable CLI accepts an argument sequence instead of rewriting
 `sys.argv`.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Call `main()` with an injected argument list and captured logs; assert exit status `0`, the selected level, one redacted database label, and no full URL or password.
 
 ### Exercise 5 — Testing
 
@@ -128,9 +142,7 @@ and malformed input never appear.
 **Why this boundary matters:** Include both successful values and exact failure types; assert
 secrets are absent from all diagnostics.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Parameterize defaults, each CLI override, mixed-case valid levels, `INF0`, missing URL, malformed URL, and sentinel credentials; compare exact `Settings` or exception types.
 
 ### Exercise 6 — Prediction
 
@@ -143,9 +155,7 @@ explicit level overrides only its environment counterpart, while the absent URL 
 **Why this boundary matters:** Apply precedence independently per setting rather than treating
 one source as an all-or-nothing bundle.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Write `Settings(database_url=None, log_level='DEBUG', dry_run=True)` before running the case, then assert the returned dataclass equals that prediction.
 
 ### Exercise 7 — Debugging
 
@@ -159,9 +169,7 @@ token.
 **Why this boundary matters:** Failure messages are an output boundary and need the same secrecy
 rule as normal logs.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Feed malformed text containing `secret-marker`; assert the repaired branch returns a fixed marker such as `<invalid-database-url>` and never includes `secret-marker`.
 
 ### Exercise 8 — Design
 
@@ -175,9 +183,7 @@ than copying it into provenance records.
 **Why this boundary matters:** Metadata about a source can be safe even when the source value is
 not.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Show provenance labels `cli`, `environment`, and `default` beside resolved fields while the complete database URL exists in only one field and never appears in the safe summary.
 
 ### Exercise 9 — Security testing
 
@@ -191,9 +197,7 @@ database label is present on success.
 **Why this boundary matters:** Test the emitted boundary, not only the return value of the
 redaction helper.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Capture startup, success, and validation-failure logs with password/query sentinels; assert every sentinel and the full URL are absent and the safe host/database label remains.
 
 ### Exercise 10 — Portability
 
@@ -208,6 +212,4 @@ platform-neutral because they use injected mappings and sequences.
 **Why this boundary matters:** Environment-setting syntax differs, but `argparse`, `Mapping`,
 and the Python entry point do not.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Record one PowerShell `$env:DS60_LOG_LEVEL=...` run and one POSIX `export ...` run; assert the same `Settings` values result when identical CLI overrides are supplied.

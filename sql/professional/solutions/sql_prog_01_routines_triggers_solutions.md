@@ -72,18 +72,13 @@ argument.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 1, read from `pro_routines_lab.work_item_audit`, `pro_routines_lab.work_items`, `OF`, `pro_routines_lab.status_change_count`, and `pro_routines_lab.reassign_open_items`. Build the answer toward `stable`; keep `stable` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-prog-01 Exercise 1, expected output: one row per `stable`. The final columns are `stable`. The final order is `wi.item_id`.
+- **Independent verification:** For sql-prog-01 Exercise 1, run an anti-check that counts rows where NOT ((a.item_id = p_item_id $function$) OR (wi.owner_name = p_from_owner AND wi.status <> 'closed') OR (wi.item_id = 1)); require unique `stable` where the expected grain is one row per key and confirm the projected `stable` against `pro_routines_lab.work_item_audit`, `pro_routines_lab.work_items`, `OF`, `pro_routines_lab.status_change_count`, and `pro_routines_lab.reassign_open_items`. Repeat with `NULL` in `stable` and state whether the row is kept, rejected, or classified.
+- **Intermediate relation check:** For sql-prog-01 Exercise 1, inspect the source keys that survive `WHERE`; then check `wi.item_id` before applying the row cap.
+- **Clause check:** For sql-prog-01 Exercise 1, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pro_routines_lab.work_item_audit`, `pro_routines_lab.work_items`, `OF`, `pro_routines_lab.status_change_count`, and `pro_routines_lab.reassign_open_items`, preserve one row per `stable`, and finish with `stable` ordered by `wi.item_id`.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 1, the chosen form is justified by this lesson-specific rationale: `status_change_count(bigint)` is `STABLE`, `PARALLEL SAFE`, and security invoker. Evaluate another form against the concrete expected result (one row per `stable`) and the verification above.
+- **Edge case:** Repeat with `NULL` in `stable` and state whether the row is kept, rejected, or classified.
 
 ## Exercise 2 — Reassignment procedure
 
@@ -97,18 +92,13 @@ permissions, migration, observability, and tests are maintained as an API.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 2, complete the reassignment procedure written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-prog-01 Exercise 2, expected output: a completed the reassignment procedure written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `update`.
+- **Independent verification:** For sql-prog-01 Exercise 2, check the reassignment procedure written analysis against `update`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-prog-01 Exercise 2, check the reassignment procedure written analysis against `update`.
+- **Clause check:** For sql-prog-01 Exercise 2, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_routines_lab.work_items`, `ON`, and `NEW.status` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 2, the chosen form is justified by this lesson-specific rationale: The procedure rejects a NULL/blank destination and updates only rows whose status is not closed. Evaluate another form against the concrete expected result (a completed the reassignment procedure written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 3 — Transition guard
 
@@ -122,18 +112,13 @@ business policy and can be difficult to version.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 3, complete the transition guard written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-prog-01 Exercise 3, expected output: a completed the transition guard written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `check_violation`, and `if`.
+- **Independent verification:** For sql-prog-01 Exercise 3, check the transition guard written analysis against `check_violation`, and `if`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-prog-01 Exercise 3, check the transition guard written analysis against `check_violation`, and `if`.
+- **Clause check:** For sql-prog-01 Exercise 3, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_routines_lab.work_items`, `ON`, and `NEW.status` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 3, the chosen form is justified by this lesson-specific rationale: The BEFORE trigger compares OLD and NEW status and raises `check_violation` for `closed -> open`. Evaluate another form against the concrete expected result (a completed the transition guard written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 4 — Audit grain
 
@@ -145,18 +130,13 @@ row counts.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 4, read from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Build the answer toward `changed_rows`; keep `changed_rows` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-prog-01 Exercise 4, expected output: one row per `changed_rows`. The final columns are `changed_rows`.
+- **Independent verification:** For sql-prog-01 Exercise 4, reselect the returned keys directly from the source; require unique `changed_rows` where the expected grain is one row per key and confirm the projected `changed_rows` against `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Add one source row with a new `changed_rows`; verify the result gains exactly one row carrying that `changed_rows` value.
+- **Intermediate relation check:** For sql-prog-01 Exercise 4, select `changed_rows` from `pro_routines_lab.work_items`, `ON`, and `NEW.status` before adding derived columns.
+- **Clause check:** For sql-prog-01 Exercise 4, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_routines_lab.work_items`, `ON`, and `NEW.status` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 4, the chosen form is justified by this lesson-specific rationale: The learner row audit has grain “one changed item status.” The statement audit has grain “one UPDATE statement,” with an array of affected item IDs. Evaluate another form against the concrete expected result (one row per `changed_rows`) and the verification above.
+- **Edge case:** Add one source row with a new `changed_rows`; verify the result gains exactly one row carrying that `changed_rows` value.
 
 ## Exercise 5 — Declarative and transaction boundaries
 
@@ -172,18 +152,13 @@ procedure's transaction contract is deliberate and integration-tested.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 5, complete the declarative boundary written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
+- **Expected result/shape:** For sql-prog-01 Exercise 5, expected output: a completed the declarative boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `call`.
+- **Independent verification:** For sql-prog-01 Exercise 5, check the declarative boundary written analysis against `call`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Intermediate relation check:** For sql-prog-01 Exercise 5, check the declarative boundary written analysis against `call`.
+- **Clause check:** For sql-prog-01 Exercise 5, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_routines_lab.work_items`, `ON`, and `NEW.status` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 5, the chosen form is justified by this lesson-specific rationale: Allowed status values are row-local and declarative, so a `CHECK` is visible, automatically enforced for every writer, and simpler than a trigger. Evaluate another form against the concrete expected result (a completed the declarative boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
+- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
 ## Exercise 6 — Volatility and parallel promises
 
@@ -200,18 +175,13 @@ incorrect promise can reuse a stale result or execute in an invalid worker.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 6, read from `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace`. Build the answer toward `proname`, `volatility`, and `parallel_mode`; keep `proname` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-prog-01 Exercise 6, expected output: one row per `proname`. The final columns are `proname`, `volatility`, and `parallel_mode`. The final order is `p.proname`.
+- **Independent verification:** For sql-prog-01 Exercise 6, project `proname` plus the raw source columns from `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace` at each join stage; record row count and distinct `proname`, then assert the final `proname`, `volatility`, and `parallel_mode` values match those staged rows without unintended fanout or loss. Add one row for which `(n.nspname = 'pro_routines_lab')` is true and one for which it is false; verify only the matching `proname` value is returned.
+- **Intermediate relation check:** For sql-prog-01 Exercise 6, start with the first relation in `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace`; after each join, record total rows and distinct `proname` so the exact fanout or loss is visible.
+- **Clause check:** For sql-prog-01 Exercise 6, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace`, preserve one row per `proname`, and finish with `proname`, `volatility`, and `parallel_mode` ordered by `p.proname`.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 6, the chosen form is justified by this lesson-specific rationale: The audit-count function is STABLE because it reads tables and should see one statement snapshot; it is not IMMUTABLE because table contents can change. Evaluate another form against the concrete expected result (one row per `proname`) and the verification above.
+- **Edge case:** Add one row for which `(n.nspname = 'pro_routines_lab')` is true and one for which it is false; verify only the matching `proname` value is returned.
 
 ## Exercise 7 — Statement trigger with transition tables
 
@@ -227,18 +197,13 @@ a different grain.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** An alternative physical/object design is valid only if catalog inspection and valid/invalid behavior prove the same invariant.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 7, read the target keys from `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-prog-01 Exercise 7, expected output: the command tag and an independently counted set of affected `integer` values. The final columns are `integer`. The final order is `s.summary_id`.
+- **Independent verification:** For sql-prog-01 Exercise 7, materialize the intended `integer` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `integer` values in both cases.
+- **Intermediate relation check:** For sql-prog-01 Exercise 7, start with the first relation in `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON`; after each join, record total rows and distinct `integer` so the exact fanout or loss is visible.
+- **Clause check:** For sql-prog-01 Exercise 7, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON`, preserve one row per `integer`, and finish with `integer` ordered by `s.summary_id`.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 7, the chosen form is justified by this lesson-specific rationale: Define an AFTER UPDATE . Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `integer` values) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `integer` values in both cases.
 
 ## Exercise 8 — Exact expected failure
 
@@ -252,18 +217,13 @@ programmer mistakes look like passing negative tests.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 8, read the target keys from `pro_routines_lab.exception_probe` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-prog-01 Exercise 8, expected output: the command tag and an independently counted set of affected `unique_violation` values. The final columns are `unique_violation`.
+- **Independent verification:** For sql-prog-01 Exercise 8, materialize the intended `unique_violation` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.exception_probe` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `unique_violation` values in both cases.
+- **Intermediate relation check:** For sql-prog-01 Exercise 8, materialize the intended `unique_violation` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.exception_probe` again and prove rollback or idempotent retry.
+- **Clause check:** For sql-prog-01 Exercise 8, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `pro_routines_lab.exception_probe`, preserve one row per `unique_violation`, and finish with `unique_violation`.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 8, the chosen form is justified by this lesson-specific rationale: A PL/pgSQL block with an inner `BEGIN . Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `unique_violation` values) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `unique_violation` values in both cases.
 
 ## Exercise 9 — SECURITY DEFINER hardening
 
@@ -278,18 +238,13 @@ temporary-object attacks, grants, and dependency changes as part of the API.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** The statement completes with the expected command tag, and a catalog or behavior query exposes the named object/rule; no unrelated schema object persists.
-- **Independent verification:** Inspect the applicable pgcatalog/informationschema entry and run one valid plus one boundary case inside the lesson's safety boundary.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 9, read from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Build the answer toward `search_path`; keep `search_path` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-prog-01 Exercise 9, expected output: one row per `search_path`. The final columns are `search_path`.
+- **Independent verification:** For sql-prog-01 Exercise 9, reselect the returned keys directly from the source; require unique `search_path` where the expected grain is one row per key and confirm the projected `search_path` against `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Add one source row with a new `search_path`; verify the result gains exactly one row carrying that `search_path` value.
+- **Intermediate relation check:** For sql-prog-01 Exercise 9, select `search_path` from `pro_routines_lab.work_items`, `ON`, and `NEW.status` before adding derived columns.
+- **Clause check:** For sql-prog-01 Exercise 9, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_routines_lab.work_items`, `ON`, and `NEW.status` or label it as proposed policy.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 9, the chosen form is justified by this lesson-specific rationale: Own the function with a NOLOGIN role that has only the required read access, set a fixed safe `search_path`, qualify every relation/operator-sensitive object, avoid writable helper schemas and unsafe dynamic SQ. Evaluate another form against the concrete expected result (one row per `search_path`) and the verification above.
+- **Edge case:** Add one source row with a new `search_path`; verify the result gains exactly one row carrying that `search_path` value.
 
 ## Exercise 10 — Concurrent work claiming
 
@@ -304,18 +259,13 @@ outbox so slow calls do not retain row locks.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** A table-shaped result containing every key/measure named in the prompt; the result must preserve the row grain described in the walkthrough and expose every named key or measure.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-prog-01 Exercise 10, read the target keys from `pro_routines_lab.claim_queue`, and `SKIP` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
+- **Expected result/shape:** For sql-prog-01 Exercise 10, expected output: one `RETURNING` row per affected `affected_row_count` plus the command tag, with pre-write and post-write values that reconcile. The final columns are `affected_row_count`, and `command_tag`.
+- **Independent verification:** For sql-prog-01 Exercise 10, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.claim_queue`, and `SKIP` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
+- **Intermediate relation check:** For sql-prog-01 Exercise 10, run `claimable` one at a time. Record each CTE's row count and `affected_row_count` uniqueness before the next stage uses it.
+- **Clause check:** For sql-prog-01 Exercise 10, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, `ORDER BY`, `LIMIT`, and `RETURNING`. Read only those operations: begin at `pro_routines_lab.claim_queue`, and `SKIP`, preserve one row per `affected_row_count`, and finish with `affected_row_count`, and `command_tag`.
+- **Alternative/trade-off:** For sql-prog-01 Exercise 10, the chosen form is justified by this lesson-specific rationale: In a short transaction, select eligible IDs in a deterministic order `FOR UPDATE SKIP LOCKED LIMIT n`, then update only those IDs and commit. Evaluate another form against the concrete expected result (one `RETURNING` row per affected `affected_row_count` plus the command tag, with pre-write and post-write values that reconcile) and the verification above.
+- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
 
 ## Edge cases
 

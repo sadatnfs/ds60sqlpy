@@ -9,60 +9,76 @@ Contents
 
 ---
 
-Exercise 1 — Fine‑tune DistilBERT for sentiment
+Worked reference for Exercise 1 — Fine‑tune DistilBERT for sentiment
 ```python
-# 1) Imports
-from datasets import load_dataset
-from transformers import (AutoTokenizer, AutoModelForSequenceClassification,
-                          TrainingArguments, Trainer)
-import numpy as np
-import evaluate
-from pathlib import Path
+import os
 
-# 2) Data: use IMDB for demo
-ds = load_dataset('imdb')
+if os.environ.get("DS60_RUN_CACHED_NLP_EXTENSION") != "1":
+    print(
+        "Skipped the optional cached fine-tuning extension. "
+        "Set DS60_RUN_CACHED_NLP_EXTENSION=1 only after the "
+        "dataset, tokenizer, model, and metric are cached."
+    )
+else:
+    # 1) Imports
+    from datasets import load_dataset
+    from transformers import (
+        AutoTokenizer,
+        AutoModelForSequenceClassification,
+        TrainingArguments,
+        Trainer,
+    )
+    import numpy as np
+    import evaluate
+    from pathlib import Path
 
-# 3) Tokenizer and encoding
-tok = AutoTokenizer.from_pretrained('distilbert-base-uncased')
+    # 2) Data: use IMDB for demo
+    ds = load_dataset("imdb")
 
-def encode(batch):
-    return tok(batch['text'], truncation=True, padding='max_length', max_length=128)
+    # 3) Tokenizer and encoding
+    tok = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 
-ds_enc = ds.map(encode, batched=True)
+    def encode(batch):
+        return tok(batch["text"], truncation=True, padding="max_length", max_length=128)
 
-ds_enc = ds_enc.rename_column('label', 'labels')
-ds_enc.set_format(type='torch', columns=['input_ids','attention_mask','labels'])
+    ds_enc = ds.map(encode, batched=True)
 
-# 4) Model
-model = AutoModelForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=2)
+    ds_enc = ds_enc.rename_column("label", "labels")
+    ds_enc.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
 
-# 5) Metrics
-accuracy = evaluate.load('accuracy')
+    # 4) Model
+    model = AutoModelForSequenceClassification.from_pretrained(
+        "distilbert-base-uncased", num_labels=2
+    )
 
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    preds = np.argmax(logits, axis=-1)
-    return {'accuracy': accuracy.compute(predictions=preds, references=labels)['accuracy']}
+    # 5) Metrics
+    accuracy = evaluate.load("accuracy")
 
-# 6) Training args and trainer
-args = TrainingArguments(
-    output_dir=str(Path('artifacts/day49/out')),
-    eval_strategy='steps',
-    eval_steps=10,
-    max_steps=20,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=16,
-    logging_steps=5,
-)
-trainer = Trainer(
-    model=model,
-    args=args,
-    train_dataset=ds_enc['train'].shuffle(seed=0).select(range(256)),
-    eval_dataset=ds_enc['test'].select(range(128)),
-    compute_metrics=compute_metrics,
-)
+    def compute_metrics(eval_pred):
+        logits, labels = eval_pred
+        preds = np.argmax(logits, axis=-1)
+        return {"accuracy": accuracy.compute(predictions=preds, references=labels)["accuracy"]}
 
-trainer.train(); trainer.evaluate()
+    # 6) Training args and trainer
+    args = TrainingArguments(
+        output_dir=str(Path("artifacts/day49/out")),
+        eval_strategy="steps",
+        eval_steps=10,
+        max_steps=20,
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=16,
+        logging_steps=5,
+    )
+    trainer = Trainer(
+        model=model,
+        args=args,
+        train_dataset=ds_enc["train"].shuffle(seed=0).select(range(256)),
+        eval_dataset=ds_enc["test"].select(range(128)),
+        compute_metrics=compute_metrics,
+    )
+
+    trainer.train()
+    trainer.evaluate()
 ```
 Line‑by‑line
 - load_dataset: quick access to IMDB; replace with your dataset if needed
@@ -73,58 +89,67 @@ Line‑by‑line
 
 ---
 
-Exercise 2 — Class weights for imbalance
+Worked reference for Exercise 2 — Class weights for imbalance
 ```python
-# Suppose your dataset has imbalance; compute class weights
-from collections import Counter
+import os
 
-labels = ds_enc['train']['labels']
-counts = Counter(labels)
-major = max(counts.values()); total = sum(counts.values())
-# inverse frequency weights normalized
-weights = [total/(2*counts[i]) for i in range(2)]
+if os.environ.get("DS60_RUN_CACHED_NLP_EXTENSION") != "1":
+    print(
+        "Skipped the optional cached fine-tuning extension. "
+        "Set DS60_RUN_CACHED_NLP_EXTENSION=1 only after the "
+        "dataset, tokenizer, model, and metric are cached."
+    )
+else:
+    # Suppose your dataset has imbalance; compute class weights
+    from collections import Counter
 
-import torch
-w = torch.tensor(weights)
+    labels = ds_enc["train"]["labels"]
+    counts = Counter(labels)
+    major = max(counts.values())
+    total = sum(counts.values())
+    # inverse frequency weights normalized
+    weights = [total / (2 * counts[i]) for i in range(2)]
 
-# Define a current Trainer subclass with a weighted loss.
-class WeightedTrainer(Trainer):
-    def __init__(self, *args, class_weights, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.class_weights = class_weights
-        # The custom loss does not use the batch-size loss kwarg.
-        self.model_accepts_loss_kwargs = False
+    import torch
 
-    def compute_loss(
-        self,
-        model,
-        inputs,
-        return_outputs=False,
-        num_items_in_batch=None,
-    ):
-        labels = inputs['labels']
-        model_inputs = {key: value for key, value in inputs.items() if key != 'labels'}
-        outputs = model(**model_inputs)
-        loss_fn = torch.nn.CrossEntropyLoss(
-            weight=self.class_weights.to(outputs.logits.device)
-        )
-        loss = loss_fn(outputs.logits, labels)
-        return (loss, outputs) if return_outputs else loss
+    w = torch.tensor(weights)
 
+    # Define a current Trainer subclass with a weighted loss.
+    class WeightedTrainer(Trainer):
+        def __init__(self, *args, class_weights, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.class_weights = class_weights
+            # The custom loss does not use the batch-size loss kwarg.
+            self.model_accepts_loss_kwargs = False
 
-weighted_model = AutoModelForSequenceClassification.from_pretrained(
-    'distilbert-base-uncased',
-    num_labels=2,
-)
-trainer_weighted = WeightedTrainer(
-    model=weighted_model,
-    args=args,
-    train_dataset=ds_enc['train'].select(range(256)),
-    eval_dataset=ds_enc['test'].select(range(128)),
-    compute_metrics=compute_metrics,
-    class_weights=w,
-)
-trainer_weighted.train(); trainer_weighted.evaluate()
+        def compute_loss(
+            self,
+            model,
+            inputs,
+            return_outputs=False,
+            num_items_in_batch=None,
+        ):
+            labels = inputs["labels"]
+            model_inputs = {key: value for key, value in inputs.items() if key != "labels"}
+            outputs = model(**model_inputs)
+            loss_fn = torch.nn.CrossEntropyLoss(weight=self.class_weights.to(outputs.logits.device))
+            loss = loss_fn(outputs.logits, labels)
+            return (loss, outputs) if return_outputs else loss
+
+    weighted_model = AutoModelForSequenceClassification.from_pretrained(
+        "distilbert-base-uncased",
+        num_labels=2,
+    )
+    trainer_weighted = WeightedTrainer(
+        model=weighted_model,
+        args=args,
+        train_dataset=ds_enc["train"].select(range(256)),
+        eval_dataset=ds_enc["test"].select(range(128)),
+        compute_metrics=compute_metrics,
+        class_weights=w,
+    )
+    trainer_weighted.train()
+    trainer_weighted.evaluate()
 ```
 Explanation
 - Compute class weights inversely proportional to class counts
@@ -134,29 +159,40 @@ Explanation
 
 ---
 
-Exercise 3 — spaCy matcher
+Worked reference for Exercise 3 — spaCy matcher
 ```python
 import spacy
 from spacy.matcher import Matcher
 
-nlp = spacy.load('en_core_web_sm')
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    # Fully local fallback: add only the entities needed by this fixture.
+    nlp = spacy.blank("en")
+    ruler = nlp.add_pipe("entity_ruler")
+    ruler.add_patterns(
+        [
+            {"label": "ORG", "pattern": "Apple"},
+            {"label": "ORG", "pattern": "AcmeCorp"},
+        ]
+    )
 matcher = Matcher(nlp.vocab)
 
 # Pattern: (ORG) + (is|plans to) + (acquire|buy) + (ORG)
 pattern = [
-    {'ENT_TYPE': 'ORG'},
-    {'LOWER': {'IN': ['is','plans','plan']}},
-    {'LOWER': {'IN': ['to']}},
-    {'LOWER': {'IN': ['acquire','buy','purchase']}},
-    {'ENT_TYPE': 'ORG'}
+    {"ENT_TYPE": "ORG"},
+    {"LOWER": {"IN": ["is", "plans", "plan"]}},
+    {"LOWER": {"IN": ["to"]}},
+    {"LOWER": {"IN": ["acquire", "buy", "purchase"]}},
+    {"ENT_TYPE": "ORG"},
 ]
-matcher.add('M&A', [pattern])
+matcher.add("M&A", [pattern])
 
-text = 'Apple plans to acquire AcmeCorp next quarter for $1B.'
+text = "Apple plans to acquire AcmeCorp next quarter for $1B."
 doc = nlp(text)
 for mid, start, end in matcher(doc):
     span = doc[start:end]
-    print('MATCH:', span.text)
+    print("MATCH:", span.text)
 ```
 Line‑by‑line
 - Matcher composes token attribute rules; ENT_TYPE uses NER labels
@@ -207,7 +243,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Try a zero-shot-classification pipeline with your own candidate labels.
 
@@ -217,16 +253,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Try a zero-shot-classification pipeline with your own candidate labels`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — tokenization contracts, cached NLP models, and sensitive-text evaluation — when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Compare tokenization from spaCy with a Hugging Face tokenizer.
 
@@ -236,14 +265,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Compare tokenization from spaCy with a Hugging Face tokenizer`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
-
+**Verify:** Practice 2 — tokenization contracts, cached NLP models, and sensitive-text evaluation — for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
 
 ### Exercise 3 — Truncation debugging
 
@@ -263,14 +285,7 @@ and attention memory cost grows rapidly.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Create a text longer than the model limit and inspect token count, special tokens, truncation...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Truncation debugging — print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.
 
 ### Exercise 4 — Model-provenance contract
 
@@ -290,14 +305,7 @@ network disabled.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Model-provenance contract — write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.
 
 ### Exercise 5 — Evaluation leakage
 
@@ -317,14 +325,7 @@ reconstructed.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Find and repair leakage when near-duplicate documents or excerpts from one source appear in b...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Evaluation leakage — group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.
 
 ### Exercise 6 — Sensitive-text boundary
 
@@ -344,4 +345,4 @@ incidents through the project's security process.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Design a local text-classification workflow that minimizes PII in logs, cached datasets, exam...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
+**Verify:** Sensitive-text boundary — run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.

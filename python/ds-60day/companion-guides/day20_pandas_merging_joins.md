@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 19 (`python-19`): table grain, grouping keys, and aggregation.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -214,7 +210,7 @@ assertion or inspection and explain what it proves.
 
 1. Join product, order-item, and customer tables to compute revenue per customer. **Before code:** write each table's row grain and key uniqueness. **Sequence:** many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record.
    **Expected behavior:** one output row per customer with orders.
-   **Verify:** use `validate` on both merges and reconcile total line revenue to customer revenue.
+   **Verify:** assert both merges pass their declared `validate` relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.
 
 2. Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order.
    **Expected behavior:** the unmatched right row survives with missing order fields. **Then:** swap table order and reproduce the result with a left join.
@@ -286,7 +282,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-20`
-(Day 20 — Merging and Joins). I am a complete beginner. Emphasize relational keys, join types, cardinality, and reconciliation.
+(Day 20 — Merging and Joins). Direct catalog prerequisites: `python-19`.
+I have completed the direct prerequisites: `python-19`. Emphasize relational keys, join types, cardinality, and reconciliation.
 Read `python/ds-60day/companion-guides/day20_pandas_merging_joins.md` and use the learner notebook
 `python/ds-60day/notebooks/day20_pandas_merging_joins.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

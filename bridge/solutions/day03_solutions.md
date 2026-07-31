@@ -41,6 +41,23 @@ The allowlist and `Identifier` solve different problems:
 Never replace the PostgreSQL integration check with SQLite. The recording fake
 proves application composition; PostgreSQL proves PostgreSQL behavior.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+The statement itself makes the value boundary inspectable before a live run:
+
+```python
+from bridge.solutions.day03_solution import FIND_CUSTOMERS_SQL
+
+assert FIND_CUSTOMERS_SQL.count("%s") == 2
+assert "ORDER BY lifetime_value DESC, c.customer_id" in FIND_CUSTOMERS_SQL
+```
+
+A cursor-double test should additionally show that the country and minimum
+total appear only in the parameter tuple.
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs align one-for-one with the learner and guide. The executable
@@ -60,9 +77,7 @@ Country and threshold remain separate parameters.
 **Why this boundary matters:** Left join orders, aggregate at customer grain, and keep two `%s`
 placeholders unquoted.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inspect `FIND_CUSTOMERS_SQL`: it selects customer ID/name, uses `LEFT JOIN`, `COALESCE`, `GROUP BY`, and `HAVING`, contains exactly two `%s` placeholders, and orders by lifetime value descending then customer ID.
 
 ### Exercise 2 — Implementation
 
@@ -75,9 +90,7 @@ construct one frozen `Customer` per row with explicit `int`, `str`, and `Decimal
 **Why this boundary matters:** Execute once, fetch once, and make row conversion explicit at the
 application boundary.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Configure rows with integer/string/Decimal fields; assert one execute call receives `(country, minimum_lifetime_value)` and the returned tuple contains exact typed `Customer` objects with `Decimal` money.
 
 ### Exercise 3 — Security testing
 
@@ -90,9 +103,7 @@ contain the hostile string, and the parameter tuple must contain that string unc
 **Why this boundary matters:** Assert both halves: placeholder remains in structure and hostile
 text appears only in parameters.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Use country `US' OR TRUE --`; assert that sentinel is absent from SQL text, appears unchanged as the first bound parameter, and cannot add rows to the fake result.
 
 ### Exercise 4 — Identifier safety
 
@@ -106,9 +117,7 @@ rather than interpolating text.
 **Why this boundary matters:** Allowlist first, import Psycopg inside the optional boundary,
 then compose schema and table identifiers.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert each of `customers`, `orders`, and `order_items` composes through `sql.Identifier`, while `users` and an injection-shaped name raise `ValueError` before cursor execution.
 
 ### Exercise 5 — Reasoning
 
@@ -121,9 +130,7 @@ injection and object authorization separately.
 **Why this boundary matters:** Quoting protects syntax; authorization controls which valid
 object may be selected.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Show that `Identifier` quotes a syntactically valid but unauthorized name, whereas the allowlist rejects it; record authorization and quoting as separate guarantees.
 
 ### Exercise 6 — Prediction
 
@@ -137,9 +144,7 @@ zero.
 **Why this boundary matters:** Track row preservation first, then aggregation, then threshold
 filtering.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** For a customer with no orders and minimum total zero, predict and assert lifetime value `Decimal('0')`; explain that the left join retains the row and `COALESCE` supplies zero before `HAVING` evaluates it.
 
 ### Exercise 7 — Boundary testing
 
@@ -152,9 +157,7 @@ secret-bearing log.
 
 **Why this boundary matters:** Mapping is application validation, not a blind cast after trust.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert integer, numeric string, and `Decimal` money rows map predictably, an empty fetch returns `()`, and malformed ID or money data raises the documented conversion exception.
 
 ### Exercise 8 — Debugging
 
@@ -167,9 +170,7 @@ enables injection; quoted `%s` is a literal string and prevents driver binding.
 **Why this boundary matters:** Placeholders are driver syntax and must not be interpolated or
 quoted.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Show the f-string version embeds the sentinel and the quoted-placeholder version sends literal `%s`; after repair, SQL stays static and the sentinel exists only in parameters.
 
 ### Exercise 9 — Protocol testing
 
@@ -182,9 +183,7 @@ cycle.
 
 **Why this boundary matters:** Model only the cursor behavior the consumer uses.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Use an `execute()` method that returns `None`; assert `find_customers()` still succeeds, `execute` is called once, and `fetchall` is called exactly once.
 
 ### Exercise 10 — Optional integration
 
@@ -198,6 +197,4 @@ deterministic shape, and close in a context manager.
 **Why this boundary matters:** Skip clearly when the opt-in dependency or variable is absent;
 never print the URL.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** With the live gate off, assert no Psycopg import or connection occurs; if enabled, run one ordered read-only query against `advanced_sql_training`, cap rows, and close cleanly.

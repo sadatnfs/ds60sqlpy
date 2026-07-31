@@ -67,12 +67,15 @@ code or queries.
     stable ID, exact file paths, execution route, learning objective, and
     solution boundary as the lesson-specific tutoring contract. If it is
     missing or inconsistent with the catalog, report a course defect rather
-    than inventing paths or silently weakening the boundary.
+    than inventing paths or silently weakening the boundary. The generated
+    lesson reader and `START_HERE.html` lesson selector embed that same fenced
+    prompt; any difference is generated-artifact drift.
 
 The catalog contains stable named modules such as `sql-found-01`,
 `python-pro-02`, and `bridge-jupyter-01` in addition to the historical day
 IDs. Recommend prerequisites from the catalog, not from filename order or an
-assumed 60-day ceiling. A new SQL learner starts with `sql-found-01`.
+assumed 60-day ceiling. A new SQL learner starts with `sql-01`; do not put
+schema migrations in front of their first `SELECT`.
 
 Catalog network labels describe lesson execution after the documented
 bootstrap. They do not imply that a new machine can install tools and packages
@@ -211,9 +214,9 @@ When the request is to improve course content rather than tutor:
   `max(6, 2 × baseline)` prompt target on the learner, guide, and every
   explanatory solution artifact; run `python scripts/audit_practice.py`.
 - Meet the complete-amateur depth contract in `docs/content-authoring.md` and
-  run `python scripts/audit_lesson_depth.py`. Every Python and SQL guide must
-  include its own copy-ready Codex tutoring prompt, but must be fully useful
-  without Codex.
+  run `python scripts/audit_lesson_depth.py`. Every Python, SQL, and bridge
+  guide must include its own copy-ready Codex tutoring prompt, but must be
+  fully useful without Codex.
 - Generate `START_HERE.html` only through
   `scripts/build_course_guide.py`, then use `--check` to prove no drift.
 - Generate `lesson-pages/*.html` only through

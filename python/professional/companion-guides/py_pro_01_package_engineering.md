@@ -180,8 +180,7 @@ files = {
     "src/tiny/core.py": b"def add(a, b): return a + b\n",
 }
 manifest = "\n".join(
-    f"{path}:{hashlib.sha256(content).hexdigest()}"
-    for path, content in sorted(files.items())
+    f"{path}:{hashlib.sha256(content).hexdigest()}" for path, content in sorted(files.items())
 )
 digest = hashlib.sha256(manifest.encode("utf-8")).hexdigest()
 print(manifest, digest, sep="\n")
@@ -217,13 +216,7 @@ file.
 Hint: `Path.suffix` handles `.whl`; `Path.name.endswith(".tar.gz")` handles the
 two-part sdist suffix.
 
-**Verify:** For task `classify artifacts`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
-
+**Verify:** classify artifacts — assert classify_artifact accepts project-1.0.whl as wheel and project-1.0.tar.gz as sdist, while package.whl.txt and project.zip return the documented unsupported result/error.
 
 ### Exercise 2 — create an offline build command
 
@@ -234,54 +227,24 @@ and choose an explicit output directory.
 Why an argument list? It avoids a second round of shell parsing and behaves the
 same way in PowerShell, Command Prompt, Bash, and zsh.
 
-**Verify:** For task `create an offline build command`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** create an offline build command — assert the argument list starts with sys.executable and contains -m build --no-isolation --sdist --wheel --outdir followed by the explicit destination; execute no shell and test a path containing spaces.
 
 ### Exercise 3 — inspect dependency intent
 
 For each fixture entry, decide whether it is:
 
-1. a runtime dependency,
+- a runtime dependency,
 
-**Verify:** For task `a runtime dependency,`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
+- an optional installed feature,
 
+- a development-only dependency group, or
 
-
-
-
-2. an optional installed feature,
-
-**Verify:** For task `an optional installed feature,`, demonstrate the concrete requirement “2. an optional installed feature,” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-3. a development-only dependency group, or
-
-**Verify:** For task `a development-only dependency group, or`, show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-4. a build bootstrap requirement.
+- a build bootstrap requirement.
 
 Explain when `colorama`'s environment marker is true. Confirm that building
 metadata does not install the `test` or `quality` groups.
 
-**Verify:** For task `a build bootstrap requirement`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** inspect dependency intent — for each fixture entry, decide whether it is: - a runtime dependency, - an optional installed feature, - a development-only dependency group, or - a build bootstrap requirement; explain when colorama's environment marker is true; confirm that building metadata does not install the test or quality groups.
 
 ### Exercise 4 — build in a disposable directory
 
@@ -311,13 +274,7 @@ If the frontend reports a missing build requirement, return to connected setup
 and install the build tools. Do not remove `--no-isolation` merely to make an
 offline test pass.
 
-**Verify:** For task `build in a disposable directory`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
-
+**Verify:** build in a disposable directory — run the platform command in disposable storage with network disabled; require exit code 0, exactly one sdist and one wheel, no build artifacts beside the staged source, and an explicit missing-build-tool error when unavailable.
 
 ### Exercise 5 — prove the installed origin
 
@@ -333,13 +290,7 @@ tree, put only that target on `PYTHONPATH`, and print:
 Implement `installed_origin_is_safe` so it accepts only a resolved path under
 the fresh target.
 
-**Verify:** For task `prove the installed origin`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
-
+**Verify:** prove the installed origin — from outside the source tree, install with --no-index --no-deps into a fresh target and assert module.__file__ resolves under that target, version/entry point match metadata, and greeting('wheel') has the expected value.
 
 ### Extended professional practice
 
@@ -353,13 +304,7 @@ Build the fixture sdist in disposable storage, unpack it, build a wheel from tha
 
 **Progressive hint:** A direct wheel and an sdist exercise different inclusion paths. Use temporary directories and inspect archive members before rebuilding.
 
-**Verify:** For task `build a wheel from the source distribution`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** build a wheel from the source distribution — build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with --no-isolation, and compare the result with the direct wheel build; record every required local tool.
 
 ### Exercise 7 — inspect installed metadata without importing
 
@@ -367,13 +312,7 @@ Use `importlib.metadata` against the fresh target to inspect name, version, requ
 
 **Progressive hint:** Distribution metadata and import packages are related but distinct. Place only the target on the child process search path.
 
-**Verify:** For task `inspect installed metadata without importing`, report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels; then measure peak active/queued work, account for every input, and prove permits/resources are released after success and injected failure.
-
-
-
-
-
-
+**Verify:** inspect installed metadata without importing — use importlib.metadata against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package; reject unexpected or missing metadata.
 
 ### Exercise 8 — separate reproducibility from equivalence
 
@@ -381,13 +320,7 @@ Build twice from the same clean staged source. Compare file hashes, archive memb
 
 **Progressive hint:** Start with semantic equivalence. Byte-for-byte reproducibility requires controlled timestamps, toolchains, environment variables, and ordering.
 
-**Verify:** For task `separate reproducibility from equivalence`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** separate reproducibility from equivalence — build twice from the same clean staged source; compare file hashes, archive member lists, metadata contents, and installed behavior; explain which differences are harmless and which invalidate the release.
 
 ### Exercise 9 — test dependency markers across targets
 
@@ -395,13 +328,7 @@ Create a review matrix for the fixture's build, runtime, optional, development, 
 
 **Progressive hint:** Parse marker intent with packaging metadata; do not infer it from the developer machine where the lesson happens to run.
 
-**Verify:** For task `test dependency markers across targets`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** test dependency markers across targets — create a review matrix for the fixture's build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.
 
 ### Exercise 10 — design a local release gate
 
@@ -409,13 +336,7 @@ Write an offline release checklist that verifies clean source, tests, type/lint 
 
 **Progressive hint:** Every gate should produce bounded evidence and fail closed. Keep index credentials, signing services, and publication outside this local lab.
 
-**Verify:** For task `design a local release gate`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** design a local release gate — write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.
 
 ## Self-check
 
@@ -488,10 +409,12 @@ Emphasize src-layout packaging, build artifacts, metadata, and clean installatio
 - guide: `python/professional/companion-guides/py_pro_01_package_engineering.md`
 - learner artifact: `python/professional/lessons/py_pro_01_package_engineering.py`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-15`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

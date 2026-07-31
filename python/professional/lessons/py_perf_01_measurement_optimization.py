@@ -4,27 +4,26 @@ Professional learner deep dive (python-perf-01)
 ------------------------------------------------
 
 Mental model:
-Performance engineering begins with a user-visible budget and a
-reproducible workload. Wall-clock timing includes noise from warm-up,
-caching, scheduling, CPU frequency, allocation, and I/O. Repeat
-measurements, report a distribution, and keep correctness checks beside
-the benchmark.
-
-Profiling locates where time or memory is spent; algorithmic analysis
-explains how cost grows. Optimize the measured bottleneck, then rerun
-correctness and end-to-end evidence. Faster code that changes results,
-ordering, errors, or resource bounds is a regression.
+Performance engineering begins with a user-visible budget and a reproducible workload. Wall-
+clock timing includes noise from warm-up, caching, scheduling, CPU frequency, allocation, and
+I/O. Repeat measurements, report a distribution, and keep correctness checks beside the
+benchmark.  Profiling locates where time or memory is spent; algorithmic analysis explains how
+cost grows. Optimize the measured bottleneck, then rerun correctness and end-to-end evidence.
+Faster code that changes results, ordering, errors, or resource bounds is a regression.
 
 API/boundary anatomy:
-* benchmark contract: fixes data size/distribution, environment, warm-up, repetitions, statistic, and correctness invariant.
-* profile → hypothesis → one change: connects an observed hotspot to a scoped optimization rather than guessing.
-* scale curve + budget: measures several input sizes and checks latency/memory against an explicit threshold.
+* benchmark contract: fixes data size/distribution, environment, warm-up, repetitions,
+  statistic, and correctness invariant.
+* profile → hypothesis → one change: connects an observed hotspot to a scoped optimization
+  rather than guessing.
+* scale curve + budget: measures several input sizes and checks latency/memory against an
+  explicit threshold.
 
 Micro-example A — report repeat timing instead of one lucky run::
 
     import statistics
     import timeit
-    
+
     samples = timeit.repeat(
         "sum(range(10_000))",
         repeat=7,
@@ -44,7 +43,7 @@ Micro-example B — contrast quadratic and linear duplicate detection::
 
     def has_duplicate_quadratic(values):
         return any(values[i] in values[:i] for i in range(len(values)))
-    
+
     def has_duplicate_linear(values):
         seen = set()
         for value in values:
@@ -52,15 +51,17 @@ Micro-example B — contrast quadratic and linear duplicate detection::
                 return True
             seen.add(value)
         return False
-    
+
     for size in (100, 1_000):
         data = list(range(size))
         assert has_duplicate_quadratic(data) == has_duplicate_linear(data) == False
     print("both implementations agree on measured inputs")
 
-Expected: Both functions preserve the Boolean contract, while the set-based design has expected linear rather than quadratic growth.
+Expected: Both functions preserve the Boolean contract, while the set-based design has expected
+          linear rather than quadratic growth.
 
-Debugging rule: Reproduce the workload, record environment, profile CPU/memory/I/O, validate outputs, change one hotspot, and compare repeated end-to-end distributions.
+Debugging rule: Reproduce the workload, record environment, profile CPU/memory/I/O, validate
+                outputs, change one hotspot, and compare repeated end-to-end distributions.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

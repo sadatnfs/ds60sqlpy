@@ -3,9 +3,8 @@
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-The solution is not a typing template. Read the learner contract, predict
-the result, then compare decisions and evidence. The central mental model is
-**labeled tabular data, row grain, indexes, selection, and vectorized columns**.
+These worked answers demonstrate **labeled tabular data, row grain, indexes, selection, and vectorized columns**. Predict each named
+result before comparing your attempt with its matching assertions.
 
 A Series is a one-dimensional labeled array; a DataFrame is a table of
 labeled columns sharing an index. Before manipulating a DataFrame,
@@ -28,241 +27,139 @@ a small sample before trusting a calculation.
 - **boolean mask:** a True/False Series used to select matching rows.
 - **vectorized operation:** a column/array operation applied without an explicit Python row loop.
 
-### Reference pattern 1 — Build and inspect a tiny labeled table
+### How to compare an answer
 
-Use constructed data so the example is fully offline.
+For this lesson's **labeled tabular data, row grain, indexes, selection, and vectorized columns** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+<!-- END BEGINNER SOLUTION REVIEW -->
+
+## Exercises 1–3 — Worked answers
+
+### Exercise 1 — worked answer
+
+**Learner contract:** Using the lesson DataFrame, select rows where `time == 'Dinner'`, then compute the mean of the selected `tip` values. **Before code:** state the row grain and write the mask separately. **Expected behavior:** the result is one scalar equal to `dinner_rows['tip'].mean()`. **Constraints:** use `.loc` and do not loop. **Verify:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
+
+**Reasoning:** Implement this exact contract as written: Using the lesson DataFrame, select rows where `time == 'Dinner'`, then compute the mean of the selected `tip` values. Before code: state the row grain and write the mask separately. Expected behavior: the result is one scalar equal to `dinner_rows['tip'].mean()`. Constraints: use `.loc` and do not loop. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert every selected row is Dinner and the selection is non-empty before reporting the mean. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.
 
 ```python
 import pandas as pd
 
-sales = pd.DataFrame({
-    "order_id": [101, 102, 103],
-    "region": ["west", "east", "west"],
-    "amount": [20.0, 35.0, 15.0],
-})
-(sales.shape, sales.dtypes.astype(str).to_dict(), sales["order_id"].is_unique)
+df = pd.DataFrame(
+    {
+        "time": ["Lunch", "Dinner", "Dinner", "Lunch"],
+        "tip": [2.0, 4.0, 3.0, 1.5],
+        "size": [2, 5, 3, 6],
+        "total_bill": [10.0, 20.0, 0.0, 12.0],
+    },
+    index=["a", "b", "c", "d"],
+)
+original_df = df.copy(deep=True)
+
+dinner_mask = df["time"].eq("Dinner")
+dinner_rows = df.loc[dinner_mask]
+if dinner_rows.empty:
+    raise ValueError("the lesson fixture has no Dinner rows")
+average_tip = dinner_rows["tip"].mean()
+
+assert dinner_rows["time"].eq("Dinner").all()
+assert average_tip == dinner_rows["tip"].mean() == 3.5
 ```
 
-**Expected observation:** `((3, 3), {...}, True)`. The dtype spellings may vary slightly; each row represents one order and `order_id` is unique here.
+The fixture grain is one restaurant check per row. Keeping
+`dinner_mask`, `dinner_rows`, and the scalar aggregation separate makes
+each shape transition inspectable.
 
-### Reference pattern 2 — Filter rows and derive a column without a loop
+**Verification evidence:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
 
-A mask selects west orders; a vectorized expression creates tax.
-
-```python
-west = sales.loc[sales["region"].eq("west"), ["order_id", "amount"]]
-sales = sales.assign(amount_with_tax=sales["amount"] * 1.08)
-(west["order_id"].tolist(), sales["amount_with_tax"].round(2).tolist())
-```
-
-**Expected observation:** `([101, 103], [21.6, 37.8, 16.2])`. The original row index is retained in `west`.
-
-## Exercise-by-exercise reasoning map
-
-The numbering and learner contracts below match the guide and notebook.
-Each entry explains what to reason about, how to inspect the worked code,
-an alternative, an edge case, and the evidence required for completion.
-
-### Exercise 1 — reasoning, alternatives, and proof
-
-**Learner contract:** Using the lesson DataFrame, select rows where `time == 'Dinner'`, then compute the mean of the selected `tip` values. **Before code:** state the row grain and write the mask separately. **Expected behavior:** the result is one scalar equal to `dinner_rows['tip'].mean()`. **Constraints:** use `.loc` and do not loop. **Verify:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
-
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies labeled tabular data, row grain, indexes, selection, and vectorized columns.
-
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Method chaining can express a readable pipeline; named intermediate frames are better while learning or debugging each contract.
-
-**Edge case:** Empty selections, duplicate indexes, zero denominators, missing values, and chained assignment need explicit behavior.
-
-**Solution evidence to inspect:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
-
-### Exercise 2 — reasoning, alternatives, and proof
+### Exercise 2 — worked answer
 
 **Learner contract:** Add a Boolean `is_big_party` column that is `True` exactly when `size >= 5`. **Constraints:** use one vectorized comparison and explicit assignment; do not use row-wise `apply`. **Verify:** compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** Implement this exact contract as written: Add a Boolean `is_big_party` column that is `True` exactly when `size >= 5`. Constraints: use one vectorized comparison and explicit assignment; do not use row-wise `apply`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+df = df.assign(is_big_party=df["size"].ge(5))
+assert df["is_big_party"].equals(df["size"].ge(5))
+assert df.loc[df["is_big_party"], "size"].ge(5).all()
+assert df.loc[~df["is_big_party"], "size"].lt(5).all()
+assert len(df["is_big_party"]) == len(df)
+assert df.index.equals(original_df.index)
+```
 
-**Alternative:** Method chaining can express a readable pipeline; named intermediate frames are better while learning or debugging each contract.
+Vectorized comparison preserves index alignment and avoids row loops.
 
-**Edge case:** Empty selections, duplicate indexes, zero denominators, missing values, and chained assignment need explicit behavior.
+**Verification evidence:** compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged.
 
-**Solution evidence to inspect:** compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged.
-
-### Exercise 3 — reasoning, alternatives, and proof
+### Exercise 3 — worked answer
 
 **Learner contract:** Create a safe `tip_rate = tip / total_bill`, treating a zero bill as missing rather than infinity, then sort descending by `tip_rate`. **Constraints:** preserve the unsorted source in a separate name and choose where missing rates appear. **Verify:** assert there are no infinite values and that non-missing rates are monotonically decreasing.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** Implement this exact contract as written: Create a safe `tip_rate = tip / total_bill`, treating a zero bill as missing rather than infinity, then sort descending by `tip_rate`. Constraints: preserve the unsorted source in a separate name and choose where missing rates appear. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert there are no infinite values and that non-missing rates are monotonically decreasing. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+```python
+import numpy as np
 
-**Alternative:** Method chaining can express a readable pipeline; named intermediate frames are better while learning or debugging each contract.
+safe_bill = df["total_bill"].mask(df["total_bill"].eq(0))
+with_rate = df.assign(tip_rate=df["tip"] / safe_bill)
+ordered = with_rate.sort_values("tip_rate", ascending=False, na_position="last")
+assert not np.isinf(ordered["tip_rate"].dropna()).any()
+assert ordered["tip_rate"].dropna().is_monotonic_decreasing
+```
 
-**Edge case:** Empty selections, duplicate indexes, zero denominators, missing values, and chained assignment need explicit behavior.
+**Verification evidence:** assert there are no infinite values and that non-missing rates are monotonically decreasing.
 
-**Solution evidence to inspect:** assert there are no infinite values and that non-missing rates are monotonically decreasing.
+## Exercises 4–8 — Expanded mastery answers
 
-### Exercise 4 — reasoning, alternatives, and proof
+### Exercise 4 — answer contract
 
 **Learner contract:** **Prediction:** Predict the difference between `.loc[labels]` and `.iloc[positions]` after an integer index has been reordered. **Progressive hint:** Labels are not automatically row positions. **Verify:** After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes.
 
-**Reasoning before code:** Evaluate the expression or state transition by hand first. Name the input state, the next operation, and the exact evidence that would falsify the prediction while applying labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** Predict this named state change before running it: Prediction: Predict the difference between `.loc[labels]` and `.iloc[positions]` after an integer index has been reordered. Progressive hint: Labels are not automatically row positions. Then compare the prediction with this proof target: After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes. This makes labeled tabular data, row grain, indexes, selection, and vectorized columns observable instead of relying on intuition.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes.
 
-**Alternative:** Method chaining can express a readable pipeline; named intermediate frames are better while learning or debugging each contract.
-
-**Edge case:** Empty selections, duplicate indexes, zero denominators, missing values, and chained assignment need explicit behavior.
-
-**Solution evidence to inspect:** After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes.
-
-### Exercise 5 — reasoning, alternatives, and proof
+### Exercise 5 — answer contract
 
 **Learner contract:** **Tracing:** Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ? **Progressive hint:** Pandas aligns many labeled objects by index. **Verify:** Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.
 
-**Reasoning before code:** Create a small trace table with one row per operation or input item. Record the relevant names, labels, shape, or iterator position after each step so the labeled tabular data, row grain, indexes, selection, and vectorized columns model is visible.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ? Progressive hint: Pandas aligns many labeled objects by index. Record the named value, shape, label, or iterator position needed to establish: Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches. The trace exposes labeled tabular data, row grain, indexes, selection, and vectorized columns directly.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.
 
-**Alternative:** Method chaining can express a readable pipeline; named intermediate frames are better while learning or debugging each contract.
-
-**Edge case:** Empty selections, duplicate indexes, zero denominators, missing values, and chained assignment need explicit behavior.
-
-**Solution evidence to inspect:** Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.
-
-### Exercise 6 — reasoning, alternatives, and proof
+### Exercise 6 — answer contract
 
 **Learner contract:** **Implementation:** Create a safe `tip_rate` column that yields missing values rather than infinity when `total_bill` is zero. **Progressive hint:** Mask or replace the zero denominator before division. **Verify:** Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.
 
-**Reasoning before code:** Separate setup/input, the operation being learned, and verification. Write the smallest implementation satisfying the stated constraints, then explain how every line applies labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** Implement this exact contract as written: Implementation: Create a safe `tip_rate` column that yields missing values rather than infinity when `total_bill` is zero. Progressive hint: Mask or replace the zero denominator before division. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.
 
-**Alternative:** Method chaining can express a readable pipeline; named intermediate frames are better while learning or debugging each contract.
-
-**Edge case:** Empty selections, duplicate indexes, zero denominators, missing values, and chained assignment need explicit behavior.
-
-**Solution evidence to inspect:** Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.
-
-### Exercise 7 — reasoning, alternatives, and proof
+### Exercise 7 — answer contract
 
 **Learner contract:** **Debugging:** Repair chained assignment on a filtered DataFrame and explain when to use `.loc` or an explicit `.copy()`. **Progressive hint:** Make ownership and target rows explicit. **Verify:** Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not.
 
-**Reasoning before code:** Reproduce the bad behavior on the smallest input, state the violated contract, make one repair, and rerun both the failing boundary and a normal case. Keep the diagnosis grounded in labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair chained assignment on a filtered DataFrame and explain when to use `.loc` or an explicit `.copy()`. Progressive hint: Make ownership and target rows explicit. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not. The diagnosis depends on labeled tabular data, row grain, indexes, selection, and vectorized columns.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
+**Evidence to locate in the grouped implementation:** Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not.
 
-**Alternative:** Method chaining can express a readable pipeline; named intermediate frames are better while learning or debugging each contract.
-
-**Edge case:** Empty selections, duplicate indexes, zero denominators, missing values, and chained assignment need explicit behavior.
-
-**Solution evidence to inspect:** Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not.
-
-### Exercise 8 — reasoning, alternatives, and proof
+### Exercise 8 — answer contract
 
 **Learner contract:** **Edge case and explanation:** Compute a statistic for a possibly empty selection and return `None` instead of silently presenting `NaN` as a real result. **Progressive hint:** Check `.empty` before aggregating when absence has business meaning. **Verify:** Test nonempty and empty selections; assert the former returns the statistic and the latter returns `None`, not a value presented as meaningful.
 
-**Reasoning before code:** Turn the ambiguous boundary into an explicit contract before coding. Test values immediately below, at, and above the boundary and explain how the result follows from labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Compute a statistic for a possibly empty selection and return `None` instead of silently presenting `NaN` as a real result. Progressive hint: Check `.empty` before aggregating when absence has business meaning. Values below, at, and above the named boundary must produce the evidence Test nonempty and empty selections; assert the former returns the statistic and the latter returns `None`, not a value presented as meaningful. Those cases show how labeled tabular data, row grain, indexes, selection, and vectorized columns behaves at its edge.
 
-**How to read the code:** identify (1) the fixture or input,
-(2) the operation that implements the contract, (3) the returned
-value or side effect, and (4) the assertion/inspection that proves
-the behavior. Comments should explain *why* a boundary exists, not
-merely repeat the syntax.
-
-**Alternative:** Method chaining can express a readable pipeline; named intermediate frames are better while learning or debugging each contract.
-
-**Edge case:** Empty selections, duplicate indexes, zero denominators, missing values, and chained assignment need explicit behavior.
-
-**Solution evidence to inspect:** Test nonempty and empty selections; assert the former returns the statistic and the latter returns `None`, not a value presented as meaningful.
-<!-- END BEGINNER SOLUTION REVIEW -->
-
-We solve selection and transformation tasks on the `tips` dataset.
-
-Contents
-- Exercise 1: Dinner rows average tip
-- Exercise 2: Boolean column is_big_party
-- Exercise 3: Sort by tip percentage descending
-
----
-
-Setup
-```python
-import pandas as pd, seaborn as sns
-
-df = sns.load_dataset('tips')
-```
-
-Exercise 1 — Average tip for Dinner
-```python
-avg_tip_dinner = df.loc[df['time'] == 'Dinner', 'tip'].mean()
-print(round(avg_tip_dinner, 2))
-```
-Line-by-line
-- Boolean mask selects Dinner rows; then select the tip column; compute mean.
-
-Exercise 2 — is_big_party (size >= 5)
-```python
-df = df.assign(is_big_party=df['size'] >= 5)
-# or: df.loc[:, 'is_big_party'] = df['size'] >= 5
-```
-
-Exercise 3 — Sort by tip percentage
-```python
-df = df.assign(tip_pct=df['tip'] / df['total_bill'])
-sorted_df = df.sort_values('tip_pct', ascending=False)
-sorted_df[['total_bill','tip','tip_pct']].head()
-```
-Notes
-- Use assign for chain-friendly column creation.
-- Avoid chained indexing for assignment; prefer .loc or assign.
-
----
+**Evidence to locate in the grouped implementation:** Test nonempty and empty selections; assert the former returns the statistic and the latter returns `None`, not a value presented as meaningful.
 
 ## Expanded mastery lab solutions
 
 State a DataFrame's row grain, column meanings, and index role before selecting or deriving data. Prefer vectorized, explicit assignments.
 
-Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.
-
-### Practices 1–2 — Labels, positions, and alignment
+### Shared implementation for Exercises 4–5 — Labels, positions, and alignment
 
 `.loc` selects index labels; `.iloc` selects zero-based positions. A boolean
 Series is aligned by labels, so a mismatched index can raise or select
 unexpected rows. Build masks from the frame being filtered.
 
-### Practices 3–5 — Safe derivation and explicit ownership
+### Shared implementation for Exercises 6–8 — Safe derivation and explicit ownership
 
 ```python
 import numpy as np

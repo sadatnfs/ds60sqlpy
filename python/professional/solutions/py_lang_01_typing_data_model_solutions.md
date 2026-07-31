@@ -29,7 +29,6 @@ Edge cases include exhausted iterators, zero batch sizes, exceptions inside a
 transaction, corrupted descriptor storage, conflicting mixin order, and a
 runtime object that has a `name` attribute of the wrong semantic type.
 
-
 ---
 
 <!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
@@ -59,16 +58,20 @@ larger system. It gives the reasoning above an executable anchor:
 ```python
 from typing import Protocol
 
+
 class Named(Protocol):
     @property
     def name(self) -> str: ...
+
 
 class PlainRecord:
     def __init__(self, name):
         self.name = name
 
+
 def label(value: Named) -> str:
     return value.name.upper()
+
 
 print(label(PlainRecord("ada")))
 assert label(PlainRecord("ada")) == "ADA"
@@ -102,13 +105,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `Complete and type the overloaded parser`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Complete and type the overloaded parser — assert parse_scalar('12','int') returns int 12, parse_scalar('true','bool') returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.
 
 ### Exercise 2 — Implement the iterator protocol
 
@@ -124,13 +121,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `Implement the iterator protocol`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Implement the iterator protocol — assert list(Batches([],2)) == [] and list(Batches([1,2,3],2)) == [(1,2),(3,)]; after exhaustion, another next() must raise StopIteration without changing the stored offset.
 
 ### Exercise 3 — Reason about variance
 
@@ -146,13 +137,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `Reason about variance`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Reason about variance — save a mypy transcript where SequenceReader[str] is accepted as Reader[object] and a mutable string repository is rejected as a mutable object repository; include the concrete unsafe integer-write counterexample.
 
 ### Exercise 4 — Model events with TypedDict
 
@@ -168,13 +153,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `Model events with TypedDict`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Model events with TypedDict — mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.
 
 ### Exercise 5 — Exercise context-manager failure
 
@@ -190,13 +169,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `Exercise context-manager failure`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Exercise context-manager failure — start with target ['before'], append inside Transaction, and raise a sentinel RuntimeError; assert the target remains ['before'] and the same exception object/message reaches the caller.
 
 ### Exercise 6 — Trace descriptor lookup
 
@@ -212,13 +185,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `Trace descriptor lookup`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Trace descriptor lookup — assert Customer.name returns the descriptor object, Customer('Ada').name returns 'Ada', and corrupting the private storage with a non-string makes instance access raise the declared TypeError.
 
 ### Exercise 7 — Draw the MRO
 
@@ -234,13 +201,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `Draw the MRO`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Draw the MRO — record the predicted label and ApiRecord.__mro__ before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.
 
 ### Exercise 8 — Bound metaclass use
 
@@ -256,13 +217,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `Bound metaclass use`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Bound metaclass use — add a second Handler with init subclass; survey how a metaclass could enforce the same rule, then state why the hook is preferable here; use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.
 
 ### Exercise 9 — design a structural Protocol
 
@@ -283,13 +238,7 @@ checks attribute presence, not full generic signatures or semantic behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `design a structural Protocol`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** design a structural Protocol — run mypy positive cases for JSON/text Serializer implementations and one negative implementation with the wrong return type; the consumer must work without inheritance and the negative fixture must fail at the protocol boundary.
 
 ### Exercise 10 — preserve signatures with ParamSpec
 
@@ -310,13 +259,7 @@ same signature and return type at decorated call sites.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `preserve signatures with ParamSpec`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** preserve signatures with ParamSpec — mypy must preserve the wrapped positional/keyword signature and return type; injected fake clock/sink tests assert one duration record, functools.wraps metadata, return-value parity, and unchanged exception propagation.
 
 ### Exercise 11 — narrow decoded data safely
 
@@ -337,13 +280,7 @@ runtime validation.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `narrow decoded data safely`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** narrow decoded data safely — assert the TypeGuard accepts exactly the required-key/type fixture and rejects missing, extra, wrong-type, and bool-in-an-int-field fixtures; inside the accepted branch mypy must narrow to the TypedDict.
 
 ### Exercise 12 — choose frozen, slots, and hash semantics
 
@@ -365,13 +302,7 @@ carefully documented normalization.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `choose frozen, slots, and hash semantics`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** choose frozen, slots, and hash semantics — print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.
 
 ### Exercise 13 — implement cooperative equality
 
@@ -392,13 +323,7 @@ raising merely because comparison is unsupported.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `implement cooperative equality`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** implement cooperative equality — assert equal values have equal hashes, unequal values compare false, direct __eq__ with an unrelated type returns NotImplemented, and one reflected-comparison fixture demonstrates why returning False immediately differs.
 
 ### Exercise 14 — evolve a typed serialization boundary
 
@@ -419,13 +344,7 @@ variant, but it cannot replace validation of arbitrary decoded JSON.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `evolve a typed serialization boundary`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** evolve a typed serialization boundary — parse one old and one new payload into the expected immutable objects; assert the optional field default, round-trip version/kind, and named unknown-version and unknown-kind errors.
 
 ### Exercise 15 — trace weak references and caches
 
@@ -446,13 +365,7 @@ bounded LRU/TTL policy is preferable for resources and deterministic eviction.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `trace weak references and caches`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** trace weak references and caches — after dropping the only strong reference, assert the normal cache still owns its value while WeakValueDictionary may lose it after collection; test a slotted class with and without weak-reference support.
 
 ### Exercise 16 — review typing compatibility
 
@@ -474,4 +387,4 @@ must both be preserved.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** For task `review typing compatibility`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+**Verify:** review typing compatibility — save mypy caller fixtures showing the Sequence[str]-to-list[str] parameter narrowing breaks a valid tuple caller and analyze the return change separately; test the compatibility wrapper and its deprecation warning.

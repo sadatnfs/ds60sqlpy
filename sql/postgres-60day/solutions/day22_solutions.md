@@ -106,18 +106,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per order.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-22 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `customer_order_count`, `customer_average`, `first_order_date`, and `last_order_date`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-22 Exercise 1, expected output: One row per order. The final columns are `order_id`, `customer_id`, `customer_order_count`, `customer_average`, `first_order_date`, and `last_order_date`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-22 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `customer_order_count`, `customer_average`, `first_order_date`, and `last_order_date` against `orders`. Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
+- **Intermediate relation check:** For sql-22 Exercise 1, check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
+- **Clause check:** For sql-22 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `customer_order_count`, `customer_average`, `first_order_date`, and `last_order_date` ordered by `o.customer_id, o.order_date, o.order_id`.
+- **Alternative/trade-off:** For sql-22 Exercise 1, the chosen form is justified by this lesson-specific rationale: Name a full-partition customer window once and reuse it. Evaluate another form against the concrete expected result (One row per order) and the verification above.
+- **Edge case:** Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
 
 ## Exercise 2 — Query writing
 
@@ -158,18 +153,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per employee with nullable peer average.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-22 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `department_id`, `salary`, and `other_employee_average`; keep `employee_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-22 Exercise 2, expected output: One row per employee with nullable peer average. The final columns are `employee_id`, `department_id`, `salary`, and `other_employee_average`. The final order is `e.department_id, e.employee_id`.
+- **Independent verification:** For sql-22 Exercise 2, choose one complete partition from `employees`; hand-calculate its first, middle, and final window values for `other_employee_average`, then verify output keys remain `employee_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Intermediate relation check:** For sql-22 Exercise 2, inspect one window partition before projecting; then check `e.department_id, e.employee_id` before applying the row cap.
+- **Clause check:** For sql-22 Exercise 2, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, preserve one row per `employee_id`, and finish with `employee_id`, `department_id`, `salary`, and `other_employee_average` ordered by `e.department_id, e.employee_id`.
+- **Alternative/trade-off:** For sql-22 Exercise 2, the chosen form is justified by this lesson-specific rationale: Use `EXCLUDE CURRENT ROW`; a one-person partition yields NULL. Evaluate another form against the concrete expected result (One row per employee with nullable peer average) and the verification above.
+- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 3 — Query writing
 
@@ -209,18 +199,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per order.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-22 Exercise 3, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, `customer_average`, `customer_stddev`, and `customer_z_score`; keep `order_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-22 Exercise 3, expected output: One row per order. The final columns are `order_id`, `customer_id`, `total_amount`, `customer_average`, `customer_stddev`, and `customer_z_score`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-22 Exercise 3, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `total_amount`, `customer_average`, `customer_stddev`, and `customer_z_score` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Intermediate relation check:** For sql-22 Exercise 3, check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
+- **Clause check:** For sql-22 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `total_amount`, `customer_average`, `customer_stddev`, and `customer_z_score` ordered by `o.customer_id, o.order_date, o.order_id`.
+- **Alternative/trade-off:** For sql-22 Exercise 3, the chosen form is justified by this lesson-specific rationale: Compute independent partition windows and guard interpretation when variation is zero. Evaluate another form against the concrete expected result (One row per order) and the verification above.
+- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
 ## Exercise 4 — Prediction
 
@@ -277,18 +262,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per event with session number starting at one.
-- **Independent verification:** Run both cases with the same inputs, record the observed difference, and revise the explanation if evidence contradicts the prediction.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-22 Exercise 4, read from `events`. Build the answer toward `event_id`, `customer_id`, `event_time`, and `session_number`; keep `event_id` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-22 Exercise 4, expected output: One row per event with session number starting at one. The final columns are `event_id`, `customer_id`, `event_time`, and `session_number`. The final order is `customer_id, event_time, event_id`.
+- **Independent verification:** For sql-22 Exercise 4, choose one complete partition from `events`; hand-calculate its first, middle, and final window values for `event_time`, then verify output keys remain `event_id`. Use a one-row partition and a partition tied on `customer_id`; verify `event_id` and `customer_id, event_time, event_id` preserve the intended first/last row.
+- **Intermediate relation check:** For sql-22 Exercise 4, run `sequenced`, and `flagged` one at a time. Record each CTE's row count and `event_id` uniqueness before the next stage uses it.
+- **Clause check:** For sql-22 Exercise 4, the solution actually uses `WITH`, `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `events`, preserve one row per `event_id`, and finish with `event_id`, `customer_id`, `event_time`, and `session_number` ordered by `customer_id, event_time, event_id`.
+- **Alternative/trade-off:** For sql-22 Exercise 4, the chosen form is justified by this lesson-specific rationale: Lag event time per customer, flag NULL/large gaps, then cumulative-sum flags in a second layer. Evaluate another form against the concrete expected result (One row per event with session number starting at one) and the verification above.
+- **Edge case:** Use a one-row partition and a partition tied on `customer_id`; verify `event_id` and `customer_id, event_time, event_id` preserve the intended first/last row.
 
 ## Exercise 5 — Debugging
 
@@ -342,18 +322,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per customer/date island.
-- **Independent verification:** Keep a minimal failing case, rerun the corrected form, and compare keys/counts/totals so the repair is proved rather than asserted.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-22 Exercise 5, read from `orders`. Build the answer toward `customer_id`, `island_start`, `island_end`, and `days_in_island`; keep `customer_id`, and `island_key` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-22 Exercise 5, expected output: One row per customer/date island. The final columns are `customer_id`, `island_start`, `island_end`, and `days_in_island`. The final order is `customer_id, island_start`.
+- **Independent verification:** For sql-22 Exercise 5, independently aggregate `orders` by `customer_id`, and `island_key`; require one output row for every distinct `customer_id`, and `island_key` tuple and compare `island_start`, `island_end`, and `days_in_island` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `island_start`, `island_end`, and `days_in_island` for the existing `customer_id`, and `island_key` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-22 Exercise 5, run `order_days`, `numbered`, and `grouped` one at a time. Record each CTE's row count and `customer_id`, and `island_key` uniqueness before the next stage uses it.
+- **Clause check:** For sql-22 Exercise 5, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `customer_id`, and `island_key`, and finish with `customer_id`, `island_start`, `island_end`, and `days_in_island` ordered by `customer_id, island_start`.
+- **Alternative/trade-off:** For sql-22 Exercise 5, the chosen form is justified by this lesson-specific rationale: Deduplicate dates, use row number to derive a stable grouping key, then aggregate islands. Evaluate another form against the concrete expected result (One row per customer/date island) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `island_start`, `island_end`, and `days_in_island` for the existing `customer_id`, and `island_key` tuple and verify the new tuple appears exactly once.
 
 ## Exercise 6 — Extension
 
@@ -415,18 +390,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Expected result/shape:** One row per customer session.
-- **Independent verification:** Check uniqueness at the declared grain, deterministic ordering when rows are ranked/limited, and reconcile counts or totals to a simpler control query over the same population.
-- **Intermediate relation check:** Run or inspect each CTE/subquery from the
-  inside out. Record its keys and row count; the first stage that violates the
-  declared grain is where debugging begins.
-- **Clause check:** Explain why every `ON`, `WHERE`, grouping, window frame,
-  projection, and final sort belongs where it is. Moving a predicate can change
-  preserved rows; removing a tie-breaker can make output nondeterministic.
-- **Alternative/trade-off:** A shorter formulation is valid only when it preserves the same grain, NULL behavior, deterministic order, and transaction boundary.
-- **Edge case:** Recheck empty input, one qualifying row, `NULL` in a relevant
-  value/key, duplicate join keys, and tied ordering values. State which cases
-  are impossible because of a database constraint and which the query handles.
+- **Inputs/evidence:** For sql-22 Exercise 6, read from `events`. Build the answer toward `customer_id`, `session_number`, `session_start`, `session_end`, `event_count`, and `session_duration`; keep `customer_id`, and `session_number` visible whenever the result has row-level grain.
+- **Expected result/shape:** For sql-22 Exercise 6, expected output: One row per customer session. The final columns are `customer_id`, `session_number`, `session_start`, `session_end`, `event_count`, and `session_duration`. The final order is `customer_id, session_number`.
+- **Independent verification:** For sql-22 Exercise 6, independently aggregate `events` by `customer_id`, and `session_number`; require one output row for every distinct `customer_id`, and `session_number` tuple and compare `event_count`, and `session_duration` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `event_count`, and `session_duration` for the existing `customer_id`, and `session_number` tuple and verify the new tuple appears exactly once.
+- **Intermediate relation check:** For sql-22 Exercise 6, run `sequenced`, `flagged`, and `assigned` one at a time. Record each CTE's row count and `customer_id`, and `session_number` uniqueness before the next stage uses it.
+- **Clause check:** For sql-22 Exercise 6, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `events`, preserve one row per `customer_id`, and `session_number`, and finish with `customer_id`, `session_number`, `session_start`, `session_end`, `event_count`, and `session_duration` ordered by `customer_id, session_number`.
+- **Alternative/trade-off:** For sql-22 Exercise 6, the chosen form is justified by this lesson-specific rationale: Aggregate only after session IDs exist at event grain. Evaluate another form against the concrete expected result (One row per customer session) and the verification above.
+- **Edge case:** Add one row to an existing group and one row for a new group; recompute `event_count`, and `session_duration` for the existing `customer_id`, and `session_number` tuple and verify the new tuple appears exactly once.
 
 ## Final self-check
 

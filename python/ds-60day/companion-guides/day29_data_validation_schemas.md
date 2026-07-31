@@ -22,10 +22,6 @@ Complete Day 28 (`python-28`) and the typed cleaner from Day 18 (`python-18`).
 Pandera is in the `data` dependency group. Pydantic is an optional
 object-validation tool in the advanced `production` group.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -202,7 +198,6 @@ import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
-
 class ReadingSchema(pa.DataFrameModel):
     sensor_id: Series[int] = pa.Field(ge=1, unique=True)
     status: Series[str] = pa.Field(isin=["ok", "warning"])
@@ -210,7 +205,6 @@ class ReadingSchema(pa.DataFrameModel):
 
     class Config:
         coerce = True
-
 
 readings = pd.DataFrame(
     {"sensor_id": [1, 2], "status": ["ok", "warning"], "value": [2.5, 4.0]}
@@ -298,7 +292,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-29`
-(Day 29 — Data Validation with Schemas). I am a complete beginner. Emphasize turning data contracts into executable schemas and informative failures.
+(Day 29 — Data Validation with Schemas). Direct catalog prerequisites: `python-28`.
+I have completed the direct prerequisites: `python-28`. Emphasize turning data contracts into executable schemas and informative failures.
 Read `python/ds-60day/companion-guides/day29_data_validation_schemas.md` and use the learner notebook
 `python/ds-60day/notebooks/day29_data_validation_schemas.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

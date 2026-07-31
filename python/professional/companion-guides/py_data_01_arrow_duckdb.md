@@ -181,10 +181,7 @@ rows = [
     {"region": "north", "units": 2, "note": "large free text"},
     {"region": "south", "units": 1, "note": "another free text"},
 ]
-projected = [
-    {"region": row["region"], "units": row["units"]}
-    for row in rows if row["units"] >= 2
-]
+projected = [{"region": row["region"], "units": row["units"]} for row in rows if row["units"] >= 2]
 print(projected)
 assert projected == [{"region": "north", "units": 2}]
 ```
@@ -214,13 +211,7 @@ Test blank notes and a malformed number.
 For real money, prefer `Decimal` or integer minor units. A binary `float` is
 used in the learner exercise only to keep its first step small.
 
-**Verify:** For task `define the CSV contract`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** define the CSV contract — assert parse_nullable_text('') is None and nonblank text is preserved; on the six-row fixture, total_revenue must be 114.60, blank notes count to three, and a malformed numeric field raises ValueError naming the field.
 
 ### Exercise 2 — compare storage contracts
 
@@ -237,13 +228,7 @@ Make a table in your notes:
 Choose a format for a five-row configuration export and for a repeated
 50-million-row analytical scan. Explain each answer.
 
-**Verify:** For task `compare storage contracts`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** compare storage contracts — complete every CSV/Parquet comparison-table cell, choose CSV for the five-row human-inspected configuration and Parquet for the repeated 50-million-row scan, and cite type/nullability, projection, engine, streaming, and inspection evidence for both choices.
 
 ### Exercise 3 — build an Arrow schema
 
@@ -257,13 +242,7 @@ write Parquet, read it, and assert:
 
 Do not infer the schema first and then claim it was guaranteed.
 
-**Verify:** For task `build an Arrow schema`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** build an Arrow schema — with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.
 
 ### Exercise 4 — make partitions deliberate
 
@@ -279,13 +258,7 @@ region=west/part-000.csv
 Partitioning every high-cardinality value can create millions of tiny files.
 Choose stable, commonly filtered dimensions and plan file sizes.
 
-**Verify:** For task `make partitions deliberate`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** make partitions deliberate — assert north, south, and west map exactly to region=<value>/part-000.csv under the root; ../north, either slash, blank, and wrong-case values must raise ValueError before any file is written.
 
 ### Exercise 5 — query Parquet with DuckDB
 
@@ -301,13 +274,7 @@ Then run `EXPLAIN` on the same SQL. Find:
 Record the plan from your installed DuckDB version. Plan formatting changes, so
 look for semantics rather than copying one exact rendering.
 
-**Verify:** For task `query Parquet with DuckDB`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** query Parquet with DuckDB — assert the parameterized DuckDB result equals the fallback's sorted region/revenue rows; the EXPLAIN output must name a Parquet scan, units filter, and projected revenue/region/units columns while excluding note.
 
 ### Exercise 6 — explain pushdown honestly
 
@@ -315,31 +282,13 @@ Pushdown does not mean every query reads zero irrelevant bytes. Row-group
 statistics, file organization, filter selectivity, expression support, and
 engine version matter. Write:
 
-1. what the plan proves,
+- what the plan proves,
 
-**Verify:** For task `what the plan proves,`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
+- what it suggests may be skipped, and
 
+- what would require profiling or scan metrics to prove.
 
-
-
-
-2. what it suggests may be skipped, and
-
-**Verify:** For task `what it suggests may be skipped, and`, demonstrate the concrete requirement “2. what it suggests may be skipped, and” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-3. what would require profiling or scan metrics to prove.
-
-**Verify:** For task `what would require profiling or scan metrics to prove`, demonstrate the concrete requirement “3. what would require profiling or scan metrics to prove” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** explain pushdown honestly — write a three-row evidence table separating what EXPLAIN proves, what row-group statistics suggest, and what measured scanned rows/bytes must establish; include one selective and one nonselective filter result.
 
 ### Exercise 7 — exercise the fallback
 
@@ -348,13 +297,7 @@ pandas exists, it uses typed `read_csv`; otherwise it uses the standard
 library. Confirm the same row count, null count, region set, and revenue across
 engines.
 
-**Verify:** For task `exercise the fallback`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** exercise the fallback — force the no-PyArrow/no-DuckDB path and assert row count 6, null-note count 3, the same region set, and revenue 114.60; compare every value with the optional-engine result when that capability is installed.
 
 ### Extended professional practice
 
@@ -368,13 +311,7 @@ Create version 2 of the sales schema with one nullable additive column and one p
 
 **Progressive hint:** Adding a nullable field is often backward-compatible; changing decimal scale, nullability, meaning, or type may require a new dataset version.
 
-**Verify:** For task `plan schema evolution`, produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
-
+**Verify:** plan schema evolution — create version 2 of the sales schema with one nullable additive column and one proposed type change; define which readers remain compatible and write a migration/rejection policy.
 
 ### Exercise 9 — control file and row-group size
 
@@ -382,13 +319,7 @@ Generate a larger local deterministic dataset and compare many tiny Parquet file
 
 **Progressive hint:** Partition values and file size solve different problems. Keep the total dataset small enough for a laptop and repeat measurements.
 
-**Verify:** For task `control file and row-group size`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** control file and row-group size — generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups; record metadata count, scan planning, file sizes, and filtered query behavior.
 
 ### Exercise 10 — validate a dataset before querying
 
@@ -396,13 +327,7 @@ Build a local validation report for schema equality, required/null counts, uniqu
 
 **Progressive hint:** Read metadata and bounded columns first where possible; include failing row counts and opaque IDs without dumping sensitive data.
 
-**Verify:** For task `validate a dataset before querying`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
-
+**Verify:** validate a dataset before querying — build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.
 
 ### Exercise 11 — reconcile a local analytical join
 
@@ -410,13 +335,7 @@ Create a small region lookup fixture, join it to sales in DuckDB, and reproduce 
 
 **Progressive hint:** Validate lookup-key uniqueness before the join and choose inner versus left semantics explicitly.
 
-**Verify:** For task `reconcile a local analytical join`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** reconcile a local analytical join — create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic; include an unknown region and duplicate lookup key.
 
 ### Exercise 12 — find a non-pushdown filter
 
@@ -424,13 +343,7 @@ Compare `units >= ?` with a transformed predicate such as a function of units. I
 
 **Progressive hint:** Simple comparisons often map to row-group statistics; arbitrary functions may need evaluation after scanning.
 
-**Verify:** For task `find a non-pushdown filter`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** find a non-pushdown filter — print both plans and measured scan evidence for units >= 2 and the transformed predicate; if rewritten, assert the sorted result rows are identical and record whether filter/projection pushdown changed.
 
 ### Exercise 13 — publish a dataset atomically
 
@@ -438,13 +351,7 @@ Write partitioned output to a temporary version directory, validate it, create a
 
 **Progressive hint:** Readers must never see a half-written dataset. The manifest is written after data files and verified before promotion.
 
-**Verify:** For task `publish a dataset atomically`, assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
-
+**Verify:** publish a dataset atomically — write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.
 
 ### Exercise 14 — reconcile decimals and timestamps across engines
 
@@ -452,13 +359,7 @@ Add boundary decimal values and timezone-aware timestamps to a local round trip.
 
 **Progressive hint:** Declare decimal precision/scale and one timestamp storage timezone. Compare canonical values, not default display strings.
 
-**Verify:** For task `reconcile decimals and timestamps across engines`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then show the relevant row/group/time identities and assert the training and evaluation information boundaries are disjoint.
-
-
-
-
-
-
+**Verify:** reconcile decimals and timestamps across engines — add boundary decimal values and timezone-aware timestamps to a local round trip; compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.
 
 ## Self-check
 
@@ -526,10 +427,12 @@ Emphasize typed data boundaries, Arrow/Parquet schema, partitions, and pushdown 
 - guide: `python/professional/companion-guides/py_data_01_arrow_duckdb.md`
 - learner artifact: `python/professional/lessons/py_data_01_arrow_duckdb.py`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-23`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

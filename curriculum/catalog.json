@@ -1419,44 +1419,6 @@
       "network": "offline"
     },
     {
-      "id": "sql-found-01",
-      "track": "sql",
-      "day": -1,
-      "title": "Relational Design, DDL, and Integrity Constraints",
-      "level": "foundation",
-      "phase": "Relational foundations",
-      "estimated_minutes": 150,
-      "prerequisites": [],
-      "lesson_path": "sql/professional/lessons/sql_found_01_relational_design.sql",
-      "guide_path": "sql/professional/companion-guides/sql_found_01_relational_design.md",
-      "solution_paths": [
-        "sql/professional/solutions/sql_found_01_relational_design_solutions.md",
-        "sql/professional/solutions/sql_found_01_relational_design_solutions.sql"
-      ],
-      "dependency_group": "postgres",
-      "network": "offline"
-    },
-    {
-      "id": "sql-found-02",
-      "track": "sql",
-      "day": 0,
-      "title": "Versioned Schema Migrations and Safe Evolution",
-      "level": "intermediate",
-      "phase": "Relational foundations",
-      "estimated_minutes": 180,
-      "prerequisites": [
-        "sql-found-01"
-      ],
-      "lesson_path": "sql/professional/lessons/sql_found_02_versioned_migrations.sql",
-      "guide_path": "sql/professional/companion-guides/sql_found_02_versioned_migrations.md",
-      "solution_paths": [
-        "sql/professional/solutions/sql_found_02_versioned_migrations_solutions.md",
-        "sql/professional/solutions/sql_found_02_versioned_migrations_solutions.sql"
-      ],
-      "dependency_group": "postgres",
-      "network": "offline"
-    },
-    {
       "id": "sql-01",
       "track": "sql",
       "day": 1,
@@ -1464,9 +1426,7 @@
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
-      "prerequisites": [
-        "sql-found-02"
-      ],
+      "prerequisites": [],
       "lesson_path": "sql/postgres-60day/day01_select_where_orderby.sql",
       "guide_path": "sql/postgres-60day/companion-guides/day01_select_where_orderby.md",
       "solution_paths": [
@@ -1757,6 +1717,26 @@
       "network": "offline"
     },
     {
+      "id": "sql-found-01",
+      "track": "sql",
+      "day": -1,
+      "title": "Relational Design, DDL, and Integrity Constraints",
+      "level": "intermediate",
+      "phase": "Relational engineering",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-15"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_found_01_relational_design.sql",
+      "guide_path": "sql/professional/companion-guides/sql_found_01_relational_design.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_found_01_relational_design_solutions.md",
+        "sql/professional/solutions/sql_found_01_relational_design_solutions.sql"
+      ],
+      "dependency_group": "postgres",
+      "network": "offline"
+    },
+    {
       "id": "sql-16",
       "track": "sql",
       "day": 16,
@@ -1765,7 +1745,7 @@
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
       "prerequisites": [
-        "sql-15"
+        "sql-found-01"
       ],
       "lesson_path": "sql/postgres-60day/day16_window_functions_fundamentals.sql",
       "guide_path": "sql/postgres-60day/companion-guides/day16_window_functions_fundamentals.md",
@@ -2237,6 +2217,27 @@
       "network": "offline"
     },
     {
+      "id": "sql-found-02",
+      "track": "sql",
+      "day": 0,
+      "title": "Versioned Schema Migrations and Safe Evolution",
+      "level": "intermediate",
+      "phase": "Relational engineering",
+      "estimated_minutes": 180,
+      "prerequisites": [
+        "sql-found-01",
+        "sql-39"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_found_02_versioned_migrations.sql",
+      "guide_path": "sql/professional/companion-guides/sql_found_02_versioned_migrations.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_found_02_versioned_migrations_solutions.md",
+        "sql/professional/solutions/sql_found_02_versioned_migrations_solutions.sql"
+      ],
+      "dependency_group": "postgres",
+      "network": "offline"
+    },
+    {
       "id": "sql-40",
       "track": "sql",
       "day": 40,
@@ -2245,7 +2246,7 @@
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
       "prerequisites": [
-        "sql-39"
+        "sql-found-02"
       ],
       "lesson_path": "sql/postgres-60day/day40_analytic_functions_advanced.sql",
       "guide_path": "sql/postgres-60day/companion-guides/day40_analytic_functions_advanced.md",

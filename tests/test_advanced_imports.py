@@ -42,6 +42,22 @@ def test_ml_extra_has_cross_platform_numba_compatibility_bounds() -> None:
     }
 
 
+def test_deep_learning_extra_retains_wheels_for_both_mac_architectures() -> None:
+    pyproject_path = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    requirements = set(pyproject["project"]["optional-dependencies"]["deep-learning"])
+
+    assert requirements == {
+        "numpy>=1.26.4,<2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+        "torch==2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+        "torch==2.11.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+        "torch>=2.3; sys_platform != 'darwin'",
+        "torchvision==0.17.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+        "torchvision==0.26.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+        "torchvision>=0.18; sys_platform != 'darwin'",
+    }
+
+
 def test_probe_code_uses_distribution_and_module_names() -> None:
     target = ImportTarget("example", "example-dist", "example_module")
     code = build_probe_code(target)

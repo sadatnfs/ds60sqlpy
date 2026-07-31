@@ -13,33 +13,80 @@ Setup
 ```python
 from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.inspection import permutation_importance
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-X, y = load_breast_cancer(return_X_y=True)
-Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
-rf = RandomForestClassifier(n_estimators=200, random_state=42).fit(Xtr, ytr)
-print({'acc': rf.score(Xte, yte)})
+dataset = load_breast_cancer()
+X, y = dataset.data, dataset.target
+feature_names = np.asarray(dataset.feature_names)
+Xtr, Xte, ytr, yte = train_test_split(
+    X,
+    y,
+    stratify=y,
+    random_state=42,
+)
+rf = RandomForestClassifier(n_estimators=80, random_state=42).fit(Xtr, ytr)
+X_explain, y_explain = Xte[:50], yte[:50]
+permutation = permutation_importance(
+    rf,
+    X_explain,
+    y_explain,
+    scoring="roc_auc",
+    n_repeats=5,
+    random_state=43,
+    n_jobs=1,
+)
+permutation_order = np.argsort(permutation.importances_mean)[::-1]
+most_important = int(permutation_order[0])
+print(
+    {
+        "held_out_accuracy": rf.score(Xte, yte),
+        "pdp_feature": feature_names[most_important],
+        "permutation_mean": permutation.importances_mean[most_important],
+    }
+)
 ```
 
-Exercise 1 — SHAP summary (tree model)
+Worked reference for Exercise 1 — SHAP summary (tree model)
 ```python
-# SHAP can be heavy; limit to a subset to keep it fast
+# Missing SHAP is a disclosed capability boundary. Any failure after a
+# successful import is a real defect and must remain visible.
 try:
     import shap
+except ModuleNotFoundError:
+    print("SHAP is not installed; complete the permutation/PDP work first.")
+else:
     shap_explainer = shap.TreeExplainer(rf)
-    X_sample = Xte[:200]
-    shap_values = shap_explainer.shap_values(X_sample)
+    shap_values = shap_explainer.shap_values(X_explain)
     # SHAP <0.45 returned one array per class; newer SHAP returns a 3-D array.
     if isinstance(shap_values, list):
-        positive_class_values = shap_values[1]
-    elif shap_values.ndim == 3:
-        positive_class_values = shap_values[:, :, 1]
+        positive_class_values = np.asarray(shap_values[1])
+    elif np.asarray(shap_values).ndim == 3:
+        positive_class_values = np.asarray(shap_values)[:, :, 1]
     else:
-        positive_class_values = shap_values
-    shap.summary_plot(positive_class_values, X_sample, show=False)
-except Exception as e:
-    print('SHAP unavailable or failed:', e)
+        positive_class_values = np.asarray(shap_values)
+    assert positive_class_values.shape == X_explain.shape
+    mean_absolute_shap = np.abs(positive_class_values).mean(axis=0)
+    shap_order = np.argsort(mean_absolute_shap)[::-1]
+    shap_top_five = feature_names[shap_order[:5]].tolist()
+    permutation_top_five = feature_names[permutation_order[:5]].tolist()
+    print(
+        {
+            "shap_top_five": shap_top_five,
+            "permutation_top_five": permutation_top_five,
+            "top_five_overlap": sorted(
+                set(shap_top_five) & set(permutation_top_five)
+            ),
+        }
+    )
+    shap.summary_plot(
+        positive_class_values,
+        X_explain,
+        feature_names=feature_names,
+        max_display=5,
+        show=False,
+    )
 ```
 Notes
 - TreeExplainer supports tree-based models efficiently
@@ -48,15 +95,25 @@ Notes
 
 ---
 
-Exercise 2 — Partial Dependence Plots (PDP)
+Worked reference for Exercise 2 — Partial Dependence Plots (PDP)
 ```python
 from sklearn.inspection import PartialDependenceDisplay
 import matplotlib.pyplot as plt
 
-fig, ax = plt.subplots(figsize=(6,4))
-# Plot single feature 0 and interaction (0,1) as an example
-PartialDependenceDisplay.from_estimator(rf, Xtr, [0, (0, 1)], ax=ax)
-plt.tight_layout(); plt.show()
+fig, ax = plt.subplots(figsize=(6, 4))
+PartialDependenceDisplay.from_estimator(
+    rf,
+    Xtr,
+    [most_important],
+    feature_names=feature_names,
+    ax=ax,
+    grid_resolution=20,
+)
+ax.set_title(
+    f"PDP for held-out permutation rank 1: {feature_names[most_important]}"
+)
+plt.tight_layout()
+plt.show()
 ```
 Interpretation
 - PDP shows the marginal effect of a feature on predictions
@@ -64,18 +121,30 @@ Interpretation
 
 ---
 
-Exercise 3 (optional) — LIME on a single prediction
+Worked reference for Exercise 3 (optional) — LIME on a single prediction
 ```python
 try:
-    import lime
     from lime.lime_tabular import LimeTabularExplainer
-    expl = LimeTabularExplainer(Xtr, feature_names=[f'f{i}' for i in range(X.shape[1])],
-                                class_names=['neg','pos'], discretize_continuous=True)
-    i = 0
-    exp = expl.explain_instance(Xte[i], rf.predict_proba, num_features=5)
-    exp.as_list()  # returns a list of feature contributions
-except Exception as e:
-    print('LIME unavailable. pip install lime to enable.\n', e)
+except ModuleNotFoundError:
+    print("LIME is not installed; this optional comparison is skipped.")
+else:
+    lime_results = []
+    for seed in (43, 44, 45):
+        explainer = LimeTabularExplainer(
+            Xtr,
+            feature_names=feature_names,
+            class_names=["negative", "positive"],
+            discretize_continuous=True,
+            random_state=seed,
+        )
+        explanation = explainer.explain_instance(
+            Xte[0],
+            rf.predict_proba,
+            labels=(1,),
+            num_features=5,
+        )
+        lime_results.append(explanation.as_list(label=1))
+    print(lime_results)
 ```
 Caveats
 - SHAP is model-aware for trees; kernel SHAP works for general models but is slower
@@ -121,9 +190,9 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
-**Prompt:** Compare a SHAP summary for the top five important features.
+**Prompt:** On the first 50 held-out rows, rank features by mean absolute positive-class SHAP value. Report the five names and values, then compare their ordering with held-out permutation importance from the same fitted model, rows, scorer, and five seeded repeats.
 
 **How to reason about it:** Aggregate absolute SHAP values over a representative held-out sample, preserve feature names, and record the explainer/background choice. Magnitude ranks influence; sign and dependence require separate inspection.
 
@@ -131,18 +200,11 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Compare a SHAP summary for the top five important features`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 1 — global versus local explanations, perturbation assumptions, and causal limits — assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
 
+### Exercise 2 — Original lesson practice
 
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
-
-**Prompt:** Plot PDP for the most important feature and interpret it.
+**Prompt:** Select the feature ranked first by the held-out permutation calculation in Exercise 1, then plot its one-dimensional PDP. Report its name, ranking value, PDP direction/nonlinearity, and where the displayed deciles show weak data support; do not use causal language.
 
 **How to reason about it:** A PDP averages model predictions over counterfactual feature values. Mark regions with little support and prefer conditional/ICE diagnostics when correlated features make those combinations unrealistic.
 
@@ -150,18 +212,11 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Plot PDP for the most important feature and interpret it`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
+**Verify:** Practice 2 — global versus local explanations, perturbation assumptions, and causal limits — print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
 
+### Exercise 3 — Original lesson practice
 
-
-
-
-
-
-
-### Reasoning notes for original Exercise 3
-
-**Prompt:** Optionally use LIME on one prediction and compare it with SHAP. LIME is installed by the `ml` dependency group but remains an optional lesson extension. Complete the required work with SHAP and scikit-learn before adding a second explanation library.
+**Prompt:** Optionally explain held-out row 0 with LIME and SHAP using the same positive-class output. Repeat LIME with three declared seeds and compare signs, top-five overlap, and instability; skip only when importing `lime` raises `ModuleNotFoundError`.
 
 **How to reason about it:** LIME is an optional local surrogate whose result depends on neighborhood sampling and kernel choices. Compare repeated explanations and do not treat agreement with SHAP as proof of causal truth.
 
@@ -169,14 +224,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Optionally use LIME on one prediction and compare it with SHAP. LIME is installed by the ml d...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
-
+**Verify:** Practice 3 — global versus local explanations, perturbation assumptions, and causal limits — treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
 
 ### Exercise 4 — Local-versus-global diagnosis
 
@@ -196,14 +244,7 @@ population. Sample representative correct cases, errors, and important slices.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Construct a case where a feature is globally important but contributes little to one predicti...`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
-
-
-
-
-
-
-
+**Verify:** Local-versus-global diagnosis — record the feature's aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row's local contribution is near zero, and identify the row-specific baseline.
 
 ### Exercise 5 — Explanation leakage
 
@@ -224,14 +265,7 @@ made from a retrained model.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Explain why selecting the 'most important' features with the final test set and then retraini...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** Explanation leakage — draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.
 
 ### Exercise 6 — Correlated-feature and causality check
 
@@ -251,4 +285,4 @@ assumptions not supplied by SHAP, PDP, LIME, or permutation importance.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, an...`, record the seed, resampling unit, run count, estimate, and an analytic or hand-worked comparison with a stated tolerance; then assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior.
+**Verify:** Correlated-feature and causality check — report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.

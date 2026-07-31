@@ -46,8 +46,9 @@ python scripts/course.py catalog
 
 After the shared lessons, use
 [professional and specialization paths](docs/professional-paths.md) for the
-named modules. New SQL learners start with `sql-found-01` and `sql-found-02`
-before SQL Day 1.
+named modules. A new SQL learner starts with `sql-01`; relational design
+(`sql-found-01`) is the milestone between Days 15 and 16, and safe versioned
+migrations (`sql-found-02`) sit between Days 39 and 40.
 
 ## Quick start
 
@@ -175,18 +176,23 @@ Python:
 SQL:
 
 1. Complete [SQL setup](sql/postgres-60day/README.md).
-2. Complete the
-   [relational-design foundation](sql/professional/companion-guides/sql_found_01_relational_design.md)
-   and
-   [versioned-migrations foundation](sql/professional/companion-guides/sql_found_02_versioned_migrations.md).
-3. Read [SQL Day 1 companion guide](sql/postgres-60day/companion-guides/day01_select_where_orderby.md).
-4. Run the lesson with error-stop behavior:
+2. Open the private course portal with `START_DS60.cmd` on Windows or
+   `scripts/learning_portal.py` with the repository interpreter on macOS/Linux.
+3. Open [SQL Day 1](lesson-pages/sql-01.html), read its guide, and choose
+   **Create/open guided SQL notebook**. The generated learner workspace is
+   ignored under `.learning/sql/sql-01/` and preserves your edits.
+4. If you prefer the terminal, run the complete lesson with error-stop behavior:
 
    ```text
    psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
    ```
 
 5. Attempt the exercises before opening [the worked solution](sql/postgres-60day/solutions/day01_solutions.md).
+6. Follow the generated catalog order: complete
+   [relational design](sql/professional/companion-guides/sql_found_01_relational_design.md)
+   between Days 15 and 16, then
+   [versioned migrations](sql/professional/companion-guides/sql_found_02_versioned_migrations.md)
+   between Days 39 and 40.
 
 `sql/postgres-60day/00_setup.sql` is a destructive reset of the disposable `training` schema. Never run it against a database that contains data you care about.
 
@@ -209,7 +215,11 @@ This repository includes the repo-local skill `$guide-ds60sqlpy-learning`. Try:
 Use $guide-ds60sqlpy-learning to assess my level and guide me through the next Python, SQL, or bridge lesson. Give hints before solutions.
 ```
 
-The tutor should adapt commands to your operating system, inspect your actual work, and avoid opening official solutions until you ask. See [Learning with Codex](docs/learning-with-codex.md).
+The tutor should adapt commands to your operating system, inspect your actual
+work, and avoid opening official solutions until you ask. Every companion
+guide ends with a lesson-specific prompt; the same exact prompt is copyable
+from its generated reader and from the lesson selector in `START_HERE.html`.
+See [Learning with Codex](docs/learning-with-codex.md).
 
 ## What is in the repository
 
@@ -283,9 +293,10 @@ The badge at the top reflects `.github/workflows/ci.yml`. Every push and pull
 request runs locked core checks on Ubuntu (Python 3.11 and 3.12), Windows
 (3.12), and macOS (3.12), exercises the learner bootstrap, and executes the
 complete learner/solution SQL sequence against PostgreSQL 17. A scheduled or
-manual job also verifies every optional dependency group on Windows and
-Ubuntu. See [Validation](docs/validation.md) for the exact local equivalents
-and the difference between structural, smoke, and full execution evidence.
+manual job also verifies every optional dependency group on Windows, Ubuntu,
+and macOS. See [Validation](docs/validation.md) for the exact local
+equivalents and the difference between structural, smoke, and full execution
+evidence.
 
 ## Scope and expectations
 

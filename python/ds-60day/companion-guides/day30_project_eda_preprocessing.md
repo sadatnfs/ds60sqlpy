@@ -21,10 +21,6 @@ Complete Days 16–29, especially cleaning (`python-18`), EDA (`python-24`),
 visualization (`python-25`), feature engineering (`python-28`), and schemas
 (`python-29`).
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -233,7 +229,7 @@ assertion or inspection and explain what it proves.
 
 4. **Validate:** apply the Day 29 schema to the actual final cleaned DataFrame before output.
    **Expected behavior:** one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. **Constraint:** do not catch and discard the validation failure.
-   **Verify:** save is impossible until validation succeeds.
+   **Verify:** assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.
 
 5. **Save and report:** write cleaned data and figures under an ignored `artifacts/day30/` path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. **Constraints:** handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned.
    **Verify:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.
@@ -305,7 +301,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-30`
-(Day 30 — Project: Reproducible EDA and Preprocessing). I am a complete beginner. Emphasize a restartable EDA and preprocessing project with an auditable evidence chain.
+(Day 30 — Project: Reproducible EDA and Preprocessing). Direct catalog prerequisites: `python-29`.
+I have completed the direct prerequisites: `python-29`. Emphasize a restartable EDA and preprocessing project with an auditable evidence chain.
 Read `python/ds-60day/companion-guides/day30_project_eda_preprocessing.md` and use the learner notebook
 `python/ds-60day/notebooks/day30_project_eda_preprocessing.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

@@ -217,31 +217,15 @@ mlflow.set_tracking_uri(original_uri)
 
 1. Log additional parameters such as Logistic Regression `C` and compare runs.
 
-**Verify:** For task `Log additional parameters such as Logistic Regression C and compare runs`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
+**Verify:** Practice 1 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
 
 2. Save a confusion-matrix PNG and log it as an artifact.
 
-**Verify:** For task `Save a confusion-matrix PNG and log it as an artifact`, verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
+**Verify:** Practice 2 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
 
 3. Try a different classifier, such as Random Forest, and compare ROC AUC.
 
-**Verify:** For task `Try a different classifier, such as Random Forest, and compare ROC AUC`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Practice 3 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
 
 ### Progressive hints
 
@@ -266,39 +250,20 @@ attempt, and record the evidence that would prove your result correct.
 4. **Failure-state handling:** Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.
    **Progressive hint:** Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.
 
-**Verify:** For task `Failure-state handling: Run an experiment that intentionally raises after logging parameters....`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** Failure-state handling — query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.
 
 5. **Provenance manifest:** Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.
    **Progressive hint:** Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.
 
-**Verify:** For task `Provenance manifest: Log a JSON provenance artifact containing data fingerprint, code revisio...`, record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state; then assert exact names, order, types/nullability or versions and prove one mismatch is rejected rather than silently coerced.
-
-
-
-
-
-
+**Verify:** Provenance manifest — download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.
 
 6. **Reload and signature check:** Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.
    **Progressive hint:** The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.
 
-**Verify:** For task `Reload and signature check: Log a fitted pipeline with an input example/signature, reload it...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
+**Verify:** Reload and signature check — load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -344,10 +309,12 @@ Emphasize MLflow run identity, params, metrics, artifacts, and reproducible evid
 - guide: `python/ds-60day/companion-guides/day53_mlops_mlflow_experiment_tracking.md`
 - learner artifact: `python/ds-60day/notebooks/day53_mlops_mlflow_experiment_tracking.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-52`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

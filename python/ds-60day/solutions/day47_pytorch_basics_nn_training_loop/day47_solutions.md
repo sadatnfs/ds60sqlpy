@@ -57,7 +57,7 @@ Explanation
 
 ---
 
-Exercise 1 — Early stopping on validation loss
+Worked reference for Exercise 1 — Early stopping on validation loss
 ```python
 class EarlyStopper:
     def __init__(self, patience=10, min_delta=0.0):
@@ -111,7 +111,7 @@ Line‑by‑line
 
 ---
 
-Exercise 2 — StepLR scheduler
+Worked reference for Exercise 2 — StepLR scheduler
 ```python
 # Reset model and optimizer for a fair comparison
 model2 = MLP(20, 128, 2).to(device)
@@ -134,7 +134,7 @@ Explanation
 
 ---
 
-Exercise 3 — Mixed precision training
+Worked reference for Exercise 3 — Mixed precision training
 ```python
 scaler = torch.cuda.amp.GradScaler(enabled=(device.type=='cuda'))
 model3 = MLP(20, 128, 2).to(device)
@@ -201,7 +201,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Reasoning notes for original Exercise 1
+### Exercise 1 — Original lesson practice
 
 **Prompt:** Add dropout to the MLP and compare results.
 
@@ -211,16 +211,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Add dropout to the MLP and compare results`, show the labeled figure and reconcile it with a numeric summary so appearance is not the only check; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Practice 1 — logits, minibatches, modes, and a correct PyTorch training loop — from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
 
-
-
-
-
-
-
-
-### Reasoning notes for original Exercise 2
+### Exercise 2 — Original lesson practice
 
 **Prompt:** Implement a small minibatch training loop with `DataLoader`.
 
@@ -230,14 +223,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** For task `Implement a small minibatch training loop with DataLoader`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
-
+**Verify:** Practice 2 — logits, minibatches, modes, and a correct PyTorch training loop — for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
 
 ### Exercise 3 — Shape and dtype contract
 
@@ -260,14 +246,7 @@ without a dimension because a batch of size one can lose its batch axis.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Write assertions at the start of a classification training step for feature shape/dtype, targ...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Shape and dtype contract — assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.
 
 ### Exercise 4 — Validation implementation
 
@@ -287,14 +266,7 @@ history does not retain tensors or device memory.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Implement an evaluation function that returns sample-weighted loss and accuracy, restores the...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
-
+**Verify:** Validation implementation — call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.
 
 ### Exercise 5 — DataLoader reproducibility
 
@@ -315,14 +287,7 @@ hold across more than one seed.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Run two shuffled DataLoaders with the same seed and compare batch order. Then state what chan...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
-
+**Verify:** DataLoader reproducibility — with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.
 
 ### Exercise 6 — Portable checkpoint
 
@@ -342,4 +307,4 @@ is a requirement.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** For task `Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resum...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
+**Verify:** Portable checkpoint — save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location='cpu', assert fixed-fixture prediction parity, then resume one step and increment epoch/history.

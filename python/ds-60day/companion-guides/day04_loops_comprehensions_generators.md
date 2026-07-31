@@ -18,10 +18,6 @@ By the end of this lesson, you can:
 
 Complete Day 3 (`python-03`): branches, loops, and exception behavior.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -191,11 +187,9 @@ transformation, and a generator when values can be streamed.
 readings = [12, -1, 18, 7, 21]
 valid_squares = [value**2 for value in readings if value >= 0]
 
-
 def batches(values: list[int], size: int):
     for start in range(0, len(values), size):
         yield values[start : start + size]
-
 
 print(list(batches(valid_squares, 2)))
 ```
@@ -282,7 +276,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-04`
-(Day 4 — Loops, Comprehensions, and Generators). I am a complete beginner. Emphasize iteration, eager collection building, and lazy generators.
+(Day 4 — Loops, Comprehensions, and Generators). Direct catalog prerequisites: `python-03`.
+I have completed the direct prerequisites: `python-03`. Emphasize iteration, eager collection building, and lazy generators.
 Read `python/ds-60day/companion-guides/day04_loops_comprehensions_generators.md` and use the learner notebook
 `python/ds-60day/notebooks/day04_loops_comprehensions_generators.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

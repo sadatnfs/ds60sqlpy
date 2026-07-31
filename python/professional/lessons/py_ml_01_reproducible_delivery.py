@@ -4,45 +4,46 @@ Professional learner deep dive (python-ml-01)
 ------------------------------------------------
 
 Mental model:
-Reproducible model delivery links exact data records, feature schema,
-training configuration, environment, metrics, and artifact bytes. A
-canonical hash is stable only after row identity/order, field order,
-numeric special values, encoding, and serialization are defined.
-
-A delivery bundle contains a safe model representation, schema, and
-manifest of hashes/versions/evidence. Loading verifies bytes and
-compatibility before parsing or prediction. Promotion is a policy
-decision based on tests, thresholds, limitations, ownership, and
+Reproducible model delivery links exact data records, feature schema, training configuration,
+environment, metrics, and artifact bytes. A canonical hash is stable only after row
+identity/order, field order, numeric special values, encoding, and serialization are defined.  A
+delivery bundle contains a safe model representation, schema, and manifest of
+hashes/versions/evidence. Loading verifies bytes and compatibility before parsing or prediction.
+Promotion is a policy decision based on tests, thresholds, limitations, ownership, and
 rollback—not the existence of a model file.
 
 API/boundary anatomy:
-* canonical data hash: normalizes only declared non-semantic ordering and rejects duplicate/missing identity or unsupported values.
-* feature/runtime compatibility: checks ordered names, types, required fields, schema version, Python and direct package ranges.
-* manifest verification before load: checks every relative path, byte hash, format, and expected metadata before trusting content.
+* canonical data hash: normalizes only declared non-semantic ordering and rejects
+  duplicate/missing identity or unsupported values.
+* feature/runtime compatibility: checks ordered names, types, required fields, schema version,
+  Python and direct package ranges.
+* manifest verification before load: checks every relative path, byte hash, format, and expected
+  metadata before trusting content.
 
 Micro-example A — make record order irrelevant but value changes visible::
 
     import hashlib
     import json
-    
+
     def snapshot(records):
         ordered = sorted(records, key=lambda row: row["record_id"])
         payload = json.dumps(
             ordered, sort_keys=True, separators=(",", ":"), allow_nan=False
         )
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-    
+
     records = [{"record_id": "b", "x": 2}, {"record_id": "a", "x": 1}]
     assert snapshot(records) == snapshot(list(reversed(records)))
     changed = [{"record_id": "b", "x": 3}, {"record_id": "a", "x": 1}]
     assert snapshot(records) != snapshot(changed)
 
-Expected: Declared row ordering does not change the identity, while one semantic value change does.
+Expected: Declared row ordering does not change the identity, while one semantic value change
+          does.
 
 Micro-example B — fail a bundle when one artifact byte changes::
 
     import hashlib
-    
+
     files = {"model.json": b'{"coefficient":2.0}', "schema.json": b'{"x":"float"}'}
     manifest = {name: hashlib.sha256(data).hexdigest()
                 for name, data in files.items()}
@@ -56,7 +57,8 @@ Micro-example B — fail a bundle when one artifact byte changes::
 
 Expected: Verification catches the changed artifact before code attempts to interpret it.
 
-Debugging rule: Rebuild the canonical bytes, print schema/version differences, verify every manifest path/hash before parse, and reload/predict in a clean process.
+Debugging rule: Rebuild the canonical bytes, print schema/version differences, verify every
+                manifest path/hash before parse, and reload/predict in a clean process.
 
 The snippets demonstrate mechanics only. They do not complete the
 numbered TODOs below; implement those from their stated contracts and

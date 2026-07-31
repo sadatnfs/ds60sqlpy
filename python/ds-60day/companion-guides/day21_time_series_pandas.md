@@ -19,10 +19,6 @@ By the end of this lesson, you can:
 
 Complete Day 20 (`python-20`): indexes, table grain, grouping, and validation.
 
-
-
-
-
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
@@ -283,7 +279,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-21`
-(Day 21 — Time Series with pandas). I am a complete beginner. Emphasize time-aware indexes, timezone policy, resampling, rolling windows, and lag features.
+(Day 21 — Time Series with pandas). Direct catalog prerequisites: `python-20`.
+I have completed the direct prerequisites: `python-20`. Emphasize time-aware indexes, timezone policy, resampling, rolling windows, and lag features.
 Read `python/ds-60day/companion-guides/day21_time_series_pandas.md` and use the learner notebook
 `python/ds-60day/notebooks/day21_time_series_pandas.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

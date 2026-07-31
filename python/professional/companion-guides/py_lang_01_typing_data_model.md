@@ -133,16 +133,20 @@ cooperative method-resolution order.
 ```python
 from typing import Protocol
 
+
 class Named(Protocol):
     @property
     def name(self) -> str: ...
+
 
 class PlainRecord:
     def __init__(self, name):
         self.name = name
 
+
 def label(value: Named) -> str:
     return value.name.upper()
+
 
 print(label(PlainRecord("ada")))
 assert label(PlainRecord("ada")) == "ADA"
@@ -193,13 +197,7 @@ flag = parse_scalar("true", "bool")
 Passing a variable typed as arbitrary `str` needs a broader overload or prior
 narrowing; overloads do not inspect future runtime text.
 
-**Verify:** For task `Complete and type the overloaded parser`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Complete and type the overloaded parser — assert parse_scalar('12','int') returns int 12, parse_scalar('true','bool') returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.
 
 ### 2. Implement the iterator protocol
 
@@ -207,13 +205,7 @@ Complete `Batches.__next__`. Return tuples, advance the offset, and raise
 `StopIteration` only after exhaustion. Test empty input and a final partial
 batch.
 
-**Verify:** For task `Implement the iterator protocol`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then run the named missing/unknown/empty boundary and assert its explicit fallback or exception instead of accepting an accidental default.
-
-
-
-
-
-
+**Verify:** Implement the iterator protocol — assert list(Batches([],2)) == [] and list(Batches([1,2,3],2)) == [(1,2),(3,)]; after exhaustion, another next() must raise StopIteration without changing the stored offset.
 
 ### 3. Reason about variance
 
@@ -221,13 +213,7 @@ Assign `SequenceReader[str]` to `Reader[object]`; this is safe because callers
 only read. Explain why a mutable repository of strings cannot be treated as a
 repository of objects: a caller might store an integer into it.
 
-**Verify:** For task `Reason about variance`, state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Reason about variance — save a mypy transcript where SequenceReader[str] is accepted as Reader[object] and a mutable string repository is rejected as a mutable object repository; include the concrete unsafe integer-write counterexample.
 
 ### 4. Model events with TypedDict
 
@@ -235,13 +221,7 @@ Add a third event with a unique literal `kind`. Update `describe_event` and let
 the checker identify unhandled or invalid fields. Add runtime validation at the
 JSON boundary; TypedDict alone does not validate decoded data.
 
-**Verify:** For task `Model events with TypedDict`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Model events with TypedDict — mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.
 
 ### 5. Exercise context-manager failure
 
@@ -249,13 +229,7 @@ Append inside `Transaction`, then raise. Verify the target remains unchanged
 and the exception propagates. Returning true from `__exit__` would suppress it;
 this implementation deliberately returns false.
 
-**Verify:** For task `Exercise context-manager failure`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case.
-
-
-
-
-
-
+**Verify:** Exercise context-manager failure — start with target ['before'], append inside Transaction, and raise a sentinel RuntimeError; assert the target remains ['before'] and the same exception object/message reaches the caller.
 
 ### 6. Trace descriptor lookup
 
@@ -263,26 +237,14 @@ Compare `Customer.name` with `Customer("Ada").name`. Explain why the descriptor
 returns itself for class access. Corrupt the private field deliberately and
 observe the runtime type guard.
 
-**Verify:** For task `Trace descriptor lookup`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** Trace descriptor lookup — assert Customer.name returns the descriptor object, Customer('Ada').name returns 'Ada', and corrupting the private storage with a non-string makes instance access raise the declared TypeError.
 
 ### 7. Draw the MRO
 
 Print `ApiRecord.__mro__`. Predict the label before calling it. Every mixin uses
 cooperative `super()`; directly naming a parent would skip or duplicate work.
 
-**Verify:** For task `Draw the MRO`, demonstrate the concrete requirement “7. Draw the MRO Print ApiRecord. mro . Predict the label before calling it. Every mixin uses cooperative super ; directly naming a parent would skip or duplicate work” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** Draw the MRO — record the predicted label and ApiRecord.__mro__ before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.
 
 ### 8. Bound metaclass use
 
@@ -291,13 +253,7 @@ enforce the same rule, then state why the hook is preferable here. Use a
 metaclass only when class-creation behavior cannot be expressed by descriptors,
 decorators, or subclass hooks.
 
-**Verify:** For task `Bound metaclass use`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then state one precise claim, the evidence supporting it, the governing assumption, and a counterexample or limitation.
-
-
-
-
-
-
+**Verify:** Bound metaclass use — add a second Handler with init subclass; survey how a metaclass could enforce the same rule, then state why the hook is preferable here; use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.
 
 ### Extended professional practice
 
@@ -311,13 +267,7 @@ Define a minimal generic `Serializer[T]` Protocol and implement JSON and text se
 
 **Progressive hint:** Protocol methods express only what the consumer needs. Use a 3.11-compatible TypeVar and abstract collection input types.
 
-**Verify:** For task `design a structural Protocol`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** design a structural Protocol — run mypy positive cases for JSON/text Serializer implementations and one negative implementation with the wrong return type; the consumer must work without inheritance and the negative fixture must fail at the protocol boundary.
 
 ### Exercise 10 — preserve signatures with ParamSpec
 
@@ -325,13 +275,7 @@ Write a timing decorator that preserves arbitrary positional/keyword parameters 
 
 **Progressive hint:** Use `ParamSpec`, a return `TypeVar`, `Callable[P, R]`, and `functools.wraps`.
 
-**Verify:** For task `preserve signatures with ParamSpec`, demonstrate the concrete requirement “Exercise 10 — preserve signatures with ParamSpec Write a timing decorator that preserves arbitrary positional/keyword parameters and return type, injects a log sink/clock for tests” with explicit inputs, observable output, and one counterexample.
-
-
-
-
-
-
+**Verify:** preserve signatures with ParamSpec — mypy must preserve the wrapped positional/keyword signature and return type; injected fake clock/sink tests assert one duration record, functools.wraps metadata, return-value parity, and unchanged exception propagation.
 
 ### Exercise 11 — narrow decoded data safely
 
@@ -339,13 +283,7 @@ Implement a `TypeGuard` that validates a decoded JSON object as a specific Typed
 
 **Progressive hint:** `isinstance(True, int)` is true. Test bool explicitly before accepting integer fields, and reject unknown keys if the boundary is strict.
 
-**Verify:** For task `narrow decoded data safely`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** narrow decoded data safely — assert the TypeGuard accepts exactly the required-key/type fixture and rejects missing, extra, wrong-type, and bool-in-an-int-field fixtures; inside the accepted branch mypy must narrow to the TypedDict.
 
 ### Exercise 12 — choose frozen, slots, and hash semantics
 
@@ -353,13 +291,7 @@ Create a small value-object dataclass and compare mutable, frozen, slotted, and 
 
 **Progressive hint:** Hashable keys must not change equality-relevant fields while stored. `unsafe_hash` does not make mutation safe.
 
-**Verify:** For task `choose frozen, slots, and hash semantics`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** choose frozen, slots, and hash semantics — print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.
 
 ### Exercise 13 — implement cooperative equality
 
@@ -367,13 +299,7 @@ Implement `__eq__` for a value type so unrelated types receive `NotImplemented`,
 
 **Progressive hint:** `NotImplemented` lets Python try the reflected comparison and then fall back appropriately; it is not the same object as `NotImplementedError`.
 
-**Verify:** For task `implement cooperative equality`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then verify identity/hash and metadata, then reload or inspect the artifact outside the creating state and test one tampered mismatch.
-
-
-
-
-
-
+**Verify:** implement cooperative equality — assert equal values have equal hashes, unequal values compare false, direct __eq__ with an unrelated type returns NotImplemented, and one reflected-comparison fixture demonstrates why returning False immediately differs.
 
 ### Exercise 14 — evolve a typed serialization boundary
 
@@ -381,13 +307,7 @@ Version a discriminated TypedDict union, add an optional field to one event, and
 
 **Progressive hint:** Narrow on literal version/kind only after runtime validation. Keep wire payloads separate from trusted domain types.
 
-**Verify:** For task `evolve a typed serialization boundary`, reproduce the failure first, capture its smallest observable symptom, apply one scoped fix, and rerun the failing plus normal case; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** evolve a typed serialization boundary — parse one old and one new payload into the expected immutable objects; assert the optional field default, round-trip version/kind, and named unknown-version and unknown-kind errors.
 
 ### Exercise 15 — trace weak references and caches
 
@@ -395,13 +315,7 @@ Compare a normal dictionary cache with `WeakValueDictionary` for objects that su
 
 **Progressive hint:** Weak caches do not own values. Slotted classes need weak-reference support explicitly, and collection timing is not a business deadline.
 
-**Verify:** For task `trace weak references and caches`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
-
+**Verify:** trace weak references and caches — after dropping the only strong reference, assert the normal cache still owns its value while WeakValueDictionary may lose it after collection; test a slotted class with and without weak-reference support.
 
 ### Exercise 16 — review typing compatibility
 
@@ -409,13 +323,7 @@ Change a public function from accepting `Sequence[str]` to `list[str]`, and anot
 
 **Progressive hint:** Parameter types are consumer inputs; narrowing them breaks callers. Return types can often become more specific, not arbitrarily more abstract.
 
-**Verify:** For task `review typing compatibility`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then produce the requested artifact with every named field/control and walk one allowed plus one rejected scenario through it.
-
-
-
-
-
-
+**Verify:** review typing compatibility — save mypy caller fixtures showing the Sequence[str]-to-list[str] parameter narrowing breaks a valid tuple caller and analyze the return change separately; test the compatibility wrapper and its deprecation warning.
 
 ## Self-check
 
@@ -478,10 +386,12 @@ Emphasize static type contracts, structural protocols, overloads, and Python dat
 - guide: `python/professional/companion-guides/py_lang_01_typing_data_model.md`
 - learner artifact: `python/professional/lessons/py_lang_01_typing_data_model.py`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-12`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

@@ -38,6 +38,30 @@ temporary PostgreSQL table for the optional live exercise.
 Test empty input, invalid batch sizes, invalid numeric forms, `NaN`, dates,
 rounding boundaries, remainders, and exact parameter rows.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+## Small executable check
+
+Validation and batching can be verified entirely offline:
+
+```python
+from decimal import Decimal
+
+from bridge.solutions.day06_solution import batches, parse_sale
+
+sale = parse_sale(
+    {
+        "source_id": "sale-1",
+        "customer_id": "7",
+        "amount": "12.30",
+        "occurred_on": "2026-07-30",
+    }
+)
+assert sale.amount == Decimal("12.30")
+assert batches([1, 2, 3], 2) == [(1, 2), (3,)]
+```
+<!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE -->
+
 ## Exercise solutions
 
 These walkthroughs align one-for-one with the learner and guide. The executable
@@ -57,9 +81,7 @@ field-level reason.
 **Why this boundary matters:** Convert each field explicitly and translate only expected
 conversion failures.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Parse one valid mapping and compare exact typed fields; assert blank source ID, non-positive/non-integer customer ID, non-finite/non-positive amount, and bad ISO date raise `RowValidationError`, and the input mapping is unchanged.
 
 ### Exercise 2 — Money
 
@@ -71,9 +93,7 @@ and tested.
 
 **Why this boundary matters:** Quantization is a domain decision, not merely display formatting.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Check amounts with more than two places and a halfway value; assert the exact two-place `Decimal` results under the documented rounding mode, not merely formatted strings.
 
 ### Exercise 3 — Partitioning
 
@@ -86,9 +106,7 @@ original mapping or unrelated exceptions.
 
 **Why this boundary matters:** Catch only `RowValidationError` from the conversion boundary.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Feed valid-invalid-valid rows; assert accepted sales and rejection `(source_id, reason)` records preserve input order and no rejected object stores the complete raw mapping.
 
 ### Exercise 4 — Batching
 
@@ -100,9 +118,7 @@ a tuple. Empty input returns an empty list and input order is unchanged.
 
 **Why this boundary matters:** Slice deterministic tuples from the original sequence.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Assert `batches([], 2) == []`, exact division has no empty tail, a remainder becomes the last tuple, and sizes `0`/negative raise `ValueError`.
 
 ### Exercise 5 — Bulk SQL
 
@@ -114,9 +130,7 @@ pass an iterable of `(source_id, customer_id, amount, occurred_on)` tuples to `e
 
 **Why this boundary matters:** Convert typed sales to one parameter tuple per row.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inspect one `executemany` call: SQL contains placeholders and the upsert clause, every sale value exists only in parameter rows, and empty input makes no driver call.
 
 ### Exercise 6 — Accounting
 
@@ -129,9 +143,7 @@ comparison/`RETURNING` if that distinction is required.
 
 **Why this boundary matters:** Do not infer business outcomes from submitted row count.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** For a mixed fixture, report separate accepted, rejected, and submitted counts; label inserted/updated as unknown unless returned/reconciled database evidence distinguishes them.
 
 ### Exercise 7 — Extension
 
@@ -145,9 +157,7 @@ tab/newline-delimited source strings.
 **Why this boundary matters:** COPY handles transport; a later set-based statement owns merge
 semantics.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Provide a COPY design that calls typed `write_row` into a staging table, validates staging rows, and performs one set-based merge without constructing delimited text.
 
 ### Exercise 8 — Edge cases
 
@@ -161,9 +171,7 @@ inputs should appear in reasons.
 **Why this boundary matters:** Classify each rejection at the field boundary and keep its reason
 safe.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Parameterize `NaN`, both infinities, zero, negative amount, blank ID, leading-zero customer ID, and invalid dates; compare exact acceptance or `RowValidationError` outcome.
 
 ### Exercise 9 — Idempotency
 
@@ -177,9 +185,7 @@ transaction.
 **Why this boundary matters:** Database upsert resolves persisted conflicts but may hide
 contradictory source rows.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Choose reject-first, reject-all, or deterministic-last-wins for duplicate `source_id`; assert the chosen result is decided before `executemany` and documented in counts.
 
 ### Exercise 10 — Scale design
 
@@ -193,9 +199,7 @@ after validation.
 **Why this boundary matters:** A tuple return is convenient for lessons but not for unlimited
 sources.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Compare peak retained rows for materialized and streaming designs; the streaming API must emit bounded batches/rejections without requiring the entire input sequence.
 
 ### Exercise 11 — Capacity
 
@@ -208,9 +212,7 @@ tuning.
 
 **Why this boundary matters:** Measure the real adapter and keep a safe configurable default.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Show a batch-size calculation using parameter count, row width, memory budget, and transaction-duration target; assert the selected size stays below every stated limit.
 
 ### Exercise 12 — Transaction failure
 
@@ -223,9 +225,7 @@ rows as committed without database evidence.
 
 **Why this boundary matters:** Submission count is not committed count.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inject a mid-load driver failure; assert the transaction owner rolls back the complete unit, the loader does not claim partial success, and retry starts from a defined boundary.
 
 ### Exercise 13 — Observability
 
@@ -238,9 +238,7 @@ in a protected bounded sink.
 
 **Why this boundary matters:** Metric labels must come from a fixed vocabulary.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Inspect metrics for a fixed rejection-reason enum and bounded outcome tags; assert no source ID, raw reason text, or complete rejected row appears as a tag.
 
 ### Exercise 14 — Reconciliation
 
@@ -253,6 +251,4 @@ the deduplicated accepted plan. The second run may update but must not duplicate
 **Why this boundary matters:** Idempotency is proven by stable final state, not by absence of
 exceptions.
 
-**Evidence:** Capture exact calls, returned values, exception types, and
-cleanup order. Re-run the case and require the same fake-backed result;
-keep live PostgreSQL evidence separately labeled and opt-in.
+**Verification evidence:** Load the accepted fixture twice under the declared upsert policy; reconcile the same source-ID set and exact total amount after both runs with no duplicate logical sale.

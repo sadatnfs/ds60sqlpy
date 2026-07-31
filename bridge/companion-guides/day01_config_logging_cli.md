@@ -12,6 +12,31 @@ boundary that turns untrusted command-line strings and environment variables
 into a small, validated `Settings` object. Code inside the application can then
 rely on that object instead of repeatedly reading global process state.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: HOW TO RUN -->
+## How to run this lesson
+
+Start at the repository root. The answer-free starter is deliberately safe to
+run: it prints orientation text and does not call unfinished functions or
+contact PostgreSQL.
+
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\python.exe bridge\lessons\day01_config_logging_cli.py
+.\.venv\Scripts\python.exe -m pytest bridge\tests -q
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python bridge/lessons/day01_config_logging_cli.py
+.venv/bin/python -m pytest bridge/tests -q
+```
+
+Read this guide first, implement one boundary at a time in
+`bridge/lessons/day01_config_logging_cli.py`, and use small fakes or recording doubles for the
+default evidence path. Any PostgreSQL step is optional, explicitly gated, and restricted to `DS60_DATABASE_URL` plus the disposable `advanced_sql_training` database. Never place a credential in source, notebook output, test fixtures, or logs.
+<!-- END BRIDGE ENRICHMENT: HOW TO RUN -->
+
 ## Objectives
 
 By the end, you can:
@@ -33,19 +58,6 @@ By the end, you can:
 | immutable | An object whose fields cannot be reassigned after creation |
 | exit code | An integer a program returns to its caller; zero conventionally means success |
 
-## Run the starter
-
-```powershell
-# Windows PowerShell, from the repository root
-.\.venv\Scripts\python.exe bridge\lessons\day01_config_logging_cli.py
-```
-
-```bash
-# macOS/Linux, from the repository root
-.venv/bin/python bridge/lessons/day01_config_logging_cli.py
-```
-
-The starter deliberately does not call unfinished functions.
 
 ## Worked example: validate once
 
@@ -75,6 +87,59 @@ For this course, use these settings:
 - `--dry-run` defaults to false and must never be inferred from a non-empty
   string such as `"false"`.
 
+
+<!-- BEGIN BRIDGE ENRICHMENT: DEEP DIVE -->
+## Mental model: turn strings into trusted state once
+
+Everything outside the program arrives as untrusted text. PowerShell
+environment variables, POSIX environment variables, command-line arguments,
+and copied connection URLs are all strings, even when they represent a Boolean
+or a log level. A **configuration boundary** performs four jobs in a visible
+order: collect candidate values, apply precedence, validate and normalize the
+chosen values, and return one typed object. The rest of the application should
+receive `Settings`; it should not repeatedly consult `os.environ`.
+
+Think about precedence one field at a time. A CLI log level can override the
+environment log level while the database URL still comes from the environment
+and `dry_run` still uses its default. Treating CLI input as an all-or-nothing
+bundle creates surprising missing values. Also distinguish *missing* from
+*present but invalid*: no URL is acceptable for this offline starter, while
+`DS60_LOG_LEVEL=INF0` is an error that should be reported before any database
+work begins.
+
+This tiny example shows the shape without implementing the lesson functions:
+
+```python
+from collections.abc import Mapping
+
+
+def choose_timeout(environ: Mapping[str, str], cli_value: str | None) -> int:
+    raw = cli_value if cli_value is not None else environ.get("APP_TIMEOUT", "30")
+    timeout = int(raw)
+    if timeout < 1:
+        raise ValueError("timeout must be positive")
+    return timeout
+
+
+assert choose_timeout({"APP_TIMEOUT": "15"}, None) == 15
+assert choose_timeout({"APP_TIMEOUT": "15"}, "5") == 5
+```
+
+Secrets require a second boundary. The program may need a complete database URL
+to connect, but logs need only a safe label. Redaction should therefore be an
+allowlist of components that may leave the process, not a list of substrings
+that happen to look secret. Query parameters can contain tokens, fragments can
+contain copied diagnostics, and malformed input can still contain a password.
+A safe failure marker is more useful than echoing unparseable text.
+
+Finally, parser construction and parser use are separate. `build_parser()`
+describes accepted CLI syntax. `main(argv)` parses a supplied sequence and is
+therefore testable without mutating `sys.argv`. The real process may pass
+`None`; a unit test can pass `["--log-level", "debug"]`. That dependency
+injection is the same idea used later for clocks, sleepers, database factories,
+and model adapters.
+<!-- END BRIDGE ENRICHMENT: DEEP DIVE -->
+
 ## Exercises
 
 ### Practice contract
@@ -90,43 +155,53 @@ For this course, use these settings:
    uppercase log-level normalization, and `None` for a missing URL.
    - **Progressive hint:** Resolve each source once, then validate the final selected value at
      the boundary.
+   - **Verify:** Assert that CLI `debug` overrides environment `WARNING`, an absent URL remains `None`, `INF0` raises `ValueError`, and the supplied environment mapping is unchanged.
 2. **Security:** Implement `redact_database_url()` so diagnostics retain scheme, user, host,
    port, and database but remove password, query, and fragment.
    - **Progressive hint:** Parsing components is safer than replacing substrings in an opaque
      secret.
+   - **Verify:** Use a URL containing sentinel password, query token, and fragment; assert all three sentinels are absent while scheme, username, host, port, and database remain visible.
 3. **Implementation:** Implement `build_parser()` with `--database-url`, `--log-level`, and
    `--dry-run` without reading global process state during parser construction.
    - **Progressive hint:** Parser construction and argument parsing are separate
      responsibilities.
+   - **Verify:** Assert `parse_args([])` leaves URL and log-level overrides unset with `dry_run=False`; then parse all three flags and compare the exact namespace without reading `sys.argv`.
 4. **Integration:** Implement `main(argv)` so it parses the supplied sequence, loads settings,
    configures logging, and emits only a safe summary.
    - **Progressive hint:** A testable CLI accepts an argument sequence instead of rewriting
      `sys.argv`.
+   - **Verify:** Call `main()` with an injected argument list and captured logs; assert exit status `0`, the selected level, one redacted database label, and no full URL or password.
 5. **Testing:** Create a table-driven test matrix for defaults, CLI precedence, mixed-case
    levels, invalid levels, malformed URLs, credentials, and a missing URL.
    - **Progressive hint:** Include both successful values and exact failure types; assert
      secrets are absent from all diagnostics.
+   - **Verify:** Parameterize defaults, each CLI override, mixed-case valid levels, `INF0`, missing URL, malformed URL, and sentinel credentials; compare exact `Settings` or exception types.
 6. **Prediction:** Predict the result when the environment says `WARNING`, the CLI supplies
    `debug`, `dry_run=True`, and no database URL exists; then verify it.
    - **Progressive hint:** Apply precedence independently per setting rather than treating one
      source as an all-or-nothing bundle.
+   - **Verify:** Write `Settings(database_url=None, log_level='DEBUG', dry_run=True)` before running the case, then assert the returned dataclass equals that prediction.
 7. **Debugging:** Repair a redactor that catches parse errors but returns `f'invalid:
    {database_url}'` and explain why the exception path is still a leak.
    - **Progressive hint:** Failure messages are an output boundary and need the same secrecy
      rule as normal logs.
+   - **Verify:** Feed malformed text containing `secret-marker`; assert the repaired branch returns a fixed marker such as `<invalid-database-url>` and never includes `secret-marker`.
 8. **Design:** Add configuration provenance such as `cli`, `environment`, or `default` without
    storing or logging the selected secret value twice.
    - **Progressive hint:** Metadata about a source can be safe even when the source value is
      not.
+   - **Verify:** Show provenance labels `cli`, `environment`, and `default` beside resolved fields while the complete database URL exists in only one field and never appears in the safe summary.
 9. **Security testing:** Use a recording logger or `caplog` to prove that startup, success, and
    validation-failure paths contain no password, query token, or full URL.
    - **Progressive hint:** Test the emitted boundary, not only the return value of the redaction
      helper.
+   - **Verify:** Capture startup, success, and validation-failure logs with password/query sentinels; assert every sentinel and the full URL are absent and the safe host/database label remains.
 10. **Portability:** Write equivalent Windows PowerShell and POSIX invocations that set
    environment values outside Python and pass CLI overrides through `argv`; identify what
    remains platform-neutral.
    - **Progressive hint:** Environment-setting syntax differs, but `argparse`, `Mapping`, and
      the Python entry point do not.
+   - **Verify:** Record one PowerShell `$env:DS60_LOG_LEVEL=...` run and one POSIX `export ...` run; assert the same `Settings` values result when identical CLI overrides are supplied.
 
 ### Before opening the solution
 
@@ -158,6 +233,46 @@ levels raise a useful error, and redacted output contains no secret substring.
   and unclear precedence.
 - **Treating an absent URL as a startup error:** offline exercises do not need a
   database; validate that requirement only at the live-DB boundary.
+
+
+<!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX -->
+## Ask Codex about this lesson
+
+Use the checked-in `guide-ds60sqlpy-learning` skill as a tutor, not as an
+answer generator. The direct catalog prerequisites are `python-15`, `sql-15`. The
+prompt below deliberately names exact paths so a new Codex task can orient
+itself without guessing.
+
+```text
+Tutor me through stable lesson ID bridge-01: Config Logging CLI.
+Direct catalog prerequisites: python-15, sql-15. Assume I completed exactly those
+prerequisites, then begin with one short Retrieval question that connects each
+prerequisite to this lesson.
+
+Use repository skill guide-ds60sqlpy-learning.
+Companion guide: bridge/companion-guides/day01_config_logging_cli.md
+Learner artifact: bridge/lessons/day01_config_logging_cli.py
+
+Do not open, quote, summarize, or copy anything under solutions/ until I
+explicitly say I have finished my attempt and ask to compare.
+
+Use these coaching phases in order:
+1. Predict — ask what I expect before I run or change code.
+2. Attempt — let me implement or explain one numbered exercise at a time.
+3. Hint — give the smallest useful conceptual hint, never a finished answer.
+4. Evidence — ask for the exact return value, exception type, recorded calls,
+   query plus bound parameters, or written decision required by that exercise.
+5. Retrieval — close with two no-notes questions and one transfer problem.
+
+Keep the default path offline and fake-first. If the lesson has an optional
+PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
+disposable advanced_sql_training database; never ask me to paste the URL.
+
+Done when every numbered exercise has its own evidence, normal/edge/failure
+behavior is explained in my words, the relevant offline tests pass, and I can
+solve the final transfer problem without opening solutions/.
+```
+<!-- END BRIDGE ENRICHMENT: ASK CODEX -->
 
 ## Next step
 

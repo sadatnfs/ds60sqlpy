@@ -43,7 +43,6 @@ labels with dtype `torch.long`. Do not apply softmax before this loss.
 ```python
 import torch
 
-
 def train_one_epoch(
     model: torch.nn.Module,
     loader: torch.utils.data.DataLoader,
@@ -207,22 +206,11 @@ assert torch.equal(eval_output, values)
 
 1. Add dropout to the MLP and compare results.
 
-**Verify:** For task `Add dropout to the MLP and compare results`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Practice 1 — logits, minibatches, modes, and a correct PyTorch training loop — from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
 
 2. Implement a small minibatch training loop with `DataLoader`.
 
-**Verify:** For task `Implement a small minibatch training loop with DataLoader`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Practice 2 — logits, minibatches, modes, and a correct PyTorch training loop — for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
 
 ### Progressive hints
 
@@ -246,50 +234,25 @@ attempt, and record the evidence that would prove your result correct.
 3. **Shape and dtype contract:** Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.
    **Progressive hint:** CrossEntropyLoss expects floating logits `(batch, classes)` and integer class indices `(batch,)` with dtype long.
 
-**Verify:** For task `Shape and dtype contract: Write assertions at the start of a classification training step for...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Shape and dtype contract — assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.
 
 4. **Validation implementation:** Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller's prior train/eval mode, and never retains an autograd graph.
    **Progressive hint:** Remember `was_training = model.training`, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.
 
-**Verify:** For task `Validation implementation: Implement an evaluation function that returns sample-weighted loss...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then report row/feature shapes, seed/splitter, train-versus-validation evidence, and the metric used without consulting final-test labels.
-
-
-
-
-
-
+**Verify:** Validation implementation — call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.
 
 5. **DataLoader reproducibility:** Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes.
    **Progressive hint:** Pass a seeded `torch.Generator`; worker initialization and external NumPy/Python randomness need their own deliberate seeds.
 
-**Verify:** For task `DataLoader reproducibility: Run two shuffled DataLoaders with the same seed and compare batch...`, use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed; then record the exact command/input, terminal result or returned value, and repeat the critical check from a clean process or fresh state.
-
-
-
-
-
-
+**Verify:** DataLoader reproducibility — with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.
 
 6. **Portable checkpoint:** Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain `state_dict` versus serializing the entire model object.
    **Progressive hint:** Save plain state dictionaries plus architecture/config metadata. Use `map_location='cpu'` and recreate the model class before loading.
 
-**Verify:** For task `Portable checkpoint: Save model, optimizer, epoch, metric history, and configuration, then re...`, assert the return type/shape/value for the stated valid input and assert the named boundary or invalid input raises/returns exactly the documented behavior; then use identical data, split, metric, and budget for both sides; record a side-by-side result and isolate the condition that changed.
-
-
-
-
-
+**Verify:** Portable checkpoint — save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location='cpu', assert fixed-fixture prediction parity, then resume one step and increment epoch/history.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
-
-
 
 ## Self-check
 
@@ -335,10 +298,12 @@ Emphasize logits, minibatches, modes, and a correct PyTorch training loop. Use e
 - guide: `python/ds-60day/companion-guides/day47_pytorch_basics_nn_training_loop.md`
 - learner artifact: `python/ds-60day/notebooks/day47_pytorch_basics_nn_training_loop.ipynb`
 
-Assume only the prerequisites declared in the guide. Do not open or
-quote anything under `solutions/` unless I explicitly ask after an
-honest attempt. First explain one concept in plain language and show a
-tiny example. Then ask me to predict what happens before I run code.
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-46`. Do not assume knowledge beyond them or skip the
+guide's declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
 Give me one bounded task at a time and wait for my code, output, error,
 or written reasoning. If I am stuck, reveal only one rung of a
 progressive hint ladder at a time.

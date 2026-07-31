@@ -48,6 +48,13 @@ jobs:
           enable-cache: true
       - name: Verify locked dependencies
         run: uv lock --check
+      - name: Verify all-extras lock portability
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        run: |
+          uv sync --quiet --frozen --all-extras --dry-run --python-platform x86_64-pc-windows-msvc
+          uv sync --quiet --frozen --all-extras --dry-run --python-platform x86_64-unknown-linux-gnu
+          uv sync --quiet --frozen --all-extras --dry-run --python-platform aarch64-apple-darwin
+          uv sync --quiet --frozen --all-extras --dry-run --python-platform x86_64-apple-darwin
       - name: Install the locked core environment
         run: >-
           uv sync --frozen --extra notebooks --extra data --extra bridge
@@ -205,11 +212,15 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
+          - macos-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Install the macOS OpenMP runtime
+        if: runner.os == 'macOS'
+        run: brew install libomp
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:

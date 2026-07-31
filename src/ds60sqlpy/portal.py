@@ -223,10 +223,32 @@ class PortalLauncher:
         )
 
     @staticmethod
+    def _native_code_path(candidate: str | Path) -> str | None:
+        """Resolve a VS Code command shim to a directly launchable executable."""
+
+        path = Path(candidate)
+        if path.suffix.lower() in {".bat", ".cmd"}:
+            # A normal Windows VS Code installation puts bin\code.cmd beside
+            # the parent Code.exe. The portal never invokes a command shell, so
+            # return the native executable rather than the batch shim.
+            for executable in (
+                path.parent.parent / "Code.exe",
+                path.parent / "Code.exe",
+            ):
+                if executable.is_file():
+                    return str(executable)
+            return None
+        if path.is_file():
+            return str(path)
+        return None
+
+    @staticmethod
     def _code_executable() -> str:
         discovered = shutil.which("code")
         if discovered:
-            return discovered
+            executable = PortalLauncher._native_code_path(discovered)
+            if executable:
+                return executable
 
         candidates: list[Path] = []
         if sys.platform == "darwin":
@@ -245,8 +267,9 @@ class PortalLauncher:
                         )
                     )
         for candidate in candidates:
-            if candidate.is_file():
-                return str(candidate)
+            executable = PortalLauncher._native_code_path(candidate)
+            if executable:
+                return executable
         raise PortalError(
             "VS Code's 'code' launcher was not found. In VS Code, install the "
             "shell command or open this repository folder manually."
