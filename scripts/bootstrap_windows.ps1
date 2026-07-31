@@ -70,10 +70,20 @@ function Invoke-Native {
         [string[]]$ArgumentList = @()
     )
 
-    & $FilePath @ArgumentList
-    if ($LASTEXITCODE -ne 0) {
+    # Windows PowerShell 5.1 turns native stderr into PowerShell error records.
+    # Temporarily use Continue so a successful tool that prints a warning does
+    # not terminate this strict script before we can inspect its exit code.
+    $PreviousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        & $FilePath @ArgumentList
+        $ExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $PreviousErrorActionPreference
+    }
+    if ($ExitCode -ne 0) {
         $RenderedArguments = $ArgumentList -join " "
-        throw "Command failed with exit code ${LASTEXITCODE}: $FilePath $RenderedArguments"
+        throw "Command failed with exit code ${ExitCode}: $FilePath $RenderedArguments"
     }
 }
 
@@ -83,12 +93,67 @@ function Invoke-NativeCapture {
         [string[]]$ArgumentList = @()
     )
 
-    $Output = (& $FilePath @ArgumentList 2>&1 | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0) {
-        $RenderedArguments = $ArgumentList -join " "
-        throw "Command failed with exit code ${LASTEXITCODE}: $FilePath $RenderedArguments"
+    # Keep stderr out of structured stdout such as JSON and version probes.
+    # This also avoids the Windows PowerShell 5.1 behavior where redirected
+    # native stderr obeys $ErrorActionPreference.
+    $ErrorPath = [IO.Path]::GetTempFileName()
+    try {
+        $PreviousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = "Continue"
+            $Output = (& $FilePath @ArgumentList 2> $ErrorPath | Out-String).Trim()
+            $ExitCode = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $PreviousErrorActionPreference
+        }
+
+        $ErrorText = [string](Get-Content -LiteralPath $ErrorPath -Raw)
+        $ErrorText = $ErrorText.Trim()
+        if ($ExitCode -ne 0) {
+            $RenderedArguments = $ArgumentList -join " "
+            $Message = "Command failed with exit code ${ExitCode}: $FilePath $RenderedArguments"
+            if (-not [string]::IsNullOrWhiteSpace($ErrorText)) {
+                $Message += "`n$ErrorText"
+            }
+            throw $Message
+        }
+        if (-not [string]::IsNullOrWhiteSpace($ErrorText)) {
+            Write-Verbose $ErrorText
+        }
+        return $Output
+    } finally {
+        Remove-Item -LiteralPath $ErrorPath -Force -ErrorAction SilentlyContinue
     }
-    return $Output
+}
+
+function Invoke-PythonSource {
+    param(
+        [Parameter(Mandatory = $true)][string]$PythonPath,
+        [Parameter(Mandatory = $true)][string]$Source,
+        [switch]$Capture
+    )
+
+    # Windows PowerShell 5.1's legacy native-argument serializer removes
+    # embedded quote characters from `python -c` source. A short UTF-8 file
+    # preserves the Python exactly and is always deleted before returning.
+    $ProbePath = Join-Path `
+        ([IO.Path]::GetTempPath()) `
+        ("ds60-python-probe-{0}.py" -f [Guid]::NewGuid().ToString("N"))
+    try {
+        [IO.File]::WriteAllText(
+            $ProbePath,
+            $Source,
+            [Text.UTF8Encoding]::new($false)
+        )
+        if ($Capture) {
+            return Invoke-NativeCapture `
+                -FilePath $PythonPath `
+                -ArgumentList @($ProbePath)
+        }
+        Invoke-Native -FilePath $PythonPath -ArgumentList @($ProbePath)
+    } finally {
+        Remove-Item -LiteralPath $ProbePath -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Add-ExistingFile {
@@ -416,7 +481,10 @@ print(json.dumps({
 '@
 
     try {
-        $Output = Invoke-NativeCapture -FilePath $Path -ArgumentList @("-c", $Probe)
+        $Output = Invoke-PythonSource `
+            -PythonPath $Path `
+            -Source $Probe `
+            -Capture
         $Data = Get-LastNonEmptyLine -Text $Output | ConvertFrom-Json
         return [PSCustomObject]@{
             Path = (Resolve-Path -LiteralPath $Data.executable).Path
@@ -1090,7 +1158,7 @@ import psycopg
 import sql
 import sqlalchemy
 '@
-Invoke-Native -FilePath $VenvPython -ArgumentList @("-c", $ImportProbe)
+Invoke-PythonSource -PythonPath $VenvPython -Source $ImportProbe
 Invoke-Native -FilePath $VenvPython -ArgumentList @("-m", "jupyter", "--version")
 
 $KernelJson = Invoke-NativeCapture `

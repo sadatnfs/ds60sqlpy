@@ -109,7 +109,7 @@ jobs:
         run: |
           uv run --no-sync python -m ipykernel install --user `
             --name ds60sqlpy --display-name "Python (ds60sqlpy)"
-          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+          powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass `
             -File .\scripts\start_ds60.ps1 `
             -DiagnosticsOnly -NonInteractive -SkipPostgreSql
       - name: Offline notebook smoke execution
@@ -132,25 +132,44 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Install uv for the locked Windows learner setup
+        if: runner.os == 'Windows'
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.6"
+          enable-cache: true
       - name: Exercise the Windows discovery bootstrap
         if: runner.os == 'Windows'
         shell: pwsh
         run: >-
-          powershell.exe -NoProfile -ExecutionPolicy Bypass
+          powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass
           -File .\scripts\bootstrap_windows.ps1
           -SkipPostgreSql -WhatIf
       - name: Run the Windows learner setup
         if: runner.os == 'Windows'
         shell: pwsh
         run: >-
-          powershell.exe -NoProfile -ExecutionPolicy Bypass
-          -File .\scripts\setup.ps1
+          powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass
+          -File .\scripts\bootstrap_windows.ps1
+          -SkipPostgreSql -DependencyMode Locked
       - name: Run the macOS/Linux learner setup
         if: runner.os != 'Windows'
         run: bash scripts/setup.sh
       - name: Re-run doctor with the Windows repository interpreter
         if: runner.os == 'Windows'
-        run: .\.venv\Scripts\python.exe scripts\course.py doctor
+        shell: powershell
+        run: |
+          if (Test-Path .\.venv\Scripts\python.exe) {
+            $CoursePython = (Resolve-Path .\.venv\Scripts\python.exe).Path
+          } elseif (Test-Path .\.venv\python.exe) {
+            $CoursePython = (Resolve-Path .\.venv\python.exe).Path
+          } else {
+            throw "The Windows bootstrap did not create a supported .venv layout."
+          }
+          & $CoursePython scripts\course.py doctor
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
       - name: Re-run doctor with the POSIX repository interpreter
         if: runner.os != 'Windows'
         run: .venv/bin/python scripts/course.py doctor

@@ -78,13 +78,87 @@ function Invoke-Native {
         [switch]$AllowFailure
     )
 
-    & $FilePath @ArgumentList | Out-Host
-    $ExitCode = $LASTEXITCODE
+    # Windows PowerShell 5.1 turns native stderr into PowerShell error records.
+    # Let the native exit code, rather than a harmless warning, decide success.
+    $PreviousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        & $FilePath @ArgumentList | Out-Host
+        $ExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $PreviousErrorActionPreference
+    }
     if ($ExitCode -ne 0 -and -not $AllowFailure) {
         $RenderedArguments = $ArgumentList -join " "
         throw "Command failed with exit code ${ExitCode}: $FilePath $RenderedArguments"
     }
     return $ExitCode
+}
+
+function Invoke-NativeCapture {
+    param(
+        [Parameter(Mandatory = $true)][string]$FilePath,
+        [string[]]$ArgumentList = @()
+    )
+
+    # Keep stderr out of structured stdout and prevent Windows PowerShell 5.1
+    # from escalating benign native warnings under the script's strict mode.
+    $ErrorPath = [IO.Path]::GetTempFileName()
+    try {
+        $PreviousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = "Continue"
+            $Output = (& $FilePath @ArgumentList 2> $ErrorPath | Out-String).Trim()
+            $ExitCode = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $PreviousErrorActionPreference
+        }
+
+        $ErrorText = [string](Get-Content -LiteralPath $ErrorPath -Raw)
+        $ErrorText = $ErrorText.Trim()
+        if ($ExitCode -ne 0) {
+            $RenderedArguments = $ArgumentList -join " "
+            $Message = "Command failed with exit code ${ExitCode}: $FilePath $RenderedArguments"
+            if (-not [string]::IsNullOrWhiteSpace($ErrorText)) {
+                $Message += "`n$ErrorText"
+            }
+            throw $Message
+        }
+        if (-not [string]::IsNullOrWhiteSpace($ErrorText)) {
+            Write-Verbose $ErrorText
+        }
+        return $Output
+    } finally {
+        Remove-Item -LiteralPath $ErrorPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Invoke-PythonSource {
+    param(
+        [Parameter(Mandatory = $true)][string]$PythonPath,
+        [Parameter(Mandatory = $true)][string]$Source,
+        [switch]$AllowFailure
+    )
+
+    # Windows PowerShell 5.1's legacy native-argument serializer removes
+    # embedded quote characters from `python -c` source. A short UTF-8 file
+    # preserves the probe exactly and is deleted before this function returns.
+    $ProbePath = Join-Path `
+        ([IO.Path]::GetTempPath()) `
+        ("ds60-python-probe-{0}.py" -f [Guid]::NewGuid().ToString("N"))
+    try {
+        [IO.File]::WriteAllText(
+            $ProbePath,
+            $Source,
+            [Text.UTF8Encoding]::new($false)
+        )
+        return Invoke-Native `
+            -FilePath $PythonPath `
+            -ArgumentList @($ProbePath) `
+            -AllowFailure:$AllowFailure
+    } finally {
+        Remove-Item -LiteralPath $ProbePath -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Get-CoursePython {
@@ -169,13 +243,18 @@ function Get-CoursePsql {
         }
         $Seen[$Key] = $true
 
-        $VersionOutput = (& $Resolved "--version" 2>&1 | Out-String).Trim()
-        if (
-            $LASTEXITCODE -eq 0 -and
-            $VersionOutput -match "psql \(PostgreSQL\) (?<major>\d+)" -and
-            [int]$Matches.major -ge 16
-        ) {
-            return $Resolved
+        try {
+            $VersionOutput = Invoke-NativeCapture `
+                -FilePath $Resolved `
+                -ArgumentList @("--version")
+            if (
+                $VersionOutput -match "psql \(PostgreSQL\) (?<major>\d+)" -and
+                [int]$Matches.major -ge 16
+            ) {
+                return $Resolved
+            }
+        } catch {
+            Write-Verbose "Ignoring unusable psql candidate $Resolved."
         }
     }
     return $null
@@ -282,8 +361,11 @@ print(f"Python version: {sys.version.split()[0]}")
 print("Notebook packages and Python (ds60sqlpy) kernel: ready")
 '@
 
-    & $PythonPath "-c" $Probe | Out-Host
-    return ($LASTEXITCODE -eq 0)
+    $ProbeExit = Invoke-PythonSource `
+        -PythonPath $PythonPath `
+        -Source $Probe `
+        -AllowFailure
+    return ($ProbeExit -eq 0)
 }
 
 function Invoke-Bootstrap {

@@ -34,6 +34,20 @@ JUPYSQL_GUIDE = (
 )
 
 
+def powershell_parser() -> str | None:
+    if os.name == "nt":
+        system_root = Path(os.environ.get("SYSTEMROOT", r"C:\Windows"))
+        windows_powershell = (
+            system_root / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+        )
+        if windows_powershell.is_file():
+            return str(windows_powershell)
+    return shutil.which("pwsh")
+
+
+POWERSHELL_PARSER = powershell_parser()
+
+
 def powershell_text() -> str:
     return POWERSHELL_LAUNCHER.read_text(encoding="utf-8")
 
@@ -183,12 +197,21 @@ def test_ci_executes_native_windows_startup_diagnostics() -> None:
     )[1].split("- name: Run the Windows learner setup", maxsplit=1)[0]
 
     assert "Exercise guided Windows startup diagnostics" in text
-    assert "powershell.exe -NoProfile -ExecutionPolicy Bypass" in startup_step
+    assert "powershell.exe" in startup_step
     assert r"-File .\scripts\start_ds60.ps1 `" in startup_step
     assert "-DiagnosticsOnly -NonInteractive -SkipPostgreSql" in startup_step
-    assert "powershell.exe -NoProfile -ExecutionPolicy Bypass" in bootstrap_step
+    assert "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass" in startup_step
+    assert "powershell.exe" in bootstrap_step
+    assert "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass" in bootstrap_step
     assert r"-File .\scripts\bootstrap_windows.ps1" in bootstrap_step
     assert "-SkipPostgreSql -WhatIf" in bootstrap_step
+    learner_setup_step = text.split(
+        "- name: Run the Windows learner setup",
+        maxsplit=1,
+    )[1].split("- name: Run the macOS/Linux learner setup", maxsplit=1)[0]
+    assert r"-File .\scripts\bootstrap_windows.ps1" in learner_setup_step
+    assert "-SkipPostgreSql -DependencyMode Locked" in learner_setup_step
+    assert r"-File .\scripts\setup.ps1" not in learner_setup_step
 
 
 def test_windows_commands_document_both_repository_environment_layouts() -> None:
@@ -306,7 +329,19 @@ def test_native_windows_guided_sql_authentication_is_explicit_and_secret_free() 
     assert "asks for or stores a database password" in portal
 
 
-@pytest.mark.skipif(shutil.which("pwsh") is None, reason="PowerShell is not installed")
+def test_startup_python_probe_avoids_legacy_native_quote_serialization() -> None:
+    text = powershell_text()
+
+    assert "function Invoke-PythonSource" in text
+    assert "[IO.File]::WriteAllText(" in text
+    assert '& $PythonPath "-c" $Probe' not in text
+    assert "Remove-Item -LiteralPath $ProbePath" in text
+    assert '$ErrorActionPreference = "Continue"' in text
+    assert "function Invoke-NativeCapture" in text
+    assert "2>&1" not in text
+
+
+@pytest.mark.skipif(POWERSHELL_PARSER is None, reason="PowerShell is not installed")
 def test_powershell_parser_accepts_startup_script() -> None:
     parser_command = (
         "$tokens = $null; $errors = $null; "
@@ -317,7 +352,7 @@ def test_powershell_parser_accepts_startup_script() -> None:
     )
     result = subprocess.run(
         [
-            shutil.which("pwsh") or "pwsh",
+            POWERSHELL_PARSER or "pwsh",
             "-NoLogo",
             "-NoProfile",
             "-NonInteractive",

@@ -16,6 +16,20 @@ VSCODE_TASKS = REPO_ROOT / ".vscode" / "tasks.json"
 SETUP_SCRIPT = REPO_ROOT / "scripts" / "setup.ps1"
 
 
+def powershell_parser() -> str | None:
+    if os.name == "nt":
+        system_root = Path(os.environ.get("SYSTEMROOT", r"C:\Windows"))
+        windows_powershell = (
+            system_root / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+        )
+        if windows_powershell.is_file():
+            return str(windows_powershell)
+    return shutil.which("pwsh")
+
+
+POWERSHELL_PARSER = powershell_parser()
+
+
 def script_text() -> str:
     return SCRIPT.read_text(encoding="utf-8")
 
@@ -264,7 +278,19 @@ def test_script_uses_only_windows_powershell_51_syntax_markers() -> None:
     assert "?." not in text
 
 
-@pytest.mark.skipif(shutil.which("pwsh") is None, reason="PowerShell is not installed")
+def test_python_probes_avoid_legacy_native_quote_serialization() -> None:
+    text = script_text()
+
+    assert "function Invoke-PythonSource" in text
+    assert "[IO.File]::WriteAllText(" in text
+    assert '@("-c", $Probe)' not in text
+    assert '@("-c", $ImportProbe)' not in text
+    assert "Remove-Item -LiteralPath $ProbePath" in text
+    assert '$ErrorActionPreference = "Continue"' in text
+    assert "2> $ErrorPath" in text
+
+
+@pytest.mark.skipif(POWERSHELL_PARSER is None, reason="PowerShell is not installed")
 def test_powershell_parser_accepts_bootstrap_script() -> None:
     parser_command = (
         "$tokens = $null; $errors = $null; "
@@ -275,7 +301,7 @@ def test_powershell_parser_accepts_bootstrap_script() -> None:
     )
     result = subprocess.run(
         [
-            shutil.which("pwsh") or "pwsh",
+            POWERSHELL_PARSER or "pwsh",
             "-NoLogo",
             "-NoProfile",
             "-NonInteractive",

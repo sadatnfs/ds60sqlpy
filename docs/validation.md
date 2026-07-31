@@ -155,14 +155,16 @@ Git-history blobs. Its narrow fixture allowances are covered by tests. It is a
 guardrail, not proof against every secret format; still review changes and use
 an organization scanner when available.
 
-Every push and pull request also runs the actual learner `setup.ps1` or
-`setup.sh` flow on fresh Windows, macOS, and Ubuntu Python 3.12 runners, reruns
-doctor through the generated `.venv`, and checks that setup produced no
-trackable files. The Windows runner first executes
-`bootstrap_windows.ps1 -SkipPostgreSql -WhatIf`, which exercises native
-Windows PowerShell 5.1 parsing and discovery without changing PATH, installing
-packages, registering a kernel, or requiring a database server on the CI
-image.
+Every push and pull request also runs the actual learner setup flow on fresh
+Windows, macOS, and Ubuntu Python 3.12 runners, reruns doctor through the
+generated `.venv`, and checks that setup produced no trackable files. macOS and
+Ubuntu execute `setup.sh`. Windows first previews
+`bootstrap_windows.ps1 -SkipPostgreSql -WhatIf`, then executes the same
+bootstrapper in locked mode. Both Windows invocations use the built-in Windows
+PowerShell 5.1 host. This exercises discovery, native-command argument handling,
+environment creation, locked dependency installation, kernel registration,
+both supported `.venv` layouts, and doctor without requiring PostgreSQL on the
+CI image.
 
 The weekly and manually dispatched heavy job validates the lock, installs every
 extra, then exercises the maintained advanced import manifest for the `bridge`,
